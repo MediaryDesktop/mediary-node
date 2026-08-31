@@ -1,0 +1,29 @@
+.root {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+
+.header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 0.75rem 1.5rem;
+	border-bottom: 1px solid var(--border);
+	background: var(--surface);
+	/* The frame stays put while a long catalog scrolls beneath it. */
+	position: sticky;
+	top: 0;
+	z-index: 10;
+}
+
+.brand {
+	font-weight: 600;
+	letter-spacing: 0.02em;
+}
+
+.main {
+	flex: 1;
+	padding: 2rem 1.5rem;
+}

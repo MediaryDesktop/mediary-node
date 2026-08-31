@@ -1,0 +1,402 @@
+components:
+  schemas:
+    ErrorDetail:
+      additionalProperties: false
+      properties:
+        location:
+          description: Where the error occurred, e.g. 'body.items[3].tags' or 'path.thing-id'
+          type: string
+        message:
+          description: Error message text
+          type: string
+        value:
+          description: The value at the given location
+      type: object
+    ErrorModel:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/ErrorModel.json
+          format: uri
+          readOnly: true
+          type: string
+        detail:
+          description: A human-readable explanation specific to this occurrence of the problem.
+          examples:
+            - Property foo is required but is missing.
+          type: string
+        errors:
+          description: Optional list of individual error details
+          items:
+            $ref: "#/components/schemas/ErrorDetail"
+          type:
+            - array
+            - "null"
+        instance:
+          description: A URI reference that identifies the specific occurrence of the problem.
+          examples:
+            - https://example.com/error-log/abc123
+          format: uri
+          type: string
+        status:
+          description: HTTP status code
+          examples:
+            - 400
+          format: int64
+          type: integer
+        title:
+          description: A short, human-readable summary of the problem type. This value should not change between occurrences of the error.
+          examples:
+            - Bad Request
+          type: string
+        type:
+          default: about:blank
+          description: A URI reference to human-readable documentation for the error.
+          examples:
+            - https://example.com/errors/example
+          format: uri
+          type: string
+      type: object
+    HealthOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/HealthOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        built:
+          description: Build timestamp.
+          examples:
+            - "2026-08-27T12:00:00Z"
+          type: string
+        commit:
+          description: Git commit the build came from.
+          examples:
+            - abc1234
+          type: string
+        linked:
+          description: True when the node is paired with a cloud account.
+          type: boolean
+        status:
+          description: Node status.
+          examples:
+            - ok
+          type: string
+        version:
+          description: Semantic version of the running build.
+          examples:
+            - 0.1.0
+          type: string
+      required:
+        - status
+        - version
+        - commit
+        - built
+        - linked
+      type: object
+    StatusOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/StatusOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        module:
+          description: Module name.
+          examples:
+            - library
+          type: string
+        ready:
+          description: True when the module's dependencies are wired.
+          type: boolean
+      required:
+        - module
+        - ready
+      type: object
+    StatusOutputBody1:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/StatusOutputBody1.json
+          format: uri
+          readOnly: true
+          type: string
+        module:
+          description: Module name.
+          examples:
+            - torrent
+          type: string
+        ready:
+          description: True when the module's dependencies are wired.
+          type: boolean
+      required:
+        - module
+        - ready
+      type: object
+    StatusOutputBody2:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/StatusOutputBody2.json
+          format: uri
+          readOnly: true
+          type: string
+        module:
+          description: Module name.
+          examples:
+            - playback
+          type: string
+        ready:
+          description: True when the module's dependencies are wired.
+          type: boolean
+      required:
+        - module
+        - ready
+      type: object
+    StatusOutputBody3:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/StatusOutputBody3.json
+          format: uri
+          readOnly: true
+          type: string
+        module:
+          description: Module name.
+          examples:
+            - reader
+          type: string
+        ready:
+          description: True when the module's dependencies are wired.
+          type: boolean
+      required:
+        - module
+        - ready
+      type: object
+    StatusOutputBody4:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/StatusOutputBody4.json
+          format: uri
+          readOnly: true
+          type: string
+        module:
+          description: Module name.
+          examples:
+            - sync
+          type: string
+        ready:
+          description: True when the module's dependencies are wired.
+          type: boolean
+      required:
+        - module
+        - ready
+      type: object
+    StatusOutputBody5:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/StatusOutputBody5.json
+          format: uri
+          readOnly: true
+          type: string
+        module:
+          description: Module name.
+          examples:
+            - extension
+          type: string
+        ready:
+          description: True when the module's dependencies are wired.
+          type: boolean
+      required:
+        - module
+        - ready
+      type: object
+  securitySchemes:
+    nodeToken:
+      description: The node's local token, generated on first start and read by the desktop shell.
+      in: header
+      name: X-Mediary-Node-Token
+      type: apiKey
+info:
+  description: "Local API of a Mediary self-hosted node: library, downloads, playback, reader and cloud sync. Bound to loopback and gated by a local token."
+  title: Mediary Node API
+  version: 0.0.0-dev
+openapi: 3.1.0
+paths:
+  /v1/extension/status:
+    get:
+      description: Reports whether the extension module is wired. Placeholder for phase 0.
+      operationId: getExtensionStatus
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatusOutputBody5"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Extension module status
+      tags:
+        - extension
+  /v1/health:
+    get:
+      description: Reports liveness, the running build and whether a cloud account is paired.
+      operationId: getNodeHealth
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Node health
+      tags:
+        - health
+  /v1/library/status:
+    get:
+      description: Reports whether the library module is wired. Placeholder for phase 0.
+      operationId: getLibraryStatus
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatusOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Library module status
+      tags:
+        - library
+  /v1/playback/status:
+    get:
+      description: Reports whether the playback module is wired. Placeholder for phase 0.
+      operationId: getPlaybackStatus
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatusOutputBody2"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Playback module status
+      tags:
+        - playback
+  /v1/reader/status:
+    get:
+      description: Reports whether the reader module is wired. Placeholder for phase 0.
+      operationId: getReaderStatus
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatusOutputBody3"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Reader module status
+      tags:
+        - reader
+  /v1/sync/status:
+    get:
+      description: Reports whether the sync module is wired. Placeholder for phase 0.
+      operationId: getSyncStatus
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatusOutputBody4"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Sync module status
+      tags:
+        - sync
+  /v1/torrent/status:
+    get:
+      description: Reports whether the torrent module is wired. Placeholder for phase 0.
+      operationId: getTorrentStatus
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatusOutputBody1"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Torrent module status
+      tags:
+        - torrent
+security:
+  - nodeToken: []
+tags:
+  - description: Liveness and build information.
+    name: health
+  - description: Local file scanning and matching against catalog titles.
+    name: library
+  - description: Providers and download management.
+    name: torrent
+  - description: mpv control, direct play and transcoding.
+    name: playback
+  - description: Image-based and epub/pdf reading.
+    name: reader
+  - description: Progress synchronisation with a paired cloud account.
+    name: sync
+  - description: Plugin runtime for metadata and torrent providers.
+    name: extension

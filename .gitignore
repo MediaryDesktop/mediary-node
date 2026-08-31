@@ -1,0 +1,8 @@
+node_modules/
+.DS_Store
+Thumbs.db
+
+# go.work lives in the workspace root, one level up, and is never committed to
+# this repository — see mediary-contracts/docs/contracts-and-codegen.md §6.
+go.work
+go.work.sum

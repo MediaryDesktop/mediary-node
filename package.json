@@ -1,0 +1,21 @@
+{
+	"name": "mediary-node",
+	"private": true,
+	"type": "module",
+	"description": "Mediary self-hosted node: Go server (server/) and Electron desktop client (desktop/).",
+	"workspaces": ["desktop"],
+	"scripts": {
+		"dev": "npm run dev -w desktop",
+		"build": "npm run build -w desktop",
+		"check": "npm run check -w desktop",
+		"lint": "npm run lint -w desktop",
+		"format": "npm run format -w desktop",
+		"api:types": "npm run api:types -w desktop",
+		"server:dev": "node scripts/server.mjs dev",
+		"server:build": "node scripts/server.mjs build",
+		"server:check": "node scripts/server.mjs check"
+	},
+	"engines": {
+		"node": ">=22"
+	}
+}

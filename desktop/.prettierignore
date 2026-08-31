@@ -1,0 +1,7 @@
+# Emitted by `npm run api:types`; formatting it is not our call.
+src/core/*/*.gen.ts
+
+node_modules/
+out/
+dist/
+release/

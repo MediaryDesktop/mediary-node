@@ -1,0 +1,94 @@
+version: "3"
+
+vars:
+  BINARY: mediary-node
+  VERSION:
+    sh: git describe --tags --always --dirty 2>/dev/null || echo "0.0.0-dev"
+  COMMIT:
+    sh: git rev-parse --short HEAD 2>/dev/null || echo "unknown"
+  # Task's own template function rather than `date` — the embedded shell has no
+  # `date` on Windows. See the same note in mediary-cloud/Taskfile.yml.
+  BUILT: '{{now | date "2006-01-02T15:04:05Z"}}'
+
+env:
+  # modernc.org/sqlite is pure Go, so the node cross-compiles from one CI job to
+  # every desktop platform. Turning cgo on would give that up.
+  CGO_ENABLED: "0"
+
+tasks:
+  default:
+    cmd: task --list
+    silent: true
+
+  dev:
+    desc: Run the node with hot reload
+    cmd: air
+
+  run:
+    desc: Run the node once, without reload
+    cmd: go run ./cmd/nodesrv
+
+  build:
+    desc: Build the node binary into bin/
+    cmd: >-
+      go build
+      -ldflags "-s -w -X main.version={{.VERSION}} -X main.commit={{.COMMIT}} -X main.built={{.BUILT}}"
+      -o bin/{{.BINARY}}{{exeExt}} ./cmd/nodesrv
+
+  build:all:
+    desc: Cross-compile the node for every desktop platform
+    cmds:
+      - GOOS=windows GOARCH=amd64 go build -ldflags "-s -w -X main.version={{.VERSION}}" -o bin/{{.BINARY}}-windows-amd64.exe ./cmd/nodesrv
+      - GOOS=darwin  GOARCH=amd64 go build -ldflags "-s -w -X main.version={{.VERSION}}" -o bin/{{.BINARY}}-darwin-amd64 ./cmd/nodesrv
+      - GOOS=darwin  GOARCH=arm64 go build -ldflags "-s -w -X main.version={{.VERSION}}" -o bin/{{.BINARY}}-darwin-arm64 ./cmd/nodesrv
+      - GOOS=linux   GOARCH=amd64 go build -ldflags "-s -w -X main.version={{.VERSION}}" -o bin/{{.BINARY}}-linux-amd64 ./cmd/nodesrv
+
+  test:
+    desc: Run the test suite
+    cmd: go test -cover ./...
+
+  test:race:
+    desc: Run the test suite under the race detector (needs a C toolchain)
+    # See the same note in mediary-cloud/Taskfile.yml: -race needs cgo, and cgo
+    # is off so the node stays cross-compilable to every desktop platform.
+    env:
+      CGO_ENABLED: "1"
+    cmd: go test -race -cover ./...
+
+  lint:
+    desc: Run golangci-lint
+    cmd: golangci-lint run
+
+  fmt:
+    desc: Format and fix import grouping
+    cmd: golangci-lint fmt
+
+  fmt:check:
+    desc: Fail if anything is unformatted
+    cmd: golangci-lint fmt --diff
+
+  sqlc:
+    desc: Regenerate the typed query layer from db/queries
+    cmd: sqlc generate
+
+  openapi:
+    desc: Write the node's OpenAPI document to api/openapi.yaml
+    cmd: go run ./cmd/openapi api/openapi.yaml
+
+  openapi:check:
+    desc: Fail if api/openapi.yaml is stale relative to the code
+    cmds:
+      - task: openapi
+      - git diff --exit-code -- api/openapi.yaml
+
+  migrate:create:
+    desc: 'Create a migration: task migrate:create -- add_library_tables'
+    cmd: goose -dir db/migrations create {{.CLI_ARGS}} sql
+
+  check:
+    desc: Everything CI runs
+    cmds:
+      - task: fmt:check
+      - task: lint
+      - task: test
+      - task: build

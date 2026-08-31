@@ -1,0 +1,17 @@
+# Normalise line endings so a checkout on Windows produces byte-identical files
+# to one on Linux.
+#
+# The drift gates (`task openapi:check`, `npm run api:types` + `git diff
+# --exit-code`) regenerate a committed file and compare. Line-ending conversion
+# on checkout would make them fail on Windows and pass in CI.
+* text=auto eol=lf
+
+# Shell scripts must keep LF even on Windows: a CRLF shebang makes Docker fail
+# with "no such file or directory" on an entrypoint that plainly exists.
+*.sh text eol=lf
+
+*.png binary
+*.jpg binary
+*.ico binary
+*.icns binary
+*.woff2 binary

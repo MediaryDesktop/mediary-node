@@ -1,0 +1,39 @@
+{
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"lib": ["ES2023", "DOM", "DOM.Iterable"],
+		"jsx": "react-jsx",
+		"types": ["vite/client"],
+		"strict": true,
+		"noUncheckedIndexedAccess": true,
+		"noImplicitOverride": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"isolatedModules": true,
+		"verbatimModuleSyntax": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"noEmit": true,
+		"composite": true,
+		// The layer aliases. Must stay in step with electron.vite.config.ts and
+		// with the boundary rules in eslint.config.mjs.
+		//
+		// No `baseUrl`: it is deprecated as of TypeScript 6 and removed in 7.
+		// Since TS 4.1 `paths` resolve relative to the directory holding this
+		// file, which is exactly what these entries already assume.
+		"paths": {
+			"@app/*": ["./src/app/*"],
+			"@modules/*": ["./src/modules/*"],
+			"@core/*": ["./src/core/*"],
+			"@ui/*": ["./src/ui/*"],
+			"@lib/*": ["./src/lib/*"]
+		}
+	},
+	// The renderer never sees electron/ — it runs in another process, and
+	// `window.mediary` is typed by src/shared/types/bridge.ts instead.
+	// vitest.setup.ts belongs here rather than in the node project: it runs
+	// under jsdom and touches `window`.
+	"include": ["src/**/*.ts", "src/**/*.tsx", "vitest.setup.ts"]
+}

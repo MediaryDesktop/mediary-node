@@ -1,0 +1,112 @@
+version: "2"
+
+run:
+  timeout: 5m
+  tests: true
+
+linters:
+  default: standard
+  enable:
+    - bodyclose
+    - contextcheck
+    - errorlint
+    - gocritic
+    - gosec
+    - misspell
+    - nilerr
+    - noctx
+    - revive
+    - rowserrcheck
+    - sqlclosecheck
+    - unconvert
+    - wastedassign
+
+  settings:
+    errcheck:
+      check-type-assertions: true
+
+    gocritic:
+      enabled-tags: [diagnostic, style, performance]
+      disabled-checks:
+        - commentFormatting
+        # zerolog.Logger and the module Deps structs are passed by value on
+        # purpose — see the same note in mediary-cloud/.golangci.yml.
+        - hugeParam
+
+    govet:
+      enable-all: true
+      disable:
+        - fieldalignment
+
+    revive:
+      rules:
+        - name: exported
+        - name: package-comments
+        - name: var-naming
+        - name: indent-error-flow
+        - name: errorf
+        - name: context-as-argument
+        - name: unused-parameter
+
+    depguard:
+      rules:
+        platform:
+          files:
+            - "**/internal/platform/**"
+          deny:
+            - pkg: github.com/mediaryorg/mediary-node/server/internal/modules
+              desc: platform is the bottom layer and must not know about a module
+            - pkg: github.com/mediaryorg/mediary-node/server/internal/app
+              desc: platform must not import the composition root
+            - pkg: github.com/mediaryorg/mediary-node/server/internal/httpapi
+              desc: platform must not import the transport layer
+        httpapi:
+          files:
+            - "**/internal/httpapi/**"
+          deny:
+            - pkg: github.com/mediaryorg/mediary-node/server/internal/modules
+              desc: httpapi must not import a module — internal/app composes them
+            - pkg: github.com/mediaryorg/mediary-node/server/internal/app
+              desc: httpapi must not import the composition root
+        contracts:
+          # Only the cloud wrapper may see the generated contract. If a module
+          # imported it directly, swapping or versioning the cloud API would
+          # touch every module instead of one package.
+          files:
+            - "**/internal/modules/**"
+            - "**/internal/httpapi/**"
+          deny:
+            - pkg: github.com/mediaryorg/mediary-contracts
+              desc: reach the cloud through internal/platform/cloud, not the generated client
+
+  exclusions:
+    generated: lax
+    rules:
+      - path: _test\.go
+        linters: [gosec, errcheck, contextcheck]
+      - path: internal/platform/db/sqlc/
+        linters: [revive, gocritic, unconvert, misspell]
+
+formatters:
+  enable:
+    - gofumpt
+    - gci
+
+  settings:
+    gofumpt:
+      extra:
+        group-params: true
+
+    gci:
+      # The generated contract gets its own group, between third-party code and
+      # ours. It is neither: we own it, but not in this repository.
+      sections:
+        - standard
+        - default
+        - prefix(github.com/mediaryorg/mediary-contracts)
+        - prefix(github.com/mediaryorg/mediary-node)
+
+  exclusions:
+    generated: lax
+    paths:
+      - internal/platform/db/sqlc

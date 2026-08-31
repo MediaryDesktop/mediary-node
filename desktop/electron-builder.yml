@@ -1,0 +1,56 @@
+appId: org.mediary.desktop
+productName: Mediary
+copyright: Copyright © 2026 Mediary
+
+directories:
+  output: release
+  buildResources: resources
+
+files:
+  - out/**
+  - package.json
+
+# The Go node binary is not a Node dependency — it is a separate executable
+# built by `task build:all` in ../server and copied in here. It must land in
+# resources/bin/, which is where NodeSupervisor looks when app.isPackaged.
+extraResources:
+  - from: ../server/bin
+    to: bin
+    filter:
+      - mediary-node*
+      - nodesrv*
+
+# Never bundle a development build's data directory or logs.
+asarUnpack:
+  - resources/bin/**
+
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+  artifactName: ${productName}-${version}-win-${arch}.${ext}
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  deleteAppDataOnUninstall: false
+
+mac:
+  target:
+    - target: dmg
+      arch: [x64, arm64]
+  category: public.app-category.entertainment
+  # The node spawns child processes and opens local sockets; the hardened
+  # runtime needs those entitlements declared explicitly.
+  hardenedRuntime: true
+  entitlementsInherit: resources/entitlements.mac.plist
+
+linux:
+  target:
+    - AppImage
+    - deb
+  category: AudioVideo
+  maintainer: Mediary
+
+publish: null

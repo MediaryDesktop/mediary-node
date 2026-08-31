@@ -1,0 +1,59 @@
+.badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.25rem 0.7rem;
+	border: 1px solid var(--border);
+	border-radius: 999px;
+	background: var(--surface-raised);
+	color: var(--text-muted);
+	font-size: 0.8125rem;
+	white-space: nowrap;
+}
+
+.dot {
+	width: 0.5rem;
+	height: 0.5rem;
+	border-radius: 50%;
+	background: currentColor;
+	flex: none;
+}
+
+.ready {
+	color: var(--ok);
+}
+
+.starting,
+.restarting {
+	color: var(--warn);
+
+	.dot {
+		animation: pulse 1.2s ease-in-out infinite;
+	}
+}
+
+.failed {
+	color: var(--error);
+}
+
+.stopped {
+	color: var(--text-muted);
+}
+
+@keyframes pulse {
+	0%,
+	100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.3;
+	}
+}
+
+/* Respect the user's motion preference — an indefinitely pulsing dot is exactly
+   the kind of animation the setting exists for. */
+@media (prefers-reduced-motion: reduce) {
+	.dot {
+		animation: none;
+	}
+}

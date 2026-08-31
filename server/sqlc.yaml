@@ -1,0 +1,18 @@
+version: "2"
+
+sql:
+  - engine: sqlite
+    # The migrations are the schema. sqlc reads the same files goose applies at
+    # node startup, so a query cannot compile against a table that does not
+    # exist on the user's machine.
+    schema: db/migrations
+    queries: db/queries
+    gen:
+      go:
+        package: sqlc
+        out: internal/platform/db/sqlc
+        emit_json_tags: true
+        emit_interface: true
+        emit_empty_slices: true
+        emit_prepared_queries: false
+        json_tags_case_style: snake

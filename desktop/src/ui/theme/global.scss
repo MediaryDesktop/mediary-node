@@ -1,0 +1,52 @@
+/*
+ * Global styles: the reset, the design tokens and nothing else. Anything that
+ * styles a specific piece of UI belongs in a `.module.scss` next to it.
+ */
+
+:root {
+	color-scheme: dark;
+
+	--bg: #0d0d10;
+	--surface: #16161c;
+	--surface-raised: #1e1e26;
+	--border: #2a2a34;
+	--text: #e8e8ee;
+	--text-muted: #9a9aa8;
+	--accent: #7c5cff;
+	--ok: #3ecf8e;
+	--warn: #f2b64c;
+	--error: #f4636e;
+
+	--radius: 10px;
+	--font-ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	--font-mono: ui-monospace, "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+	height: 100%;
+	margin: 0;
+}
+
+body {
+	background: var(--bg);
+	color: var(--text);
+	font-family: var(--font-ui);
+	font-size: 15px;
+	line-height: 1.5;
+	-webkit-font-smoothing: antialiased;
+	/* The window frame is the application's, not a document's: rubber-band
+	   scrolling on the body would drag the whole UI. */
+	overscroll-behavior: none;
+}
+
+a {
+	color: var(--accent);
+}
