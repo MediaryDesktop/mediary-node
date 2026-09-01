@@ -3,92 +3,87 @@ import prettierConfig from 'eslint-config-prettier'
 import reactPlugin from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
 import globals from 'globals'
-import { readdirSync } from 'node:fs'
-import { fileURLToPath } from 'node:url'
 import tseslint from 'typescript-eslint'
 
 /*
  * ---------------------------------------------------------------------------
  * Architecture boundaries — see docs/architecture.md
  *
- *   app      composition
- *   modules  domain ownership     → core, ui, lib, sibling module public API
- *   core     app infrastructure   → lib
- *   ui       visual primitives    → lib
- *   lib      technical primitives → nothing
+ *   app         composition: routes, providers, the frame
+ *   pages       one route each: composes features and entities
+ *   features    a user scenario that changes something
+ *   entities    a domain concept and the state that is it
+ *   infra       the outside world: cloud, node, the Electron bridge
+ *   shared      domain-free toolkit: ui, request layer, primitives
  *
- * This is a categorisation of ownership, not a layer hierarchy — but the
- * dependency *direction* between those categories is still one-way, and that
- * part is machine-checkable.
+ * A layer may import strictly downwards, never sideways and never up. The
+ * sideways half matters as much as the direction: two slices of the same layer
+ * that need each other are one slice with a seam drawn in the wrong place, and
+ * a cycle waiting to be written.
  *
- * ESLint sees one file at a time, so it enforces direction only. It cannot see
- * cycles: a cycle is a property of the graph, not of any single file. That is
- * what scripts/check-architecture.mjs is for. `npm run arch:check` runs both,
- * and violations are errors, not warnings.
+ * ESLint sees one file at a time, so it enforces direction and public-API
+ * access only. It cannot see cycles: a cycle is a property of the graph, not of
+ * any single file. That is what scripts/check-architecture.mjs is for.
+ * `npm run arch:check` runs both, and violations are errors, not warnings.
  * ---------------------------------------------------------------------------
  */
 
-/** Every alias pattern for a category: the bare alias plus everything under it. */
-const alias = name => [`@${name}`, `@${name}/*`, `@${name}/*/**`]
+/** Bottom to top. Index order *is* the dependency rule. */
+const LAYERS = [
+	{ alias: 'shared', dir: 'shared' },
+	{ alias: 'infra', dir: 'infrastructure' },
+	{ alias: 'entities', dir: 'entities' },
+	{ alias: 'features', dir: 'features' },
+	{ alias: 'pages', dir: 'pages' },
+	{ alias: 'app', dir: 'app' }
+]
 
-/** One `no-restricted-imports` rule. `deny` holds category names. */
-function layer(files, deny, message) {
-	return {
-		files,
-		rules: {
-			'no-restricted-imports': ['error', { patterns: [{ group: deny.flatMap(alias), message }] }]
-		}
-	}
-}
-
-const MODULES_DIR = fileURLToPath(new URL('./src/modules', import.meta.url))
-
-function readModuleNames() {
-	try {
-		return readdirSync(MODULES_DIR, { withFileTypes: true })
-			.filter(entry => entry.isDirectory())
-			.map(entry => entry.name)
-	} catch {
-		return []
-	}
-}
+/** Every alias pattern for a layer: the bare alias plus everything under it. */
+const patternsFor = alias => [`@${alias}`, `@${alias}/*`, `@${alias}/*/**`]
 
 /**
- * A module may import a sibling's public index (`@modules/library`) but never
- * reach inside it (`@modules/library/model/...`). Its own deep paths stay
- * legal, so the deny list is generated per module with a negated self-pattern.
+ * Layers whose slices have a public index. Reaching past it
+ * (`@entities/session/model`) makes the index documentation rather than a
+ * boundary, so the deep path is denied everywhere.
  *
- * This is the rule that makes the public API mean something: without it, the
- * index file is documentation rather than a boundary.
+ * `shared` is exempt on purpose: it is a toolkit of independent segments, not
+ * slices with an owner, and `@shared/ui/theme/global.scss` has to be reachable.
  */
-function crossModuleDeepImportRules() {
-	return readModuleNames().map(name => ({
-		files: [`src/modules/${name}/**/*.{ts,tsx}`],
-		rules: {
-			'no-restricted-imports': [
-				'error',
-				{
-					patterns: [
-						{
-							group: [
-								'@modules/*/*',
-								'@modules/*/*/**',
-								`!@modules/${name}/*`,
-								`!@modules/${name}/*/**`
-							],
-							message:
-								'Import a sibling module through its public index (`@modules/<name>`), not a deep path.'
-						},
-						{
-							group: alias('app'),
-							message:
-								'A module must not import app. Composition depends on modules, never the reverse.'
-						}
-					]
-				}
-			]
+const SLICED_LAYERS = ['infra', 'entities', 'features', 'pages']
+
+const deepImportRule = {
+	group: SLICED_LAYERS.flatMap(alias => [`@${alias}/*/*`, `@${alias}/*/*/**`]),
+	message: 'Import a slice through its public index (`@entities/session`), not a path inside it.'
+}
+
+/** One config per layer: may not import its own layer or anything above it. */
+function layerRules() {
+	return LAYERS.map(({ alias, dir }, index) => {
+		const forbidden = LAYERS.slice(index).map(layer => layer.alias)
+
+		return {
+			files: [`src/${dir}/**/*.{ts,tsx}`],
+			rules: {
+				'no-restricted-imports': [
+					'error',
+					{
+						patterns: [
+							{
+								group: forbidden.flatMap(patternsFor),
+								message:
+									`\`${alias}\` may import only layers below it ` +
+									`(${LAYERS.slice(0, index)
+										.map(layer => layer.alias)
+										.join(', ') || 'nothing'}). ` +
+									'Sideways imports are denied too: two slices that need each other are one slice.'
+							},
+							deepImportRule
+						]
+					}
+				]
+			}
 		}
-	}))
+	})
 }
 
 export default tseslint.config(
@@ -98,8 +93,9 @@ export default tseslint.config(
 			'dist/**',
 			'release/**',
 			'node_modules/**',
-			// Generated by `npm run api:types`.
-			'src/core/*/*.gen.ts',
+			// Generated: API types by `npm run api:types`, the sprite metadata by
+			// the @neodx/svg plugin on every dev run and build.
+			'src/**/*.gen.ts',
 			// Declaration files carry no logic to lint.
 			'**/*.d.ts'
 		]
@@ -168,7 +164,7 @@ export default tseslint.config(
 				{
 					patterns: [
 						{
-							group: ['@app/*', '@modules/*', '@core/*', '@ui/*', '@lib/*'],
+							group: LAYERS.flatMap(layer => patternsFor(layer.alias)),
 							message: 'The main process must not import renderer code — they are separate processes.'
 						}
 					]
@@ -178,26 +174,7 @@ export default tseslint.config(
 	},
 
 	// ── Dependency directions ───────────────────────────────────────────────
-	layer(
-		['src/lib/**/*.{ts,tsx}'],
-		['ui', 'core', 'modules', 'app'],
-		'`lib` holds generic technical primitives and may import nothing above it. ' +
-			'A utility that knows about media, playback or the node belongs to a module.'
-	),
-	layer(
-		['src/ui/**/*.{ts,tsx}'],
-		['core', 'modules', 'app'],
-		'`ui` is the design system: domain-free and infrastructure-free. ' +
-			'A component that knows what a title or a download is belongs to its module.'
-	),
-	layer(
-		['src/core/**/*.{ts,tsx}'],
-		['modules', 'app'],
-		'`core` is application infrastructure and must not know about any domain. ' +
-			'Core means "everyone needs it and it has no owner", not "it is important".'
-	),
-
-	...crossModuleDeepImportRules(),
+	...layerRules(),
 
 	prettierConfig
 )

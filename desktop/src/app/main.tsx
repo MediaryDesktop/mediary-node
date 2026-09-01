@@ -1,9 +1,10 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 
-import '@ui/theme/global.scss'
+import '@shared/i18n'
+import '@shared/ui/theme/global.scss'
 
-import { App } from './app'
+import { App } from './App'
 
 const container = document.getElementById('root')
 

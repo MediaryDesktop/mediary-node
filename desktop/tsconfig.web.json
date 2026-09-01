@@ -25,14 +25,15 @@
 		// file, which is exactly what these entries already assume.
 		"paths": {
 			"@app/*": ["./src/app/*"],
-			"@modules/*": ["./src/modules/*"],
-			"@core/*": ["./src/core/*"],
-			"@ui/*": ["./src/ui/*"],
-			"@lib/*": ["./src/lib/*"]
+			"@pages/*": ["./src/pages/*"],
+			"@features/*": ["./src/features/*"],
+			"@entities/*": ["./src/entities/*"],
+			"@infra/*": ["./src/infrastructure/*"],
+			"@shared/*": ["./src/shared/*"]
 		}
 	},
 	// The renderer never sees electron/ — it runs in another process, and
-	// `window.mediary` is typed by src/shared/types/bridge.ts instead.
+	// `window.mediary` is typed by src/infrastructure/node/bridge-types.ts instead.
 	// vitest.setup.ts belongs here rather than in the node project: it runs
 	// under jsdom and touches `window`.
 	"include": ["src/**/*.ts", "src/**/*.tsx", "vitest.setup.ts"]

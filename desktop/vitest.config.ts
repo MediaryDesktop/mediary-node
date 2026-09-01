@@ -7,10 +7,11 @@ export default defineConfig({
 	resolve: {
 		alias: {
 			'@app': dir('./src/app'),
-			'@modules': dir('./src/modules'),
-			'@core': dir('./src/core'),
-			'@ui': dir('./src/ui'),
-			'@lib': dir('./src/lib')
+			'@pages': dir('./src/pages'),
+			'@features': dir('./src/features'),
+			'@entities': dir('./src/entities'),
+			'@infra': dir('./src/infrastructure'),
+			'@shared': dir('./src/shared')
 		}
 	},
 	test: {

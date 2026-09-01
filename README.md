@@ -74,8 +74,9 @@ Go-частина має власні команди — див. [server/Taskfil
 ## Архітектура
 
 - Сервер ноди: [docs/server-architecture.md](docs/server-architecture.md)
-- Renderer: [docs/architecture.md](docs/architecture.md) — модульний моноліт,
-  ownership і межі, як їх перевіряє `npm run arch:check`
+- Renderer: [docs/architecture.md](docs/architecture.md) — Feature-Sliced Design
+  із шаром інфраструктури: шари, слайси й межі, як їх перевіряє
+  `npm run arch:check`
 - Плани реалізації: [../docs/plans/](../docs/plans/)
 
 ## Залежність від контракту

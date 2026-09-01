@@ -1,5 +1,6 @@
+import svg from '@neodx/svg/vite'
 import react from '@vitejs/plugin-react'
-import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
+import { defineConfig } from 'electron-vite'
 import { fileURLToPath } from 'node:url'
 
 const dir = (path: string) => fileURLToPath(new URL(path, import.meta.url))
@@ -15,7 +16,6 @@ const dir = (path: string) => fileURLToPath(new URL(path, import.meta.url))
  */
 export default defineConfig({
 	main: {
-		plugins: [externalizeDepsPlugin()],
 		build: {
 			outDir: 'out/main',
 			rollupOptions: { input: { index: dir('./electron/main/index.ts') } }
@@ -23,7 +23,6 @@ export default defineConfig({
 	},
 
 	preload: {
-		plugins: [externalizeDepsPlugin()],
 		build: {
 			outDir: 'out/preload',
 			rollupOptions: { input: { index: dir('./electron/preload/index.ts') } }
@@ -32,14 +31,36 @@ export default defineConfig({
 
 	renderer: {
 		root: dir('./src'),
-		plugins: [react()],
+		plugins: [
+			react(),
+			/*
+			 * Icons: every `src/shared/ui/icon/assets/<group>/<name>.svg` becomes a
+			 * symbol in `src/public/sprite/<group>.svg`, and the generated metadata
+			 * gives `Icon` its `name` union plus each symbol's real viewBox.
+			 *
+			 * Paths are relative to the package directory (the plugin's own vfs
+			 * root), not to the renderer `root` above.
+			 */
+			svg({
+				inputRoot: 'src/shared/ui/icon/assets',
+				output: 'src/public/sprite',
+				// One sprite per asset folder, so a screen pays for the group it
+				// uses instead of downloading every icon in the app.
+				group: true,
+				metadata: 'src/shared/ui/icon/sprite.gen.ts',
+				// The glyphs are stroke-only and already say `currentColor`; this
+				// keeps a designer's hardcoded fill from slipping in later.
+				resetColors: true
+			})
+		],
 		resolve: {
 			alias: {
 				'@app': dir('./src/app'),
-				'@modules': dir('./src/modules'),
-				'@core': dir('./src/core'),
-				'@ui': dir('./src/ui'),
-				'@lib': dir('./src/lib')
+				'@pages': dir('./src/pages'),
+				'@features': dir('./src/features'),
+				'@entities': dir('./src/entities'),
+				'@infra': dir('./src/infrastructure'),
+				'@shared': dir('./src/shared')
 			}
 		},
 		build: {

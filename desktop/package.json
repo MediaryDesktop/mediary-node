@@ -20,9 +20,9 @@
 		"test:watch": "vitest",
 		"check": "npm run format:check && npm run arch:check && npm run typecheck && npm run test",
 		"api:types": "npm run api:types:node && npm run api:types:cloud",
-		"api:types:node": "openapi-typescript ../server/api/openapi.yaml -o src/core/node/schema.gen.ts --root-types",
-		"api:types:node:remote": "openapi-typescript http://127.0.0.1:43211/openapi.yaml -o src/core/node/schema.gen.ts --root-types",
-		"api:types:cloud": "openapi-typescript ../../mediary-contracts/openapi/cloud.openapi.yaml -o src/core/cloud/schema.gen.ts --root-types"
+		"api:types:node": "openapi-typescript ../server/api/openapi.yaml -o src/infrastructure/node/schema.gen.ts --root-types",
+		"api:types:node:remote": "openapi-typescript http://127.0.0.1:43211/openapi.yaml -o src/infrastructure/node/schema.gen.ts --root-types",
+		"api:types:cloud": "openapi-typescript ../../mediary-contracts/openapi/cloud.openapi.yaml -o src/infrastructure/cloud/schema.gen.ts --root-types"
 	},
 	"dependencies": {
 		"@farfetched/core": "^0.15.0",
@@ -30,14 +30,17 @@
 		"clsx": "^2.1.1",
 		"effector": "^23.4.4",
 		"effector-react": "^23.3.0",
+		"i18next": "^26.4.1",
 		"ofetch": "^1.4.1",
 		"patronum": "^2.3.0",
 		"react": "^19.2.8",
-		"react-dom": "^19.2.8"
+		"react-dom": "^19.2.8",
+		"react-i18next": "^17.0.13"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.39.5",
 		"@mediaryorg/core": "^1.0.5",
+		"@neodx/svg": "^1.1.1",
 		"@testing-library/jest-dom": "^6.6.3",
 		"@testing-library/react": "^16.3.0",
 		"@trivago/prettier-plugin-sort-imports": "^6.0.2",

@@ -1,15 +1,17 @@
 #!/usr/bin/env node
 /**
- * Module-level cycle detector — see docs/architecture.md.
+ * Slice-level cycle detector — see docs/architecture.md.
  *
  * ESLint enforces the *direction* of imports (which layer may reach which).
  * It cannot see cycles, because a cycle is a property of the graph, not of any
- * single file: `library/lib/*` importing `media/types` and `media/pages/*`
- * importing `library` are each legal in isolation and jointly a cycle.
+ * single file: `features/download/lib/*` importing `entities/media` and
+ * `entities/media/ui/*` importing `entities/torrent` are each legal in
+ * isolation and jointly a cycle.
  *
- * This script collapses every source file to its owning node (`modules/library`,
- * `shell`, `kernel`, …), builds the import graph between nodes, and fails on any
- * strongly connected component larger than one node.
+ * This script collapses every source file to its owning node
+ * (`entities/session`, `features/auth`, `app`, …), builds the import graph
+ * between nodes, and fails on any strongly connected component larger than one
+ * node.
  *
  * Usage: node scripts/check-architecture.mjs
  */
@@ -20,17 +22,30 @@ import { fileURLToPath } from 'node:url'
 const SRC = fileURLToPath(new URL('../src', import.meta.url))
 const SOURCE_EXTENSIONS = ['.ts', '.tsx']
 
-/** Ownership categories, each of which collapses to one graph node. */
-const CATEGORIES = ['lib', 'ui', 'core', 'app']
+/** Layer directory → the alias it is addressed by. */
+const LAYER_DIRS = {
+	shared: 'shared',
+	infrastructure: 'infra',
+	entities: 'entities',
+	features: 'features',
+	pages: 'pages',
+	app: 'app'
+}
+
+/**
+ * Layers whose slices are independent graph nodes: a cycle between two entities
+ * or two features is exactly what this script exists to catch. `app` collapses
+ * to one node — it is the composition root and has no slices.
+ */
+const SLICED_LAYERS = new Set(['shared', 'infra', 'entities', 'features', 'pages'])
 
 /** Alias prefix → the owning graph node. */
-const ALIAS_NODES = {
-	'@lib': () => 'lib',
-	'@ui': () => 'ui',
-	'@core': segments => (segments[0] ? `core/${segments[0]}` : 'core'),
-	'@app': () => 'app',
-	'@modules': segments => (segments[0] ? `modules/${segments[0]}` : 'modules')
-}
+const ALIAS_NODES = Object.fromEntries(
+	Object.values(LAYER_DIRS).map(alias => [
+		`@${alias}`,
+		segments => (SLICED_LAYERS.has(alias) && segments[0] ? `${alias}/${segments[0]}` : alias)
+	])
+)
 
 const IMPORT_PATTERN = /(?:from|import)\s*\(?\s*['"]([^'"]+)['"]/g
 
@@ -66,20 +81,14 @@ function collectSourceFiles(dir, found = []) {
 /** The node a file belongs to, mirroring the alias map above. */
 function nodeOfFile(path) {
 	const segments = relative(SRC, path).split(sep)
-	const [area, name] = segments
+	const [dir, name] = segments
+	const alias = LAYER_DIRS[dir]
 
-	// modules and core are the two categories whose members are independent
-	// graph nodes: a cycle between two modules, or between two core packages, is
-	// exactly what this script exists to catch.
-	if (area === 'modules' || area === 'core') {
-		return name ? `${area}/${name}` : area
+	if (!alias) {
+		return 'root'
 	}
 
-	if (CATEGORIES.includes(area)) {
-		return area
-	}
-
-	return 'root'
+	return SLICED_LAYERS.has(alias) && name ? `${alias}/${name}` : alias
 }
 
 /** The node an import specifier points at, or null for relative / package imports. */
@@ -180,11 +189,11 @@ const cycles = findCycles(edges)
 const nodeCount = [...edges.keys()].filter(node => edges.get(node).size > 0 || node !== 'root').length
 
 if (cycles.length === 0) {
-	console.log(`✔ No module cycles (${files.length} files, ${nodeCount} nodes).`)
+	console.log(`✔ No slice cycles (${files.length} files, ${nodeCount} nodes).`)
 	process.exit(0)
 }
 
-console.error(`✖ Found ${cycles.length} module cycle(s) across ${files.length} files:\n`)
+console.error(`✖ Found ${cycles.length} slice cycle(s) across ${files.length} files:\n`)
 
 cycles.forEach((component, position) => {
 	console.error(`${position + 1}) ${component.join(' ↔ ')}`)
@@ -204,5 +213,5 @@ cycles.forEach((component, position) => {
 	console.error('')
 })
 
-console.error('Modules must form a DAG. See docs/architecture.md.')
+console.error('Slices must form a DAG. See docs/architecture.md.')
 process.exit(1)

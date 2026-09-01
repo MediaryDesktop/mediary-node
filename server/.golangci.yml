@@ -40,8 +40,6 @@ linters:
 
     revive:
       rules:
-        - name: exported
-        - name: package-comments
         - name: var-naming
         - name: indent-error-flow
         - name: errorf

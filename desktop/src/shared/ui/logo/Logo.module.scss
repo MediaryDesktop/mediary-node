@@ -1,0 +1,19 @@
+.root {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.625rem;
+	line-height: 1;
+	user-select: none;
+
+	.mark {
+		display: block;
+		flex-shrink: 0;
+		object-fit: contain;
+	}
+
+	.wordmark {
+		font-weight: 600;
+		letter-spacing: 0.02em;
+		white-space: nowrap;
+	}
+}

@@ -1,0 +1,38 @@
+.root {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+
+	.header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		min-height: var(--titlebar-height);
+		padding: 0.75rem 1.5rem;
+		padding-right: calc(var(--controls-inset) + 1.5rem);
+		border-bottom: 1px solid var(--border);
+		background: var(--surface);
+		-webkit-app-region: drag;
+		position: sticky;
+		top: 0;
+		z-index: 10;
+
+		.brand {
+			font-weight: 600;
+			letter-spacing: 0.02em;
+		}
+
+		.headerActions {
+			display: flex;
+			align-items: center;
+			gap: 0.75rem;
+			-webkit-app-region: no-drag;
+		}
+	}
+
+	.main {
+		flex: 1;
+		padding: 2rem 1.5rem;
+	}
+}

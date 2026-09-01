@@ -19,10 +19,11 @@ export default {
 	importOrderParserPlugins: ['classProperties', 'decorators-legacy', 'typescript', 'jsx'],
 	importOrder: [
 		'<THIRD_PARTY_MODULES>',
-		'^@lib/(.*)$',
-		'^@ui/(.*)$',
-		'^@core/(.*)$',
-		'^@modules/(.*)$',
+		'^@shared/(.*)$',
+		'^@infra/(.*)$',
+		'^@entities/(.*)$',
+		'^@features/(.*)$',
+		'^@pages/(.*)$',
 		'^@app/(.*)$',
 		'^../(.*)$',
 		'^./(.*)$'

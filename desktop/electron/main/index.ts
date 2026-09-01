@@ -19,6 +19,9 @@ const supervisor = new NodeSupervisor({
 
 let mainWindow: BrowserWindow | null = null
 
+/** Height of the strip the renderer keeps clear for the window controls. */
+const TITLE_BAR_HEIGHT = 40
+
 function createWindow(): BrowserWindow {
 	const window = new BrowserWindow({
 		width: 1440,
@@ -28,6 +31,27 @@ function createWindow(): BrowserWindow {
 		show: false,
 		autoHideMenuBar: true,
 		backgroundColor: '#0d0d10',
+		// The native caption bar is dropped, but not the buttons in it: Windows
+		// and Linux keep drawing minimise/maximise/close as an overlay in the
+		// same corner, and macOS keeps its traffic lights. Re-implementing those
+		// controls in the renderer would cost the OS-native hit targets, the
+		// snap-layouts flyout on Windows and the hover behaviour users expect.
+		//
+		// The trade is that the window loses its drag handle, so the renderer has
+		// to declare one — see `-webkit-app-region: drag` in the layouts.
+		titleBarStyle: 'hidden',
+		...(process.platform === 'darwin'
+			? {}
+			: {
+					titleBarOverlay: {
+						// Transparent, so the strip belongs to whatever the route
+						// draws underneath — the header's surface on framed pages,
+						// the video on the auth screens. Only the glyphs are ours.
+						color: '#00000000',
+						symbolColor: '#e8e8ee',
+						height: TITLE_BAR_HEIGHT
+					}
+				}),
 		webPreferences: {
 			preload: join(__dirname, '../preload/index.js'),
 			// Renderer is untrusted-by-default; everything it needs goes through preload/index.ts.
