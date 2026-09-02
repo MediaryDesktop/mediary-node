@@ -257,11 +257,22 @@ export const sprites = defineSpriteMap([
 			],
 			defineExternalAssetMeta('common.svg')
 		)
+	]),
+	defineSprite('social', [
+		defineSpriteAsset(
+			[
+				defineSpriteSymbol(['apple'], [48]),
+				defineSpriteSymbol(['facebook'], [48]),
+				defineSpriteSymbol(['google'], [48])
+			],
+			defineExternalAssetMeta('social.svg')
+		)
 	])
 ])
 
 export type SpritesMeta = {
 	common: 'arrow-left' | 'arrow-right' | 'eye-off' | 'eye' | 'lock' | 'mail' | 'user'
+	social: 'apple' | 'facebook' | 'google'
 }
 
 //#endregion

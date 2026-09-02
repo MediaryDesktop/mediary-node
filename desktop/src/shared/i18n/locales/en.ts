@@ -48,17 +48,33 @@ export const en = {
 			aside: 'An account is only needed for the cloud catalog and sync. The local library, player and downloads work without one.'
 		},
 		back: 'Go back',
+		or: 'or',
+		otherWay: 'Use a different sign-in method',
+		providers: {
+			label: 'Continue with',
+			lastUsed: 'Last used',
+			failed: 'Could not sign in with {{provider}}. Please try again.'
+		},
 		signIn: {
-			title: 'Welcome back',
-			subtitle: 'Sign in to continue',
+			eyebrow: 'Welcome back',
+			title: 'Hi there!',
+			subtitle: 'Choose how you want to sign in.',
+			emailTitle: 'Sign in',
+			emailSubtitle: 'Sign in to continue where you left off.',
 			submit: 'Sign in',
+			useEmail: 'Sign in with email and password',
+			forgotPassword: 'Forgot password?',
 			noAccount: 'No account yet?',
 			switch: 'Create one'
 		},
 		signUp: {
+			eyebrow: 'Join us',
 			title: 'Create an account',
-			subtitle: 'A few fields and you are done',
+			subtitle: 'Choose how you want to sign up.',
+			emailTitle: 'Sign up',
+			emailSubtitle: 'A few fields and you are done.',
 			submit: 'Sign up',
+			useEmail: 'Sign up with email',
 			haveAccount: 'Already have an account?',
 			switch: 'Sign in'
 		},
@@ -67,7 +83,37 @@ export const en = {
 			email: 'Email',
 			password: 'Password',
 			passwordHint: 'Password, at least {{min}} characters',
-			confirmation: 'Repeat the password'
+			confirmation: 'Repeat the password',
+			code: 'Confirmation code'
+		},
+		verify: {
+			eyebrow: 'Almost there',
+			title: 'Verify your email',
+			description: 'Enter the {{length}}-digit code we sent to {{email}}.',
+			submit: 'Verify email',
+			resendLabel: 'Did not get the code?',
+			resend: 'Send a new one',
+			later: 'Verify later'
+		},
+		reset: {
+			eyebrow: 'Account recovery',
+			title: 'Reset password',
+			description:
+				'Enter the address you registered with. If it has an account, a code is already on its way.',
+			submit: 'Send reset code',
+			backToSignIn: 'Back to sign in'
+		},
+		newPassword: {
+			eyebrow: 'Almost done',
+			title: 'New password',
+			description: 'Enter the code sent to {{email}}, then choose a new password.',
+			submit: 'Save new password',
+			requestAnother: 'Request a new code',
+			remembered: 'Remembered your password? Sign in'
+		},
+		otp: {
+			remaining: 'expires in {{time}}',
+			expired: 'Code expired'
 		},
 		validation: {
 			emailRequired: 'Enter your email',
@@ -79,7 +125,9 @@ export const en = {
 			passwordTooLong: 'Password must be at most {{max}} characters',
 			passwordEchoesIdentity: 'The password must not repeat your email or name',
 			confirmationRequired: 'Repeat the password',
-			confirmationMismatch: 'The passwords do not match'
+			confirmationMismatch: 'The passwords do not match',
+			codeRequired: 'Enter the code from the email',
+			codeIncomplete: 'The code is {{length}} digits long'
 		},
 		error: {
 			cloudUnreachable: 'Could not reach the cloud',

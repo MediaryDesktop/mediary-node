@@ -4,10 +4,21 @@ import { combine, createEvent, createStore, sample } from 'effector'
 import { unauthorized } from '@shared/api'
 import { atom } from '@shared/factory'
 
-import { hasCloudSession, setCloudSession } from '@infra/cloud'
+import { authorizeOAuthFx, hasCloudSession, setCloudSession, wasCancelled } from '@infra/cloud'
+import type { OAuthRedirect } from '@infra/cloud'
 
-import { fetchAccountFx, signInFx, signOutFx, signUpFx } from './api'
-import type { Account, LoginInput, RegisterInput, Session } from './api'
+import {
+	completeOAuthFx,
+	confirmEmailFx,
+	fetchAccountFx,
+	fetchOAuthProvidersFx,
+	sendEmailVerificationFx,
+	signInFx,
+	signOutFx,
+	signUpFx,
+	startOAuthFx
+} from './api'
+import type { Account, ConfirmEmailInput, LoginInput, RegisterInput, Session } from './api'
 
 /**
  * Who is signed in to the cloud.
@@ -30,12 +41,22 @@ import type { Account, LoginInput, RegisterInput, Session } from './api'
 /** The account as the server currently sees it — refetched, not derived. */
 export const accountQuery = createQuery({ effect: fetchAccountFx, name: 'account' })
 
+/**
+ * Which providers this deployment actually offers, which is a property of the
+ * cloud rather than of the client: a build that hardcoded "Google" would show a
+ * button that answers 404 on a deployment without credentials for it.
+ */
+export const oauthProvidersQuery = createQuery({ effect: fetchOAuthProvidersFx, name: 'oauthProviders' })
+
 export const sessionModel = atom(() => {
 	// ── Input ───────────────────────────────────────────────────────────────
 	const signInRequested = createEvent<LoginInput>()
 	const signUpRequested = createEvent<RegisterInput>()
 	const signOutRequested = createEvent()
 	const accountRefreshRequested = createEvent()
+	const oauthRequested = createEvent<string>()
+	const emailVerificationRequested = createEvent()
+	const emailConfirmationRequested = createEvent<ConfirmEmailInput>()
 
 	// ── Output ──────────────────────────────────────────────────────────────
 	/** Fires once per established session. Pages listen to navigate. */
@@ -44,6 +65,8 @@ export const sessionModel = atom(() => {
 	const signedOut = createEvent()
 	/** The server rejected the credential we were holding. */
 	const sessionExpired = createEvent()
+	/** Fires once the address on the account has been confirmed. */
+	const emailVerified = createEvent<Account>()
 
 	// ── State ───────────────────────────────────────────────────────────────
 	const $account = createStore<Account | null>(null)
@@ -57,6 +80,8 @@ export const sessionModel = atom(() => {
 	 */
 	const signInFailed = signInFx.failData
 	const signUpFailed = signUpFx.failData
+	const emailConfirmationFailed = confirmEmailFx.failData
+	const emailVerificationFailed = sendEmailVerificationFx.failData
 
 	/** Internal: a fresh `{ token, user }` pair, from either credential flow. */
 	const sessionEstablished = createEvent<Session>()
@@ -70,6 +95,54 @@ export const sessionModel = atom(() => {
 	// already in place.
 	sessionEstablished.watch(session => setCloudSession(session.token))
 	sample({ clock: sessionEstablished, fn: session => session.user, target: authenticated })
+
+	// ── OAuth ───────────────────────────────────────────────────────────────
+	// Three steps that must stay one scenario: the cloud issues a consent URL,
+	// the shell shows it and catches the redirect, the cloud exchanges what came
+	// back. The provider is carried in a store rather than threaded through the
+	// payloads, because the middle step goes through the preload bridge and
+	// comes back knowing only `{ code, state }`.
+	const $oauthProvider = createStore<string | null>(null)
+
+	/** Any of the three steps refusing. Closing the window is not one of them. */
+	const oauthFailed = createEvent<Error>()
+
+	/** The user closed the consent window: nothing failed, nothing happened. */
+	const oauthCancelled = createEvent()
+
+	sample({ clock: oauthRequested, target: startOAuthFx })
+	sample({ clock: startOAuthFx.doneData, fn: ({ url }) => url, target: authorizeOAuthFx })
+	sample({ clock: authorizeOAuthFx.doneData, filter: wasCancelled, target: oauthCancelled })
+
+	const redirected = sample({
+		clock: authorizeOAuthFx.doneData,
+		filter: (authorization): authorization is OAuthRedirect => !wasCancelled(authorization)
+	})
+
+	sample({
+		clock: redirected,
+		source: $oauthProvider,
+		filter: (provider: string | null): provider is string => provider !== null,
+		fn: (provider, redirect) => ({ provider, ...redirect }),
+		target: completeOAuthFx
+	})
+	sample({ clock: completeOAuthFx.doneData, target: sessionEstablished })
+	sample({
+		clock: [startOAuthFx.failData, authorizeOAuthFx.failData, completeOAuthFx.failData],
+		target: oauthFailed
+	})
+
+	$oauthProvider
+		.on(oauthRequested, (_, provider) => provider)
+		.reset(sessionEstablished, oauthFailed, oauthCancelled)
+
+	// ── Email confirmation ──────────────────────────────────────────────────
+	// Part of the account rather than of signing in: registration already hands
+	// out a session, and an unconfirmed address costs the user nothing until a
+	// feature asks for one.
+	sample({ clock: emailVerificationRequested, target: sendEmailVerificationFx })
+	sample({ clock: emailConfirmationRequested, target: confirmEmailFx })
+	sample({ clock: confirmEmailFx.doneData, target: emailVerified })
 
 	// ── Sign out ────────────────────────────────────────────────────────────
 	sample({ clock: signOutRequested, target: [signOutFx, signedOut] })
@@ -89,7 +162,10 @@ export const sessionModel = atom(() => {
 	sessionExpired.watch(() => setCloudSession(null))
 	sample({ clock: sessionExpired, target: signedOut })
 
-	$account.on(authenticated, (_, account) => account).reset(signedOut)
+	$account
+		.on(authenticated, (_, account) => account)
+		.on(emailVerified, (_, account) => account)
+		.reset(signedOut)
 
 	// ── Refresh ─────────────────────────────────────────────────────────────
 	sample({ clock: accountRefreshRequested, target: accountQuery.start })
@@ -100,17 +176,28 @@ export const sessionModel = atom(() => {
 		signUpRequested,
 		signOutRequested,
 		accountRefreshRequested,
+		oauthRequested,
+		emailVerificationRequested,
+		emailConfirmationRequested,
 
 		authenticated,
 		signedOut,
 		sessionExpired,
 		signInFailed,
 		signUpFailed,
+		oauthFailed,
+		oauthCancelled,
+		emailVerified,
+		emailConfirmationFailed,
+		emailVerificationFailed,
 
 		$account,
 		$isAuthenticated,
 		$pending,
 		$signInPending: signInFx.pending,
-		$signUpPending: signUpFx.pending
+		$signUpPending: signUpFx.pending,
+		$oauthProvider,
+		$emailConfirmationPending: confirmEmailFx.pending,
+		$emailVerificationPending: sendEmailVerificationFx.pending
 	}
 })

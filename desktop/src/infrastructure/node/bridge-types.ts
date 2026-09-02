@@ -16,6 +16,15 @@ export interface NodeConnection {
 
 export type NodeState = 'stopped' | 'starting' | 'ready' | 'restarting' | 'failed'
 
+/** The pair a provider hands back on the redirect that ends OAuth consent. */
+export interface OAuthRedirect {
+	code: string
+	state: string
+}
+
+/** Closing the consent window is an answer, not a failure. */
+export type OAuthAuthorization = OAuthRedirect | { cancelled: true }
+
 export interface MediaryBridge {
 	node: {
 		connection: () => Promise<NodeConnection>
@@ -24,6 +33,9 @@ export interface MediaryBridge {
 	}
 	app: {
 		version: () => Promise<string>
+	}
+	oauth: {
+		authorize: (consentUrl: string) => Promise<OAuthAuthorization>
 	}
 }
 

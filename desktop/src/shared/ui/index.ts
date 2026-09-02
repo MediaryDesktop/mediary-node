@@ -12,6 +12,9 @@ export type { ButtonProps, ButtonVariant } from './button/Button'
 export { Input } from './input/Input'
 export type { InputProps } from './input/Input'
 
+export { OtpInput } from './otp-input/OtpInput'
+export type { OtpInputProps } from './otp-input/OtpInput'
+
 export { Logo } from './logo/Logo'
 export type { LogoProps } from './logo/Logo'
 

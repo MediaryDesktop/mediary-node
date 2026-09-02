@@ -1,19 +1,44 @@
 /**
- * Signing in and registering: the two forms, their local rules, and the frame
- * they share.
+ * Signing in, registering, confirming an address and recovering a password:
+ * the forms, their local rules, and the frame they share.
  *
  * The session itself — who is signed in, and the requests that establish or
  * revoke that — is `entities/session`. This slice is the scenario around it.
  *
- * Nothing here decides where a fresh session lands: the pages listen to
- * `sessionModel.authenticated` for that, so the feature never learns what
- * routes exist.
+ * Nothing here decides where a step leads: the panels take callbacks and the
+ * pages supply them, so the feature never learns what routes exist.
  */
+import { newPasswordForm } from './model/new-password'
+import { resetPasswordForm } from './model/reset-password'
+
+/** The length of both mailed codes, for screens that describe them. */
+export { CODE_LENGTH } from './lib/validation'
 
 export { AuthLayout } from './ui/AuthLayout'
+export type { AuthLayoutProps } from './ui/AuthLayout'
 
-export { SignInForm } from './ui/SignInForm'
-export type { SignInFormProps } from './ui/SignInForm'
+export { AuthFormWrapper } from './ui/AuthFormWrapper'
+export type { AuthFormWrapperProps } from './ui/AuthFormWrapper'
 
-export { SignUpForm } from './ui/SignUpForm'
-export type { SignUpFormProps } from './ui/SignUpForm'
+export { AuthProvidersPanel } from './ui/AuthProvidersPanel'
+export type { AuthProvidersPanelProps } from './ui/AuthProvidersPanel'
+
+export { AuthEmailPanel } from './ui/AuthEmailPanel'
+export type { AuthEmailPanelProps } from './ui/AuthEmailPanel'
+
+export { AuthVerifyEmailPanel } from './ui/AuthVerifyEmailPanel'
+export type { AuthVerifyEmailPanelProps } from './ui/AuthVerifyEmailPanel'
+
+export { AuthResetPasswordPanel } from './ui/AuthResetPasswordPanel'
+export type { AuthResetPasswordPanelProps } from './ui/AuthResetPasswordPanel'
+
+export { AuthNewPasswordPanel } from './ui/AuthNewPasswordPanel'
+export type { AuthNewPasswordPanelProps } from './ui/AuthNewPasswordPanel'
+
+/**
+ * The two moments a recovery screen ends on. Exported as events rather than as
+ * the models that own them: a page needs to know that the step finished and
+ * with which address, not how the form got there.
+ */
+export const passwordResetSent = resetPasswordForm.sent
+export const passwordResetCompleted = newPasswordForm.succeeded

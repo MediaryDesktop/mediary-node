@@ -6,7 +6,15 @@ import { createRequestFx } from '@shared/api'
  * process token. Cache policy differs too; see desktop-implementation-plan.md.
  */
 
-const CLOUD_BASE_URL = import.meta.env.VITE_CLOUD_URL ?? 'http://localhost:8080'
+/**
+ * `127.0.0.1`, not `localhost`: the renderer's CSP (`index.html`) allows
+ * `connect-src http://127.0.0.1:*` for loopback traffic and `https:` for the
+ * real deployment, and nothing in between — `localhost` resolves to the same
+ * machine but is a different origin string, and CSP matches strings, not DNS.
+ * A request to `http://localhost:8080` is silently blocked by Chromium before
+ * it ever reaches the network.
+ */
+const CLOUD_BASE_URL = import.meta.env.VITE_CLOUD_URL ?? 'http://127.0.0.1:8080'
 
 /**
  * The current session identifier — an opaque server-side Redis session, not a

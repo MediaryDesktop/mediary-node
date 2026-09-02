@@ -14,6 +14,15 @@ export const MAX_PASSWORD_LENGTH = 128
 export const MIN_DISPLAY_NAME = 2
 export const MAX_DISPLAY_NAME = 40
 export const MAX_EMAIL_LENGTH = 254
+export const CODE_LENGTH = 6
+
+/**
+ * How long a mailed code stays usable — `AUTH_CODE_TTL` in the cloud's config,
+ * thirty minutes by default. The countdown a form shows is a copy of that
+ * deadline, not the deadline itself: the server decides, and a deployment that
+ * shortened it would expire a code this counter still believes in.
+ */
+export const CODE_TTL_SECONDS = 30 * 60
 
 /** Collapses runs of whitespace, matching the server's `strings.Fields` join. */
 export function normalizeDisplayName(raw: string): string {
@@ -78,6 +87,18 @@ export function validatePassword(password: string, email: string, displayName: s
 	}
 
 	return null
+}
+
+export function validateCode(raw: string): string | null {
+	const value = raw.trim()
+
+	if (!value) {
+		return translate('auth.validation.codeRequired')
+	}
+
+	return value.length === CODE_LENGTH
+		? null
+		: translate('auth.validation.codeIncomplete', { length: CODE_LENGTH })
 }
 
 export function validatePasswordConfirmation(password: string, confirmation: string): string | null {

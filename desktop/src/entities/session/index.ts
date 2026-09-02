@@ -10,6 +10,22 @@
  * credential (a device token, not a session) and will be its own entity.
  */
 
-export { accountQuery, sessionModel } from './model'
+export { accountQuery, oauthProvidersQuery, sessionModel } from './model'
 
-export type { Account, LoginInput, OAuthProviders, RegisterInput, Session } from './api'
+/**
+ * Password recovery leaves the session alone — it is the one account scenario
+ * that runs with nobody signed in — so its two calls are exported as effects
+ * for `features/auth` to sequence, rather than as events on a model that would
+ * hold no state for them.
+ */
+export { completePasswordResetFx, requestPasswordResetFx } from './api'
+
+export type {
+	Account,
+	LoginInput,
+	OAuthProviders,
+	PasswordResetInput,
+	PasswordResetRequest,
+	RegisterInput,
+	Session
+} from './api'

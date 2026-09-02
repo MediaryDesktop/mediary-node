@@ -6,7 +6,9 @@ export const IPC = {
 	/** Invoke for the current supervisor state; also pushed on every change. */
 	nodeState: 'node:state',
 	/** Returns the packaged application version. */
-	appVersion: 'app:version'
+	appVersion: 'app:version',
+	/** Opens a provider's consent page and resolves with the intercepted redirect. */
+	oauthAuthorize: 'oauth:authorize'
 } as const
 
 export type IpcChannel = (typeof IPC)[keyof typeof IPC]

@@ -50,16 +50,6 @@
 		-webkit-app-region: drag;
 	}
 
-	.actions {
-		position: absolute;
-		top: clamp(1.25rem, 2.5vh, 1.75rem);
-		right: clamp(2rem, 6vw, 5.5rem);
-		z-index: 2;
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-	}
-
 	.copy {
 		max-width: 34rem;
 
@@ -98,6 +88,10 @@
 	}
 
 	.card {
+		display: flex;
+		flex-direction: column;
+		max-height: calc(100dvh - 6rem);
+		overflow: hidden;
 		padding: 2rem;
 		border: 1px solid var(--glass-border);
 		border-radius: var(--radius-lg);
@@ -137,10 +131,6 @@
 
 		.brand {
 			left: 1.5rem;
-		}
-
-		.actions {
-			right: 1.5rem;
 		}
 
 		.copy {

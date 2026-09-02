@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import { IPC } from '../shared/ipc.js'
 
 import { NodeSupervisor, type SupervisorState } from './node-supervisor.js'
+import { authorizeOAuth } from './oauth.js'
 
 const supervisor = new NodeSupervisor({
 	onLog: (line, stream) => {
@@ -94,6 +95,15 @@ function registerIpc(): void {
 	ipcMain.handle(IPC.nodeConnection, () => supervisor.connection)
 	ipcMain.handle(IPC.nodeState, (): SupervisorState => supervisor.currentState)
 	ipcMain.handle(IPC.appVersion, () => app.getVersion())
+	ipcMain.handle(IPC.oauthAuthorize, (event, consentUrl: unknown) => {
+		if (typeof consentUrl !== 'string') {
+			throw new TypeError('oauth: the consent URL must be a string')
+		}
+
+		// Parented to the window that asked, so the consent sheet cannot be lost
+		// behind the application and the renderer stays inert while it is open.
+		return authorizeOAuth(consentUrl, BrowserWindow.fromWebContents(event.sender))
+	})
 }
 
 // A second instance would fight the first over the node's port and SQLite file.

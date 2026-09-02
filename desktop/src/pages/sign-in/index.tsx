@@ -1,29 +1,33 @@
-import { useNavigate, useRouter } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { useCallback, useEffect } from 'react'
+
+import { useTranslation } from '@shared/i18n'
+import { useGoBack } from '@shared/lib'
 
 import { sessionModel } from '@entities/session'
 
-import { AuthLayout, SignInForm } from '@features/auth'
-import { LanguageSwitcher } from '@features/switch-language'
+import { AuthFormWrapper, AuthLayout, AuthProvidersPanel } from '@features/auth'
 
 export function SignInPage() {
+	const { t } = useTranslation()
 	const navigate = useNavigate()
-	const router = useRouter()
+	const goBack = useGoBack('/')
 
 	useEffect(() => sessionModel.authenticated.watch(() => navigate({ to: '/' })), [navigate])
 
-	const goBack = useCallback(() => {
-		if (router.history.canGoBack()) {
-			router.history.back()
-			return
-		}
-
-		navigate({ to: '/' })
-	}, [navigate, router])
-
 	return (
-		<AuthLayout actions={<LanguageSwitcher />} onBack={goBack}>
-			<SignInForm onSwitchToSignUp={useCallback(() => navigate({ to: '/sign-up' }), [navigate])} />
+		<AuthLayout onBack={goBack}>
+			<AuthFormWrapper
+				eyebrow={t('auth.signIn.eyebrow')}
+				title={t('auth.signIn.title')}
+				description={t('auth.signIn.subtitle')}
+			>
+				<AuthProvidersPanel
+					mode='signIn'
+					onUseEmail={useCallback(() => navigate({ to: '/sign-in/email' }), [navigate])}
+					onSwitch={useCallback(() => navigate({ to: '/sign-up' }), [navigate])}
+				/>
+			</AuthFormWrapper>
 		</AuthLayout>
 	)
 }

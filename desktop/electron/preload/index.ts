@@ -27,6 +27,16 @@ const api = {
 
 	app: {
 		version: (): Promise<string> => ipcRenderer.invoke(IPC.appVersion)
+	},
+
+	oauth: {
+		/**
+		 * Opens the provider's consent page in a window main owns and resolves
+		 * with the redirect it intercepts, or with `{ cancelled: true }` if the
+		 * user closed it.
+		 */
+		authorize: (consentUrl: string): Promise<OAuthAuthorization> =>
+			ipcRenderer.invoke(IPC.oauthAuthorize, consentUrl)
 	}
 } as const
 
@@ -37,6 +47,13 @@ export interface NodeConnection {
 }
 
 export type NodeState = 'stopped' | 'starting' | 'ready' | 'restarting' | 'failed'
+
+export interface OAuthRedirect {
+	code: string
+	state: string
+}
+
+export type OAuthAuthorization = OAuthRedirect | { cancelled: true }
 
 export type MediaryBridge = typeof api
 

@@ -7,11 +7,10 @@ import styles from './AuthLayout.module.scss'
 
 export interface AuthLayoutProps {
 	children: ReactNode
-	actions?: ReactNode
 	onBack?: () => void
 }
 
-export function AuthLayout({ children, actions, onBack }: AuthLayoutProps) {
+export function AuthLayout({ children, onBack }: AuthLayoutProps) {
 	const { t } = useTranslation()
 
 	return (
@@ -30,8 +29,6 @@ export function AuthLayout({ children, actions, onBack }: AuthLayoutProps) {
 			<div className={styles.dragStrip} />
 
 			<Logo className={styles.brand} size={50} markOnly />
-
-			{actions && <div className={styles.actions}>{actions}</div>}
 
 			<section className={styles.copy}>
 				<h1 className={styles.headline}>

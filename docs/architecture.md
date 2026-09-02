@@ -25,11 +25,16 @@ src/
 │
 ├── pages/            один слайс = один маршрут
 │   ├── home/
-│   ├── sign-in/
-│   └── sign-up/
+│   ├── sign-in/      вибір способу входу
+│   ├── sign-in-email/
+│   ├── sign-up/
+│   ├── sign-up-email/
+│   ├── verify-email/
+│   ├── reset-password/
+│   └── new-password/
 │
 ├── features/         сценарій, що щось змінює
-│   ├── auth/         форми входу й реєстрації, їхні локальні правила
+│   ├── auth/         вхід, реєстрація, підтвердження пошти, відновлення пароля
 │   └── switch-language/
 │
 ├── entities/         доменне поняття і стан, який ним є
@@ -57,7 +62,7 @@ src/
 |---|---|
 | `entities` | `session` · `media` · `episode` · `library-item` · `torrent` · `download` · `playback` |
 | `features` | `auth` · `switch-language` · `search-media` · `add-to-library` · `download-media` · `select-source` · `select-quality` · `pair-node` |
-| `pages` | `home` · `media` · `watch` · `read` · `library` · `downloads` · `settings` · `sign-in` · `sign-up` |
+| `pages` | `home` · `media` · `watch` · `read` · `library` · `downloads` · `settings` · `sign-in` · `sign-in-email` · `sign-up` · `sign-up-email` · `verify-email` · `reset-password` · `new-password` |
 | `infrastructure` | `cloud` · `node` (далі: `realtime`, `storage`) |
 
 ---
@@ -135,6 +140,11 @@ bundler їх не відтрусить. Заміряно на попереднь
 правилами, її станом «у процесі» — і нічим із того, що лишається після неї.
 
 `features/auth` — форми й валідація. Сама сесія — не тут.
+
+Вхід розкладений на два кроки й тому на два маршрути: `/sign-in` пропонує спосіб
+(провайдери або пошта), `/sign-in/email` — саму форму. Це не вкладені роути:
+перший екран не є каркасом другого, і `Outlet` намалював би кнопки провайдерів
+під формою.
 
 ### entities — доменні поняття
 
@@ -419,13 +429,14 @@ i18next уже тримає поточну мову й уже повідомля
 
 ### Де стоїть перемикач
 
-`features/switch-language` рендериться в каркасі (`app/layout`) і на сторінках
-авторизації. Друге — через слот: `AuthLayout` живе в `features/auth`, а фіча не
-імпортує фічу (§4), тож перемикач передає сторінка:
+`features/switch-language` рендериться лише в каркасі (`app/layout`). На екранах
+авторизації його немає навмисно: мова — налаштування застосунку, а не крок
+входу, і вибір, зроблений будь-де, все одно лежить у `localStorage` і діє
+всюди.
 
-```tsx
-<AuthLayout actions={<LanguageSwitcher />} onBack={goBack}>
-```
+Якби він там знадобився, то приїхав би слотом: `AuthLayout` живе в
+`features/auth`, а фіча не імпортує фічу (§4), тож передавати `<LanguageSwitcher />`
+мусила б сторінка.
 
 ---
 
@@ -441,6 +452,10 @@ Auth-стек не писався з нуля — його взято з `mediar
 | `HttpRequestError` | `shared/api` | розбирає RFC 7807 (`detail` + `errors[]`) замість NestJS-полів `message`/`error` |
 | flow входу/реєстрації | `entities/session` | без тостів і `router.push` усередині моделі |
 | поля форми, локальна валідація | `features/auth` | без змін по суті |
+| панелі кроків (`AuthProvidersPanel`, `AuthEmailPanel`, …) | `features/auth/ui` | переходи не `<Link>`, а колбеки: маршрути знає сторінка |
+| `AuthFormWrapper` | `features/auth/ui` | структура та сама, стилі — на токенах теми; картку малює `AuthLayout`, тож у обгортці лишились шапка й прокручуване тіло |
+| `OTPInput` | `shared/ui/otp-input` | керований: значення тримає поле моделі, а не сам компонент — «надіслати новий код» більше не потребує remount через `key` |
+| countdown-таймер коду | `features/auth/hooks` | рахує до мітки часу, а не декрементом: у згорнутому вікні таймери throttling'уються |
 
 Три адаптації, які варто розуміти:
 
@@ -458,6 +473,35 @@ Auth-стек не писався з нуля — його взято з `mediar
 
 **Сесія не переживає перезапуск** — і поки що це навмисно: токен лежить у
 памʼяті, а не на диску, тож ціна рестарту — один вхід, а не credential у файлі.
+
+**Капчі немає.** У попереднього клієнта reCAPTCHA вмикалась після трьох невдалих
+спроб. Хмара такого заголовка не читає взагалі — обмеження там серверне
+(`AUTH_LOGIN_ATTEMPTS`, `AUTH_CODE_REQUESTS`), тож віджет був би написом на
+дверях без замка.
+
+### OAuth: чому половина його — в main-процесі
+
+У хмари немає callback-сторінки. `POST /v1/account/oauth/{provider}/start`
+віддає consent-URL, у якого `redirect_uri` веде на адресу, за яку відповідає сам
+застосунок, і цей редірект треба перехопити **до** того, як Chromium піде за ним
+у мережу. Renderer у sandbox чужої навігації не бачить, а системний браузер
+віддав би `code` тому процесу, який виявиться власником URL.
+
+Тому потік такий:
+
+```
+renderer          entities/session   →  POST …/start
+main              BrowserWindow з consent-сторінкою, ловить will-redirect
+renderer          entities/session   →  POST …/callback  →  SessionBody
+```
+
+Вікно консенту не має preload'а й живе у власній сесії без `persist:` — сторінці
+провайдера немає до чого дотягнутись, і після неї не лишається cookie. Закрите
+користувачем вікно повертає `{ cancelled: true }`, а не помилку: передумати — це
+відповідь, і читати її з тексту exception'а було б вгадуванням.
+
+`redirect_uri` не конфігурується в клієнті — main дістає його з того самого
+consent-URL, який видала хмара. Одна адреса, один власник.
 Коли зʼявиться `infrastructure/storage` поверх Electron `safeStorage`, тут
 зʼявиться і відновлення сесії; `entities/session` для цього готова — це буде ще
 одне джерело події `authenticated`.
