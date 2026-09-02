@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Icon, Logo } from '@shared/ui'
+import { Icon, Logo, WindowControls } from '@shared/ui'
 
 import styles from './AuthLayout.module.scss'
 
@@ -27,6 +27,7 @@ export function AuthLayout({ children, onBack }: AuthLayoutProps) {
 			/>
 			<div className={styles.scrim} />
 			<div className={styles.dragStrip} />
+			<WindowControls className={styles.windowControls} />
 
 			<Logo className={styles.brand} size={50} markOnly />
 

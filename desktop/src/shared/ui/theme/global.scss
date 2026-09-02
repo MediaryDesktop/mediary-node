@@ -24,8 +24,10 @@
 	--control-height: 46px;
 
 	--titlebar-height: 40px;
+	/* Three `WindowControls` buttons, 46px each — the width every layout
+	 * reserves in its drag strip so content never sits under them. */
+	--window-controls-width: 138px;
 
-	--controls-inset: calc(100% - env(titlebar-area-width, 100%) - env(titlebar-area-x, 0px));
 	--font-ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 	--font-mono: ui-monospace, "Cascadia Code", "JetBrains Mono", Consolas, monospace;
 }
@@ -55,4 +57,29 @@ body {
 
 a {
 	color: var(--accent);
+}
+
+* {
+	scrollbar-width: thin;
+	scrollbar-color: var(--border) transparent;
+}
+
+*::-webkit-scrollbar {
+	width: 10px;
+	height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+	border: 2px solid transparent;
+	border-radius: 999px;
+	background-color: var(--border);
+	background-clip: padding-box;
+
+	&:hover {
+		background-color: var(--text-muted);
+	}
 }

@@ -1,0 +1,36 @@
+.step {
+	.labelRow {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		margin-bottom: 0.5rem;
+
+		.label {
+			font-size: 0.875rem;
+			font-weight: 600;
+		}
+
+		.required {
+			color: var(--error);
+			font-size: 0.875rem;
+		}
+	}
+
+	.playIcon {
+		color: var(--ok);
+	}
+
+	.hint {
+		margin: 0.5rem 0 0;
+		color: var(--text-muted);
+		font-size: 0.8125rem;
+		line-height: 1.5;
+	}
+
+	.install {
+		margin: 1.25rem 0 0;
+		color: var(--text-muted);
+		font-size: 0.8125rem;
+		line-height: 1.6;
+	}
+}

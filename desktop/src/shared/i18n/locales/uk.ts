@@ -22,6 +22,13 @@ export const uk: Translation = {
 		hidePassword: 'Сховати пароль'
 	},
 
+	window: {
+		minimize: 'Згорнути',
+		maximize: 'Розгорнути',
+		restore: 'Відновити',
+		close: 'Закрити'
+	},
+
 	auth: {
 		pitch: {
 			titleLead: 'Твоя',
@@ -117,6 +124,101 @@ export const uk: Translation = {
 		}
 	},
 
+	setup: {
+		note: 'Ці налаштування можна змінити пізніше',
+		railLabel: 'Кроки налаштування',
+		progress: 'Крок {{current}} з {{total}}',
+		previous: 'Назад',
+		next: 'Далі',
+		finish: 'Завершити',
+		pending: 'Цей крок ще не зроблено.',
+		steps: {
+			library: {
+				label: 'Локальна бібліотека',
+				title: 'Локальна бібліотека',
+				description:
+					'Оберіть теки, де вже лежать ваші файли. Mediary просканує їх і зіставить знайдене з каталогом.'
+			},
+			player: {
+				label: 'Плеєр',
+				title: 'Зовнішній плеєр',
+				description:
+					'Оберіть, чим відтворювати аніме, фільми й серіали. Прогрес відстежується автоматично.'
+			},
+			downloads: {
+				label: 'Завантаження',
+				title: 'Завантаження файлів',
+				description: 'Налаштуйте торент-клієнт для завантаження.'
+			},
+			account: {
+				label: 'Хмарний акаунт',
+				title: 'Хмарний акаунт',
+				description:
+					'Привʼяжіть цей компʼютер до акаунта Mediary, щоб прогрес їхав за вами на інші пристрої.'
+			},
+			debrid: {
+				label: 'Debrid-сервіс',
+				title: 'Debrid-сервіс',
+				description: 'Debrid-сервіси пришвидшують завантаження й дають миттєвий стрімінг із хмари.'
+			}
+		},
+		account: {
+			blurb: 'Акаунт потрібен лише для хмарного каталогу й синхронізації. Локальна бібліотека, плеєр і завантаження працюють і без нього.',
+			google: 'Продовжити через Google',
+			or: 'або',
+			email: 'Продовжити через email',
+			skip: 'Пропустити поки що'
+		},
+		library: {
+			placeholder: 'Теку не обрано',
+			browse: 'Обрати теку',
+			video: {
+				label: 'Відео',
+				hint: 'Аніме, фільми й серіали. Вкладені теки теж скануються.'
+			},
+			reading: {
+				label: 'Читання',
+				hint: 'Манга, манхва й книги.'
+			},
+			aside: 'Це можна пропустити й додати теки згодом — каталог працює й без локальної бібліотеки.'
+		},
+		player: {
+			notice: 'Нода Mediary має вбудований плеєр на базі mpv. Нижче все одно можна налаштувати зовнішній.',
+			select: {
+				label: 'Плеєр для десктопа',
+				mpv: 'MPV (Рекомендовано)',
+				vlc: 'VLC',
+				custom: 'Своя команда',
+				hint: 'MPV рекомендовано для кращого рендерингу субтитрів і торент-стримінгу.'
+			},
+			install: 'У Windows встановіть MPV через Scoop або Chocolatey. У macOS — через Homebrew.'
+		},
+		downloading: {
+			client: {
+				title: 'Торент-клієнт',
+				description: 'Клієнт для завантаження торентів',
+				label: 'Клієнт',
+				qbittorrent: 'qBittorrent'
+			},
+			qbittorrent: {
+				title: 'Налаштування qBittorrent',
+				host: 'Хост',
+				username: 'Імʼя користувача',
+				password: 'Пароль',
+				port: 'Порт',
+				executable: 'Шлях до виконуваного файлу'
+			}
+		},
+		debrid: {
+			label: 'Debrid-сервіс',
+			none: 'Немає',
+			torbox: 'TorBox',
+			realDebrid: 'Real-Debrid',
+			allDebrid: 'AllDebrid',
+			premiumize: 'Premiumize'
+		}
+	},
+
 	home: {
 		subtitle: 'Скелет фази 0. Каталогу ще немає — тут лише перевірка, що оболонка бачить ноду.',
 		account: {
@@ -124,6 +226,11 @@ export const uk: Translation = {
 			anonymous: 'Не увійдено — каталог і синхронізація недоступні.',
 			signIn: 'Увійти',
 			signOut: 'Вийти'
+		},
+		dev: {
+			title: 'Розробка',
+			setupHint: 'Визначення першого запуску ще не підключено.',
+			setupLink: 'Відкрити майстер налаштування'
 		},
 		node: {
 			title: 'Локальна нода',

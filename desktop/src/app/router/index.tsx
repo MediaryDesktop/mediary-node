@@ -3,6 +3,7 @@ import { createHashHistory, createRootRoute, createRoute, createRouter, Outlet }
 import { HomePage } from '@pages/home'
 import { NewPasswordPage } from '@pages/new-password'
 import { ResetPasswordPage } from '@pages/reset-password'
+import { SetupPage } from '@pages/setup'
 import { SignInPage } from '@pages/sign-in'
 import { SignInEmailPage } from '@pages/sign-in-email'
 import { SignUpPage } from '@pages/sign-up'
@@ -34,6 +35,16 @@ const homeRoute = createRoute({
  * own right, not a shell around `/sign-in/email`, and giving it an `Outlet`
  * would mean rendering the provider buttons underneath the email form.
  */
+/**
+ * `/setup` sits outside the frame for the same reason the auth screens do: the
+ * first run has no shell to put it in yet, and the wizard owns the whole window.
+ */
+const setupRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: '/setup',
+	component: SetupPage
+})
+
 const signInRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: '/sign-in',
@@ -83,6 +94,7 @@ const newPasswordRoute = createRoute({
 
 const routeTree = rootRoute.addChildren([
 	framedRoute.addChildren([homeRoute]),
+	setupRoute,
 	signInRoute,
 	signInEmailRoute,
 	signUpRoute,

@@ -8,7 +8,7 @@ import { Icon } from '../icon/Icon'
 import styles from './Input.module.scss'
 
 export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
-	type?: 'text' | 'email' | 'password'
+	type?: 'text' | 'email' | 'password' | 'number'
 	startIcon?: ReactNode
 	revealable?: boolean
 	error?: string

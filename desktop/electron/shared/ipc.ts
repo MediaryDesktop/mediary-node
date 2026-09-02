@@ -8,7 +8,13 @@ export const IPC = {
 	/** Returns the packaged application version. */
 	appVersion: 'app:version',
 	/** Opens a provider's consent page and resolves with the intercepted redirect. */
-	oauthAuthorize: 'oauth:authorize'
+	oauthAuthorize: 'oauth:authorize',
+	windowMinimize: 'window:minimize',
+	/** Maximizes if restored, restores if maximized — the caption button toggles. */
+	windowToggleMaximize: 'window:toggle-maximize',
+	windowClose: 'window:close',
+	/** Invoke for the window's maximized state right now; also pushed on every change. */
+	windowIsMaximized: 'window:is-maximized'
 } as const
 
 export type IpcChannel = (typeof IPC)[keyof typeof IPC]

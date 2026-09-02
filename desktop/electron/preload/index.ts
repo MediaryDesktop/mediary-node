@@ -37,7 +37,33 @@ const api = {
 		 */
 		authorize: (consentUrl: string): Promise<OAuthAuthorization> =>
 			ipcRenderer.invoke(IPC.oauthAuthorize, consentUrl)
-	}
+	},
+
+	/**
+	 * The window is frameless (`electron/main/index.ts`), so these are the only
+	 * way to minimize, maximize or close it — see `shared/ui/window-controls`.
+	 */
+	window: {
+		minimize: (): Promise<void> => ipcRenderer.invoke(IPC.windowMinimize),
+		toggleMaximize: (): Promise<void> => ipcRenderer.invoke(IPC.windowToggleMaximize),
+		close: (): Promise<void> => ipcRenderer.invoke(IPC.windowClose),
+
+		/** Whether the window is maximized right now. */
+		isMaximized: (): Promise<boolean> => ipcRenderer.invoke(IPC.windowIsMaximized),
+
+		/** Subscribe to maximize/restore, however it happens — button, double-click
+		 * the drag strip, Windows Snap. Returns an unsubscribe function. */
+		onMaximizedChange: (listener: (maximized: boolean) => void): (() => void) => {
+			const handler = (_event: unknown, maximized: boolean) => listener(maximized)
+			ipcRenderer.on(IPC.windowIsMaximized, handler)
+			return () => {
+				ipcRenderer.off(IPC.windowIsMaximized, handler)
+			}
+		}
+	},
+
+	/** `darwin` | `win32` | `linux` — which side draws the caption buttons. */
+	platform: process.platform
 } as const
 
 export interface NodeConnection {

@@ -20,9 +20,6 @@ const supervisor = new NodeSupervisor({
 
 let mainWindow: BrowserWindow | null = null
 
-/** Height of the strip the renderer keeps clear for the window controls. */
-const TITLE_BAR_HEIGHT = 40
-
 function createWindow(): BrowserWindow {
 	const window = new BrowserWindow({
 		width: 1440,
@@ -32,27 +29,13 @@ function createWindow(): BrowserWindow {
 		show: false,
 		autoHideMenuBar: true,
 		backgroundColor: '#0d0d10',
-		// The native caption bar is dropped, but not the buttons in it: Windows
-		// and Linux keep drawing minimise/maximise/close as an overlay in the
-		// same corner, and macOS keeps its traffic lights. Re-implementing those
-		// controls in the renderer would cost the OS-native hit targets, the
-		// snap-layouts flyout on Windows and the hover behaviour users expect.
-		//
-		// The trade is that the window loses its drag handle, so the renderer has
-		// to declare one — see `-webkit-app-region: drag` in the layouts.
-		titleBarStyle: 'hidden',
-		...(process.platform === 'darwin'
-			? {}
-			: {
-					titleBarOverlay: {
-						// Transparent, so the strip belongs to whatever the route
-						// draws underneath — the header's surface on framed pages,
-						// the video on the auth screens. Only the glyphs are ours.
-						color: '#00000000',
-						symbolColor: '#e8e8ee',
-						height: TITLE_BAR_HEIGHT
-					}
-				}),
+		// No native chrome at all, on any platform: the renderer draws its own
+		// caption buttons (`shared/ui/window-controls`) and its own drag strip
+		// (`-webkit-app-region: drag` in the layouts) instead of the OS's. The
+		// trade against `titleBarOverlay` is real — Windows' Snap Layouts flyout
+		// and native hover feel are gone — but so is the ceiling on styling them,
+		// which is what this bought.
+		frame: false,
 		webPreferences: {
 			preload: join(__dirname, '../preload/index.js'),
 			// Renderer is untrusted-by-default; everything it needs goes through preload/index.ts.
@@ -65,6 +48,9 @@ function createWindow(): BrowserWindow {
 
 	// Show only once painted, to avoid the white flash on launch.
 	window.once('ready-to-show', () => window.show())
+
+	window.on('maximize', () => window.webContents.send(IPC.windowIsMaximized, true))
+	window.on('unmaximize', () => window.webContents.send(IPC.windowIsMaximized, false))
 
 	// External links (AniList, TMDB, ...) open in the real browser, not a
 	// chromeless window with no way back.
@@ -104,6 +90,26 @@ function registerIpc(): void {
 		// behind the application and the renderer stays inert while it is open.
 		return authorizeOAuth(consentUrl, BrowserWindow.fromWebContents(event.sender))
 	})
+
+	// The caption buttons act on the window that hosts the page calling them,
+	// not on `mainWindow` — the two agree today (one window, single-instance
+	// locked) but a handler that reached for the module-level variable would
+	// silently stop working the day that changes.
+	ipcMain.handle(IPC.windowMinimize, event => BrowserWindow.fromWebContents(event.sender)?.minimize())
+	ipcMain.handle(IPC.windowToggleMaximize, event => {
+		const window = BrowserWindow.fromWebContents(event.sender)
+
+		if (window?.isMaximized()) {
+			window.unmaximize()
+		} else {
+			window?.maximize()
+		}
+	})
+	ipcMain.handle(IPC.windowClose, event => BrowserWindow.fromWebContents(event.sender)?.close())
+	ipcMain.handle(
+		IPC.windowIsMaximized,
+		event => BrowserWindow.fromWebContents(event.sender)?.isMaximized() ?? false
+	)
 }
 
 // A second instance would fight the first over the node's port and SQLite file.

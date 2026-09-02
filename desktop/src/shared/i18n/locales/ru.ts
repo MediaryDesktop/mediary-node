@@ -22,6 +22,13 @@ export const ru: Translation = {
 		hidePassword: 'Скрыть пароль'
 	},
 
+	window: {
+		minimize: 'Свернуть',
+		maximize: 'Развернуть',
+		restore: 'Восстановить',
+		close: 'Закрыть'
+	},
+
 	auth: {
 		pitch: {
 			titleLead: 'Твоя',
@@ -118,6 +125,101 @@ export const ru: Translation = {
 		}
 	},
 
+	setup: {
+		note: 'Эти настройки можно изменить позже',
+		railLabel: 'Шаги настройки',
+		progress: 'Шаг {{current}} из {{total}}',
+		previous: 'Назад',
+		next: 'Далее',
+		finish: 'Завершить',
+		pending: 'Этот шаг ещё не сделан.',
+		steps: {
+			library: {
+				label: 'Локальная библиотека',
+				title: 'Локальная библиотека',
+				description:
+					'Выберите папки, где уже лежат ваши файлы. Mediary просканирует их и сопоставит найденное с каталогом.'
+			},
+			player: {
+				label: 'Плеер',
+				title: 'Внешний плеер',
+				description:
+					'Выберите, чем воспроизводить аниме, фильмы и сериалы. Прогресс отслеживается автоматически.'
+			},
+			downloads: {
+				label: 'Загрузки',
+				title: 'Загрузка файлов',
+				description: 'Настройте торрент-клиент для загрузки.'
+			},
+			account: {
+				label: 'Облачный аккаунт',
+				title: 'Облачный аккаунт',
+				description:
+					'Привяжите этот компьютер к аккаунту Mediary, чтобы прогресс переезжал на другие устройства.'
+			},
+			debrid: {
+				label: 'Debrid-сервис',
+				title: 'Debrid-сервис',
+				description: 'Debrid-сервисы ускоряют загрузки и дают мгновенный стриминг из облака.'
+			}
+		},
+		account: {
+			blurb: 'Аккаунт нужен только для облачного каталога и синхронизации. Локальная библиотека, плеер и загрузки работают и без него.',
+			google: 'Продолжить через Google',
+			or: 'или',
+			email: 'Продолжить через email',
+			skip: 'Пропустить пока'
+		},
+		library: {
+			placeholder: 'Папка не выбрана',
+			browse: 'Выбрать папку',
+			video: {
+				label: 'Видео',
+				hint: 'Аниме, фильмы и сериалы. Вложенные папки тоже сканируются.'
+			},
+			reading: {
+				label: 'Чтение',
+				hint: 'Манга, манхва и книги.'
+			},
+			aside: 'Это можно пропустить и добавить папки позже — каталог работает и без локальной библиотеки.'
+		},
+		player: {
+			notice: 'Нода Mediary поставляется со встроенным плеером на mpv. Ниже всё равно можно настроить внешний.',
+			select: {
+				label: 'Плеер для десктопа',
+				mpv: 'MPV (Рекомендуется)',
+				vlc: 'VLC',
+				custom: 'Своя команда',
+				hint: 'MPV рекомендуется для лучшего рендеринга субтитров и торрент-стриминга.'
+			},
+			install: 'В Windows установите MPV через Scoop или Chocolatey. В macOS — через Homebrew.'
+		},
+		downloading: {
+			client: {
+				title: 'Торрент-клиент',
+				description: 'Клиент для загрузки торрентов',
+				label: 'Клиент',
+				qbittorrent: 'qBittorrent'
+			},
+			qbittorrent: {
+				title: 'Настройки qBittorrent',
+				host: 'Хост',
+				username: 'Имя пользователя',
+				password: 'Пароль',
+				port: 'Порт',
+				executable: 'Путь к исполняемому файлу'
+			}
+		},
+		debrid: {
+			label: 'Debrid-сервис',
+			none: 'Нет',
+			torbox: 'TorBox',
+			realDebrid: 'Real-Debrid',
+			allDebrid: 'AllDebrid',
+			premiumize: 'Premiumize'
+		}
+	},
+
 	home: {
 		subtitle: 'Скелет фазы 0. Каталога ещё нет — это лишь проверка, что оболочка видит ноду.',
 		account: {
@@ -125,6 +227,11 @@ export const ru: Translation = {
 			anonymous: 'Вход не выполнен — каталог и синхронизация недоступны.',
 			signIn: 'Войти',
 			signOut: 'Выйти'
+		},
+		dev: {
+			title: 'Разработка',
+			setupHint: 'Определение первого запуска ещё не подключено.',
+			setupLink: 'Открыть мастер настройки'
 		},
 		node: {
 			title: 'Локальная нода',

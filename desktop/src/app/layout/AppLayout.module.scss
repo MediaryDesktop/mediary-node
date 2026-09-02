@@ -10,7 +10,7 @@
 		gap: 1rem;
 		min-height: var(--titlebar-height);
 		padding: 0.75rem 1.5rem;
-		padding-right: calc(var(--controls-inset) + 1.5rem);
+		padding-right: calc(var(--window-controls-width) + 1.5rem);
 		border-bottom: 1px solid var(--border);
 		background: var(--surface);
 		-webkit-app-region: drag;
@@ -28,6 +28,13 @@
 			align-items: center;
 			gap: 0.75rem;
 			-webkit-app-region: no-drag;
+		}
+
+		.windowControls {
+			position: absolute;
+			top: 0;
+			right: 0;
+			height: 100%;
 		}
 	}
 

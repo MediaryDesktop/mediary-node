@@ -39,6 +39,13 @@ export const en = {
 		hidePassword: 'Hide password'
 	},
 
+	window: {
+		minimize: 'Minimize',
+		maximize: 'Maximize',
+		restore: 'Restore',
+		close: 'Close'
+	},
+
 	auth: {
 		pitch: {
 			titleLead: 'Your',
@@ -135,6 +142,102 @@ export const en = {
 		}
 	},
 
+	setup: {
+		note: 'These settings can be changed later',
+		railLabel: 'Setup steps',
+		progress: 'Step {{current}} of {{total}}',
+		previous: 'Previous',
+		next: 'Next',
+		finish: 'Finish',
+		pending: 'This step is not built yet.',
+		steps: {
+			library: {
+				label: 'Local library',
+				title: 'Local library',
+				description:
+					'Choose the folders your files already live in. Mediary scans them and matches what it finds against the catalog.'
+			},
+			player: {
+				label: 'Player',
+				title: 'External media player',
+				description:
+					'Choose your preferred player for anime, films and series. Progress is tracked automatically.'
+			},
+			downloads: {
+				label: 'Downloads',
+				title: 'Downloading',
+				description: 'Configure your torrent client for downloading.'
+			},
+			account: {
+				label: 'Cloud account',
+				title: 'Cloud account',
+				description:
+					'Link this computer to a Mediary account so progress follows you to your other devices.'
+			},
+			debrid: {
+				label: 'Debrid service',
+				title: 'Debrid service',
+				description: 'Debrid services offer faster downloads and instant streaming from the cloud.'
+			}
+		},
+		account: {
+			blurb: 'An account is only needed for the cloud catalog and sync. The local library, player and downloads work without one.',
+			google: 'Continue with Google',
+			or: 'or',
+			email: 'Continue with email',
+			skip: 'Skip for now'
+		},
+		library: {
+			placeholder: 'No folder selected',
+			browse: 'Choose a folder',
+			video: {
+				label: 'Video',
+				hint: 'Anime, films and series. Subfolders are scanned too.'
+			},
+			reading: {
+				label: 'Reading',
+				hint: 'Manga, manhwa and books.'
+			},
+			aside: 'You can skip this and add folders later — the catalog works without a local library.'
+		},
+		player: {
+			notice: "Mediary's node comes with a built-in player powered by mpv. You can still configure an external one below.",
+			select: {
+				label: 'Desktop media player',
+				mpv: 'MPV (Recommended)',
+				vlc: 'VLC',
+				custom: 'Custom command',
+				hint: 'MPV is recommended for better subtitle rendering and torrent streaming.'
+			},
+			install:
+				'On Windows, install MPV using Scoop or Chocolatey. On macOS, install MPV using Homebrew.'
+		},
+		downloading: {
+			client: {
+				title: 'Torrent client',
+				description: 'Client used to download torrents',
+				label: 'Client',
+				qbittorrent: 'qBittorrent'
+			},
+			qbittorrent: {
+				title: 'qBittorrent settings',
+				host: 'Host',
+				username: 'Username',
+				password: 'Password',
+				port: 'Port',
+				executable: 'Executable path'
+			}
+		},
+		debrid: {
+			label: 'Debrid service',
+			none: 'None',
+			torbox: 'TorBox',
+			realDebrid: 'Real-Debrid',
+			allDebrid: 'AllDebrid',
+			premiumize: 'Premiumize'
+		}
+	},
+
 	home: {
 		subtitle: 'Phase 0 skeleton. No catalog yet — this only proves the shell can see the node.',
 		account: {
@@ -142,6 +245,11 @@ export const en = {
 			anonymous: 'Not signed in — catalog and sync are unavailable.',
 			signIn: 'Sign in',
 			signOut: 'Sign out'
+		},
+		dev: {
+			title: 'Developer',
+			setupHint: 'First-run detection is not wired up yet.',
+			setupLink: 'Open setup wizard'
 		},
 		node: {
 			title: 'Local node',

@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react'
 
+import { WindowControls } from '@shared/ui'
+
 import { LanguageSwitcher } from '@features/switch-language'
 
 import styles from './AppLayout.module.scss'
@@ -15,6 +17,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
 					<LanguageSwitcher />
 					<NodeStatusBadge />
 				</div>
+
+				<WindowControls className={styles.windowControls} />
 			</header>
 
 			<main className={styles.main}>{children}</main>

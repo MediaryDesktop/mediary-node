@@ -1,0 +1,83 @@
+.rail {
+	display: flex;
+	align-items: flex-start;
+	justify-content: center;
+	gap: clamp(0.5rem, 3vw, 2rem);
+	flex-wrap: wrap;
+	margin-top: clamp(1.5rem, 4vh, 2.5rem);
+
+	.step {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.625rem;
+		width: 7.5rem;
+		padding: 0;
+		border: 0;
+		background: none;
+		color: var(--text-muted);
+		font: inherit;
+		cursor: pointer;
+		transition: color 160ms;
+
+		&:disabled {
+			cursor: default;
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--accent);
+			outline-offset: 4px;
+			border-radius: var(--radius);
+		}
+
+		.badge {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			width: 40px;
+			height: 40px;
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			background: var(--surface);
+			transition:
+				background-color 160ms,
+				border-color 160ms,
+				color 160ms;
+		}
+
+		.label {
+			font-size: 0.8125rem;
+			font-weight: 600;
+			line-height: 1.3;
+			text-align: center;
+		}
+
+		&.done {
+			color: var(--text);
+
+			.badge {
+				border-color: var(--accent);
+				color: var(--accent);
+			}
+		}
+
+		&.active {
+			color: var(--text);
+
+			.badge {
+				border-color: transparent;
+				background: var(--accent-soft);
+				color: var(--accent);
+				box-shadow: 0 0 0 1px var(--accent) inset;
+			}
+		}
+
+		&:not(:disabled):not(.active):hover {
+			color: var(--text);
+
+			.badge {
+				border-color: var(--accent);
+			}
+		}
+	}
+}
