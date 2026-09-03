@@ -12,15 +12,12 @@ export function NewPasswordPage() {
 	const goBack = useGoBack('/reset-password')
 	const { email } = useSearch({ from: '/new-password' })
 
-	// Reached without an address — a hand-typed URL, or a link that lost its
-	// query. There is no code to spend, so the step starts over.
 	useEffect(() => {
 		if (!email) {
 			void navigate({ to: '/reset-password' })
 		}
 	}, [email, navigate])
 
-	// The reset ended every session the account had, so the way on is the form.
 	useEffect(() => passwordResetCompleted.watch(() => navigate({ to: '/sign-in/email' })), [navigate])
 
 	return (

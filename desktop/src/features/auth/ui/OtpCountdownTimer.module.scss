@@ -1,10 +1,10 @@
 .timer {
-	color: var(--text-muted);
+	color: var(--text-secondary);
 	font-size: 0.875rem;
 	font-variant-numeric: tabular-nums;
 
 	&.expired {
-		color: var(--error);
+		color: var(--danger-text);
 		font-weight: 600;
 	}
 }

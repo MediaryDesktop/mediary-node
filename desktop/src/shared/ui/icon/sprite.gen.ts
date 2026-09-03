@@ -265,10 +265,12 @@ export const sprites = defineSpriteMap([
 				defineSpriteSymbol(['mail'], [24]),
 				defineSpriteSymbol(['maximize'], [24]),
 				defineSpriteSymbol(['minimize'], [24]),
+				defineSpriteSymbol(['moon'], [24]),
 				defineSpriteSymbol(['play'], [24]),
 				defineSpriteSymbol(['player'], [24]),
 				defineSpriteSymbol(['restore'], [24]),
 				defineSpriteSymbol(['sparkles'], [24]),
+				defineSpriteSymbol(['sun'], [24]),
 				defineSpriteSymbol(['user'], [24])
 			],
 			defineExternalAssetMeta('common.svg')
@@ -306,10 +308,12 @@ export type SpritesMeta = {
 		| 'mail'
 		| 'maximize'
 		| 'minimize'
+		| 'moon'
 		| 'play'
 		| 'player'
 		| 'restore'
 		| 'sparkles'
+		| 'sun'
 		| 'user'
 	social: 'apple' | 'facebook' | 'google'
 }

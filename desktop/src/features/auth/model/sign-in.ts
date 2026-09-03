@@ -9,15 +9,6 @@ import type { AuthFailure } from '../lib/failure'
 
 import { createField } from './field'
 
-/**
- * The sign-in form: field state, and the shape of a rejection.
- *
- * The credential check itself belongs to `entities/session`; this model only
- * collects what the user typed and reads back what went wrong. Sign-in
- * deliberately skips the local rules registration applies — an account created
- * before a rule changed must still be able to get in, and "your password is too
- * short" on a sign-in form tells an attacker which half of the pair was wrong.
- */
 export const signInForm = atom(() => {
 	const email = createField()
 	const password = createField()
@@ -35,8 +26,6 @@ export const signInForm = atom(() => {
 
 	$failure
 		.on(sessionModel.signInFailed, (_, error) => toAuthFailure(error))
-		// Cleared on anything that makes the old complaint stale: a new attempt,
-		// a success, or the user editing the input it was about.
 		.reset(submitted, sessionModel.authenticated, email.changed, password.changed)
 
 	return {

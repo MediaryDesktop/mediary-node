@@ -1,16 +1,16 @@
 .failure {
 	margin: 0 0 1rem;
 	padding: 0.625rem 0.75rem;
-	border: 1px solid rgba(244, 99, 110, 0.35);
+	border: 1px solid var(--danger);
 	border-radius: var(--radius);
-	background: rgba(244, 99, 110, 0.1);
-	color: var(--error);
+	background: var(--danger-muted);
+	color: var(--danger-text);
 	font-size: 0.875rem;
 }
 
 .label {
 	margin: 0 0 0.75rem;
-	color: var(--text-muted);
+	color: var(--text-secondary);
 	font-size: 0.6875rem;
 	font-weight: 600;
 	letter-spacing: 0.14em;
@@ -38,7 +38,7 @@
 			padding: 0.0625rem 0.5rem;
 			border-radius: 999px;
 			background: var(--accent);
-			color: var(--accent-fg);
+			color: var(--text-on-accent);
 			font-size: 0.625rem;
 			font-weight: 600;
 			white-space: nowrap;

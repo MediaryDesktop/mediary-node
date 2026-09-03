@@ -28,6 +28,20 @@ Button · Input · Icon · Logo · Modal · Dialog · Tabs · Select · theme ·
 стилів (`theme/global.scss`). Правила й причини —
 [architecture.md §5–6](../../../../docs/architecture.md).
 
+## Кольори
+
+Ні `.tsx`, ні `.module.scss` не містять жодного hex чи `rgba()` — тільки
+`var(--token)`. Усі значення обох тем лежать у `theme/palette.scss`; метрики,
+шрифти й базові стилі — у `theme/global.scss`.
+
+Дві пари токенів, які найлегше переплутати:
+
+- `--accent` — заливка, рамка, outline; `--accent-text` — текст і лінки
+  (бренд-червоний як дрібний текст на білому не проходить AA);
+- `--danger` — рамка й заливка; `--danger-text` — текст помилки.
+
+Правила теми цілком — [architecture.md §8](../../../../docs/architecture.md).
+
 ## Іконки
 
 Щоб додати іконку, достатньо покласти файл:

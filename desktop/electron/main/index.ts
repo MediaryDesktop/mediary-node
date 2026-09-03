@@ -8,7 +8,6 @@ import { authorizeOAuth } from './oauth.js'
 
 const supervisor = new NodeSupervisor({
 	onLog: (line, stream) => {
-		// The node already emits structured JSON; pass it through unparsed.
 		if (stream === 'stderr') {
 			process.stderr.write(`[node] ${line}\n`)
 		} else {
@@ -29,16 +28,11 @@ function createWindow(): BrowserWindow {
 		show: false,
 		autoHideMenuBar: true,
 		backgroundColor: '#0d0d10',
-		// No native chrome at all, on any platform: the renderer draws its own
-		// caption buttons (`shared/ui/window-controls`) and its own drag strip
-		// (`-webkit-app-region: drag` in the layouts) instead of the OS's. The
-		// trade against `titleBarOverlay` is real — Windows' Snap Layouts flyout
-		// and native hover feel are gone — but so is the ceiling on styling them,
-		// which is what this bought.
+
 		frame: false,
 		webPreferences: {
 			preload: join(__dirname, '../preload/index.js'),
-			// Renderer is untrusted-by-default; everything it needs goes through preload/index.ts.
+
 			contextIsolation: true,
 			nodeIntegration: false,
 			sandbox: true,
@@ -46,14 +40,11 @@ function createWindow(): BrowserWindow {
 		}
 	})
 
-	// Show only once painted, to avoid the white flash on launch.
 	window.once('ready-to-show', () => window.show())
 
 	window.on('maximize', () => window.webContents.send(IPC.windowIsMaximized, true))
 	window.on('unmaximize', () => window.webContents.send(IPC.windowIsMaximized, false))
 
-	// External links (AniList, TMDB, ...) open in the real browser, not a
-	// chromeless window with no way back.
 	window.webContents.setWindowOpenHandler(({ url }) => {
 		void shell.openExternal(url)
 		return { action: 'deny' }
@@ -77,7 +68,6 @@ function broadcast(channel: string, payload: unknown): void {
 }
 
 function registerIpc(): void {
-	// This is the entire main→renderer API — nothing else is reachable.
 	ipcMain.handle(IPC.nodeConnection, () => supervisor.connection)
 	ipcMain.handle(IPC.nodeState, (): SupervisorState => supervisor.currentState)
 	ipcMain.handle(IPC.appVersion, () => app.getVersion())
@@ -86,15 +76,9 @@ function registerIpc(): void {
 			throw new TypeError('oauth: the consent URL must be a string')
 		}
 
-		// Parented to the window that asked, so the consent sheet cannot be lost
-		// behind the application and the renderer stays inert while it is open.
 		return authorizeOAuth(consentUrl, BrowserWindow.fromWebContents(event.sender))
 	})
 
-	// The caption buttons act on the window that hosts the page calling them,
-	// not on `mainWindow` — the two agree today (one window, single-instance
-	// locked) but a handler that reached for the module-level variable would
-	// silently stop working the day that changes.
 	ipcMain.handle(IPC.windowMinimize, event => BrowserWindow.fromWebContents(event.sender)?.minimize())
 	ipcMain.handle(IPC.windowToggleMaximize, event => {
 		const window = BrowserWindow.fromWebContents(event.sender)
@@ -112,7 +96,6 @@ function registerIpc(): void {
 	)
 }
 
-// A second instance would fight the first over the node's port and SQLite file.
 if (!app.requestSingleInstanceLock()) {
 	app.quit()
 } else {
@@ -126,13 +109,10 @@ if (!app.requestSingleInstanceLock()) {
 	})
 
 	void app.whenReady().then(async () => {
-		// Settle the port before the renderer can ask for it on mount.
 		await supervisor.reservePort()
 
 		registerIpc()
 
-		// The window opens first; the renderer shows its own progress via
-		// nodeState instead of blocking on node startup.
 		mainWindow = createWindow()
 
 		supervisor.start().catch((error: unknown) => {
@@ -152,8 +132,6 @@ if (!app.requestSingleInstanceLock()) {
 		}
 	})
 
-	// Quit is deferred until the async node stop finishes, or SQLite is left
-	// with a hot journal.
 	let shuttingDown = false
 
 	app.on('before-quit', event => {

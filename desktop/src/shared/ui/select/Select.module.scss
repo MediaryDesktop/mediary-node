@@ -19,9 +19,9 @@
 			width: 100%;
 			height: var(--control-height);
 			padding: 0 2.5rem 0 0.875rem;
-			border: 1px solid var(--glass-border);
+			border: 1px solid var(--border);
 			border-radius: var(--radius);
-			background: rgba(255, 255, 255, 0.04);
+			background: var(--field);
 			color: var(--text);
 			font-family: inherit;
 			font-size: 0.9375rem;
@@ -33,14 +33,14 @@
 				box-shadow 160ms;
 
 			&:hover:not(:disabled) {
-				background: rgba(255, 255, 255, 0.06);
+				background: var(--field-hover);
 			}
 
 			&:focus {
 				outline: none;
 				border-color: var(--accent);
-				background: rgba(255, 255, 255, 0.06);
-				box-shadow: 0 0 0 3px var(--accent-soft);
+				background: var(--field-hover);
+				box-shadow: var(--focus-shadow);
 			}
 
 			&:disabled {
@@ -53,16 +53,16 @@
 			}
 
 			&.invalid {
-				border-color: var(--error);
+				border-color: var(--danger);
 
 				&:focus {
-					border-color: var(--error);
-					box-shadow: 0 0 0 3px rgba(244, 99, 110, 0.18);
+					border-color: var(--danger);
+					box-shadow: 0 0 0 3px var(--danger-ring);
 				}
 			}
 
 			option {
-				background: var(--surface-raised);
+				background: var(--surface);
 				color: var(--text);
 			}
 		}
@@ -70,14 +70,14 @@
 		.chevron {
 			position: absolute;
 			right: 0.875rem;
-			color: var(--text-muted);
+			color: var(--text-secondary);
 			pointer-events: none;
 		}
 	}
 
 	.error {
 		margin: 0;
-		color: var(--error);
+		color: var(--danger-text);
 		font-size: 0.8125rem;
 	}
 }

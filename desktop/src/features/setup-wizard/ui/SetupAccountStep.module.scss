@@ -4,7 +4,7 @@
 
 	.blurb {
 		margin: 0 0 1.25rem;
-		color: var(--text-muted);
+		color: var(--text-secondary);
 		font-size: 0.875rem;
 		line-height: 1.55;
 		text-align: center;
@@ -15,7 +15,7 @@
 		align-items: center;
 		gap: 0.875rem;
 		margin: 1.25rem 0;
-		color: var(--text-muted);
+		color: var(--text-secondary);
 		font-size: 0.8125rem;
 
 		&::before,
@@ -32,7 +32,7 @@
 		padding: 0;
 		border: 0;
 		background: none;
-		color: var(--text-muted);
+		color: var(--text-secondary);
 		font: inherit;
 		font-size: 0.8125rem;
 		cursor: pointer;

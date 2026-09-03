@@ -11,23 +11,14 @@ import { validateCode, validatePassword } from '../lib/validation'
 
 import { createField } from './field'
 
-/**
- * Spending a reset code on a new password.
- *
- * The address is not a field: it comes from the link the previous step
- * navigated to, so it arrives with the submit event rather than living in a
- * store that would have to be kept in step with the route.
- */
 export const newPasswordForm = atom(() => {
 	const code = createField()
 	const password = createField()
 
-	/** Carries the address the code was mailed to. */
 	const submitted = createEvent<string>()
 
 	const failedLocally = createEvent<FieldErrors>()
 
-	/** The password is changed and every session is gone, this one included. */
 	const succeeded = createEvent()
 
 	const $failure = createStore<AuthFailure | null>(null)
@@ -40,8 +31,7 @@ export const newPasswordForm = atom(() => {
 			const problems: FieldErrors = {}
 
 			const codeProblem = validateCode(values.code)
-			// No display name to compare against here, and the address is the one
-			// the code was mailed to — which is exactly what a password must not be.
+
 			const passwordProblem = validatePassword(values.password, email, '')
 
 			if (codeProblem) problems.code = codeProblem

@@ -6,13 +6,6 @@ import { createServer } from 'node:net'
 import { join } from 'node:path'
 import { setTimeout as delay } from 'node:timers/promises'
 
-/**
- * Owns the lifetime of the Go node process. The renderer talks to it over
- * HTTP on loopback, not IPC — costs a socket, buys a node that runs headless
- * in Docker and a torrent-engine crash that doesn't take the window with it.
- */
-
-/** How the renderer reaches the node. */
 export interface NodeConnection {
 	baseUrl: string
 	wsUrl: string
@@ -22,7 +15,7 @@ export interface NodeConnection {
 export interface SupervisorOptions {
 	host?: string
 	port?: number
-	/** Time to wait for the node to answer /healthz before giving up. */
+
 	startupTimeoutMs?: number
 	onLog?: (line: string, stream: 'stdout' | 'stderr') => void
 	onStateChange?: (state: SupervisorState) => void
@@ -32,13 +25,10 @@ export type SupervisorState = 'stopped' | 'starting' | 'ready' | 'restarting' | 
 
 const DEFAULT_HOST = '127.0.0.1'
 
-/** Preferred port, not guaranteed — see reservePort. Not 43211 (Seanime's
- * default), or colliding with an already-running Seanime restarts forever. */
 const DEFAULT_PORT = 43711
 
 const DEFAULT_STARTUP_TIMEOUT_MS = 20_000
 
-/** Backoff between restart attempts. The last value repeats indefinitely. */
 const RESTART_DELAYS_MS = [500, 1_000, 2_000, 5_000, 10_000]
 
 export class NodeSupervisor {
@@ -49,14 +39,12 @@ export class NodeSupervisor {
 
 	private readonly host: string
 	private readonly preferredPort: number
-	/** Resolved by reservePort before the node is ever spawned. */
+
 	private port: number
 	private portReserved = false
 	private readonly startupTimeoutMs: number
 	private readonly options: SupervisorOptions
 
-	/** Generated once per launch and passed to the child via env — a token
-	 * scoped to the app's lifetime can't leak from a file. */
 	private readonly token = randomBytes(32).toString('base64url')
 
 	constructor(options: SupervisorOptions = {}) {
@@ -67,11 +55,6 @@ export class NodeSupervisor {
 		this.startupTimeoutMs = options.startupTimeoutMs ?? DEFAULT_STARTUP_TIMEOUT_MS
 	}
 
-	/**
-	 * Settles which port the node will listen on before anything asks — a fixed
-	 * default eventually collides with something, and that failure never
-	 * converges on its own. Called before the window opens.
-	 */
 	async reservePort(): Promise<number> {
 		if (this.portReserved) {
 			return this.port
@@ -101,7 +84,6 @@ export class NodeSupervisor {
 		return this.state
 	}
 
-	/** Starts the node and resolves once it answers /healthz. */
 	async start(): Promise<void> {
 		if (this.child) {
 			return
@@ -131,7 +113,7 @@ export class NodeSupervisor {
 				NODE_HTTP_ALLOWED_ORIGINS: allowedOrigins().join(','),
 				NODE_LOG_PRETTY: 'false'
 			},
-			// Detached would survive the shell; the node must not outlive its window.
+
 			detached: false,
 			stdio: ['ignore', 'pipe', 'pipe']
 		})
@@ -157,7 +139,6 @@ export class NodeSupervisor {
 		this.setState('ready')
 	}
 
-	/** Stops the node and suppresses the automatic restart. */
 	async stop(): Promise<void> {
 		this.stopping = true
 
@@ -169,7 +150,6 @@ export class NodeSupervisor {
 
 		child.kill('SIGTERM')
 
-		// Give it a moment to drain in-flight requests before insisting.
 		await Promise.race([new Promise<void>(resolve => child.once('exit', () => resolve())), delay(5_000)])
 
 		if (this.child) {
@@ -200,8 +180,6 @@ export class NodeSupervisor {
 		}
 	}
 
-	/** Polls /healthz rather than a stdout ready line — a request proves the
-	 * socket actually accepts connections, which is what the renderer needs. */
 	private async waitUntilHealthy(): Promise<void> {
 		const deadline = Date.now() + this.startupTimeoutMs
 
@@ -218,9 +196,7 @@ export class NodeSupervisor {
 				if (response.ok) {
 					return
 				}
-			} catch {
-				// Not up yet. Expected for the first few hundred milliseconds.
-			}
+			} catch {}
 
 			await delay(200)
 		}
@@ -246,7 +222,6 @@ export class NodeSupervisor {
 	}
 }
 
-/** Whether a port can be bound right now on the given host. */
 function isPortFree(host: string, port: number): Promise<boolean> {
 	return new Promise(resolve => {
 		const probe = createServer()
@@ -257,11 +232,6 @@ function isPortFree(host: string, port: number): Promise<boolean> {
 	})
 }
 
-/**
- * Asks the OS for any free port. There is a race — the port is released
- * before the node claims it — but it's microseconds on loopback, cheaper
- * than handing the listening socket to a Go child process.
- */
 function askOsForPort(host: string): Promise<number> {
 	return new Promise((resolve, reject) => {
 		const probe = createServer()
@@ -281,7 +251,6 @@ function askOsForPort(host: string): Promise<number> {
 	})
 }
 
-/** Where the node binary lives — differs between a checkout and an installed app. */
 function resolveBinaryPath(): string | null {
 	const name = process.platform === 'win32' ? 'nodesrv.exe' : 'nodesrv'
 
@@ -295,10 +264,6 @@ function resolveBinaryPath(): string | null {
 	return candidates.find(existsSync) ?? null
 }
 
-/**
- * Origins the node accepts requests from — loose here is worse than on a
- * public API, since any page could drive downloads or read the library.
- */
 function allowedOrigins(): string[] {
 	const origins = ['app://-', 'file://']
 

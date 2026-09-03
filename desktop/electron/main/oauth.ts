@@ -1,47 +1,17 @@
 import { BrowserWindow } from 'electron'
 
-/**
- * The provider half of OAuth sign-in: a consent page, and the redirect that
- * ends it.
- *
- * The cloud never hosts a callback page — it hands out a consent URL whose
- * `redirect_uri` points at an address only this application answers for, and
- * the redirect is caught here before Chromium tries to fetch it. That is the
- * whole reason this lives in main: a sandboxed renderer cannot watch another
- * window's navigation, and shipping the user out to the system browser would
- * hand the code to whatever process happens to own that URL.
- *
- * The redirect address is expected to be an http(s) one — a loopback URL is
- * what a provider's "desktop app" client type hands out, and it is the form
- * Chromium reports through the two navigation events below.
- *
- * The window is deliberately plain — no preload, its own in-memory session —
- * so the page a provider serves has no bridge to reach and leaves no cookies
- * behind. `partition` without the `persist:` prefix is what makes it in-memory.
- */
-
 export interface OAuthRedirect {
 	code: string
 	state: string
 }
 
-/**
- * Closing the window is an answer, not an error: the user changed their mind,
- * and a renderer that had to read that out of an exception message would be
- * guessing. Every other way this ends rejects.
- */
 export type OAuthAuthorization = OAuthRedirect | { cancelled: true }
 
 const WINDOW_WIDTH = 520
 const WINDOW_HEIGHT = 720
 
-/**
- * One at a time. A second attempt while a window is open is a user who gave up
- * on the first, so the stale window goes rather than fighting for focus.
- */
 let activeWindow: BrowserWindow | null = null
 
-/** Where the provider will send the browser once the user decides. */
 function redirectTargetOf(consentUrl: URL): string {
 	const target = consentUrl.searchParams.get('redirect_uri')
 
@@ -52,7 +22,6 @@ function redirectTargetOf(consentUrl: URL): string {
 	return target
 }
 
-/** The redirect either carries the pair we asked for, or says why it does not. */
 function resultOf(url: URL): OAuthRedirect {
 	const failure = url.searchParams.get('error')
 
@@ -76,9 +45,6 @@ export async function authorizeOAuth(
 ): Promise<OAuthAuthorization> {
 	const consent = new URL(consentUrl)
 
-	// The renderer is untrusted by default, and this argument crosses that line:
-	// an http:// consent page would put the authorization code on the wire in
-	// clear text.
 	if (consent.protocol !== 'https:') {
 		throw new Error('the consent URL must be https')
 	}
@@ -116,8 +82,7 @@ export async function authorizeOAuth(
 
 			settled = true
 			outcome()
-			// Destroying inside the navigation handler that is still running is
-			// what Electron's own samples do; the close arrives on the next tick.
+
 			window.destroy()
 		}
 
@@ -126,8 +91,6 @@ export async function authorizeOAuth(
 				return
 			}
 
-			// The address answers to nobody: letting the navigation proceed would
-			// show the user a connection error instead of a closing window.
 			event.preventDefault()
 
 			try {
@@ -139,13 +102,9 @@ export async function authorizeOAuth(
 			}
 		}
 
-		// Both, because a provider reaches the redirect either by answering with
-		// a 302 (`will-redirect`) or by having its own page navigate there.
 		window.webContents.on('will-redirect', intercept)
 		window.webContents.on('will-navigate', intercept)
 
-		// Anything the consent page tries to open — "privacy policy", "help" —
-		// belongs in the real browser, not in a window the user reads as ours.
 		window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
 
 		window.once('ready-to-show', () => window.show())

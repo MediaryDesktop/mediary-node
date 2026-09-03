@@ -11,8 +11,6 @@ export function ResetPasswordPage() {
 	const navigate = useNavigate()
 	const goBack = useGoBack('/sign-in/email')
 
-	// The address travels in the URL because the next screen needs it beside the
-	// code, and a reload on that screen must not lose it.
 	useEffect(
 		() =>
 			passwordResetSent.watch(email => {

@@ -13,8 +13,6 @@ export function SignUpEmailPage() {
 	const navigate = useNavigate()
 	const goBack = useGoBack('/sign-up')
 
-	// Registration signs the account in and leaves the address unconfirmed, so
-	// the session it establishes leads to the code screen rather than home.
 	useEffect(() => sessionModel.authenticated.watch(() => navigate({ to: '/verify-email' })), [navigate])
 
 	return (

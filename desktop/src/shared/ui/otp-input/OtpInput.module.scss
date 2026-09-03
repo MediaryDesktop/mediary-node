@@ -9,9 +9,9 @@
 		max-width: 3.25rem;
 		height: 3.5rem;
 		padding: 0;
-		border: 1px solid var(--glass-border);
+		border: 1px solid var(--border);
 		border-radius: var(--radius);
-		background: rgba(255, 255, 255, 0.04);
+		background: var(--field);
 		color: var(--text);
 		font-family: inherit;
 		font-size: 1.375rem;
@@ -25,8 +25,8 @@
 		&:focus {
 			outline: none;
 			border-color: var(--accent);
-			background: rgba(255, 255, 255, 0.06);
-			box-shadow: 0 0 0 3px var(--accent-soft);
+			background: var(--field-hover);
+			box-shadow: var(--focus-shadow);
 		}
 
 		&:disabled {
@@ -36,14 +36,14 @@
 
 		&.filled {
 			border-color: var(--accent);
-			background: var(--accent-soft);
+			background: var(--accent-muted);
 		}
 
 		&.invalid {
-			border-color: var(--error);
+			border-color: var(--danger);
 
 			&:focus {
-				box-shadow: 0 0 0 3px rgba(244, 99, 110, 0.18);
+				box-shadow: 0 0 0 3px var(--danger-ring);
 			}
 		}
 	}

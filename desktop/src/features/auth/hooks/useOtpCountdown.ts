@@ -1,17 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
 
-/**
- * How long the code in the user's inbox is still worth typing.
- *
- * The deadline is the server's, not ours: this only counts down to it so a form
- * can say "expired" before the user spends an attempt on a code that is already
- * gone. `restart` is for the resend button, which asks for a new one.
- *
- * It counts to a timestamp rather than decrementing a number, because an
- * Electron window that was minimised for ten minutes had its timers throttled
- * and would otherwise come back believing the code is still fresh.
- */
-
 export interface OtpCountdown {
 	secondsLeft: number
 	expired: boolean

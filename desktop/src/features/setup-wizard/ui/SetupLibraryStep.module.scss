@@ -26,7 +26,7 @@
 				border: 1px solid transparent;
 				border-radius: 8px;
 				background: none;
-				color: var(--text-muted);
+				color: var(--text-secondary);
 				cursor: pointer;
 				transition:
 					background-color 160ms,
@@ -35,7 +35,7 @@
 
 				&:hover {
 					border-color: var(--border);
-					background: var(--surface-raised);
+					background: var(--bg-muted);
 					color: var(--text);
 				}
 
@@ -48,7 +48,7 @@
 
 		.hint {
 			margin: 0.5rem 0 0;
-			color: var(--text-muted);
+			color: var(--text-secondary);
 			font-size: 0.8125rem;
 			line-height: 1.5;
 		}
@@ -58,7 +58,7 @@
 		margin: 0;
 		padding-left: 0.75rem;
 		border-left: 2px solid var(--accent);
-		color: var(--text-muted);
+		color: var(--text-secondary);
 		font-size: 0.8125rem;
 		line-height: 1.5;
 	}

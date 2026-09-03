@@ -11,20 +11,12 @@ import { validateEmail } from '../lib/validation'
 
 import { createField } from './field'
 
-/**
- * Asking for a reset code.
- *
- * The cloud answers the same way whether or not the address has an account, so
- * `sent` fires on any accepted request and the screen that listens must not
- * word it as "we found you" — the endpoint is deliberately unable to say so.
- */
 export const resetPasswordForm = atom(() => {
 	const email = createField()
 	const submitted = createEvent()
 
 	const failedLocally = createEvent<FieldErrors>()
 
-	/** Carries the address, which the next step needs alongside the code. */
 	const sent = createEvent<string>()
 
 	const $failure = createStore<AuthFailure | null>(null)

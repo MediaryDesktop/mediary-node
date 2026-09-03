@@ -5,8 +5,8 @@
 	padding: 0.25rem 0.7rem;
 	border: 1px solid var(--border);
 	border-radius: 999px;
-	background: var(--surface-raised);
-	color: var(--text-muted);
+	background: var(--bg-muted);
+	color: var(--text-secondary);
 	font-size: 0.8125rem;
 	white-space: nowrap;
 
@@ -19,12 +19,12 @@
 	}
 
 	&.stopped {
-		color: var(--text-muted);
+		color: var(--text-secondary);
 	}
 
 	&.starting,
 	&.restarting {
-		color: var(--warn);
+		color: var(--warning-text);
 
 		.dot {
 			animation: pulse 1.2s ease-in-out infinite;
@@ -32,11 +32,11 @@
 	}
 
 	&.ready {
-		color: var(--ok);
+		color: var(--success-text);
 	}
 
 	&.failed {
-		color: var(--error);
+		color: var(--danger-text);
 	}
 
 	@media (prefers-reduced-motion: reduce) {

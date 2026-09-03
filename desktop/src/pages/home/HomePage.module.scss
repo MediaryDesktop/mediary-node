@@ -10,7 +10,7 @@
 
 	.subtitle {
 		margin: 0 0 2rem;
-		color: var(--text-muted);
+		color: var(--text-secondary);
 	}
 
 	.panel {
@@ -27,7 +27,7 @@
 			margin: 0 0 1rem;
 			font-size: 0.9375rem;
 			font-weight: 600;
-			color: var(--text-muted);
+			color: var(--text-secondary);
 			text-transform: uppercase;
 			letter-spacing: 0.06em;
 		}
@@ -56,12 +56,12 @@
 
 		.muted {
 			margin: 0;
-			color: var(--text-muted);
+			color: var(--text-secondary);
 		}
 
 		.error {
 			margin: 0;
-			color: var(--error);
+			color: var(--danger-text);
 		}
 
 		.facts {
@@ -71,7 +71,7 @@
 			margin: 0;
 
 			dt {
-				color: var(--text-muted);
+				color: var(--text-secondary);
 			}
 
 			dd {

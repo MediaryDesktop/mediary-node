@@ -24,7 +24,6 @@ interface SignUpValues {
 	confirmation: string
 }
 
-/** The local pass, keyed the same way the server keys its own complaints. */
 function check(values: SignUpValues): FieldErrors {
 	const fields: FieldErrors = {}
 
@@ -41,13 +40,6 @@ function check(values: SignUpValues): FieldErrors {
 	return fields
 }
 
-/**
- * The registration form.
- *
- * Validation runs here before the request goes out, and the server validates
- * everything again — its answer wins. The local pass exists so a typo costs no
- * round trip, and the limits are copied exactly on purpose (see lib/validation).
- */
 export const signUpForm = atom(() => {
 	const name = createField()
 	const email = createField()

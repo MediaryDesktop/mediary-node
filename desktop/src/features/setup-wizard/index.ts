@@ -1,12 +1,3 @@
-/**
- * The first-run wizard: the frame, the step rail, the footer and the screens
- * inside them.
- *
- * UI only for now — nothing here reads or writes a setting. When the steps get
- * real behaviour it lands in `model/`, and the components keep taking values
- * and callbacks so the page stays the only thing that knows what a finished
- * wizard leads to.
- */
 export { SETUP_STEPS } from './lib/steps'
 export type { SetupStep, SetupStepId } from './lib/steps'
 

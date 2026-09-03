@@ -29,7 +29,7 @@
 		position: absolute;
 		inset: 0;
 		z-index: -1;
-		background: radial-gradient(90% 60% at 50% -10%, rgba(124, 92, 255, 0.18) 0%, transparent 62%);
+		background: radial-gradient(90% 60% at 50% -10%, rgba(var(--accent-rgb), 0.18) 0%, transparent 62%);
 		pointer-events: none;
 	}
 
@@ -42,7 +42,7 @@
 
 		.note {
 			margin: 0;
-			color: var(--text-muted);
+			color: var(--text-secondary);
 			font-size: 0.875rem;
 		}
 	}
@@ -63,7 +63,7 @@
 
 	.caption {
 		margin: clamp(1rem, 3vh, 2rem) 0 0;
-		color: var(--text-muted);
+		color: var(--text-secondary);
 		font-size: 0.8125rem;
 	}
 }

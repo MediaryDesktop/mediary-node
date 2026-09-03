@@ -1,20 +1,5 @@
 #!/usr/bin/env node
-/**
- * Slice-level cycle detector — see docs/architecture.md.
- *
- * ESLint enforces the *direction* of imports (which layer may reach which).
- * It cannot see cycles, because a cycle is a property of the graph, not of any
- * single file: `features/download/lib/*` importing `entities/media` and
- * `entities/media/ui/*` importing `entities/torrent` are each legal in
- * isolation and jointly a cycle.
- *
- * This script collapses every source file to its owning node
- * (`entities/session`, `features/auth`, `app`, …), builds the import graph
- * between nodes, and fails on any strongly connected component larger than one
- * node.
- *
- * Usage: node scripts/check-architecture.mjs
- */
+
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, relative, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -22,7 +7,6 @@ import { fileURLToPath } from 'node:url'
 const SRC = fileURLToPath(new URL('../src', import.meta.url))
 const SOURCE_EXTENSIONS = ['.ts', '.tsx']
 
-/** Layer directory → the alias it is addressed by. */
 const LAYER_DIRS = {
 	shared: 'shared',
 	infrastructure: 'infra',
@@ -32,14 +16,8 @@ const LAYER_DIRS = {
 	app: 'app'
 }
 
-/**
- * Layers whose slices are independent graph nodes: a cycle between two entities
- * or two features is exactly what this script exists to catch. `app` collapses
- * to one node — it is the composition root and has no slices.
- */
 const SLICED_LAYERS = new Set(['shared', 'infra', 'entities', 'features', 'pages'])
 
-/** Alias prefix → the owning graph node. */
 const ALIAS_NODES = Object.fromEntries(
 	Object.values(LAYER_DIRS).map(alias => [
 		`@${alias}`,
@@ -49,16 +27,6 @@ const ALIAS_NODES = Object.fromEntries(
 
 const IMPORT_PATTERN = /(?:from|import)\s*\(?\s*['"]([^'"]+)['"]/g
 
-/**
- * Type-only imports and exports, which vanish at compile time.
- *
- * `verbatimModuleSyntax` keeps `import { type A } from 'x'` as a real import,
- * so that form stays a genuine runtime edge and is left alone. `import type
- * { A } from 'x'` is erased entirely and creates no edge — counting it would
- * report cycles that cannot exist at runtime, which matters now that shared
- * domain types live in the module that owns them rather than in a neutral
- * layer.
- */
 const TYPE_ONLY_PATTERN = /(?:import|export)\s+type\s+[\s\S]*?from\s*['"][^'"]+['"]/g
 
 function collectSourceFiles(dir, found = []) {
@@ -78,7 +46,6 @@ function collectSourceFiles(dir, found = []) {
 	return found
 }
 
-/** The node a file belongs to, mirroring the alias map above. */
 function nodeOfFile(path) {
 	const segments = relative(SRC, path).split(sep)
 	const [dir, name] = segments
@@ -91,7 +58,6 @@ function nodeOfFile(path) {
 	return SLICED_LAYERS.has(alias) && name ? `${alias}/${name}` : alias
 }
 
-/** The node an import specifier points at, or null for relative / package imports. */
 function nodeOfSpecifier(specifier) {
 	const [prefix, ...segments] = specifier.split('/')
 	const resolve = ALIAS_NODES[prefix]
@@ -99,7 +65,6 @@ function nodeOfSpecifier(specifier) {
 	return resolve ? resolve(segments) : null
 }
 
-/** Tarjan's SCC — every component with more than one node is a cycle. */
 function findCycles(edges) {
 	const index = new Map()
 	const lowlink = new Map()
@@ -153,7 +118,6 @@ function findCycles(edges) {
 
 const files = collectSourceFiles(SRC)
 
-/** node → target node → sample import lines, kept for the failure report. */
 const edges = new Map()
 
 for (const file of files) {

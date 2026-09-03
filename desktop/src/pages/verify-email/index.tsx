@@ -15,8 +15,6 @@ export function VerifyEmailPage() {
 	const goBack = useGoBack('/')
 	const account = useUnit(sessionModel.$account)
 
-	// The code is spent against the session, so there is nothing to confirm
-	// without one — and nothing to confirm twice.
 	useEffect(() => {
 		if (!account) {
 			void navigate({ to: '/sign-in' })

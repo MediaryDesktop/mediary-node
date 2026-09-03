@@ -11,25 +11,25 @@
 		}
 
 		.required {
-			color: var(--error);
+			color: var(--danger-text);
 			font-size: 0.875rem;
 		}
 	}
 
 	.playIcon {
-		color: var(--ok);
+		color: var(--success-text);
 	}
 
 	.hint {
 		margin: 0.5rem 0 0;
-		color: var(--text-muted);
+		color: var(--text-secondary);
 		font-size: 0.8125rem;
 		line-height: 1.5;
 	}
 
 	.install {
 		margin: 1.25rem 0 0;
-		color: var(--text-muted);
+		color: var(--text-secondary);
 		font-size: 0.8125rem;
 		line-height: 1.6;
 	}

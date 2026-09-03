@@ -38,16 +38,20 @@
 	}
 
 	&.primary {
-		background: var(--accent-gradient);
-		color: var(--accent-fg);
+		background: var(--accent);
+		color: var(--text-on-accent);
 
 		&:not(:disabled):hover {
-			filter: brightness(1.12);
+			background: var(--accent-hover);
+		}
+
+		&:not(:disabled):active {
+			background: var(--accent-active);
 		}
 	}
 
 	&.secondary {
-		background: var(--surface-raised);
+		background: var(--bg-muted);
 		border-color: var(--border);
 
 		&:not(:disabled):hover {
@@ -57,17 +61,17 @@
 	}
 
 	&.glass {
-		background: rgba(255, 255, 255, 0.04);
-		border-color: var(--glass-border);
+		background: var(--field);
+		border-color: var(--border);
 
 		&:not(:disabled):hover {
-			background: rgba(255, 255, 255, 0.08);
+			background: var(--field-hover);
 		}
 	}
 
 	&.ghost {
 		background: transparent;
-		color: var(--text-muted);
+		color: var(--text-secondary);
 
 		&:not(:disabled):hover {
 			color: var(--text);

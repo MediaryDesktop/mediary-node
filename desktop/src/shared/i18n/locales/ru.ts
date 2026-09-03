@@ -7,6 +7,12 @@ export const ru: Translation = {
 		ru: 'Русский'
 	},
 
+	theme: {
+		label: 'Тема',
+		dark: 'Тёмная тема',
+		light: 'Светлая тема'
+	},
+
 	node: {
 		state: {
 			stopped: 'Нода остановлена',

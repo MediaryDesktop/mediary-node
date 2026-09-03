@@ -6,41 +6,19 @@ import type { FetchOptions } from 'ofetch'
 import { HttpRequestError } from './api-error'
 import { unauthorized } from './unauthorized'
 
-/**
- * The request factory both backends are reached through.
- *
- * Carried over from the previous client, where it earned its place: one funnel
- * for headers, timeouts, retry policy and error normalization means a call site
- * declares *what* it wants and nothing about how requests behave. The desktop
- * adaptations are three:
- *
- *  - no `credentials: 'include'` — this is not a browser and there is no cookie
- *    jar; credentials are headers, supplied per connection;
- *  - `baseURL` and `headers` may be functions, because the node's address and
- *    token are only known once the Electron main process reports them;
- *  - a 401 fires an event instead of navigating (see ./unauthorized.ts).
- */
-
-/** A request described declaratively: `url` plus anything ofetch understands. */
 export type RequestConfig = FetchOptions & {
 	url: string
-	/**
-	 * Set on calls where 401 is an answer rather than an expired session — the
-	 * sign-in request itself, above all. Without it, a mistyped password would
-	 * report the *current* session as dead.
-	 */
+
 	expectsUnauthorized?: boolean
 }
 
-/** Either a fixed config or one derived from the effect's parameters. */
 type ConfigOf<Params> = RequestConfig | ((params: Params) => RequestConfig)
 
-/** A value or a function producing it at request time. */
 type Provider<T> = T | (() => T)
 
 export interface RequestFxOptions {
 	baseURL: Provider<string>
-	/** Credentials and anything else every request on this connection carries. */
+
 	headers?: Provider<HeadersInit>
 	timeout?: number
 }
@@ -57,20 +35,12 @@ function configOf<Params>(config: ConfigOf<Params>, params: Params): RequestConf
 	return typeof config === 'function' ? config(params) : config
 }
 
-/**
- * Retries are for requests that can be repeated without changing anything.
- * A retried POST is a second registration, a second payment, a second session.
- */
 function isIdempotent(method?: string): boolean {
 	const normalized = (method ?? 'GET').toUpperCase()
 
 	return normalized === 'GET' || normalized === 'HEAD'
 }
 
-/**
- * Binds one connection — a base URL and its credentials — and returns the
- * factory that turns a request description into an Effector effect.
- */
 export function createRequestFx(options: RequestFxOptions) {
 	return <Params = void, Result = void>(
 		config: ConfigOf<Params>

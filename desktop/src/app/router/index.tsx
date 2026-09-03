@@ -30,15 +30,6 @@ const homeRoute = createRoute({
 	component: HomePage
 })
 
-/**
- * The auth routes are flat rather than nested: `/sign-in` is a screen in its
- * own right, not a shell around `/sign-in/email`, and giving it an `Outlet`
- * would mean rendering the provider buttons underneath the email form.
- */
-/**
- * `/setup` sits outside the frame for the same reason the auth screens do: the
- * first run has no shell to put it in yet, and the wizard owns the whole window.
- */
 const setupRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: '/setup',
@@ -84,8 +75,7 @@ const resetPasswordRoute = createRoute({
 const newPasswordRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: '/new-password',
-	// The address the code was mailed to. Kept in the URL so a reload on this
-	// screen does not lose the half of the pair the user cannot retype.
+
 	validateSearch: (search: Record<string, unknown>): { email: string } => ({
 		email: typeof search.email === 'string' ? search.email : ''
 	}),

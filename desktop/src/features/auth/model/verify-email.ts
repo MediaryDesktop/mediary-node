@@ -11,13 +11,6 @@ import { validateCode } from '../lib/validation'
 
 import { createField } from './field'
 
-/**
- * Confirming the address the account was registered with.
- *
- * The code is spent against the session, not against an email address — the
- * cloud takes no address here on purpose — so this form only exists for someone
- * already signed in, and there is nothing to identify beyond the six digits.
- */
 export const verifyEmailForm = atom(() => {
 	const code = createField()
 	const submitted = createEvent()
@@ -57,7 +50,6 @@ export const verifyEmailForm = atom(() => {
 
 	sample({ clock: resent, target: sessionModel.emailVerificationRequested })
 
-	// A resend invalidates whatever is typed: the code on screen is the old one.
 	sample({ clock: resent, fn: () => '', target: code.changed })
 
 	$failure

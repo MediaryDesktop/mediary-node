@@ -1,31 +1,11 @@
+@use "../theme/palette/palette";
+
 :root {
-	color-scheme: dark;
-
-	--bg: #0d0d10;
-	--surface: #16161c;
-	--surface-raised: #1e1e26;
-	--border: #2a2a34;
-	--text: #e8e8ee;
-	--text-muted: #9a9aa8;
-	--accent: #7c5cff;
-	--ok: #3ecf8e;
-	--warn: #f2b64c;
-	--error: #f4636e;
-
-	--accent-fg: #ffffff;
-	--accent-soft: rgba(124, 92, 255, 0.16);
-	--accent-gradient: linear-gradient(96deg, #4d7cff 0%, #7c5cff 52%, #a855f7 100%);
-
-	--glass: rgba(20, 20, 28, 0.62);
-	--glass-border: rgba(255, 255, 255, 0.09);
-
 	--radius: 10px;
 	--radius-lg: 16px;
 	--control-height: 46px;
 
 	--titlebar-height: 40px;
-	/* Three `WindowControls` buttons, 46px each — the width every layout
-	 * reserves in its drag strip so content never sits under them. */
 	--window-controls-width: 138px;
 
 	--font-ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -53,15 +33,18 @@ body {
 	line-height: 1.5;
 	-webkit-font-smoothing: antialiased;
 	overscroll-behavior: none;
+	transition:
+		background-color 200ms ease,
+		color 200ms ease;
 }
 
 a {
-	color: var(--accent);
+	color: var(--accent-text);
 }
 
 * {
 	scrollbar-width: thin;
-	scrollbar-color: var(--border) transparent;
+	scrollbar-color: var(--border-strong) transparent;
 }
 
 *::-webkit-scrollbar {
@@ -76,7 +59,7 @@ a {
 *::-webkit-scrollbar-thumb {
 	border: 2px solid transparent;
 	border-radius: 999px;
-	background-color: var(--border);
+	background-color: var(--border-strong);
 	background-clip: padding-box;
 
 	&:hover {

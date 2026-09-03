@@ -1,11 +1,5 @@
 import '@testing-library/jest-dom/vitest'
 
-/**
- * The renderer assumes `window.mediary` exists — it is injected by the preload
- * script, which never runs under jsdom. A default stub here means a test only
- * has to override the parts it cares about, instead of every test reconstructing
- * the whole bridge.
- */
 Object.defineProperty(window, 'mediary', {
 	writable: true,
 	value: {

@@ -1,14 +1,5 @@
 import type { IconName } from '@shared/ui'
 
-/**
- * How a provider is drawn, for the providers the deployment happens to offer.
- *
- * The list itself comes from the cloud (`oauthProvidersQuery`) — a build that
- * hardcoded it would offer buttons that answer 404. This is only the label and
- * the mark, which the contract has no field for; a provider the cloud adds
- * before this table knows about it still works, it just shows its bare name.
- */
-
 export interface ProviderLook {
 	label: string
 	icon: IconName

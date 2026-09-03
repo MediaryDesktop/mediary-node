@@ -1,20 +1,5 @@
-/**
- * The key source of truth.
- *
- * Every other locale is typed as `typeof en`, so a missing or misspelled key in
- * a translation is a compile error rather than a English string leaking into a
- * Ukrainian screen. Adding a key here without translating it breaks the build —
- * which is the point.
- */
 type Widen<T> = { [Key in keyof T]: T[Key] extends string ? string : Widen<T[Key]> }
 
-/**
- * The shape every other locale must satisfy: same keys, plain strings.
- *
- * `en` keeps its literal types (`as const`) so i18next can derive both the key
- * union and the interpolation variables inside each phrase; the other locales
- * would fail to match those literals, hence the widening.
- */
 export type Translation = Widen<typeof en>
 
 export const en = {
@@ -22,6 +7,12 @@ export const en = {
 		en: 'English',
 		uk: 'Українська',
 		ru: 'Русский'
+	},
+
+	theme: {
+		label: 'Theme',
+		dark: 'Dark theme',
+		light: 'Light theme'
 	},
 
 	node: {

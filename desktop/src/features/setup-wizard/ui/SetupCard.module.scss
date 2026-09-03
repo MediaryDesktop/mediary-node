@@ -19,8 +19,8 @@
 			width: 32px;
 			height: 32px;
 			border-radius: 9px;
-			background: var(--accent-soft);
-			color: var(--accent);
+			background: var(--accent-muted);
+			color: var(--accent-text);
 		}
 
 		.title {
@@ -31,7 +31,7 @@
 
 		.description {
 			margin: 0.25rem 0 0;
-			color: var(--text-muted);
+			color: var(--text-secondary);
 			font-size: 0.8125rem;
 			line-height: 1.5;
 		}

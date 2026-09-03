@@ -2,7 +2,8 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 
 import '@shared/i18n'
-import '@shared/ui/theme/global.scss'
+import '@shared/style/main.scss'
+import '@shared/style/theme'
 
 import { App } from './App'
 

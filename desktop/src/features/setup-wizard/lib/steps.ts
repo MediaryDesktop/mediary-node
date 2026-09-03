@@ -1,14 +1,3 @@
-/**
- * The order of the wizard, as data.
- *
- * The rail, the footer and the page all need the same sequence, and keeping it
- * in one array means a reordered or renamed step cannot drift between them.
- *
- * The phrase keys are spelled out per step rather than built as
- * `` `setup.steps.${id}.title` ``: i18next derives its key union from `en.ts`,
- * and a literal is what turns a typo here into a compile error instead of a
- * missing phrase at runtime.
- */
 import type { IconName } from '@shared/ui'
 
 export type SetupStepId = 'library' | 'player' | 'downloads' | 'account' | 'debrid'
