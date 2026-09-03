@@ -1,14 +1,16 @@
 import { createHashHistory, createRootRoute, createRoute, createRouter, Outlet } from '@tanstack/react-router'
 
+import {
+	NewPasswordPage,
+	ResetPasswordPage,
+	SignInEmailPage,
+	SignInProvidersPage,
+	SignUpEmailPage,
+	SignUpProvidersPage,
+	VerifyEmailPage
+} from '@pages/auth'
 import { HomePage } from '@pages/home'
-import { NewPasswordPage } from '@pages/new-password'
-import { ResetPasswordPage } from '@pages/reset-password'
 import { SetupPage } from '@pages/setup'
-import { SignInPage } from '@pages/sign-in'
-import { SignInEmailPage } from '@pages/sign-in-email'
-import { SignUpPage } from '@pages/sign-up'
-import { SignUpEmailPage } from '@pages/sign-up-email'
-import { VerifyEmailPage } from '@pages/verify-email'
 
 import { AppLayout } from '../layout/AppLayout'
 
@@ -39,7 +41,7 @@ const setupRoute = createRoute({
 const signInRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: '/sign-in',
-	component: SignInPage
+	component: SignInProvidersPage
 })
 
 const signInEmailRoute = createRoute({
@@ -51,7 +53,7 @@ const signInEmailRoute = createRoute({
 const signUpRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: '/sign-up',
-	component: SignUpPage
+	component: SignUpProvidersPage
 })
 
 const signUpEmailRoute = createRoute({

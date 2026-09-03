@@ -8,7 +8,7 @@ import { sessionModel } from '@entities/session'
 
 import { AuthFormWrapper, AuthLayout, AuthProvidersPanel } from '@features/auth'
 
-export function SignInPage() {
+export function SignUpProvidersPage() {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
 	const goBack = useGoBack('/')
@@ -18,14 +18,14 @@ export function SignInPage() {
 	return (
 		<AuthLayout onBack={goBack}>
 			<AuthFormWrapper
-				eyebrow={t('auth.signIn.eyebrow')}
-				title={t('auth.signIn.title')}
-				description={t('auth.signIn.subtitle')}
+				eyebrow={t('auth.signUp.eyebrow')}
+				title={t('auth.signUp.title')}
+				description={t('auth.signUp.subtitle')}
 			>
 				<AuthProvidersPanel
-					mode='signIn'
-					onUseEmail={useCallback(() => navigate({ to: '/sign-in/email' }), [navigate])}
-					onSwitch={useCallback(() => navigate({ to: '/sign-up' }), [navigate])}
+					mode='signUp'
+					onUseEmail={useCallback(() => navigate({ to: '/sign-up/email' }), [navigate])}
+					onSwitch={useCallback(() => navigate({ to: '/sign-in' }), [navigate])}
 				/>
 			</AuthFormWrapper>
 		</AuthLayout>
