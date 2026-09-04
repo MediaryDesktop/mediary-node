@@ -4,10 +4,10 @@ import { useEffect } from 'react'
 import { useTranslation } from '@shared/i18n'
 import { Button, Icon } from '@shared/ui'
 
-import { providerLabel, providerLook } from '../lib/providers'
-import { oauthPanel } from '../model/oauth'
+import { providerLabel, providerLook } from '../../lib'
+import { oauthPanel } from '../../model'
+import { AuthLink } from '../common'
 
-import { AuthLink } from './AuthLink'
 import panel from './AuthPanel.module.scss'
 import styles from './AuthProvidersPanel.module.scss'
 
@@ -19,10 +19,9 @@ export interface AuthProvidersPanelProps {
 
 export function AuthProvidersPanel({ mode, onUseEmail, onSwitch }: AuthProvidersPanelProps) {
 	const { t } = useTranslation()
-	const [providers, lastUsed, failure, pending] = useUnit([
+	const [providers, lastUsed, pending] = useUnit([
 		oauthPanel.$providers,
 		oauthPanel.$lastUsed,
-		oauthPanel.$failure,
 		oauthPanel.$pending
 	])
 
@@ -30,8 +29,6 @@ export function AuthProvidersPanel({ mode, onUseEmail, onSwitch }: AuthProviders
 
 	return (
 		<div className={panel.panel}>
-			{failure && <p className={styles.failure}>{failure}</p>}
-
 			{providers.length > 0 && (
 				<>
 					<p className={styles.label}>{t('auth.providers.label')}</p>

@@ -4,11 +4,11 @@ import { once } from 'patronum'
 import { HttpRequestError } from '@shared/api'
 import { atom } from '@shared/factory'
 import { translate } from '@shared/i18n'
+import { toast } from '@shared/ui'
 
 import { oauthProvidersQuery, sessionModel } from '@entities/session'
 
-import { readLastProvider, storeLastProvider } from '../lib/last-provider'
-import { providerLabel } from '../lib/providers'
+import { providerLabel, readLastProvider, storeLastProvider } from '../lib'
 
 export const oauthPanel = atom(() => {
 	const mounted = createEvent()
@@ -25,12 +25,6 @@ export const oauthPanel = atom(() => {
 
 	providerChosen.watch(storeLastProvider)
 
-	const $failure = createStore<string | null>(null).reset(
-		providerChosen,
-		sessionModel.authenticated,
-		sessionModel.oauthCancelled
-	)
-
 	sample({
 		clock: sessionModel.oauthFailed,
 		source: $lastUsed,
@@ -38,9 +32,8 @@ export const oauthPanel = atom(() => {
 		fn: (provider, error) =>
 			error instanceof HttpRequestError && error.body?.detail
 				? error.body.detail
-				: translate('auth.providers.failed', { provider: providerLabel(provider ?? '') }),
-		target: $failure
-	})
+				: translate('auth.providers.failed', { provider: providerLabel(provider ?? '') })
+	}).watch(message => toast.error(message))
 
 	sample({ clock: providerChosen, target: sessionModel.oauthRequested })
 
@@ -49,7 +42,6 @@ export const oauthPanel = atom(() => {
 		providerChosen,
 		$providers,
 		$lastUsed,
-		$failure,
 		$pending: sessionModel.$oauthProvider
 	}
 })

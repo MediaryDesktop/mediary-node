@@ -90,8 +90,7 @@ export const en = {
 			description: 'Enter the {{length}}-digit code we sent to {{email}}.',
 			submit: 'Verify email',
 			resendLabel: 'Did not get the code?',
-			resend: 'Send a new one',
-			later: 'Verify later'
+			resend: 'Send a new one'
 		},
 		reset: {
 			eyebrow: 'Account recovery',
@@ -119,13 +118,18 @@ export const en = {
 			emailInvalid: 'That email does not look right',
 			nameRequired: 'Enter your name',
 			nameLength: 'Name must be {{min}} to {{max}} characters',
+			passwordRequired: 'Enter your password',
 			passwordTooShort: 'Password must be at least {{min}} characters',
 			passwordTooLong: 'Password must be at most {{max}} characters',
 			passwordEchoesIdentity: 'The password must not repeat your email or name',
 			confirmationRequired: 'Repeat the password',
 			confirmationMismatch: 'The passwords do not match',
 			codeRequired: 'Enter the code from the email',
-			codeIncomplete: 'The code is {{length}} digits long'
+			codeIncomplete: 'The code is {{length}} digits long',
+			fieldRequired: 'Fill in the “{{field}}” field',
+			fieldInvalid: 'Check the “{{field}}” field',
+			fieldTooShort: '“{{field}}” must be at least {{min}} characters',
+			fieldTooLong: '“{{field}}” must be at most {{max}} characters'
 		},
 		error: {
 			cloudUnreachable: 'Could not reach the cloud',

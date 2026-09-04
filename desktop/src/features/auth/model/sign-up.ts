@@ -1,19 +1,17 @@
-import { combine, createEvent, createStore, sample } from 'effector'
+import { combine, createEvent, sample } from 'effector'
 
-import type { FieldErrors } from '@shared/api'
 import { atom } from '@shared/factory'
 
 import { sessionModel } from '@entities/session'
 
-import { localFailure, toAuthFailure } from '../lib/failure'
-import type { AuthFailure } from '../lib/failure'
+import { notifyFailure, notifyProblems } from '../lib'
 import {
 	normalizeDisplayName,
 	validateDisplayName,
 	validateEmail,
 	validatePassword,
 	validatePasswordConfirmation
-} from '../lib/validation'
+} from '../validation'
 
 import { createField } from './field'
 
@@ -24,20 +22,13 @@ interface SignUpValues {
 	confirmation: string
 }
 
-function check(values: SignUpValues): FieldErrors {
-	const fields: FieldErrors = {}
-
-	const name = validateDisplayName(values.display_name)
-	const email = validateEmail(values.email)
-	const password = validatePassword(values.password, values.email, values.display_name)
-	const confirmation = validatePasswordConfirmation(values.password, values.confirmation)
-
-	if (name) fields.display_name = name
-	if (email) fields.email = email
-	if (password) fields.password = password
-	if (confirmation) fields.confirmation = confirmation
-
-	return fields
+function check(values: SignUpValues): string[] {
+	return [
+		validateDisplayName(values.display_name),
+		validateEmail(values.email),
+		validatePassword(values.password, values.email, values.display_name),
+		validatePasswordConfirmation(values.password, values.confirmation)
+	].filter((problem): problem is string => problem !== null)
 }
 
 export const signUpForm = atom(() => {
@@ -47,9 +38,6 @@ export const signUpForm = atom(() => {
 	const confirmation = createField()
 	const submitted = createEvent()
 
-	const failedLocally = createEvent<FieldErrors>()
-
-	const $failure = createStore<AuthFailure | null>(null)
 	const $values = combine<SignUpValues>({
 		display_name: name.$value,
 		email: email.$value,
@@ -65,14 +53,13 @@ export const signUpForm = atom(() => {
 
 	sample({
 		clock: checked,
-		filter: ({ problems }) => Object.keys(problems).length > 0,
-		fn: ({ problems }) => problems,
-		target: failedLocally
-	})
+		filter: ({ problems }) => problems.length > 0,
+		fn: ({ problems }) => problems
+	}).watch(notifyProblems)
 
 	sample({
 		clock: checked,
-		filter: ({ problems }) => Object.keys(problems).length === 0,
+		filter: ({ problems }) => problems.length === 0,
 		fn: ({ values }) => ({
 			display_name: normalizeDisplayName(values.display_name),
 			email: values.email.trim(),
@@ -81,17 +68,7 @@ export const signUpForm = atom(() => {
 		target: sessionModel.signUpRequested
 	})
 
-	$failure
-		.on(failedLocally, (_, fields) => localFailure(fields))
-		.on(sessionModel.signUpFailed, (_, error) => toAuthFailure(error))
-		.reset(
-			submitted,
-			sessionModel.authenticated,
-			name.changed,
-			email.changed,
-			password.changed,
-			confirmation.changed
-		)
+	sessionModel.signUpFailed.watch(notifyFailure)
 
 	return {
 		name,
@@ -99,7 +76,6 @@ export const signUpForm = atom(() => {
 		password,
 		confirmation,
 		submitted,
-		$failure,
 		$pending: sessionModel.$signUpPending
 	}
 })

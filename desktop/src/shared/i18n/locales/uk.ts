@@ -88,8 +88,7 @@ export const uk: Translation = {
 			description: 'Введіть код із {{length}} цифр, який ми надіслали на {{email}}.',
 			submit: 'Підтвердити пошту',
 			resendLabel: 'Не отримали код?',
-			resend: 'Надіслати новий',
-			later: 'Підтвердити пізніше'
+			resend: 'Надіслати новий'
 		},
 		reset: {
 			eyebrow: 'Відновлення доступу',
@@ -116,13 +115,18 @@ export const uk: Translation = {
 			emailInvalid: 'Email виглядає некоректно',
 			nameRequired: 'Вкажіть імʼя',
 			nameLength: 'Імʼя від {{min}} до {{max}} символів',
+			passwordRequired: 'Введіть пароль',
 			passwordTooShort: 'Пароль щонайменше {{min}} символів',
 			passwordTooLong: 'Пароль не довший за {{max}} символів',
 			passwordEchoesIdentity: 'Пароль не має повторювати email або імʼя',
 			confirmationRequired: 'Повторіть пароль',
 			confirmationMismatch: 'Паролі не збігаються',
 			codeRequired: 'Введіть код із листа',
-			codeIncomplete: 'Код складається з {{length}} цифр'
+			codeIncomplete: 'Код складається з {{length}} цифр',
+			fieldRequired: 'Заповніть поле «{{field}}»',
+			fieldInvalid: 'Перевірте поле «{{field}}»',
+			fieldTooShort: 'Поле «{{field}}» — щонайменше {{min}} символів',
+			fieldTooLong: 'Поле «{{field}}» — не довше за {{max}} символів'
 		},
 		error: {
 			cloudUnreachable: 'Не вдалося звʼязатися з хмарою',

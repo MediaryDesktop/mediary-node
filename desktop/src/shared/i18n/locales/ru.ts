@@ -88,8 +88,7 @@ export const ru: Translation = {
 			description: 'Введите код из {{length}} цифр, отправленный на {{email}}.',
 			submit: 'Подтвердить почту',
 			resendLabel: 'Не получили код?',
-			resend: 'Отправить новый',
-			later: 'Подтвердить позже'
+			resend: 'Отправить новый'
 		},
 		reset: {
 			eyebrow: 'Восстановление доступа',
@@ -117,13 +116,18 @@ export const ru: Translation = {
 			emailInvalid: 'Email выглядит некорректно',
 			nameRequired: 'Укажите имя',
 			nameLength: 'Имя от {{min}} до {{max}} символов',
+			passwordRequired: 'Введите пароль',
 			passwordTooShort: 'Пароль не менее {{min}} символов',
 			passwordTooLong: 'Пароль не длиннее {{max}} символов',
 			passwordEchoesIdentity: 'Пароль не должен повторять email или имя',
 			confirmationRequired: 'Повторите пароль',
 			confirmationMismatch: 'Пароли не совпадают',
 			codeRequired: 'Введите код из письма',
-			codeIncomplete: 'Код состоит из {{length}} цифр'
+			codeIncomplete: 'Код состоит из {{length}} цифр',
+			fieldRequired: 'Заполните поле «{{field}}»',
+			fieldInvalid: 'Проверьте поле «{{field}}»',
+			fieldTooShort: 'Поле «{{field}}» — не менее {{min}} символов',
+			fieldTooLong: 'Поле «{{field}}» — не длиннее {{max}} символов'
 		},
 		error: {
 			cloudUnreachable: 'Не удалось связаться с облаком',

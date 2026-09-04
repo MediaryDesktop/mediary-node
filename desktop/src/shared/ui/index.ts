@@ -8,3 +8,5 @@ export { Icon } from './icon/Icon'
 export type { IconName } from './icon/Icon'
 
 export { Select } from './select/Select'
+
+export { Toaster, toast } from './toast'

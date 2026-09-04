@@ -4,17 +4,13 @@ import type { FormEvent } from 'react'
 import { useTranslation } from '@shared/i18n'
 import { Button, Icon, Input } from '@shared/ui'
 
-import { resetPasswordForm } from '../model/reset-password'
+import { resetPasswordForm } from '../../model'
 
 import styles from './AuthForm.module.scss'
 
 export function ResetPasswordForm() {
 	const { t } = useTranslation()
-	const [email, failure, pending] = useUnit([
-		resetPasswordForm.email.$value,
-		resetPasswordForm.$failure,
-		resetPasswordForm.$pending
-	])
+	const [email, pending] = useUnit([resetPasswordForm.email.$value, resetPasswordForm.$pending])
 
 	const submit = (event: FormEvent) => {
 		event.preventDefault()
@@ -23,8 +19,6 @@ export function ResetPasswordForm() {
 
 	return (
 		<form className={styles.form} onSubmit={submit} noValidate>
-			{failure?.message && <p className={styles.formError}>{failure.message}</p>}
-
 			<Input
 				type='email'
 				name='email'
@@ -32,7 +26,6 @@ export function ResetPasswordForm() {
 				autoComplete='email'
 				startIcon={<Icon name='common/mail' size={18} />}
 				value={email}
-				error={failure?.fields.email}
 				onChange={event => resetPasswordForm.email.changed(event.target.value)}
 			/>
 

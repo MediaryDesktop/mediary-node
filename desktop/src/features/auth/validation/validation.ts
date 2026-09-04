@@ -7,7 +7,7 @@ export const MAX_DISPLAY_NAME = 40
 export const MAX_EMAIL_LENGTH = 254
 export const CODE_LENGTH = 6
 
-export const CODE_TTL_SECONDS = 30 * 60
+export const CODE_TTL_SECONDS = 5 * 60
 
 export function normalizeDisplayName(raw: string): string {
 	return raw.trim().split(/\s+/u).join(' ')
@@ -47,7 +47,11 @@ export function validateDisplayName(raw: string): string | null {
 	return null
 }
 
-export function validatePassword(password: string, email: string, displayName: string): string | null {
+export function validatePasswordLength(password: string): string | null {
+	if (!password) {
+		return translate('auth.validation.passwordRequired')
+	}
+
 	const length = [...password].length
 
 	if (length < MIN_PASSWORD_LENGTH) {
@@ -56,6 +60,16 @@ export function validatePassword(password: string, email: string, displayName: s
 
 	if (length > MAX_PASSWORD_LENGTH) {
 		return translate('auth.validation.passwordTooLong', { max: MAX_PASSWORD_LENGTH })
+	}
+
+	return null
+}
+
+export function validatePassword(password: string, email: string, displayName: string): string | null {
+	const tooShortOrLong = validatePasswordLength(password)
+
+	if (tooShortOrLong) {
+		return tooShortOrLong
 	}
 
 	const localPart = email.split('@')[0] ?? ''

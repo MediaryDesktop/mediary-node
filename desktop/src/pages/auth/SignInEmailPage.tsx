@@ -4,7 +4,7 @@ import { useCallback, useEffect } from 'react'
 import { useTranslation } from '@shared/i18n'
 import { useGoBack } from '@shared/lib'
 
-import { sessionModel } from '@entities/session'
+import { landingRoute, sessionModel } from '@entities/session'
 
 import { AuthEmailPanel, AuthFormWrapper, AuthLayout } from '@features/auth'
 
@@ -13,7 +13,10 @@ export function SignInEmailPage() {
 	const navigate = useNavigate()
 	const goBack = useGoBack('/sign-in')
 
-	useEffect(() => sessionModel.authenticated.watch(() => navigate({ to: '/' })), [navigate])
+	useEffect(
+		() => sessionModel.authenticated.watch(account => navigate({ to: landingRoute(account) })),
+		[navigate]
+	)
 
 	return (
 		<AuthLayout onBack={goBack}>

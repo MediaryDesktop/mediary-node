@@ -4,10 +4,10 @@ import type { FormEvent } from 'react'
 import { useTranslation } from '@shared/i18n'
 import { Button, Icon, Input } from '@shared/ui'
 
-import { signInForm } from '../model/sign-in'
+import { signInForm } from '../../model'
+import { AuthLink } from '../common'
 
 import styles from './AuthForm.module.scss'
-import { AuthLink } from './AuthLink'
 
 export interface SignInFormProps {
 	onForgotPassword: () => void
@@ -15,10 +15,9 @@ export interface SignInFormProps {
 
 export function SignInForm({ onForgotPassword }: SignInFormProps) {
 	const { t } = useTranslation()
-	const [email, password, failure, pending] = useUnit([
+	const [email, password, pending] = useUnit([
 		signInForm.email.$value,
 		signInForm.password.$value,
-		signInForm.$failure,
 		signInForm.$pending
 	])
 
@@ -29,8 +28,6 @@ export function SignInForm({ onForgotPassword }: SignInFormProps) {
 
 	return (
 		<form className={styles.form} onSubmit={submit} noValidate>
-			{failure?.message && <p className={styles.formError}>{failure.message}</p>}
-
 			<Input
 				type='email'
 				name='email'
@@ -38,7 +35,6 @@ export function SignInForm({ onForgotPassword }: SignInFormProps) {
 				autoComplete='email'
 				startIcon={<Icon name='common/mail' size={18} />}
 				value={email}
-				error={failure?.fields.email}
 				onChange={event => signInForm.email.changed(event.target.value)}
 			/>
 
@@ -50,7 +46,6 @@ export function SignInForm({ onForgotPassword }: SignInFormProps) {
 				revealable
 				startIcon={<Icon name='common/lock' size={18} />}
 				value={password}
-				error={failure?.fields.password}
 				onChange={event => signInForm.password.changed(event.target.value)}
 			/>
 

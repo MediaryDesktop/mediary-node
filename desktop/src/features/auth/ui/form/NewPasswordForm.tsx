@@ -4,12 +4,12 @@ import type { FormEvent } from 'react'
 import { useTranslation } from '@shared/i18n'
 import { Button, Icon, Input, OtpInput } from '@shared/ui'
 
-import { useOtpCountdown } from '../hooks/useOtpCountdown'
-import { CODE_LENGTH, CODE_TTL_SECONDS, MIN_PASSWORD_LENGTH } from '../lib/validation'
-import { newPasswordForm } from '../model/new-password'
+import { useOtpCountdown } from '../../hooks'
+import { newPasswordForm } from '../../model'
+import { CODE_LENGTH, CODE_TTL_SECONDS, MIN_PASSWORD_LENGTH } from '../../validation'
+import { OtpCountdownTimer } from '../common'
 
 import styles from './AuthForm.module.scss'
-import { OtpCountdownTimer } from './OtpCountdownTimer'
 
 export interface NewPasswordFormProps {
 	email: string
@@ -18,10 +18,9 @@ export interface NewPasswordFormProps {
 export function NewPasswordForm({ email }: NewPasswordFormProps) {
 	const { t } = useTranslation()
 	const { expired, formatted } = useOtpCountdown(CODE_TTL_SECONDS)
-	const [code, password, failure, pending] = useUnit([
+	const [code, password, pending] = useUnit([
 		newPasswordForm.code.$value,
 		newPasswordForm.password.$value,
-		newPasswordForm.$failure,
 		newPasswordForm.$pending
 	])
 
@@ -32,19 +31,14 @@ export function NewPasswordForm({ email }: NewPasswordFormProps) {
 
 	return (
 		<form className={styles.form} onSubmit={submit} noValidate>
-			{failure?.message && <p className={styles.formError}>{failure.message}</p>}
-
 			<OtpInput
 				className={styles.otp}
 				value={code}
 				length={CODE_LENGTH}
 				disabled={expired || pending}
-				invalid={Boolean(failure?.fields.code)}
 				aria-label={t('auth.field.code')}
 				onChange={newPasswordForm.code.changed}
 			/>
-
-			{failure?.fields.code && <p className={styles.fieldError}>{failure.fields.code}</p>}
 
 			<Input
 				type='password'
@@ -54,7 +48,6 @@ export function NewPasswordForm({ email }: NewPasswordFormProps) {
 				revealable
 				startIcon={<Icon name='common/lock' size={18} />}
 				value={password}
-				error={failure?.fields.password}
 				onChange={event => newPasswordForm.password.changed(event.target.value)}
 			/>
 

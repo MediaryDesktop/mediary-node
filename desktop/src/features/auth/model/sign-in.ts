@@ -1,11 +1,11 @@
-import { combine, createEvent, createStore, sample } from 'effector'
+import { combine, createEvent, sample } from 'effector'
 
 import { atom } from '@shared/factory'
 
 import { sessionModel } from '@entities/session'
 
-import { toAuthFailure } from '../lib/failure'
-import type { AuthFailure } from '../lib/failure'
+import { notifyFailure, notifyProblems } from '../lib'
+import { validateEmail, validatePasswordLength } from '../validation'
 
 import { createField } from './field'
 
@@ -14,25 +14,38 @@ export const signInForm = atom(() => {
 	const password = createField()
 	const submitted = createEvent()
 
-	const $failure = createStore<AuthFailure | null>(null)
 	const $values = combine({ email: email.$value, password: password.$value })
 
-	sample({
+	const checked = sample({
 		clock: submitted,
 		source: $values,
-		fn: ({ email: value, password: secret }) => ({ email: value.trim(), password: secret }),
+		fn: values => ({
+			values,
+			problems: [validateEmail(values.email), validatePasswordLength(values.password)].filter(
+				(problem): problem is string => problem !== null
+			)
+		})
+	})
+
+	sample({
+		clock: checked,
+		filter: ({ problems }) => problems.length > 0,
+		fn: ({ problems }) => problems
+	}).watch(notifyProblems)
+
+	sample({
+		clock: checked,
+		filter: ({ problems }) => problems.length === 0,
+		fn: ({ values }) => ({ email: values.email.trim(), password: values.password }),
 		target: sessionModel.signInRequested
 	})
 
-	$failure
-		.on(sessionModel.signInFailed, (_, error) => toAuthFailure(error))
-		.reset(submitted, sessionModel.authenticated, email.changed, password.changed)
+	sessionModel.signInFailed.watch(notifyFailure)
 
 	return {
 		email,
 		password,
 		submitted,
-		$failure,
 		$pending: sessionModel.$signInPending
 	}
 })

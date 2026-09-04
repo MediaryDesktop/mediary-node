@@ -4,1275 +4,1284 @@
  */
 
 export interface paths {
-	'/v1/account/email/verification': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		get?: never
-		put?: never
-		/**
-		 * Send a confirmation code
-		 * @description Mails a fresh 6-digit code to the signed-in account's own address. Takes no email parameter on purpose: the session already says who is asking, so the endpoint cannot be used to probe which addresses are registered.
-		 */
-		post: operations['sendEmailVerification']
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/v1/account/email/verification/confirm': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		get?: never
-		put?: never
-		/**
-		 * Confirm the email address
-		 * @description Spends a code and marks the address confirmed. Idempotent: confirming an already-confirmed address returns the account unchanged rather than an error.
-		 */
-		post: operations['confirmEmail']
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/v1/account/me': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		/**
-		 * Current account
-		 * @description Returns the signed-in account. Read from the database rather than from the session, so a change of role or name is visible immediately.
-		 */
-		get: operations['getCurrentAccount']
-		put?: never
-		post?: never
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/v1/account/oauth/providers': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		/**
-		 * Available OAuth providers
-		 * @description Lists providers this deployment has real credentials for.
-		 */
-		get: operations['listOAuthProviders']
-		put?: never
-		post?: never
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/v1/account/oauth/{provider}/callback': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		get?: never
-		put?: never
-		/**
-		 * Complete OAuth sign-in
-		 * @description Exchanges an intercepted redirect for a session. Creates the account on first sign-in; refuses to link a provider to an email that already has an account under a different method.
-		 */
-		post: operations['completeOAuth']
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/v1/account/oauth/{provider}/start': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		get?: never
-		put?: never
-		/**
-		 * Start OAuth sign-in
-		 * @description Returns the provider's consent URL. There is no cloud-hosted callback page — the client opens this URL itself and intercepts the final redirect before it reaches the network.
-		 */
-		post: operations['startOAuth']
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/v1/account/password': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		get?: never
-		/**
-		 * Change the password
-		 * @description Replaces the password of the signed-in account and ends every session, this one included. The current password is required as well as the session: an unattended open session should not be enough to lock its owner out.
-		 */
-		put: operations['changePassword']
-		post?: never
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/v1/account/password/reset': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		get?: never
-		put?: never
-		/**
-		 * Request a password reset
-		 * @description Mails a reset code if the address belongs to an account that has a password. The response is identical either way — an endpoint that answered honestly would let anyone test an address list against the user base.
-		 */
-		post: operations['requestPasswordReset']
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/v1/account/password/reset/confirm': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		get?: never
-		put?: never
-		/**
-		 * Set a new password with a reset code
-		 * @description Exchanges a mailed code for a new password and ends every session the account holds, this one included — a reset is the answer to a compromise, and leaving the intruder signed in would defeat it.
-		 */
-		post: operations['completePasswordReset']
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/v1/account/register': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		get?: never
-		put?: never
-		/**
-		 * Create an account
-		 * @description Registers an account and signs it in. The returned token is the session identifier; it is shown once and cannot be recovered.
-		 */
-		post: operations['registerAccount']
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/v1/account/sessions': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		get?: never
-		put?: never
-		/**
-		 * Sign in
-		 * @description Exchanges credentials for a session identifier. Repeated failures throttle the account, not the address they come from.
-		 */
-		post: operations['createSession']
-		/**
-		 * Sign out everywhere
-		 * @description Ends every session the account holds, including this one. Intended for a lost or stolen device.
-		 */
-		delete: operations['deleteAllSessions']
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/v1/account/sessions/current': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		get?: never
-		put?: never
-		post?: never
-		/**
-		 * Sign out
-		 * @description Ends the session used to make this call. Revocation is immediate: the identifier is deleted, not denylisted.
-		 */
-		delete: operations['deleteCurrentSession']
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/v1/health': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		/**
-		 * Service health
-		 * @description Reports liveness and the build the process is running.
-		 */
-		get: operations['getHealth']
-		put?: never
-		post?: never
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
+    "/v1/account/email/verification": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Send a confirmation code
+         * @description Mails a fresh 6-digit code to the signed-in account's own address. Takes no email parameter on purpose: the session already says who is asking, so the endpoint cannot be used to probe which addresses are registered.
+         */
+        post: operations["sendEmailVerification"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/account/email/verification/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Confirm the email address
+         * @description Spends a code and marks the address confirmed. Idempotent: confirming an already-confirmed address returns the account unchanged rather than an error.
+         */
+        post: operations["confirmEmail"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/account/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Current account
+         * @description Returns the signed-in account. Read from the database rather than from the session, so a change of role or name is visible immediately.
+         */
+        get: operations["getCurrentAccount"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/account/oauth/providers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Available OAuth providers
+         * @description Lists providers this deployment has real credentials for.
+         */
+        get: operations["listOAuthProviders"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/account/oauth/{provider}/callback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Complete OAuth sign-in
+         * @description Exchanges an intercepted redirect for a session. Creates the account on first sign-in; refuses to link a provider to an email that already has an account under a different method.
+         */
+        post: operations["completeOAuth"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/account/oauth/{provider}/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Start OAuth sign-in
+         * @description Returns the provider's consent URL. There is no cloud-hosted callback page — the client opens this URL itself and intercepts the final redirect before it reaches the network.
+         */
+        post: operations["startOAuth"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/account/password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Change the password
+         * @description Replaces the password of the signed-in account and ends every session, this one included. The current password is required as well as the session: an unattended open session should not be enough to lock its owner out.
+         */
+        put: operations["changePassword"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/account/password/reset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Request a password reset
+         * @description Mails a reset code if the address belongs to an account that has a password. The response is identical either way — an endpoint that answered honestly would let anyone test an address list against the user base.
+         */
+        post: operations["requestPasswordReset"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/account/password/reset/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Set a new password with a reset code
+         * @description Exchanges a mailed code for a new password and ends every session the account holds, this one included — a reset is the answer to a compromise, and leaving the intruder signed in would defeat it.
+         */
+        post: operations["completePasswordReset"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/account/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create an account
+         * @description Registers an account and mails a confirmation code. The returned token is the session identifier; it is shown once and cannot be recovered. Until the code is spent the session is restricted: it reaches only this account's own profile, the confirmation endpoints and sign-out, and every other operation answers 403.
+         */
+        post: operations["registerAccount"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/account/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sign in
+         * @description Exchanges credentials for a session identifier. Repeated failures throttle the account, not the address they come from.
+         */
+        post: operations["createSession"];
+        /**
+         * Sign out everywhere
+         * @description Ends every session the account holds, including this one. Intended for a lost or stolen device.
+         */
+        delete: operations["deleteAllSessions"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/account/sessions/current": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Sign out
+         * @description Ends the session used to make this call. Revocation is immediate: the identifier is deleted, not denylisted.
+         */
+        delete: operations["deleteCurrentSession"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Service health
+         * @description Reports liveness and the build the process is running.
+         */
+        get: operations["getHealth"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
-export type webhooks = Record<string, never>
+export type webhooks = Record<string, never>;
 export interface components {
-	schemas: {
-		AcceptedOutputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/AcceptedOutputBody.json
-			 */
-			readonly $schema?: string
-			/** @description Human-readable confirmation that the request was accepted. */
-			message: string
-		}
-		Body: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/Body.json
-			 */
-			readonly $schema?: string
-			/**
-			 * Format: date-time
-			 * @description When the account was created.
-			 */
-			created_at: string
-			/** @description Name shown to other users. */
-			display_name: string
-			/**
-			 * Format: email
-			 * @description The account's normalised address.
-			 */
-			email: string
-			/** @description Whether the address has been confirmed. */
-			email_verified: boolean
-			/**
-			 * Format: uuid
-			 * @description Stable account identifier.
-			 */
-			id: string
-			/**
-			 * @description Permission level.
-			 * @enum {string}
-			 */
-			role: 'user' | 'moderator' | 'admin'
-		}
-		ChangePasswordInputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/ChangePasswordInputBody.json
-			 */
-			readonly $schema?: string
-			/** @description The password in use now. Required even though the session proves identity. */
-			current_password: string
-			/** @description The replacement. Same rules as registration. */
-			new_password: string
-		}
-		ClientRequirements: {
-			/**
-			 * @description Oldest client build allowed to use cloud features. Empty means no minimum is enforced.
-			 * @example 1.2.0
-			 */
-			min_supported?: string
-			/**
-			 * @description Newest available build, for a non-blocking update hint. Empty means no hint.
-			 * @example 1.4.0
-			 */
-			recommended?: string
-			/**
-			 * @description Where to send the user to update. Always present when min_supported is set.
-			 * @example https://mediary.example/download
-			 */
-			update_url?: string
-		}
-		CompletePasswordResetInputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/CompletePasswordResetInputBody.json
-			 */
-			readonly $schema?: string
-			/** @description The 6-digit code from the reset email. */
-			code: string
-			/**
-			 * Format: email
-			 * @description The address the code was sent to.
-			 */
-			email: string
-			/** @description The new password. Same rules as registration. */
-			password: string
-		}
-		ConfirmEmailInputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/ConfirmEmailInputBody.json
-			 */
-			readonly $schema?: string
-			/** @description The 6-digit code from the confirmation email. */
-			code: string
-		}
-		ErrorDetail: {
-			/** @description Where the error occurred, e.g. 'body.items[3].tags' or 'path.thing-id' */
-			location?: string
-			/** @description Error message text */
-			message?: string
-			/** @description The value at the given location */
-			value?: unknown
-		}
-		ErrorModel: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/ErrorModel.json
-			 */
-			readonly $schema?: string
-			/**
-			 * @description A human-readable explanation specific to this occurrence of the problem.
-			 * @example Property foo is required but is missing.
-			 */
-			detail?: string
-			/** @description Optional list of individual error details */
-			errors?: components['schemas']['ErrorDetail'][] | null
-			/**
-			 * Format: uri
-			 * @description A URI reference that identifies the specific occurrence of the problem.
-			 * @example https://example.com/error-log/abc123
-			 */
-			instance?: string
-			/**
-			 * Format: int64
-			 * @description HTTP status code
-			 * @example 400
-			 */
-			status?: number
-			/**
-			 * @description A short, human-readable summary of the problem type. This value should not change between occurrences of the error.
-			 * @example Bad Request
-			 */
-			title?: string
-			/**
-			 * Format: uri
-			 * @description A URI reference to human-readable documentation for the error.
-			 * @default about:blank
-			 * @example https://example.com/errors/example
-			 */
-			type: string
-		}
-		HealthOutputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/HealthOutputBody.json
-			 */
-			readonly $schema?: string
-			/**
-			 * @description Build timestamp.
-			 * @example 2026-08-27T12:00:00Z
-			 */
-			built: string
-			/** @description Which client builds this deployment serves. */
-			client: components['schemas']['ClientRequirements']
-			/**
-			 * @description Git commit the build came from.
-			 * @example abc1234
-			 */
-			commit: string
-			/**
-			 * @description Service status.
-			 * @example ok
-			 */
-			status: string
-			/**
-			 * @description Semantic version of the running build.
-			 * @example 0.1.0
-			 */
-			version: string
-		}
-		LoginInputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/LoginInputBody.json
-			 */
-			readonly $schema?: string
-			/**
-			 * Format: email
-			 * @description The account's address.
-			 */
-			email: string
-			/** @description The account's password. */
-			password: string
-		}
-		OAuthCallbackInputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/OAuthCallbackInputBody.json
-			 */
-			readonly $schema?: string
-			/** @description Authorization code from the provider's redirect. */
-			code: string
-			/** @description The state value returned alongside the code. */
-			state: string
-		}
-		OAuthProvidersOutputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/OAuthProvidersOutputBody.json
-			 */
-			readonly $schema?: string
-			/** @description OAuth providers available on this deployment, e.g. ["google"]. */
-			providers: string[] | null
-		}
-		OAuthStartOutputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/OAuthStartOutputBody.json
-			 */
-			readonly $schema?: string
-			/** @description Open this in a browser to begin the provider's consent flow. */
-			url: string
-		}
-		RegisterInputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/RegisterInputBody.json
-			 */
-			readonly $schema?: string
-			/** @description Name shown to other users. Must be unique, ignoring case. */
-			display_name: string
-			/**
-			 * Format: email
-			 * @description Address to register. Stored lowercased.
-			 */
-			email: string
-			/** @description At least 10 characters. No composition rules — length is what makes a password hard to guess. */
-			password: string
-		}
-		RequestPasswordResetInputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/RequestPasswordResetInputBody.json
-			 */
-			readonly $schema?: string
-			/**
-			 * Format: email
-			 * @description Address to send a reset code to.
-			 */
-			email: string
-		}
-		RevokedOutputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/RevokedOutputBody.json
-			 */
-			readonly $schema?: string
-			/**
-			 * Format: int64
-			 * @description Number of sessions ended, including the current one.
-			 */
-			revoked: number
-		}
-		SessionBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/SessionBody.json
-			 */
-			readonly $schema?: string
-			/**
-			 * Format: date-time
-			 * @description Absolute deadline. Activity extends the idle window, never this.
-			 */
-			expires_at: string
-			/** @description Opaque session identifier. Send it as 'Authorization: Bearer <token>'. */
-			token: string
-			/** @description The signed-in account. */
-			user: components['schemas']['Body']
-		}
-	}
-	responses: never
-	parameters: never
-	requestBodies: never
-	headers: never
-	pathItems: never
+    schemas: {
+        AcceptedOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/AcceptedOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Human-readable confirmation that the request was accepted. */
+            message: string;
+        };
+        Body: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/Body.json
+             */
+            readonly $schema?: string;
+            /**
+             * Format: date-time
+             * @description When the account was created.
+             */
+            created_at: string;
+            /** @description Name shown to other users. */
+            display_name: string;
+            /**
+             * Format: email
+             * @description The account's normalised address.
+             */
+            email: string;
+            /** @description Whether the address has been confirmed. */
+            email_verified: boolean;
+            /**
+             * Format: uuid
+             * @description Stable account identifier.
+             */
+            id: string;
+            /**
+             * @description Permission level.
+             * @enum {string}
+             */
+            role: "user" | "moderator" | "admin";
+        };
+        ChangePasswordInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/ChangePasswordInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description The password in use now. Required even though the session proves identity. */
+            current_password: string;
+            /** @description The replacement. Same rules as registration. */
+            new_password: string;
+        };
+        ClientRequirements: {
+            /**
+             * @description Oldest client build allowed to use cloud features. Empty means no minimum is enforced.
+             * @example 1.2.0
+             */
+            min_supported?: string;
+            /**
+             * @description Newest available build, for a non-blocking update hint. Empty means no hint.
+             * @example 1.4.0
+             */
+            recommended?: string;
+            /**
+             * @description Where to send the user to update. Always present when min_supported is set.
+             * @example https://mediary.example/download
+             */
+            update_url?: string;
+        };
+        CompletePasswordResetInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/CompletePasswordResetInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description The 6-digit code from the reset email. */
+            code: string;
+            /**
+             * Format: email
+             * @description The address the code was sent to.
+             */
+            email: string;
+            /** @description The new password. Same rules as registration. */
+            password: string;
+        };
+        ConfirmEmailInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/ConfirmEmailInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description The 6-digit code from the confirmation email. */
+            code: string;
+        };
+        ErrorDetail: {
+            /** @description Where the error occurred, e.g. 'body.items[3].tags' or 'path.thing-id' */
+            location?: string;
+            /** @description Error message text */
+            message?: string;
+            /** @description The value at the given location */
+            value?: unknown;
+        };
+        ErrorModel: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/ErrorModel.json
+             */
+            readonly $schema?: string;
+            /**
+             * @description A human-readable explanation specific to this occurrence of the problem.
+             * @example Property foo is required but is missing.
+             */
+            detail?: string;
+            /** @description Optional list of individual error details */
+            errors?: components["schemas"]["ErrorDetail"][] | null;
+            /**
+             * Format: uri
+             * @description A URI reference that identifies the specific occurrence of the problem.
+             * @example https://example.com/error-log/abc123
+             */
+            instance?: string;
+            /**
+             * Format: int64
+             * @description HTTP status code
+             * @example 400
+             */
+            status?: number;
+            /**
+             * @description A short, human-readable summary of the problem type. This value should not change between occurrences of the error.
+             * @example Bad Request
+             */
+            title?: string;
+            /**
+             * Format: uri
+             * @description A URI reference to human-readable documentation for the error.
+             * @default about:blank
+             * @example https://example.com/errors/example
+             */
+            type: string;
+        };
+        HealthOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/HealthOutputBody.json
+             */
+            readonly $schema?: string;
+            /**
+             * @description Build timestamp.
+             * @example 2026-08-27T12:00:00Z
+             */
+            built: string;
+            /** @description Which client builds this deployment serves. */
+            client: components["schemas"]["ClientRequirements"];
+            /**
+             * @description Git commit the build came from.
+             * @example abc1234
+             */
+            commit: string;
+            /**
+             * @description Service status.
+             * @example ok
+             */
+            status: string;
+            /**
+             * @description Semantic version of the running build.
+             * @example 0.1.0
+             */
+            version: string;
+        };
+        LoginInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/LoginInputBody.json
+             */
+            readonly $schema?: string;
+            /**
+             * Format: email
+             * @description The account's address.
+             */
+            email: string;
+            /** @description The account's password. */
+            password: string;
+        };
+        OAuthCallbackInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/OAuthCallbackInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Authorization code from the provider's redirect. */
+            code: string;
+            /** @description The state value returned alongside the code. */
+            state: string;
+        };
+        OAuthProvidersOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/OAuthProvidersOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description OAuth providers available on this deployment, e.g. ["google"]. */
+            providers: string[] | null;
+        };
+        OAuthStartOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/OAuthStartOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Open this in a browser to begin the provider's consent flow. */
+            url: string;
+        };
+        RegisterInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/RegisterInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Name shown to other users. Must be unique, ignoring case. */
+            display_name: string;
+            /**
+             * Format: email
+             * @description Address to register. Stored lowercased.
+             */
+            email: string;
+            /** @description At least 10 characters. No composition rules — length is what makes a password hard to guess. */
+            password: string;
+        };
+        RequestPasswordResetInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/RequestPasswordResetInputBody.json
+             */
+            readonly $schema?: string;
+            /**
+             * Format: email
+             * @description Address to send a reset code to.
+             */
+            email: string;
+        };
+        RevokedOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/RevokedOutputBody.json
+             */
+            readonly $schema?: string;
+            /**
+             * Format: int64
+             * @description Number of sessions ended, including the current one.
+             */
+            revoked: number;
+        };
+        SessionBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/SessionBody.json
+             */
+            readonly $schema?: string;
+            /**
+             * Format: date-time
+             * @description Absolute deadline. Activity extends the idle window, never this.
+             */
+            expires_at: string;
+            /** @description Opaque session identifier. Send it as 'Authorization: Bearer <token>'. */
+            token: string;
+            /** @description The signed-in account. */
+            user: components["schemas"]["Body"];
+        };
+    };
+    responses: never;
+    parameters: never;
+    requestBodies: never;
+    headers: never;
+    pathItems: never;
 }
-export type SchemaAcceptedOutputBody = components['schemas']['AcceptedOutputBody']
-export type SchemaBody = components['schemas']['Body']
-export type SchemaChangePasswordInputBody = components['schemas']['ChangePasswordInputBody']
-export type SchemaClientRequirements = components['schemas']['ClientRequirements']
-export type SchemaCompletePasswordResetInputBody = components['schemas']['CompletePasswordResetInputBody']
-export type SchemaConfirmEmailInputBody = components['schemas']['ConfirmEmailInputBody']
-export type SchemaErrorDetail = components['schemas']['ErrorDetail']
-export type SchemaErrorModel = components['schemas']['ErrorModel']
-export type SchemaHealthOutputBody = components['schemas']['HealthOutputBody']
-export type SchemaLoginInputBody = components['schemas']['LoginInputBody']
-export type SchemaOAuthCallbackInputBody = components['schemas']['OAuthCallbackInputBody']
-export type SchemaOAuthProvidersOutputBody = components['schemas']['OAuthProvidersOutputBody']
-export type SchemaOAuthStartOutputBody = components['schemas']['OAuthStartOutputBody']
-export type SchemaRegisterInputBody = components['schemas']['RegisterInputBody']
-export type SchemaRequestPasswordResetInputBody = components['schemas']['RequestPasswordResetInputBody']
-export type SchemaRevokedOutputBody = components['schemas']['RevokedOutputBody']
-export type SchemaSessionBody = components['schemas']['SessionBody']
-export type $defs = Record<string, never>
+export type SchemaAcceptedOutputBody = components['schemas']['AcceptedOutputBody'];
+export type SchemaBody = components['schemas']['Body'];
+export type SchemaChangePasswordInputBody = components['schemas']['ChangePasswordInputBody'];
+export type SchemaClientRequirements = components['schemas']['ClientRequirements'];
+export type SchemaCompletePasswordResetInputBody = components['schemas']['CompletePasswordResetInputBody'];
+export type SchemaConfirmEmailInputBody = components['schemas']['ConfirmEmailInputBody'];
+export type SchemaErrorDetail = components['schemas']['ErrorDetail'];
+export type SchemaErrorModel = components['schemas']['ErrorModel'];
+export type SchemaHealthOutputBody = components['schemas']['HealthOutputBody'];
+export type SchemaLoginInputBody = components['schemas']['LoginInputBody'];
+export type SchemaOAuthCallbackInputBody = components['schemas']['OAuthCallbackInputBody'];
+export type SchemaOAuthProvidersOutputBody = components['schemas']['OAuthProvidersOutputBody'];
+export type SchemaOAuthStartOutputBody = components['schemas']['OAuthStartOutputBody'];
+export type SchemaRegisterInputBody = components['schemas']['RegisterInputBody'];
+export type SchemaRequestPasswordResetInputBody = components['schemas']['RequestPasswordResetInputBody'];
+export type SchemaRevokedOutputBody = components['schemas']['RevokedOutputBody'];
+export type SchemaSessionBody = components['schemas']['SessionBody'];
+export type $defs = Record<string, never>;
 export interface operations {
-	sendEmailVerification: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			/** @description Accepted */
-			202: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['AcceptedOutputBody']
-				}
-			}
-			/** @description Unauthorized */
-			401: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-			/** @description Conflict */
-			409: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-			/** @description Too Many Requests */
-			429: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-			/** @description Internal Server Error */
-			500: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	confirmEmail: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['ConfirmEmailInputBody']
-			}
-		}
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['Body']
-				}
-			}
-			/** @description Unauthorized */
-			401: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-			/** @description Unprocessable Entity */
-			422: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-			/** @description Internal Server Error */
-			500: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	getCurrentAccount: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['Body']
-				}
-			}
-			/** @description Unauthorized */
-			401: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-			/** @description Internal Server Error */
-			500: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	listOAuthProviders: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['OAuthProvidersOutputBody']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	completeOAuth: {
-		parameters: {
-			query?: never
-			header?: {
-				/** @description Recorded with the session so a user can recognise it later. */
-				'User-Agent'?: string
-			}
-			path: {
-				/** @description Must match the provider OAuthStart was called with. */
-				provider: string
-			}
-			cookie?: never
-		}
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['OAuthCallbackInputBody']
-			}
-		}
-		responses: {
-			/** @description Created */
-			201: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['SessionBody']
-				}
-			}
-			/** @description Unauthorized */
-			401: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-			/** @description Not Found */
-			404: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-			/** @description Conflict */
-			409: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-			/** @description Unprocessable Entity */
-			422: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-			/** @description Internal Server Error */
-			500: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-			/** @description Bad Gateway */
-			502: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	startOAuth: {
-		parameters: {
-			query?: never
-			header?: never
-			path: {
-				/** @description OAuth provider identifier, e.g. "google". */
-				provider: string
-			}
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['OAuthStartOutputBody']
-				}
-			}
-			/** @description Not Found */
-			404: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-			/** @description Unprocessable Entity */
-			422: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-			/** @description Internal Server Error */
-			500: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	changePassword: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['ChangePasswordInputBody']
-			}
-		}
-		responses: {
-			/** @description No Content */
-			204: {
-				headers: {
-					[name: string]: unknown
-				}
-				content?: never
-			}
-			/** @description Unauthorized */
-			401: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-			/** @description Conflict */
-			409: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-			/** @description Unprocessable Entity */
-			422: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-			/** @description Internal Server Error */
-			500: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	requestPasswordReset: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['RequestPasswordResetInputBody']
-			}
-		}
-		responses: {
-			/** @description Accepted */
-			202: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['AcceptedOutputBody']
-				}
-			}
-			/** @description Unprocessable Entity */
-			422: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-			/** @description Too Many Requests */
-			429: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-			/** @description Internal Server Error */
-			500: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	completePasswordReset: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['CompletePasswordResetInputBody']
-			}
-		}
-		responses: {
-			/** @description No Content */
-			204: {
-				headers: {
-					[name: string]: unknown
-				}
-				content?: never
-			}
-			/** @description Unauthorized */
-			401: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-			/** @description Unprocessable Entity */
-			422: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-			/** @description Internal Server Error */
-			500: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	registerAccount: {
-		parameters: {
-			query?: never
-			header?: {
-				/** @description Recorded with the session so a user can recognise it later. */
-				'User-Agent'?: string
-			}
-			path?: never
-			cookie?: never
-		}
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['RegisterInputBody']
-			}
-		}
-		responses: {
-			/** @description Created */
-			201: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['SessionBody']
-				}
-			}
-			/** @description Unprocessable Entity */
-			422: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-			/** @description Too Many Requests */
-			429: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-			/** @description Internal Server Error */
-			500: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	createSession: {
-		parameters: {
-			query?: never
-			header?: {
-				/** @description Recorded with the session so a user can recognise it later. */
-				'User-Agent'?: string
-			}
-			path?: never
-			cookie?: never
-		}
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['LoginInputBody']
-			}
-		}
-		responses: {
-			/** @description Created */
-			201: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['SessionBody']
-				}
-			}
-			/** @description Unauthorized */
-			401: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-			/** @description Forbidden */
-			403: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-			/** @description Unprocessable Entity */
-			422: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-			/** @description Too Many Requests */
-			429: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-			/** @description Internal Server Error */
-			500: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	deleteAllSessions: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['RevokedOutputBody']
-				}
-			}
-			/** @description Unauthorized */
-			401: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-			/** @description Internal Server Error */
-			500: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	deleteCurrentSession: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			/** @description No Content */
-			204: {
-				headers: {
-					[name: string]: unknown
-				}
-				content?: never
-			}
-			/** @description Unauthorized */
-			401: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-			/** @description Internal Server Error */
-			500: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	getHealth: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['HealthOutputBody']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
+    sendEmailVerification: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AcceptedOutputBody"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    confirmEmail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfirmEmailInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Body"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getCurrentAccount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Body"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listOAuthProviders: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OAuthProvidersOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    completeOAuth: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Recorded with the session so a user can recognise it later. */
+                "User-Agent"?: string;
+            };
+            path: {
+                /** @description Must match the provider OAuthStart was called with. */
+                provider: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OAuthCallbackInputBody"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionBody"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Bad Gateway */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    startOAuth: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description OAuth provider identifier, e.g. "google". */
+                provider: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OAuthStartOutputBody"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    changePassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangePasswordInputBody"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    requestPasswordReset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequestPasswordResetInputBody"];
+            };
+        };
+        responses: {
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AcceptedOutputBody"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    completePasswordReset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompletePasswordResetInputBody"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    registerAccount: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Recorded with the session so a user can recognise it later. */
+                "User-Agent"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterInputBody"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionBody"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    createSession: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Recorded with the session so a user can recognise it later. */
+                "User-Agent"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginInputBody"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionBody"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    deleteAllSessions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RevokedOutputBody"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    deleteCurrentSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getHealth: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HealthOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
 }

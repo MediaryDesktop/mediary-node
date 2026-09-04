@@ -3,7 +3,6 @@ import { useUnit } from 'effector-react'
 import { useCallback, useEffect } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { useGoBack } from '@shared/lib'
 
 import { sessionModel } from '@entities/session'
 
@@ -12,7 +11,6 @@ import { AuthFormWrapper, AuthLayout, AuthVerifyEmailPanel, CODE_LENGTH } from '
 export function VerifyEmailPage() {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
-	const goBack = useGoBack('/')
 	const account = useUnit(sessionModel.$account)
 
 	useEffect(() => {
@@ -28,8 +26,13 @@ export function VerifyEmailPage() {
 
 	useEffect(() => sessionModel.emailVerified.watch(() => navigate({ to: '/' })), [navigate])
 
+	const leave = useCallback(() => {
+		sessionModel.signOutRequested()
+		void navigate({ to: '/sign-in' })
+	}, [navigate])
+
 	return (
-		<AuthLayout onBack={goBack}>
+		<AuthLayout onBack={leave}>
 			<AuthFormWrapper
 				eyebrow={t('auth.verify.eyebrow')}
 				title={t('auth.verify.title')}
@@ -38,7 +41,7 @@ export function VerifyEmailPage() {
 					length: CODE_LENGTH
 				})}
 			>
-				<AuthVerifyEmailPanel onLater={useCallback(() => navigate({ to: '/' }), [navigate])} />
+				<AuthVerifyEmailPanel />
 			</AuthFormWrapper>
 		</AuthLayout>
 	)

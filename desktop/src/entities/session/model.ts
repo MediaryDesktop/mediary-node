@@ -22,6 +22,10 @@ import type { Account, ConfirmEmailInput, LoginInput, RegisterInput, Session } f
 
 export const accountQuery = createQuery({ effect: fetchAccountFx, name: 'account' })
 
+export function landingRoute(account: Account) {
+	return account.email_verified ? '/' : '/verify-email'
+}
+
 export const oauthProvidersQuery = createQuery({ effect: fetchOAuthProvidersFx, name: 'oauthProviders' })
 
 export const sessionModel = atom(() => {
@@ -40,6 +44,8 @@ export const sessionModel = atom(() => {
 	const sessionExpired = createEvent()
 
 	const emailVerified = createEvent<Account>()
+
+	const $verificationCodeSent = createStore(false)
 
 	const $account = createStore<Account | null>(null)
 	const $isAuthenticated = $account.map(account => account !== null)
@@ -103,6 +109,10 @@ export const sessionModel = atom(() => {
 	sessionExpired.watch(() => setCloudSession(null))
 	sample({ clock: sessionExpired, target: signedOut })
 
+	$verificationCodeSent
+		.on([signUpFx.doneData, emailVerificationRequested], () => true)
+		.reset(signedOut, emailVerified)
+
 	$account
 		.on(authenticated, (_, account) => account)
 		.on(emailVerified, (_, account) => account)
@@ -133,6 +143,7 @@ export const sessionModel = atom(() => {
 
 		$account,
 		$isAuthenticated,
+		$verificationCodeSent,
 		$pending,
 		$signInPending: signInFx.pending,
 		$signUpPending: signUpFx.pending,

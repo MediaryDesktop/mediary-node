@@ -1,9 +1,9 @@
 import { useTranslation } from '@shared/i18n'
 
-import { AuthLink } from './AuthLink'
+import { AuthLink } from '../common'
+import { SignInForm, SignUpForm } from '../form'
+
 import panel from './AuthPanel.module.scss'
-import { SignInForm } from './SignInForm'
-import { SignUpForm } from './SignUpForm'
 
 export interface AuthEmailPanelProps {
 	mode: 'signIn' | 'signUp'
