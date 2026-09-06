@@ -22,7 +22,7 @@ export function SetupLayout({ rail, children, footer, caption }: SetupLayoutProp
 			<div className={styles.glow} />
 
 			<header className={styles.head}>
-				<Logo size={52} markOnly />
+				<Logo markOnly />
 				<p className={styles.note}>{t('setup.note')}</p>
 			</header>
 

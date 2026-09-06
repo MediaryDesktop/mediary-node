@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react'
 
-import { useTheme } from '@shared/style/theme'
+import { useSurfaceTheme } from '@shared/style/theme'
 import { Toaster } from '@shared/ui'
 
 export function AppProviders({ children }: { children: ReactNode }) {
-	const theme = useTheme()
+	const theme = useSurfaceTheme()
 
 	return (
 		<>

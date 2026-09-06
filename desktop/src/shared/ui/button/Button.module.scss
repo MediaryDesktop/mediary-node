@@ -69,6 +69,11 @@
 		}
 	}
 
+	&.glass-accent{
+		background: var(--accent-muted);
+		border-color: var(--accent);
+	}
+
 	&.ghost {
 		background: transparent;
 		color: var(--text-secondary);

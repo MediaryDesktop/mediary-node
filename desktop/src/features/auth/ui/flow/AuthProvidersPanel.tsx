@@ -44,7 +44,8 @@ export function AuthProvidersPanel({ mode, onUseEmail, onSwitch }: AuthProviders
 									)}
 
 									<Button
-										variant='glass'
+										variant='glass-accent'
+										
 										fullWidth
 										loading={pending === provider}
 										disabled={pending !== null}

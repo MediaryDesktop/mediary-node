@@ -9,7 +9,7 @@ $accent-700: #cb1010;
 $accent-800: #a11212;
 $accent-900: #781111;
 
-$accent-rgb: 254, 54, 53;
+$accent-rgb: 229, 9, 20;
 
 :root {
 	color-scheme: light;
@@ -42,12 +42,12 @@ $accent-rgb: 254, 54, 53;
 	--accent: #{$accent-500};
 	--accent-hover: #{$accent-600};
 	--accent-active: #{$accent-700};
-	--accent-text: #d61312;
+	--accent-text: #{$accent-500};
 	--accent-muted: rgba(#{$accent-rgb}, 0.1);
 	--accent-muted-hover: rgba(#{$accent-rgb}, 0.16);
 	--accent-border: rgba(#{$accent-rgb}, 0.32);
 	--accent-on-muted: #{$accent-800};
-	--accent-gradient: linear-gradient(96deg, #{$accent-400} 0%, #{$accent-500} 52%, #{$accent-700} 100%);
+	--accent-gradient: linear-gradient(90deg, #{$accent-50} 0%, #{$accent-500} 0%, #{$accent-50} 100%);
 
 	--focus-ring: rgba(#{$accent-rgb}, 0.45);
 	--focus-shadow: 0 0 0 3px var(--focus-ring);
@@ -96,7 +96,7 @@ $accent-rgb: 254, 54, 53;
 
 	--field: rgba(255, 255, 255, 0.04);
 	--field-hover: rgba(255, 255, 255, 0.06);
-	--glass: rgba(20, 20, 28, 0.62);
+	--glass: rgba(69, 69, 69, 0.132);
 	--glass-border: rgba(255, 255, 255, 0.09);
 
 	--text: #f4f4f5;
@@ -112,12 +112,12 @@ $accent-rgb: 254, 54, 53;
 	--accent: #{$accent-500};
 	--accent-hover: #ff5c56;
 	--accent-active: #e5211f;
-	--accent-text: #ff6b63;
+	--accent-text: #{$accent-500};
 	--accent-muted: rgba(#{$accent-rgb}, 0.16);
 	--accent-muted-hover: rgba(#{$accent-rgb}, 0.24);
 	--accent-border: rgba(#{$accent-rgb}, 0.4);
 	--accent-on-muted: #ff8a84;
-	--accent-gradient: linear-gradient(96deg, #ff8a84 0%, #{$accent-500} 52%, #{$accent-600} 100%);
+	--accent-gradient: linear-gradient(90deg, #{$accent-50} 0%, #{$accent-500} 0%, #{$accent-50} 100%);
 
 	--focus-ring: rgba(#{$accent-rgb}, 0.55);
 

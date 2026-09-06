@@ -1,24 +1,16 @@
-import clsx from 'clsx'
 import type { ReactNode } from 'react'
 
 import styles from './AuthLink.module.scss'
 
 export interface AuthLinkProps {
 	onClick: () => void
-	tone?: 'accent' | 'muted'
 	disabled?: boolean
-	className?: string
 	children: ReactNode
 }
 
-export function AuthLink({ onClick, tone = 'accent', disabled = false, className, children }: AuthLinkProps) {
+export function AuthLink({ onClick, disabled = false, children }: AuthLinkProps) {
 	return (
-		<button
-			type='button'
-			className={clsx(styles.link, tone === 'muted' && styles.muted, className)}
-			disabled={disabled}
-			onClick={onClick}
-		>
+		<button type='button' className={styles.link} disabled={disabled} onClick={onClick}>
 			{children}
 		</button>
 	)

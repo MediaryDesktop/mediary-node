@@ -3,7 +3,7 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react'
 
 import styles from './button.module.scss'
 
-export type ButtonVariant = 'primary' | 'secondary' | 'glass' | 'ghost'
+export type ButtonVariant = 'primary' | 'secondary' | 'glass' | 'glass-accent' | 'ghost'
 
 export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
 	variant?: ButtonVariant

@@ -93,11 +93,12 @@
 		max-height: calc(100dvh - 6rem);
 		overflow: hidden;
 		padding: 2rem;
-		border: 1px solid var(--glass-border);
 		border-radius: var(--radius-lg);
-		background: var(--glass);
-		backdrop-filter: blur(18px);
-		box-shadow: var(--shadow-lg);
+		background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+		backdrop-filter: blur(10px);
+		-webkit-backdrop-filter: blur(10px);
+		border: 1px solid rgba(255, 255, 255, 0.18);
+		box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 	}
 
 	.back {
