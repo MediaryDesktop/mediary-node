@@ -121,15 +121,13 @@ export const en = {
 			passwordRequired: 'Enter your password',
 			passwordTooShort: 'Password must be at least {{min}} characters',
 			passwordTooLong: 'Password must be at most {{max}} characters',
+			passwordLength: 'Password must be {{min}} to {{max}} characters',
 			passwordEchoesIdentity: 'The password must not repeat your email or name',
 			confirmationRequired: 'Repeat the password',
 			confirmationMismatch: 'The passwords do not match',
 			codeRequired: 'Enter the code from the email',
 			codeIncomplete: 'The code is {{length}} digits long',
-			fieldRequired: 'Fill in the “{{field}}” field',
-			fieldInvalid: 'Check the “{{field}}” field',
-			fieldTooShort: '“{{field}}” must be at least {{min}} characters',
-			fieldTooLong: '“{{field}}” must be at most {{max}} characters'
+			fieldInvalid: 'Check the “{{field}}” field'
 		},
 		error: {
 			cloudUnreachable: 'Could not reach the cloud',

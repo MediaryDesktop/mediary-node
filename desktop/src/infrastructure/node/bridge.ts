@@ -1,6 +1,6 @@
 import { createEffect, createEvent, createStore, sample } from 'effector'
 
-import type { NodeConnection, NodeState } from './bridge-types'
+import type { NodeConnection, NodeState } from '@shared/bridge'
 
 export const nodeBridgeMounted = createEvent()
 
@@ -22,6 +22,12 @@ export const $nodeState = createStore<NodeState>('stopped')
 export const $nodeReady = $nodeState.map(state => state === 'ready')
 
 sample({ clock: nodeBridgeMounted, target: [readNodeConnectionFx, readNodeStateFx] })
+
+sample({
+	clock: nodeStateChanged,
+	filter: (state: NodeState) => state === 'ready',
+	target: readNodeConnectionFx
+})
 
 export function subscribeToNodeState(): () => void {
 	return window.mediary.node.onStateChange(state => nodeStateChanged(state))

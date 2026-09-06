@@ -1,6 +1,8 @@
 import { contextBridge, ipcRenderer } from 'electron'
 
 import { IPC } from '../shared/ipc.js'
+import type { OAuthAuthorization, OAuthListener } from '../shared/oauth.js'
+import type { StoredSession } from '../shared/session.js'
 
 const api = {
 	node: {
@@ -22,8 +24,19 @@ const api = {
 	},
 
 	oauth: {
+		prepare: (): Promise<OAuthListener> => ipcRenderer.invoke(IPC.oauthPrepare),
+
 		authorize: (consentUrl: string): Promise<OAuthAuthorization> =>
-			ipcRenderer.invoke(IPC.oauthAuthorize, consentUrl)
+			ipcRenderer.invoke(IPC.oauthAuthorize, consentUrl),
+
+		release: (): Promise<void> => ipcRenderer.invoke(IPC.oauthRelease)
+	},
+
+	session: {
+		canPersist: (): Promise<boolean> => ipcRenderer.invoke(IPC.sessionCanPersist),
+		read: (): Promise<StoredSession | null> => ipcRenderer.invoke(IPC.sessionRead),
+		write: (session: StoredSession): Promise<void> => ipcRenderer.invoke(IPC.sessionWrite, session),
+		clear: (): Promise<void> => ipcRenderer.invoke(IPC.sessionClear)
 	},
 
 	window: {
@@ -53,12 +66,8 @@ export interface NodeConnection {
 
 export type NodeState = 'stopped' | 'starting' | 'ready' | 'restarting' | 'failed'
 
-export interface OAuthRedirect {
-	code: string
-	state: string
-}
-
-export type OAuthAuthorization = OAuthRedirect | { cancelled: true }
+export type { OAuthAuthorization, OAuthListener, OAuthRedirect } from '../shared/oauth.js'
+export type { StoredSession } from '../shared/session.js'
 
 export type MediaryBridge = typeof api
 

@@ -10,7 +10,7 @@ import styles from './AuthForm.module.scss'
 
 export function ResetPasswordForm() {
 	const { t } = useTranslation()
-	const [email, pending] = useUnit([resetPasswordForm.email.$value, resetPasswordForm.$pending])
+	const [email, pending] = useUnit([resetPasswordForm.fields.email.$value, resetPasswordForm.$pending])
 
 	const submit = (event: FormEvent) => {
 		event.preventDefault()
@@ -26,7 +26,7 @@ export function ResetPasswordForm() {
 				autoComplete='email'
 				startIcon={<Icon name='common/mail' size={18} />}
 				value={email}
-				onChange={event => resetPasswordForm.email.changed(event.target.value)}
+				onChange={event => resetPasswordForm.fields.email.changed(event.target.value)}
 			/>
 
 			<Button

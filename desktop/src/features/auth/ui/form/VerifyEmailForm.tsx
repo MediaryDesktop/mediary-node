@@ -7,19 +7,20 @@ import { Button, Icon, OtpInput } from '@shared/ui'
 
 import { useOtpCountdown } from '../../hooks'
 import { verifyEmailForm } from '../../model'
-import { CODE_LENGTH, CODE_TTL_SECONDS } from '../../validation'
+import { CODE_LENGTH } from '../../validation'
 import { AuthLink, OtpCountdownTimer } from '../common'
 
 import styles from './AuthForm.module.scss'
 
 export function VerifyEmailForm() {
 	const { t } = useTranslation()
-	const { expired, formatted, restart } = useOtpCountdown(CODE_TTL_SECONDS)
-	const [code, pending, resendPending] = useUnit([
-		verifyEmailForm.code.$value,
+	const [code, pending, resendPending, expiresAt] = useUnit([
+		verifyEmailForm.fields.code.$value,
 		verifyEmailForm.$pending,
-		verifyEmailForm.$resendPending
+		verifyEmailForm.$resendPending,
+		verifyEmailForm.$expiresAt
 	])
+	const { known, expired, formatted } = useOtpCountdown(expiresAt)
 
 	useEffect(() => verifyEmailForm.mounted(), [])
 
@@ -28,10 +29,7 @@ export function VerifyEmailForm() {
 		verifyEmailForm.submitted()
 	}
 
-	const resend = () => {
-		verifyEmailForm.resent()
-		restart()
-	}
+	const resend = () => verifyEmailForm.resent()
 
 	return (
 		<form className={styles.form} onSubmit={submit} noValidate>
@@ -39,9 +37,9 @@ export function VerifyEmailForm() {
 				className={styles.otp}
 				value={code}
 				length={CODE_LENGTH}
-				disabled={expired || pending}
+				disabled={pending}
 				aria-label={t('auth.field.code')}
-				onChange={verifyEmailForm.code.changed}
+				onChange={verifyEmailForm.fields.code.changed}
 			/>
 
 			<Button
@@ -49,7 +47,6 @@ export function VerifyEmailForm() {
 				variant='primary'
 				fullWidth
 				loading={pending}
-				disabled={expired}
 				endIcon={<Icon name='common/arrow-right' size={18} />}
 				className={styles.submit}
 			>
@@ -61,7 +58,7 @@ export function VerifyEmailForm() {
 				<AuthLink onClick={resend} disabled={resendPending}>
 					{t('auth.verify.resend')}
 				</AuthLink>
-				<OtpCountdownTimer expired={expired} formatted={formatted} />
+				{known && <OtpCountdownTimer expired={expired} formatted={formatted} />}
 			</p>
 		</form>
 	)

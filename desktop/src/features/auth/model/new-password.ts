@@ -1,62 +1,39 @@
-import { combine, createEvent, sample } from 'effector'
+import { createEvent, createStore, sample } from 'effector'
 
 import { atom } from '@shared/factory'
 
-import { completePasswordResetFx } from '@entities/session'
+import { completePasswordResetFx, requestPasswordResetFx } from '@entities/session'
+import type { PasswordResetInput } from '@entities/session'
 
-import { notifyFailure, notifyProblems } from '../lib'
 import { validateCode, validatePassword } from '../validation'
 
-import { createField } from './field'
+import { createAuthForm } from './form'
 
 export const newPasswordForm = atom(() => {
-	const code = createField()
-	const password = createField()
-
-	const submitted = createEvent<string>()
-
 	const succeeded = createEvent()
 
-	const $values = combine({ code: code.$value, password: password.$value })
-
-	const checked = sample({
-		clock: submitted,
-		source: $values,
-		fn: (values, email) => ({
-			email,
-			values,
-			problems: [validateCode(values.code), validatePassword(values.password, email, '')].filter(
-				(problem): problem is string => problem !== null
-			)
-		})
-	})
-
-	sample({
-		clock: checked,
-		filter: ({ problems }) => problems.length > 0,
-		fn: ({ problems }) => problems
-	}).watch(notifyProblems)
-
-	sample({
-		clock: checked,
-		filter: ({ problems }) => problems.length === 0,
-		fn: ({ email, values }) => ({
+	const form = createAuthForm<'code' | 'password', PasswordResetInput, string>({
+		fields: ['code', 'password'] as const,
+		validate: (values, email) => [
+			validateCode(values.code),
+			validatePassword(values.password, email, '')
+		],
+		prepare: (values, email) => ({
 			email,
 			code: values.code.trim(),
 			password: values.password
 		}),
-		target: completePasswordResetFx
+		submit: completePasswordResetFx,
+		pending: completePasswordResetFx.pending,
+		failure: completePasswordResetFx.failData
 	})
+
+	const $expiresAt = createStore<string | null>(null).on(
+		requestPasswordResetFx.doneData,
+		(_, accepted) => accepted.expires_at
+	)
 
 	sample({ clock: completePasswordResetFx.done, target: succeeded })
 
-	completePasswordResetFx.failData.watch(notifyFailure)
-
-	return {
-		code,
-		password,
-		submitted,
-		succeeded,
-		$pending: completePasswordResetFx.pending
-	}
+	return { ...form, succeeded, $expiresAt }
 })

@@ -4,7 +4,13 @@ import { join } from 'node:path'
 import { IPC } from '../shared/ipc.js'
 
 import { NodeSupervisor, type SupervisorState } from './node-supervisor.js'
-import { authorizeOAuth } from './oauth.js'
+import { authorizeOAuth, prepareOAuth, releaseOAuthListener } from './oauth.js'
+import {
+	canPersistSession,
+	clearStoredSession,
+	readStoredSession,
+	writeStoredSession
+} from './session-store.js'
 
 const supervisor = new NodeSupervisor({
 	onLog: (line, stream) => {
@@ -71,13 +77,32 @@ function registerIpc(): void {
 	ipcMain.handle(IPC.nodeConnection, () => supervisor.connection)
 	ipcMain.handle(IPC.nodeState, (): SupervisorState => supervisor.currentState)
 	ipcMain.handle(IPC.appVersion, () => app.getVersion())
-	ipcMain.handle(IPC.oauthAuthorize, (event, consentUrl: unknown) => {
+	ipcMain.handle(IPC.oauthPrepare, () => prepareOAuth())
+	ipcMain.handle(IPC.oauthRelease, () => releaseOAuthListener())
+	ipcMain.handle(IPC.oauthAuthorize, (_event, consentUrl: unknown) => {
 		if (typeof consentUrl !== 'string') {
 			throw new TypeError('oauth: the consent URL must be a string')
 		}
 
-		return authorizeOAuth(consentUrl, BrowserWindow.fromWebContents(event.sender))
+		return authorizeOAuth(consentUrl)
 	})
+
+	ipcMain.handle(IPC.sessionCanPersist, () => canPersistSession())
+	ipcMain.handle(IPC.sessionRead, () => readStoredSession())
+	ipcMain.handle(IPC.sessionWrite, (_event, session: unknown) => {
+		if (typeof session !== 'object' || session === null) {
+			throw new TypeError('session: expected a record to store')
+		}
+
+		const { token, account } = session as { token?: unknown; account?: unknown }
+
+		if (token !== null && typeof token !== 'string') {
+			throw new TypeError('session: the token must be a string or null')
+		}
+
+		return writeStoredSession({ token: token ?? null, account: account ?? null })
+	})
+	ipcMain.handle(IPC.sessionClear, () => clearStoredSession())
 
 	ipcMain.handle(IPC.windowMinimize, event => BrowserWindow.fromWebContents(event.sender)?.minimize())
 	ipcMain.handle(IPC.windowToggleMaximize, event => {
@@ -125,6 +150,8 @@ if (!app.requestSingleInstanceLock()) {
 			}
 		})
 	})
+
+	app.on('before-quit', releaseOAuthListener)
 
 	app.on('window-all-closed', () => {
 		if (process.platform !== 'darwin') {

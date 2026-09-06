@@ -8,10 +8,17 @@ import { landingRoute, sessionModel } from '@entities/session'
 
 import { AuthEmailPanel, AuthFormWrapper, AuthLayout } from '@features/auth'
 
-export function SignInEmailPage() {
+import { AUTH_MODES, type AuthMode } from './modes'
+
+export interface AuthEmailPageProps {
+	mode: AuthMode
+}
+
+export function AuthEmailPage({ mode }: AuthEmailPageProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
-	const goBack = useGoBack('/sign-in')
+	const copy = AUTH_MODES[mode]
+	const goBack = useGoBack(copy.providersRoute)
 
 	useEffect(
 		() => sessionModel.authenticated.watch(account => navigate({ to: landingRoute(account) })),
@@ -21,14 +28,17 @@ export function SignInEmailPage() {
 	return (
 		<AuthLayout onBack={goBack}>
 			<AuthFormWrapper
-				eyebrow={t('auth.signIn.eyebrow')}
-				title={t('auth.signIn.emailTitle')}
-				description={t('auth.signIn.emailSubtitle')}
+				eyebrow={t(copy.eyebrow)}
+				title={t(copy.emailTitle)}
+				description={t(copy.emailSubtitle)}
 			>
 				<AuthEmailPanel
-					mode='signIn'
-					onUseProviders={useCallback(() => navigate({ to: '/sign-in' }), [navigate])}
-					onSwitch={useCallback(() => navigate({ to: '/sign-up/email' }), [navigate])}
+					mode={mode}
+					onUseProviders={useCallback(
+						() => navigate({ to: copy.providersRoute }),
+						[navigate, copy]
+					)}
+					onSwitch={useCallback(() => navigate({ to: copy.otherEmailRoute }), [navigate, copy])}
 					onForgotPassword={useCallback(() => navigate({ to: '/reset-password' }), [navigate])}
 				/>
 			</AuthFormWrapper>

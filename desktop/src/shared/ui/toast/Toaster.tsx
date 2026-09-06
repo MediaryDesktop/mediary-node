@@ -1,5 +1,5 @@
-import { Toaster as SonnerToaster } from 'sonner'
 import type { ComponentProps } from 'react'
+import { Toaster as SonnerToaster } from 'sonner'
 
 import styles from './toast.module.scss'
 

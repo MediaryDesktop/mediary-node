@@ -1,49 +1,26 @@
-import { combine, createEvent, sample } from 'effector'
+import { createEvent, sample } from 'effector'
 
 import { atom } from '@shared/factory'
 
 import { requestPasswordResetFx } from '@entities/session'
 
-import { notifyFailure, notifyProblems } from '../lib'
 import { validateEmail } from '../validation'
 
-import { createField } from './field'
+import { createAuthForm } from './form'
 
 export const resetPasswordForm = atom(() => {
-	const email = createField()
-	const submitted = createEvent()
-
 	const sent = createEvent<string>()
 
-	const $values = combine({ email: email.$value })
-
-	const checked = sample({
-		clock: submitted,
-		source: $values,
-		fn: values => ({ values, problems: [validateEmail(values.email)].filter(Boolean) as string[] })
-	})
-
-	sample({
-		clock: checked,
-		filter: ({ problems }) => problems.length > 0,
-		fn: ({ problems }) => problems
-	}).watch(notifyProblems)
-
-	sample({
-		clock: checked,
-		filter: ({ problems }) => problems.length === 0,
-		fn: ({ values }) => ({ email: values.email.trim() }),
-		target: requestPasswordResetFx
+	const form = createAuthForm({
+		fields: ['email'] as const,
+		validate: values => [validateEmail(values.email)],
+		prepare: values => ({ email: values.email.trim() }),
+		submit: requestPasswordResetFx,
+		pending: requestPasswordResetFx.pending,
+		failure: requestPasswordResetFx.failData
 	})
 
 	sample({ clock: requestPasswordResetFx.done, fn: ({ params }) => params.email, target: sent })
 
-	requestPasswordResetFx.failData.watch(notifyFailure)
-
-	return {
-		email,
-		submitted,
-		sent,
-		$pending: requestPasswordResetFx.pending
-	}
+	return { ...form, sent }
 })

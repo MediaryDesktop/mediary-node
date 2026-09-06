@@ -5,7 +5,15 @@ export const IPC = {
 
 	appVersion: 'app:version',
 
+	oauthPrepare: 'oauth:prepare',
 	oauthAuthorize: 'oauth:authorize',
+	oauthRelease: 'oauth:release',
+
+	sessionRead: 'session:read',
+	sessionWrite: 'session:write',
+	sessionClear: 'session:clear',
+	sessionCanPersist: 'session:can-persist',
+
 	windowMinimize: 'window:minimize',
 
 	windowToggleMaximize: 'window:toggle-maximize',

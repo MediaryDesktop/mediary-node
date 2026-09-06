@@ -119,15 +119,13 @@ export const ru: Translation = {
 			passwordRequired: 'Введите пароль',
 			passwordTooShort: 'Пароль не менее {{min}} символов',
 			passwordTooLong: 'Пароль не длиннее {{max}} символов',
+			passwordLength: 'Пароль от {{min}} до {{max}} символов',
 			passwordEchoesIdentity: 'Пароль не должен повторять email или имя',
 			confirmationRequired: 'Повторите пароль',
 			confirmationMismatch: 'Пароли не совпадают',
 			codeRequired: 'Введите код из письма',
 			codeIncomplete: 'Код состоит из {{length}} цифр',
-			fieldRequired: 'Заполните поле «{{field}}»',
-			fieldInvalid: 'Проверьте поле «{{field}}»',
-			fieldTooShort: 'Поле «{{field}}» — не менее {{min}} символов',
-			fieldTooLong: 'Поле «{{field}}» — не длиннее {{max}} символов'
+			fieldInvalid: 'Проверьте поле «{{field}}»'
 		},
 		error: {
 			cloudUnreachable: 'Не удалось связаться с облаком',

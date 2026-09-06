@@ -1,144 +1,144 @@
 .page {
-    position: relative;
-    isolation: isolate;
-    display: grid;
-    grid-template-columns: 1fr minmax(0, 26rem);
-    align-items: center;
-    gap: 3rem;
-    min-height: 100%;
-    padding: 3rem clamp(2rem, 6vw, 5.5rem);
-    overflow: hidden;
+	position: relative;
+	isolation: isolate;
+	display: grid;
+	grid-template-columns: 1fr minmax(0, 26rem);
+	align-items: center;
+	gap: 3rem;
+	min-height: 100%;
+	padding: 3rem clamp(2rem, 6vw, 5.5rem);
+	overflow: hidden;
 
-    .video {
-        position: absolute;
-        inset: 0;
-        z-index: -2;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
+	.video {
+		position: absolute;
+		inset: 0;
+		z-index: -2;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
 
-    .scrim {
-        position: absolute;
-        inset: 0;
-        z-index: -1;
-        background: var(--scrim-veil), var(--scrim-glow);
-    }
+	.scrim {
+		position: absolute;
+		inset: 0;
+		z-index: -1;
+		background: var(--scrim-veil), var(--scrim-glow);
+	}
 
-    .dragStrip {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: var(--titlebar-height);
-        z-index: 1;
-        -webkit-app-region: drag;
-    }
+	.dragStrip {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: var(--titlebar-height);
+		z-index: 1;
+		-webkit-app-region: drag;
+	}
 
-    .windowControls {
-        position: absolute;
-        top: 0;
-        right: 0;
-        z-index: 3;
-    }
+	.windowControls {
+		position: absolute;
+		top: 0;
+		right: 0;
+		z-index: 3;
+	}
 
-    .brand {
-        position: absolute;
-        top: clamp(1.25rem, 2.5vh, 1.75rem);
-        left: clamp(2rem, 6vw, 5.5rem);
-        z-index: 2;
-        -webkit-app-region: drag;
-    }
+	.brand {
+		position: absolute;
+		top: clamp(1.25rem, 2.5vh, 1.75rem);
+		left: clamp(2rem, 6vw, 5.5rem);
+		z-index: 2;
+		-webkit-app-region: drag;
+	}
 
-    .copy {
-        max-width: 34rem;
+	.copy {
+		max-width: 34rem;
 
-        .headline {
-            margin: 0 0 1.25rem;
-            font-size: clamp(2.5rem, 4.6vw, 3.9rem);
-            font-weight: 700;
-            line-height: 1.04;
-            letter-spacing: 0.02em;
-            text-transform: uppercase;
+		.headline {
+			margin: 0 0 1.25rem;
+			font-size: clamp(2.5rem, 4.6vw, 3.9rem);
+			font-weight: 700;
+			line-height: 1.04;
+			letter-spacing: 0.02em;
+			text-transform: uppercase;
 
-            .headlineAccent {
-                background: var(--accent-gradient);
-                background-clip: text;
-                -webkit-background-clip: text;
-                color: transparent;
-            }
-        }
+			.headlineAccent {
+				background: var(--accent-gradient);
+				background-clip: text;
+				-webkit-background-clip: text;
+				color: transparent;
+			}
+		}
 
-        .tagline {
-            margin: 0;
-            max-width: 26rem;
-            color: var(--text-secondary);
-            font-size: 1.0625rem;
-            line-height: 1.6;
-        }
+		.tagline {
+			margin: 0;
+			max-width: 26rem;
+			color: var(--text-secondary);
+			font-size: 1.0625rem;
+			line-height: 1.6;
+		}
 
-        .aside {
-            margin: 2rem 0 0;
-            padding-left: 0.875rem;
-            border-left: 2px solid var(--accent);
-            color: var(--text-secondary);
-            font-size: 0.9375rem;
-            max-width: 24rem;
-        }
-    }
+		.aside {
+			margin: 2rem 0 0;
+			padding-left: 0.875rem;
+			border-left: 2px solid var(--accent);
+			color: var(--text-secondary);
+			font-size: 0.9375rem;
+			max-width: 24rem;
+		}
+	}
 
-    .card {
-        display: flex;
-        flex-direction: column;
-        max-height: calc(100dvh - 6rem);
-        overflow: hidden;
-        padding: 2rem;
-        border: 1px solid var(--glass-border);
-        border-radius: var(--radius-lg);
-        background: var(--glass);
-        backdrop-filter: blur(18px);
-        box-shadow: var(--shadow-lg);
-    }
+	.card {
+		display: flex;
+		flex-direction: column;
+		max-height: calc(100dvh - 6rem);
+		overflow: hidden;
+		padding: 2rem;
+		border: 1px solid var(--glass-border);
+		border-radius: var(--radius-lg);
+		background: var(--glass);
+		backdrop-filter: blur(18px);
+		box-shadow: var(--shadow-lg);
+	}
 
-    .back {
-        position: absolute;
-        bottom: clamp(1.5rem, 3vh, 2.25rem);
-        left: clamp(2rem, 6vw, 5.5rem);
-        z-index: 2;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        padding: 0;
-        border: 0;
-        background: none;
-        color: var(--text-secondary);
-        font: inherit;
-        font-size: 0.875rem;
-        cursor: pointer;
-        transition: color 0.15s ease;
-        -webkit-app-region: no-drag;
+	.back {
+		position: absolute;
+		bottom: clamp(1.5rem, 3vh, 2.25rem);
+		left: clamp(2rem, 6vw, 5.5rem);
+		z-index: 2;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		padding: 0;
+		border: 0;
+		background: none;
+		color: var(--text-secondary);
+		font: inherit;
+		font-size: 0.875rem;
+		cursor: pointer;
+		transition: color 0.15s ease;
+		-webkit-app-region: no-drag;
 
-        &:hover,
-        &:focus-visible {
-            color: var(--text);
-        }
-    }
+		&:hover,
+		&:focus-visible {
+			color: var(--text);
+		}
+	}
 
-    @media (max-width: 62rem) {
-        grid-template-columns: minmax(0, 26rem);
-        justify-content: center;
-        padding: 5rem 1.5rem 4rem;
+	@media (max-width: 62rem) {
+		grid-template-columns: minmax(0, 26rem);
+		justify-content: center;
+		padding: 5rem 1.5rem 4rem;
 
-        .brand {
-            left: 1.5rem;
-        }
+		.brand {
+			left: 1.5rem;
+		}
 
-        .copy {
-            display: none;
-        }
+		.copy {
+			display: none;
+		}
 
-        .back {
-            right: 1.5rem;
-        }
-    }
+		.back {
+			right: 1.5rem;
+		}
+	}
 }

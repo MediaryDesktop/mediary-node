@@ -1,10 +1,14 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export interface OtpCountdown {
+	known: boolean
 	secondsLeft: number
 	expired: boolean
 	formatted: string
-	restart: () => void
+}
+
+function remaining(deadline: number): number {
+	return Math.max(0, Math.ceil((deadline - Date.now()) / 1000))
 }
 
 function format(totalSeconds: number): string {
@@ -14,33 +18,28 @@ function format(totalSeconds: number): string {
 	return `${minutes}:${seconds.toString().padStart(2, '0')}`
 }
 
-export function useOtpCountdown(ttlSeconds: number): OtpCountdown {
-	const [deadline, setDeadline] = useState(() => Date.now() + ttlSeconds * 1000)
-	const [secondsLeft, setSecondsLeft] = useState(ttlSeconds)
+export function useOtpCountdown(expiresAt: string | null): OtpCountdown {
+	const parsed = expiresAt === null ? Number.NaN : Date.parse(expiresAt)
+	const known = Number.isFinite(parsed)
+
+	const [, tick] = useState(0)
 
 	useEffect(() => {
-		const timer = setInterval(() => {
-			const left = Math.max(0, Math.ceil((deadline - Date.now()) / 1000))
+		if (!known) {
+			return
+		}
 
-			setSecondsLeft(left)
-
-			if (left === 0) {
-				clearInterval(timer)
-			}
-		}, 1000)
+		const timer = setInterval(() => tick(previous => previous + 1), 1000)
 
 		return () => clearInterval(timer)
-	}, [deadline])
+	}, [known, parsed])
 
-	const restart = useCallback(() => {
-		setDeadline(Date.now() + ttlSeconds * 1000)
-		setSecondsLeft(ttlSeconds)
-	}, [ttlSeconds])
+	const secondsLeft = known ? remaining(parsed) : 0
 
 	return {
+		known,
 		secondsLeft,
-		expired: secondsLeft === 0,
-		formatted: format(secondsLeft),
-		restart
+		expired: known && secondsLeft === 0,
+		formatted: format(secondsLeft)
 	}
 }

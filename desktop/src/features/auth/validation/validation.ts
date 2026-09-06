@@ -1,13 +1,13 @@
 import { translate } from '@shared/i18n'
 
-export const MIN_PASSWORD_LENGTH = 10
-export const MAX_PASSWORD_LENGTH = 128
-export const MIN_DISPLAY_NAME = 2
-export const MAX_DISPLAY_NAME = 40
-export const MAX_EMAIL_LENGTH = 254
-export const CODE_LENGTH = 6
-
-export const CODE_TTL_SECONDS = 5 * 60
+import {
+	CODE_LENGTH,
+	MAX_DISPLAY_NAME,
+	MAX_EMAIL_LENGTH,
+	MAX_PASSWORD_LENGTH,
+	MIN_DISPLAY_NAME,
+	MIN_PASSWORD_LENGTH
+} from './limits.gen'
 
 export function normalizeDisplayName(raw: string): string {
 	return raw.trim().split(/\s+/u).join(' ')

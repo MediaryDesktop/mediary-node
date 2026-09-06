@@ -1,18 +1,45 @@
-import { createHashHistory, createRootRoute, createRoute, createRouter, Outlet } from '@tanstack/react-router'
+import {
+	createHashHistory,
+	createRootRoute,
+	createRoute,
+	createRouter,
+	Outlet,
+	redirect
+} from '@tanstack/react-router'
+
+import { landingRoute, resolveSession } from '@entities/session'
 
 import {
+	AuthEmailPage,
+	AuthProvidersPage,
 	NewPasswordPage,
 	ResetPasswordPage,
-	SignInEmailPage,
-	SignInProvidersPage,
-	SignUpEmailPage,
-	SignUpProvidersPage,
 	VerifyEmailPage
 } from '@pages/auth'
 import { HomePage } from '@pages/home'
 import { SetupPage } from '@pages/setup'
 
 import { AppLayout } from '../layout/AppLayout'
+
+async function requireLiveSession() {
+	const { account, linked } = await resolveSession()
+
+	if (!account || !linked) {
+		throw redirect({ to: '/sign-in' })
+	}
+
+	if (account.email_verified) {
+		throw redirect({ to: '/' })
+	}
+}
+
+async function requireNoLiveSession() {
+	const { account, linked } = await resolveSession()
+
+	if (linked && account) {
+		throw redirect({ to: landingRoute(account) })
+	}
+}
 
 const rootRoute = createRootRoute({ component: Outlet })
 
@@ -41,30 +68,35 @@ const setupRoute = createRoute({
 const signInRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: '/sign-in',
-	component: SignInProvidersPage
+	beforeLoad: requireNoLiveSession,
+	component: () => <AuthProvidersPage mode='signIn' />
 })
 
 const signInEmailRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: '/sign-in/email',
-	component: SignInEmailPage
+	beforeLoad: requireNoLiveSession,
+	component: () => <AuthEmailPage mode='signIn' />
 })
 
 const signUpRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: '/sign-up',
-	component: SignUpProvidersPage
+	beforeLoad: requireNoLiveSession,
+	component: () => <AuthProvidersPage mode='signUp' />
 })
 
 const signUpEmailRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: '/sign-up/email',
-	component: SignUpEmailPage
+	beforeLoad: requireNoLiveSession,
+	component: () => <AuthEmailPage mode='signUp' />
 })
 
 const verifyEmailRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: '/verify-email',
+	beforeLoad: requireLiveSession,
 	component: VerifyEmailPage
 })
 

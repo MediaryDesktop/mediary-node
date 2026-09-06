@@ -64,10 +64,18 @@ export const fetchOAuthProvidersFx = createCloudRequestFx<void, OAuthProviders>(
 	url: '/v1/account/oauth/providers'
 })
 
-export const startOAuthFx = createCloudRequestFx<string, OAuthStart>(provider => ({
-	url: `/v1/account/oauth/${encodeURIComponent(provider)}/start`,
-	method: 'POST'
-}))
+export interface OAuthStartInput {
+	provider: string
+	callbackPort: number
+}
+
+export const startOAuthFx = createCloudRequestFx<OAuthStartInput, OAuthStart>(
+	({ provider, callbackPort }) => ({
+		url: `/v1/account/oauth/${encodeURIComponent(provider)}/start`,
+		method: 'POST',
+		body: { callback_port: callbackPort }
+	})
+)
 
 export const completeOAuthFx = createCloudRequestFx<OAuthCallbackInput, Session>(({ provider, ...body }) => ({
 	url: `/v1/account/oauth/${encodeURIComponent(provider)}/callback`,

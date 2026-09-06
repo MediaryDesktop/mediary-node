@@ -12,10 +12,10 @@ import styles from './AuthForm.module.scss'
 export function SignUpForm() {
 	const { t } = useTranslation()
 	const [name, email, password, confirmation, pending] = useUnit([
-		signUpForm.name.$value,
-		signUpForm.email.$value,
-		signUpForm.password.$value,
-		signUpForm.confirmation.$value,
+		signUpForm.fields.display_name.$value,
+		signUpForm.fields.email.$value,
+		signUpForm.fields.password.$value,
+		signUpForm.fields.confirmation.$value,
 		signUpForm.$pending
 	])
 
@@ -32,7 +32,7 @@ export function SignUpForm() {
 				autoComplete='nickname'
 				startIcon={<Icon name='common/user' size={18} />}
 				value={name}
-				onChange={event => signUpForm.name.changed(event.target.value)}
+				onChange={event => signUpForm.fields.display_name.changed(event.target.value)}
 			/>
 
 			<Input
@@ -42,7 +42,7 @@ export function SignUpForm() {
 				autoComplete='email'
 				startIcon={<Icon name='common/mail' size={18} />}
 				value={email}
-				onChange={event => signUpForm.email.changed(event.target.value)}
+				onChange={event => signUpForm.fields.email.changed(event.target.value)}
 			/>
 
 			<Input
@@ -53,7 +53,7 @@ export function SignUpForm() {
 				revealable
 				startIcon={<Icon name='common/lock' size={18} />}
 				value={password}
-				onChange={event => signUpForm.password.changed(event.target.value)}
+				onChange={event => signUpForm.fields.password.changed(event.target.value)}
 			/>
 
 			<Input
@@ -64,7 +64,7 @@ export function SignUpForm() {
 				revealable
 				startIcon={<Icon name='common/lock' size={18} />}
 				value={confirmation}
-				onChange={event => signUpForm.confirmation.changed(event.target.value)}
+				onChange={event => signUpForm.fields.confirmation.changed(event.target.value)}
 			/>
 
 			<Button

@@ -6,7 +6,7 @@ import { Button, Icon, Input, OtpInput } from '@shared/ui'
 
 import { useOtpCountdown } from '../../hooks'
 import { newPasswordForm } from '../../model'
-import { CODE_LENGTH, CODE_TTL_SECONDS, MIN_PASSWORD_LENGTH } from '../../validation'
+import { CODE_LENGTH, MIN_PASSWORD_LENGTH } from '../../validation'
 import { OtpCountdownTimer } from '../common'
 
 import styles from './AuthForm.module.scss'
@@ -17,12 +17,13 @@ export interface NewPasswordFormProps {
 
 export function NewPasswordForm({ email }: NewPasswordFormProps) {
 	const { t } = useTranslation()
-	const { expired, formatted } = useOtpCountdown(CODE_TTL_SECONDS)
-	const [code, password, pending] = useUnit([
-		newPasswordForm.code.$value,
-		newPasswordForm.password.$value,
-		newPasswordForm.$pending
+	const [code, password, pending, expiresAt] = useUnit([
+		newPasswordForm.fields.code.$value,
+		newPasswordForm.fields.password.$value,
+		newPasswordForm.$pending,
+		newPasswordForm.$expiresAt
 	])
+	const { known, expired, formatted } = useOtpCountdown(expiresAt)
 
 	const submit = (event: FormEvent) => {
 		event.preventDefault()
@@ -35,9 +36,9 @@ export function NewPasswordForm({ email }: NewPasswordFormProps) {
 				className={styles.otp}
 				value={code}
 				length={CODE_LENGTH}
-				disabled={expired || pending}
+				disabled={pending}
 				aria-label={t('auth.field.code')}
-				onChange={newPasswordForm.code.changed}
+				onChange={newPasswordForm.fields.code.changed}
 			/>
 
 			<Input
@@ -48,7 +49,7 @@ export function NewPasswordForm({ email }: NewPasswordFormProps) {
 				revealable
 				startIcon={<Icon name='common/lock' size={18} />}
 				value={password}
-				onChange={event => newPasswordForm.password.changed(event.target.value)}
+				onChange={event => newPasswordForm.fields.password.changed(event.target.value)}
 			/>
 
 			<Button
@@ -56,7 +57,6 @@ export function NewPasswordForm({ email }: NewPasswordFormProps) {
 				variant='primary'
 				fullWidth
 				loading={pending}
-				disabled={expired}
 				endIcon={<Icon name='common/arrow-right' size={18} />}
 				className={styles.submit}
 			>
@@ -64,7 +64,7 @@ export function NewPasswordForm({ email }: NewPasswordFormProps) {
 			</Button>
 
 			<p className={styles.resend}>
-				<OtpCountdownTimer expired={expired} formatted={formatted} />
+				{known && <OtpCountdownTimer expired={expired} formatted={formatted} />}
 			</p>
 		</form>
 	)

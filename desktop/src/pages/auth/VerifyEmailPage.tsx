@@ -13,23 +13,9 @@ export function VerifyEmailPage() {
 	const navigate = useNavigate()
 	const account = useUnit(sessionModel.$account)
 
-	useEffect(() => {
-		if (!account) {
-			void navigate({ to: '/sign-in' })
-			return
-		}
-
-		if (account.email_verified) {
-			void navigate({ to: '/' })
-		}
-	}, [account, navigate])
-
 	useEffect(() => sessionModel.emailVerified.watch(() => navigate({ to: '/' })), [navigate])
 
-	const leave = useCallback(() => {
-		sessionModel.signOutRequested()
-		void navigate({ to: '/sign-in' })
-	}, [navigate])
+	const leave = useCallback(() => sessionModel.signOutRequested(), [])
 
 	return (
 		<AuthLayout onBack={leave}>

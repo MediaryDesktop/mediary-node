@@ -1,10 +1,10 @@
 import clsx from 'clsx'
 import { useUnit } from 'effector-react'
 
+import type { NodeState } from '@shared/bridge'
 import { useTranslation } from '@shared/i18n'
 
 import { $nodeState } from '@infra/node'
-import type { NodeState } from '@infra/node'
 
 import styles from './NodeStatusBadge.module.scss'
 

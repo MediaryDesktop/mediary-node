@@ -1,6 +1,6 @@
-export { createCloudRequestFx, hasCloudSession, setCloudSession } from './client'
+export { createCloudRequestFx, hasCloudToken, setCloudToken } from './client'
 
-export { authorizeOAuthFx, wasCancelled } from './oauth'
-export type { OAuthRedirect } from './oauth'
+export { authorizeOAuthFx, prepareOAuthFx, releaseOAuthFx, wasCancelled } from './oauth'
+export type { OAuthAuthorization, OAuthListener, OAuthRedirect } from './oauth'
 
 export type { CloudSchemas } from './schema'

@@ -1,17 +1,15 @@
-import { combine, createEvent, sample } from 'effector'
+import { createEvent, sample } from 'effector'
 
 import { atom } from '@shared/factory'
 
 import { sessionModel } from '@entities/session'
 
-import { notifyFailure, notifyProblems } from '../lib'
+import { notifyFailure } from '../lib'
 import { validateCode } from '../validation'
 
-import { createField } from './field'
+import { createAuthForm } from './form'
 
 export const verifyEmailForm = atom(() => {
-	const code = createField()
-	const submitted = createEvent()
 	const resent = createEvent()
 	const mounted = createEvent()
 
@@ -22,40 +20,25 @@ export const verifyEmailForm = atom(() => {
 		target: sessionModel.emailVerificationRequested
 	})
 
-	const $values = combine({ code: code.$value })
-
-	const checked = sample({
-		clock: submitted,
-		source: $values,
-		fn: values => ({ values, problems: [validateCode(values.code)].filter(Boolean) as string[] })
-	})
-
-	sample({
-		clock: checked,
-		filter: ({ problems }) => problems.length > 0,
-		fn: ({ problems }) => problems
-	}).watch(notifyProblems)
-
-	sample({
-		clock: checked,
-		filter: ({ problems }) => problems.length === 0,
-		fn: ({ values }) => ({ code: values.code.trim() }),
-		target: sessionModel.emailConfirmationRequested
+	const form = createAuthForm({
+		fields: ['code'] as const,
+		validate: values => [validateCode(values.code)],
+		prepare: values => ({ code: values.code.trim() }),
+		submit: sessionModel.emailConfirmationRequested,
+		pending: sessionModel.$emailConfirmationPending,
+		failure: sessionModel.emailConfirmationFailed
 	})
 
 	sample({ clock: resent, target: sessionModel.emailVerificationRequested })
+	sample({ clock: resent, fn: () => '', target: form.fields.code.changed })
 
-	sample({ clock: resent, fn: () => '', target: code.changed })
-
-	sessionModel.emailConfirmationFailed.watch(notifyFailure)
 	sessionModel.emailVerificationFailed.watch(notifyFailure)
 
 	return {
-		code,
-		submitted,
+		...form,
 		resent,
 		mounted,
-		$pending: sessionModel.$emailConfirmationPending,
+		$expiresAt: sessionModel.$codeExpiresAt,
 		$resendPending: sessionModel.$emailVerificationPending
 	}
 })

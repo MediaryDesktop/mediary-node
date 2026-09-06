@@ -15,8 +15,6 @@ export interface ProblemBody {
 	errors?: ProblemDetail[]
 }
 
-export type FieldErrors = Record<string, string>
-
 export class HttpRequestError extends Error {
 	readonly status: number
 	readonly body?: ProblemBody
@@ -54,47 +52,46 @@ export class HttpRequestError extends Error {
 	}
 }
 
-function fieldOf(location: string | undefined): string | null {
-	if (!location) {
-		return null
-	}
-
-	const name = location.replace(/^body\./u, '')
-
-	return name.includes('.') || name.includes('[') ? null : name
+export interface ApiProblem {
+	field: string
+	message: string
+	fromSchema: boolean
 }
 
-export function getApiFieldErrors(error: unknown): FieldErrors {
+const SCHEMA_PREFIX = 'body.'
+
+function fieldOf(location: string): string | null {
+	const name = location.startsWith(SCHEMA_PREFIX) ? location.slice(SCHEMA_PREFIX.length) : location
+
+	return name === '' || name.includes('.') || name.includes('[') ? null : name
+}
+
+export function getApiProblems(error: unknown): ApiProblem[] {
 	const problem = error instanceof HttpRequestError ? error.body : undefined
-	const fields: FieldErrors = {}
+	const seen = new Set<string>()
+	const problems: ApiProblem[] = []
 
 	for (const detail of problem?.errors ?? []) {
-		const field = fieldOf(detail?.location)
+		const location = detail?.location
 
-		if (field && detail?.message && !fields[field]) {
-			fields[field] = detail.message
+		if (!location || !detail?.message) {
+			continue
 		}
+
+		const field = fieldOf(location)
+
+		if (!field || seen.has(field)) {
+			continue
+		}
+
+		seen.add(field)
+
+		problems.push({
+			field,
+			message: detail.message,
+			fromSchema: location.startsWith(SCHEMA_PREFIX)
+		})
 	}
 
-	return fields
-}
-
-export function getApiErrorStatus(error: unknown): number | undefined {
-	if (error instanceof HttpRequestError) {
-		return error.status || undefined
-	}
-
-	if (error instanceof FetchError) {
-		return error.response?.status ?? error.status ?? error.statusCode
-	}
-
-	return undefined
-}
-
-export function getApiErrorMessage(error: unknown, fallback: string): string {
-	if (error instanceof HttpRequestError || error instanceof FetchError) {
-		return HttpRequestError.fromUnknown(error, fallback).message || fallback
-	}
-
-	return fallback
+	return problems
 }

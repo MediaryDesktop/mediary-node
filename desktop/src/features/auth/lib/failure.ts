@@ -1,61 +1,32 @@
-import { getApiFieldErrors, HttpRequestError } from '@shared/api'
+import { getApiProblems, HttpRequestError } from '@shared/api'
 import { translate } from '@shared/i18n'
 
-const FIELD_LABEL: Record<string, () => string> = {
-	display_name: () => translate('auth.field.name'),
-	email: () => translate('auth.field.email'),
-	password: () => translate('auth.field.password'),
-	confirmation: () => translate('auth.field.confirmation'),
-	code: () => translate('auth.field.code')
-}
+import {
+	CODE_LENGTH,
+	MAX_DISPLAY_NAME,
+	MAX_EMAIL_LENGTH,
+	MAX_PASSWORD_LENGTH,
+	MIN_DISPLAY_NAME,
+	MIN_PASSWORD_LENGTH
+} from '../validation'
 
-const REQUIRED = /required property/iu
-const EMAIL_FORMAT = /email/iu
-const MIN_LENGTH = /^expected length >= (\d+)/u
-const MAX_LENGTH = /^expected length <= (\d+)/u
-
-function label(field: string): string {
-	return FIELD_LABEL[field]?.() ?? field
-}
-
-function readable(field: string, raw: string): string {
-	if (REQUIRED.test(raw)) {
-		return translate('auth.validation.fieldRequired', { field: label(field) })
-	}
-
-	if (field === 'email' && EMAIL_FORMAT.test(raw)) {
-		return translate('auth.validation.emailInvalid')
-	}
-
-	const min = MIN_LENGTH.exec(raw)?.[1]
-
-	if (min) {
-		if (field === 'code') {
-			return translate('auth.validation.codeIncomplete', { length: Number(min) })
-		}
-
-		if (field === 'password') {
-			return translate('auth.validation.passwordTooShort', { min: Number(min) })
-		}
-
-		return translate('auth.validation.fieldTooShort', { field: label(field), min: Number(min) })
-	}
-
-	const max = MAX_LENGTH.exec(raw)?.[1]
-
-	if (max) {
-		if (field === 'password') {
-			return translate('auth.validation.passwordTooLong', { max: Number(max) })
-		}
-
-		if (field === 'email') {
-			return translate('auth.validation.emailTooLong', { max: Number(max) })
-		}
-
-		return translate('auth.validation.fieldTooLong', { field: label(field), max: Number(max) })
-	}
-
-	return translate('auth.validation.fieldInvalid', { field: label(field) })
+const SCHEMA_RULE: Record<string, () => string> = {
+	display_name: () =>
+		translate('auth.validation.nameLength', { min: MIN_DISPLAY_NAME, max: MAX_DISPLAY_NAME }),
+	email: () => translate('auth.validation.emailTooLong', { max: MAX_EMAIL_LENGTH }),
+	password: () =>
+		translate('auth.validation.passwordLength', {
+			min: MIN_PASSWORD_LENGTH,
+			max: MAX_PASSWORD_LENGTH
+		}),
+	new_password: () =>
+		translate('auth.validation.passwordLength', {
+			min: MIN_PASSWORD_LENGTH,
+			max: MAX_PASSWORD_LENGTH
+		}),
+	current_password: () => translate('auth.validation.passwordRequired'),
+	confirmation: () => translate('auth.validation.confirmationMismatch'),
+	code: () => translate('auth.validation.codeIncomplete', { length: CODE_LENGTH })
 }
 
 export function toAuthMessages(error: unknown): string[] {
@@ -65,10 +36,15 @@ export function toAuthMessages(error: unknown): string[] {
 		return [translate('auth.error.cloudUnreachable')]
 	}
 
-	const fields = Object.entries(getApiFieldErrors(error))
+	const problems = getApiProblems(error)
 
-	if (fields.length > 0) {
-		return fields.map(([field, raw]) => readable(field, raw))
+	if (problems.length > 0) {
+		return problems.map(problem =>
+			problem.fromSchema
+				? (SCHEMA_RULE[problem.field]?.() ??
+					translate('auth.validation.fieldInvalid', { field: problem.field }))
+				: problem.message
+		)
 	}
 
 	return [failure.body?.detail ?? translate('auth.error.requestFailed')]

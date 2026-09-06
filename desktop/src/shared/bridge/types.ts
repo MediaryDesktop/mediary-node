@@ -13,6 +13,15 @@ export interface OAuthRedirect {
 
 export type OAuthAuthorization = OAuthRedirect | { cancelled: true }
 
+export interface OAuthListener {
+	callbackPort: number
+}
+
+export interface StoredSession {
+	token: string | null
+	account: unknown
+}
+
 export interface MediaryBridge {
 	node: {
 		connection: () => Promise<NodeConnection>
@@ -23,7 +32,15 @@ export interface MediaryBridge {
 		version: () => Promise<string>
 	}
 	oauth: {
+		prepare: () => Promise<OAuthListener>
 		authorize: (consentUrl: string) => Promise<OAuthAuthorization>
+		release: () => Promise<void>
+	}
+	session: {
+		canPersist: () => Promise<boolean>
+		read: () => Promise<StoredSession | null>
+		write: (session: StoredSession) => Promise<void>
+		clear: () => Promise<void>
 	}
 	window: {
 		minimize: () => Promise<void>

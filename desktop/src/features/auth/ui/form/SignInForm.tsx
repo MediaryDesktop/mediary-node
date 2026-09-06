@@ -16,8 +16,8 @@ export interface SignInFormProps {
 export function SignInForm({ onForgotPassword }: SignInFormProps) {
 	const { t } = useTranslation()
 	const [email, password, pending] = useUnit([
-		signInForm.email.$value,
-		signInForm.password.$value,
+		signInForm.fields.email.$value,
+		signInForm.fields.password.$value,
 		signInForm.$pending
 	])
 
@@ -35,7 +35,7 @@ export function SignInForm({ onForgotPassword }: SignInFormProps) {
 				autoComplete='email'
 				startIcon={<Icon name='common/mail' size={18} />}
 				value={email}
-				onChange={event => signInForm.email.changed(event.target.value)}
+				onChange={event => signInForm.fields.email.changed(event.target.value)}
 			/>
 
 			<Input
@@ -46,7 +46,7 @@ export function SignInForm({ onForgotPassword }: SignInFormProps) {
 				revealable
 				startIcon={<Icon name='common/lock' size={18} />}
 				value={password}
-				onChange={event => signInForm.password.changed(event.target.value)}
+				onChange={event => signInForm.fields.password.changed(event.target.value)}
 			/>
 
 			<div className={styles.options}>

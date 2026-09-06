@@ -8,9 +8,16 @@ import { landingRoute, sessionModel } from '@entities/session'
 
 import { AuthFormWrapper, AuthLayout, AuthProvidersPanel } from '@features/auth'
 
-export function SignInProvidersPage() {
+import { AUTH_MODES, type AuthMode } from './modes'
+
+export interface AuthProvidersPageProps {
+	mode: AuthMode
+}
+
+export function AuthProvidersPage({ mode }: AuthProvidersPageProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
+	const copy = AUTH_MODES[mode]
 	const goBack = useGoBack('/')
 
 	useEffect(
@@ -20,15 +27,11 @@ export function SignInProvidersPage() {
 
 	return (
 		<AuthLayout onBack={goBack}>
-			<AuthFormWrapper
-				eyebrow={t('auth.signIn.eyebrow')}
-				title={t('auth.signIn.title')}
-				description={t('auth.signIn.subtitle')}
-			>
+			<AuthFormWrapper eyebrow={t(copy.eyebrow)} title={t(copy.title)} description={t(copy.subtitle)}>
 				<AuthProvidersPanel
-					mode='signIn'
-					onUseEmail={useCallback(() => navigate({ to: '/sign-in/email' }), [navigate])}
-					onSwitch={useCallback(() => navigate({ to: '/sign-up' }), [navigate])}
+					mode={mode}
+					onUseEmail={useCallback(() => navigate({ to: copy.emailRoute }), [navigate, copy])}
+					onSwitch={useCallback(() => navigate({ to: copy.otherRoute }), [navigate, copy])}
 				/>
 			</AuthFormWrapper>
 		</AuthLayout>

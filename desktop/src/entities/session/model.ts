@@ -1,10 +1,19 @@
 import { createQuery } from '@farfetched/core'
-import { combine, createEvent, createStore, sample } from 'effector'
+import { combine, createEffect, createEvent, createStore, sample } from 'effector'
+import { once } from 'patronum'
 
 import { unauthorized } from '@shared/api'
+import type { StoredSession } from '@shared/bridge'
 import { atom } from '@shared/factory'
 
-import { authorizeOAuthFx, hasCloudSession, setCloudSession, wasCancelled } from '@infra/cloud'
+import {
+	authorizeOAuthFx,
+	hasCloudToken,
+	prepareOAuthFx,
+	releaseOAuthFx,
+	setCloudToken,
+	wasCancelled
+} from '@infra/cloud'
 import type { OAuthRedirect } from '@infra/cloud'
 
 import {
@@ -28,7 +37,22 @@ export function landingRoute(account: Account) {
 
 export const oauthProvidersQuery = createQuery({ effect: fetchOAuthProvidersFx, name: 'oauthProviders' })
 
+const readSessionFx = createEffect<void, StoredSession | null>(() => window.mediary.session.read())
+
+const writeSessionFx = createEffect<StoredSession, void>(session => window.mediary.session.write(session))
+
+function storedAccount(session: StoredSession | null): Account | null {
+	const account = session?.account
+
+	if (typeof account !== 'object' || account === null || !('id' in account)) {
+		return null
+	}
+
+	return account as Account
+}
+
 export const sessionModel = atom(() => {
+	const appStarted = createEvent()
 	const signInRequested = createEvent<LoginInput>()
 	const signUpRequested = createEvent<RegisterInput>()
 	const signOutRequested = createEvent()
@@ -38,40 +62,76 @@ export const sessionModel = atom(() => {
 	const emailConfirmationRequested = createEvent<ConfirmEmailInput>()
 
 	const authenticated = createEvent<Account>()
+	const emailVerified = createEvent<Account>()
+	const restored = createEvent<Account>()
 
 	const signedOut = createEvent()
 
-	const sessionExpired = createEvent()
+	const cloudSessionLost = createEvent()
 
-	const emailVerified = createEvent<Account>()
+	const sessionEstablished = createEvent<Session>()
 
+	const $token = createStore<string | null>(null)
+	const $account = createStore<Account | null>(null)
+
+	const $restoring = createStore(true)
+	const $codeExpiresAt = createStore<string | null>(null)
 	const $verificationCodeSent = createStore(false)
 
-	const $account = createStore<Account | null>(null)
+	const $hasCloudSession = $token.map(token => token !== null)
 	const $isAuthenticated = $account.map(account => account !== null)
 	const $pending = combine(signInFx.pending, signUpFx.pending, (signIn, signUp) => signIn || signUp)
+
+	$token.watch(setCloudToken)
 
 	const signInFailed = signInFx.failData
 	const signUpFailed = signUpFx.failData
 	const emailConfirmationFailed = confirmEmailFx.failData
 	const emailVerificationFailed = sendEmailVerificationFx.failData
 
-	const sessionEstablished = createEvent<Session>()
+	sample({ clock: once(appStarted), target: readSessionFx })
+
+	$token.on(readSessionFx.doneData, (_, session) => session?.token ?? null)
+	$account.on(readSessionFx.doneData, (_, session) => storedAccount(session))
+
+	sample({
+		clock: readSessionFx.doneData,
+		filter: session => Boolean(session?.token),
+		target: accountQuery.start
+	})
+
+	sample({
+		clock: readSessionFx.doneData,
+		filter: session => !session?.token,
+		fn: () => false,
+		target: $restoring
+	})
+
+	sample({ clock: readSessionFx.failData, fn: () => false, target: $restoring })
+	sample({ clock: accountQuery.finished.finally, fn: () => false, target: $restoring })
+	sample({ clock: accountQuery.finished.success, fn: ({ result }) => result, target: restored })
 
 	sample({ clock: signInRequested, target: signInFx })
 	sample({ clock: signUpRequested, target: signUpFx })
 	sample({ clock: [signInFx.doneData, signUpFx.doneData], target: sessionEstablished })
 
-	sessionEstablished.watch(session => setCloudSession(session.token))
+	$token.on(sessionEstablished, (_, session) => session.token)
 	sample({ clock: sessionEstablished, fn: session => session.user, target: authenticated })
 
 	const $oauthProvider = createStore<string | null>(null)
-
 	const oauthFailed = createEvent<Error>()
-
 	const oauthCancelled = createEvent()
 
-	sample({ clock: oauthRequested, target: startOAuthFx })
+	sample({ clock: oauthRequested, target: prepareOAuthFx })
+
+	sample({
+		clock: prepareOAuthFx.doneData,
+		source: $oauthProvider,
+		filter: (provider: string | null): provider is string => provider !== null,
+		fn: (provider, listener) => ({ provider, callbackPort: listener.callbackPort }),
+		target: startOAuthFx
+	})
+
 	sample({ clock: startOAuthFx.doneData, fn: ({ url }) => url, target: authorizeOAuthFx })
 	sample({ clock: authorizeOAuthFx.doneData, filter: wasCancelled, target: oauthCancelled })
 
@@ -87,11 +147,20 @@ export const sessionModel = atom(() => {
 		fn: (provider, redirect) => ({ provider, ...redirect }),
 		target: completeOAuthFx
 	})
+
 	sample({ clock: completeOAuthFx.doneData, target: sessionEstablished })
+
 	sample({
-		clock: [startOAuthFx.failData, authorizeOAuthFx.failData, completeOAuthFx.failData],
+		clock: [
+			prepareOAuthFx.failData,
+			startOAuthFx.failData,
+			authorizeOAuthFx.failData,
+			completeOAuthFx.failData
+		],
 		target: oauthFailed
 	})
+
+	sample({ clock: [startOAuthFx.failData, oauthCancelled], target: releaseOAuthFx })
 
 	$oauthProvider
 		.on(oauthRequested, (_, provider) => provider)
@@ -101,27 +170,43 @@ export const sessionModel = atom(() => {
 	sample({ clock: emailConfirmationRequested, target: confirmEmailFx })
 	sample({ clock: confirmEmailFx.doneData, target: emailVerified })
 
-	sample({ clock: signOutRequested, target: [signOutFx, signedOut] })
+	sample({ clock: signOutRequested, target: signOutFx })
+	sample({ clock: signOutFx.finally, target: signedOut })
 
-	signOutFx.finally.watch(() => setCloudSession(null))
+	sample({ clock: unauthorized, filter: () => hasCloudToken(), target: cloudSessionLost })
 
-	sample({ clock: unauthorized, filter: () => hasCloudSession(), target: sessionExpired })
-	sessionExpired.watch(() => setCloudSession(null))
-	sample({ clock: sessionExpired, target: signedOut })
+	$token.on(cloudSessionLost, () => null).reset(signedOut)
+	$account.on([authenticated, emailVerified, restored], (_, account) => account).reset(signedOut)
 
 	$verificationCodeSent
 		.on([signUpFx.doneData, emailVerificationRequested], () => true)
 		.reset(signedOut, emailVerified)
 
-	$account
-		.on(authenticated, (_, account) => account)
-		.on(emailVerified, (_, account) => account)
-		.reset(signedOut)
+	$codeExpiresAt
+		.on(sendEmailVerificationFx.doneData, (_, accepted) => accepted.expires_at)
+		.reset(signedOut, emailVerified)
+
+	const $stored = combine({ token: $token, account: $account })
+
+	sample({ clock: $stored.updates, target: writeSessionFx })
 
 	sample({ clock: accountRefreshRequested, target: accountQuery.start })
-	$account.on(accountQuery.finished.success, (_, { result }) => result)
+
+	const settled = new Promise<void>(resolve => {
+		const stop = $restoring.watch(restoring => {
+			if (restoring) {
+				return
+			}
+
+			stop()
+			resolve()
+		})
+	})
 
 	return {
+		settled,
+
+		appStarted,
 		signInRequested,
 		signUpRequested,
 		signOutRequested,
@@ -131,8 +216,9 @@ export const sessionModel = atom(() => {
 		emailConfirmationRequested,
 
 		authenticated,
+		restored,
 		signedOut,
-		sessionExpired,
+		cloudSessionLost,
 		signInFailed,
 		signUpFailed,
 		oauthFailed,
@@ -143,6 +229,9 @@ export const sessionModel = atom(() => {
 
 		$account,
 		$isAuthenticated,
+		$hasCloudSession,
+		$restoring,
+		$codeExpiresAt,
 		$verificationCodeSent,
 		$pending,
 		$signInPending: signInFx.pending,
@@ -152,3 +241,19 @@ export const sessionModel = atom(() => {
 		$emailVerificationPending: sendEmailVerificationFx.pending
 	}
 })
+
+export interface ResolvedSession {
+	account: Account | null
+	linked: boolean
+}
+
+export async function resolveSession(): Promise<ResolvedSession> {
+	sessionModel.appStarted()
+
+	await sessionModel.settled
+
+	return {
+		account: sessionModel.$account.getState(),
+		linked: sessionModel.$hasCloudSession.getState()
+	}
+}

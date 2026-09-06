@@ -31,6 +31,22 @@ const DEFAULT_STARTUP_TIMEOUT_MS = 20_000
 
 const RESTART_DELAYS_MS = [500, 1_000, 2_000, 5_000, 10_000]
 
+interface ExternalNode {
+	baseUrl: string
+	token: string
+}
+
+function externalNode(): ExternalNode | null {
+	const baseUrl = process.env.MEDIARY_NODE_URL
+	const token = process.env.MEDIARY_NODE_TOKEN
+
+	if (!baseUrl || !token || app.isPackaged) {
+		return null
+	}
+
+	return { baseUrl: baseUrl.replace(/\/$/u, ''), token }
+}
+
 export class NodeSupervisor {
 	private child: ChildProcess | null = null
 	private state: SupervisorState = 'stopped'
@@ -45,7 +61,9 @@ export class NodeSupervisor {
 	private readonly startupTimeoutMs: number
 	private readonly options: SupervisorOptions
 
-	private readonly token = randomBytes(32).toString('base64url')
+	private readonly external = externalNode()
+
+	private readonly token: string
 
 	constructor(options: SupervisorOptions = {}) {
 		this.options = options
@@ -53,17 +71,36 @@ export class NodeSupervisor {
 		this.preferredPort = options.port ?? DEFAULT_PORT
 		this.port = this.preferredPort
 		this.startupTimeoutMs = options.startupTimeoutMs ?? DEFAULT_STARTUP_TIMEOUT_MS
+		this.token = this.external?.token ?? randomBytes(32).toString('base64url')
+	}
+
+	get attached(): boolean {
+		return this.external !== null
 	}
 
 	async reservePort(): Promise<number> {
-		if (this.portReserved) {
+		if (this.external) {
 			return this.port
 		}
+
+		if (this.portReserved && (await isPortFree(this.host, this.port))) {
+			return this.port
+		}
+
+		const previous = this.portReserved ? this.port : null
 
 		if (await isPortFree(this.host, this.preferredPort)) {
 			this.port = this.preferredPort
 		} else {
 			this.port = await askOsForPort(this.host)
+		}
+
+		if (previous !== null && previous !== this.port) {
+			this.options.onLog?.(
+				`port ${previous} was taken while we were away; moving to ${this.port}`,
+				'stdout'
+			)
+		} else if (this.port !== this.preferredPort) {
 			this.options.onLog?.(`port ${this.preferredPort} is taken; using ${this.port} instead`, 'stdout')
 		}
 
@@ -73,9 +110,11 @@ export class NodeSupervisor {
 	}
 
 	get connection(): NodeConnection {
+		const base = this.external?.baseUrl ?? `http://${this.host}:${this.port}`
+
 		return {
-			baseUrl: `http://${this.host}:${this.port}`,
-			wsUrl: `ws://${this.host}:${this.port}/ws`,
+			baseUrl: base,
+			wsUrl: `${base.replace(/^http/u, 'ws')}/ws`,
 			token: this.token
 		}
 	}
@@ -91,6 +130,20 @@ export class NodeSupervisor {
 
 		this.stopping = false
 		this.setState('starting')
+
+		if (this.external) {
+			this.options.onLog?.(
+				`attaching to the node already running at ${this.external.baseUrl}`,
+				'stdout'
+			)
+
+			await this.waitUntilHealthy()
+
+			this.restartAttempt = 0
+			this.setState('ready')
+
+			return
+		}
 
 		await this.reservePort()
 
@@ -142,6 +195,11 @@ export class NodeSupervisor {
 	async stop(): Promise<void> {
 		this.stopping = true
 
+		if (this.external) {
+			this.setState('stopped')
+			return
+		}
+
 		const child = this.child
 		if (!child) {
 			this.setState('stopped')
@@ -184,7 +242,7 @@ export class NodeSupervisor {
 		const deadline = Date.now() + this.startupTimeoutMs
 
 		while (Date.now() < deadline) {
-			if (!this.child) {
+			if (!this.child && !this.external) {
 				throw new Error('node exited before it became healthy')
 			}
 

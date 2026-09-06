@@ -14,6 +14,25 @@ Object.defineProperty(window, 'mediary', {
 		},
 		app: {
 			version: async () => '0.0.0-test'
-		}
+		},
+		oauth: {
+			prepare: async () => ({ callbackPort: 45123 }),
+			authorize: async () => ({ cancelled: true }) as const,
+			release: async () => {}
+		},
+		session: {
+			canPersist: async () => true,
+			read: async () => null,
+			write: async () => {},
+			clear: async () => {}
+		},
+		window: {
+			minimize: async () => {},
+			toggleMaximize: async () => {},
+			close: async () => {},
+			isMaximized: async () => false,
+			onMaximizedChange: () => () => {}
+		},
+		platform: 'test'
 	}
 })

@@ -118,15 +118,13 @@ export const uk: Translation = {
 			passwordRequired: 'Введіть пароль',
 			passwordTooShort: 'Пароль щонайменше {{min}} символів',
 			passwordTooLong: 'Пароль не довший за {{max}} символів',
+			passwordLength: 'Пароль від {{min}} до {{max}} символів',
 			passwordEchoesIdentity: 'Пароль не має повторювати email або імʼя',
 			confirmationRequired: 'Повторіть пароль',
 			confirmationMismatch: 'Паролі не збігаються',
 			codeRequired: 'Введіть код із листа',
 			codeIncomplete: 'Код складається з {{length}} цифр',
-			fieldRequired: 'Заповніть поле «{{field}}»',
-			fieldInvalid: 'Перевірте поле «{{field}}»',
-			fieldTooShort: 'Поле «{{field}}» — щонайменше {{min}} символів',
-			fieldTooLong: 'Поле «{{field}}» — не довше за {{max}} символів'
+			fieldInvalid: 'Перевірте поле «{{field}}»'
 		},
 		error: {
 			cloudUnreachable: 'Не вдалося звʼязатися з хмарою',
