@@ -37,6 +37,12 @@ export function OtpInput({
 }: OtpInputProps) {
 	const cells = useRef<(HTMLInputElement | null)[]>([])
 
+	const valueRef = useRef(value)
+
+	useEffect(() => {
+		valueRef.current = value
+	}, [value])
+
 	useEffect(() => {
 		if (autoFocus) {
 			cells.current[0]?.focus({ preventScroll: true })
@@ -49,8 +55,10 @@ export function OtpInput({
 
 	const handleChange = (index: number, raw: string) => {
 		const digit = raw.replace(DIGITS_ONLY, '').slice(-1)
+		const next = write(value, index, digit, length)
 
-		onChange(write(value, index, digit, length))
+		valueRef.current = next
+		onChange(next)
 
 		if (digit) {
 			focusCell(index + 1)
@@ -66,7 +74,10 @@ export function OtpInput({
 				return
 			}
 
-			onChange(write(value, index - 1, '', length))
+			const next = write(value, index - 1, '', length)
+
+			valueRef.current = next
+			onChange(next)
 			focusCell(index - 1)
 			return
 		}
@@ -91,6 +102,7 @@ export function OtpInput({
 			return
 		}
 
+		valueRef.current = pasted
 		onChange(pasted)
 		focusCell(pasted.length)
 	}
@@ -120,8 +132,8 @@ export function OtpInput({
 					onKeyDown={event => handleKeyDown(index, event)}
 					onPaste={handlePaste}
 					onFocus={event => {
-						if (index > value.length) {
-							focusCell(value.length)
+						if (index > valueRef.current.length) {
+							focusCell(valueRef.current.length)
 							return
 						}
 

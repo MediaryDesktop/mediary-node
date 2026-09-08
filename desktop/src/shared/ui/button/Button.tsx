@@ -1,7 +1,9 @@
 import clsx from 'clsx'
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 
-import styles from './button.module.scss'
+import { useRipple } from '../ripple/useRipple'
+
+import styles from './Button.module.scss'
 
 export type ButtonVariant = 'primary' | 'secondary' | 'glass' | 'glass-accent' | 'ghost'
 
@@ -12,6 +14,7 @@ export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement
 	loading?: boolean
 	startIcon?: ReactNode
 	endIcon?: ReactNode
+	disableRipple?: boolean
 	children?: ReactNode
 }
 
@@ -22,17 +25,22 @@ export function Button({
 	loading = false,
 	startIcon,
 	endIcon,
+	disableRipple = false,
 	children,
 	className,
 	disabled,
 	type = 'button',
 	...props
 }: ButtonProps) {
+	const inactive = Boolean(disabled || loading)
+	const ripple = useRipple<HTMLButtonElement>({ disabled: inactive || disableRipple })
+
 	return (
 		<button
 			{...props}
+			ref={ripple}
 			type={type}
-			disabled={disabled || loading}
+			disabled={inactive}
 			className={clsx(
 				styles.button,
 				styles[variant],

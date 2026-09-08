@@ -7,9 +7,11 @@
 	box-sizing: border-box;
 	height: var(--control-height);
 	min-height: var(--control-height);
-	padding: 0 1.125rem;
-	border: 1px solid transparent;
+	padding: 0 calc(1.125rem + var(--ring-width));
+	border: 0;
 	border-radius: var(--radius);
+	--ring-width: 1px;
+	overflow: hidden;
 	background: transparent;
 	color: var(--text);
 	font-family: inherit;
@@ -18,9 +20,8 @@
 	cursor: pointer;
 	transition:
 		background-color 160ms,
-		border-color 160ms,
+		box-shadow 160ms,
 		color 160ms,
-		transform 160ms,
 		filter 160ms;
 
 	&:disabled {
@@ -28,41 +29,24 @@
 		opacity: 0.55;
 	}
 
-	&:not(:disabled):active {
-		transform: translateY(1px);
-	}
-
-	&:focus-visible {
-		outline: 2px solid var(--accent);
-		outline-offset: 2px;
-	}
-
 	&.primary {
 		background: var(--accent);
 		color: var(--text-on-accent);
-
-		&:not(:disabled):hover {
-			background: var(--accent-hover);
-		}
-
-		&:not(:disabled):active {
-			background: var(--accent-active);
-		}
 	}
 
 	&.secondary {
 		background: var(--bg-muted);
-		border-color: var(--border);
+		box-shadow: inset 0 0 0 var(--ring-width) var(--border);
 
 		&:not(:disabled):hover {
 			background: var(--surface);
-			border-color: var(--accent);
+			box-shadow: inset 0 0 0 var(--ring-width) var(--accent);
 		}
 	}
 
 	&.glass {
 		background: var(--glass);
-		border-color: var(--border-stronger);
+		box-shadow: inset 0 0 0 var(--ring-width) var(--border-stronger);
 
 		&:not(:disabled):hover {
 			background: var(--field-hover);
@@ -71,7 +55,7 @@
 
 	&.glass-accent {
 		background: var(--accent-muted);
-		border-color: var(--accent);
+		box-shadow: inset 0 0 0 var(--ring-width) var(--accent);
 		color: var(--accent);
 
 		&:not(:disabled):hover {
@@ -91,7 +75,7 @@
 	&.small {
 		height: 38px;
 		min-height: 38px;
-		padding: 0 0.875rem;
+		padding: 0 calc(0.875rem + var(--ring-width));
 		font-size: 0.875rem;
 	}
 

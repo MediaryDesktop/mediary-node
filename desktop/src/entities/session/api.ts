@@ -44,7 +44,8 @@ export const sendEmailVerificationFx = createCloudRequestFx<void, Accepted>({
 export const confirmEmailFx = createCloudRequestFx<ConfirmEmailInput, Account>(body => ({
 	url: '/v1/account/email/verification/confirm',
 	method: 'POST',
-	body
+	body,
+	expectsUnauthorized: true
 }))
 
 export const requestPasswordResetFx = createCloudRequestFx<PasswordResetRequest, Accepted>(body => ({
