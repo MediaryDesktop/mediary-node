@@ -72,7 +72,6 @@ export function SignUpForm() {
 				variant='primary'
 				fullWidth
 				loading={pending}
-				endIcon={<Icon name='common/arrow-right' size={18} />}
 				className={styles.submit}
 			>
 				{t('auth.signUp.submit')}

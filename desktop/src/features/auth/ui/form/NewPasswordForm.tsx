@@ -57,7 +57,6 @@ export function NewPasswordForm({ email }: NewPasswordFormProps) {
 				variant='primary'
 				fullWidth
 				loading={pending}
-				endIcon={<Icon name='common/arrow-right' size={18} />}
 				className={styles.submit}
 			>
 				{t('auth.newPassword.submit')}

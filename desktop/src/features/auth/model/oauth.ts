@@ -1,5 +1,4 @@
 import { createEvent, createStore, sample } from 'effector'
-import { once } from 'patronum'
 
 import { HttpRequestError } from '@shared/api'
 import { atom } from '@shared/factory'
@@ -13,10 +12,13 @@ import { providerLabel, readLastProvider, storeLastProvider } from '../lib'
 export const oauthPanel = atom(() => {
 	const mounted = createEvent()
 	const providerChosen = createEvent<string>()
+	const cancelled = createEvent()
+	const reloadRequested = createEvent()
 
-	sample({ clock: once(mounted), target: oauthProvidersQuery.start })
+	sample({ clock: [mounted, reloadRequested], target: oauthProvidersQuery.start })
 
 	const $providers = oauthProvidersQuery.$data.map(data => data?.providers ?? [])
+	const $unavailable = oauthProvidersQuery.$error.map(error => error !== null)
 
 	const $lastUsed = createStore<string | null>(readLastProvider()).on(
 		providerChosen,
@@ -36,12 +38,17 @@ export const oauthPanel = atom(() => {
 	}).watch(message => toast.error(message))
 
 	sample({ clock: providerChosen, target: sessionModel.oauthRequested })
+	sample({ clock: cancelled, target: sessionModel.oauthCancelRequested })
 
 	return {
 		mounted,
 		providerChosen,
+		cancelled,
+		reloadRequested,
 		$providers,
+		$unavailable,
 		$lastUsed,
-		$pending: sessionModel.$oauthProvider
+		$pending: sessionModel.$oauthProvider,
+		$starting: sessionModel.$oauthStarting
 	}
 })

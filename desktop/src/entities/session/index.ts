@@ -2,6 +2,6 @@ export { accountQuery, landingRoute, oauthProvidersQuery, resolveSession, sessio
 
 export type { ResolvedSession } from './model'
 
-export { completePasswordResetFx, requestPasswordResetFx } from './api'
+export { completePasswordResetFx, fetchOAuthProvidersFx, requestPasswordResetFx } from './api'
 
 export type { Account, PasswordResetInput } from './api'

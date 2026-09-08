@@ -9,13 +9,21 @@
 		margin: 1.5rem 0 1.25rem;
 		color: var(--text-secondary);
 		font-size: 0.8125rem;
+		text-transform: uppercase;
 
 		&::before,
 		&::after {
 			content: "";
+			margin-top: 5px;
+			border-radius: 10px;
 			flex: 1;
 			height: 1px;
-			background: var(--border);
+			background: var(--text-secondary);
+			opacity: 0.5;
+		}
+
+		& + .links {
+			margin-top: 0;
 		}
 	}
 

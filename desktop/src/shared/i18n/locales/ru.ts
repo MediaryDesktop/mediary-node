@@ -49,6 +49,10 @@ export const ru: Translation = {
 		providers: {
 			label: 'Продолжить через',
 			lastUsed: 'В прошлый раз',
+			waiting: 'Ожидание {{provider}} в браузере.',
+			cancel: 'Отменить',
+			unavailable: 'Не удалось загрузить способы входа.',
+			reload: 'Повторить',
 			failed: 'Не удалось войти через {{provider}}. Попробуйте ещё раз.'
 		},
 		signIn: {

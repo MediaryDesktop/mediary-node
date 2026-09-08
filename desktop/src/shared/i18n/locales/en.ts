@@ -51,6 +51,10 @@ export const en = {
 		providers: {
 			label: 'Continue with',
 			lastUsed: 'Last used',
+			waiting: 'Waiting for {{provider}} in your browser.',
+			cancel: 'Cancel',
+			unavailable: 'Could not load sign-in options.',
+			reload: 'Try again',
 			failed: 'Could not sign in with {{provider}}. Please try again.'
 		},
 		signIn: {

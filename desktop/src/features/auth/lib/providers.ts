@@ -7,6 +7,7 @@ export interface ProviderLook {
 
 const LOOKS: Record<string, ProviderLook> = {
 	google: { label: 'Google', icon: 'social/google' },
+	github: { label: 'GitHub', icon: 'social/github' },
 	facebook: { label: 'Facebook', icon: 'social/facebook' },
 	apple: { label: 'Apple', icon: 'social/apple' }
 }

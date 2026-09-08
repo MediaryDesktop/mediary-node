@@ -1,4 +1,4 @@
-import { createQuery } from '@farfetched/core'
+import { createQuery, exponentialDelay, retry } from '@farfetched/core'
 import { combine, createEffect, createEvent, createStore, sample } from 'effector'
 import { once } from 'patronum'
 
@@ -37,6 +37,8 @@ export function landingRoute(account: Account) {
 
 export const oauthProvidersQuery = createQuery({ effect: fetchOAuthProvidersFx, name: 'oauthProviders' })
 
+retry(oauthProvidersQuery, { times: 5, delay: exponentialDelay(700) })
+
 const readSessionFx = createEffect<void, StoredSession | null>(() => window.mediary.session.read())
 
 const writeSessionFx = createEffect<StoredSession, void>(session => window.mediary.session.write(session))
@@ -58,6 +60,7 @@ export const sessionModel = atom(() => {
 	const signOutRequested = createEvent()
 	const accountRefreshRequested = createEvent()
 	const oauthRequested = createEvent<string>()
+	const oauthCancelRequested = createEvent()
 	const emailVerificationRequested = createEvent()
 	const emailConfirmationRequested = createEvent<ConfirmEmailInput>()
 
@@ -122,6 +125,12 @@ export const sessionModel = atom(() => {
 	const oauthFailed = createEvent<Error>()
 	const oauthCancelled = createEvent()
 
+	const $oauthStarting = combine(
+		prepareOAuthFx.pending,
+		startOAuthFx.pending,
+		(preparing, starting) => preparing || starting
+	)
+
 	sample({ clock: oauthRequested, target: prepareOAuthFx })
 
 	sample({
@@ -160,7 +169,10 @@ export const sessionModel = atom(() => {
 		target: oauthFailed
 	})
 
-	sample({ clock: [startOAuthFx.failData, oauthCancelled], target: releaseOAuthFx })
+	sample({
+		clock: [startOAuthFx.failData, oauthCancelled, oauthCancelRequested],
+		target: releaseOAuthFx
+	})
 
 	$oauthProvider
 		.on(oauthRequested, (_, provider) => provider)
@@ -212,6 +224,7 @@ export const sessionModel = atom(() => {
 		signOutRequested,
 		accountRefreshRequested,
 		oauthRequested,
+		oauthCancelRequested,
 		emailVerificationRequested,
 		emailConfirmationRequested,
 
@@ -237,6 +250,7 @@ export const sessionModel = atom(() => {
 		$signInPending: signInFx.pending,
 		$signUpPending: signUpFx.pending,
 		$oauthProvider,
+		$oauthStarting,
 		$emailConfirmationPending: confirmEmailFx.pending,
 		$emailVerificationPending: sendEmailVerificationFx.pending
 	}

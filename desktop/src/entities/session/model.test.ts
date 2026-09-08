@@ -1,7 +1,7 @@
 import { allSettled, fork } from 'effector'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { fetchAccountFx, signOutFx } from './api'
+import { fetchAccountFx, signOutFx, startOAuthFx } from './api'
 import type { Account } from './api'
 import { sessionModel } from './model'
 
@@ -98,5 +98,57 @@ describe('signing out', () => {
 		expect(scope.getState(sessionModel.$hasCloudSession)).toBe(false)
 		expect(scope.getState(sessionModel.$account)).toBeNull()
 		expect(bridge.write).toHaveBeenLastCalledWith({ token: null, account: null })
+	})
+})
+
+describe('an OAuth flow the browser never finishes', () => {
+	const CONSENT = { url: 'https://provider.test/consent?redirect_uri=x' }
+
+	it('frees the provider buttons once the authorization comes back cancelled', async () => {
+		const scope = fork({ handlers: [[startOAuthFx, () => Promise.resolve(CONSENT)]] })
+
+		await allSettled(sessionModel.oauthRequested, { scope, params: 'github' })
+
+		expect(scope.getState(sessionModel.$oauthProvider)).toBeNull()
+	})
+
+	it('asks the main process to release the loopback listener when cancelled', async () => {
+		const release = vi.fn().mockResolvedValue(undefined)
+
+		window.mediary.oauth.release = release
+
+		const scope = fork()
+
+		await allSettled(sessionModel.oauthCancelRequested, { scope })
+
+		expect(release).toHaveBeenCalledTimes(1)
+	})
+
+	it('stops reporting starting once the browser has the consent page', async () => {
+		let releaseStart: ((consent: typeof CONSENT) => void) | undefined
+
+		const scope = fork({
+			handlers: [
+				[
+					startOAuthFx,
+					() =>
+						new Promise<typeof CONSENT>(resolve => {
+							releaseStart = resolve
+						})
+				]
+			]
+		})
+
+		const flow = allSettled(sessionModel.oauthRequested, { scope, params: 'github' })
+
+		await vi.waitFor(() => {
+			expect(scope.getState(sessionModel.$oauthStarting)).toBe(true)
+		})
+
+		releaseStart?.(CONSENT)
+		await flow
+
+		expect(scope.getState(sessionModel.$oauthStarting)).toBe(false)
+		expect(scope.getState(sessionModel.$oauthProvider)).toBeNull()
 	})
 })

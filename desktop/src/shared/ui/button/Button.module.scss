@@ -61,17 +61,22 @@
 	}
 
 	&.glass {
-		background: var(--field);
-		border-color: var(--border);
+		background: var(--glass);
+		border-color: var(--border-stronger);
 
 		&:not(:disabled):hover {
 			background: var(--field-hover);
 		}
 	}
 
-	&.glass-accent{
+	&.glass-accent {
 		background: var(--accent-muted);
 		border-color: var(--accent);
+		color: var(--accent);
+
+		&:not(:disabled):hover {
+			background: var(--accent-muted-hover);
+		}
 	}
 
 	&.ghost {

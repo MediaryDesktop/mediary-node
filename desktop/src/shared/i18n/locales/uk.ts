@@ -49,6 +49,10 @@ export const uk: Translation = {
 		providers: {
 			label: 'Продовжити через',
 			lastUsed: 'Минулого разу',
+			waiting: 'Очікування {{provider}} у браузері.',
+			cancel: 'Скасувати',
+			unavailable: 'Не вдалося завантажити способи входу.',
+			reload: 'Спробувати ще раз',
 			failed: 'Не вдалося увійти через {{provider}}. Спробуйте ще раз.'
 		},
 		signIn: {

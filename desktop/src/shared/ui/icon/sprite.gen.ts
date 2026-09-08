@@ -281,6 +281,7 @@ export const sprites = defineSpriteMap([
 			[
 				defineSpriteSymbol(['apple'], [48]),
 				defineSpriteSymbol(['facebook'], [48]),
+				defineSpriteSymbol(['github'], [24]),
 				defineSpriteSymbol(['google'], [48])
 			],
 			defineExternalAssetMeta('social.svg')
@@ -315,7 +316,7 @@ export type SpritesMeta = {
 		| 'sparkles'
 		| 'sun'
 		| 'user'
-	social: 'apple' | 'facebook' | 'google'
+	social: 'apple' | 'facebook' | 'github' | 'google'
 }
 
 //#endregion

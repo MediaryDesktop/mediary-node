@@ -19,10 +19,12 @@ export interface AuthProvidersPanelProps {
 
 export function AuthProvidersPanel({ mode, onUseEmail, onSwitch }: AuthProvidersPanelProps) {
 	const { t } = useTranslation()
-	const [providers, lastUsed, pending] = useUnit([
+	const [providers, lastUsed, pending, starting, unavailable] = useUnit([
 		oauthPanel.$providers,
 		oauthPanel.$lastUsed,
-		oauthPanel.$pending
+		oauthPanel.$pending,
+		oauthPanel.$starting,
+		oauthPanel.$unavailable
 	])
 
 	useEffect(() => oauthPanel.mounted(), [])
@@ -36,21 +38,22 @@ export function AuthProvidersPanel({ mode, onUseEmail, onSwitch }: AuthProviders
 					<ul className={styles.providers}>
 						{providers.map(provider => {
 							const look = providerLook(provider)
+							const remembered = lastUsed === provider
 
 							return (
 								<li key={provider} className={styles.provider}>
-									{lastUsed === provider && (
+									{remembered && (
 										<span className={styles.badge}>{t('auth.providers.lastUsed')}</span>
 									)}
 
 									<Button
-										variant='glass-accent'
-										
+										variant={remembered ? 'glass-accent' : 'glass'}
 										fullWidth
 										loading={pending === provider}
-										disabled={pending !== null}
+										disabled={starting}
 										startIcon={look && <Icon name={look.icon} size={20} />}
 										onClick={() => oauthPanel.providerChosen(provider)}
+										className={styles.providerBtn}
 									>
 										{providerLabel(provider)}
 									</Button>
@@ -59,11 +62,27 @@ export function AuthProvidersPanel({ mode, onUseEmail, onSwitch }: AuthProviders
 						})}
 					</ul>
 
+					{pending !== null && (
+						<p className={styles.waiting}>
+							{t('auth.providers.waiting', { provider: providerLabel(pending) })}{' '}
+							<AuthLink onClick={oauthPanel.cancelled} disabled={starting}>
+								{t('auth.providers.cancel')}
+							</AuthLink>
+						</p>
+					)}
+
 					<div className={panel.divider}>{t('auth.or')}</div>
 				</>
 			)}
 
-			<Button variant='secondary' fullWidth onClick={onUseEmail}>
+			{providers.length === 0 && unavailable && (
+				<p className={styles.waiting}>
+					{t('auth.providers.unavailable')}{' '}
+					<AuthLink onClick={oauthPanel.reloadRequested}>{t('auth.providers.reload')}</AuthLink>
+				</p>
+			)}
+
+			<Button variant='glass' fullWidth onClick={onUseEmail}>
 				{t(mode === 'signIn' ? 'auth.signIn.useEmail' : 'auth.signUp.useEmail')}
 			</Button>
 

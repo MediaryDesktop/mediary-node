@@ -76,9 +76,16 @@ function deliver(flow: PendingFlow): void {
 }
 
 export function releaseOAuthListener(): void {
-	if (pending) {
-		close(pending)
+	if (!pending) {
+		return
 	}
+
+	if (pending.resolve) {
+		deliver(pending)
+		return
+	}
+
+	close(pending)
 }
 
 export async function prepareOAuth(): Promise<OAuthListener> {

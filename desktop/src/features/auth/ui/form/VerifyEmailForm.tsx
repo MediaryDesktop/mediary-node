@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 import type { FormEvent } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, Icon, OtpInput } from '@shared/ui'
+import { Button, OtpInput } from '@shared/ui'
 
 import { useOtpCountdown } from '../../hooks'
 import { verifyEmailForm } from '../../model'
@@ -47,7 +47,6 @@ export function VerifyEmailForm() {
 				variant='primary'
 				fullWidth
 				loading={pending}
-				endIcon={<Icon name='common/arrow-right' size={18} />}
 				className={styles.submit}
 			>
 				{t('auth.verify.submit')}
