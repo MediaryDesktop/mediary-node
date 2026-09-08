@@ -1,7 +1,8 @@
 import { useTranslation } from '@shared/i18n'
 import { Icon, Input, Select } from '@shared/ui'
 
-import { SetupCard } from './SetupCard'
+import { SetupCard } from '../common'
+
 import styles from './SetupDownloadingStep.module.scss'
 
 export function SetupDownloadingStep() {

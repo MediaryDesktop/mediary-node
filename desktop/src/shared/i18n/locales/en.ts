@@ -181,8 +181,7 @@ export const en = {
 			blurb: 'An account is only needed for the cloud catalog and sync. The local library, player and downloads work without one.',
 			google: 'Continue with Google',
 			or: 'or',
-			email: 'Continue with email',
-			skip: 'Skip for now'
+			email: 'Continue with email'
 		},
 		library: {
 			placeholder: 'No folder selected',

@@ -1,15 +1,12 @@
-export { SETUP_STEPS } from './lib/steps'
-export type { SetupStepId } from './lib/steps'
+export { SETUP_STEPS } from './config/steps'
+export type { SetupStepId } from './config/steps'
 
-export { SetupLayout } from './ui/SetupLayout'
-export { SetupStepRail } from './ui/SetupStepRail'
-export { SetupStepPanel } from './ui/SetupStepPanel'
-export { SetupFooter } from './ui/SetupFooter'
-export { SetupNotice } from './ui/SetupNotice'
-
-export { SetupAccountStep } from './ui/SetupAccountStep'
-export { SetupLibraryStep } from './ui/SetupLibraryStep'
-export { SetupPlayerStep } from './ui/SetupPlayerStep'
-export { SetupDownloadingStep } from './ui/SetupDownloadingStep'
-export { SetupDebridStep } from './ui/SetupDebridStep'
-export { SetupPendingStep } from './ui/SetupPendingStep'
+export { SetupNotice } from './ui/common'
+export { SetupFooter, SetupLayout, SetupStepPanel, SetupStepRail } from './ui/layout'
+export {
+	SetupAccountStep,
+	SetupDebridStep,
+	SetupDownloadingStep,
+	SetupLibraryStep,
+	SetupPlayerStep
+} from './ui/step'

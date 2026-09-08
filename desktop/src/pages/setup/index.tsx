@@ -12,14 +12,11 @@ import {
 	SetupLayout,
 	SetupLibraryStep,
 	SetupNotice,
-	SetupPendingStep,
 	SetupPlayerStep,
 	SetupStepPanel,
 	SetupStepRail
 } from '@features/setup-wizard'
 import type { SetupStepId } from '@features/setup-wizard'
-
-const BUILT_STEPS: readonly SetupStepId[] = ['account', 'library', 'player', 'downloads', 'debrid']
 
 export function SetupPage() {
 	const { t } = useTranslation()
@@ -70,7 +67,6 @@ export function SetupPage() {
 				{step.id === 'player' && <SetupPlayerStep />}
 				{step.id === 'downloads' && <SetupDownloadingStep />}
 				{step.id === 'debrid' && <SetupDebridStep />}
-				{!BUILT_STEPS.includes(step.id) && <SetupPendingStep />}
 			</SetupStepPanel>
 		</SetupLayout>
 	)

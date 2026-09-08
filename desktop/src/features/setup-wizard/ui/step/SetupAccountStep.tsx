@@ -1,8 +1,9 @@
 import { useTranslation } from '@shared/i18n'
 import { Button, Icon } from '@shared/ui'
 
+import { SetupCard } from '../common'
+
 import styles from './SetupAccountStep.module.scss'
-import { SetupCard } from './SetupCard'
 
 export function SetupAccountStep() {
 	const { t } = useTranslation()
@@ -18,13 +19,9 @@ export function SetupAccountStep() {
 
 				<div className={styles.divider}>{t('setup.account.or')}</div>
 
-				<Button variant='secondary' fullWidth startIcon={<Icon name='common/mail' size={18} />}>
+				<Button variant='ghost' fullWidth startIcon={<Icon name='common/mail' size={18} />}>
 					{t('setup.account.email')}
 				</Button>
-
-				<button type='button' className={styles.skip}>
-					{t('setup.account.skip')}
-				</button>
 			</div>
 		</SetupCard>
 	)

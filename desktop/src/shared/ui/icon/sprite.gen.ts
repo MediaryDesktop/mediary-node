@@ -260,7 +260,7 @@ export const sprites = defineSpriteMap([
 				defineSpriteSymbol(['folder-open'], [24]),
 				defineSpriteSymbol(['folder'], [24]),
 				defineSpriteSymbol(['info'], [24]),
-				defineSpriteSymbol(['library'], [24]),
+				defineSpriteSymbol(['library'], [64, '0 0 32 32']),
 				defineSpriteSymbol(['lock'], [24]),
 				defineSpriteSymbol(['mail'], [24]),
 				defineSpriteSymbol(['maximize'], [24]),

@@ -34,8 +34,8 @@
 			display: inline-flex;
 			align-items: center;
 			justify-content: center;
-			width: 40px;
-			height: 40px;
+			width: 50px;
+			height: 50px;
 			border: 1px solid var(--border);
 			border-radius: 12px;
 			background: var(--surface);
@@ -46,37 +46,21 @@
 		}
 
 		.label {
-			font-size: 0.8125rem;
+			font-size: 1rem;
 			font-weight: 600;
 			line-height: 1.3;
 			text-align: center;
 		}
 
-		&.done {
-			color: var(--text);
-
-			.badge {
-				border-color: var(--accent);
-				color: var(--accent-text);
-			}
-		}
-
+		&.done,
 		&.active {
-			color: var(--text);
+			color: var(--accent);
 
 			.badge {
 				border-color: transparent;
 				background: var(--accent-muted);
 				color: var(--accent-text);
 				box-shadow: 0 0 0 1px var(--accent) inset;
-			}
-		}
-
-		&:not(:disabled):not(.active):hover {
-			color: var(--text);
-
-			.badge {
-				border-color: var(--accent);
 			}
 		}
 	}

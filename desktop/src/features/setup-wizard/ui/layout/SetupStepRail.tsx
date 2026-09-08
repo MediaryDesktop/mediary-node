@@ -3,8 +3,7 @@ import clsx from 'clsx'
 import { useTranslation } from '@shared/i18n'
 import { Icon } from '@shared/ui'
 
-import { SETUP_STEPS } from '../lib/steps'
-import type { SetupStepId } from '../lib/steps'
+import {type SetupStepId, SETUP_STEPS } from '../../config'
 
 import styles from './SetupStepRail.module.scss'
 
@@ -33,7 +32,7 @@ export function SetupStepRail({ current, onSelect }: SetupStepRailProps) {
 						onClick={() => onSelect?.(step.id)}
 					>
 						<span className={styles.badge}>
-							<Icon name={done ? 'common/check' : step.icon} size={20} />
+							<Icon name={step.icon} size={24} />
 						</span>
 
 						<span className={styles.label}>{t(step.labelKey)}</span>

@@ -26,20 +26,4 @@
 			background: var(--border);
 		}
 	}
-
-	.skip {
-		margin: 1.25rem auto 0;
-		padding: 0;
-		border: 0;
-		background: none;
-		color: var(--text-secondary);
-		font: inherit;
-		font-size: 0.8125rem;
-		cursor: pointer;
-
-		&:hover,
-		&:focus-visible {
-			color: var(--text);
-		}
-	}
 }

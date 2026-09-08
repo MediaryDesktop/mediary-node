@@ -3,7 +3,8 @@ import { useId } from 'react'
 import { useTranslation } from '@shared/i18n'
 import { Icon, Input } from '@shared/ui'
 
-import { SetupCard } from './SetupCard'
+import { SetupCard } from '../common'
+
 import styles from './SetupLibraryStep.module.scss'
 
 interface FolderFieldProps {
