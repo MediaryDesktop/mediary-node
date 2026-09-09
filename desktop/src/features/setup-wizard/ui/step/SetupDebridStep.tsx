@@ -1,7 +1,7 @@
-import { useId } from 'react'
+import { useId, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Select } from '@shared/ui'
+import { SelectDropdown } from '@shared/ui'
 
 import { SetupCard } from '../layout'
 
@@ -10,6 +10,7 @@ import styles from './SetupDebridStep.module.scss'
 export function SetupDebridStep() {
 	const { t } = useTranslation()
 	const id = useId()
+	const [service, setService] = useState<string | null>('none')
 
 	return (
 		<SetupCard>
@@ -18,9 +19,10 @@ export function SetupDebridStep() {
 					{t('setup.debrid.label')}
 				</label>
 
-				<Select
+				<SelectDropdown
 					id={id}
-					defaultValue='none'
+					value={service}
+					onChange={setService}
 					options={[
 						{ value: 'none', label: t('setup.debrid.none') },
 						{ value: 'torbox', label: t('setup.debrid.torbox') },

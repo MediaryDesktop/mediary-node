@@ -30,6 +30,12 @@ export const en = {
 		hidePassword: 'Hide password'
 	},
 
+	select: {
+		placeholder: 'Select…',
+		noResults: 'Nothing found',
+		clear: 'Clear selection',
+		remove: 'Remove {{label}}'
+	},
 	window: {
 		minimize: 'Minimize',
 		maximize: 'Maximize',

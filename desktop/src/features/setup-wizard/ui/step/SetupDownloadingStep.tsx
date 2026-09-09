@@ -1,5 +1,7 @@
+import { useState } from 'react'
+
 import { useTranslation } from '@shared/i18n'
-import { Icon, Input, Select } from '@shared/ui'
+import { Icon, Input, SelectDropdown } from '@shared/ui'
 
 import { SetupCard } from '../layout'
 
@@ -7,6 +9,7 @@ import styles from './SetupDownloadingStep.module.scss'
 
 export function SetupDownloadingStep() {
 	const { t } = useTranslation()
+	const [client, setClient] = useState<string | null>('qbittorrent')
 
 	return (
 		<>
@@ -18,8 +21,9 @@ export function SetupDownloadingStep() {
 				<div className={styles.field}>
 					<span className={styles.label}>{t('setup.downloading.client.label')}</span>
 
-					<Select
-						defaultValue='qbittorrent'
+					<SelectDropdown
+						value={client}
+						onChange={setClient}
 						options={[{ value: 'qbittorrent', label: t('setup.downloading.client.qbittorrent') }]}
 					/>
 				</div>

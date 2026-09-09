@@ -1,5 +1,15 @@
 import '@testing-library/jest-dom/vitest'
 
+class ResizeObserverStub implements ResizeObserver {
+	observe() {}
+	unobserve() {}
+	disconnect() {}
+}
+
+globalThis.ResizeObserver ??= ResizeObserverStub
+
+Element.prototype.scrollIntoView ??= () => {}
+
 Object.defineProperty(window, 'mediary', {
 	writable: true,
 	value: {

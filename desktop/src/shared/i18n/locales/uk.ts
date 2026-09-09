@@ -28,6 +28,12 @@ export const uk: Translation = {
 		hidePassword: 'Сховати пароль'
 	},
 
+	select: {
+		placeholder: 'Оберіть…',
+		noResults: 'Нічого не знайдено',
+		clear: 'Очистити вибір',
+		remove: 'Прибрати {{label}}'
+	},
 	window: {
 		minimize: 'Згорнути',
 		maximize: 'Розгорнути',

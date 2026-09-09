@@ -10,6 +10,7 @@ export type { RippleOptions } from './ripple/useRipple'
 export { Icon } from './icon/Icon'
 export type { IconName } from './icon/Icon'
 
-export { Select } from './select/Select'
+export { SelectDropdown } from './select-dropdown'
+export type { SelectDropdownOption, SelectDropdownProps } from './select-dropdown'
 
 export { Toaster, toast } from './toast'

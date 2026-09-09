@@ -1,7 +1,7 @@
-import { useId } from 'react'
+import { useId, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Icon, Select } from '@shared/ui'
+import { Icon, SelectDropdown } from '@shared/ui'
 
 import { SetupCard } from '../layout'
 
@@ -10,6 +10,7 @@ import styles from './SetupPlayerStep.module.scss'
 export function SetupPlayerStep() {
 	const { t } = useTranslation()
 	const id = useId()
+	const [player, setPlayer] = useState<string | null>('mpv')
 
 	return (
 		<>
@@ -28,9 +29,10 @@ export function SetupPlayerStep() {
 						<span className={styles.required}>*</span>
 					</div>
 
-					<Select
+					<SelectDropdown
 						id={id}
-						defaultValue='mpv'
+						value={player}
+						onChange={setPlayer}
 						startIcon={<Icon name='common/play' size={16} className={styles.playIcon} />}
 						options={[
 							{ value: 'mpv', label: t('setup.player.select.mpv') },

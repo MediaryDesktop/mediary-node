@@ -28,6 +28,12 @@ export const ru: Translation = {
 		hidePassword: 'Скрыть пароль'
 	},
 
+	select: {
+		placeholder: 'Выберите…',
+		noResults: 'Ничего не найдено',
+		clear: 'Очистить выбор',
+		remove: 'Убрать {{label}}'
+	},
 	window: {
 		minimize: 'Свернуть',
 		maximize: 'Развернуть',
