@@ -234,6 +234,18 @@ export const en = {
 		}
 	},
 
+	fallback: {
+		notFound: {
+			title: 'This screen does not exist',
+			description: 'The address is wrong, or the screen has been removed.',
+			home: 'Back to home'
+		},
+		error: {
+			title: 'Something went wrong',
+			description: 'The screen could not be opened. Try again, or go back to home.',
+			retry: 'Try again'
+		}
+	},
 	home: {
 		subtitle: 'Phase 0 skeleton. No catalog yet — this only proves the shell can see the node.',
 		account: {

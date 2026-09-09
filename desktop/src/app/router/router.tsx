@@ -16,30 +16,11 @@ import {
 	ResetPasswordPage,
 	VerifyEmailPage
 } from '@pages/auth'
+import { NotFoundPage, RouteErrorPage } from '@pages/fallback'
 import { HomePage } from '@pages/home'
 import { SetupPage } from '@pages/setup'
 
 import { AppLayout } from '../layout/AppLayout'
-
-async function requireLiveSession() {
-	const { account, linked } = await resolveSession()
-
-	if (!account || !linked) {
-		throw redirect({ to: '/sign-in' })
-	}
-
-	if (account.email_verified) {
-		throw redirect({ to: '/' })
-	}
-}
-
-async function requireNoLiveSession() {
-	const { account, linked } = await resolveSession()
-
-	if (linked && account) {
-		throw redirect({ to: landingRoute(account) })
-	}
-}
 
 const rootRoute = createRootRoute({ component: Outlet })
 
@@ -65,73 +46,98 @@ const setupRoute = createRoute({
 	component: SetupPage
 })
 
-const signInRoute = createRoute({
+const guestRoute = createRoute({
 	getParentRoute: () => rootRoute,
+	id: 'guest',
+	beforeLoad: async () => {
+		const { account, linked } = await resolveSession()
+
+		if (linked && account) {
+			throw redirect({ to: landingRoute(account) })
+		}
+	}
+})
+
+const signInRoute = createRoute({
+	getParentRoute: () => guestRoute,
 	path: '/sign-in',
-	beforeLoad: requireNoLiveSession,
 	component: () => <AuthProvidersPage mode='signIn' />
 })
 
 const signInEmailRoute = createRoute({
-	getParentRoute: () => rootRoute,
+	getParentRoute: () => guestRoute,
 	path: '/sign-in/email',
-	beforeLoad: requireNoLiveSession,
 	component: () => <AuthEmailPage mode='signIn' />
 })
 
 const signUpRoute = createRoute({
-	getParentRoute: () => rootRoute,
+	getParentRoute: () => guestRoute,
 	path: '/sign-up',
-	beforeLoad: requireNoLiveSession,
 	component: () => <AuthProvidersPage mode='signUp' />
 })
 
 const signUpEmailRoute = createRoute({
-	getParentRoute: () => rootRoute,
+	getParentRoute: () => guestRoute,
 	path: '/sign-up/email',
-	beforeLoad: requireNoLiveSession,
 	component: () => <AuthEmailPage mode='signUp' />
 })
 
-const verifyEmailRoute = createRoute({
-	getParentRoute: () => rootRoute,
-	path: '/verify-email',
-	beforeLoad: requireLiveSession,
-	component: VerifyEmailPage
-})
-
 const resetPasswordRoute = createRoute({
-	getParentRoute: () => rootRoute,
+	getParentRoute: () => guestRoute,
 	path: '/reset-password',
 	component: ResetPasswordPage
 })
 
 const newPasswordRoute = createRoute({
-	getParentRoute: () => rootRoute,
+	getParentRoute: () => guestRoute,
 	path: '/new-password',
-
 	validateSearch: (search: Record<string, unknown>): { email: string } => ({
 		email: typeof search.email === 'string' ? search.email : ''
 	}),
-	component: NewPasswordPage
+	beforeLoad: ({ search }) => {
+		if (!search.email) {
+			throw redirect({ to: '/reset-password' })
+		}
+	},
+	component: () => <NewPasswordPage email={newPasswordRoute.useSearch().email} />
+})
+
+const verifyEmailRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: '/verify-email',
+	beforeLoad: async () => {
+		const { account, linked } = await resolveSession()
+
+		if (!account || !linked) {
+			throw redirect({ to: '/sign-in' })
+		}
+
+		if (account.email_verified) {
+			throw redirect({ to: '/' })
+		}
+	},
+	component: VerifyEmailPage
 })
 
 const routeTree = rootRoute.addChildren([
 	framedRoute.addChildren([homeRoute]),
 	setupRoute,
-	signInRoute,
-	signInEmailRoute,
-	signUpRoute,
-	signUpEmailRoute,
 	verifyEmailRoute,
-	resetPasswordRoute,
-	newPasswordRoute
+	guestRoute.addChildren([
+		signInRoute,
+		signInEmailRoute,
+		signUpRoute,
+		signUpEmailRoute,
+		resetPasswordRoute,
+		newPasswordRoute
+	])
 ])
 
 export const router = createRouter({
 	routeTree,
 	history: createHashHistory(),
-	defaultPreload: 'intent'
+	defaultNotFoundComponent: NotFoundPage,
+	defaultErrorComponent: RouteErrorPage
 })
 
 declare module '@tanstack/react-router' {

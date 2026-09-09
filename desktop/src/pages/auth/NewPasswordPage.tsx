@@ -1,4 +1,4 @@
-import { useNavigate, useSearch } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { useCallback, useEffect } from 'react'
 
 import { useTranslation } from '@shared/i18n'
@@ -6,17 +6,14 @@ import { useGoBack } from '@shared/lib'
 
 import { AuthFormWrapper, AuthLayout, AuthNewPasswordPanel, passwordResetCompleted } from '@features/auth'
 
-export function NewPasswordPage() {
+export interface NewPasswordPageProps {
+	email: string
+}
+
+export function NewPasswordPage({ email }: NewPasswordPageProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
 	const goBack = useGoBack('/reset-password')
-	const { email } = useSearch({ from: '/new-password' })
-
-	useEffect(() => {
-		if (!email) {
-			void navigate({ to: '/reset-password' })
-		}
-	}, [email, navigate])
 
 	useEffect(() => passwordResetCompleted.watch(() => navigate({ to: '/sign-in/email' })), [navigate])
 
