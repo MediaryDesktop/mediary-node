@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Logo, WindowControls } from '@shared/ui'
+import { Logo } from '@shared/ui'
 
 import styles from './SetupLayout.module.scss'
 
@@ -18,7 +18,6 @@ export function SetupLayout({ rail, children, footer, caption }: SetupLayoutProp
 	return (
 		<div className={styles.page}>
 			<div className={styles.dragStrip} />
-			<WindowControls className={styles.windowControls} />
 			<div className={styles.glow} />
 
 			<header className={styles.head}>

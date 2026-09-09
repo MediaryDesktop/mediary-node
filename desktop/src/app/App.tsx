@@ -5,6 +5,7 @@ import { nodeBridgeMounted, subscribeToNodeState } from '@infra/node'
 
 import { sessionModel } from '@entities/session'
 
+import { WindowChrome } from './layout/WindowChrome'
 import { AppProviders } from './providers'
 import { router } from './router'
 
@@ -22,6 +23,7 @@ export function App() {
 	return (
 		<AppProviders>
 			<RouterProvider router={router} />
+			<WindowChrome />
 		</AppProviders>
 	)
 }
