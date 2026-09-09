@@ -18,8 +18,6 @@ export function App() {
 		return unsubscribe
 	}, [])
 
-	useEffect(() => sessionModel.signedOut.watch(() => void router.navigate({ to: '/' })), [])
-
 	return (
 		<AppProviders>
 			<RouterProvider router={router} />

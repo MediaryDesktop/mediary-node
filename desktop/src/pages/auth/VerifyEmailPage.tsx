@@ -1,6 +1,5 @@
-import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
-import { useCallback, useEffect } from 'react'
+import { useCallback } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 
@@ -10,10 +9,7 @@ import { AuthFormWrapper, AuthLayout, AuthVerifyEmailPanel, CODE_LENGTH } from '
 
 export function VerifyEmailPage() {
 	const { t } = useTranslation()
-	const navigate = useNavigate()
 	const account = useUnit(sessionModel.$account)
-
-	useEffect(() => sessionModel.emailVerified.watch(() => navigate({ to: '/' })), [navigate])
 
 	const leave = useCallback(() => sessionModel.signOutRequested(), [])
 
