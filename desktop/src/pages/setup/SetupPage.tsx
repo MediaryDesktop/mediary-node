@@ -8,15 +8,13 @@ import {
 	SetupAccountStep,
 	SetupDebridStep,
 	SetupDownloadingStep,
-	SetupFooter,
 	SetupLayout,
 	SetupLibraryStep,
-	SetupNotice,
-	SetupPlayerStep,
-	SetupStepPanel,
-	SetupStepRail
+	SetupPlayerStep
 } from '@features/setup-wizard'
 import type { SetupStepId } from '@features/setup-wizard'
+
+import styles from './SetupPage.module.scss'
 
 export function SetupPage() {
 	const { t } = useTranslation()
@@ -44,30 +42,28 @@ export function SetupPage() {
 
 	return (
 		<SetupLayout
-			rail={<SetupStepRail current={step.id} onSelect={goTo} />}
-			footer={
-				<SetupFooter
-					onBack={goBack}
-					onNext={goNext}
-					backDisabled={index === 0}
-					nextLabel={isLast ? t('setup.finish') : undefined}
-				/>
-			}
+			current={step.id}
+			onSelectStep={goTo}
+			onBack={goBack}
+			onNext={goNext}
+			backDisabled={index === 0}
+			nextLabel={isLast ? t('setup.finish') : undefined}
 			caption={t('setup.progress', { current: index + 1, total: SETUP_STEPS.length })}
 		>
-			<SetupStepPanel
-				notice={
-					step.id === 'player' ? <SetupNotice>{t('setup.player.notice')}</SetupNotice> : undefined
-				}
-				title={t(step.titleKey)}
-				description={t(step.descriptionKey)}
-			>
-				{step.id === 'account' && <SetupAccountStep />}
-				{step.id === 'library' && <SetupLibraryStep />}
-				{step.id === 'player' && <SetupPlayerStep />}
-				{step.id === 'downloads' && <SetupDownloadingStep />}
-				{step.id === 'debrid' && <SetupDebridStep />}
-			</SetupStepPanel>
+			<section className={styles.panel}>
+				<header className={styles.header}>
+					<h1 className={styles.title}>{t(step.titleKey)}</h1>
+					<p className={styles.description}>{t(step.descriptionKey)}</p>
+				</header>
+
+				<div className={styles.content}>
+					{step.id === 'account' && <SetupAccountStep />}
+					{step.id === 'library' && <SetupLibraryStep />}
+					{step.id === 'player' && <SetupPlayerStep />}
+					{step.id === 'downloads' && <SetupDownloadingStep />}
+					{step.id === 'debrid' && <SetupDebridStep />}
+				</div>
+			</section>
 		</SetupLayout>
 	)
 }

@@ -3,7 +3,7 @@ import { useId } from 'react'
 import { useTranslation } from '@shared/i18n'
 import { Select } from '@shared/ui'
 
-import { SetupCard } from '../common'
+import { SetupCard } from '../layout'
 
 import styles from './SetupDebridStep.module.scss'
 

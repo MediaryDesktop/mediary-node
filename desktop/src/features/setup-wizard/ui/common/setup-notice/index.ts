@@ -1,1 +1,0 @@
-export { SetupNotice } from './SetupNotice'

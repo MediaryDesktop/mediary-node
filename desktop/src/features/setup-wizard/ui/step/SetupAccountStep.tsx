@@ -1,7 +1,7 @@
 import { useTranslation } from '@shared/i18n'
 import { Button, Icon } from '@shared/ui'
 
-import { SetupCard } from '../common'
+import { SetupCard } from '../layout'
 
 import styles from './SetupAccountStep.module.scss'
 
