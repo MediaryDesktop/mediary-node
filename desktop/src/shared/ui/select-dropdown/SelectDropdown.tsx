@@ -1,24 +1,25 @@
 import clsx from 'clsx'
 import type { KeyboardEvent, ReactNode } from 'react'
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import { useTranslation } from '../../i18n'
 import { Icon } from '../icon/Icon'
-import type { IconName } from '../icon/Icon'
-import { useRipple } from '../ripple/useRipple'
 
-import { activeIndexOf, edgeIndex, filterOptions, resolveKeyAction, stepIndex } from './lib'
+import {
+	activeIndexOf,
+	edgeIndex,
+	filterOptions,
+	resolveKeyAction,
+	selectedOptionsOf,
+	stepIndex
+} from './logic'
+import type { SelectDropdownOption } from './logic'
+import { Option } from './Option'
 import styles from './SelectDropdown.module.scss'
 import { useFloatingPanel } from './useFloatingPanel'
 
-export interface SelectDropdownOption {
-	value: string
-	label: string
-	description?: string
-	icon?: IconName
-	disabled?: boolean
-}
+export type { SelectDropdownOption } from './logic'
 
 interface SelectDropdownBaseProps {
 	options: SelectDropdownOption[]
@@ -67,35 +68,20 @@ export function SelectDropdown(props: SelectDropdownProps) {
 	const panelRef = useRef<HTMLDivElement>(null)
 
 	const multiple = props.mode === 'multiple'
+	const selected = multiple ? props.value : props.value ? [props.value] : []
 
-	const selected = useMemo(
-		() => (props.mode === 'multiple' ? props.value : props.value ? [props.value] : []),
-		[props.mode, props.value]
-	)
+	const selectedOptions = selectedOptionsOf(options, selected)
+	const visible = filterOptions(options, query)
+	const activeIndex = activeIndexOf(visible, activeValue ?? selected[0])
 
-	const selectedOptions = useMemo(
-		() => selected.flatMap(value => options.filter(option => option.value === value)),
-		[options, selected]
-	)
+	const commit = (next: string[]) => {
+		if (props.mode === 'multiple') {
+			props.onChange(next)
+			return
+		}
 
-	const visible = useMemo(() => filterOptions(options, query), [options, query])
-
-	const activeIndex = useMemo(
-		() => activeIndexOf(visible, activeValue ?? selected[0]),
-		[visible, activeValue, selected]
-	)
-
-	const commit = useCallback(
-		(next: string[]) => {
-			if (props.mode === 'multiple') {
-				props.onChange(next)
-				return
-			}
-
-			props.onChange(next[0] ?? null)
-		},
-		[props]
-	)
+		props.onChange(next[0] ?? null)
+	}
 
 	const close = useCallback(() => {
 		setOpen(false)
@@ -103,31 +89,33 @@ export function SelectDropdown(props: SelectDropdownProps) {
 		setActiveValue(null)
 	}, [])
 
-	const position = useFloatingPanel({ open, anchorRef: fieldRef, panelRef, containerRef, onDismiss: close })
+	const position = useFloatingPanel({
+		open,
+		anchorRef: fieldRef,
+		panelRef,
+		containerRef,
+		onDismiss: close
+	})
 
-	const toggleOption = useCallback(
-		(option: SelectDropdownOption) => {
-			if (option.disabled) {
-				return
-			}
+	const toggleOption = (option: SelectDropdownOption) => {
+		if (option.disabled) {
+			return
+		}
 
-			if (multiple) {
-				const next = selected.includes(option.value)
+		if (multiple) {
+			commit(
+				selected.includes(option.value)
 					? selected.filter(value => value !== option.value)
 					: [...selected, option.value]
+			)
 
-				commit(next)
-				setQuery('')
-				return
-			}
+			setQuery('')
+			return
+		}
 
-			commit([option.value])
-			close()
-		},
-		[close, commit, multiple, selected]
-	)
-
-	const clear = useCallback(() => commit([]), [commit])
+		commit([option.value])
+		close()
+	}
 
 	useEffect(() => {
 		if (!open) {
@@ -291,7 +279,7 @@ export function SelectDropdown(props: SelectDropdownProps) {
 							className={styles.action}
 							aria-label={t('select.clear')}
 							onMouseDown={event => event.stopPropagation()}
-							onClick={clear}
+							onClick={() => commit([])}
 						>
 							<Icon name='common/close' size={16} />
 						</button>
@@ -343,51 +331,6 @@ export function SelectDropdown(props: SelectDropdownProps) {
 					</div>,
 					document.body
 				)}
-		</div>
-	)
-}
-
-interface OptionProps {
-	id: string
-	option: SelectDropdownOption
-	selected: boolean
-	active: boolean
-	multiple: boolean
-	onSelect: (option: SelectDropdownOption) => void
-	onHover: () => void
-}
-
-function Option({ id, option, selected, active, multiple, onSelect, onHover }: OptionProps) {
-	const ripple = useRipple<HTMLDivElement>({ disabled: option.disabled })
-
-	return (
-		<div
-			ref={ripple}
-			id={id}
-			role='option'
-			aria-selected={selected}
-			aria-disabled={option.disabled || undefined}
-			data-active={active}
-			className={clsx(
-				styles.option,
-				selected && styles.isSelected,
-				active && styles.isActive,
-				option.disabled && styles.isDisabled
-			)}
-			onMouseMove={onHover}
-			onMouseDown={event => event.preventDefault()}
-			onClick={() => onSelect(option)}
-		>
-			{multiple && <span className={clsx(styles.checkbox, selected && styles.isChecked)} />}
-
-			{option.icon && <Icon name={option.icon} size={20} className={styles.optionIcon} />}
-
-			<span className={styles.optionText}>
-				<span className={styles.optionLabel}>{option.label}</span>
-				{option.description && <span className={styles.optionDescription}>{option.description}</span>}
-			</span>
-
-			{!multiple && selected && <Icon name='common/check' size={16} className={styles.check} />}
 		</div>
 	)
 }

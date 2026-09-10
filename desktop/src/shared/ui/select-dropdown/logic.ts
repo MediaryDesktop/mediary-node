@@ -1,4 +1,12 @@
-import type { SelectDropdownOption } from './SelectDropdown'
+import type { IconName } from '../icon/Icon'
+
+export interface SelectDropdownOption {
+	value: string
+	label: string
+	description?: string
+	icon?: IconName
+	disabled?: boolean
+}
 
 export type SelectAction =
 	'open' | 'close' | 'dismiss' | 'next' | 'previous' | 'first' | 'last' | 'select' | 'removeLast'
@@ -9,6 +17,19 @@ export interface SelectKeyContext {
 	multiple: boolean
 	hasQuery: boolean
 	hasSelection: boolean
+}
+
+export function selectedOptionsOf(
+	options: SelectDropdownOption[],
+	selected: string[]
+): SelectDropdownOption[] {
+	const byValue = new Map(options.map(option => [option.value, option]))
+
+	return selected.flatMap(value => {
+		const option = byValue.get(value)
+
+		return option ? [option] : []
+	})
 }
 
 export function filterOptions(options: SelectDropdownOption[], query: string): SelectDropdownOption[] {

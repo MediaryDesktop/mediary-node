@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import { useState } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
-import { resolveKeyAction, stepIndex } from './lib'
+import { resolveKeyAction, stepIndex } from './logic'
 import { SelectDropdown } from './SelectDropdown'
 import type { SelectDropdownOption } from './SelectDropdown'
 
@@ -186,6 +186,24 @@ describe('multiple mode', () => {
 		fireEvent.click(screen.getByRole('option', { name: /mpv/ }))
 
 		expect(onChange).toHaveBeenLastCalledWith([])
+	})
+
+	it('shows tags in the order they were picked, not in the order of the options', () => {
+		const onChange = vi.fn()
+		render(<Multiple onChange={onChange} />)
+
+		openMenu()
+		fireEvent.click(screen.getByRole('option', { name: /Custom player/ }))
+		fireEvent.click(screen.getByRole('option', { name: /mpv/ }))
+
+		expect(screen.getAllByRole('button', { name: /^Remove/ }).map(button => button.ariaLabel)).toEqual([
+			'Remove Custom player',
+			'Remove mpv'
+		])
+
+		fireEvent.keyDown(screen.getByRole('combobox'), { key: 'Backspace' })
+
+		expect(onChange).toHaveBeenLastCalledWith(['custom'])
 	})
 
 	it('drops the last tag on Backspace with an empty query', () => {
