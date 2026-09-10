@@ -18,8 +18,7 @@
 		cursor: pointer;
 		transition:
 			border-color 160ms,
-			background-color 160ms,
-			box-shadow 160ms;
+			background-color 160ms;
 
 		&:hover:not(.isDisabled) {
 			background: var(--field-hover);
@@ -28,7 +27,6 @@
 		&:focus-within {
 			border-color: var(--accent);
 			background: var(--field-hover);
-			box-shadow: var(--focus-shadow);
 		}
 
 		&.invalid {
@@ -194,6 +192,19 @@
 			color: var(--text);
 			cursor: pointer;
 			transition: background-color 160ms;
+
+			:global(.ripple__container) {
+				z-index: 0;
+				border-radius: inherit;
+			}
+
+			.checkbox,
+			.optionIcon,
+			.optionText,
+			.check {
+				position: relative;
+				z-index: 1;
+			}
 
 			&.isActive {
 				background: var(--surface-hover);
