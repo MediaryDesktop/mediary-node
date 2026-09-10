@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import type { KeyboardEvent, ReactNode } from 'react'
-import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import { useTranslation } from '../../i18n'
@@ -8,7 +8,9 @@ import { Icon } from '../icon/Icon'
 import type { IconName } from '../icon/Icon'
 import { useRipple } from '../ripple/useRipple'
 
+import { activeIndexOf, edgeIndex, filterOptions, resolveKeyAction, stepIndex } from './lib'
 import styles from './SelectDropdown.module.scss'
+import { useFloatingPanel } from './useFloatingPanel'
 
 export interface SelectDropdownOption {
 	value: string
@@ -36,20 +38,6 @@ export type SelectDropdownProps = SelectDropdownBaseProps &
 		| { mode: 'multiple'; value: string[]; onChange: (value: string[]) => void }
 	)
 
-const GAP = 4
-const VIEWPORT_MARGIN = 8
-const MAX_HEIGHT = 240
-const MIN_HEIGHT = 96
-
-interface Position {
-	top: number
-	left: number
-	width: number
-	maxHeight: number
-}
-
-const INITIAL_POSITION: Position = { top: 0, left: 0, width: 0, maxHeight: MAX_HEIGHT }
-
 export function SelectDropdown(props: SelectDropdownProps) {
 	const {
 		options,
@@ -72,7 +60,6 @@ export function SelectDropdown(props: SelectDropdownProps) {
 	const [open, setOpen] = useState(false)
 	const [query, setQuery] = useState('')
 	const [activeValue, setActiveValue] = useState<string | null>(null)
-	const [position, setPosition] = useState<Position>(INITIAL_POSITION)
 
 	const containerRef = useRef<HTMLDivElement>(null)
 	const fieldRef = useRef<HTMLDivElement>(null)
@@ -91,18 +78,12 @@ export function SelectDropdown(props: SelectDropdownProps) {
 		[options, selected]
 	)
 
-	const visible = useMemo(() => {
-		const term = query.trim().toLowerCase()
+	const visible = useMemo(() => filterOptions(options, query), [options, query])
 
-		if (!term) {
-			return options
-		}
-
-		return options.filter(
-			option =>
-				option.label.toLowerCase().includes(term) || option.description?.toLowerCase().includes(term)
-		)
-	}, [options, query])
+	const activeIndex = useMemo(
+		() => activeIndexOf(visible, activeValue ?? selected[0]),
+		[visible, activeValue, selected]
+	)
 
 	const commit = useCallback(
 		(next: string[]) => {
@@ -116,23 +97,13 @@ export function SelectDropdown(props: SelectDropdownProps) {
 		[props]
 	)
 
-	const activeIndex = useMemo(() => {
-		const preferred = activeValue ?? selected[0]
-		const preferredIndex = visible.findIndex(option => option.value === preferred && !option.disabled)
-
-		return preferredIndex === -1
-			? Math.max(
-					0,
-					visible.findIndex(option => !option.disabled)
-				)
-			: preferredIndex
-	}, [activeValue, selected, visible])
-
 	const close = useCallback(() => {
 		setOpen(false)
 		setQuery('')
 		setActiveValue(null)
 	}, [])
+
+	const position = useFloatingPanel({ open, anchorRef: fieldRef, panelRef, containerRef, onDismiss: close })
 
 	const toggleOption = useCallback(
 		(option: SelectDropdownOption) => {
@@ -158,85 +129,6 @@ export function SelectDropdown(props: SelectDropdownProps) {
 
 	const clear = useCallback(() => commit([]), [commit])
 
-	const updatePosition = useCallback(() => {
-		const field = fieldRef.current
-
-		if (!field) {
-			return
-		}
-
-		const rect = field.getBoundingClientRect()
-		const viewportHeight = window.innerHeight
-		const below = viewportHeight - rect.bottom - GAP - VIEWPORT_MARGIN
-		const above = rect.top - GAP - VIEWPORT_MARGIN
-
-		const openAbove = below < MAX_HEIGHT && above > below
-		const available = openAbove ? above : below
-		const maxHeight = Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, available))
-		const height = Math.min(panelRef.current?.offsetHeight ?? maxHeight, maxHeight)
-
-		const top = openAbove ? rect.top - GAP - height : rect.bottom + GAP
-
-		setPosition({
-			top: Math.max(VIEWPORT_MARGIN, Math.min(top, viewportHeight - height - VIEWPORT_MARGIN)),
-			left: rect.left,
-			width: rect.width,
-			maxHeight
-		})
-	}, [])
-
-	useLayoutEffect(() => {
-		if (!open) {
-			return
-		}
-
-		updatePosition()
-
-		const frame = requestAnimationFrame(updatePosition)
-
-		return () => cancelAnimationFrame(frame)
-	}, [open, query, selected.length, updatePosition])
-
-	useEffect(() => {
-		const field = fieldRef.current
-
-		if (!open || !field) {
-			return
-		}
-
-		const observer = new ResizeObserver(updatePosition)
-		observer.observe(field)
-
-		window.addEventListener('scroll', updatePosition, true)
-		window.addEventListener('resize', updatePosition)
-
-		return () => {
-			observer.disconnect()
-			window.removeEventListener('scroll', updatePosition, true)
-			window.removeEventListener('resize', updatePosition)
-		}
-	}, [open, updatePosition])
-
-	useEffect(() => {
-		if (!open) {
-			return
-		}
-
-		const handlePointerDown = (event: PointerEvent) => {
-			const target = event.target as Node
-
-			if (containerRef.current?.contains(target) || panelRef.current?.contains(target)) {
-				return
-			}
-
-			close()
-		}
-
-		document.addEventListener('pointerdown', handlePointerDown)
-
-		return () => document.removeEventListener('pointerdown', handlePointerDown)
-	}, [close, open])
-
 	useEffect(() => {
 		if (!open) {
 			return
@@ -245,111 +137,73 @@ export function SelectDropdown(props: SelectDropdownProps) {
 		panelRef.current?.querySelector('[data-active="true"]')?.scrollIntoView({ block: 'nearest' })
 	}, [activeIndex, open])
 
-	const step = (direction: 1 | -1) => {
-		let next = activeIndex
-
-		for (let attempt = 0; attempt < visible.length; attempt += 1) {
-			next = (next + direction + visible.length) % visible.length
-			const candidate = visible[next]
-
-			if (candidate && !candidate.disabled) {
-				setActiveValue(candidate.value)
-				return
-			}
-		}
-	}
-
-	const jumpTo = (edge: 'first' | 'last') => {
-		const enabled = visible.filter(option => !option.disabled)
-		const target = edge === 'first' ? enabled[0] : enabled[enabled.length - 1]
-
-		if (target) {
-			setActiveValue(target.value)
-		}
-	}
-
-	const selectActive = () => {
-		const option = visible[activeIndex]
+	const moveTo = (index: number | null) => {
+		const option = index === null ? undefined : visible[index]
 
 		if (option) {
-			toggleOption(option)
+			setActiveValue(option.value)
 		}
 	}
 
 	const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-		switch (event.key) {
-			case 'ArrowDown':
-			case 'ArrowUp': {
-				event.preventDefault()
+		const action = resolveKeyAction(event.key, {
+			open,
+			searchable,
+			multiple,
+			hasQuery: query !== '',
+			hasSelection: selected.length > 0
+		})
 
-				if (open) {
-					step(event.key === 'ArrowDown' ? 1 : -1)
-					return
-				}
+		if (action === null) {
+			return
+		}
 
+		if (action !== 'close') {
+			event.preventDefault()
+		}
+
+		switch (action) {
+			case 'open':
 				setOpen(true)
 				return
-			}
 
-			case 'Home':
-			case 'End': {
-				if (!open) {
-					return
-				}
-
-				event.preventDefault()
-				jumpTo(event.key === 'Home' ? 'first' : 'last')
-				return
-			}
-
-			case 'Enter': {
-				event.preventDefault()
-
-				if (open) {
-					selectActive()
-					return
-				}
-
-				setOpen(true)
-				return
-			}
-
-			case ' ': {
-				if (searchable && open) {
-					return
-				}
-
-				event.preventDefault()
-
-				if (open) {
-					selectActive()
-					return
-				}
-
-				setOpen(true)
-				return
-			}
-
-			case 'Escape': {
-				if (open) {
-					event.preventDefault()
+			case 'close':
+			case 'dismiss':
+				if (action === 'dismiss') {
 					event.stopPropagation()
-					close()
 				}
 
-				return
-			}
-
-			case 'Tab': {
 				close()
 				return
+
+			case 'next':
+				moveTo(stepIndex(visible, activeIndex, 1))
+				return
+
+			case 'previous':
+				moveTo(stepIndex(visible, activeIndex, -1))
+				return
+
+			case 'first':
+				moveTo(edgeIndex(visible, 'first'))
+				return
+
+			case 'last':
+				moveTo(edgeIndex(visible, 'last'))
+				return
+
+			case 'select': {
+				const option = visible[activeIndex]
+
+				if (option) {
+					toggleOption(option)
+				}
+
+				return
 			}
 
-			case 'Backspace': {
-				if (multiple && query === '' && selected.length > 0) {
-					commit(selected.slice(0, -1))
-				}
-			}
+			case 'removeLast':
+				commit(selected.slice(0, -1))
 		}
 	}
 

@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import { useState } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
+import { resolveKeyAction, stepIndex } from './lib'
 import { SelectDropdown } from './SelectDropdown'
 import type { SelectDropdownOption } from './SelectDropdown'
 
@@ -212,5 +213,61 @@ describe('clearing', () => {
 
 		expect(onChange).toHaveBeenLastCalledWith(null)
 		expect(screen.getByRole('combobox')).toHaveValue('')
+	})
+})
+
+describe('resolveKeyAction', () => {
+	const closed = { open: false, searchable: false, multiple: false, hasQuery: false, hasSelection: false }
+	const opened = { ...closed, open: true }
+
+	it.each([
+		['ArrowDown', closed, 'open'],
+		['ArrowDown', opened, 'next'],
+		['ArrowUp', opened, 'previous'],
+		['Home', closed, null],
+		['Home', opened, 'first'],
+		['End', opened, 'last'],
+		['Enter', closed, 'open'],
+		['Enter', opened, 'select'],
+		['Escape', closed, null],
+		['Escape', opened, 'dismiss'],
+		['Tab', opened, 'close'],
+		['a', opened, null]
+	])('maps %s to %s', (key, context, expected) => {
+		expect(resolveKeyAction(key, context)).toBe(expected)
+	})
+
+	it('types a space instead of selecting only while searching', () => {
+		expect(resolveKeyAction(' ', opened)).toBe('select')
+		expect(resolveKeyAction(' ', { ...opened, searchable: true })).toBeNull()
+		expect(resolveKeyAction(' ', { ...closed, searchable: true })).toBe('open')
+	})
+
+	it('removes the last value only when a multiple select has nothing to erase', () => {
+		const multiple = { ...opened, multiple: true, hasSelection: true }
+
+		expect(resolveKeyAction('Backspace', multiple)).toBe('removeLast')
+		expect(resolveKeyAction('Backspace', { ...multiple, hasQuery: true })).toBeNull()
+		expect(resolveKeyAction('Backspace', { ...multiple, hasSelection: false })).toBeNull()
+		expect(resolveKeyAction('Backspace', { ...opened, hasSelection: true })).toBeNull()
+	})
+})
+
+describe('stepIndex', () => {
+	const options = [
+		{ value: 'a', label: 'A' },
+		{ value: 'b', label: 'B', disabled: true },
+		{ value: 'c', label: 'C' }
+	]
+
+	it('wraps around and skips what is disabled', () => {
+		expect(stepIndex(options, 0, 1)).toBe(2)
+		expect(stepIndex(options, 2, 1)).toBe(0)
+		expect(stepIndex(options, 0, -1)).toBe(2)
+	})
+
+	it('gives up when nothing can be reached', () => {
+		expect(stepIndex([{ value: 'a', label: 'A', disabled: true }], 0, 1)).toBeNull()
+		expect(stepIndex([], 0, 1)).toBeNull()
 	})
 })
