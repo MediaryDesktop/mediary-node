@@ -11,6 +11,20 @@ $accent-900: #781111;
 
 $accent-rgb: 229, 9, 20;
 
+$grey-100: #cccccc;
+$grey-200: #b2b2b2;
+$grey-300: #888888;
+$grey-400: #666666;
+$grey-500: #545454;
+$grey-600: #464646;
+$grey-700: #3d3d3d;
+$grey-800: #333333;
+$grey-900: #2a2a2a;
+$grey-950: #212121;
+$grey-975: #181818;
+
+$shadow-rgb: 10, 10, 10;
+
 :root {
 	color-scheme: light;
 
@@ -86,35 +100,35 @@ $accent-rgb: 229, 9, 20;
 @mixin dark-theme {
 	color-scheme: dark;
 
-	--bg: #0d0d0f;
-	--bg-subtle: #141417;
-	--bg-muted: #1c1c20;
-	--surface: #16161a;
-	--surface-hover: #1f1f24;
-	--surface-active: #26262c;
-	--overlay: rgba(0, 0, 0, 0.65);
+	--bg: #{$grey-975};
+	--bg-subtle: #1d1d1d;
+	--bg-muted: #{$grey-800};
+	--surface: #{$grey-950};
+	--surface-hover: #{$grey-900};
+	--surface-active: #{$grey-700};
+	--overlay: rgba(#{$shadow-rgb}, 0.7);
 
 	--field: rgba(255, 255, 255, 0.04);
-	--field-hover: rgba(255, 255, 255, 0.06);
-	--glass: rgba(69, 69, 69, 0.132);
-	--glass-border: rgba(255, 255, 255, 0.09);
+	--field-hover: rgba(255, 255, 255, 0.08);
+	--glass: rgba(70, 70, 70, 0.14);
+	--glass-border: rgba(255, 255, 255, 0.1);
 
-	--text: #f4f4f5;
-	--text-secondary: #a1a1aa;
-	--text-muted: #78787f;
-	--text-disabled: #52525b;
+	--text: #ffffff;
+	--text-secondary: #{$grey-200};
+	--text-muted: #{$grey-300};
+	--text-disabled: #{$grey-400};
 	--text-on-accent: #ffffff;
 
-	--border: #2a2a31;
-	--border-strong: #3a3a43;
-	--border-stronger: #52525b;
+	--border: #{$grey-800};
+	--border-strong: #{$grey-600};
+	--border-stronger: #{$grey-400};
 
 	--accent: #{$accent-500};
 	--accent-hover: #ff5c56;
 	--accent-active: #e5211f;
 	--accent-text: #{$accent-500};
-	--accent-muted: rgba(#{$accent-rgb}, 0.16);
-	--accent-muted-hover: rgba(#{$accent-rgb}, 0.24);
+	--accent-muted: rgba(#{$accent-rgb}, 0.1);
+	--accent-muted-hover: rgba(#{$accent-rgb}, 0.16);
 	--accent-border: rgba(#{$accent-rgb}, 0.4);
 	--accent-on-muted: #ff8a84;
 	--accent-gradient: linear-gradient(90deg, #{$accent-50} 0%, #{$accent-500} 0%, #{$accent-50} 100%);
@@ -139,15 +153,15 @@ $accent-rgb: 229, 9, 20;
 	--info-muted: rgba(96, 165, 250, 0.16);
 	--info-text: #93c5fd;
 
-	--shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-	--shadow-md: 0 2px 4px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.5);
-	--shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.5), 0 16px 48px rgba(0, 0, 0, 0.6);
+	--shadow-sm: 0 1px 2px rgba(#{$shadow-rgb}, 0.45);
+	--shadow-md: 0 2px 4px rgba(#{$shadow-rgb}, 0.45), 0 8px 24px rgba(#{$shadow-rgb}, 0.55);
+	--shadow-lg: 0 4px 8px rgba(#{$shadow-rgb}, 0.55), 0 16px 48px rgba(#{$shadow-rgb}, 0.65);
 
 	--scrim-veil: linear-gradient(
 		100deg,
-		rgba(9, 9, 13, 0.92) 0%,
-		rgba(9, 9, 13, 0.62) 45%,
-		rgba(9, 9, 13, 0.78) 100%
+		rgba(24, 24, 24, 0.92) 0%,
+		rgba(24, 24, 24, 0.62) 45%,
+		rgba(24, 24, 24, 0.78) 100%
 	);
 	--scrim-glow: radial-gradient(120% 90% at 78% 50%, rgba(#{$accent-rgb}, 0.22) 0%, transparent 60%);
 }
