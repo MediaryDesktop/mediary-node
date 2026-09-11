@@ -13,7 +13,6 @@
 		padding-right: calc(var(--window-controls-width) + 1.5rem);
 		border-bottom: 1px solid var(--border);
 		background: var(--surface);
-		-webkit-app-region: drag;
 		position: sticky;
 		top: 0;
 		z-index: 10;

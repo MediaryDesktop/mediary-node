@@ -35,7 +35,6 @@ export function SetupLayout({
 
 	return (
 		<div className={styles.page}>
-			<div className={styles.dragStrip} />
 			<div className={styles.glow} />
 
 			<header className={styles.head}>

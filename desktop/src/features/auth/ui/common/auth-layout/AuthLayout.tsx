@@ -30,7 +30,6 @@ export function AuthLayout({ children, onBack }: AuthLayoutProps) {
 				tabIndex={-1}
 			/>
 			<div className={styles.scrim} />
-			<div className={styles.dragStrip} />
 
 			<Logo className={styles.brand} />
 

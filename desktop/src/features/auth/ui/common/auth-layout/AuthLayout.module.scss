@@ -25,16 +25,6 @@
 		background: var(--scrim-veil), var(--scrim-glow);
 	}
 
-	.dragStrip {
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		height: var(--titlebar-height);
-		z-index: 1;
-		-webkit-app-region: drag;
-	}
-
 	.brand {
 		position: absolute;
 		top: clamp(1.25rem, 2.5vh, 1.75rem);

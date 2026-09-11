@@ -8,16 +8,6 @@
 	padding: clamp(1.5rem, 4vh, 2.75rem) clamp(1.5rem, 5vw, 3rem) clamp(1rem, 3vh, 1.75rem);
 	overflow-y: auto;
 
-	.dragStrip {
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		height: var(--titlebar-height);
-		z-index: 1;
-		-webkit-app-region: drag;
-	}
-
 	.glow {
 		position: absolute;
 		inset: 0;
