@@ -9,7 +9,7 @@
 		max-width: 3.25rem;
 		height: 3.5rem;
 		padding: 0;
-		border: 1px solid var(--border-stronger);
+		border: 1px solid var(--border);
 		border-radius: var(--radius);
 		background: var(--field);
 		color: var(--text);
@@ -24,7 +24,7 @@
 
 		&:focus {
 			outline: none;
-			border-color: var(--accent);
+			border-color: var(--border-stronger);
 			background: var(--field-hover);
 		}
 

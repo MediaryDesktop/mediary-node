@@ -20,7 +20,7 @@
 			width: 100%;
 			height: var(--control-height);
 			padding: 0 0.875rem;
-			border: 1px solid var(--border-stronger);
+			border: 1px solid var(--border);
 			border-radius: var(--radius);
 			background: var(--field);
 			color: var(--text);
@@ -35,14 +35,9 @@
 				color: var(--text-secondary);
 			}
 
-			&:hover:not(:disabled) {
-				background: var(--field-hover);
-			}
-
 			&:focus {
+				border-color: var(--border-stronger);
 				outline: none;
-				border-color: var(--accent);
-				background: var(--field-hover);
 			}
 
 			&:disabled {
@@ -63,7 +58,6 @@
 
 				&:focus {
 					border-color: var(--danger);
-					box-shadow: 0 0 0 3px var(--danger-ring);
 				}
 			}
 		}

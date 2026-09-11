@@ -20,13 +20,8 @@
 			border-color 160ms,
 			background-color 160ms;
 
-		&:hover:not(.isDisabled) {
-			background: var(--field-hover);
-		}
-
 		&:focus-within {
-			border-color: var(--accent);
-			background: var(--field-hover);
+			border-color: var(--border-stronger);
 		}
 
 		&.invalid {
@@ -34,7 +29,6 @@
 
 			&:focus-within {
 				border-color: var(--danger);
-				box-shadow: 0 0 0 3px var(--danger-ring);
 			}
 		}
 
@@ -171,12 +165,11 @@
 	border: 1px solid var(--border);
 	border-radius: var(--radius);
 	background: var(--surface);
-	box-shadow: var(--shadow-md);
 
 	.list {
 		display: flex;
 		flex-direction: column;
-		gap: 0.125rem;
+		gap: 0.25rem;
 		padding: 0.25rem;
 		overflow-y: auto;
 		overscroll-behavior: contain;
