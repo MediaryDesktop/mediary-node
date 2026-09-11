@@ -30,6 +30,41 @@ export const en = {
 		hidePassword: 'Hide password'
 	},
 
+	nav: {
+		label: 'Main navigation',
+		home: 'Home',
+		discover: 'Discover',
+		catalog: 'Catalog',
+		lists: 'My lists',
+		library: 'Library',
+		downloads: 'Downloads',
+		settings: 'Settings',
+		signIn: 'Sign in'
+	},
+
+	placeholder: {
+		discover: 'Recommendations and fresh releases will live here once the cloud catalog is connected.',
+		catalog: 'Search across every media type with filters by genre, year and rating.',
+		lists: 'Your watch statuses, ratings and personal collections.',
+		library: 'Local files scanned by the node and matched against catalog titles.',
+		downloads: 'Torrent providers and the download queue handled by the node.'
+	},
+
+	settings: {
+		appearance: {
+			name: 'Appearance',
+			hint: 'Light or dark surface for the whole app.'
+		},
+		language: {
+			name: 'Language',
+			hint: 'Interface language. Catalog titles keep their own languages.'
+		},
+		wizard: {
+			name: 'Setup wizard',
+			hint: 'Re-run first-time setup: folders, player, downloads.',
+			action: 'Open wizard'
+		}
+	},
 	select: {
 		placeholder: 'Select…',
 		noResults: 'Nothing found',
@@ -259,11 +294,6 @@ export const en = {
 			anonymous: 'Not signed in — catalog and sync are unavailable.',
 			signIn: 'Sign in',
 			signOut: 'Sign out'
-		},
-		dev: {
-			title: 'Developer',
-			setupHint: 'First-run detection is not wired up yet.',
-			setupLink: 'Open setup wizard'
 		},
 		node: {
 			title: 'Local node',

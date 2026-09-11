@@ -249,18 +249,22 @@ export const sprites = defineSpriteMap([
 			[
 				defineSpriteSymbol(['arrow-left'], [24]),
 				defineSpriteSymbol(['arrow-right'], [24]),
+				defineSpriteSymbol(['book-open'], [24]),
 				defineSpriteSymbol(['check'], [24]),
 				defineSpriteSymbol(['chevron-down'], [24]),
 				defineSpriteSymbol(['close'], [24]),
 				defineSpriteSymbol(['cloud'], [24]),
+				defineSpriteSymbol(['compass'], [24]),
 				defineSpriteSymbol(['database'], [24]),
 				defineSpriteSymbol(['download'], [24]),
 				defineSpriteSymbol(['eye-off'], [24]),
 				defineSpriteSymbol(['eye'], [24]),
 				defineSpriteSymbol(['folder-open'], [24]),
 				defineSpriteSymbol(['folder'], [24]),
+				defineSpriteSymbol(['home'], [24]),
 				defineSpriteSymbol(['info'], [24]),
-				defineSpriteSymbol(['library'], [64, '0 0 32 32']),
+				defineSpriteSymbol(['library'], [24]),
+				defineSpriteSymbol(['list-checks'], [24]),
 				defineSpriteSymbol(['lock'], [24]),
 				defineSpriteSymbol(['mail'], [24]),
 				defineSpriteSymbol(['maximize'], [24]),
@@ -269,6 +273,8 @@ export const sprites = defineSpriteMap([
 				defineSpriteSymbol(['play'], [24]),
 				defineSpriteSymbol(['player'], [24]),
 				defineSpriteSymbol(['restore'], [24]),
+				defineSpriteSymbol(['search'], [24]),
+				defineSpriteSymbol(['settings'], [24]),
 				defineSpriteSymbol(['sparkles'], [24]),
 				defineSpriteSymbol(['sun'], [24]),
 				defineSpriteSymbol(['user'], [24])
@@ -293,18 +299,22 @@ export type SpritesMeta = {
 	common:
 		| 'arrow-left'
 		| 'arrow-right'
+		| 'book-open'
 		| 'check'
 		| 'chevron-down'
 		| 'close'
 		| 'cloud'
+		| 'compass'
 		| 'database'
 		| 'download'
 		| 'eye-off'
 		| 'eye'
 		| 'folder-open'
 		| 'folder'
+		| 'home'
 		| 'info'
 		| 'library'
+		| 'list-checks'
 		| 'lock'
 		| 'mail'
 		| 'maximize'
@@ -313,6 +323,8 @@ export type SpritesMeta = {
 		| 'play'
 		| 'player'
 		| 'restore'
+		| 'search'
+		| 'settings'
 		| 'sparkles'
 		| 'sun'
 		| 'user'

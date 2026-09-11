@@ -1,0 +1,136 @@
+.rail {
+	position: fixed;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	z-index: 20;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.5rem;
+	width: var(--sidebar-width);
+	padding: 0.75rem 0 1rem;
+	border-right: 1px solid var(--border);
+	background: var(--bg-subtle);
+
+	.mark {
+		flex: none;
+		margin-bottom: 1rem;
+	}
+
+	.sections {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.25rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.utilities {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.25rem;
+		margin-top: auto;
+	}
+
+	.item {
+		position: relative;
+		display: grid;
+		place-items: center;
+		width: 2.75rem;
+		height: 2.75rem;
+		border-radius: 12px;
+		background: transparent;
+		color: var(--text-muted);
+		text-decoration: none;
+		cursor: pointer;
+		transition:
+			background-color 160ms,
+			color 160ms;
+		-webkit-app-region: no-drag;
+
+		&:hover {
+			background: var(--surface-hover);
+			color: var(--text);
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--accent);
+			outline-offset: -2px;
+		}
+
+		&.active {
+			background: var(--accent-muted);
+			color: var(--accent-text);
+		}
+
+		&:hover .tooltip,
+		&:focus-visible .tooltip {
+			opacity: 1;
+			transform: translate(0, -50%);
+			visibility: visible;
+		}
+	}
+
+	.status {
+		cursor: default;
+
+		&:hover {
+			background: transparent;
+		}
+
+		&.stopped {
+			color: var(--text-disabled);
+		}
+
+		&.starting,
+		&.restarting {
+			color: var(--warning-text);
+		}
+
+		&.ready {
+			color: var(--success-text);
+		}
+
+		&.failed {
+			color: var(--danger-text);
+		}
+	}
+
+	.avatar {
+		background: var(--accent-muted);
+		color: var(--accent-text);
+		font-size: 0.9375rem;
+		font-weight: 650;
+		cursor: default;
+
+		&:hover {
+			background: var(--accent-muted);
+		}
+	}
+
+	.tooltip {
+		position: absolute;
+		top: 50%;
+		left: calc(100% + 0.5rem);
+		z-index: 1;
+		padding: 0.375rem 0.625rem;
+		border: 1px solid var(--border);
+		border-radius: 8px;
+		background: var(--surface);
+		box-shadow: var(--shadow-md);
+		color: var(--text);
+		font-size: 0.8125rem;
+		white-space: nowrap;
+		opacity: 0;
+		visibility: hidden;
+		transform: translate(-0.25rem, -50%);
+		pointer-events: none;
+		transition:
+			opacity 140ms,
+			transform 140ms;
+	}
+}

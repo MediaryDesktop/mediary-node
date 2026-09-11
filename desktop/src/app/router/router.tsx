@@ -16,8 +16,14 @@ import {
 	ResetPasswordPage,
 	VerifyEmailPage
 } from '@pages/auth'
+import { CatalogPage } from '@pages/catalog'
+import { DiscoverPage } from '@pages/discover'
+import { DownloadsPage } from '@pages/downloads'
 import { NotFoundPage, RouteErrorPage } from '@pages/fallback'
 import { HomePage } from '@pages/home'
+import { LibraryPage } from '@pages/library'
+import { ListsPage } from '@pages/lists'
+import { SettingsPage } from '@pages/settings'
 import { SetupPage } from '@pages/setup'
 
 import { AppLayout } from '../layout/AppLayout'
@@ -38,6 +44,42 @@ const homeRoute = createRoute({
 	getParentRoute: () => framedRoute,
 	path: '/',
 	component: HomePage
+})
+
+const discoverRoute = createRoute({
+	getParentRoute: () => framedRoute,
+	path: '/discover',
+	component: DiscoverPage
+})
+
+const catalogRoute = createRoute({
+	getParentRoute: () => framedRoute,
+	path: '/catalog',
+	component: CatalogPage
+})
+
+const listsRoute = createRoute({
+	getParentRoute: () => framedRoute,
+	path: '/lists',
+	component: ListsPage
+})
+
+const libraryRoute = createRoute({
+	getParentRoute: () => framedRoute,
+	path: '/library',
+	component: LibraryPage
+})
+
+const downloadsRoute = createRoute({
+	getParentRoute: () => framedRoute,
+	path: '/downloads',
+	component: DownloadsPage
+})
+
+const settingsRoute = createRoute({
+	getParentRoute: () => framedRoute,
+	path: '/settings',
+	component: SettingsPage
 })
 
 const setupRoute = createRoute({
@@ -120,7 +162,15 @@ const verifyEmailRoute = createRoute({
 })
 
 const routeTree = rootRoute.addChildren([
-	framedRoute.addChildren([homeRoute]),
+	framedRoute.addChildren([
+		homeRoute,
+		discoverRoute,
+		catalogRoute,
+		listsRoute,
+		libraryRoute,
+		downloadsRoute,
+		settingsRoute
+	]),
 	setupRoute,
 	verifyEmailRoute,
 	guestRoute.addChildren([

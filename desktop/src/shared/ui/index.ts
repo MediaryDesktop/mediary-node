@@ -13,4 +13,6 @@ export type { IconName } from './icon/Icon'
 export { SelectDropdown } from './select-dropdown'
 export type { SelectDropdownOption, SelectDropdownProps } from './select-dropdown'
 
+export { Placeholder } from './placeholder/Placeholder'
+
 export { Toaster, toast } from './toast'

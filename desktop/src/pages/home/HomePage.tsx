@@ -73,18 +73,6 @@ export function HomePage() {
 					</dl>
 				)}
 			</section>
-
-			<section className={styles.panel}>
-				<h2 className={styles.panelTitle}>{t('home.dev.title')}</h2>
-
-				<div className={styles.accountRow}>
-					<p className={styles.muted}>{t('home.dev.setupHint')}</p>
-
-					<Link to='/setup' className={styles.signIn}>
-						{t('home.dev.setupLink')}
-					</Link>
-				</div>
-			</section>
 		</div>
 	)
 }
