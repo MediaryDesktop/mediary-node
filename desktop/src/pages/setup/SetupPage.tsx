@@ -1,7 +1,9 @@
 import { useNavigate } from '@tanstack/react-router'
+import clsx from 'clsx'
 import { useCallback, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
+import { SLIDE_CONTENT_CLASS, startSlideTransition } from '@shared/ui'
 
 import {
 	SETUP_STEPS,
@@ -25,11 +27,25 @@ export function SetupPage() {
 	const isLast = index === SETUP_STEPS.length - 1
 
 	const goTo = useCallback(
-		(id: SetupStepId) => setIndex(SETUP_STEPS.findIndex(candidate => candidate.id === id)),
-		[]
+		(id: SetupStepId) => {
+			const target = SETUP_STEPS.findIndex(candidate => candidate.id === id)
+
+			if (target === index) {
+				return
+			}
+
+			startSlideTransition(target < index ? 'back' : 'forward', () => setIndex(target), 'setup')
+		},
+		[index]
 	)
 
-	const goBack = useCallback(() => setIndex(current => Math.max(0, current - 1)), [])
+	const goBack = useCallback(() => {
+		if (index === 0) {
+			return
+		}
+
+		startSlideTransition('back', () => setIndex(current => Math.max(0, current - 1)), 'setup')
+	}, [index])
 
 	const goNext = useCallback(() => {
 		if (isLast) {
@@ -37,7 +53,7 @@ export function SetupPage() {
 			return
 		}
 
-		setIndex(current => current + 1)
+		startSlideTransition('forward', () => setIndex(current => current + 1), 'setup')
 	}, [isLast, navigate])
 
 	return (
@@ -50,7 +66,7 @@ export function SetupPage() {
 			nextLabel={isLast ? t('setup.finish') : undefined}
 			caption={t('setup.progress', { current: index + 1, total: SETUP_STEPS.length })}
 		>
-			<section className={styles.panel}>
+			<section className={clsx(styles.panel, SLIDE_CONTENT_CLASS)}>
 				<header className={styles.header}>
 					<h1 className={styles.title}>{t(step.titleKey)}</h1>
 					<p className={styles.description}>{t(step.descriptionKey)}</p>

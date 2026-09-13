@@ -1,19 +1,26 @@
-import { useLayoutEffect } from 'react'
+import clsx from 'clsx'
+import { createContext, useCallback, useContext, useLayoutEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { pinTheme } from '@shared/style/theme'
-import { Icon, Logo } from '@shared/ui'
+import { Icon, Logo, SLIDE_CONTENT_CLASS, SLIDE_FRAME_CLASS } from '@shared/ui'
 
 import styles from './AuthLayout.module.scss'
 
+type BackHandler = () => void
+
+const AuthBackContext = createContext<(handler: BackHandler | null) => void>(() => {})
+
 export interface AuthLayoutProps {
 	children: ReactNode
-	onBack?: () => void
 }
 
-export function AuthLayout({ children, onBack }: AuthLayoutProps) {
+export function AuthLayout({ children }: AuthLayoutProps) {
 	const { t } = useTranslation()
+	const [onBack, setOnBack] = useState<BackHandler | null>(null)
+
+	const registerBack = useCallback((handler: BackHandler | null) => setOnBack(() => handler), [])
 
 	useLayoutEffect(() => pinTheme('dark'), [])
 
@@ -45,7 +52,11 @@ export function AuthLayout({ children, onBack }: AuthLayoutProps) {
 				<p className={styles.aside}>{t('auth.pitch.aside')}</p>
 			</section>
 
-			<div className={styles.card}>{children}</div>
+			<div className={clsx(styles.card, SLIDE_FRAME_CLASS)}>
+				<div className={clsx(styles.content, SLIDE_CONTENT_CLASS)}>
+					<AuthBackContext value={registerBack}>{children}</AuthBackContext>
+				</div>
+			</div>
 
 			{onBack && (
 				<button type='button' className={styles.back} onClick={onBack}>
@@ -55,4 +66,14 @@ export function AuthLayout({ children, onBack }: AuthLayoutProps) {
 			)}
 		</div>
 	)
+}
+
+export function useAuthBack(handler: BackHandler) {
+	const register = useContext(AuthBackContext)
+
+	useLayoutEffect(() => {
+		register(handler)
+
+		return () => register(null)
+	}, [register, handler])
 }

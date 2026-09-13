@@ -1,0 +1,77 @@
+$duration: 420ms;
+$ease: cubic-bezier(0.32, 0.72, 0, 1);
+$shift: calc((100% + var(--slide-gap, 0px)) * var(--slide-direction, 1));
+
+:root:active-view-transition-type(slide) {
+	.slide-frame {
+		view-transition-name: slide-frame;
+	}
+
+	.slide-content {
+		view-transition-name: slide-content;
+	}
+
+	&::view-transition-old(root) {
+		display: none;
+	}
+
+	&::view-transition-new(root) {
+		animation: none;
+	}
+}
+
+:root:active-view-transition-type(slide-forward) {
+	--slide-direction: 1;
+}
+
+:root:active-view-transition-type(slide-back) {
+	--slide-direction: -1;
+}
+
+::view-transition-group(slide-frame),
+::view-transition-group(slide-content) {
+	animation-duration: $duration;
+	animation-timing-function: $ease;
+}
+
+::view-transition-group(slide-content) {
+	overflow: clip;
+	overflow-clip-margin: var(--slide-gap, 0px);
+}
+
+::view-transition-old(slide-content),
+::view-transition-new(slide-content) {
+	mix-blend-mode: normal;
+	animation-duration: $duration;
+	animation-timing-function: $ease;
+	animation-fill-mode: both;
+}
+
+::view-transition-old(slide-content) {
+	animation-name: slide-transition-out;
+}
+
+::view-transition-new(slide-content) {
+	animation-name: slide-transition-in;
+}
+
+@keyframes slide-transition-out {
+	to {
+		transform: translateX(calc(#{$shift} * -1));
+	}
+}
+
+@keyframes slide-transition-in {
+	from {
+		transform: translateX(#{$shift});
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	::view-transition-group(slide-frame),
+	::view-transition-group(slide-content),
+	::view-transition-old(slide-content),
+	::view-transition-new(slide-content) {
+		animation: none;
+	}
+}

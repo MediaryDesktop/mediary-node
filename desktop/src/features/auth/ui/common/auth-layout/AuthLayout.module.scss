@@ -1,3 +1,14 @@
+$card-padding: 2rem;
+
+@mixin glass {
+	border-radius: var(--radius-lg);
+	background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	border: 1px solid rgba(255, 255, 255, 0.18);
+	box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
 .page {
 	position: relative;
 	isolation: isolate;
@@ -75,13 +86,14 @@
 		flex-direction: column;
 		max-height: calc(100dvh - 6rem);
 		overflow: hidden;
-		padding: 2rem;
-		border-radius: var(--radius-lg);
-		background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
-		backdrop-filter: blur(10px);
-		-webkit-backdrop-filter: blur(10px);
-		border: 1px solid rgba(255, 255, 255, 0.18);
-		box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+		padding: $card-padding;
+		@include glass;
+	}
+
+	.content {
+		display: flex;
+		flex-direction: column;
+		min-height: 0;
 	}
 
 	.back {
@@ -124,5 +136,19 @@
 		.back {
 			right: 1.5rem;
 		}
+	}
+}
+
+:root:active-view-transition-type(auth) {
+	--slide-gap: #{$card-padding};
+
+	&::view-transition-group(slide-frame) {
+		box-sizing: border-box;
+		@include glass;
+	}
+
+	&::view-transition-old(slide-frame),
+	&::view-transition-new(slide-frame) {
+		display: none;
 	}
 }

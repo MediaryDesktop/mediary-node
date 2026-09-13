@@ -4,7 +4,7 @@ import { useCallback } from 'react'
 import { useTranslation } from '@shared/i18n'
 import { useGoBack } from '@shared/lib'
 
-import { AuthEmailPanel, AuthFormWrapper, AuthLayout } from '@features/auth'
+import { AuthEmailPanel, AuthFormWrapper, useAuthBack } from '@features/auth'
 
 import { AUTH_MODES, type AuthMode } from './modes'
 
@@ -18,23 +18,20 @@ export function AuthEmailPage({ mode }: AuthEmailPageProps) {
 	const copy = AUTH_MODES[mode]
 	const goBack = useGoBack(copy.providersRoute)
 
+	useAuthBack(goBack)
+
 	return (
-		<AuthLayout onBack={goBack}>
-			<AuthFormWrapper
-				eyebrow={t(copy.eyebrow)}
-				title={t(copy.emailTitle)}
-				description={t(copy.emailSubtitle)}
-			>
-				<AuthEmailPanel
-					mode={mode}
-					onUseProviders={useCallback(
-						() => navigate({ to: copy.providersRoute }),
-						[navigate, copy]
-					)}
-					onSwitch={useCallback(() => navigate({ to: copy.otherEmailRoute }), [navigate, copy])}
-					onForgotPassword={useCallback(() => navigate({ to: '/reset-password' }), [navigate])}
-				/>
-			</AuthFormWrapper>
-		</AuthLayout>
+		<AuthFormWrapper
+			eyebrow={t(copy.eyebrow)}
+			title={t(copy.emailTitle)}
+			description={t(copy.emailSubtitle)}
+		>
+			<AuthEmailPanel
+				mode={mode}
+				onUseProviders={useCallback(() => navigate({ to: copy.providersRoute }), [navigate, copy])}
+				onSwitch={useCallback(() => navigate({ to: copy.otherEmailRoute }), [navigate, copy])}
+				onForgotPassword={useCallback(() => navigate({ to: '/reset-password' }), [navigate])}
+			/>
+		</AuthFormWrapper>
 	)
 }

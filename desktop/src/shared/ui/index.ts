@@ -7,6 +7,14 @@ export { Logo } from './logo/Logo'
 export { useRipple, RIPPLE_HOST_CLASS } from './ripple/useRipple'
 export type { RippleOptions } from './ripple/useRipple'
 
+export {
+	SLIDE_CONTENT_CLASS,
+	SLIDE_FRAME_CLASS,
+	slideTransitionTypes,
+	startSlideTransition
+} from './slide-transition'
+export type { SlideDirection } from './slide-transition'
+
 export { Icon } from './icon/Icon'
 export type { IconName } from './icon/Icon'
 

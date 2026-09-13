@@ -9,6 +9,8 @@ import {
 
 import { landingRoute, resolveSession } from '@entities/session'
 
+import { AuthLayout } from '@features/auth'
+
 import {
 	AuthEmailPage,
 	AuthProvidersPage,
@@ -27,6 +29,8 @@ import { SettingsPage } from '@pages/settings'
 import { SetupPage } from '@pages/setup'
 
 import { AppLayout } from '../layout/AppLayout'
+
+import { authViewTransition } from './transitions'
 
 const rootRoute = createRootRoute({ component: Outlet })
 
@@ -88,8 +92,18 @@ const setupRoute = createRoute({
 	component: SetupPage
 })
 
-const guestRoute = createRoute({
+const authRoute = createRoute({
 	getParentRoute: () => rootRoute,
+	id: 'auth',
+	component: () => (
+		<AuthLayout>
+			<Outlet />
+		</AuthLayout>
+	)
+})
+
+const guestRoute = createRoute({
+	getParentRoute: () => authRoute,
 	id: 'guest',
 	beforeLoad: async () => {
 		const { account, linked } = await resolveSession()
@@ -145,7 +159,7 @@ const newPasswordRoute = createRoute({
 })
 
 const verifyEmailRoute = createRoute({
-	getParentRoute: () => rootRoute,
+	getParentRoute: () => authRoute,
 	path: '/verify-email',
 	beforeLoad: async () => {
 		const { account, linked } = await resolveSession()
@@ -172,20 +186,23 @@ const routeTree = rootRoute.addChildren([
 		settingsRoute
 	]),
 	setupRoute,
-	verifyEmailRoute,
-	guestRoute.addChildren([
-		signInRoute,
-		signInEmailRoute,
-		signUpRoute,
-		signUpEmailRoute,
-		resetPasswordRoute,
-		newPasswordRoute
+	authRoute.addChildren([
+		verifyEmailRoute,
+		guestRoute.addChildren([
+			signInRoute,
+			signInEmailRoute,
+			signUpRoute,
+			signUpEmailRoute,
+			resetPasswordRoute,
+			newPasswordRoute
+		])
 	])
 ])
 
 export const router = createRouter({
 	routeTree,
 	history: createHashHistory(),
+	defaultViewTransition: authViewTransition,
 	defaultNotFoundComponent: NotFoundPage,
 	defaultErrorComponent: RouteErrorPage
 })

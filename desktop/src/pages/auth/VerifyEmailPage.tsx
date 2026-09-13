@@ -5,7 +5,7 @@ import { useTranslation } from '@shared/i18n'
 
 import { sessionModel } from '@entities/session'
 
-import { AuthFormWrapper, AuthLayout, AuthVerifyEmailPanel, CODE_LENGTH } from '@features/auth'
+import { AuthFormWrapper, AuthVerifyEmailPanel, CODE_LENGTH, useAuthBack } from '@features/auth'
 
 export function VerifyEmailPage() {
 	const { t } = useTranslation()
@@ -13,18 +13,18 @@ export function VerifyEmailPage() {
 
 	const leave = useCallback(() => sessionModel.signOutRequested(), [])
 
+	useAuthBack(leave)
+
 	return (
-		<AuthLayout onBack={leave}>
-			<AuthFormWrapper
-				eyebrow={t('auth.verify.eyebrow')}
-				title={t('auth.verify.title')}
-				description={t('auth.verify.description', {
-					email: account?.email ?? '',
-					length: CODE_LENGTH
-				})}
-			>
-				<AuthVerifyEmailPanel />
-			</AuthFormWrapper>
-		</AuthLayout>
+		<AuthFormWrapper
+			eyebrow={t('auth.verify.eyebrow')}
+			title={t('auth.verify.title')}
+			description={t('auth.verify.description', {
+				email: account?.email ?? '',
+				length: CODE_LENGTH
+			})}
+		>
+			<AuthVerifyEmailPanel />
+		</AuthFormWrapper>
 	)
 }
