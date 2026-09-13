@@ -23,6 +23,12 @@ const SECTIONS = [
 	{ to: '/downloads', icon: 'common/download', labelKey: 'nav.downloads' }
 ] as const satisfies readonly { to: string; icon: IconName; labelKey: string }[]
 
+// 'ready' is the steady state for nearly the whole session — the node is not
+// an optional feature to report on, it is this app's own backend process.
+// Surfacing it here would look like a togglable connection, so only the
+// states that actually need a user's attention get an icon.
+const VISIBLE_NODE_STATES = new Set<NodeState>(['starting', 'restarting', 'failed'])
+
 const NODE_LABELS = {
 	stopped: 'node.state.stopped',
 	starting: 'node.state.starting',
@@ -57,10 +63,12 @@ export function Sidebar() {
 			</ul>
 
 			<div className={styles.utilities}>
-				<span className={clsx(styles.item, styles.status, styles[state])}>
-					<Icon name='common/cloud' size={22} />
-					<Tooltip>{t(NODE_LABELS[state])}</Tooltip>
-				</span>
+				{VISIBLE_NODE_STATES.has(state) && (
+					<span className={clsx(styles.item, styles.status, styles[state])}>
+						<Icon name='common/cloud' size={22} />
+						<Tooltip>{t(NODE_LABELS[state])}</Tooltip>
+					</span>
+				)}
 
 				<Link
 					to='/settings'
