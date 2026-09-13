@@ -245,6 +245,7 @@ export function useRipple<T extends HTMLElement = HTMLElement>(options: RippleOp
 
 		if (clips) {
 			host.classList.add(RIPPLE_HOST_CLASS)
+			host.style.setProperty('isolation', 'isolate')
 		}
 
 		const onMouseDown = (event: MouseEvent) => {
@@ -312,6 +313,7 @@ export function useRipple<T extends HTMLElement = HTMLElement>(options: RippleOp
 		return () => {
 			if (clips) {
 				host.classList.remove(RIPPLE_HOST_CLASS)
+				host.style.removeProperty('isolation')
 			}
 
 			host.removeEventListener('mousedown', onMouseDown)

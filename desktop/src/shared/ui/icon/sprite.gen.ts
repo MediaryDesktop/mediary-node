@@ -270,6 +270,7 @@ export const sprites = defineSpriteMap([
 				defineSpriteSymbol(['maximize'], [24]),
 				defineSpriteSymbol(['minimize'], [24]),
 				defineSpriteSymbol(['moon'], [24]),
+				defineSpriteSymbol(['node'], [64, '-16 0 288 288']),
 				defineSpriteSymbol(['play'], [24]),
 				defineSpriteSymbol(['player'], [24]),
 				defineSpriteSymbol(['restore'], [24]),
@@ -320,6 +321,7 @@ export type SpritesMeta = {
 		| 'maximize'
 		| 'minimize'
 		| 'moon'
+		| 'node'
 		| 'play'
 		| 'player'
 		| 'restore'

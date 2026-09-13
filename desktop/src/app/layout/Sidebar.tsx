@@ -5,7 +5,7 @@ import type { ReactNode } from 'react'
 
 import type { NodeState } from '@shared/bridge'
 import { useTranslation } from '@shared/i18n'
-import { Icon, Logo } from '@shared/ui'
+import { Icon, Logo, useRipple } from '@shared/ui'
 import type { IconName } from '@shared/ui'
 
 import { $nodeState } from '@infra/node'
@@ -23,10 +23,6 @@ const SECTIONS = [
 	{ to: '/downloads', icon: 'common/download', labelKey: 'nav.downloads' }
 ] as const satisfies readonly { to: string; icon: IconName; labelKey: string }[]
 
-// 'ready' is the steady state for nearly the whole session — the node is not
-// an optional feature to report on, it is this app's own backend process.
-// Surfacing it here would look like a togglable connection, so only the
-// states that actually need a user's attention get an icon.
 const VISIBLE_NODE_STATES = new Set<NodeState>(['starting', 'restarting', 'failed'])
 
 const NODE_LABELS = {
@@ -36,6 +32,8 @@ const NODE_LABELS = {
 	restarting: 'node.state.restarting',
 	failed: 'node.state.failed'
 } as const satisfies Record<NodeState, string>
+
+type RailTo = (typeof SECTIONS)[number]['to'] | '/settings' | '/sign-in'
 
 export function Sidebar() {
 	const { t } = useTranslation()
@@ -48,16 +46,12 @@ export function Sidebar() {
 			<ul className={styles.sections}>
 				{SECTIONS.map(section => (
 					<li key={section.to}>
-						<Link
+						<RailLink
 							to={section.to}
-							activeOptions={{ exact: section.to === '/' }}
-							activeProps={{ className: styles.active }}
-							className={styles.item}
-							aria-label={t(section.labelKey)}
-						>
-							<Icon name={section.icon} size={22} />
-							<Tooltip>{t(section.labelKey)}</Tooltip>
-						</Link>
+							icon={section.icon}
+							label={t(section.labelKey)}
+							exact={section.to === '/'}
+						/>
 					</li>
 				))}
 			</ul>
@@ -70,15 +64,7 @@ export function Sidebar() {
 					</span>
 				)}
 
-				<Link
-					to='/settings'
-					activeProps={{ className: styles.active }}
-					className={styles.item}
-					aria-label={t('nav.settings')}
-				>
-					<Icon name='common/settings' size={22} />
-					<Tooltip>{t('nav.settings')}</Tooltip>
-				</Link>
+				<RailLink to='/settings' icon='common/settings' label={t('nav.settings')} />
 
 				{account ? (
 					<span className={clsx(styles.item, styles.avatar)}>
@@ -86,13 +72,36 @@ export function Sidebar() {
 						<Tooltip>{account.display_name}</Tooltip>
 					</span>
 				) : (
-					<Link to='/sign-in' className={styles.item} aria-label={t('nav.signIn')}>
-						<Icon name='common/user' size={22} />
-						<Tooltip>{t('nav.signIn')}</Tooltip>
-					</Link>
+					<RailLink to='/sign-in' icon='common/user' label={t('nav.signIn')} markActive={false} />
 				)}
 			</div>
 		</nav>
+	)
+}
+
+interface RailLinkProps {
+	to: RailTo
+	icon: IconName
+	label: string
+	exact?: boolean
+	markActive?: boolean
+}
+
+function RailLink({ to, icon, label, exact = false, markActive = true }: RailLinkProps) {
+	const ripple = useRipple<HTMLAnchorElement>()
+
+	return (
+		<Link
+			ref={ripple}
+			to={to}
+			activeOptions={{ exact }}
+			activeProps={markActive ? { className: styles.active } : undefined}
+			className={styles.item}
+			aria-label={label}
+		>
+			<Icon name={icon} size={22} />
+			<Tooltip>{label}</Tooltip>
+		</Link>
 	)
 }
 

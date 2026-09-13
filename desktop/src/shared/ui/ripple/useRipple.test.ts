@@ -64,6 +64,20 @@ describe('useRipple', () => {
 		expect(host.classList.contains(RIPPLE_HOST_CLASS)).toBe(false)
 	})
 
+	it('survives a rerender that rewrites the host className', () => {
+		const { host } = mount()
+
+		host.className = 'item active'
+
+		expect(host.style.isolation).toBe('isolate')
+	})
+
+	it('leaves the stacking context alone when clipping is turned off', () => {
+		const { host } = mount({ host: false })
+
+		expect(host.style.isolation).toBe('')
+	})
+
 	it('grows a ripple on press and removes it after release', () => {
 		const { host } = mount()
 
