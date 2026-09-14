@@ -5,7 +5,7 @@ import { landingRoute, sessionModel } from '@entities/session'
 
 import { passwordResetCompleted, passwordResetSent } from '@features/auth'
 
-import { router } from './router'
+import { router } from '../router'
 
 const navigateFx = createEffect((options: NavigateOptions) => {
 	void router.navigate(options)
