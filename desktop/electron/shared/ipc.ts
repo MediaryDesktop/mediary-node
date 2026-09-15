@@ -9,6 +9,8 @@ export const IPC = {
 	oauthAuthorize: 'oauth:authorize',
 	oauthRelease: 'oauth:release',
 
+	aniListOpenAuthorize: 'anilist:open-authorize',
+
 	sessionRead: 'session:read',
 	sessionWrite: 'session:write',
 	sessionClear: 'session:clear',

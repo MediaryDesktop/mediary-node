@@ -1,5 +1,187 @@
 components:
   schemas:
+    AcceptedOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/AcceptedOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        accepted:
+          description: The refresh was started or is already running.
+          type: boolean
+      required:
+        - accepted
+      type: object
+    Account:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/Account.json
+          format: uri
+          readOnly: true
+          type: string
+        avatar_url:
+          type:
+            - string
+            - "null"
+        display_adult_content:
+          type: boolean
+        id:
+          format: int64
+          type: integer
+        name:
+          type: string
+        score_format:
+          type: string
+        site_url:
+          type: string
+      required:
+        - id
+        - name
+        - site_url
+        - avatar_url
+        - score_format
+        - display_adult_content
+      type: object
+    Date:
+      additionalProperties: false
+      properties:
+        day:
+          format: int64
+          type:
+            - integer
+            - "null"
+        month:
+          format: int64
+          type:
+            - integer
+            - "null"
+        year:
+          format: int64
+          type:
+            - integer
+            - "null"
+      required:
+        - year
+        - month
+        - day
+      type: object
+    EntriesOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/EntriesOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        entries:
+          description: One entry per title, in AniList's list order.
+          items:
+            $ref: "#/components/schemas/Entry"
+          type:
+            - array
+            - "null"
+        fetched_at:
+          description: When AniList last answered for this collection.
+          format: date-time
+          type: string
+        lists:
+          description: Status and custom lists with their sizes.
+          items:
+            $ref: "#/components/schemas/List"
+          type:
+            - array
+            - "null"
+        media_type:
+          description: The collection this response describes.
+          type: string
+        sources:
+          description: Attribution for every field that came from an external source.
+          items:
+            $ref: "#/components/schemas/Source"
+          type:
+            - array
+            - "null"
+        stale:
+          description: True when the data is older than the refresh interval; a refresh is already running.
+          type: boolean
+      required:
+        - media_type
+        - entries
+        - lists
+        - fetched_at
+        - stale
+        - sources
+      type: object
+    Entry:
+      additionalProperties: false
+      properties:
+        completed_at:
+          $ref: "#/components/schemas/Date"
+        custom_lists:
+          items:
+            type: string
+          type:
+            - array
+            - "null"
+        media:
+          $ref: "#/components/schemas/Media"
+        media_ref:
+          type: string
+        media_type:
+          type: string
+        notes:
+          type: string
+        private:
+          type: boolean
+        progress:
+          format: int64
+          type: integer
+        progress_volumes:
+          format: int64
+          type:
+            - integer
+            - "null"
+        provider:
+          type: string
+        repeat:
+          format: int64
+          type: integer
+        score:
+          format: int64
+          type: integer
+        started_at:
+          $ref: "#/components/schemas/Date"
+        status:
+          type: string
+        updated_at:
+          format: date-time
+          type: string
+      required:
+        - media_ref
+        - provider
+        - media_type
+        - status
+        - score
+        - progress
+        - progress_volumes
+        - repeat
+        - private
+        - notes
+        - started_at
+        - completed_at
+        - updated_at
+        - custom_lists
+        - media
+      type: object
     ErrorDetail:
       additionalProperties: false
       properties:
@@ -98,6 +280,152 @@ components:
         - commit
         - built
         - linked
+      type: object
+    List:
+      additionalProperties: false
+      properties:
+        count:
+          format: int64
+          type: integer
+        custom:
+          type: boolean
+        name:
+          type: string
+        status:
+          type:
+            - string
+            - "null"
+      required:
+        - name
+        - custom
+        - status
+        - count
+      type: object
+    Media:
+      additionalProperties: false
+      properties:
+        banner_image:
+          type:
+            - string
+            - "null"
+        chapters:
+          format: int64
+          type:
+            - integer
+            - "null"
+        cover_color:
+          type:
+            - string
+            - "null"
+        cover_image:
+          type:
+            - string
+            - "null"
+        episodes:
+          format: int64
+          type:
+            - integer
+            - "null"
+        format:
+          type:
+            - string
+            - "null"
+        is_adult:
+          type: boolean
+        season_year:
+          format: int64
+          type:
+            - integer
+            - "null"
+        site_url:
+          type: string
+        status:
+          type:
+            - string
+            - "null"
+        title:
+          $ref: "#/components/schemas/Title"
+        volumes:
+          format: int64
+          type:
+            - integer
+            - "null"
+      required:
+        - title
+        - format
+        - status
+        - episodes
+        - chapters
+        - volumes
+        - season_year
+        - is_adult
+        - cover_image
+        - cover_color
+        - banner_image
+        - site_url
+      type: object
+    SessionOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/SessionOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        account:
+          $ref: "#/components/schemas/Account"
+          description: The connected account. Absent while AniList is unreachable and the account was never mirrored.
+        authorize_url:
+          description: Where to send the user to grant access. Absent when the node has no AniList client id configured.
+          type: string
+        connected:
+          description: Whether an AniList access token is stored in this node.
+          type: boolean
+      required:
+        - connected
+      type: object
+    SignInInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/SignInInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        access_token:
+          description: Token from AniList's implicit grant.
+          maxLength: 4096
+          minLength: 1
+          type: string
+      required:
+        - access_token
+      type: object
+    Source:
+      additionalProperties: false
+      properties:
+        id:
+          description: Stable source identifier.
+          examples:
+            - anilist
+          type: string
+        name:
+          description: Name to show next to the data.
+          examples:
+            - AniList
+          type: string
+        url:
+          description: Where the attribution links to.
+          examples:
+            - https://anilist.co
+          type: string
+      required:
+        - id
+        - name
+        - url
       type: object
     StatusOutputBody:
       additionalProperties: false
@@ -231,6 +559,31 @@ components:
         - module
         - ready
       type: object
+    Title:
+      additionalProperties: false
+      properties:
+        english:
+          type:
+            - string
+            - "null"
+        native:
+          type:
+            - string
+            - "null"
+        romaji:
+          type:
+            - string
+            - "null"
+        user_preferred:
+          type:
+            - string
+            - "null"
+      required:
+        - user_preferred
+        - romaji
+        - english
+        - native
+      type: object
   securitySchemes:
     nodeToken:
       description: The node's local token, generated on first start and read by the desktop shell.
@@ -243,6 +596,65 @@ info:
   version: 0.0.0-dev
 openapi: 3.1.0
 paths:
+  /v1/anilist/session:
+    delete:
+      description: Forgets the token and deletes the mirrored collections.
+      operationId: disconnectAniList
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Disconnect the AniList account
+      tags:
+        - tracker
+    get:
+      operationId: getAniListSession
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: AniList connection
+      tags:
+        - tracker
+    put:
+      description: Validates the token against AniList before storing it, then starts fetching both collections in the background.
+      operationId: connectAniList
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignInInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Connect an AniList account
+      tags:
+        - tracker
   /v1/extension/status:
     get:
       description: Reports whether the extension module is wired. Placeholder for phase 0.
@@ -383,6 +795,70 @@ paths:
       summary: Torrent module status
       tags:
         - torrent
+  /v1/tracker/entries:
+    get:
+      description: Served from the node's mirror, so it works offline. A stale mirror is returned immediately while a refresh runs; a `tracker` event announces the result.
+      operationId: listTrackerEntries
+      parameters:
+        - description: Which collection to read.
+          explode: false
+          in: query
+          name: type
+          required: true
+          schema:
+            description: Which collection to read.
+            enum:
+              - anime
+              - manga
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EntriesOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Tracker entries
+      tags:
+        - tracker
+  /v1/tracker/refresh:
+    post:
+      description: Starts a background refresh; the result arrives as a `tracker` event.
+      operationId: refreshTrackerEntries
+      parameters:
+        - description: Which collection to read.
+          explode: false
+          in: query
+          name: type
+          required: true
+          schema:
+            description: Which collection to read.
+            enum:
+              - anime
+              - manga
+            type: string
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AcceptedOutputBody"
+          description: Accepted
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Refresh tracker entries
+      tags:
+        - tracker
 security:
   - nodeToken: []
 tags:

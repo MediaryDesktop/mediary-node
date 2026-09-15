@@ -1,0 +1,17 @@
+query Viewer {
+  Viewer {
+    id
+    name
+    siteUrl
+    avatar {
+      large
+      medium
+    }
+    options {
+      displayAdultContent
+    }
+    mediaListOptions {
+      scoreFormat
+    }
+  }
+}

@@ -73,6 +73,22 @@ function broadcast(channel: string, payload: unknown): void {
 	}
 }
 
+const ANILIST_HOST = 'anilist.co'
+
+function openAniListAuthorize(authorizeUrl: unknown): Promise<void> {
+	if (typeof authorizeUrl !== 'string') {
+		throw new TypeError('anilist: the authorize URL must be a string')
+	}
+
+	const url = new URL(authorizeUrl)
+
+	if (url.protocol !== 'https:' || url.hostname !== ANILIST_HOST) {
+		throw new Error('anilist: refusing to open a non-AniList address')
+	}
+
+	return shell.openExternal(url.toString())
+}
+
 function registerIpc(): void {
 	ipcMain.handle(IPC.nodeConnection, () => supervisor.connection)
 	ipcMain.handle(IPC.nodeState, (): SupervisorState => supervisor.currentState)
@@ -86,6 +102,10 @@ function registerIpc(): void {
 
 		return authorizeOAuth(consentUrl)
 	})
+
+	ipcMain.handle(IPC.aniListOpenAuthorize, (_event, authorizeUrl: unknown) =>
+		openAniListAuthorize(authorizeUrl)
+	)
 
 	ipcMain.handle(IPC.sessionCanPersist, () => canPersistSession())
 	ipcMain.handle(IPC.sessionRead, () => readStoredSession())

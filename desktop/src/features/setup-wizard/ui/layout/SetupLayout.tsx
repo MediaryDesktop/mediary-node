@@ -15,6 +15,7 @@ export interface SetupLayoutProps {
 	onBack?: () => void
 	onNext?: () => void
 	backDisabled?: boolean
+	nextDisabled?: boolean
 	nextLabel?: string
 	caption?: ReactNode
 	children: ReactNode
@@ -26,6 +27,7 @@ export function SetupLayout({
 	onBack,
 	onNext,
 	backDisabled = false,
+	nextDisabled = false,
 	nextLabel,
 	caption,
 	children
@@ -80,6 +82,7 @@ export function SetupLayout({
 
 				<Button
 					variant='primary'
+					disabled={nextDisabled}
 					onClick={onNext}
 					endIcon={<Icon name='common/arrow-right' size={16} />}
 				>

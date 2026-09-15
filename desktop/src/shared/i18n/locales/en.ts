@@ -42,6 +42,62 @@ export const en = {
 		signIn: 'Sign in'
 	},
 
+	anilist: {
+		connect: {
+			title: 'AniList',
+			description:
+				'Anime and manga live in your AniList account. Mediary reads and updates them from this computer.',
+			open: 'Get a token on AniList',
+			tokenLabel: 'Access token',
+			tokenPlaceholder: 'Paste the token from AniList',
+			tokenHint:
+				'AniList opens in your browser. Approve access, copy the token it shows and paste it here.',
+			submit: 'Connect',
+			notConfigured: 'This build has no AniList client configured, so sign-in is unavailable.',
+			connectedAs: 'Connected as {{name}}',
+			disconnect: 'Disconnect',
+			failure: {
+				rejected: 'AniList did not accept this token. Copy it again and retry.',
+				unreachable: 'AniList is unreachable right now. Check your connection and retry.',
+				unknown: 'Could not connect the account. Try again.'
+			}
+		}
+	},
+
+	lists: {
+		tabs: {
+			anime: 'Anime',
+			manga: 'Manga'
+		},
+		loading: 'Loading your list…',
+		stale: 'Showing saved data while AniList updates',
+		failed: 'Could not load the list.',
+		retry: 'Retry',
+		empty: 'Nothing here yet.',
+		connect: 'Connect AniList to see your lists',
+		source: 'Data from {{name}}',
+		episodes: 'Ep. {{progress}}',
+		chapters: 'Ch. {{progress}}',
+		status: {
+			anime: {
+				CURRENT: 'Watching',
+				PLANNING: 'Plan to watch',
+				COMPLETED: 'Completed',
+				DROPPED: 'Dropped',
+				PAUSED: 'Paused',
+				REPEATING: 'Rewatching'
+			},
+			manga: {
+				CURRENT: 'Reading',
+				PLANNING: 'Plan to read',
+				COMPLETED: 'Completed',
+				DROPPED: 'Dropped',
+				PAUSED: 'Paused',
+				REPEATING: 'Rereading'
+			}
+		}
+	},
+
 	placeholder: {
 		discover: 'Recommendations and fresh releases will live here once the cloud catalog is connected.',
 		catalog: 'Search across every media type with filters by genre, year and rating.',
@@ -206,11 +262,17 @@ export const en = {
 				title: 'Downloading',
 				description: 'Configure your torrent client for downloading.'
 			},
-			account: {
-				label: 'Cloud account',
-				title: 'Cloud account',
+			anilist: {
+				label: 'AniList',
+				title: 'Connect AniList',
 				description:
-					'Link this computer to a Mediary account so progress follows you to your other devices.'
+					'Anime and manga lists live in your AniList account. Connect it once and Mediary keeps them in sync.'
+			},
+			account: {
+				label: 'Backup',
+				title: 'Mediary account',
+				description:
+					'Optional. A Mediary account only keeps a backup of your lists and settings for your other devices.'
 			},
 			debrid: {
 				label: 'Debrid service',
@@ -219,7 +281,7 @@ export const en = {
 			}
 		},
 		account: {
-			blurb: 'An account is only needed for the cloud catalog and sync. The local library, player and downloads work without one.',
+			blurb: 'A Mediary account is optional: it only backs up your lists and settings so you can move to another device.',
 			google: 'Continue with Google',
 			or: 'or',
 			email: 'Continue with email'

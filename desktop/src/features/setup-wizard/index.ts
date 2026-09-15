@@ -4,6 +4,7 @@ export type { SetupStepId } from './config/steps'
 export { SetupLayout } from './ui/layout'
 export {
 	SetupAccountStep,
+	SetupAniListStep,
 	SetupDebridStep,
 	SetupDownloadingStep,
 	SetupLibraryStep,

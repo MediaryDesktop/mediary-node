@@ -27,7 +27,17 @@ type Config struct {
 	Torrent  Torrent
 	Playback Playback
 	Cloud    Cloud
+	AniList  AniList
 	Log      Log
+}
+
+type AniList struct {
+	ClientID     string        `env:"NODE_ANILIST_CLIENT_ID"`
+	Endpoint     string        `env:"NODE_ANILIST_ENDPOINT"      envDefault:"https://graphql.anilist.co"`
+	AuthorizeURL string        `env:"NODE_ANILIST_AUTHORIZE_URL" envDefault:"https://anilist.co/api/v2/oauth/authorize"`
+	Timeout      time.Duration `env:"NODE_ANILIST_TIMEOUT"       envDefault:"30s"`
+
+	RefreshInterval time.Duration `env:"NODE_ANILIST_REFRESH_INTERVAL" envDefault:"5m"`
 }
 
 type HTTP struct {
@@ -123,6 +133,10 @@ func (c *Config) TokenPath() string {
 	return filepath.Join(c.DataDir, "token")
 }
 
+func (c *Config) AniListTokenPath() string {
+	return filepath.Join(c.DataDir, "anilist-token")
+}
+
 func (c *Config) applyDefaults() error {
 	if c.DataDir == "" {
 		base, err := os.UserConfigDir()
@@ -170,6 +184,14 @@ func (c *Config) validate() error {
 		}
 	default:
 		return fmt.Errorf("NODE_TORRENT_CLIENT must be embedded or qbittorrent, got %q", c.Torrent.Client)
+	}
+
+	if c.AniList.RefreshInterval < time.Minute {
+		return fmt.Errorf(
+			"NODE_ANILIST_REFRESH_INTERVAL must be at least 1m, got %s: "+
+				"the collection is one of the heaviest AniList queries",
+			c.AniList.RefreshInterval,
+		)
 	}
 
 	if c.HTTP.Host != "127.0.0.1" && c.HTTP.Host != "localhost" && c.HTTP.Token == "" {

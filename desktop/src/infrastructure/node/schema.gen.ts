@@ -4,6 +4,31 @@
  */
 
 export interface paths {
+	'/v1/anilist/session': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/** AniList connection */
+		get: operations['getAniListSession']
+		/**
+		 * Connect an AniList account
+		 * @description Validates the token against AniList before storing it, then starts fetching both collections in the background.
+		 */
+		put: operations['connectAniList']
+		post?: never
+		/**
+		 * Disconnect the AniList account
+		 * @description Forgets the token and deletes the mirrored collections.
+		 */
+		delete: operations['disconnectAniList']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/v1/extension/status': {
 		parameters: {
 			query?: never
@@ -144,10 +169,128 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/v1/tracker/entries': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Tracker entries
+		 * @description Served from the node's mirror, so it works offline. A stale mirror is returned immediately while a refresh runs; a `tracker` event announces the result.
+		 */
+		get: operations['listTrackerEntries']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/tracker/refresh': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Refresh tracker entries
+		 * @description Starts a background refresh; the result arrives as a `tracker` event.
+		 */
+		post: operations['refreshTrackerEntries']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 }
 export type webhooks = Record<string, never>
 export interface components {
 	schemas: {
+		AcceptedOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/AcceptedOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The refresh was started or is already running. */
+			accepted: boolean
+		}
+		Account: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/Account.json
+			 */
+			readonly $schema?: string
+			avatar_url: string | null
+			display_adult_content: boolean
+			/** Format: int64 */
+			id: number
+			name: string
+			score_format: string
+			site_url: string
+		}
+		Date: {
+			/** Format: int64 */
+			day: number | null
+			/** Format: int64 */
+			month: number | null
+			/** Format: int64 */
+			year: number | null
+		}
+		EntriesOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/EntriesOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description One entry per title, in AniList's list order. */
+			entries: components['schemas']['Entry'][] | null
+			/**
+			 * Format: date-time
+			 * @description When AniList last answered for this collection.
+			 */
+			fetched_at: string
+			/** @description Status and custom lists with their sizes. */
+			lists: components['schemas']['List'][] | null
+			/** @description The collection this response describes. */
+			media_type: string
+			/** @description Attribution for every field that came from an external source. */
+			sources: components['schemas']['Source'][] | null
+			/** @description True when the data is older than the refresh interval; a refresh is already running. */
+			stale: boolean
+		}
+		Entry: {
+			completed_at: components['schemas']['Date']
+			custom_lists: string[] | null
+			media: components['schemas']['Media']
+			media_ref: string
+			media_type: string
+			notes: string
+			private: boolean
+			/** Format: int64 */
+			progress: number
+			/** Format: int64 */
+			progress_volumes: number | null
+			provider: string
+			/** Format: int64 */
+			repeat: number
+			/** Format: int64 */
+			score: number
+			started_at: components['schemas']['Date']
+			status: string
+			/** Format: date-time */
+			updated_at: string
+		}
 		ErrorDetail: {
 			/** @description Where the error occurred, e.g. 'body.items[3].tags' or 'path.thing-id' */
 			location?: string
@@ -224,6 +367,72 @@ export interface components {
 			 * @example 0.1.0
 			 */
 			version: string
+		}
+		List: {
+			/** Format: int64 */
+			count: number
+			custom: boolean
+			name: string
+			status: string | null
+		}
+		Media: {
+			banner_image: string | null
+			/** Format: int64 */
+			chapters: number | null
+			cover_color: string | null
+			cover_image: string | null
+			/** Format: int64 */
+			episodes: number | null
+			format: string | null
+			is_adult: boolean
+			/** Format: int64 */
+			season_year: number | null
+			site_url: string
+			status: string | null
+			title: components['schemas']['Title']
+			/** Format: int64 */
+			volumes: number | null
+		}
+		SessionOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/SessionOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The connected account. Absent while AniList is unreachable and the account was never mirrored. */
+			account?: components['schemas']['Account']
+			/** @description Where to send the user to grant access. Absent when the node has no AniList client id configured. */
+			authorize_url?: string
+			/** @description Whether an AniList access token is stored in this node. */
+			connected: boolean
+		}
+		SignInInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/SignInInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description Token from AniList's implicit grant. */
+			access_token: string
+		}
+		Source: {
+			/**
+			 * @description Stable source identifier.
+			 * @example anilist
+			 */
+			id: string
+			/**
+			 * @description Name to show next to the data.
+			 * @example AniList
+			 */
+			name: string
+			/**
+			 * @description Where the attribution links to.
+			 * @example https://anilist.co
+			 */
+			url: string
 		}
 		StatusOutputBody: {
 			/**
@@ -315,6 +524,12 @@ export interface components {
 			/** @description True when the module's dependencies are wired. */
 			ready: boolean
 		}
+		Title: {
+			english: string | null
+			native: string | null
+			romaji: string | null
+			user_preferred: string | null
+		}
 	}
 	responses: never
 	parameters: never
@@ -322,17 +537,117 @@ export interface components {
 	headers: never
 	pathItems: never
 }
+export type SchemaAcceptedOutputBody = components['schemas']['AcceptedOutputBody']
+export type SchemaAccount = components['schemas']['Account']
+export type SchemaDate = components['schemas']['Date']
+export type SchemaEntriesOutputBody = components['schemas']['EntriesOutputBody']
+export type SchemaEntry = components['schemas']['Entry']
 export type SchemaErrorDetail = components['schemas']['ErrorDetail']
 export type SchemaErrorModel = components['schemas']['ErrorModel']
 export type SchemaHealthOutputBody = components['schemas']['HealthOutputBody']
+export type SchemaList = components['schemas']['List']
+export type SchemaMedia = components['schemas']['Media']
+export type SchemaSessionOutputBody = components['schemas']['SessionOutputBody']
+export type SchemaSignInInputBody = components['schemas']['SignInInputBody']
+export type SchemaSource = components['schemas']['Source']
 export type SchemaStatusOutputBody = components['schemas']['StatusOutputBody']
 export type SchemaStatusOutputBody1 = components['schemas']['StatusOutputBody1']
 export type SchemaStatusOutputBody2 = components['schemas']['StatusOutputBody2']
 export type SchemaStatusOutputBody3 = components['schemas']['StatusOutputBody3']
 export type SchemaStatusOutputBody4 = components['schemas']['StatusOutputBody4']
 export type SchemaStatusOutputBody5 = components['schemas']['StatusOutputBody5']
+export type SchemaTitle = components['schemas']['Title']
 export type $defs = Record<string, never>
 export interface operations {
+	getAniListSession: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['SessionOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	connectAniList: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['SignInInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['Account']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	disconnectAniList: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
 	getExtensionStatus: {
 		parameters: {
 			query?: never
@@ -523,6 +838,70 @@ export interface operations {
 				}
 				content: {
 					'application/json': components['schemas']['StatusOutputBody1']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listTrackerEntries: {
+		parameters: {
+			query: {
+				/** @description Which collection to read. */
+				type: 'anime' | 'manga'
+			}
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['EntriesOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	refreshTrackerEntries: {
+		parameters: {
+			query: {
+				/** @description Which collection to read. */
+				type: 'anime' | 'manga'
+			}
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description Accepted */
+			202: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['AcceptedOutputBody']
 				}
 			}
 			/** @description Error */

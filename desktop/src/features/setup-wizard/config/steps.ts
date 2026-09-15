@@ -1,6 +1,6 @@
 import type { IconName } from '@shared/ui'
 
-export type SetupStepId = 'library' | 'player' | 'downloads' | 'account' | 'debrid'
+export type SetupStepId = 'anilist' | 'account' | 'library' | 'player' | 'downloads' | 'debrid'
 
 export interface SetupStep {
 	id: SetupStepId
@@ -11,6 +11,13 @@ export interface SetupStep {
 }
 
 export const SETUP_STEPS: readonly SetupStep[] = [
+	{
+		id: 'anilist',
+		icon: 'social/anilist',
+		labelKey: 'setup.steps.anilist.label',
+		titleKey: 'setup.steps.anilist.title',
+		descriptionKey: 'setup.steps.anilist.description'
+	},
 	{
 		id: 'account',
 		icon: 'common/cloud',

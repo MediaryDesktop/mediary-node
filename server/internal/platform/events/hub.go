@@ -14,6 +14,8 @@ const (
 	TopicPlayback      Topic = "playback"
 	TopicSync          Topic = "sync"
 	TopicNotification  Topic = "notification"
+	TopicTracker       Topic = "tracker"
+	TopicAniListAuth   Topic = "anilist.session"
 )
 
 type Event struct {

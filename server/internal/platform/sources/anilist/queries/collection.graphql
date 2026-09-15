@@ -1,0 +1,57 @@
+query Collection($userId: Int, $type: MediaType) {
+  MediaListCollection(userId: $userId, type: $type, forceSingleCompletedList: true) {
+    lists {
+      name
+      isCustomList
+      status
+      entries {
+        id
+        mediaId
+        status
+        score(format: POINT_100)
+        progress
+        progressVolumes
+        repeat
+        private
+        notes
+        updatedAt
+        startedAt {
+          year
+          month
+          day
+        }
+        completedAt {
+          year
+          month
+          day
+        }
+        media {
+          id
+          idMal
+          type
+          format
+          status(version: 2)
+          episodes
+          chapters
+          volumes
+          seasonYear
+          isAdult
+          siteUrl
+          bannerImage
+          title {
+            userPreferred
+            romaji
+            english
+            native
+          }
+          coverImage {
+            extraLarge
+            large
+            medium
+            color
+          }
+        }
+      }
+    }
+  }
+}

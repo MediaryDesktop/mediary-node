@@ -16,6 +16,8 @@ const (
 
 	KindConflict Kind = "conflict"
 
+	KindPrecondition Kind = "precondition"
+
 	KindUnavailable Kind = "unavailable"
 
 	KindUpstream Kind = "upstream"

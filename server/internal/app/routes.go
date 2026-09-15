@@ -2,6 +2,7 @@ package app
 
 import (
 	"database/sql"
+	"time"
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/rs/zerolog"
@@ -13,8 +14,10 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/modules/reader"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/sync"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent"
+	"github.com/mediaryorg/mediary-node/server/internal/modules/tracker"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/cloud"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
 )
 
 type Deps struct {
@@ -24,6 +27,11 @@ type Deps struct {
 	Cloud  *cloud.Client
 	Build  httpapi.BuildInfo
 	Linked bool
+
+	AniList             *anilist.Client
+	AniListClientID     string
+	AniListAuthorizeURL string
+	AniListRefresh      time.Duration
 }
 
 func Register(api huma.API, deps Deps) {
@@ -50,6 +58,16 @@ func Register(api huma.API, deps Deps) {
 	reader.New(reader.Deps{
 		DB:     deps.DB,
 		Logger: moduleLogger(deps.Logger, "reader"),
+	}).Register(api)
+
+	tracker.New(tracker.Deps{
+		DB:                  deps.DB,
+		Logger:              moduleLogger(deps.Logger, "tracker"),
+		Events:              deps.Events,
+		AniList:             deps.AniList,
+		AniListClientID:     deps.AniListClientID,
+		AniListAuthorizeURL: deps.AniListAuthorizeURL,
+		RefreshInterval:     deps.AniListRefresh,
 	}).Register(api)
 
 	sync.New(sync.Deps{

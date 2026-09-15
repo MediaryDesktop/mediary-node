@@ -17,6 +17,7 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/platform/db"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/logging"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
 	"github.com/mediaryorg/mediary-node/server/internal/wsapi"
 )
 
@@ -74,6 +75,13 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 		return fmt.Errorf("build cloud client: %w", err)
 	}
 
+	aniList := anilist.New(anilist.Options{
+		Endpoint:  cfg.AniList.Endpoint,
+		Timeout:   cfg.AniList.Timeout,
+		UserAgent: "mediary-node/" + build.Version,
+		Tokens:    anilist.NewTokenStore(cfg.AniListTokenPath()),
+	})
+
 	router, api := httpapi.New(httpapi.Options{
 		Version:        build.Version,
 		Token:          token,
@@ -88,6 +96,11 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 		Cloud:  cloudClient,
 		Build:  build,
 		Linked: cfg.Cloud.Linked(),
+
+		AniList:             aniList,
+		AniListClientID:     cfg.AniList.ClientID,
+		AniListAuthorizeURL: cfg.AniList.AuthorizeURL,
+		AniListRefresh:      cfg.AniList.RefreshInterval,
 	})
 
 	if mux, ok := router.(*chi.Mux); ok {

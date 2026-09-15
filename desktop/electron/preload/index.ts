@@ -32,6 +32,11 @@ const api = {
 		release: (): Promise<void> => ipcRenderer.invoke(IPC.oauthRelease)
 	},
 
+	anilist: {
+		openAuthorize: (authorizeUrl: string): Promise<void> =>
+			ipcRenderer.invoke(IPC.aniListOpenAuthorize, authorizeUrl)
+	},
+
 	session: {
 		canPersist: (): Promise<boolean> => ipcRenderer.invoke(IPC.sessionCanPersist),
 		read: (): Promise<StoredSession | null> => ipcRenderer.invoke(IPC.sessionRead),

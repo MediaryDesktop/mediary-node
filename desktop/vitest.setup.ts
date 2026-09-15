@@ -30,6 +30,9 @@ Object.defineProperty(window, 'mediary', {
 			authorize: async () => ({ cancelled: true }) as const,
 			release: async () => {}
 		},
+		anilist: {
+			openAuthorize: async () => {}
+		},
 		session: {
 			canPersist: async () => true,
 			read: async () => null,
