@@ -317,7 +317,7 @@ export interface components {
 			 * @description Permission level.
 			 * @enum {string}
 			 */
-			role: 'user' | 'moderator' | 'admin'
+			role: 'user' | 'admin'
 		}
 		ChangePasswordInputBody: {
 			/**
