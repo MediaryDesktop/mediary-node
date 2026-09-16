@@ -1,0 +1,68 @@
+@mixin popover($distance: 6px) {
+	transform-origin: var(--radix-popper-transform-origin);
+
+	&[data-state="open"],
+	&[data-state="delayed-open"],
+	&[data-state="instant-open"] {
+		&[data-side="top"] {
+			animation: popover-from-bottom 160ms cubic-bezier(0.2, 0, 0, 1);
+		}
+
+		&[data-side="bottom"] {
+			animation: popover-from-top 160ms cubic-bezier(0.2, 0, 0, 1);
+		}
+
+		&[data-side="left"] {
+			animation: popover-from-right 160ms cubic-bezier(0.2, 0, 0, 1);
+		}
+
+		&[data-side="right"] {
+			animation: popover-from-left 160ms cubic-bezier(0.2, 0, 0, 1);
+		}
+	}
+
+	&[data-state="closed"] {
+		animation: popover-out 120ms ease-in forwards;
+	}
+
+	@keyframes popover-from-top {
+		from {
+			opacity: 0;
+			transform: translateY(-$distance) scale(0.98);
+		}
+	}
+
+	@keyframes popover-from-bottom {
+		from {
+			opacity: 0;
+			transform: translateY($distance) scale(0.98);
+		}
+	}
+
+	@keyframes popover-from-left {
+		from {
+			opacity: 0;
+			transform: translateX(-$distance) scale(0.98);
+		}
+	}
+
+	@keyframes popover-from-right {
+		from {
+			opacity: 0;
+			transform: translateX($distance) scale(0.98);
+		}
+	}
+
+	@keyframes popover-out {
+		to {
+			opacity: 0;
+			transform: scale(0.98);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		&[data-state] {
+			animation-duration: 1ms;
+		}
+	}
+}

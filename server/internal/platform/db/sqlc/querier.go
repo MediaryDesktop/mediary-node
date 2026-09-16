@@ -10,13 +10,23 @@ import (
 
 type Querier interface {
 	DeleteAniListMirror(ctx context.Context) error
+	DeleteAniListOutbox(ctx context.Context) error
+	DeleteAniListOutboxEntryIfUnchanged(ctx context.Context, arg DeleteAniListOutboxEntryIfUnchangedParams) (int64, error)
+	DeleteAniListOutboxForOtherAccounts(ctx context.Context, accountID int64) error
+	DeleteSourceCacheOlderThan(ctx context.Context, arg DeleteSourceCacheOlderThanParams) error
 	GetAniListMirror(ctx context.Context, kind string) (AnilistMirror, error)
+	GetAniListOutboxEntry(ctx context.Context, arg GetAniListOutboxEntryParams) (AnilistOutbox, error)
 	// Phase 0 queries, proving `task sqlc` produces compiling Go. Module queries
 	// go in db/queries/<module>.sql.
 	GetNodeMeta(ctx context.Context, key string) (NodeMetum, error)
+	GetSourceCache(ctx context.Context, arg GetSourceCacheParams) (SourceCache, error)
+	ListAniListOutbox(ctx context.Context, accountID int64) ([]AnilistOutbox, error)
 	ListNodeMeta(ctx context.Context) ([]NodeMetum, error)
+	RecordAniListOutboxFailure(ctx context.Context, arg RecordAniListOutboxFailureParams) error
 	UpsertAniListMirror(ctx context.Context, arg UpsertAniListMirrorParams) error
+	UpsertAniListOutboxEntry(ctx context.Context, arg UpsertAniListOutboxEntryParams) error
 	UpsertNodeMeta(ctx context.Context, arg UpsertNodeMetaParams) (NodeMetum, error)
+	UpsertSourceCache(ctx context.Context, arg UpsertSourceCacheParams) error
 }
 
 var _ Querier = (*Queries)(nil)

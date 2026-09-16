@@ -1,0 +1,15 @@
+@use "../../style/animation/popover-motion" as motion;
+
+.content {
+	z-index: 40;
+	width: 20rem;
+	max-width: calc(100vw - 2rem);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-lg);
+	background: var(--surface);
+	box-shadow: var(--shadow-lg);
+	overflow: hidden;
+	-webkit-app-region: no-drag;
+
+	@include motion.popover;
+}

@@ -2,8 +2,11 @@
 	min-height: 100vh;
 
 	.main {
+		--page-inset-top: calc(var(--titlebar-height) + 1rem);
+		--page-inset-x: 2rem;
+		--page-inset-left: calc(var(--sidebar-width) + var(--page-inset-x));
+
 		min-height: 100vh;
-		margin-left: var(--sidebar-width);
-		padding: calc(var(--titlebar-height) + 1rem) 2rem 2rem;
+		padding: var(--page-inset-top) var(--page-inset-x) 2rem var(--page-inset-left);
 	}
 }

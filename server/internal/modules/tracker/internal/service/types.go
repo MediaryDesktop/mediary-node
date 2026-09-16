@@ -69,6 +69,7 @@ type Entry struct {
 	CompletedAt     Date      `json:"completed_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
 	CustomLists     []string  `json:"custom_lists"`
+	SyncPending     bool      `json:"sync_pending"`
 	Media           Media     `json:"media"`
 }
 

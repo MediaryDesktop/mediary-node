@@ -19,14 +19,6 @@ func New(svc *service.Service) *Handler {
 	return &Handler{svc: svc}
 }
 
-type Source struct {
-	ID   string `json:"id" example:"anilist" doc:"Stable source identifier."`
-	Name string `json:"name" example:"AniList" doc:"Name to show next to the data."`
-	URL  string `json:"url" example:"https://anilist.co" doc:"Where the attribution links to."`
-}
-
-var aniListSource = Source{ID: "anilist", Name: "AniList", URL: "https://anilist.co"}
-
 type SessionOutput struct {
 	Body struct {
 		Connected    bool             `json:"connected" doc:"Whether an AniList access token is stored in this node."`
@@ -56,8 +48,23 @@ type EntriesOutput struct {
 		Lists     []service.List    `json:"lists" doc:"Status and custom lists with their sizes."`
 		FetchedAt time.Time         `json:"fetched_at" doc:"When AniList last answered for this collection."`
 		Stale     bool              `json:"stale" doc:"True when the data is older than the refresh interval; a refresh is already running."`
-		Sources   []Source          `json:"sources" doc:"Attribution for every field that came from an external source."`
+		Sources   []httpapi.Source  `json:"sources" doc:"Attribution for every field that came from an external source."`
 	}
+}
+
+type UpdateEntryInput struct {
+	MediaRef string `path:"media_ref" example:"anilist:154587" doc:"The entry's media reference, as returned by listTrackerEntries."`
+	Body     struct {
+		Status          *string `json:"status,omitempty" enum:"CURRENT,PLANNING,COMPLETED,DROPPED,PAUSED,REPEATING" doc:"New list status."`
+		Score           *int    `json:"score,omitempty" minimum:"0" maximum:"100" doc:"Score on a 0-100 scale; clients convert from the account's score format."`
+		Progress        *int    `json:"progress,omitempty" minimum:"0" doc:"Episodes watched or chapters read."`
+		ProgressVolumes *int    `json:"progress_volumes,omitempty" minimum:"0" doc:"Volumes read; manga only."`
+		Repeat          *int    `json:"repeat,omitempty" minimum:"0" doc:"How many times the title was rewatched or reread."`
+	}
+}
+
+type EntryOutput struct {
+	Body *service.Entry
 }
 
 type AcceptedOutput struct {
@@ -138,9 +145,31 @@ func (h *Handler) Register(api huma.API) {
 		out.Body.Lists = collection.Lists
 		out.Body.FetchedAt = collection.FetchedAt
 		out.Body.Stale = collection.Stale
-		out.Body.Sources = []Source{aniListSource}
+		out.Body.Sources = []httpapi.Source{httpapi.AniListSource}
 
 		return out, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "updateTrackerEntry",
+		Method:      http.MethodPut,
+		Path:        "/v1/tracker/entries/{media_ref}",
+		Summary:     "Update a tracker entry",
+		Description: "Applies the change locally and queues it for AniList, so it works offline. The returned entry already carries the change with `sync_pending: true`; a `tracker` event with reason `synced` follows once AniList has it. A progress lower than what AniList already holds is only sent when it is lower than what the user saw — so an older offline edit never rolls back progress made on another device.",
+		Tags:        []string{"tracker"},
+	}, func(ctx context.Context, in *UpdateEntryInput) (*EntryOutput, error) {
+		entry, err := h.svc.UpdateEntry(ctx, in.MediaRef, service.EntryPatch{
+			Status:          in.Body.Status,
+			Score:           in.Body.Score,
+			Progress:        in.Body.Progress,
+			ProgressVolumes: in.Body.ProgressVolumes,
+			Repeat:          in.Body.Repeat,
+		})
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return &EntryOutput{Body: entry}, nil
 	})
 
 	huma.Register(api, huma.Operation{

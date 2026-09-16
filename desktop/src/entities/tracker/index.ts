@@ -1,3 +1,20 @@
-export { formatProgress, preferredTitle, trackerQueries } from './model'
+export {
+	formatProgress,
+	preferredTitle,
+	trackerModel,
+	trackerQueries,
+	updateTrackerEntryMutation
+} from './model/model'
 
-export type { TrackerCollection, TrackerEntry, TrackerList, TrackerMediaType, TrackerSource } from './api'
+export { formatScoreValue, nextScore } from './model/score-format'
+export type { ScoreFormat } from './model/score-format'
+
+export type {
+	TrackerCollection,
+	TrackerEntry,
+	TrackerEntryPatch,
+	TrackerList,
+	TrackerMediaType,
+	TrackerSource,
+	UpdateTrackerEntryParams
+} from './api/api'

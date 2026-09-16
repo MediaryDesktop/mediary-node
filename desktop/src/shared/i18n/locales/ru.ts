@@ -74,8 +74,20 @@ export const ru: Translation = {
 		empty: 'Здесь пока пусто.',
 		connect: 'Подключите AniList, чтобы увидеть свои списки',
 		source: 'Данные из {{name}}',
+		pending: 'Ещё не синхронизировано',
+		decrement: 'На один меньше',
+		increment: 'На один больше',
+		updateFailed: 'Не удалось сохранить изменение. Попробуйте ещё раз.',
 		episodes: 'Эп. {{progress}}',
 		chapters: 'Гл. {{progress}}',
+		editor: {
+			status: 'Статус',
+			score: 'Оценка',
+			episodes: 'Эпизоды',
+			chapters: 'Главы',
+			volumes: 'Тома',
+			repeat: 'Повторы'
+		},
 		status: {
 			anime: {
 				CURRENT: 'Смотрю',
@@ -93,6 +105,127 @@ export const ru: Translation = {
 				PAUSED: 'На паузе',
 				REPEATING: 'Перечитываю'
 			}
+		}
+	},
+
+	media: {
+		back: 'Назад',
+		loading: 'Загружаем тайтл…',
+		failed: 'Не удалось загрузить тайтл.',
+		retry: 'Повторить',
+		offline: 'Подробности сейчас недоступны. Показываем то, что известно из вашего списка.',
+		openOn: 'Открыть на {{name}}',
+		source: 'Данные из {{name}}',
+		adult: '18+',
+		editEntry: 'Редактировать запись в списке',
+		addToList: 'Добавить в список',
+		trailer: 'Трейлер',
+		downloadBatch: 'Скачать пакет / {{count}} эпизодов',
+		comingSoon: 'Скоро будет',
+		nextAiringDay: 'Эпизод {{episode}} {{when}}',
+		views: {
+			library: 'Локальная библиотека',
+			torrent: 'Торрент-стриминг'
+		},
+		library: {
+			notInLibrary: 'Нет в вашей библиотеке',
+			episodesNotInLibrary: 'Этих эпизодов нет в вашей библиотеке:',
+			episode: 'Эпизод {{number}}',
+			metadataUnavailable: 'Данные об эпизодах пока недоступны — библиотека в разработке.',
+			andMore: 'И другие…'
+		},
+		menu: {
+			label: 'Больше действий',
+			details: 'Подробности',
+			addToLibrary: 'Добавить в библиотеку'
+		},
+		sections: {
+			synopsis: 'Описание',
+			details: 'Подробности',
+			relations: 'Связанные тайтлы',
+			entry: 'Ваш список'
+		},
+		readMore: 'Читать дальше',
+		noDescription: 'Описания пока нет.',
+		notInList: 'Этого тайтла ещё нет в вашем списке.',
+		nextEpisode: 'Эпизод {{episode}} · {{when}}',
+		stats: {
+			averageScore: 'Средняя оценка',
+			popularity: 'Пользователей',
+			favourites: 'В избранном'
+		},
+		fields: {
+			format: 'Формат',
+			status: 'Статус',
+			episodes: 'Эпизоды',
+			chapters: 'Главы',
+			volumes: 'Тома',
+			duration: 'Длительность эпизода',
+			season: 'Сезон',
+			start: 'Начало',
+			end: 'Окончание',
+			studios: 'Студии',
+			source: 'Первоисточник',
+			country: 'Страна',
+			synonyms: 'Также известен как'
+		},
+		minutes: '{{count}} мин',
+		format: {
+			TV: 'ТВ',
+			TV_SHORT: 'Короткий ТВ',
+			MOVIE: 'Фильм',
+			SPECIAL: 'Спешл',
+			OVA: 'OVA',
+			ONA: 'ONA',
+			MUSIC: 'Клип',
+			MANGA: 'Манга',
+			NOVEL: 'Ранобэ',
+			ONE_SHOT: 'Ваншот'
+		},
+		status: {
+			FINISHED: 'Завершён',
+			RELEASING: 'Выходит',
+			NOT_YET_RELEASED: 'Ещё не вышел',
+			CANCELLED: 'Отменён',
+			HIATUS: 'На паузе'
+		},
+		season: {
+			WINTER: 'Зима',
+			SPRING: 'Весна',
+			SUMMER: 'Лето',
+			FALL: 'Осень'
+		},
+		relation: {
+			ADAPTATION: 'Адаптация',
+			PREQUEL: 'Приквел',
+			SEQUEL: 'Сиквел',
+			PARENT: 'Основная история',
+			SIDE_STORY: 'Побочная история',
+			CHARACTER: 'Персонаж',
+			SUMMARY: 'Рекап',
+			ALTERNATIVE: 'Альтернатива',
+			SPIN_OFF: 'Спин-офф',
+			OTHER: 'Другое',
+			SOURCE: 'Первоисточник',
+			COMPILATION: 'Компиляция',
+			CONTAINS: 'Содержит'
+		},
+		origin: {
+			ORIGINAL: 'Оригинал',
+			MANGA: 'Манга',
+			LIGHT_NOVEL: 'Ранобэ',
+			VISUAL_NOVEL: 'Визуальная новелла',
+			VIDEO_GAME: 'Видеоигра',
+			OTHER: 'Другое',
+			NOVEL: 'Роман',
+			DOUJINSHI: 'Додзинси',
+			ANIME: 'Аниме',
+			WEB_NOVEL: 'Веб-новелла',
+			LIVE_ACTION: 'Живые актёры',
+			GAME: 'Игра',
+			COMIC: 'Комикс',
+			MULTIMEDIA_PROJECT: 'Мультимедийный проект',
+			PICTURE_BOOK: 'Книжка с картинками'
 		}
 	},
 

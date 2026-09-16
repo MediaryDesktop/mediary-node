@@ -76,8 +76,20 @@ export const en = {
 		empty: 'Nothing here yet.',
 		connect: 'Connect AniList to see your lists',
 		source: 'Data from {{name}}',
+		pending: 'Not synced yet',
+		decrement: 'One less',
+		increment: 'One more',
+		updateFailed: 'Could not save the change. Try again.',
 		episodes: 'Ep. {{progress}}',
 		chapters: 'Ch. {{progress}}',
+		editor: {
+			status: 'Status',
+			score: 'Score',
+			episodes: 'Episodes',
+			chapters: 'Chapters',
+			volumes: 'Volumes',
+			repeat: 'Repeat'
+		},
 		status: {
 			anime: {
 				CURRENT: 'Watching',
@@ -95,6 +107,127 @@ export const en = {
 				PAUSED: 'Paused',
 				REPEATING: 'Rereading'
 			}
+		}
+	},
+
+	media: {
+		back: 'Back',
+		loading: 'Loading title…',
+		failed: 'Could not load this title.',
+		retry: 'Retry',
+		offline: 'Details are unavailable right now. Showing what your list knows.',
+		openOn: 'Open on {{name}}',
+		source: 'Data from {{name}}',
+		adult: '18+',
+		editEntry: 'Edit list entry',
+		addToList: 'Add to list',
+		trailer: 'Trailer',
+		downloadBatch: 'Download batch / {{count}} episodes',
+		comingSoon: 'Coming soon',
+		nextAiringDay: 'Episode {{episode}} {{when}}',
+		views: {
+			library: 'Local library',
+			torrent: 'Torrent streaming'
+		},
+		library: {
+			notInLibrary: 'Not in your library',
+			episodesNotInLibrary: 'The following episodes are not in your library:',
+			episode: 'Episode {{number}}',
+			metadataUnavailable: 'Episode details are not available yet — the library is still being built.',
+			andMore: 'And more…'
+		},
+		menu: {
+			label: 'More actions',
+			details: 'Details',
+			addToLibrary: 'Add to library'
+		},
+		sections: {
+			synopsis: 'Synopsis',
+			details: 'Details',
+			relations: 'Related titles',
+			entry: 'Your list'
+		},
+		readMore: 'Read more',
+		noDescription: 'No description yet.',
+		notInList: 'This title is not in your list yet.',
+		nextEpisode: 'Episode {{episode}} · {{when}}',
+		stats: {
+			averageScore: 'Average score',
+			popularity: 'Members',
+			favourites: 'Favourites'
+		},
+		fields: {
+			format: 'Format',
+			status: 'Status',
+			episodes: 'Episodes',
+			chapters: 'Chapters',
+			volumes: 'Volumes',
+			duration: 'Episode length',
+			season: 'Season',
+			start: 'Start',
+			end: 'End',
+			studios: 'Studios',
+			source: 'Source',
+			country: 'Country',
+			synonyms: 'Also known as'
+		},
+		minutes: '{{count}} min',
+		format: {
+			TV: 'TV',
+			TV_SHORT: 'TV short',
+			MOVIE: 'Movie',
+			SPECIAL: 'Special',
+			OVA: 'OVA',
+			ONA: 'ONA',
+			MUSIC: 'Music',
+			MANGA: 'Manga',
+			NOVEL: 'Light novel',
+			ONE_SHOT: 'One-shot'
+		},
+		status: {
+			FINISHED: 'Finished',
+			RELEASING: 'Releasing',
+			NOT_YET_RELEASED: 'Not yet released',
+			CANCELLED: 'Cancelled',
+			HIATUS: 'On hiatus'
+		},
+		season: {
+			WINTER: 'Winter',
+			SPRING: 'Spring',
+			SUMMER: 'Summer',
+			FALL: 'Fall'
+		},
+		relation: {
+			ADAPTATION: 'Adaptation',
+			PREQUEL: 'Prequel',
+			SEQUEL: 'Sequel',
+			PARENT: 'Parent story',
+			SIDE_STORY: 'Side story',
+			CHARACTER: 'Character',
+			SUMMARY: 'Summary',
+			ALTERNATIVE: 'Alternative',
+			SPIN_OFF: 'Spin-off',
+			OTHER: 'Other',
+			SOURCE: 'Source',
+			COMPILATION: 'Compilation',
+			CONTAINS: 'Contains'
+		},
+		origin: {
+			ORIGINAL: 'Original',
+			MANGA: 'Manga',
+			LIGHT_NOVEL: 'Light novel',
+			VISUAL_NOVEL: 'Visual novel',
+			VIDEO_GAME: 'Video game',
+			OTHER: 'Other',
+			NOVEL: 'Novel',
+			DOUJINSHI: 'Doujinshi',
+			ANIME: 'Anime',
+			WEB_NOVEL: 'Web novel',
+			LIVE_ACTION: 'Live action',
+			GAME: 'Game',
+			COMIC: 'Comic',
+			MULTIMEDIA_PROJECT: 'Multimedia project',
+			PICTURE_BOOK: 'Picture book'
 		}
 	},
 

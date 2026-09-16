@@ -1,0 +1,50 @@
+mutation SaveEntry($mediaId: Int, $status: MediaListStatus, $scoreRaw: Int, $progress: Int, $progressVolumes: Int, $repeat: Int) {
+  SaveMediaListEntry(mediaId: $mediaId, status: $status, scoreRaw: $scoreRaw, progress: $progress, progressVolumes: $progressVolumes, repeat: $repeat) {
+    id
+    mediaId
+    status
+    score(format: POINT_100)
+    progress
+    progressVolumes
+    repeat
+    private
+    notes
+    updatedAt
+    startedAt {
+      year
+      month
+      day
+    }
+    completedAt {
+      year
+      month
+      day
+    }
+    media {
+      id
+      idMal
+      type
+      format
+      status(version: 2)
+      episodes
+      chapters
+      volumes
+      seasonYear
+      isAdult
+      siteUrl
+      bannerImage
+      title {
+        userPreferred
+        romaji
+        english
+        native
+      }
+      coverImage {
+        extraLarge
+        large
+        medium
+        color
+      }
+    }
+  }
+}

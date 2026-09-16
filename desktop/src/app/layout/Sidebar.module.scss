@@ -10,8 +10,12 @@
 	gap: 0.5rem;
 	width: var(--sidebar-width);
 	padding: 0.75rem 0 1rem;
-	border-right: 1px solid var(--border);
-	background: var(--bg-subtle);
+	background: transparent;
+	pointer-events: none;
+
+	> * {
+		pointer-events: auto;
+	}
 
 	.mark {
 		flex: none;
@@ -51,11 +55,6 @@
 			background-color 160ms,
 			color 160ms;
 		-webkit-app-region: no-drag;
-
-		&:hover {
-			background: var(--surface-hover);
-			color: var(--text);
-		}
 
 		&:focus-visible {
 			outline: 2px solid var(--accent);

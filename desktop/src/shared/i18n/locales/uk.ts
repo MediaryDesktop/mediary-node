@@ -74,8 +74,20 @@ export const uk: Translation = {
 		empty: 'Тут поки порожньо.',
 		connect: 'Підключіть AniList, щоб побачити свої списки',
 		source: 'Дані з {{name}}',
+		pending: 'Ще не синхронізовано',
+		decrement: 'На один менше',
+		increment: 'На один більше',
+		updateFailed: 'Не вдалося зберегти зміну. Спробуйте ще раз.',
 		episodes: 'Еп. {{progress}}',
 		chapters: 'Гл. {{progress}}',
+		editor: {
+			status: 'Статус',
+			score: 'Оцінка',
+			episodes: 'Епізоди',
+			chapters: 'Розділи',
+			volumes: 'Томи',
+			repeat: 'Повтори'
+		},
 		status: {
 			anime: {
 				CURRENT: 'Дивлюсь',
@@ -93,6 +105,127 @@ export const uk: Translation = {
 				PAUSED: 'На паузі',
 				REPEATING: 'Перечитую'
 			}
+		}
+	},
+
+	media: {
+		back: 'Назад',
+		loading: 'Завантажуємо тайтл…',
+		failed: 'Не вдалося завантажити тайтл.',
+		retry: 'Повторити',
+		offline: 'Подробиці зараз недоступні. Показуємо те, що відомо з вашого списку.',
+		openOn: 'Відкрити на {{name}}',
+		source: 'Дані з {{name}}',
+		adult: '18+',
+		editEntry: 'Редагувати запис у списку',
+		addToList: 'Додати до списку',
+		trailer: 'Трейлер',
+		downloadBatch: 'Завантажити пакет / {{count}} епізодів',
+		comingSoon: 'Скоро буде',
+		nextAiringDay: 'Епізод {{episode}} {{when}}',
+		views: {
+			library: 'Локальна бібліотека',
+			torrent: 'Торент-стрімінг'
+		},
+		library: {
+			notInLibrary: 'Немає у вашій бібліотеці',
+			episodesNotInLibrary: 'Цих епізодів немає у вашій бібліотеці:',
+			episode: 'Епізод {{number}}',
+			metadataUnavailable: 'Дані про епізоди ще недоступні — бібліотека в розробці.',
+			andMore: 'Та інші…'
+		},
+		menu: {
+			label: 'Більше дій',
+			details: 'Подробиці',
+			addToLibrary: 'Додати до бібліотеки'
+		},
+		sections: {
+			synopsis: 'Опис',
+			details: 'Подробиці',
+			relations: 'Повʼязані тайтли',
+			entry: 'Ваш список'
+		},
+		readMore: 'Читати далі',
+		noDescription: 'Опису поки немає.',
+		notInList: 'Цього тайтлу ще немає у вашому списку.',
+		nextEpisode: 'Епізод {{episode}} · {{when}}',
+		stats: {
+			averageScore: 'Середня оцінка',
+			popularity: 'Користувачів',
+			favourites: 'В улюблених'
+		},
+		fields: {
+			format: 'Формат',
+			status: 'Статус',
+			episodes: 'Епізоди',
+			chapters: 'Розділи',
+			volumes: 'Томи',
+			duration: 'Тривалість епізоду',
+			season: 'Сезон',
+			start: 'Початок',
+			end: 'Завершення',
+			studios: 'Студії',
+			source: 'Першоджерело',
+			country: 'Країна',
+			synonyms: 'Також відомий як'
+		},
+		minutes: '{{count}} хв',
+		format: {
+			TV: 'ТБ',
+			TV_SHORT: 'Короткий ТБ',
+			MOVIE: 'Фільм',
+			SPECIAL: 'Спешл',
+			OVA: 'OVA',
+			ONA: 'ONA',
+			MUSIC: 'Кліп',
+			MANGA: 'Манга',
+			NOVEL: 'Ранобе',
+			ONE_SHOT: 'Ваншот'
+		},
+		status: {
+			FINISHED: 'Завершено',
+			RELEASING: 'Виходить',
+			NOT_YET_RELEASED: 'Ще не вийшов',
+			CANCELLED: 'Скасовано',
+			HIATUS: 'На паузі'
+		},
+		season: {
+			WINTER: 'Зима',
+			SPRING: 'Весна',
+			SUMMER: 'Літо',
+			FALL: 'Осінь'
+		},
+		relation: {
+			ADAPTATION: 'Адаптація',
+			PREQUEL: 'Приквел',
+			SEQUEL: 'Сиквел',
+			PARENT: 'Основна історія',
+			SIDE_STORY: 'Побічна історія',
+			CHARACTER: 'Персонаж',
+			SUMMARY: 'Рекап',
+			ALTERNATIVE: 'Альтернатива',
+			SPIN_OFF: 'Спінофф',
+			OTHER: 'Інше',
+			SOURCE: 'Першоджерело',
+			COMPILATION: 'Компіляція',
+			CONTAINS: 'Містить'
+		},
+		origin: {
+			ORIGINAL: 'Оригінал',
+			MANGA: 'Манга',
+			LIGHT_NOVEL: 'Ранобе',
+			VISUAL_NOVEL: 'Візуальна новела',
+			VIDEO_GAME: 'Відеогра',
+			OTHER: 'Інше',
+			NOVEL: 'Роман',
+			DOUJINSHI: 'Доджінші',
+			ANIME: 'Аніме',
+			WEB_NOVEL: 'Веб-новела',
+			LIVE_ACTION: 'Живі актори',
+			GAME: 'Гра',
+			COMIC: 'Комікс',
+			MULTIMEDIA_PROJECT: 'Мультимедійний проєкт',
+			PICTURE_BOOK: 'Книжка з картинками'
 		}
 	},
 

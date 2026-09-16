@@ -1,0 +1,82 @@
+query MediaDetails($id: Int) {
+  Media(id: $id) {
+    id
+    idMal
+    type
+    format
+    status(version: 2)
+    episodes
+    chapters
+    volumes
+    duration
+    season
+    seasonYear
+    averageScore
+    meanScore
+    popularity
+    favourites
+    genres
+    synonyms
+    countryOfOrigin
+    isAdult
+    siteUrl
+    source(version: 3)
+    bannerImage
+    description(asHtml: false)
+    startDate {
+      year
+      month
+      day
+    }
+    endDate {
+      year
+      month
+      day
+    }
+    title {
+      userPreferred
+      romaji
+      english
+      native
+    }
+    coverImage {
+      extraLarge
+      large
+      medium
+      color
+    }
+    nextAiringEpisode {
+      episode
+      airingAt
+    }
+    studios(isMain: true) {
+      nodes {
+        id
+        name
+      }
+    }
+    relations {
+      edges {
+        relationType(version: 2)
+        node {
+          id
+          type
+          format
+          status(version: 2)
+          seasonYear
+          title {
+            userPreferred
+            romaji
+            english
+            native
+          }
+          coverImage {
+            large
+            medium
+            color
+          }
+        }
+      }
+    }
+  }
+}

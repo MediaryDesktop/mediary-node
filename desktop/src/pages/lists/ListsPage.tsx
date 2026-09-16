@@ -1,15 +1,17 @@
-import clsx from 'clsx'
+import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
 import { useEffect, useMemo, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button } from '@shared/ui'
+import { Button, PageTransition, Tabs } from '@shared/ui'
 
 import { aniListAccountModel } from '@entities/anilist-account'
-import { formatProgress, preferredTitle, trackerQueries } from '@entities/tracker'
+import { MediaCard } from '@entities/media'
+import { trackerQueries } from '@entities/tracker'
 import type { TrackerEntry, TrackerMediaType } from '@entities/tracker'
 
 import { ConnectAniList } from '@features/connect-anilist'
+import { EntryControls } from '@features/track-media'
 
 import styles from './ListsPage.module.scss'
 
@@ -21,6 +23,10 @@ type TrackerStatus = (typeof STATUS_ORDER)[number]
 
 function isKnownStatus(status: string): status is TrackerStatus {
 	return (STATUS_ORDER as readonly string[]).includes(status)
+}
+
+function entryTotal(entry: TrackerEntry, mediaType: TrackerMediaType): number | null {
+	return mediaType === 'anime' ? entry.media.episodes : entry.media.chapters
 }
 
 function groupByStatus(entries: TrackerEntry[]): [TrackerStatus, TrackerEntry[]][] {
@@ -44,6 +50,7 @@ function groupByStatus(entries: TrackerEntry[]): [TrackerStatus, TrackerEntry[]]
 
 export function ListsPage() {
 	const { t } = useTranslation()
+	const navigate = useNavigate()
 	const [mediaType, setMediaType] = useState<TrackerMediaType>('anime')
 
 	const query = trackerQueries[mediaType]
@@ -79,24 +86,15 @@ export function ListsPage() {
 	}
 
 	return (
-		<div className={styles.root}>
+		<PageTransition className={styles.root}>
 			<header className={styles.header}>
 				<h1 className={styles.title}>{t('nav.lists')}</h1>
 
-				<div className={styles.tabs} role='tablist'>
-					{MEDIA_TYPES.map(type => (
-						<button
-							key={type}
-							type='button'
-							role='tab'
-							aria-selected={type === mediaType}
-							className={clsx(styles.tab, type === mediaType && styles.active)}
-							onClick={() => setMediaType(type)}
-						>
-							{t(`lists.tabs.${type}`)}
-						</button>
-					))}
-				</div>
+				<Tabs
+					value={mediaType}
+					onValueChange={setMediaType}
+					items={MEDIA_TYPES.map(type => ({ value: type, label: t(`lists.tabs.${type}`) }))}
+				/>
 			</header>
 
 			{data?.stale && <p className={styles.notice}>{t('lists.stale')}</p>}
@@ -123,27 +121,24 @@ export function ListsPage() {
 
 					<ul className={styles.grid}>
 						{entries.map(entry => (
-							<li key={entry.media_ref} className={styles.card}>
-								<div
-									className={styles.cover}
-									style={{ backgroundColor: entry.media.cover_color ?? undefined }}
+							<li key={entry.media_ref}>
+								<MediaCard
+									media={entry.media}
+									scoreBadge={entry.score > 0 ? entry.score : undefined}
+									progress={
+										entry.progress > 0
+											? { value: entry.progress, max: entryTotal(entry, mediaType) }
+											: undefined
+									}
+									onOpen={() =>
+										navigate({
+											to: '/media/$mediaRef',
+											params: { mediaRef: entry.media_ref }
+										})
+									}
 								>
-									{entry.media.cover_image && (
-										<img src={entry.media.cover_image} alt='' loading='lazy' />
-									)}
-								</div>
-
-								<p className={styles.cardTitle}>{preferredTitle(entry.media.title)}</p>
-
-								<p className={styles.progress}>
-									{mediaType === 'anime'
-										? t('lists.episodes', {
-												progress: formatProgress(entry.progress, entry.media.episodes)
-											})
-										: t('lists.chapters', {
-												progress: formatProgress(entry.progress, entry.media.chapters)
-											})}
-								</p>
+									<EntryControls entry={entry} mediaType={mediaType} />
+								</MediaCard>
 							</li>
 						))}
 					</ul>
@@ -159,6 +154,6 @@ export function ListsPage() {
 					))}
 				</footer>
 			)}
-		</div>
+		</PageTransition>
 	)
 }

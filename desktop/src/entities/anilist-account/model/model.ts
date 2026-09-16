@@ -6,7 +6,7 @@ import { atom } from '@shared/factory'
 
 import { nodeOnline, nodeTopic } from '@infra/node'
 
-import { connectAniListFx, disconnectAniListFx, fetchAniListSessionFx } from './api'
+import { connectAniListFx, disconnectAniListFx, fetchAniListSessionFx } from '../api/api'
 
 export type AniListConnectFailure = 'rejected' | 'unreachable' | 'unknown'
 

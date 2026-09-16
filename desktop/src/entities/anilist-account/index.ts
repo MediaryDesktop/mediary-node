@@ -1,4 +1,4 @@
-export { aniListAccountModel, aniListSessionQuery } from './model'
-export type { AniListConnectFailure } from './model'
+export { aniListAccountModel, aniListSessionQuery } from './model/model'
+export type { AniListConnectFailure } from './model/model'
 
-export type { AniListAccount, AniListSession } from './api'
+export type { AniListAccount, AniListSession } from './api/api'

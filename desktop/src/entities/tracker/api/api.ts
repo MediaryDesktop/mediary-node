@@ -12,3 +12,18 @@ export const fetchTrackerEntriesFx = createNodeRequestFx<TrackerMediaType, Track
 	url: '/v1/tracker/entries',
 	query: { type: mediaType }
 }))
+
+export type TrackerEntryPatch = Omit<NodeSchemas['UpdateEntryInputBody'], '$schema'>
+
+export interface UpdateTrackerEntryParams {
+	mediaRef: string
+	patch: TrackerEntryPatch
+}
+
+export const updateTrackerEntryFx = createNodeRequestFx<UpdateTrackerEntryParams, TrackerEntry>(
+	({ mediaRef, patch }) => ({
+		url: `/v1/tracker/entries/${encodeURIComponent(mediaRef)}`,
+		method: 'PUT',
+		body: patch
+	})
+)

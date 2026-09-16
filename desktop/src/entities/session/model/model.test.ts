@@ -1,8 +1,8 @@
 import { allSettled, fork } from 'effector'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { fetchAccountFx, signOutFx, startOAuthFx } from './api'
-import type { Account } from './api'
+import { fetchAccountFx, signOutFx, startOAuthFx } from '../api/api'
+import type { Account } from '../api/api'
 import { sessionModel } from './model'
 
 const ACCOUNT: Account = {

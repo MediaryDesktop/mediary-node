@@ -6,6 +6,7 @@ import { DownloadsPage } from '@pages/downloads'
 import { HomePage } from '@pages/home'
 import { LibraryPage } from '@pages/library'
 import { ListsPage } from '@pages/lists'
+import { MediaPage } from '@pages/media'
 import { SettingsPage } from '@pages/settings'
 
 import { AppLayout } from '../../layout/AppLayout'
@@ -46,6 +47,15 @@ const listsRoute = createRoute({
 	component: ListsPage
 })
 
+const mediaRoute = createRoute({
+	getParentRoute: () => framedRoute,
+	path: '/media/$mediaRef',
+	component: function MediaRoute() {
+		const { mediaRef } = mediaRoute.useParams()
+		return <MediaPage key={mediaRef} mediaRef={mediaRef} />
+	}
+})
+
 const libraryRoute = createRoute({
 	getParentRoute: () => framedRoute,
 	path: '/library',
@@ -69,6 +79,7 @@ export const framedTree = framedRoute.addChildren([
 	discoverRoute,
 	catalogRoute,
 	listsRoute,
+	mediaRoute,
 	libraryRoute,
 	downloadsRoute,
 	settingsRoute

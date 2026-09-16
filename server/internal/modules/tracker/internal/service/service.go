@@ -22,6 +22,7 @@ type Options struct {
 	ClientID        string
 	AuthorizeURL    string
 	RefreshInterval time.Duration
+	FlushDelay      time.Duration
 	Now             func() time.Time
 }
 
@@ -33,6 +34,9 @@ type Service struct {
 
 	mu         sync.Mutex
 	refreshing map[MediaType]bool
+	flushTimer *time.Timer
+
+	flushMu sync.Mutex
 }
 
 func New(st *store.Store, logger zerolog.Logger, hub *events.Hub, opts Options) *Service {
@@ -42,6 +46,10 @@ func New(st *store.Store, logger zerolog.Logger, hub *events.Hub, opts Options) 
 
 	if opts.RefreshInterval <= 0 {
 		opts.RefreshInterval = 5 * time.Minute
+	}
+
+	if opts.FlushDelay <= 0 {
+		opts.FlushDelay = defaultFlushDelay
 	}
 
 	return &Service{
@@ -116,7 +124,7 @@ func (s *Service) SignIn(ctx context.Context, token string) (*Account, error) {
 		return nil, apperr.Wrap(err, apperr.KindInternal, "encode anilist account")
 	}
 
-	if err := s.store.ReplaceAccount(ctx, payload, s.opts.Now()); err != nil {
+	if err := s.store.ReplaceAccount(ctx, account.ID, payload, s.opts.Now()); err != nil {
 		return nil, apperr.Wrap(err, apperr.KindInternal, "store anilist account")
 	}
 
@@ -128,6 +136,7 @@ func (s *Service) SignIn(ctx context.Context, token string) (*Account, error) {
 
 	s.refreshInBackground(ctx, MediaTypeAnime)
 	s.refreshInBackground(ctx, MediaTypeManga)
+	s.scheduleFlush(ctx)
 
 	return &account, nil
 }
@@ -139,6 +148,10 @@ func (s *Service) SignOut(ctx context.Context) error {
 
 	if err := s.store.ClearMirror(ctx); err != nil {
 		return apperr.Wrap(err, apperr.KindInternal, "clear anilist mirror")
+	}
+
+	if err := s.store.ClearOutbox(ctx); err != nil {
+		return apperr.Wrap(err, apperr.KindInternal, "clear pending anilist changes")
 	}
 
 	s.publishSession(false, "signed_out")
@@ -161,12 +174,22 @@ func (s *Service) Entries(ctx context.Context, mediaType MediaType) (*Collection
 	}
 
 	if cached == nil {
-		return s.refresh(ctx, mediaType)
-	}
-
-	if s.opts.Now().Sub(cached.FetchedAt) >= s.opts.RefreshInterval {
+		cached, err = s.refresh(ctx, mediaType)
+		if err != nil {
+			return nil, err
+		}
+	} else if s.opts.Now().Sub(cached.FetchedAt) >= s.opts.RefreshInterval {
 		cached.Stale = true
 		s.refreshInBackground(ctx, mediaType)
+	}
+
+	pending, err := s.applyPending(ctx, cached)
+	if err != nil {
+		return nil, err
+	}
+
+	if pending {
+		s.scheduleFlush(ctx)
 	}
 
 	return cached, nil

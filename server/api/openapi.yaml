@@ -49,6 +49,19 @@ components:
         - score_format
         - display_adult_content
       type: object
+    AiringEpisode:
+      additionalProperties: false
+      properties:
+        airing_at:
+          format: date-time
+          type: string
+        episode:
+          format: int64
+          type: integer
+      required:
+        - episode
+        - airing_at
+      type: object
     Date:
       additionalProperties: false
       properties:
@@ -71,6 +84,30 @@ components:
         - year
         - month
         - day
+      type: object
+    DetailsOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/DetailsOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        media:
+          $ref: "#/components/schemas/MediaDetails"
+          description: Everything a title page shows about the title itself.
+        sources:
+          description: Attribution for every field that came from an external source.
+          items:
+            $ref: "#/components/schemas/Source"
+          type:
+            - array
+            - "null"
+      required:
+        - media
+        - sources
       type: object
     EntriesOutputBody:
       additionalProperties: false
@@ -124,6 +161,13 @@ components:
     Entry:
       additionalProperties: false
       properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/Entry.json
+          format: uri
+          readOnly: true
+          type: string
         completed_at:
           $ref: "#/components/schemas/Date"
         custom_lists:
@@ -162,6 +206,8 @@ components:
           $ref: "#/components/schemas/Date"
         status:
           type: string
+        sync_pending:
+          type: boolean
         updated_at:
           format: date-time
           type: string
@@ -180,6 +226,7 @@ components:
         - completed_at
         - updated_at
         - custom_lists
+        - sync_pending
         - media
       type: object
     ErrorDetail:
@@ -240,6 +287,29 @@ components:
             - https://example.com/errors/example
           format: uri
           type: string
+      type: object
+    FuzzyDate:
+      additionalProperties: false
+      properties:
+        day:
+          format: int64
+          type:
+            - integer
+            - "null"
+        month:
+          format: int64
+          type:
+            - integer
+            - "null"
+        year:
+          format: int64
+          type:
+            - integer
+            - "null"
+      required:
+        - year
+        - month
+        - day
       type: object
     HealthOutputBody:
       additionalProperties: false
@@ -363,6 +433,207 @@ components:
         - cover_color
         - banner_image
         - site_url
+      type: object
+    MediaDetails:
+      additionalProperties: false
+      properties:
+        average_score:
+          format: int64
+          type:
+            - integer
+            - "null"
+        banner_image:
+          type:
+            - string
+            - "null"
+        chapters:
+          format: int64
+          type:
+            - integer
+            - "null"
+        country_of_origin:
+          type:
+            - string
+            - "null"
+        cover_color:
+          type:
+            - string
+            - "null"
+        cover_image:
+          type:
+            - string
+            - "null"
+        description:
+          type: string
+        duration:
+          format: int64
+          type:
+            - integer
+            - "null"
+        end_date:
+          $ref: "#/components/schemas/FuzzyDate"
+        episodes:
+          format: int64
+          type:
+            - integer
+            - "null"
+        favourites:
+          format: int64
+          type:
+            - integer
+            - "null"
+        fetched_at:
+          format: date-time
+          type: string
+        format:
+          type:
+            - string
+            - "null"
+        genres:
+          items:
+            type: string
+          type:
+            - array
+            - "null"
+        is_adult:
+          type: boolean
+        mean_score:
+          format: int64
+          type:
+            - integer
+            - "null"
+        media_ref:
+          type: string
+        media_type:
+          type: string
+        next_airing_episode:
+          $ref: "#/components/schemas/AiringEpisode"
+        popularity:
+          format: int64
+          type:
+            - integer
+            - "null"
+        relations:
+          items:
+            $ref: "#/components/schemas/RelatedMedia"
+          type:
+            - array
+            - "null"
+        season:
+          type:
+            - string
+            - "null"
+        season_year:
+          format: int64
+          type:
+            - integer
+            - "null"
+        site_url:
+          type: string
+        source:
+          type:
+            - string
+            - "null"
+        start_date:
+          $ref: "#/components/schemas/FuzzyDate"
+        status:
+          type:
+            - string
+            - "null"
+        studios:
+          items:
+            type: string
+          type:
+            - array
+            - "null"
+        synonyms:
+          items:
+            type: string
+          type:
+            - array
+            - "null"
+        title:
+          $ref: "#/components/schemas/TitleNames"
+        volumes:
+          format: int64
+          type:
+            - integer
+            - "null"
+      required:
+        - media_ref
+        - media_type
+        - format
+        - status
+        - title
+        - synonyms
+        - description
+        - cover_image
+        - cover_color
+        - banner_image
+        - episodes
+        - chapters
+        - volumes
+        - duration
+        - season
+        - season_year
+        - start_date
+        - end_date
+        - average_score
+        - mean_score
+        - popularity
+        - favourites
+        - genres
+        - studios
+        - source
+        - country_of_origin
+        - is_adult
+        - site_url
+        - next_airing_episode
+        - relations
+        - fetched_at
+      type: object
+    RelatedMedia:
+      additionalProperties: false
+      properties:
+        cover_color:
+          type:
+            - string
+            - "null"
+        cover_image:
+          type:
+            - string
+            - "null"
+        format:
+          type:
+            - string
+            - "null"
+        media_ref:
+          type: string
+        media_type:
+          type: string
+        relation_type:
+          type: string
+        season_year:
+          format: int64
+          type:
+            - integer
+            - "null"
+        status:
+          type:
+            - string
+            - "null"
+        title:
+          $ref: "#/components/schemas/TitleNames"
+      required:
+        - relation_type
+        - media_ref
+        - media_type
+        - format
+        - status
+        - season_year
+        - title
+        - cover_image
+        - cover_color
       type: object
     SessionOutputBody:
       additionalProperties: false
@@ -584,6 +855,73 @@ components:
         - english
         - native
       type: object
+    TitleNames:
+      additionalProperties: false
+      properties:
+        english:
+          type:
+            - string
+            - "null"
+        native:
+          type:
+            - string
+            - "null"
+        romaji:
+          type:
+            - string
+            - "null"
+        user_preferred:
+          type:
+            - string
+            - "null"
+      required:
+        - user_preferred
+        - romaji
+        - english
+        - native
+      type: object
+    UpdateEntryInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/UpdateEntryInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        progress:
+          description: Episodes watched or chapters read.
+          format: int64
+          minimum: 0
+          type: integer
+        progress_volumes:
+          description: Volumes read; manga only.
+          format: int64
+          minimum: 0
+          type: integer
+        repeat:
+          description: How many times the title was rewatched or reread.
+          format: int64
+          minimum: 0
+          type: integer
+        score:
+          description: Score on a 0-100 scale; clients convert from the account's score format.
+          format: int64
+          maximum: 100
+          minimum: 0
+          type: integer
+        status:
+          description: New list status.
+          enum:
+            - CURRENT
+            - PLANNING
+            - COMPLETED
+            - DROPPED
+            - PAUSED
+            - REPEATING
+          type: string
+      type: object
   securitySchemes:
     nodeToken:
       description: The node's local token, generated on first start and read by the desktop shell.
@@ -715,6 +1053,36 @@ paths:
       summary: Library module status
       tags:
         - library
+  /v1/media/{media_ref}:
+    get:
+      description: Fetched from the source on demand and kept for at most a day, as the source's terms allow. Past that the node asks again; while the source is unreachable the request fails, and clients fall back to what the user's own list already knows about the title.
+      operationId: getMediaDetails
+      parameters:
+        - description: The title's media reference.
+          in: path
+          name: media_ref
+          required: true
+          schema:
+            description: The title's media reference.
+            examples:
+              - anilist:154587
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DetailsOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Title details
+      tags:
+        - media
   /v1/playback/status:
     get:
       description: Reports whether the playback module is wired. Placeholder for phase 0.
@@ -825,6 +1193,42 @@ paths:
                 $ref: "#/components/schemas/ErrorModel"
           description: Error
       summary: Tracker entries
+      tags:
+        - tracker
+  /v1/tracker/entries/{media_ref}:
+    put:
+      description: "Applies the change locally and queues it for AniList, so it works offline. The returned entry already carries the change with `sync_pending: true`; a `tracker` event with reason `synced` follows once AniList has it. A progress lower than what AniList already holds is only sent when it is lower than what the user saw — so an older offline edit never rolls back progress made on another device."
+      operationId: updateTrackerEntry
+      parameters:
+        - description: The entry's media reference, as returned by listTrackerEntries.
+          in: path
+          name: media_ref
+          required: true
+          schema:
+            description: The entry's media reference, as returned by listTrackerEntries.
+            examples:
+              - anilist:154587
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateEntryInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Entry"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Update a tracker entry
       tags:
         - tracker
   /v1/tracker/refresh:

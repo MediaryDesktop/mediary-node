@@ -10,6 +10,7 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/httpapi"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/extension"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/library"
+	"github.com/mediaryorg/mediary-node/server/internal/modules/media"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/playback"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/reader"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/sync"
@@ -58,6 +59,12 @@ func Register(api huma.API, deps Deps) {
 	reader.New(reader.Deps{
 		DB:     deps.DB,
 		Logger: moduleLogger(deps.Logger, "reader"),
+	}).Register(api)
+
+	media.New(media.Deps{
+		DB:      deps.DB,
+		Logger:  moduleLogger(deps.Logger, "media"),
+		AniList: deps.AniList,
 	}).Register(api)
 
 	tracker.New(tracker.Deps{

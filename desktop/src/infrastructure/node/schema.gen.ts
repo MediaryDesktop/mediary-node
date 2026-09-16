@@ -89,6 +89,26 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/v1/media/{media_ref}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Title details
+		 * @description Fetched from the source on demand and kept for at most a day, as the source's terms allow. Past that the node asks again; while the source is unreachable the request fails, and clients fall back to what the user's own list already knows about the title.
+		 */
+		get: operations['getMediaDetails']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/v1/playback/status': {
 		parameters: {
 			query?: never
@@ -189,6 +209,26 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/v1/tracker/entries/{media_ref}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		/**
+		 * Update a tracker entry
+		 * @description Applies the change locally and queues it for AniList, so it works offline. The returned entry already carries the change with `sync_pending: true`; a `tracker` event with reason `synced` follows once AniList has it. A progress lower than what AniList already holds is only sent when it is lower than what the user saw — so an older offline edit never rolls back progress made on another device.
+		 */
+		put: operations['updateTrackerEntry']
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/v1/tracker/refresh': {
 		parameters: {
 			query?: never
@@ -238,6 +278,12 @@ export interface components {
 			score_format: string
 			site_url: string
 		}
+		AiringEpisode: {
+			/** Format: date-time */
+			airing_at: string
+			/** Format: int64 */
+			episode: number
+		}
 		Date: {
 			/** Format: int64 */
 			day: number | null
@@ -245,6 +291,18 @@ export interface components {
 			month: number | null
 			/** Format: int64 */
 			year: number | null
+		}
+		DetailsOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/DetailsOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description Everything a title page shows about the title itself. */
+			media: components['schemas']['MediaDetails']
+			/** @description Attribution for every field that came from an external source. */
+			sources: components['schemas']['Source'][] | null
 		}
 		EntriesOutputBody: {
 			/**
@@ -270,6 +328,12 @@ export interface components {
 			stale: boolean
 		}
 		Entry: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/Entry.json
+			 */
+			readonly $schema?: string
 			completed_at: components['schemas']['Date']
 			custom_lists: string[] | null
 			media: components['schemas']['Media']
@@ -288,6 +352,7 @@ export interface components {
 			score: number
 			started_at: components['schemas']['Date']
 			status: string
+			sync_pending: boolean
 			/** Format: date-time */
 			updated_at: string
 		}
@@ -337,6 +402,14 @@ export interface components {
 			 * @example https://example.com/errors/example
 			 */
 			type: string
+		}
+		FuzzyDate: {
+			/** Format: int64 */
+			day: number | null
+			/** Format: int64 */
+			month: number | null
+			/** Format: int64 */
+			year: number | null
 		}
 		HealthOutputBody: {
 			/**
@@ -392,6 +465,61 @@ export interface components {
 			title: components['schemas']['Title']
 			/** Format: int64 */
 			volumes: number | null
+		}
+		MediaDetails: {
+			/** Format: int64 */
+			average_score: number | null
+			banner_image: string | null
+			/** Format: int64 */
+			chapters: number | null
+			country_of_origin: string | null
+			cover_color: string | null
+			cover_image: string | null
+			description: string
+			/** Format: int64 */
+			duration: number | null
+			end_date: components['schemas']['FuzzyDate']
+			/** Format: int64 */
+			episodes: number | null
+			/** Format: int64 */
+			favourites: number | null
+			/** Format: date-time */
+			fetched_at: string
+			format: string | null
+			genres: string[] | null
+			is_adult: boolean
+			/** Format: int64 */
+			mean_score: number | null
+			media_ref: string
+			media_type: string
+			next_airing_episode: components['schemas']['AiringEpisode']
+			/** Format: int64 */
+			popularity: number | null
+			relations: components['schemas']['RelatedMedia'][] | null
+			season: string | null
+			/** Format: int64 */
+			season_year: number | null
+			site_url: string
+			source: string | null
+			start_date: components['schemas']['FuzzyDate']
+			status: string | null
+			studios: string[] | null
+			synonyms: string[] | null
+			title: components['schemas']['TitleNames']
+			/** Format: int64 */
+			volumes: number | null
+		}
+		RelatedMedia: {
+			cover_color: string | null
+			cover_image: string | null
+			format: string | null
+			media_ref: string
+			media_type: string
+			relation_type: string
+			/** Format: int64 */
+			season_year: number | null
+			status: string | null
+			title: components['schemas']['TitleNames']
 		}
 		SessionOutputBody: {
 			/**
@@ -530,6 +658,45 @@ export interface components {
 			romaji: string | null
 			user_preferred: string | null
 		}
+		TitleNames: {
+			english: string | null
+			native: string | null
+			romaji: string | null
+			user_preferred: string | null
+		}
+		UpdateEntryInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/UpdateEntryInputBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * Format: int64
+			 * @description Episodes watched or chapters read.
+			 */
+			progress?: number
+			/**
+			 * Format: int64
+			 * @description Volumes read; manga only.
+			 */
+			progress_volumes?: number
+			/**
+			 * Format: int64
+			 * @description How many times the title was rewatched or reread.
+			 */
+			repeat?: number
+			/**
+			 * Format: int64
+			 * @description Score on a 0-100 scale; clients convert from the account's score format.
+			 */
+			score?: number
+			/**
+			 * @description New list status.
+			 * @enum {string}
+			 */
+			status?: 'CURRENT' | 'PLANNING' | 'COMPLETED' | 'DROPPED' | 'PAUSED' | 'REPEATING'
+		}
 	}
 	responses: never
 	parameters: never
@@ -539,14 +706,19 @@ export interface components {
 }
 export type SchemaAcceptedOutputBody = components['schemas']['AcceptedOutputBody']
 export type SchemaAccount = components['schemas']['Account']
+export type SchemaAiringEpisode = components['schemas']['AiringEpisode']
 export type SchemaDate = components['schemas']['Date']
+export type SchemaDetailsOutputBody = components['schemas']['DetailsOutputBody']
 export type SchemaEntriesOutputBody = components['schemas']['EntriesOutputBody']
 export type SchemaEntry = components['schemas']['Entry']
 export type SchemaErrorDetail = components['schemas']['ErrorDetail']
 export type SchemaErrorModel = components['schemas']['ErrorModel']
+export type SchemaFuzzyDate = components['schemas']['FuzzyDate']
 export type SchemaHealthOutputBody = components['schemas']['HealthOutputBody']
 export type SchemaList = components['schemas']['List']
 export type SchemaMedia = components['schemas']['Media']
+export type SchemaMediaDetails = components['schemas']['MediaDetails']
+export type SchemaRelatedMedia = components['schemas']['RelatedMedia']
 export type SchemaSessionOutputBody = components['schemas']['SessionOutputBody']
 export type SchemaSignInInputBody = components['schemas']['SignInInputBody']
 export type SchemaSource = components['schemas']['Source']
@@ -557,6 +729,8 @@ export type SchemaStatusOutputBody3 = components['schemas']['StatusOutputBody3']
 export type SchemaStatusOutputBody4 = components['schemas']['StatusOutputBody4']
 export type SchemaStatusOutputBody5 = components['schemas']['StatusOutputBody5']
 export type SchemaTitle = components['schemas']['Title']
+export type SchemaTitleNames = components['schemas']['TitleNames']
+export type SchemaUpdateEntryInputBody = components['schemas']['UpdateEntryInputBody']
 export type $defs = Record<string, never>
 export interface operations {
 	getAniListSession: {
@@ -735,6 +909,38 @@ export interface operations {
 			}
 		}
 	}
+	getMediaDetails: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description The title's media reference. */
+				media_ref: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['DetailsOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
 	getPlaybackStatus: {
 		parameters: {
 			query?: never
@@ -870,6 +1076,42 @@ export interface operations {
 				}
 				content: {
 					'application/json': components['schemas']['EntriesOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	updateTrackerEntry: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description The entry's media reference, as returned by listTrackerEntries. */
+				media_ref: string
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['UpdateEntryInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['Entry']
 				}
 			}
 			/** @description Error */

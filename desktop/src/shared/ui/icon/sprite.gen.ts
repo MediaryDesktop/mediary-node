@@ -250,17 +250,21 @@ export const sprites = defineSpriteMap([
 				defineSpriteSymbol(['arrow-left'], [24]),
 				defineSpriteSymbol(['arrow-right'], [24]),
 				defineSpriteSymbol(['book-open'], [24]),
+				defineSpriteSymbol(['calendar'], [24]),
 				defineSpriteSymbol(['check'], [24]),
 				defineSpriteSymbol(['chevron-down'], [24]),
+				defineSpriteSymbol(['clock'], [24]),
 				defineSpriteSymbol(['close'], [24]),
 				defineSpriteSymbol(['cloud'], [24]),
 				defineSpriteSymbol(['compass'], [24]),
 				defineSpriteSymbol(['database'], [24]),
 				defineSpriteSymbol(['download'], [24]),
+				defineSpriteSymbol(['external-link'], [24]),
 				defineSpriteSymbol(['eye-off'], [24]),
 				defineSpriteSymbol(['eye'], [24]),
 				defineSpriteSymbol(['folder-open'], [24]),
 				defineSpriteSymbol(['folder'], [24]),
+				defineSpriteSymbol(['heart'], [24]),
 				defineSpriteSymbol(['home'], [24]),
 				defineSpriteSymbol(['info'], [24]),
 				defineSpriteSymbol(['library'], [24]),
@@ -270,15 +274,21 @@ export const sprites = defineSpriteMap([
 				defineSpriteSymbol(['maximize'], [24]),
 				defineSpriteSymbol(['minimize'], [24]),
 				defineSpriteSymbol(['moon'], [24]),
+				defineSpriteSymbol(['more-vertical'], [24]),
 				defineSpriteSymbol(['node'], [64, '-16 0 288 288']),
+				defineSpriteSymbol(['pencil'], [24]),
 				defineSpriteSymbol(['play'], [24]),
 				defineSpriteSymbol(['player'], [24]),
+				defineSpriteSymbol(['plus'], [24]),
 				defineSpriteSymbol(['restore'], [24]),
 				defineSpriteSymbol(['search'], [24]),
 				defineSpriteSymbol(['settings'], [24]),
+				defineSpriteSymbol(['signal'], [24]),
 				defineSpriteSymbol(['sparkles'], [24]),
+				defineSpriteSymbol(['star'], [24]),
 				defineSpriteSymbol(['sun'], [24]),
-				defineSpriteSymbol(['user'], [24])
+				defineSpriteSymbol(['user'], [24]),
+				defineSpriteSymbol(['users'], [24])
 			],
 			defineExternalAssetMeta('common.svg')
 		)
@@ -302,17 +312,21 @@ export type SpritesMeta = {
 		| 'arrow-left'
 		| 'arrow-right'
 		| 'book-open'
+		| 'calendar'
 		| 'check'
 		| 'chevron-down'
+		| 'clock'
 		| 'close'
 		| 'cloud'
 		| 'compass'
 		| 'database'
 		| 'download'
+		| 'external-link'
 		| 'eye-off'
 		| 'eye'
 		| 'folder-open'
 		| 'folder'
+		| 'heart'
 		| 'home'
 		| 'info'
 		| 'library'
@@ -322,15 +336,21 @@ export type SpritesMeta = {
 		| 'maximize'
 		| 'minimize'
 		| 'moon'
+		| 'more-vertical'
 		| 'node'
+		| 'pencil'
 		| 'play'
 		| 'player'
+		| 'plus'
 		| 'restore'
 		| 'search'
 		| 'settings'
+		| 'signal'
 		| 'sparkles'
+		| 'star'
 		| 'sun'
 		| 'user'
+		| 'users'
 	social: 'anilist' | 'apple' | 'facebook' | 'github' | 'google'
 }
 

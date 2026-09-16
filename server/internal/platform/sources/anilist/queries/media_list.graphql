@@ -1,0 +1,8 @@
+query MediaListEntry($userId: Int, $mediaId: Int) {
+  MediaList(userId: $userId, mediaId: $mediaId) {
+    id
+    status
+    progress
+    progressVolumes
+  }
+}

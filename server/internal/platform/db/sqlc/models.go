@@ -4,14 +4,37 @@
 
 package sqlc
 
+import (
+	"database/sql"
+)
+
 type AnilistMirror struct {
 	Kind      string `json:"kind"`
 	Payload   string `json:"payload"`
 	FetchedAt int64  `json:"fetched_at"`
 }
 
+type AnilistOutbox struct {
+	AccountID     int64          `json:"account_id"`
+	MediaID       int64          `json:"media_id"`
+	MediaType     string         `json:"media_type"`
+	Patch         string         `json:"patch"`
+	AllowDecrease int64          `json:"allow_decrease"`
+	CreatedAt     int64          `json:"created_at"`
+	UpdatedAt     int64          `json:"updated_at"`
+	Attempts      int64          `json:"attempts"`
+	LastError     sql.NullString `json:"last_error"`
+}
+
 type NodeMetum struct {
 	Key       string `json:"key"`
 	Value     string `json:"value"`
 	UpdatedAt int64  `json:"updated_at"`
+}
+
+type SourceCache struct {
+	Provider   string `json:"provider"`
+	ExternalID string `json:"external_id"`
+	Payload    string `json:"payload"`
+	FetchedAt  int64  `json:"fetched_at"`
 }

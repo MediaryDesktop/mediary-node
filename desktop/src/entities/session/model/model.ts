@@ -26,8 +26,8 @@ import {
 	signOutFx,
 	signUpFx,
 	startOAuthFx
-} from './api'
-import type { Account, ConfirmEmailInput, LoginInput, RegisterInput, Session } from './api'
+} from '../api/api'
+import type { Account, ConfirmEmailInput, LoginInput, RegisterInput, Session } from '../api/api'
 
 export const accountQuery = createQuery({ effect: fetchAccountFx, name: 'account' })
 

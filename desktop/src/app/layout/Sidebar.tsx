@@ -37,7 +37,7 @@ type RailTo = (typeof SECTIONS)[number]['to'] | '/settings' | '/sign-in'
 
 export function Sidebar() {
 	const { t } = useTranslation()
-	const [state, account] = useUnit([$nodeState, sessionModel.$account])
+	const { state, account } = useUnit({ state: $nodeState, account: sessionModel.$account })
 
 	return (
 		<nav className={styles.rail} aria-label={t('nav.label')}>
