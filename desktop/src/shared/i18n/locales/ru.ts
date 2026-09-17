@@ -75,6 +75,7 @@ export const ru: Translation = {
 		connect: 'Подключите AniList, чтобы увидеть свои списки',
 		source: 'Данные из {{name}}',
 		pending: 'Ещё не синхронизировано',
+		menu: 'Действия с тайтлом',
 		decrement: 'На один меньше',
 		increment: 'На один больше',
 		updateFailed: 'Не удалось сохранить изменение. Попробуйте ещё раз.',

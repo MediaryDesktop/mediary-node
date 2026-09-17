@@ -77,6 +77,7 @@ export const en = {
 		connect: 'Connect AniList to see your lists',
 		source: 'Data from {{name}}',
 		pending: 'Not synced yet',
+		menu: 'Title options',
 		decrement: 'One less',
 		increment: 'One more',
 		updateFailed: 'Could not save the change. Try again.',

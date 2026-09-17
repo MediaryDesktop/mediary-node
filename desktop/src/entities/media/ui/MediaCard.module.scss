@@ -1,7 +1,18 @@
 .card {
+	position: relative;
 	display: flex;
 	flex-direction: column;
 	min-width: 0;
+	max-width: 100%;
+	padding: 12px;
+	border-radius: 14px;
+	background: var(--surface);
+	box-shadow: var(--shadow-sm);
+
+	&:has(.open:focus-visible) {
+		border-color: transparent;
+		box-shadow: 0 0 0 2px var(--focus-ring);
+	}
 
 	.open {
 		display: flex;
@@ -17,44 +28,47 @@
 		&:is(button) {
 			cursor: pointer;
 
-			&:hover .cover img {
+			&:hover .poster img {
 				transform: scale(1.04);
-			}
-
-			&:hover .title {
-				color: var(--accent-text);
 			}
 
 			&:focus-visible {
 				outline: none;
-
-				.cover {
-					box-shadow: 0 0 0 2px var(--focus-ring);
-				}
 			}
+		}
+
+		.clipDefs {
+			position: absolute;
 		}
 
 		.cover {
 			position: relative;
 			display: block;
-			aspect-ratio: 2 / 3;
-			overflow: hidden;
-			border-radius: var(--radius);
-			background: var(--surface);
-			box-shadow: var(--shadow-sm);
+			min-height: 0;
+			aspect-ratio: 2.2 / 3;
+			background: var(--bg-muted);
 
-			img {
+			.poster {
+				display: block;
 				width: 100%;
 				height: 100%;
-				object-fit: cover;
-				transition: transform 320ms cubic-bezier(0.2, 0, 0, 1);
+				overflow: hidden;
+				background: var(--bg-muted);
+
+				img {
+					display: block;
+					width: 100%;
+					height: 100%;
+					object-fit: cover;
+					transition: transform 320ms cubic-bezier(0.2, 0, 0, 1);
+				}
 			}
 
 			.overlay {
 				position: absolute;
 				top: 0.5rem;
 				left: 0.5rem;
-				right: 0.5rem;
+				right: 22%;
 				display: flex;
 				flex-wrap: wrap;
 				gap: 0.25rem;
@@ -62,11 +76,11 @@
 
 			.cornerLabel {
 				position: absolute;
-				top: 0;
 				right: 0;
+				bottom: 0;
 				z-index: 1;
 				padding: 0.3125rem 0.75rem;
-				border-bottom-left-radius: var(--radius);
+				border-top-left-radius: 8px;
 				background: var(--overlay);
 				color: var(--text-on-accent);
 				font-size: 0.8125rem;
@@ -104,42 +118,31 @@
 					color: var(--info-text);
 				}
 			}
-
-			.progress {
-				position: absolute;
-				bottom: 0;
-				left: 0;
-				right: 0;
-				z-index: 1;
-				padding: 0 2px 2px;
-			}
 		}
+	}
 
-		.title {
-			display: -webkit-box;
-			margin-top: 0.5rem;
-			overflow: hidden;
-			font-size: 0.875rem;
-			font-weight: 600;
-			line-height: 1.35;
-			transition: color 160ms;
-			-webkit-box-orient: vertical;
-			-webkit-line-clamp: 2;
-		}
+	.menuFrame {
+		position: absolute;
+		top: 12px;
+		left: 12px;
+		right: 12px;
+		z-index: 2;
+		aspect-ratio: 2.2 / 3;
+		pointer-events: none;
 
-		.caption {
-			margin-top: 0.125rem;
-			overflow: hidden;
+		.menu {
+			position: absolute;
+			top: 6.5%;
+			left: 88.5%;
+			transform: translate(-50%, -50%);
+			pointer-events: auto;
 			color: var(--text-secondary);
-			font-size: 0.75rem;
-			text-overflow: ellipsis;
-			white-space: nowrap;
 		}
 	}
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.card .open .cover img {
+	.card .open .cover .poster img {
 		transition: none;
 	}
 }

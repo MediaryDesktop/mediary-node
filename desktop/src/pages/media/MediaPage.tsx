@@ -471,9 +471,6 @@ function RelationCard({ relation }: { relation: NonNullable<MediaDetails['relati
 		<MediaCard
 			media={relation}
 			cornerLabel={enumLabel(t, 'relation', relation.relation_type)}
-			caption={[enumLabel(t, 'format', relation.format), relation.season_year]
-				.filter(Boolean)
-				.join(' · ')}
 			onOpen={() => navigate({ to: '/media/$mediaRef', params: { mediaRef: relation.media_ref } })}
 		/>
 	)

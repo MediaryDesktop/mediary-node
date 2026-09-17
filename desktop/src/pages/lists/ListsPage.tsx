@@ -11,7 +11,7 @@ import { trackerQueries } from '@entities/tracker'
 import type { TrackerEntry, TrackerMediaType } from '@entities/tracker'
 
 import { ConnectAniList } from '@features/connect-anilist'
-import { EntryControls } from '@features/track-media'
+import { EntryMenu } from '@features/track-media'
 
 import styles from './ListsPage.module.scss'
 
@@ -23,10 +23,6 @@ type TrackerStatus = (typeof STATUS_ORDER)[number]
 
 function isKnownStatus(status: string): status is TrackerStatus {
 	return (STATUS_ORDER as readonly string[]).includes(status)
-}
-
-function entryTotal(entry: TrackerEntry, mediaType: TrackerMediaType): number | null {
-	return mediaType === 'anime' ? entry.media.episodes : entry.media.chapters
 }
 
 function groupByStatus(entries: TrackerEntry[]): [TrackerStatus, TrackerEntry[]][] {
@@ -125,20 +121,14 @@ export function ListsPage() {
 								<MediaCard
 									media={entry.media}
 									scoreBadge={entry.score > 0 ? entry.score : undefined}
-									progress={
-										entry.progress > 0
-											? { value: entry.progress, max: entryTotal(entry, mediaType) }
-											: undefined
-									}
+									menu={<EntryMenu entry={entry} mediaType={mediaType} />}
 									onOpen={() =>
 										navigate({
 											to: '/media/$mediaRef',
 											params: { mediaRef: entry.media_ref }
 										})
 									}
-								>
-									<EntryControls entry={entry} mediaType={mediaType} />
-								</MediaCard>
+								/>
 							</li>
 						))}
 					</ul>

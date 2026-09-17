@@ -13,22 +13,22 @@ describe('MediaCard', () => {
 	it('opens the title when it is clickable', () => {
 		const onOpen = vi.fn()
 
-		render(<MediaCard media={MEDIA} caption='TV · 2023' onOpen={onOpen} />)
+		render(<MediaCard media={MEDIA} onOpen={onOpen} />)
 
-		fireEvent.click(screen.getByRole('button', { name: /Frieren/ }))
+		fireEvent.click(screen.getByRole('button', { name: 'Frieren' }))
 
 		expect(onOpen).toHaveBeenCalledTimes(1)
-		expect(screen.getByText('TV · 2023')).toBeInTheDocument()
 	})
 
 	it('renders a static card without an open handler', () => {
 		render(
-			<MediaCard media={MEDIA}>
+			<MediaCard media={MEDIA} cornerLabel='SEQUEL'>
 				<span>controls</span>
 			</MediaCard>
 		)
 
 		expect(screen.queryByRole('button')).toBeNull()
+		expect(screen.getByText('SEQUEL')).toBeInTheDocument()
 		expect(screen.getByText('controls')).toBeInTheDocument()
 	})
 })
