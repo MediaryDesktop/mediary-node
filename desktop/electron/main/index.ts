@@ -11,6 +11,9 @@ import {
 	readStoredSession,
 	writeStoredSession
 } from './session-store.js'
+import { stopTrailerHost, trailerHostOrigin } from './trailer-host.js'
+
+app.commandLine.appendSwitch('disable-quic')
 
 const supervisor = new NodeSupervisor({
 	onLog: (line, stream) => {
@@ -107,6 +110,8 @@ function registerIpc(): void {
 		openAniListAuthorize(authorizeUrl)
 	)
 
+	ipcMain.handle(IPC.trailerHost, () => trailerHostOrigin())
+
 	ipcMain.handle(IPC.sessionCanPersist, () => canPersistSession())
 	ipcMain.handle(IPC.sessionRead, () => readStoredSession())
 	ipcMain.handle(IPC.sessionWrite, (_event, session: unknown) => {
@@ -172,6 +177,7 @@ if (!app.requestSingleInstanceLock()) {
 	})
 
 	app.on('before-quit', releaseOAuthListener)
+	app.on('before-quit', stopTrailerHost)
 
 	app.on('window-all-closed', () => {
 		if (process.platform !== 'darwin') {

@@ -123,6 +123,7 @@ export const en = {
 		editEntry: 'Edit list entry',
 		addToList: 'Add to list',
 		trailer: 'Trailer',
+		trailerFor: 'Trailer for {{title}}',
 		downloadBatch: 'Download batch / {{count}} episodes',
 		comingSoon: 'Coming soon',
 		nextAiringDay: 'Episode {{episode}} {{when}}',

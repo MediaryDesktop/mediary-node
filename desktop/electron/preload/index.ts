@@ -37,6 +37,10 @@ const api = {
 			ipcRenderer.invoke(IPC.aniListOpenAuthorize, authorizeUrl)
 	},
 
+	trailer: {
+		host: (): Promise<string> => ipcRenderer.invoke(IPC.trailerHost)
+	},
+
 	session: {
 		canPersist: (): Promise<boolean> => ipcRenderer.invoke(IPC.sessionCanPersist),
 		read: (): Promise<StoredSession | null> => ipcRenderer.invoke(IPC.sessionRead),

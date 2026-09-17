@@ -121,6 +121,32 @@
 		}
 	}
 
+	.previewFrame {
+		position: absolute;
+		top: 12px;
+		left: 12px;
+		right: 12px;
+		z-index: 1;
+		aspect-ratio: 2.2 / 3;
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 200ms ease;
+	}
+
+	&.previewing {
+		.previewFrame {
+			opacity: 1;
+		}
+
+		.open .cover {
+			.scoreBadge,
+			.cornerLabel,
+			.overlay {
+				opacity: 0;
+			}
+		}
+	}
+
 	.menuFrame {
 		position: absolute;
 		top: 12px;
@@ -142,7 +168,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.card .open .cover .poster img {
+	.card .open .cover .poster img,
+	.card .previewFrame {
 		transition: none;
 	}
 }

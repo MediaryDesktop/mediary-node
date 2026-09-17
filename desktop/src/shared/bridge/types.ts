@@ -39,6 +39,9 @@ export interface MediaryBridge {
 	anilist: {
 		openAuthorize: (authorizeUrl: string) => Promise<void>
 	}
+	trailer: {
+		host: () => Promise<string>
+	}
 	session: {
 		canPersist: () => Promise<boolean>
 		read: () => Promise<StoredSession | null>

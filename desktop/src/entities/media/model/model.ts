@@ -1,11 +1,11 @@
 import { createQuery } from '@farfetched/core'
-import { createStore } from 'effector'
+import { createEffect, createEvent, createStore, sample } from 'effector'
 import type { TFunction } from 'i18next'
 
 import { atom } from '@shared/factory'
 
 import { fetchMediaDetailsFx } from '../api/api'
-import type { MediaDate, MediaTitle } from '../api/api'
+import type { MediaDate, MediaDetails, MediaTitle } from '../api/api'
 
 export const mediaDetailsQuery = createQuery({
 	effect: fetchMediaDetailsFx,
@@ -22,6 +22,43 @@ export const mediaDetailsModel = atom(() => {
 		$failedMediaRef,
 		detailsRequested: mediaDetailsQuery.start
 	}
+})
+
+const fetchTrailerHostFx = createEffect<void, string>(() => window.mediary.trailer.host())
+
+export const mediaPreviewModel = atom(() => {
+	const previewRequested = createEvent<string>()
+
+	const $previews = createStore<Record<string, MediaDetails>>({}).on(
+		fetchMediaDetailsFx.done,
+		(previews, { params, result }) => ({ ...previews, [params]: result.media })
+	)
+
+	const $inFlight = createStore<Record<string, true>>({})
+		.on(fetchMediaDetailsFx, (refs, mediaRef) => ({ ...refs, [mediaRef]: true }))
+		.on(fetchMediaDetailsFx.fail, (refs, { params }) => {
+			const { [params]: _dropped, ...rest } = refs
+			return rest
+		})
+
+	sample({
+		clock: previewRequested,
+		source: { previews: $previews, inFlight: $inFlight },
+		filter: ({ previews, inFlight }, mediaRef) => !(mediaRef in previews) && !(mediaRef in inFlight),
+		fn: (_, mediaRef) => mediaRef,
+		target: fetchMediaDetailsFx
+	})
+
+	const $trailerHost = createStore<string | null>(null).on(fetchTrailerHostFx.doneData, (_, host) => host)
+
+	sample({
+		clock: previewRequested,
+		source: { host: $trailerHost, asking: fetchTrailerHostFx.pending },
+		filter: ({ host, asking }) => host === null && !asking,
+		target: fetchTrailerHostFx
+	})
+
+	return { $previews, $trailerHost, previewRequested }
 })
 
 export function mediaTitle(title: MediaTitle): string {

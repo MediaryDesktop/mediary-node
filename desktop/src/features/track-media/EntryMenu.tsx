@@ -75,7 +75,7 @@ export function EntryMenu({ entry, mediaType }: EntryMenuProps) {
 					className={clsx(styles.trigger, entry.sync_pending && styles.pending)}
 					aria-label={t('lists.menu')}
 				>
-					<Icon name='common/more-vertical' size={18} />
+					<Icon name='common/more-vertical' size={20} />
 				</button>
 			}
 		/>

@@ -122,6 +122,7 @@ export function ListsPage() {
 									media={entry.media}
 									scoreBadge={entry.score > 0 ? entry.score : undefined}
 									menu={<EntryMenu entry={entry} mediaType={mediaType} />}
+									previewRef={entry.media_ref}
 									onOpen={() =>
 										navigate({
 											to: '/media/$mediaRef',

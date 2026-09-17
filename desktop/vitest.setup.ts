@@ -33,6 +33,9 @@ Object.defineProperty(window, 'mediary', {
 		anilist: {
 			openAuthorize: async () => {}
 		},
+		trailer: {
+			host: async () => 'http://127.0.0.1:45999'
+		},
 		session: {
 			canPersist: async () => true,
 			read: async () => null,

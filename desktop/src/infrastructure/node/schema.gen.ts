@@ -506,6 +506,7 @@ export interface components {
 			studios: string[] | null
 			synonyms: string[] | null
 			title: components['schemas']['TitleNames']
+			trailer: components['schemas']['Trailer']
 			/** Format: int64 */
 			volumes: number | null
 		}
@@ -664,6 +665,14 @@ export interface components {
 			romaji: string | null
 			user_preferred: string | null
 		}
+		Trailer: {
+			/** @description Video id on the hosting site. */
+			id: string
+			/** @description Where the video lives, e.g. youtube or dailymotion. */
+			site: string
+			/** @description Preview frame for the trailer. */
+			thumbnail: string | null
+		}
 		UpdateEntryInputBody: {
 			/**
 			 * Format: uri
@@ -730,6 +739,7 @@ export type SchemaStatusOutputBody4 = components['schemas']['StatusOutputBody4']
 export type SchemaStatusOutputBody5 = components['schemas']['StatusOutputBody5']
 export type SchemaTitle = components['schemas']['Title']
 export type SchemaTitleNames = components['schemas']['TitleNames']
+export type SchemaTrailer = components['schemas']['Trailer']
 export type SchemaUpdateEntryInputBody = components['schemas']['UpdateEntryInputBody']
 export type $defs = Record<string, never>
 export interface operations {

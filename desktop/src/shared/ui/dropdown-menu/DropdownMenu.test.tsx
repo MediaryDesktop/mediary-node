@@ -28,7 +28,6 @@ describe('DropdownMenu', () => {
 		render(<DropdownMenu trigger={<button>Open</button>} items={ITEMS} />)
 
 		openMenu()
-		// Radix registers its outside-pointerdown listener on the next tick.
 		await new Promise(resolve => setTimeout(resolve, 0))
 		fireEvent.pointerDown(document.body)
 

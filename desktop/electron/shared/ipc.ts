@@ -11,6 +11,8 @@ export const IPC = {
 
 	aniListOpenAuthorize: 'anilist:open-authorize',
 
+	trailerHost: 'trailer:host',
+
 	sessionRead: 'session:read',
 	sessionWrite: 'session:write',
 	sessionClear: 'session:clear',

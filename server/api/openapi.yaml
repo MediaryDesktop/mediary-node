@@ -554,6 +554,8 @@ components:
             - "null"
         title:
           $ref: "#/components/schemas/TitleNames"
+        trailer:
+          $ref: "#/components/schemas/Trailer"
         volumes:
           format: int64
           type:
@@ -588,6 +590,7 @@ components:
         - country_of_origin
         - is_adult
         - site_url
+        - trailer
         - next_airing_episode
         - relations
         - fetched_at
@@ -879,6 +882,25 @@ components:
         - romaji
         - english
         - native
+      type: object
+    Trailer:
+      additionalProperties: false
+      properties:
+        id:
+          description: Video id on the hosting site.
+          type: string
+        site:
+          description: Where the video lives, e.g. youtube or dailymotion.
+          type: string
+        thumbnail:
+          description: Preview frame for the trailer.
+          type:
+            - string
+            - "null"
+      required:
+        - id
+        - site
+        - thumbnail
       type: object
     UpdateEntryInputBody:
       additionalProperties: false

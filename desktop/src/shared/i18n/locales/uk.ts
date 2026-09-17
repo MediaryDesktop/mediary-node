@@ -121,6 +121,7 @@ export const uk: Translation = {
 		editEntry: 'Редагувати запис у списку',
 		addToList: 'Додати до списку',
 		trailer: 'Трейлер',
+		trailerFor: 'Трейлер: {{title}}',
 		downloadBatch: 'Завантажити пакет / {{count}} епізодів',
 		comingSoon: 'Скоро буде',
 		nextAiringDay: 'Епізод {{episode}} {{when}}',

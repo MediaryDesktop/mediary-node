@@ -23,6 +23,11 @@ query MediaDetails($id: Int) {
     source(version: 3)
     bannerImage
     description(asHtml: false)
+    trailer {
+      id
+      site
+      thumbnail
+    }
     startDate {
       year
       month

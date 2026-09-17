@@ -32,6 +32,12 @@ type RelatedMedia struct {
 	CoverColor   *string    `json:"cover_color"`
 }
 
+type Trailer struct {
+	ID        string  `json:"id" doc:"Video id on the hosting site."`
+	Site      string  `json:"site" doc:"Where the video lives, e.g. youtube or dailymotion."`
+	Thumbnail *string `json:"thumbnail" doc:"Preview frame for the trailer."`
+}
+
 type MediaDetails struct {
 	MediaRef          string         `json:"media_ref"`
 	MediaType         string         `json:"media_type"`
@@ -61,6 +67,7 @@ type MediaDetails struct {
 	CountryOfOrigin   *string        `json:"country_of_origin"`
 	IsAdult           bool           `json:"is_adult"`
 	SiteURL           string         `json:"site_url"`
+	Trailer           *Trailer       `json:"trailer"`
 	NextAiringEpisode *AiringEpisode `json:"next_airing_episode"`
 	Relations         []RelatedMedia `json:"relations"`
 	FetchedAt         time.Time      `json:"fetched_at"`

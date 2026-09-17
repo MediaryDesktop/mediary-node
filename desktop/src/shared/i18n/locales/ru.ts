@@ -121,6 +121,7 @@ export const ru: Translation = {
 		editEntry: 'Редактировать запись в списке',
 		addToList: 'Добавить в список',
 		trailer: 'Трейлер',
+		trailerFor: 'Трейлер: {{title}}',
 		downloadBatch: 'Скачать пакет / {{count}} эпизодов',
 		comingSoon: 'Скоро будет',
 		nextAiringDay: 'Эпизод {{episode}} {{when}}',

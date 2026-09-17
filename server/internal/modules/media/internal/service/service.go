@@ -16,6 +16,15 @@ import (
 
 const aniListMaxAge = 24 * time.Hour
 
+// Bump when MediaDetails gains a field, so payloads cached by an older build
+// are fetched again instead of being served without it for up to a day.
+const detailsCacheVersion = 2
+
+type cachedDetails struct {
+	Version int          `json:"version"`
+	Details MediaDetails `json:"details"`
+}
+
 type Options struct {
 	AniList *anilist.Client
 	Now     func() time.Time
@@ -64,9 +73,9 @@ func (s *Service) Details(ctx context.Context, mediaRef string) (*MediaDetails, 
 	}
 
 	if cached != nil && now.Sub(cached.FetchedAt) < aniListMaxAge {
-		var details MediaDetails
-		if decodeErr := json.Unmarshal(cached.Payload, &details); decodeErr == nil {
-			return &details, nil
+		var entry cachedDetails
+		if decodeErr := json.Unmarshal(cached.Payload, &entry); decodeErr == nil && entry.Version == detailsCacheVersion {
+			return &entry.Details, nil
 		}
 	}
 
@@ -77,7 +86,7 @@ func (s *Service) Details(ctx context.Context, mediaRef string) (*MediaDetails, 
 
 	details := detailsFromAniList(source, now)
 
-	payload, err := json.Marshal(details)
+	payload, err := json.Marshal(cachedDetails{Version: detailsCacheVersion, Details: details})
 	if err != nil {
 		return nil, apperr.Wrap(err, apperr.KindInternal, "encode media details")
 	}

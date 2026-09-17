@@ -1,5 +1,6 @@
 import clsx from 'clsx'
-import type { ButtonHTMLAttributes, ReactNode } from 'react'
+import { forwardRef } from 'react'
+import type { ButtonHTMLAttributes, ReactNode, Ref } from 'react'
 
 import { useRipple } from '../ripple/useRipple'
 
@@ -11,6 +12,7 @@ export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement
 	variant?: ButtonVariant
 	size?: 'default' | 'small'
 	fullWidth?: boolean
+	iconOnly?: boolean
 	loading?: boolean
 	startIcon?: ReactNode
 	endIcon?: ReactNode
@@ -18,27 +20,43 @@ export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement
 	children?: ReactNode
 }
 
-export function Button({
-	variant = 'secondary',
-	size = 'default',
-	fullWidth = false,
-	loading = false,
-	startIcon,
-	endIcon,
-	disableRipple = false,
-	children,
-	className,
-	disabled,
-	type = 'button',
-	...props
-}: ButtonProps) {
+function mergeRefs<T>(...refs: (Ref<T> | undefined)[]) {
+	return (node: T | null) => {
+		for (const ref of refs) {
+			if (typeof ref === 'function') {
+				ref(node)
+			} else if (ref) {
+				;(ref as { current: T | null }).current = node
+			}
+		}
+	}
+}
+
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
+	{
+		variant = 'secondary',
+		size = 'default',
+		fullWidth = false,
+		iconOnly = false,
+		loading = false,
+		startIcon,
+		endIcon,
+		disableRipple = false,
+		children,
+		className,
+		disabled,
+		type = 'button',
+		...props
+	},
+	forwardedRef
+) {
 	const inactive = Boolean(disabled || loading)
 	const ripple = useRipple<HTMLButtonElement>({ disabled: inactive || disableRipple })
 
 	return (
 		<button
 			{...props}
-			ref={ripple}
+			ref={mergeRefs(ripple, forwardedRef)}
 			type={type}
 			disabled={inactive}
 			className={clsx(
@@ -46,6 +64,7 @@ export function Button({
 				styles[variant],
 				size === 'small' && styles.small,
 				fullWidth && styles.fullWidth,
+				iconOnly && styles.iconOnly,
 				className
 			)}
 		>
@@ -60,4 +79,4 @@ export function Button({
 			{endIcon && !loading && <span className={styles.icon}>{endIcon}</span>}
 		</button>
 	)
-}
+})

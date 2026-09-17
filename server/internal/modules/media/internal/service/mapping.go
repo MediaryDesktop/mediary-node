@@ -102,6 +102,14 @@ func detailsFromAniList(source *anilist.MediaDetails, fetchedAt time.Time) Media
 		details.Studios = append(details.Studios, studio.Name)
 	}
 
+	if source.Trailer != nil && source.Trailer.ID != nil && source.Trailer.Site != nil {
+		details.Trailer = &Trailer{
+			ID:        *source.Trailer.ID,
+			Site:      *source.Trailer.Site,
+			Thumbnail: source.Trailer.Thumbnail,
+		}
+	}
+
 	if source.NextAiringEpisode != nil {
 		details.NextAiringEpisode = &AiringEpisode{
 			Episode:  source.NextAiringEpisode.Episode,

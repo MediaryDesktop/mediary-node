@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Badge, DropdownMenu, Icon, Modal, PageTransition, Skeleton, Tooltip } from '@shared/ui'
+import { Button, DropdownMenu, Icon, Modal, PageTransition, Skeleton, Tooltip } from '@shared/ui'
 
 import { aniListAccountModel } from '@entities/anilist-account'
 import {
@@ -88,10 +88,15 @@ export function MediaPage({ mediaRef }: MediaPageProps) {
 
 	return (
 		<PageTransition className={styles.root}>
-			<button type='button' className={styles.back} onClick={() => router.history.back()}>
-				<Icon name='common/arrow-left' size={18} />
+			<Button
+				variant='glass'
+				size='small'
+				className={styles.back}
+				startIcon={<Icon name='common/arrow-left' size={18} />}
+				onClick={() => router.history.back()}
+			>
 				{t('media.back')}
-			</button>
+			</Button>
 
 			{details && <MediaView media={details.media} sources={details.sources ?? []} entry={entry} />}
 
@@ -107,9 +112,9 @@ export function MediaPage({ mediaRef }: MediaPageProps) {
 			{failed && !entry && (
 				<div className={styles.failure}>
 					<p>{t('media.failed')}</p>
-					<button type='button' className={styles.retry} onClick={() => requestDetails(mediaRef)}>
+					<Button size='small' onClick={() => requestDetails(mediaRef)}>
 						{t('media.retry')}
-					</button>
+					</Button>
 				</div>
 			)}
 		</PageTransition>
@@ -195,32 +200,6 @@ function MediaView({ media, sources, entry }: MediaViewProps) {
 									<span className={styles.progressTotal}>/{total ?? '-'}</span>
 								</span>
 
-								{entry && isTrackerMediaType(mediaType) ? (
-									<Tooltip content={t('media.editEntry')}>
-										<button
-											type='button'
-											className={styles.iconAction}
-											aria-label={t('media.editEntry')}
-											onClick={() => setEntryOpen(true)}
-										>
-											<Icon name='common/pencil' size={16} />
-										</button>
-									</Tooltip>
-								) : (
-									<Tooltip content={t('media.comingSoon')}>
-										<span className={styles.iconActionWrap}>
-											<button
-												type='button'
-												disabled
-												className={styles.iconAction}
-												aria-label={t('media.addToList')}
-											>
-												<Icon name='common/plus' size={16} />
-											</button>
-										</span>
-									</Tooltip>
-								)}
-
 								{entry && (
 									<span className={styles.listStatus}>
 										{isTrackerMediaType(mediaType)
@@ -228,10 +207,6 @@ function MediaView({ media, sources, entry }: MediaViewProps) {
 													defaultValue: entry.status
 												})
 											: entry.status}
-
-										{entry.repeat > 0 && (
-											<Badge className={styles.repeatBadge}>{entry.repeat}</Badge>
-										)}
 									</span>
 								)}
 
@@ -315,90 +290,123 @@ function MediaView({ media, sources, entry }: MediaViewProps) {
 							</div>
 						</div>
 					</div>
-
-					<div className={styles.actions}>
-						<div className={styles.actionButtons}>
-							<DropdownMenu
-								trigger={
-									<button
-										type='button'
-										className={styles.iconAction}
-										aria-label={t('media.menu.label')}
-									>
-										<Icon name='common/more-vertical' size={18} />
-									</button>
-								}
-								items={[
-									{
-										id: 'details',
-										label: t('media.menu.details'),
-										icon: 'common/info',
-										onSelect: () => setDetailsOpen(true)
-									},
-									{
-										id: 'anilist',
-										label: t('media.openOn', { name: sources[0]?.name ?? 'AniList' }),
-										icon: 'common/external-link',
-										onSelect: () => window.open(base.site_url, '_blank', 'noreferrer')
-									},
-									{
-										id: 'library',
-										label: t('media.menu.addToLibrary'),
-										icon: 'common/library',
-										disabled: true,
-										onSelect: () => {}
-									}
-								]}
-							/>
-
-							<Tooltip content={t('media.comingSoon')}>
-								<span className={styles.iconActionWrap}>
-									<button type='button' disabled className={styles.downloadButton}>
-										<Icon name='common/download' size={20} />
-										{t('media.downloadBatch', { count: total ?? 0 })}
-									</button>
-								</span>
-							</Tooltip>
-						</div>
-
-						<div className={styles.viewTabs} role='tablist'>
-							<button type='button' role='tab' aria-selected className={styles.viewTab}>
-								<Icon name='common/library' size={20} />
-								{t('media.views.library')}
-							</button>
-
-							<Tooltip content={t('media.comingSoon')}>
-								<span className={styles.iconActionWrap}>
-									<button
-										type='button'
-										role='tab'
-										aria-selected={false}
-										disabled
-										className={styles.viewTab}
-									>
-										{t('media.views.torrent')}
-									</button>
-								</span>
-							</Tooltip>
-						</div>
-					</div>
-
-					{media?.next_airing_episode && (
-						<p className={styles.nextAiring}>
-							<span className={styles.nextAiringEpisode}>
-								{t('media.nextAiringDay', {
-									episode: media.next_airing_episode.episode,
-									when: formatRelative(media.next_airing_episode.airing_at, locale)
-								})}
-							</span>
-							<Icon name='common/calendar' size={17} />
-							<span className={styles.nextAiringDay}>
-								{formatWeekday(media.next_airing_episode.airing_at, locale)}
-							</span>
-						</p>
-					)}
 				</div>
 			</header>
+
+			<div className={styles.actions}>
+				<div className={styles.actionButtons}>
+					{entry && isTrackerMediaType(mediaType) ? (
+						<Tooltip content={t('media.editEntry')}>
+							<Button
+								iconOnly
+								variant='ghost'
+								className={styles.iconAction}
+								aria-label={t('media.editEntry')}
+								onClick={() => setEntryOpen(true)}
+							>
+								<Icon name='common/pencil' size={16} />
+							</Button>
+						</Tooltip>
+					) : (
+						<Tooltip content={t('media.comingSoon')}>
+							<span className={styles.iconActionWrap}>
+								<Button
+									iconOnly
+									variant='ghost'
+									disabled
+									className={styles.iconAction}
+									aria-label={t('media.addToList')}
+								>
+									<Icon name='common/plus' size={16} />
+								</Button>
+							</span>
+						</Tooltip>
+					)}
+
+					<DropdownMenu
+						trigger={
+							<Button
+								iconOnly
+								variant='ghost'
+								className={styles.iconAction}
+								aria-label={t('media.menu.label')}
+							>
+								<Icon name='common/more-vertical' size={18} />
+							</Button>
+						}
+						items={[
+							{
+								id: 'details',
+								label: t('media.menu.details'),
+								icon: 'common/info',
+								onSelect: () => setDetailsOpen(true)
+							},
+							{
+								id: 'anilist',
+								label: t('media.openOn', { name: sources[0]?.name ?? 'AniList' }),
+								icon: 'common/external-link',
+								onSelect: () => window.open(base.site_url, '_blank', 'noreferrer')
+							},
+							{
+								id: 'library',
+								label: t('media.menu.addToLibrary'),
+								icon: 'common/library',
+								disabled: true,
+								onSelect: () => {}
+							}
+						]}
+					/>
+
+					<Tooltip content={t('media.comingSoon')}>
+						<span className={styles.iconActionWrap}>
+							<Button disabled startIcon={<Icon name='common/download' size={20} />}>
+								{t('media.downloadBatch', { count: total ?? 0 })}
+							</Button>
+						</span>
+					</Tooltip>
+				</div>
+
+				<div className={styles.viewTabs} role='tablist'>
+					<Button
+						role='tab'
+						aria-selected
+						variant='ghost'
+						className={styles.viewTab}
+						startIcon={<Icon name='common/library' size={20} />}
+					>
+						{t('media.views.library')}
+					</Button>
+
+					<Tooltip content={t('media.comingSoon')}>
+						<span className={styles.iconActionWrap}>
+							<Button
+								role='tab'
+								aria-selected={false}
+								disabled
+								variant='ghost'
+								className={styles.viewTab}
+							>
+								{t('media.views.torrent')}
+							</Button>
+						</span>
+					</Tooltip>
+				</div>
+			</div>
+
+			{media?.next_airing_episode && (
+				<p className={styles.nextAiring}>
+					<span className={styles.nextAiringEpisode}>
+						{t('media.nextAiringDay', {
+							episode: media.next_airing_episode.episode,
+							when: formatRelative(media.next_airing_episode.airing_at, locale)
+						})}
+					</span>
+					<Icon name='common/calendar' size={17} />
+					<span className={styles.nextAiringDay}>
+						{formatWeekday(media.next_airing_episode.airing_at, locale)}
+					</span>
+				</p>
+			)}
 
 			<div className={styles.sections}>
 				<LibrarySection media={base} total={total} mediaType={mediaType} />
@@ -471,6 +479,7 @@ function RelationCard({ relation }: { relation: NonNullable<MediaDetails['relati
 		<MediaCard
 			media={relation}
 			cornerLabel={enumLabel(t, 'relation', relation.relation_type)}
+			previewRef={relation.media_ref}
 			onOpen={() => navigate({ to: '/media/$mediaRef', params: { mediaRef: relation.media_ref } })}
 		/>
 	)

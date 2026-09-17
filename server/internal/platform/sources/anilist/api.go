@@ -286,6 +286,11 @@ type MediaDetails struct {
 		Medium     *string `json:"medium"`
 		Color      *string `json:"color"`
 	} `json:"coverImage"`
+	Trailer *struct {
+		ID        *string `json:"id"`
+		Site      *string `json:"site"`
+		Thumbnail *string `json:"thumbnail"`
+	} `json:"trailer"`
 	NextAiringEpisode *struct {
 		Episode  int   `json:"episode"`
 		AiringAt int64 `json:"airingAt"`

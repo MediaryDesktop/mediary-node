@@ -25,6 +25,7 @@ const detailsFixture = `{"data":{"Media":{
   "startDate":{"year":2023,"month":9,"day":29},"endDate":{"year":2024,"month":3,"day":22},
   "title":{"userPreferred":"Sousou no Frieren","romaji":"Sousou no Frieren","english":"Frieren","native":null},
   "coverImage":{"extraLarge":null,"large":"https://img/l.jpg","medium":"https://img/m.jpg","color":"#aabbcc"},
+  "trailer":{"id":"ZEkwCGJ3o7M","site":"youtube","thumbnail":"https://img/trailer.jpg"},
   "nextAiringEpisode":null,
   "studios":{"nodes":[{"id":1,"name":"Madhouse"}]},
   "relations":{"edges":[{"relationType":"SOURCE","node":{"id":118586,"type":"MANGA","format":"MANGA","title":{"userPreferred":"Frieren"},"coverImage":{"large":"https://img/manga.jpg"}}}]}
@@ -104,6 +105,9 @@ func TestDetailsAreMappedAndCachedForADay(t *testing.T) {
 	if len(details.Relations) != 1 || details.Relations[0].MediaRef != "anilist:118586" || details.Relations[0].MediaType != "manga" {
 		t.Fatalf("relations = %+v", details.Relations)
 	}
+	if details.Trailer == nil || details.Trailer.ID != "ZEkwCGJ3o7M" || details.Trailer.Site != "youtube" {
+		t.Fatalf("trailer = %+v", details.Trailer)
+	}
 
 	h.now = h.now.Add(23 * time.Hour)
 	if _, err := h.svc.Details(ctx, "anilist:154587"); err != nil {
@@ -119,6 +123,41 @@ func TestDetailsAreMappedAndCachedForADay(t *testing.T) {
 	}
 	if h.requests.Load() != 2 {
 		t.Fatalf("past a day the source is asked again, got %d requests", h.requests.Load())
+	}
+}
+
+func TestDetailsCachedByAnOlderBuildAreFetchedAgain(t *testing.T) {
+	h := newDetailsHarness(t)
+	ctx := context.Background()
+
+	legacy := []byte(`{"media_ref":"anilist:154587","media_type":"anime","title":{"user_preferred":"Frieren"}}`)
+	if err := h.svc.store.Put(ctx, ProviderAniList, "154587", legacy, h.now); err != nil {
+		t.Fatalf("seed legacy cache: %v", err)
+	}
+
+	details, err := h.svc.Details(ctx, "anilist:154587")
+	if err != nil {
+		t.Fatalf("details: %v", err)
+	}
+
+	if h.requests.Load() != 1 {
+		t.Fatalf("a payload without the current version must be refetched, got %d requests", h.requests.Load())
+	}
+	if details.Trailer == nil {
+		t.Fatal("the refetched details must carry the fields the legacy payload lacked")
+	}
+}
+
+func TestATrailerWithoutAnIDIsDropped(t *testing.T) {
+	source := &anilist.MediaDetails{}
+	source.Trailer = &struct {
+		ID        *string `json:"id"`
+		Site      *string `json:"site"`
+		Thumbnail *string `json:"thumbnail"`
+	}{}
+
+	if details := detailsFromAniList(source, time.Now()); details.Trailer != nil {
+		t.Fatalf("an empty trailer must not reach clients, got %+v", details.Trailer)
 	}
 }
 
