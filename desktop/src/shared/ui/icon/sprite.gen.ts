@@ -262,6 +262,7 @@ export const sprites = defineSpriteMap([
 				defineSpriteSymbol(['external-link'], [24]),
 				defineSpriteSymbol(['eye-off'], [24]),
 				defineSpriteSymbol(['eye'], [24]),
+				defineSpriteSymbol(['filter'], [24]),
 				defineSpriteSymbol(['folder-open'], [24]),
 				defineSpriteSymbol(['folder'], [24]),
 				defineSpriteSymbol(['heart'], [24]),
@@ -284,9 +285,12 @@ export const sprites = defineSpriteMap([
 				defineSpriteSymbol(['search'], [24]),
 				defineSpriteSymbol(['settings'], [24]),
 				defineSpriteSymbol(['signal'], [24]),
+				defineSpriteSymbol(['sort'], [24]),
 				defineSpriteSymbol(['sparkles'], [24]),
 				defineSpriteSymbol(['star'], [24]),
 				defineSpriteSymbol(['sun'], [24]),
+				defineSpriteSymbol(['tag'], [24]),
+				defineSpriteSymbol(['trash'], [24]),
 				defineSpriteSymbol(['user'], [24]),
 				defineSpriteSymbol(['users'], [24])
 			],
@@ -324,6 +328,7 @@ export type SpritesMeta = {
 		| 'external-link'
 		| 'eye-off'
 		| 'eye'
+		| 'filter'
 		| 'folder-open'
 		| 'folder'
 		| 'heart'
@@ -346,9 +351,12 @@ export type SpritesMeta = {
 		| 'search'
 		| 'settings'
 		| 'signal'
+		| 'sort'
 		| 'sparkles'
 		| 'star'
 		| 'sun'
+		| 'tag'
+		| 'trash'
 		| 'user'
 		| 'users'
 	social: 'anilist' | 'apple' | 'facebook' | 'github' | 'google'

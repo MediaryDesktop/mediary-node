@@ -72,3 +72,62 @@ type MediaDetails struct {
 	Relations         []RelatedMedia `json:"relations"`
 	FetchedAt         time.Time      `json:"fetched_at"`
 }
+
+type MediaSummary struct {
+	MediaRef          string         `json:"media_ref"`
+	MediaType         string         `json:"media_type"`
+	Format            *string        `json:"format"`
+	Status            *string        `json:"status"`
+	Title             TitleNames     `json:"title"`
+	CoverImage        *string        `json:"cover_image"`
+	CoverColor        *string        `json:"cover_color"`
+	BannerImage       *string        `json:"banner_image"`
+	Episodes          *int           `json:"episodes"`
+	Chapters          *int           `json:"chapters"`
+	Volumes           *int           `json:"volumes"`
+	Season            *string        `json:"season"`
+	SeasonYear        *int           `json:"season_year"`
+	StartDate         FuzzyDate      `json:"start_date"`
+	AverageScore      *int           `json:"average_score"`
+	Popularity        *int           `json:"popularity"`
+	Genres            []string       `json:"genres"`
+	IsAdult           bool           `json:"is_adult"`
+	SiteURL           string         `json:"site_url"`
+	NextAiringEpisode *AiringEpisode `json:"next_airing_episode"`
+}
+
+type SearchParams struct {
+	Query     string
+	MediaType string
+	Sort      string
+	Genres    []string
+	Tags      []string
+	Formats   []string
+	Statuses  []string
+	Season    string
+	Year      int
+	MinScore  int
+	Adult     bool
+	Page      int
+	PerPage   int
+}
+
+type SearchPage struct {
+	Items       []MediaSummary `json:"items"`
+	Page        int            `json:"page"`
+	PerPage     int            `json:"per_page"`
+	Total       int            `json:"total"`
+	HasNextPage bool           `json:"has_next_page"`
+}
+
+type FilterTag struct {
+	Name     string `json:"name"`
+	Category string `json:"category"`
+	IsAdult  bool   `json:"is_adult"`
+}
+
+type FilterOptions struct {
+	Genres    []string    `json:"genres"`
+	Tags      []FilterTag `json:"tags"`
+	FetchedAt time.Time   `json:"fetched_at"`
+}

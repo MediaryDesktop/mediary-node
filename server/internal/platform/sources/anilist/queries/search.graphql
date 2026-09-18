@@ -1,0 +1,76 @@
+query SearchMedia(
+  $page: Int
+  $perPage: Int
+  $search: String
+  $type: MediaType
+  $sort: [MediaSort]
+  $genres: [String]
+  $tags: [String]
+  $formats: [MediaFormat]
+  $statuses: [MediaStatus]
+  $season: MediaSeason
+  $seasonYear: Int
+  $minimumScore: Int
+  $isAdult: Boolean
+) {
+  Page(page: $page, perPage: $perPage) {
+    pageInfo {
+      total
+      currentPage
+      lastPage
+      hasNextPage
+      perPage
+    }
+    media(
+      search: $search
+      type: $type
+      sort: $sort
+      genre_in: $genres
+      tag_in: $tags
+      format_in: $formats
+      status_in: $statuses
+      season: $season
+      seasonYear: $seasonYear
+      averageScore_greater: $minimumScore
+      isAdult: $isAdult
+    ) {
+      id
+      idMal
+      type
+      format
+      status(version: 2)
+      episodes
+      chapters
+      volumes
+      season
+      seasonYear
+      averageScore
+      popularity
+      genres
+      isAdult
+      siteUrl
+      bannerImage
+      startDate {
+        year
+        month
+        day
+      }
+      title {
+        userPreferred
+        romaji
+        english
+        native
+      }
+      coverImage {
+        extraLarge
+        large
+        medium
+        color
+      }
+      nextAiringEpisode {
+        episode
+        airingAt
+      }
+    }
+  }
+}

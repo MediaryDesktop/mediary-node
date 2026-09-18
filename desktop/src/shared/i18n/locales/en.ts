@@ -233,9 +233,50 @@ export const en = {
 		}
 	},
 
+	catalog: {
+		heading: {
+			popular: 'Popular titles',
+			results: 'Search results'
+		},
+		total: 'Found: {{count}}',
+		searchPlaceholder: 'Title',
+		searchLabel: 'Search by title',
+		filters: 'Filters',
+		clear: 'Clear filters',
+		adult: 'Adult',
+		empty: 'Nothing matched. Try another title or fewer filters.',
+		failed: 'Could not search right now.',
+		loadMoreFailed: 'Could not load more titles.',
+		retry: 'Retry',
+		loadMore: 'Show more',
+		source: 'Data from {{name}}',
+		scoreAtLeast: '{{score}}% and above',
+		type: {
+			anime: 'Anime',
+			manga: 'Manga'
+		},
+		sort: {
+			POPULARITY_DESC: 'Most popular',
+			SEARCH_MATCH: 'Best match',
+			TRENDING_DESC: 'Trending now',
+			SCORE_DESC: 'Highest scored',
+			FAVOURITES_DESC: 'Most favourited',
+			START_DATE_DESC: 'Newest first',
+			TITLE_ROMAJI: 'By title'
+		},
+		any: {
+			genres: 'All genres',
+			tags: 'All tags',
+			formats: 'All formats',
+			seasons: 'Any season',
+			year: 'Any year',
+			statuses: 'Any status',
+			score: 'Any score'
+		}
+	},
+
 	placeholder: {
 		discover: 'Recommendations and fresh releases will live here once the cloud catalog is connected.',
-		catalog: 'Search across every media type with filters by genre, year and rating.',
 		lists: 'Your watch statuses, ratings and personal collections.',
 		library: 'Local files scanned by the node and matched against catalog titles.',
 		downloads: 'Torrent providers and the download queue handled by the node.'

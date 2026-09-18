@@ -325,14 +325,8 @@ func (c *Client) MediaDetails(ctx context.Context, mediaID int) (*MediaDetails, 
 	}
 
 	variables := map[string]any{"id": mediaID}
-	if err := c.query(ctx, c.optionalToken(), mediaDetailsQuery, variables, &data); err != nil {
-		if IsTokenRejected(err) {
-			if retryErr := c.query(ctx, "", mediaDetailsQuery, variables, &data); retryErr != nil {
-				return nil, retryErr
-			}
-		} else {
-			return nil, err
-		}
+	if err := c.queryOptionalAuth(ctx, mediaDetailsQuery, variables, &data); err != nil {
+		return nil, err
 	}
 
 	if data.Media == nil {

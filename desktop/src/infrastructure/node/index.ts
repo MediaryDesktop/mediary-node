@@ -7,4 +7,4 @@ export type { NodeEvent } from './events'
 
 export { nodeHealthQuery } from './health.query'
 
-export type { NodeSchemas } from './schema'
+export type { NodeOperation, NodeSchemas } from './schema'

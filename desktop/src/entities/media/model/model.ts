@@ -4,12 +4,22 @@ import type { TFunction } from 'i18next'
 
 import { atom } from '@shared/factory'
 
-import { fetchMediaDetailsFx } from '../api/api'
+import { fetchMediaDetailsFx, fetchMediaFilterOptionsFx, searchMediaFx } from '../api/api'
 import type { MediaDate, MediaDetails, MediaTitle } from '../api/api'
 
 export const mediaDetailsQuery = createQuery({
 	effect: fetchMediaDetailsFx,
 	name: 'mediaDetails'
+})
+
+export const mediaSearchQuery = createQuery({
+	effect: searchMediaFx,
+	name: 'mediaSearch'
+})
+
+export const mediaFilterOptionsQuery = createQuery({
+	effect: fetchMediaFilterOptionsFx,
+	name: 'mediaFilterOptions'
 })
 
 export const mediaDetailsModel = atom(() => {

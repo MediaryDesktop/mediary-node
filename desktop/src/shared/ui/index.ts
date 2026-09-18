@@ -49,6 +49,9 @@ export type { ProgressBarProps } from './progress-bar/ProgressBar'
 export { Skeleton } from './skeleton/Skeleton'
 export type { SkeletonProps } from './skeleton/Skeleton'
 
+export { Switch } from './switch/Switch'
+export type { SwitchProps } from './switch/Switch'
+
 export { Tabs } from './tabs/Tabs'
 export type { TabItem, TabsProps } from './tabs/Tabs'
 

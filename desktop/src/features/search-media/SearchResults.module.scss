@@ -1,0 +1,50 @@
+.results {
+	display: flex;
+	flex-direction: column;
+}
+
+.grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+	gap: 1rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.skeletonCard {
+	display: flex;
+	padding: 12px;
+	border-radius: 14px;
+	background: var(--surface);
+
+	.skeletonPoster {
+		aspect-ratio: 2.2 / 3;
+	}
+}
+
+.notice {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+}
+
+.muted {
+	margin: 0;
+	color: var(--text-secondary);
+}
+
+.more {
+	display: flex;
+	justify-content: center;
+	margin-top: 1.75rem;
+}
+
+.sources {
+	margin-top: 2.5rem;
+	font-size: 0.75rem;
+
+	a {
+		color: var(--text-secondary);
+	}
+}

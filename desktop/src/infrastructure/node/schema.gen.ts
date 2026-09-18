@@ -89,6 +89,46 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/v1/media/filter-options': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Genres and tags to filter by
+		 * @description The source's own vocabulary, kept for at most a day. Formats, statuses and seasons are fixed enums of searchMedia and are not repeated here.
+		 */
+		get: operations['getMediaFilterOptions']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/media/search': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Search titles
+		 * @description Asks the source that owns this kind of media, on demand and never in the background. Results are not stored: only a title the user opens is cached, and only for as long as the source's terms allow.
+		 */
+		get: operations['searchMedia']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/v1/media/{media_ref}': {
 		parameters: {
 			query?: never
@@ -403,6 +443,29 @@ export interface components {
 			 */
 			type: string
 		}
+		FilterOptions: {
+			/** Format: date-time */
+			fetched_at: string
+			genres: string[] | null
+			tags: components['schemas']['FilterTag'][] | null
+		}
+		FilterOptionsOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/FilterOptionsOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The vocabulary the filter panel offers. */
+			options: components['schemas']['FilterOptions']
+			/** @description Attribution for every field that came from an external source. */
+			sources: components['schemas']['Source'][] | null
+		}
+		FilterTag: {
+			category: string
+			is_adult: boolean
+			name: string
+		}
 		FuzzyDate: {
 			/** Format: int64 */
 			day: number | null
@@ -510,6 +573,34 @@ export interface components {
 			/** Format: int64 */
 			volumes: number | null
 		}
+		MediaSummary: {
+			/** Format: int64 */
+			average_score: number | null
+			banner_image: string | null
+			/** Format: int64 */
+			chapters: number | null
+			cover_color: string | null
+			cover_image: string | null
+			/** Format: int64 */
+			episodes: number | null
+			format: string | null
+			genres: string[] | null
+			is_adult: boolean
+			media_ref: string
+			media_type: string
+			next_airing_episode: components['schemas']['AiringEpisode']
+			/** Format: int64 */
+			popularity: number | null
+			season: string | null
+			/** Format: int64 */
+			season_year: number | null
+			site_url: string
+			start_date: components['schemas']['FuzzyDate']
+			status: string | null
+			title: components['schemas']['TitleNames']
+			/** Format: int64 */
+			volumes: number | null
+		}
 		RelatedMedia: {
 			cover_color: string | null
 			cover_image: string | null
@@ -521,6 +612,28 @@ export interface components {
 			season_year: number | null
 			status: string | null
 			title: components['schemas']['TitleNames']
+		}
+		SearchOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/SearchOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description One page of titles, plus what it takes to ask for the next. */
+			results: components['schemas']['SearchPage']
+			/** @description Attribution for every field that came from an external source. */
+			sources: components['schemas']['Source'][] | null
+		}
+		SearchPage: {
+			has_next_page: boolean
+			items: components['schemas']['MediaSummary'][] | null
+			/** Format: int64 */
+			page: number
+			/** Format: int64 */
+			per_page: number
+			/** Format: int64 */
+			total: number
 		}
 		SessionOutputBody: {
 			/**
@@ -722,12 +835,18 @@ export type SchemaEntriesOutputBody = components['schemas']['EntriesOutputBody']
 export type SchemaEntry = components['schemas']['Entry']
 export type SchemaErrorDetail = components['schemas']['ErrorDetail']
 export type SchemaErrorModel = components['schemas']['ErrorModel']
+export type SchemaFilterOptions = components['schemas']['FilterOptions']
+export type SchemaFilterOptionsOutputBody = components['schemas']['FilterOptionsOutputBody']
+export type SchemaFilterTag = components['schemas']['FilterTag']
 export type SchemaFuzzyDate = components['schemas']['FuzzyDate']
 export type SchemaHealthOutputBody = components['schemas']['HealthOutputBody']
 export type SchemaList = components['schemas']['List']
 export type SchemaMedia = components['schemas']['Media']
 export type SchemaMediaDetails = components['schemas']['MediaDetails']
+export type SchemaMediaSummary = components['schemas']['MediaSummary']
 export type SchemaRelatedMedia = components['schemas']['RelatedMedia']
+export type SchemaSearchOutputBody = components['schemas']['SearchOutputBody']
+export type SchemaSearchPage = components['schemas']['SearchPage']
 export type SchemaSessionOutputBody = components['schemas']['SessionOutputBody']
 export type SchemaSignInInputBody = components['schemas']['SignInInputBody']
 export type SchemaSource = components['schemas']['Source']
@@ -906,6 +1025,111 @@ export interface operations {
 				}
 				content: {
 					'application/json': components['schemas']['StatusOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getMediaFilterOptions: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['FilterOptionsOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	searchMedia: {
+		parameters: {
+			query?: {
+				/** @description Free text to match against every title the source knows. Empty browses by the filters alone. */
+				q?: string
+				/** @description Which catalog to search. Every source owns one kind of media, so this also picks the source. */
+				type?: 'anime' | 'manga'
+				/** @description Order of the results. Left out it means relevance while searching and popularity while browsing. */
+				sort?:
+					| 'SEARCH_MATCH'
+					| 'POPULARITY_DESC'
+					| 'TRENDING_DESC'
+					| 'SCORE_DESC'
+					| 'FAVOURITES_DESC'
+					| 'START_DATE_DESC'
+					| 'TITLE_ROMAJI'
+				/** @description Genres a title must all have, as listed by getMediaFilterOptions. */
+				genres?: string[] | null
+				/** @description Tags a title must all have, as listed by getMediaFilterOptions. */
+				tags?: string[] | null
+				/** @description Any of these formats. */
+				formats?:
+					| (
+							| 'TV'
+							| 'TV_SHORT'
+							| 'MOVIE'
+							| 'SPECIAL'
+							| 'OVA'
+							| 'ONA'
+							| 'MUSIC'
+							| 'MANGA'
+							| 'NOVEL'
+							| 'ONE_SHOT'
+					  )[]
+					| null
+				/** @description Any of these release statuses. */
+				statuses?: ('FINISHED' | 'RELEASING' | 'NOT_YET_RELEASED' | 'CANCELLED' | 'HIATUS')[] | null
+				/** @description Season the title started in. */
+				season?: 'WINTER' | 'SPRING' | 'SUMMER' | 'FALL'
+				/** @description Year the title started in. */
+				year?: number
+				/** @description Keep titles scored above this, on a 0-100 scale. */
+				min_score?: number
+				/** @description Include adult titles. They are left out unless this is set, and the source hides them entirely from a node with no account connected. */
+				adult?: boolean
+				/** @description Which page of results to return. */
+				page?: number
+				/** @description How many titles per page. */
+				per_page?: number
+			}
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['SearchOutputBody']
 				}
 			}
 			/** @description Error */

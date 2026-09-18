@@ -135,3 +135,36 @@ func detailsFromAniList(source *anilist.MediaDetails, fetchedAt time.Time) Media
 
 	return details
 }
+
+func summaryFromAniList(source *anilist.MediaSummary) MediaSummary {
+	summary := MediaSummary{
+		MediaRef:     aniListMediaRef(source.ID),
+		MediaType:    mediaTypes[source.Type],
+		Format:       source.Format,
+		Status:       source.Status,
+		Title:        titleNames(source.Title),
+		CoverImage:   firstPresent(source.CoverImage.ExtraLarge, source.CoverImage.Large, source.CoverImage.Medium),
+		CoverColor:   source.CoverImage.Color,
+		BannerImage:  source.BannerImage,
+		Episodes:     source.Episodes,
+		Chapters:     source.Chapters,
+		Volumes:      source.Volumes,
+		Season:       source.Season,
+		SeasonYear:   source.SeasonYear,
+		StartDate:    FuzzyDate(source.StartDate),
+		AverageScore: source.AverageScore,
+		Popularity:   source.Popularity,
+		Genres:       nonNilStrings(source.Genres),
+		IsAdult:      source.IsAdult,
+		SiteURL:      source.SiteURL,
+	}
+
+	if source.NextAiringEpisode != nil {
+		summary.NextAiringEpisode = &AiringEpisode{
+			Episode:  source.NextAiringEpisode.Episode,
+			AiringAt: time.Unix(source.NextAiringEpisode.AiringAt, 0).UTC(),
+		}
+	}
+
+	return summary
+}

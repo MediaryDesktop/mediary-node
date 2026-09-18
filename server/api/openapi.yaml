@@ -288,6 +288,67 @@ components:
           format: uri
           type: string
       type: object
+    FilterOptions:
+      additionalProperties: false
+      properties:
+        fetched_at:
+          format: date-time
+          type: string
+        genres:
+          items:
+            type: string
+          type:
+            - array
+            - "null"
+        tags:
+          items:
+            $ref: "#/components/schemas/FilterTag"
+          type:
+            - array
+            - "null"
+      required:
+        - genres
+        - tags
+        - fetched_at
+      type: object
+    FilterOptionsOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/FilterOptionsOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        options:
+          $ref: "#/components/schemas/FilterOptions"
+          description: The vocabulary the filter panel offers.
+        sources:
+          description: Attribution for every field that came from an external source.
+          items:
+            $ref: "#/components/schemas/Source"
+          type:
+            - array
+            - "null"
+      required:
+        - options
+        - sources
+      type: object
+    FilterTag:
+      additionalProperties: false
+      properties:
+        category:
+          type: string
+        is_adult:
+          type: boolean
+        name:
+          type: string
+      required:
+        - name
+        - category
+        - is_adult
+      type: object
     FuzzyDate:
       additionalProperties: false
       properties:
@@ -595,6 +656,105 @@ components:
         - relations
         - fetched_at
       type: object
+    MediaSummary:
+      additionalProperties: false
+      properties:
+        average_score:
+          format: int64
+          type:
+            - integer
+            - "null"
+        banner_image:
+          type:
+            - string
+            - "null"
+        chapters:
+          format: int64
+          type:
+            - integer
+            - "null"
+        cover_color:
+          type:
+            - string
+            - "null"
+        cover_image:
+          type:
+            - string
+            - "null"
+        episodes:
+          format: int64
+          type:
+            - integer
+            - "null"
+        format:
+          type:
+            - string
+            - "null"
+        genres:
+          items:
+            type: string
+          type:
+            - array
+            - "null"
+        is_adult:
+          type: boolean
+        media_ref:
+          type: string
+        media_type:
+          type: string
+        next_airing_episode:
+          $ref: "#/components/schemas/AiringEpisode"
+        popularity:
+          format: int64
+          type:
+            - integer
+            - "null"
+        season:
+          type:
+            - string
+            - "null"
+        season_year:
+          format: int64
+          type:
+            - integer
+            - "null"
+        site_url:
+          type: string
+        start_date:
+          $ref: "#/components/schemas/FuzzyDate"
+        status:
+          type:
+            - string
+            - "null"
+        title:
+          $ref: "#/components/schemas/TitleNames"
+        volumes:
+          format: int64
+          type:
+            - integer
+            - "null"
+      required:
+        - media_ref
+        - media_type
+        - format
+        - status
+        - title
+        - cover_image
+        - cover_color
+        - banner_image
+        - episodes
+        - chapters
+        - volumes
+        - season
+        - season_year
+        - start_date
+        - average_score
+        - popularity
+        - genres
+        - is_adult
+        - site_url
+        - next_airing_episode
+      type: object
     RelatedMedia:
       additionalProperties: false
       properties:
@@ -637,6 +797,57 @@ components:
         - title
         - cover_image
         - cover_color
+      type: object
+    SearchOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/SearchOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        results:
+          $ref: "#/components/schemas/SearchPage"
+          description: One page of titles, plus what it takes to ask for the next.
+        sources:
+          description: Attribution for every field that came from an external source.
+          items:
+            $ref: "#/components/schemas/Source"
+          type:
+            - array
+            - "null"
+      required:
+        - results
+        - sources
+      type: object
+    SearchPage:
+      additionalProperties: false
+      properties:
+        has_next_page:
+          type: boolean
+        items:
+          items:
+            $ref: "#/components/schemas/MediaSummary"
+          type:
+            - array
+            - "null"
+        page:
+          format: int64
+          type: integer
+        per_page:
+          format: int64
+          type: integer
+        total:
+          format: int64
+          type: integer
+      required:
+        - items
+        - page
+        - per_page
+        - total
+        - has_next_page
       type: object
     SessionOutputBody:
       additionalProperties: false
@@ -1075,6 +1286,202 @@ paths:
       summary: Library module status
       tags:
         - library
+  /v1/media/filter-options:
+    get:
+      description: The source's own vocabulary, kept for at most a day. Formats, statuses and seasons are fixed enums of searchMedia and are not repeated here.
+      operationId: getMediaFilterOptions
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FilterOptionsOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Genres and tags to filter by
+      tags:
+        - media
+  /v1/media/search:
+    get:
+      description: "Asks the source that owns this kind of media, on demand and never in the background. Results are not stored: only a title the user opens is cached, and only for as long as the source's terms allow."
+      operationId: searchMedia
+      parameters:
+        - description: Free text to match against every title the source knows. Empty browses by the filters alone.
+          explode: false
+          in: query
+          name: q
+          schema:
+            description: Free text to match against every title the source knows. Empty browses by the filters alone.
+            maxLength: 100
+            type: string
+        - description: Which catalog to search. Every source owns one kind of media, so this also picks the source.
+          explode: false
+          in: query
+          name: type
+          schema:
+            default: anime
+            description: Which catalog to search. Every source owns one kind of media, so this also picks the source.
+            enum:
+              - anime
+              - manga
+            type: string
+        - description: Order of the results. Left out it means relevance while searching and popularity while browsing.
+          explode: false
+          in: query
+          name: sort
+          schema:
+            description: Order of the results. Left out it means relevance while searching and popularity while browsing.
+            enum:
+              - SEARCH_MATCH
+              - POPULARITY_DESC
+              - TRENDING_DESC
+              - SCORE_DESC
+              - FAVOURITES_DESC
+              - START_DATE_DESC
+              - TITLE_ROMAJI
+            type: string
+        - description: Genres a title must all have, as listed by getMediaFilterOptions.
+          explode: false
+          in: query
+          name: genres
+          schema:
+            description: Genres a title must all have, as listed by getMediaFilterOptions.
+            items:
+              type: string
+            type:
+              - array
+              - "null"
+        - description: Tags a title must all have, as listed by getMediaFilterOptions.
+          explode: false
+          in: query
+          name: tags
+          schema:
+            description: Tags a title must all have, as listed by getMediaFilterOptions.
+            items:
+              type: string
+            type:
+              - array
+              - "null"
+        - description: Any of these formats.
+          explode: false
+          in: query
+          name: formats
+          schema:
+            description: Any of these formats.
+            items:
+              enum:
+                - TV
+                - TV_SHORT
+                - MOVIE
+                - SPECIAL
+                - OVA
+                - ONA
+                - MUSIC
+                - MANGA
+                - NOVEL
+                - ONE_SHOT
+              type: string
+            type:
+              - array
+              - "null"
+        - description: Any of these release statuses.
+          explode: false
+          in: query
+          name: statuses
+          schema:
+            description: Any of these release statuses.
+            items:
+              enum:
+                - FINISHED
+                - RELEASING
+                - NOT_YET_RELEASED
+                - CANCELLED
+                - HIATUS
+              type: string
+            type:
+              - array
+              - "null"
+        - description: Season the title started in.
+          explode: false
+          in: query
+          name: season
+          schema:
+            description: Season the title started in.
+            enum:
+              - WINTER
+              - SPRING
+              - SUMMER
+              - FALL
+            type: string
+        - description: Year the title started in.
+          explode: false
+          in: query
+          name: year
+          schema:
+            description: Year the title started in.
+            format: int64
+            maximum: 2100
+            minimum: 1940
+            type: integer
+        - description: Keep titles scored above this, on a 0-100 scale.
+          explode: false
+          in: query
+          name: min_score
+          schema:
+            description: Keep titles scored above this, on a 0-100 scale.
+            format: int64
+            maximum: 100
+            minimum: 0
+            type: integer
+        - description: Include adult titles. They are left out unless this is set, and the source hides them entirely from a node with no account connected.
+          explode: false
+          in: query
+          name: adult
+          schema:
+            description: Include adult titles. They are left out unless this is set, and the source hides them entirely from a node with no account connected.
+            type: boolean
+        - description: Which page of results to return.
+          explode: false
+          in: query
+          name: page
+          schema:
+            default: 1
+            description: Which page of results to return.
+            format: int64
+            minimum: 1
+            type: integer
+        - description: How many titles per page.
+          explode: false
+          in: query
+          name: per_page
+          schema:
+            default: 30
+            description: How many titles per page.
+            format: int64
+            maximum: 50
+            minimum: 1
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Search titles
+      tags:
+        - media
   /v1/media/{media_ref}:
     get:
       description: Fetched from the source on demand and kept for at most a day, as the source's terms allow. Past that the node asks again; while the source is unreachable the request fails, and clients fall back to what the user's own list already knows about the title.
