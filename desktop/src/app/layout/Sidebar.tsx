@@ -17,7 +17,7 @@ import styles from './Sidebar.module.scss'
 const SECTIONS = [
 	{ to: '/', icon: 'common/home', labelKey: 'nav.home' },
 	{ to: '/discover', icon: 'common/compass', labelKey: 'nav.discover' },
-	{ to: '/catalog', icon: 'common/search', labelKey: 'nav.catalog' },
+	{ to: '/search', icon: 'common/search', labelKey: 'nav.search' },
 	{ to: '/lists', icon: 'common/list-checks', labelKey: 'nav.lists' },
 	{ to: '/library', icon: 'common/book-open', labelKey: 'nav.library' },
 	{ to: '/downloads', icon: 'common/download', labelKey: 'nav.downloads' }

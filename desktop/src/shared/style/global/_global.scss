@@ -1,9 +1,17 @@
 @use "../theme/palette/palette";
 
 :root {
-	--radius: 10px;
+	--radius-xs: 4px;
+	--radius-sm: 6px;
+	--radius-md: 10px;
+	--radius: 14px;
 	--radius-lg: 16px;
-	--control-height: 46px;
+
+	--control-height: 48px;
+	--control-height-sm: 40px;
+	--control-height-xs: 32px;
+
+	--opacity-inactive: 0.3;
 
 	--titlebar-height: 40px;
 	--sidebar-width: 64px;

@@ -23,6 +23,15 @@ $grey-900: #2a2a2a;
 $grey-950: #212121;
 $grey-975: #181818;
 
+$light-100: #2b2b2b;
+$light-200: #4a4a4a;
+$light-300: #6b6b6b;
+$light-400: #8a8a8a;
+$light-600: #a0a0a0;
+$light-800: #cecece;
+$light-900: #dbdbdb;
+$light-950: #f5f5f5;
+
 $shadow-rgb: 10, 10, 10;
 
 :root {
@@ -31,30 +40,32 @@ $shadow-rgb: 10, 10, 10;
 	--accent-rgb: #{$accent-rgb};
 
 	--bg: #ffffff;
-	--bg-subtle: #f7f7f8;
-	--bg-muted: #efeff1;
-	--surface: #ffffff;
-	--surface-hover: #f7f7f8;
-	--surface-active: #efeff1;
+	--bg-subtle: #{$light-950};
+	--bg-muted: #d4d4d4;
+	--surface: #f2f2f2;
+	--surface-hover: #{$light-900};
+	--surface-active: #{$light-800};
+	--surface-muted: #{$light-800};
+	--surface-muted-hover: #{$light-600};
 	--overlay: rgba(9, 9, 11, 0.45);
 
-	--field: rgba(9, 9, 11, 0.03);
-	--field-hover: rgba(9, 9, 11, 0.05);
+	--field: #{$light-900};
+	--field-hover: #{$light-800};
 	--glass: rgba(255, 255, 255, 0.78);
 	--glass-border: rgba(9, 9, 11, 0.1);
 
-	--text: #18181b;
-	--text-secondary: #52525b;
-	--text-muted: #8b8b93;
-	--text-disabled: #b4b4bb;
+	--text: #000000;
+	--text-secondary: #{$light-300};
+	--text-muted: #{$light-400};
+	--text-disabled: #{$light-600};
 	--text-on-accent: #ffffff;
 
-	--border: #e4e4e7;
-	--border-strong: #d3d3d8;
-	--border-stronger: #a1a1aa;
+	--border: #{$light-800};
+	--border-strong: #{$light-600};
+	--border-stronger: #{$light-400};
 
 	--accent: #{$accent-500};
-	--accent-hover: #{$accent-600};
+	--accent-hover: color-mix(in srgb, #{$accent-500} 85%, transparent);
 	--accent-active: #{$accent-700};
 	--accent-text: #{$accent-500};
 	--accent-muted: rgba(#{$accent-rgb}, 0.1);
@@ -84,9 +95,10 @@ $shadow-rgb: 10, 10, 10;
 	--info-muted: rgba(29, 78, 216, 0.1);
 	--info-text: #1e40af;
 
-	--shadow-sm: 0 1px 2px rgba(9, 9, 11, 0.06);
-	--shadow-md: 0 2px 4px rgba(9, 9, 11, 0.06), 0 8px 24px rgba(9, 9, 11, 0.08);
-	--shadow-lg: 0 4px 8px rgba(9, 9, 11, 0.08), 0 16px 48px rgba(9, 9, 11, 0.12);
+	--color-shadow: rgba(15, 23, 42, 0.12);
+	--shadow-sm: 1px 1px 4px 2px color-mix(in srgb, var(--color-shadow) 10%, transparent);
+	--shadow-md: 0 4px 20px 0 color-mix(in srgb, var(--color-shadow) 40%, transparent);
+	--shadow-lg: 0 0 24px 12px color-mix(in srgb, var(--color-shadow) 50%, transparent);
 
 	--scrim-veil: linear-gradient(
 		100deg,
@@ -102,14 +114,16 @@ $shadow-rgb: 10, 10, 10;
 
 	--bg: #{$grey-975};
 	--bg-subtle: #1d1d1d;
-	--bg-muted: #{$grey-800};
+	--bg-muted: #{$grey-900};
 	--surface: #{$grey-950};
 	--surface-hover: #{$grey-900};
 	--surface-active: #{$grey-700};
+	--surface-muted: #{$grey-600};
+	--surface-muted-hover: #{$grey-400};
 	--overlay: rgba(#{$shadow-rgb}, 0.7);
 
-	--field: rgba(255, 255, 255, 0.04);
-	--field-hover: rgba(255, 255, 255, 0.08);
+	--field: #{$grey-800};
+	--field-hover: #{$grey-700};
 	--glass: rgba(70, 70, 70, 0.14);
 	--glass-border: rgba(255, 255, 255, 0.1);
 
@@ -119,12 +133,12 @@ $shadow-rgb: 10, 10, 10;
 	--text-disabled: #{$grey-400};
 	--text-on-accent: #ffffff;
 
-	--border: #{$grey-700};
-	--border-strong: #{$grey-500};
+	--border: #{$grey-800};
+	--border-strong: #{$grey-600};
 	--border-stronger: #{$grey-400};
 
 	--accent: #{$accent-500};
-	--accent-hover: #ff5c56;
+	--accent-hover: color-mix(in srgb, #{$accent-500} 70%, transparent);
 	--accent-active: #e5211f;
 	--accent-text: #{$accent-500};
 	--accent-muted: rgba(#{$accent-rgb}, 0.1);
@@ -153,9 +167,10 @@ $shadow-rgb: 10, 10, 10;
 	--info-muted: rgba(96, 165, 250, 0.16);
 	--info-text: #93c5fd;
 
-	--shadow-sm: 0 1px 2px rgba(#{$shadow-rgb}, 0.45);
-	--shadow-md: 0 2px 4px rgba(#{$shadow-rgb}, 0.45), 0 8px 24px rgba(#{$shadow-rgb}, 0.55);
-	--shadow-lg: 0 4px 8px rgba(#{$shadow-rgb}, 0.55), 0 16px 48px rgba(#{$shadow-rgb}, 0.65);
+	--color-shadow: #{$grey-950};
+	--shadow-sm: 1px 1px 4px 2px color-mix(in srgb, var(--color-shadow) 10%, transparent);
+	--shadow-md: 0 4px 20px 0 color-mix(in srgb, var(--color-shadow) 40%, transparent);
+	--shadow-lg: 0 0 24px 12px color-mix(in srgb, var(--color-shadow) 50%, transparent);
 
 	--scrim-veil: linear-gradient(
 		100deg,

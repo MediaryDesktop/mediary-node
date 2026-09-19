@@ -135,16 +135,6 @@ export function ListsPage() {
 					</ul>
 				</section>
 			))}
-
-			{data?.sources && data.sources.length > 0 && (
-				<footer className={styles.sources}>
-					{data.sources.map(source => (
-						<a key={source.id} href={source.url} target='_blank' rel='noreferrer'>
-							{t('lists.source', { name: source.name })}
-						</a>
-					))}
-				</footer>
-			)}
 		</PageTransition>
 	)
 }

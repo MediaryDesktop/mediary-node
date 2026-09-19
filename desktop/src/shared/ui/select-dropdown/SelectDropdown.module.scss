@@ -9,7 +9,7 @@
 		display: flex;
 		align-items: stretch;
 		min-height: var(--control-height);
-		border: 1px solid var(--border);
+		border: 2px solid transparent;
 		border-radius: var(--radius);
 		background: var(--field);
 		cursor: pointer;
@@ -17,8 +17,9 @@
 			border-color 160ms,
 			background-color 160ms;
 
-		&:focus-within {
-			border-color: var(--border-stronger);
+		&:focus-within,
+		&.isOpen {
+			border-color: var(--border-strong);
 		}
 
 		&.invalid {
@@ -30,7 +31,7 @@
 		}
 
 		&.isDisabled {
-			opacity: 0.55;
+			opacity: var(--opacity-inactive);
 			cursor: not-allowed;
 		}
 
@@ -39,9 +40,33 @@
 			flex-shrink: 0;
 			align-items: center;
 			justify-content: center;
-			width: 2.75rem;
-			border-right: 1px solid var(--border);
+			width: 44px;
+			border-right: 1px solid var(--border-strong);
 			color: var(--text-secondary);
+			transition: color 160ms;
+
+			&.leadingActive {
+				color: var(--accent);
+			}
+		}
+
+		.main {
+			display: flex;
+			flex: 1;
+			align-items: stretch;
+			min-width: 0;
+			border-radius: calc(var(--radius) - 2px);
+			transition: background-color 160ms;
+		}
+
+		.leading + .main {
+			border-top-left-radius: 0;
+			border-bottom-left-radius: 0;
+		}
+
+		&:not(.isDisabled) .main:hover,
+		&.isOpen .main {
+			background: var(--field-hover);
 		}
 
 		.body {
@@ -49,20 +74,21 @@
 			flex: 1;
 			flex-wrap: wrap;
 			align-items: center;
-			gap: 0.375rem;
+			gap: 6px;
 			min-width: 0;
-			padding: 0 0.875rem;
+			padding: 0 12px;
 		}
 
 		.input {
 			flex: 1;
 			min-width: 4rem;
-			height: calc(var(--control-height) - 2px);
+			height: calc(var(--control-height) - 4px);
 			border: none;
 			background: none;
 			color: var(--text);
 			font-family: inherit;
-			font-size: 0.9375rem;
+			font-size: 14px;
+			font-weight: 500;
 			text-overflow: ellipsis;
 			outline: none;
 			cursor: inherit;
@@ -78,25 +104,25 @@
 
 		.tags + .input {
 			min-width: 2rem;
-			height: 1.75rem;
+			height: 28px;
 		}
 
 		.tags {
 			display: flex;
 			flex-wrap: wrap;
 			align-items: center;
-			gap: 0.375rem;
-			padding: 0.375rem 0;
+			gap: 6px;
+			padding: 6px 0;
 
 			.tag {
 				display: inline-flex;
 				align-items: center;
-				gap: 0.375rem;
-				padding: 0.125rem 0.25rem 0.125rem 0.5rem;
-				border-radius: calc(var(--radius) - 4px);
-				background: var(--bg-muted);
+				gap: 6px;
+				padding: 4px 4px 4px 8px;
+				border-radius: var(--radius-sm);
+				background: var(--surface-muted);
 				color: var(--text);
-				font-size: 0.8125rem;
+				font-size: 12px;
 
 				.tagLabel {
 					white-space: nowrap;
@@ -106,20 +132,20 @@
 					display: inline-flex;
 					align-items: center;
 					justify-content: center;
-					width: 1.125rem;
-					height: 1.125rem;
+					width: 20px;
+					height: 20px;
 					padding: 0;
 					border: none;
-					border-radius: 999px;
+					border-radius: var(--radius-xs);
 					background: none;
-					color: var(--text-secondary);
+					color: var(--text);
 					cursor: pointer;
 					transition:
 						background-color 160ms,
 						color 160ms;
 
 					&:hover {
-						background: var(--surface-active);
+						background: var(--surface-muted-hover);
 						color: var(--text);
 					}
 				}
@@ -129,19 +155,19 @@
 		.actions {
 			display: flex;
 			align-items: center;
-			gap: 0.25rem;
+			gap: 8px;
 			flex-shrink: 0;
-			padding-right: 0.875rem;
+			padding-right: 12px;
 
 			.action {
 				display: inline-flex;
 				align-items: center;
 				justify-content: center;
-				width: 1.375rem;
-				height: 1.375rem;
+				width: 20px;
+				height: 20px;
 				padding: 0;
 				border: none;
-				border-radius: 999px;
+				border-radius: var(--radius-xs);
 				background: none;
 				color: var(--text-secondary);
 				cursor: pointer;
@@ -150,7 +176,7 @@
 					color 160ms;
 
 				&:hover {
-					background: var(--surface-active);
+					background: var(--surface-muted-hover);
 					color: var(--text);
 				}
 			}
@@ -178,25 +204,31 @@
 	position: fixed;
 	z-index: 900;
 	overflow: hidden;
-	border: 1px solid var(--border);
-	border-radius: var(--radius);
-	background: var(--surface);
+	border: 1px solid var(--border-strong);
+	border-radius: var(--radius-md);
+	background: var(--field);
+	box-shadow: var(--shadow-md);
 
 	.list {
 		display: flex;
 		flex-direction: column;
-		gap: 0.25rem;
-		padding: 0.25rem;
+		gap: 4px;
+		padding: 4px;
 		overflow-y: auto;
 		overscroll-behavior: contain;
+		scrollbar-width: none;
+
+		&::-webkit-scrollbar {
+			display: none;
+		}
 
 		.option {
 			position: relative;
 			display: flex;
 			flex-shrink: 0;
 			align-items: center;
-			gap: 0.625rem;
-			padding: 0.625rem 0.75rem;
+			gap: 12px;
+			padding: 12px;
 			border-radius: calc(var(--radius) - 2px);
 			color: var(--text);
 			cursor: pointer;
@@ -216,7 +248,7 @@
 			}
 
 			&.isActive {
-				background: var(--surface-hover);
+				background: var(--surface-muted);
 			}
 
 			&.isSelected {
@@ -240,10 +272,10 @@
 			.checkbox {
 				position: relative;
 				flex-shrink: 0;
-				width: 1rem;
-				height: 1rem;
+				width: 16px;
+				height: 16px;
 				border: 2px solid var(--border-stronger);
-				border-radius: 4px;
+				border-radius: 3px;
 				transition:
 					background-color 160ms,
 					border-color 160ms;
@@ -251,18 +283,12 @@
 				&.isChecked {
 					border-color: var(--accent);
 					background: var(--accent);
-
-					&::after {
-						content: "";
-						position: absolute;
-						top: 45%;
-						left: 50%;
-						width: 0.25rem;
-						height: 0.5rem;
-						border: solid var(--text-on-accent);
-						border-width: 0 2px 2px 0;
-						transform: translate(-50%, -50%) rotate(45deg);
-					}
+					mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cmask id='m'%3E%3Crect width='16' height='16' rx='3' fill='white'/%3E%3Cpath d='M4 8.5 7 11.5 12.5 4.5' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/mask%3E%3Crect width='16' height='16' rx='3' fill='white' mask='url(%23m)'/%3E%3C/svg%3E");
+					mask-repeat: no-repeat;
+					mask-size: 100% 100%;
+					-webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cmask id='m'%3E%3Crect width='16' height='16' rx='3' fill='white'/%3E%3Cpath d='M4 8.5 7 11.5 12.5 4.5' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/mask%3E%3Crect width='16' height='16' rx='3' fill='white' mask='url(%23m)'/%3E%3C/svg%3E");
+					-webkit-mask-repeat: no-repeat;
+					-webkit-mask-size: 100% 100%;
 				}
 			}
 
@@ -278,7 +304,7 @@
 				min-width: 0;
 
 				.optionLabel {
-					font-size: 0.9375rem;
+					font-size: 14px;
 					font-weight: 500;
 					line-height: 1.3;
 					overflow: hidden;
@@ -288,7 +314,7 @@
 
 				.optionDescription {
 					color: var(--text-secondary);
-					font-size: 0.8125rem;
+					font-size: 12px;
 					line-height: 1.35;
 				}
 			}
@@ -301,9 +327,9 @@
 
 		.empty {
 			margin: 0;
-			padding: 0.875rem 0.75rem;
+			padding: 14px 12px;
 			color: var(--text-secondary);
-			font-size: 0.9375rem;
+			font-size: 14px;
 			text-align: center;
 		}
 	}

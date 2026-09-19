@@ -1,12 +1,12 @@
 import { createRoute, Outlet } from '@tanstack/react-router'
 
-import { CatalogPage } from '@pages/catalog'
 import { DiscoverPage } from '@pages/discover'
 import { DownloadsPage } from '@pages/downloads'
 import { HomePage } from '@pages/home'
 import { LibraryPage } from '@pages/library'
 import { ListsPage } from '@pages/lists'
 import { MediaPage } from '@pages/media'
+import { SearchPage } from '@pages/search'
 import { SettingsPage } from '@pages/settings'
 
 import { AppLayout } from '../../layout/AppLayout'
@@ -35,10 +35,10 @@ const discoverRoute = createRoute({
 	component: DiscoverPage
 })
 
-const catalogRoute = createRoute({
+const searchRoute = createRoute({
 	getParentRoute: () => framedRoute,
-	path: '/catalog',
-	component: CatalogPage
+	path: '/search',
+	component: SearchPage
 })
 
 const listsRoute = createRoute({
@@ -77,7 +77,7 @@ const settingsRoute = createRoute({
 export const framedTree = framedRoute.addChildren([
 	homeRoute,
 	discoverRoute,
-	catalogRoute,
+	searchRoute,
 	listsRoute,
 	mediaRoute,
 	libraryRoute,

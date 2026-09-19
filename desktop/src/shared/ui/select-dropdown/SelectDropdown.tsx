@@ -31,6 +31,7 @@ interface SelectDropdownBaseProps {
 	className?: string
 	id?: string
 	startIcon?: ReactNode
+	accentWhenSelected?: boolean
 }
 
 export type SelectDropdownProps = SelectDropdownBaseProps &
@@ -49,7 +50,8 @@ export function SelectDropdown(props: SelectDropdownProps) {
 		error,
 		className,
 		id,
-		startIcon
+		startIcon,
+		accentWhenSelected = false
 	} = props
 
 	const { t } = useTranslation()
@@ -221,75 +223,88 @@ export function SelectDropdown(props: SelectDropdownProps) {
 					setOpen(current => !current)
 				}}
 			>
-				{leading && <span className={styles.leading}>{leading}</span>}
+				{leading && (
+					<span
+						className={clsx(
+							styles.leading,
+							accentWhenSelected && selected.length > 0 && styles.leadingActive
+						)}
+					>
+						{leading}
+					</span>
+				)}
 
-				<div className={styles.body}>
-					{multiple && selectedOptions.length > 0 && (
-						<div className={styles.tags}>
-							{selectedOptions.map(option => (
-								<span key={option.value} className={styles.tag}>
-									{option.icon && <Icon name={option.icon} size={14} />}
-									<span className={styles.tagLabel}>{option.label}</span>
+				<div className={styles.main}>
+					<div className={styles.body}>
+						{multiple && selectedOptions.length > 0 && (
+							<div className={styles.tags}>
+								{selectedOptions.map(option => (
+									<span key={option.value} className={styles.tag}>
+										{option.icon && <Icon name={option.icon} size={14} />}
+										<span className={styles.tagLabel}>{option.label}</span>
 
-									<button
-										type='button'
-										className={styles.tagRemove}
-										aria-label={t('select.remove', { label: option.label })}
-										onMouseDown={event => event.stopPropagation()}
-										onClick={() => toggleOption(option)}
-									>
-										<Icon name='common/close' size={12} />
-									</button>
-								</span>
-							))}
-						</div>
-					)}
+										<button
+											type='button'
+											className={styles.tagRemove}
+											aria-label={t('select.remove', { label: option.label })}
+											onMouseDown={event => event.stopPropagation()}
+											onClick={() => toggleOption(option)}
+										>
+											<Icon name='common/close' size={12} />
+										</button>
+									</span>
+								))}
+							</div>
+						)}
 
-					<input
-						ref={inputRef}
-						id={fieldId}
-						className={styles.input}
-						role='combobox'
-						readOnly={!searchable}
-						disabled={disabled}
-						value={inputValue}
-						placeholder={showPlaceholder ? (placeholder ?? t('select.placeholder')) : undefined}
-						autoComplete='off'
-						spellCheck={false}
-						aria-expanded={open}
-						aria-controls={listId}
-						aria-autocomplete={searchable ? 'list' : 'none'}
-						aria-activedescendant={open ? `${listId}-${activeIndex}` : undefined}
-						aria-invalid={error ? true : undefined}
-						aria-describedby={error ? errorId : undefined}
-						onChange={event => {
-							setQuery(event.target.value)
-							setOpen(true)
-						}}
-						onKeyDown={handleKeyDown}
-						onMouseDown={event => event.stopPropagation()}
-						onClick={() => !disabled && setOpen(current => !current)}
-					/>
-				</div>
-
-				<div className={styles.actions}>
-					{clearable && selected.length > 0 && !disabled && (
-						<button
-							type='button'
-							className={styles.action}
-							aria-label={t('select.clear')}
+						<input
+							ref={inputRef}
+							id={fieldId}
+							className={styles.input}
+							role='combobox'
+							readOnly={!searchable}
+							disabled={disabled}
+							value={inputValue}
+							placeholder={
+								showPlaceholder ? (placeholder ?? t('select.placeholder')) : undefined
+							}
+							autoComplete='off'
+							spellCheck={false}
+							aria-expanded={open}
+							aria-controls={listId}
+							aria-autocomplete={searchable ? 'list' : 'none'}
+							aria-activedescendant={open ? `${listId}-${activeIndex}` : undefined}
+							aria-invalid={error ? true : undefined}
+							aria-describedby={error ? errorId : undefined}
+							onChange={event => {
+								setQuery(event.target.value)
+								setOpen(true)
+							}}
+							onKeyDown={handleKeyDown}
 							onMouseDown={event => event.stopPropagation()}
-							onClick={() => commit([])}
-						>
-							<Icon name='common/close' size={16} />
-						</button>
-					)}
+							onClick={() => !disabled && setOpen(current => !current)}
+						/>
+					</div>
 
-					<Icon
-						name='common/chevron-down'
-						size={16}
-						className={clsx(styles.chevron, open && styles.chevronUp)}
-					/>
+					<div className={styles.actions}>
+						{clearable && selected.length > 0 && !disabled && (
+							<button
+								type='button'
+								className={styles.action}
+								aria-label={t('select.clear')}
+								onMouseDown={event => event.stopPropagation()}
+								onClick={() => commit([])}
+							>
+								<Icon name='common/close' size={16} />
+							</button>
+						)}
+
+						<Icon
+							name='common/chevron-down'
+							size={16}
+							className={clsx(styles.chevron, open && styles.chevronUp)}
+						/>
+					</div>
 				</div>
 			</div>
 

@@ -8,17 +8,15 @@
 	background: var(--surface);
 
 	.adult {
+		flex-direction: row-reverse;
+		justify-content: space-between;
 		margin-top: 0.25rem;
 		padding: 0 0.125rem;
 	}
 
 	.clear {
-		align-self: flex-start;
+		align-self: flex-end;
 		margin-top: 0.25rem;
-		color: var(--danger-text);
-
-		&:hover:not(:disabled) {
-			background: var(--danger-muted);
-		}
+		color: var(--accent);
 	}
 }

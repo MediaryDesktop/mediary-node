@@ -51,7 +51,7 @@ export const SEARCH_SCORES = [90, 80, 70, 60, 50] as const
 export const EARLIEST_YEAR = 1940
 
 const PER_PAGE = 30
-const TYPING_PAUSE_MS = 400
+const CHANGE_PAUSE_MS = 400
 
 const BROWSE_SORT: MediaSearchSort = 'POPULARITY_DESC'
 const RELEVANCE_SORT: MediaSearchSort = 'SEARCH_MATCH'
@@ -105,6 +105,17 @@ function applyPatch(filters: SearchFilters, patch: Partial<SearchFilters>): Sear
 	return next
 }
 
+interface SearchCriteria {
+	title: string
+	filters: SearchFilters
+}
+
+const INITIAL_CRITERIA: SearchCriteria = { title: '', filters: INITIAL_FILTERS }
+
+function sameCriteria(a: SearchCriteria, b: SearchCriteria): boolean {
+	return a.title.trim() === b.title.trim() && JSON.stringify(a.filters) === JSON.stringify(b.filters)
+}
+
 function requestOf(title: string, filters: SearchFilters, page: number): MediaSearchQuery {
 	const query = title.trim()
 
@@ -155,13 +166,13 @@ export const searchMediaModel = atom(() => {
 		target: filtersPatched
 	})
 
-	const $submittedTitle = createStore('').on(debounce(titleChanged, TYPING_PAUSE_MS), (_, title) => title)
+	const $draft = combine({ title: $title, filters: $filters })
 
-	const $criteria = combine({ title: $submittedTitle, filters: $filters })
+	const $criteria = createStore(INITIAL_CRITERIA).on(debounce($draft, CHANGE_PAUSE_MS), (current, draft) =>
+		sameCriteria(current, draft) ? current : draft
+	)
 
-	const $total = mediaSearchQuery.$data.map(data => data?.results.total ?? 0)
 	const $hasNextPage = mediaSearchQuery.$data.map(data => data?.results.has_next_page ?? false)
-	const $sources = mediaSearchQuery.$data.map(data => data?.sources ?? [])
 	const $filterOptions = mediaFilterOptionsQuery.$data.map(data => data?.options ?? null)
 
 	sample({
@@ -232,9 +243,7 @@ export const searchMediaModel = atom(() => {
 		$activeFilterCount,
 		$filterOptions,
 		$items,
-		$total,
 		$hasNextPage,
-		$sources,
 		$loadingFirstPage,
 		$loadingMore,
 		$failed,

@@ -34,7 +34,7 @@ export const en = {
 		label: 'Main navigation',
 		home: 'Home',
 		discover: 'Discover',
-		catalog: 'Catalog',
+		search: 'Search',
 		lists: 'My lists',
 		library: 'Library',
 		downloads: 'Downloads',
@@ -75,7 +75,6 @@ export const en = {
 		retry: 'Retry',
 		empty: 'Nothing here yet.',
 		connect: 'Connect AniList to see your lists',
-		source: 'Data from {{name}}',
 		pending: 'Not synced yet',
 		menu: 'Title options',
 		decrement: 'One less',
@@ -118,7 +117,6 @@ export const en = {
 		retry: 'Retry',
 		offline: 'Details are unavailable right now. Showing what your list knows.',
 		openOn: 'Open on {{name}}',
-		source: 'Data from {{name}}',
 		adult: '18+',
 		editEntry: 'Edit list entry',
 		addToList: 'Add to list',
@@ -233,23 +231,17 @@ export const en = {
 		}
 	},
 
-	catalog: {
-		heading: {
-			popular: 'Popular titles',
-			results: 'Search results'
-		},
-		total: 'Found: {{count}}',
+	search: {
 		searchPlaceholder: 'Title',
 		searchLabel: 'Search by title',
 		filters: 'Filters',
 		clear: 'Clear filters',
-		adult: 'Adult',
+		adult: 'Show adult content',
 		empty: 'Nothing matched. Try another title or fewer filters.',
 		failed: 'Could not search right now.',
 		loadMoreFailed: 'Could not load more titles.',
 		retry: 'Retry',
 		loadMore: 'Show more',
-		source: 'Data from {{name}}',
 		scoreAtLeast: '{{score}}% and above',
 		type: {
 			anime: 'Anime',

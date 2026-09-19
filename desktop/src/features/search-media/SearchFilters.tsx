@@ -94,7 +94,7 @@ export function SearchFilters() {
 		() =>
 			SEARCH_SCORES.map(score => ({
 				value: String(score),
-				label: t('catalog.scoreAtLeast', { score })
+				label: t('search.scoreAtLeast', { score })
 			})),
 		[t]
 	)
@@ -104,14 +104,16 @@ export function SearchFilters() {
 			<SelectDropdown
 				value={filters.type}
 				onChange={value => patch({ type: (value ?? 'anime') as MediaSearchType })}
-				options={SEARCH_TYPES.map(type => ({ value: type, label: t(`catalog.type.${type}`) }))}
+				options={SEARCH_TYPES.map(type => ({ value: type, label: t(`search.type.${type}`) }))}
+				accentWhenSelected
 				startIcon={<Icon name='common/library' size={18} />}
 			/>
 
 			<SelectDropdown
 				value={filters.sort}
 				onChange={value => patch({ sort: (value ?? 'POPULARITY_DESC') as MediaSearchSort })}
-				options={SEARCH_SORTS.map(sort => ({ value: sort, label: t(`catalog.sort.${sort}`) }))}
+				options={SEARCH_SORTS.map(sort => ({ value: sort, label: t(`search.sort.${sort}`) }))}
+				accentWhenSelected
 				startIcon={<Icon name='common/sort' size={18} />}
 			/>
 
@@ -122,7 +124,8 @@ export function SearchFilters() {
 				options={genres}
 				searchable
 				clearable
-				placeholder={t('catalog.any.genres')}
+				accentWhenSelected
+				placeholder={t('search.any.genres')}
 				startIcon={<Icon name='common/sparkles' size={18} />}
 			/>
 
@@ -133,7 +136,8 @@ export function SearchFilters() {
 				options={tags}
 				searchable
 				clearable
-				placeholder={t('catalog.any.tags')}
+				accentWhenSelected
+				placeholder={t('search.any.tags')}
 				startIcon={<Icon name='common/tag' size={18} />}
 			/>
 
@@ -143,7 +147,8 @@ export function SearchFilters() {
 				onChange={value => patch({ formats: value as MediaSearchFormat[] })}
 				options={formats}
 				clearable
-				placeholder={t('catalog.any.formats')}
+				accentWhenSelected
+				placeholder={t('search.any.formats')}
 				startIcon={<Icon name='common/player' size={18} />}
 			/>
 
@@ -152,7 +157,8 @@ export function SearchFilters() {
 				onChange={value => patch({ season: (value as MediaSearchSeason | null) ?? null })}
 				options={seasons}
 				clearable
-				placeholder={t('catalog.any.seasons')}
+				accentWhenSelected
+				placeholder={t('search.any.seasons')}
 				startIcon={<Icon name='common/compass' size={18} />}
 			/>
 
@@ -162,7 +168,8 @@ export function SearchFilters() {
 				options={years}
 				searchable
 				clearable
-				placeholder={t('catalog.any.year')}
+				accentWhenSelected
+				placeholder={t('search.any.year')}
 				startIcon={<Icon name='common/calendar' size={18} />}
 			/>
 
@@ -172,7 +179,8 @@ export function SearchFilters() {
 				onChange={value => patch({ statuses: value as MediaSearchStatus[] })}
 				options={statuses}
 				clearable
-				placeholder={t('catalog.any.statuses')}
+				accentWhenSelected
+				placeholder={t('search.any.statuses')}
 				startIcon={<Icon name='common/signal' size={18} />}
 			/>
 
@@ -181,28 +189,27 @@ export function SearchFilters() {
 				onChange={value => patch({ minScore: value === null ? null : Number(value) })}
 				options={scores}
 				clearable
-				placeholder={t('catalog.any.score')}
+				accentWhenSelected
+				placeholder={t('search.any.score')}
 				startIcon={<Icon name='common/star' size={18} />}
 			/>
 
 			<Switch
 				checked={filters.adult}
 				onChange={adult => patch({ adult })}
-				label={t('catalog.adult')}
+				label={t('search.adult')}
 				className={styles.adult}
 			/>
 
 			<Button
-				variant='ghost'
+				variant='glass-accent'
 				size='small'
-				iconOnly
 				disabled={activeFilters === 0}
 				onClick={() => clear()}
-				aria-label={t('catalog.clear')}
-				title={t('catalog.clear')}
 				className={styles.clear}
+				startIcon={<Icon name='common/trash' size={18} />}
 			>
-				<Icon name='common/trash' size={18} />
+				{t('search.clear')}
 			</Button>
 		</div>
 	)

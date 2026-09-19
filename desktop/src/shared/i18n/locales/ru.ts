@@ -32,7 +32,7 @@ export const ru: Translation = {
 		label: 'Основная навигация',
 		home: 'Главная',
 		discover: 'Обзор',
-		catalog: 'Каталог',
+		search: 'Поиск',
 		lists: 'Мои списки',
 		library: 'Библиотека',
 		downloads: 'Загрузки',
@@ -73,7 +73,6 @@ export const ru: Translation = {
 		retry: 'Повторить',
 		empty: 'Здесь пока пусто.',
 		connect: 'Подключите AniList, чтобы увидеть свои списки',
-		source: 'Данные из {{name}}',
 		pending: 'Ещё не синхронизировано',
 		menu: 'Действия с тайтлом',
 		decrement: 'На один меньше',
@@ -116,7 +115,6 @@ export const ru: Translation = {
 		retry: 'Повторить',
 		offline: 'Подробности сейчас недоступны. Показываем то, что известно из вашего списка.',
 		openOn: 'Открыть на {{name}}',
-		source: 'Данные из {{name}}',
 		adult: '18+',
 		editEntry: 'Редактировать запись в списке',
 		addToList: 'Добавить в список',
@@ -231,23 +229,17 @@ export const ru: Translation = {
 		}
 	},
 
-	catalog: {
-		heading: {
-			popular: 'Популярные тайтлы',
-			results: 'Результаты поиска'
-		},
-		total: 'Найдено: {{count}}',
+	search: {
 		searchPlaceholder: 'Название',
 		searchLabel: 'Поиск по названию',
 		filters: 'Фильтры',
 		clear: 'Сбросить фильтры',
-		adult: '18+',
+		adult: 'Показывать контент 18+',
 		empty: 'Ничего не нашли. Попробуйте другое название или меньше фильтров.',
 		failed: 'Не удалось выполнить поиск.',
 		loadMoreFailed: 'Не удалось загрузить ещё тайтлы.',
 		retry: 'Повторить',
 		loadMore: 'Показать ещё',
-		source: 'Данные из {{name}}',
 		scoreAtLeast: 'От {{score}}%',
 		type: {
 			anime: 'Аниме',

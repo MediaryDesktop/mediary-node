@@ -6,8 +6,7 @@
 		top: 0;
 		left: 0;
 		z-index: 5;
-		border-radius: 999px;
-		backdrop-filter: blur(12px);
+
 	}
 
 	.offline {
@@ -157,6 +156,7 @@
 				font-weight: 700;
 				line-height: 1.15;
 				letter-spacing: -0.015em;
+				line-clamp: 2;
 				text-shadow: 0 1px 10px var(--overlay);
 				-webkit-box-orient: vertical;
 				-webkit-line-clamp: 2;
@@ -337,7 +337,6 @@
 	}
 
 	.iconAction {
-		border-radius: 8px;
 		background: var(--surface);
 		color: var(--text-secondary);
 
@@ -532,14 +531,6 @@
 		p {
 			margin: 0.25rem 0 0;
 			font-weight: 600;
-		}
-	}
-
-	.sources {
-		font-size: 0.75rem;
-
-		a {
-			color: var(--text-secondary);
 		}
 	}
 

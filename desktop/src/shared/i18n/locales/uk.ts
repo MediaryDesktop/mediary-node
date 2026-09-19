@@ -32,7 +32,7 @@ export const uk: Translation = {
 		label: 'Головна навігація',
 		home: 'Головна',
 		discover: 'Огляд',
-		catalog: 'Каталог',
+		search: 'Пошук',
 		lists: 'Мої списки',
 		library: 'Бібліотека',
 		downloads: 'Завантаження',
@@ -73,7 +73,6 @@ export const uk: Translation = {
 		retry: 'Повторити',
 		empty: 'Тут поки порожньо.',
 		connect: 'Підключіть AniList, щоб побачити свої списки',
-		source: 'Дані з {{name}}',
 		pending: 'Ще не синхронізовано',
 		menu: 'Дії з тайтлом',
 		decrement: 'На один менше',
@@ -116,7 +115,6 @@ export const uk: Translation = {
 		retry: 'Повторити',
 		offline: 'Подробиці зараз недоступні. Показуємо те, що відомо з вашого списку.',
 		openOn: 'Відкрити на {{name}}',
-		source: 'Дані з {{name}}',
 		adult: '18+',
 		editEntry: 'Редагувати запис у списку',
 		addToList: 'Додати до списку',
@@ -231,23 +229,17 @@ export const uk: Translation = {
 		}
 	},
 
-	catalog: {
-		heading: {
-			popular: 'Популярні тайтли',
-			results: 'Результати пошуку'
-		},
-		total: 'Знайдено: {{count}}',
+	search: {
 		searchPlaceholder: 'Назва',
 		searchLabel: 'Пошук за назвою',
 		filters: 'Фільтри',
 		clear: 'Скинути фільтри',
-		adult: '18+',
+		adult: 'Показувати контент 18+',
 		empty: 'Нічого не знайшли. Спробуйте іншу назву або менше фільтрів.',
 		failed: 'Не вдалося виконати пошук.',
 		loadMoreFailed: 'Не вдалося завантажити ще тайтли.',
 		retry: 'Повторити',
 		loadMore: 'Показати ще',
-		source: 'Дані з {{name}}',
 		scoreAtLeast: 'Від {{score}}%',
 		type: {
 			anime: 'Аніме',

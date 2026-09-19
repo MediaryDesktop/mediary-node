@@ -7,17 +7,12 @@ import { PageTransition } from '@shared/ui'
 
 import { SearchFilters, searchMediaModel, SearchResults, SearchToolbar } from '@features/search-media'
 
-import styles from './CatalogPage.module.scss'
+import styles from './SearchPage.module.scss'
 
-export function CatalogPage() {
+export function SearchPage() {
 	const { t } = useTranslation()
 
-	const [title, filtersOpen, total, pageOpened] = useUnit([
-		searchMediaModel.$title,
-		searchMediaModel.$filtersOpen,
-		searchMediaModel.$total,
-		searchMediaModel.pageOpened
-	])
+	const [filtersOpen, pageOpened] = useUnit([searchMediaModel.$filtersOpen, searchMediaModel.pageOpened])
 
 	useEffect(() => {
 		pageOpened()
@@ -25,13 +20,7 @@ export function CatalogPage() {
 
 	return (
 		<PageTransition className={styles.root}>
-			<header className={styles.header}>
-				<h1 className={styles.title}>
-					{title.trim() ? t('catalog.heading.results') : t('catalog.heading.popular')}
-				</h1>
-
-				{total > 0 && <span className={styles.total}>{t('catalog.total', { count: total })}</span>}
-			</header>
+			<h1 className={styles.title}>{t('nav.search')}</h1>
 
 			<SearchToolbar />
 

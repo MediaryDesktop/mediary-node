@@ -3,11 +3,11 @@
 .content {
 	z-index: 45;
 	min-width: 11rem;
-	padding: 0.3125rem;
-	border: 1px solid var(--border);
-	border-radius: var(--radius);
-	background: var(--surface);
-	box-shadow: var(--shadow-lg);
+	padding: 4px;
+	border: 1px solid var(--border-strong);
+	border-radius: var(--radius-md);
+	background: var(--field);
+	box-shadow: var(--shadow-md);
 	-webkit-app-region: no-drag;
 
 	@include motion.popover;
@@ -33,7 +33,7 @@
 		user-select: none;
 
 		&[data-highlighted] {
-			background: var(--surface-hover);
+			background: var(--surface-muted);
 		}
 
 		&[data-disabled] {

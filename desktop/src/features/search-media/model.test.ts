@@ -106,6 +106,28 @@ describe('search paging', () => {
 		expect(scope.getState(searchMediaModel.$items)).toHaveLength(2)
 	})
 
+	it('collapses a burst of filter changes into one request', async () => {
+		const search = vi.fn().mockResolvedValue(page(['anilist:1'], false))
+		const scope = searchScope(search)
+
+		await allSettled(searchMediaModel.pageOpened, { scope })
+		expect(search).toHaveBeenCalledTimes(1)
+
+		await Promise.all([
+			allSettled(searchMediaModel.filtersPatched, { scope, params: { genres: ['Action'] } }),
+			allSettled(searchMediaModel.filtersPatched, {
+				scope,
+				params: { genres: ['Action', 'Adventure'] }
+			}),
+			allSettled(searchMediaModel.filtersPatched, { scope, params: { statuses: ['FINISHED'] } })
+		])
+
+		expect(search).toHaveBeenCalledTimes(2)
+		expect(search).toHaveBeenLastCalledWith(
+			expect.objectContaining({ genres: ['Action', 'Adventure'], statuses: ['FINISHED'] })
+		)
+	})
+
 	it('does not ask for a page the source said is not there', async () => {
 		const search = vi.fn().mockResolvedValue(page(['anilist:1'], false))
 		const scope = searchScope(search)
@@ -118,7 +140,7 @@ describe('search paging', () => {
 })
 
 describe('search filters', () => {
-	it('drops formats that belong to the other catalog', async () => {
+	it('drops formats that belong to the other media type', async () => {
 		const search = vi.fn().mockResolvedValue(page([], false))
 		const scope = searchScope(search)
 

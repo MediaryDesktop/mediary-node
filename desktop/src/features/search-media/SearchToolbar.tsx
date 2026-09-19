@@ -22,19 +22,19 @@ export function SearchToolbar() {
 				className={styles.field}
 				value={title}
 				onChange={event => titleChanged(event.target.value)}
-				placeholder={t('catalog.searchPlaceholder')}
-				aria-label={t('catalog.searchLabel')}
+				placeholder={t('search.searchPlaceholder')}
+				aria-label={t('search.searchLabel')}
 				startIcon={<Icon name='common/search' size={18} />}
 			/>
 
 			<Button
-				variant={filtersOpen ? 'primary' : 'secondary'}
+				variant='secondary'
 				onClick={() => filtersToggled()}
 				aria-expanded={filtersOpen}
 				startIcon={<Icon name='common/filter' size={18} />}
 				className={styles.toggle}
 			>
-				{t('catalog.filters')}
+				{t('search.filters')}
 			</Button>
 		</div>
 	)

@@ -15,18 +15,16 @@ export function SearchResults() {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
 
-	const [items, loading, loadingMore, failed, loadMoreFailed, hasNextPage, sources, loadMore, retry] =
-		useUnit([
-			searchMediaModel.$items,
-			searchMediaModel.$loadingFirstPage,
-			searchMediaModel.$loadingMore,
-			searchMediaModel.$failed,
-			searchMediaModel.$loadMoreFailed,
-			searchMediaModel.$hasNextPage,
-			searchMediaModel.$sources,
-			searchMediaModel.nextPageRequested,
-			searchMediaModel.retried
-		])
+	const [items, loading, loadingMore, failed, loadMoreFailed, hasNextPage, loadMore, retry] = useUnit([
+		searchMediaModel.$items,
+		searchMediaModel.$loadingFirstPage,
+		searchMediaModel.$loadingMore,
+		searchMediaModel.$failed,
+		searchMediaModel.$loadMoreFailed,
+		searchMediaModel.$hasNextPage,
+		searchMediaModel.nextPageRequested,
+		searchMediaModel.retried
+	])
 
 	if (loading) {
 		return (
@@ -43,16 +41,16 @@ export function SearchResults() {
 	if (failed) {
 		return (
 			<div className={styles.notice}>
-				<p className={styles.muted}>{t('catalog.failed')}</p>
+				<p className={styles.muted}>{t('search.failed')}</p>
 				<Button size='small' onClick={() => retry()}>
-					{t('catalog.retry')}
+					{t('search.retry')}
 				</Button>
 			</div>
 		)
 	}
 
 	if (items.length === 0) {
-		return <p className={styles.muted}>{t('catalog.empty')}</p>
+		return <p className={styles.muted}>{t('search.empty')}</p>
 	}
 
 	return (
@@ -72,7 +70,7 @@ export function SearchResults() {
 				))}
 			</ul>
 
-			{loadMoreFailed && <p className={styles.muted}>{t('catalog.loadMoreFailed')}</p>}
+			{loadMoreFailed && <p className={styles.muted}>{t('search.loadMoreFailed')}</p>}
 
 			{hasNextPage && (
 				<div className={styles.more}>
@@ -81,19 +79,9 @@ export function SearchResults() {
 						loading={loadingMore}
 						onClick={() => (loadMoreFailed ? retry() : loadMore())}
 					>
-						{t('catalog.loadMore')}
+						{t('search.loadMore')}
 					</Button>
 				</div>
-			)}
-
-			{sources.length > 0 && (
-				<footer className={styles.sources}>
-					{sources.map(source => (
-						<a key={source.id} href={source.url} target='_blank' rel='noreferrer'>
-							{t('catalog.source', { name: source.name })}
-						</a>
-					))}
-				</footer>
 			)}
 		</div>
 	)

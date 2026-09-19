@@ -89,13 +89,12 @@ export function MediaPage({ mediaRef }: MediaPageProps) {
 	return (
 		<PageTransition className={styles.root}>
 			<Button
-				variant='glass'
+				variant='ghost'
 				size='small'
 				className={styles.back}
 				startIcon={<Icon name='common/arrow-left' size={18} />}
 				onClick={() => router.history.back()}
 			>
-				{t('media.back')}
 			</Button>
 
 			{details && <MediaView media={details.media} sources={details.sources ?? []} entry={entry} />}
@@ -423,16 +422,6 @@ function MediaView({ media, sources, entry }: MediaViewProps) {
 							))}
 						</ul>
 					</section>
-				)}
-
-				{sources.length > 0 && (
-					<footer className={styles.sources}>
-						{sources.map(source => (
-							<a key={source.id} href={source.url} target='_blank' rel='noreferrer'>
-								{t('media.source', { name: source.name })}
-							</a>
-						))}
-					</footer>
 				)}
 			</div>
 
