@@ -7,7 +7,10 @@ import { Icon } from '../icon/Icon'
 
 import styles from './Input.module.scss'
 
+export type InputVariant = 'default' | 'glass'
+
 export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
+	variant?: InputVariant
 	type?: 'text' | 'email' | 'password' | 'number'
 	startIcon?: ReactNode
 	revealable?: boolean
@@ -15,6 +18,7 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
 }
 
 export function Input({
+	variant = 'default',
 	type = 'text',
 	startIcon,
 	revealable = false,
@@ -45,6 +49,7 @@ export function Input({
 					aria-describedby={error ? errorId : undefined}
 					className={clsx(
 						styles.input,
+						variant === 'glass' && styles.glass,
 						startIcon && styles.withStartIcon,
 						showToggle && styles.withEndAction,
 						error && styles.invalid

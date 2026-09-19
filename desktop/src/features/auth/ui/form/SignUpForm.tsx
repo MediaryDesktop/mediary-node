@@ -27,6 +27,7 @@ export function SignUpForm() {
 	return (
 		<form className={styles.form} onSubmit={submit} noValidate>
 			<Input
+				variant='glass'
 				name='display_name'
 				placeholder={t('auth.field.name')}
 				autoComplete='nickname'
@@ -36,6 +37,7 @@ export function SignUpForm() {
 			/>
 
 			<Input
+				variant='glass'
 				type='email'
 				name='email'
 				placeholder={t('auth.field.email')}
@@ -46,6 +48,7 @@ export function SignUpForm() {
 			/>
 
 			<Input
+				variant='glass'
 				type='password'
 				name='password'
 				placeholder={t('auth.field.passwordHint', { min: MIN_PASSWORD_LENGTH })}
@@ -57,6 +60,7 @@ export function SignUpForm() {
 			/>
 
 			<Input
+				variant='glass'
 				type='password'
 				name='confirmation'
 				placeholder={t('auth.field.confirmation')}

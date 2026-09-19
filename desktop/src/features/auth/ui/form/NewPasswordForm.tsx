@@ -33,6 +33,7 @@ export function NewPasswordForm({ email }: NewPasswordFormProps) {
 	return (
 		<form className={styles.form} onSubmit={submit} noValidate>
 			<OtpInput
+				variant='glass'
 				className={styles.otp}
 				value={code}
 				length={CODE_LENGTH}
@@ -42,6 +43,7 @@ export function NewPasswordForm({ email }: NewPasswordFormProps) {
 			/>
 
 			<Input
+				variant='glass'
 				type='password'
 				name='password'
 				placeholder={t('auth.field.passwordHint', { min: MIN_PASSWORD_LENGTH })}

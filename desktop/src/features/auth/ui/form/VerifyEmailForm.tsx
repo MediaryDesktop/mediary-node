@@ -34,6 +34,7 @@ export function VerifyEmailForm() {
 	return (
 		<form className={styles.form} onSubmit={submit} noValidate>
 			<OtpInput
+				variant='glass'
 				className={styles.otp}
 				value={code}
 				length={CODE_LENGTH}

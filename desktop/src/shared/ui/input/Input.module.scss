@@ -20,7 +20,7 @@
 			width: 100%;
 			height: var(--control-height);
 			padding: 0 20px;
-			border: 2px solid transparent;
+			border: 1px solid transparent;
 			border-radius: var(--radius);
 			background: var(--field);
 			color: var(--text);
@@ -60,6 +60,20 @@
 				&:focus {
 					border-color: var(--danger);
 				}
+			}
+
+			&.glass {
+				background: var(--glass);
+				border-color: var(--border-stronger);
+
+				&:hover:not(:disabled) {
+					background: var(--glass-border);
+				}
+
+				&:focus {
+					background: var(--glass-border);
+				}
+
 			}
 		}
 

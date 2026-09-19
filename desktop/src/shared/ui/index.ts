@@ -1,6 +1,8 @@
 export { Button } from './button/Button'
 export { Input } from './input/Input'
+export type { InputProps, InputVariant } from './input/Input'
 export { OtpInput } from './otp-input/OtpInput'
+export type { OtpInputProps, OtpInputVariant } from './otp-input/OtpInput'
 export { WindowControls } from './window-controls/WindowControls'
 export { Logo } from './logo/Logo'
 

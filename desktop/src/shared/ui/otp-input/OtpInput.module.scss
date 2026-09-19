@@ -45,6 +45,29 @@
 				box-shadow: 0 0 0 3px var(--danger-ring);
 			}
 		}
+
+		&.glass {
+			border-color: var(--border-stronger);
+			background: var(--glass);
+
+			&:hover:not(:disabled) {
+				background: var(--glass-border);
+			}
+
+			&:focus {
+				border-color: var(--accent);
+				background: var(--glass-border);
+			}
+
+			&.filled {
+				border-color: var(--accent);
+				background: var(--accent-muted);
+			}
+
+			&.invalid {
+				border-color: var(--danger);
+			}
+		}
 	}
 
 	@media (max-width: 26rem) {

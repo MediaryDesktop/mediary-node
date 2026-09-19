@@ -29,6 +29,7 @@ export function SignInForm({ onForgotPassword }: SignInFormProps) {
 	return (
 		<form className={styles.form} onSubmit={submit} noValidate>
 			<Input
+				variant='glass'
 				type='email'
 				name='email'
 				placeholder={t('auth.field.email')}
@@ -39,6 +40,7 @@ export function SignInForm({ onForgotPassword }: SignInFormProps) {
 			/>
 
 			<Input
+				variant='glass'
 				type='password'
 				name='password'
 				placeholder={t('auth.field.password')}

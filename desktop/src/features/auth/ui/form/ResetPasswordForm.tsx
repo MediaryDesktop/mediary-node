@@ -20,6 +20,7 @@ export function ResetPasswordForm() {
 	return (
 		<form className={styles.form} onSubmit={submit} noValidate>
 			<Input
+				variant='glass'
 				type='email'
 				name='email'
 				placeholder={t('auth.field.email')}

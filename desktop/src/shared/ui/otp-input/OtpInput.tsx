@@ -4,7 +4,10 @@ import { useEffect, useRef } from 'react'
 
 import styles from './OtpInput.module.scss'
 
+export type OtpInputVariant = 'default' | 'glass'
+
 export interface OtpInputProps {
+	variant?: OtpInputVariant
 	value: string
 	onChange: (code: string) => void
 	length?: number
@@ -26,6 +29,7 @@ function write(code: string, index: number, digit: string, length: number): stri
 }
 
 export function OtpInput({
+	variant = 'default',
 	value,
 	onChange,
 	length = 6,
@@ -120,7 +124,12 @@ export function OtpInput({
 					ref={cell => {
 						cells.current[index] = cell
 					}}
-					className={clsx(styles.cell, value[index] && styles.filled, invalid && styles.invalid)}
+					className={clsx(
+						styles.cell,
+						variant === 'glass' && styles.glass,
+						value[index] && styles.filled,
+						invalid && styles.invalid
+					)}
 					type='text'
 					inputMode='numeric'
 					pattern='\d*'
