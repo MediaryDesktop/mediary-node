@@ -1,5 +1,15 @@
 query Collection($userId: Int, $type: MediaType) {
   MediaListCollection(userId: $userId, type: $type, forceSingleCompletedList: true) {
+    user {
+      mediaListOptions {
+        animeList {
+          customLists
+        }
+        mangaList {
+          customLists
+        }
+      }
+    }
     lists {
       name
       isCustomList

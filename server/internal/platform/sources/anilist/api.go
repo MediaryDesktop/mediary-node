@@ -22,6 +22,9 @@ var (
 
 	//go:embed queries/media_details.graphql
 	mediaDetailsQuery string
+
+	//go:embed queries/update_custom_lists.graphql
+	updateCustomListsMutation string
 )
 
 type MediaType string
@@ -42,9 +45,17 @@ type Viewer struct {
 	Options struct {
 		DisplayAdultContent bool `json:"displayAdultContent"`
 	} `json:"options"`
-	MediaListOptions struct {
-		ScoreFormat string `json:"scoreFormat"`
-	} `json:"mediaListOptions"`
+	MediaListOptions MediaListOptions `json:"mediaListOptions"`
+}
+
+type MediaListOptions struct {
+	ScoreFormat string `json:"scoreFormat"`
+	AnimeList   struct {
+		CustomLists []string `json:"customLists"`
+	} `json:"animeList"`
+	MangaList struct {
+		CustomLists []string `json:"customLists"`
+	} `json:"mangaList"`
 }
 
 type FuzzyDate struct {
@@ -105,6 +116,24 @@ type List struct {
 
 type Collection struct {
 	Lists []List `json:"lists"`
+	User  *struct {
+		MediaListOptions MediaListOptions `json:"mediaListOptions"`
+	} `json:"user"`
+}
+
+// CustomListNames returns every custom list the account declares for this media
+// type, including ones no title sits in yet — `lists` only carries the ones with
+// entries, so a freshly created list would otherwise be invisible until used.
+func (c *Collection) CustomListNames(mediaType MediaType) []string {
+	if c.User == nil {
+		return nil
+	}
+
+	if mediaType == MediaTypeManga {
+		return c.User.MediaListOptions.MangaList.CustomLists
+	}
+
+	return c.User.MediaListOptions.AnimeList.CustomLists
 }
 
 func (c *Client) Viewer(ctx context.Context) (*Viewer, error) {
@@ -206,6 +235,44 @@ func (c *Client) SaveEntry(ctx context.Context, change EntryChange) (*ListEntry,
 	}
 
 	return data.SaveMediaListEntry, nil
+}
+
+// UpdateCustomLists rewrites both custom-list arrays on the account. AniList has
+// no per-list mutation: the names are account settings, so a caller reads the
+// current arrays and sends them back whole. Both are sent every time because an
+// omitted array reaches AniList as null, which it reads as "no custom lists" and
+// would drop the other media type's lists along with every title's membership.
+func (c *Client) UpdateCustomLists(ctx context.Context, anime, manga []string) (*MediaListOptions, error) {
+	token, err := c.storedToken()
+	if err != nil {
+		return nil, err
+	}
+
+	if anime == nil {
+		anime = []string{}
+	}
+
+	if manga == nil {
+		manga = []string{}
+	}
+
+	var data struct {
+		UpdateUser *struct {
+			ID               int              `json:"id"`
+			MediaListOptions MediaListOptions `json:"mediaListOptions"`
+		} `json:"UpdateUser"`
+	}
+
+	variables := map[string]any{"animeLists": anime, "mangaLists": manga}
+	if err := c.query(ctx, token, updateCustomListsMutation, variables, &data); err != nil {
+		return nil, err
+	}
+
+	if data.UpdateUser == nil {
+		return nil, apperr.New(apperr.KindUpstream, "anilist returned no user for the custom list change")
+	}
+
+	return &data.UpdateUser.MediaListOptions, nil
 }
 
 func (c *Client) RemoteProgress(ctx context.Context, userID, mediaID int) (*RemoteProgress, error) {

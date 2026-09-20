@@ -27,3 +27,42 @@ export const updateTrackerEntryFx = createNodeRequestFx<UpdateTrackerEntryParams
 		body: patch
 	})
 )
+
+export type TrackerCustomList = NodeSchemas['CustomList']
+export type TrackerListCollection = NodeSchemas['ListsOutputBody']
+export type ListMediaType = TrackerCustomList['media_type']
+
+export const fetchTrackerListsFx = createNodeRequestFx<void, TrackerListCollection>(() => ({
+	url: '/v1/tracker/lists'
+}))
+
+export interface CreateTrackerListParams {
+	mediaType: ListMediaType
+	name: string
+}
+
+export const createTrackerListFx = createNodeRequestFx<CreateTrackerListParams, TrackerCustomList>(
+	({ mediaType, name }) => ({
+		url: '/v1/tracker/lists',
+		method: 'POST',
+		body: { media_type: mediaType, name }
+	})
+)
+
+export interface RenameTrackerListParams {
+	id: string
+	name: string
+}
+
+export const renameTrackerListFx = createNodeRequestFx<RenameTrackerListParams, TrackerCustomList>(
+	({ id, name }) => ({
+		url: `/v1/tracker/lists/${encodeURIComponent(id)}`,
+		method: 'PATCH',
+		body: { name }
+	})
+)
+
+export const deleteTrackerListFx = createNodeRequestFx<string, void>(id => ({
+	url: `/v1/tracker/lists/${encodeURIComponent(id)}`,
+	method: 'DELETE'
+}))

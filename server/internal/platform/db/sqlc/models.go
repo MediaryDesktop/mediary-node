@@ -26,6 +26,21 @@ type AnilistOutbox struct {
 	LastError     sql.NullString `json:"last_error"`
 }
 
+type CustomList struct {
+	ID        int64  `json:"id"`
+	MediaType string `json:"media_type"`
+	Name      string `json:"name"`
+	Position  int64  `json:"position"`
+	CreatedAt int64  `json:"created_at"`
+}
+
+type CustomListItem struct {
+	ListID   int64  `json:"list_id"`
+	MediaRef string `json:"media_ref"`
+	Position int64  `json:"position"`
+	AddedAt  int64  `json:"added_at"`
+}
+
 type NodeMetum struct {
 	Key       string `json:"key"`
 	Value     string `json:"value"`

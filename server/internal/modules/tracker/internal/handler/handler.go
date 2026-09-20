@@ -73,6 +73,35 @@ type AcceptedOutput struct {
 	}
 }
 
+type ListsOutput struct {
+	Body struct {
+		Lists   []service.CustomList `json:"lists" doc:"Every custom list the user made, across all media types."`
+		Sources []httpapi.Source     `json:"sources" doc:"Attribution for every field that came from an external source."`
+	}
+}
+
+type CreateListInput struct {
+	Body struct {
+		MediaType service.ListMediaType `json:"media_type" enum:"anime,manga,movie,series,dorama,book" required:"true" doc:"The one media type this list holds. A list never mixes types: anime and manga lists are created in the user's AniList account, the rest in this node."`
+		Name      string                `json:"name" minLength:"1" maxLength:"100" doc:"What to call the list."`
+	}
+}
+
+type ListIDInput struct {
+	ID string `path:"id" example:"anilist:anime:Rewatch" doc:"The list's identifier, as returned by listTrackerLists."`
+}
+
+type RenameListInput struct {
+	ID   string `path:"id" doc:"The list's identifier, as returned by listTrackerLists."`
+	Body struct {
+		Name string `json:"name" minLength:"1" maxLength:"100" doc:"The new name."`
+	}
+}
+
+type ListOutput struct {
+	Body *service.CustomList
+}
+
 func (h *Handler) Register(api huma.API) {
 	huma.Register(api, huma.Operation{
 		OperationID: "getAniListSession",
@@ -170,6 +199,74 @@ func (h *Handler) Register(api huma.API) {
 		}
 
 		return &EntryOutput{Body: entry}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "listTrackerLists",
+		Method:      http.MethodGet,
+		Path:        "/v1/tracker/lists",
+		Summary:     "Custom lists",
+		Description: "Every list the user made, in one response. Anime and manga lists are read from the node's AniList mirror, so they work offline; the other media types are the node's own. Status lists are not included — those are an entry's status, not a list.",
+		Tags:        []string{"tracker"},
+	}, func(ctx context.Context, _ *struct{}) (*ListsOutput, error) {
+		lists, err := h.svc.Lists(ctx)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		out := &ListsOutput{}
+		out.Body.Lists = lists
+		out.Body.Sources = []httpapi.Source{httpapi.AniListSource}
+
+		return out, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID:   "createTrackerList",
+		Method:        http.MethodPost,
+		Path:          "/v1/tracker/lists",
+		Summary:       "Create a custom list",
+		Description:   "An anime or manga list is created in the user's AniList account and needs AniList reachable; the other media types are stored in this node and work offline.",
+		Tags:          []string{"tracker"},
+		DefaultStatus: http.StatusCreated,
+	}, func(ctx context.Context, in *CreateListInput) (*ListOutput, error) {
+		list, err := h.svc.CreateList(ctx, in.Body.MediaType, in.Body.Name)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return &ListOutput{Body: list}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "renameTrackerList",
+		Method:      http.MethodPatch,
+		Path:        "/v1/tracker/lists/{id}",
+		Summary:     "Rename a custom list",
+		Tags:        []string{"tracker"},
+	}, func(ctx context.Context, in *RenameListInput) (*ListOutput, error) {
+		list, err := h.svc.RenameList(ctx, in.ID, in.Body.Name)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return &ListOutput{Body: list}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID:   "deleteTrackerList",
+		Method:        http.MethodDelete,
+		Path:          "/v1/tracker/lists/{id}",
+		Summary:       "Delete a custom list",
+		Description:   "Removes the list. Titles in it keep their entry and their status; they only lose this list's label.",
+		Tags:          []string{"tracker"},
+		DefaultStatus: http.StatusNoContent,
+	}, func(ctx context.Context, in *ListIDInput) (*struct{}, error) {
+		if err := h.svc.DeleteList(ctx, in.ID); err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return nil, nil
 	})
 
 	huma.Register(api, huma.Operation{

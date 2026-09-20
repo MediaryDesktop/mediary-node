@@ -1,36 +1,36 @@
-.root {
-	display: inline-flex;
-	align-items: center;
-	gap: 0.125rem;
-	padding: 0.125rem;
-	border: 1px solid var(--border);
-	border-radius: 999px;
-	background: var(--field);
-	-webkit-app-region: no-drag;
+.group {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
 
 	.option {
 		display: inline-flex;
 		align-items: center;
-		justify-content: center;
-		width: 1.75rem;
-		height: 1.75rem;
-		padding: 0;
+		gap: 0.5rem;
+		height: var(--control-height);
+		padding: 0 1rem;
 		border: 0;
-		border-radius: 999px;
-		background: transparent;
+		border-radius: var(--radius);
+		background: var(--field);
 		color: var(--text-secondary);
+		font: inherit;
+		font-size: 14px;
+		font-weight: 500;
+		white-space: nowrap;
 		cursor: pointer;
+		user-select: none;
 		transition:
 			background-color 160ms,
 			color 160ms;
 
 		&:hover {
+			background: var(--field-hover);
 			color: var(--text);
 		}
 
 		&:focus-visible {
 			outline: 2px solid var(--accent);
-			outline-offset: 1px;
+			outline-offset: 2px;
 		}
 
 		&.active {

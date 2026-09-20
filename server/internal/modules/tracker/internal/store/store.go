@@ -202,3 +202,96 @@ func (s *Store) ClearOutbox(ctx context.Context) error {
 
 	return nil
 }
+
+type CustomList struct {
+	ID        int64
+	MediaType string
+	Name      string
+	Position  int
+	Count     int
+	CreatedAt time.Time
+}
+
+func (s *Store) CustomLists(ctx context.Context) ([]CustomList, error) {
+	rows, err := sqlc.New(s.db).ListCustomLists(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("list custom lists: %w", err)
+	}
+
+	lists := make([]CustomList, 0, len(rows))
+	for _, row := range rows {
+		lists = append(lists, CustomList{
+			ID:        row.ID,
+			MediaType: row.MediaType,
+			Name:      row.Name,
+			Position:  int(row.Position),
+			Count:     int(row.ItemCount),
+			CreatedAt: time.Unix(row.CreatedAt, 0).UTC(),
+		})
+	}
+
+	return lists, nil
+}
+
+func (s *Store) CustomList(ctx context.Context, id int64) (*CustomList, error) {
+	row, err := sqlc.New(s.db).GetCustomList(ctx, id)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("read custom list %d: %w", id, err)
+	}
+
+	return &CustomList{
+		ID:        row.ID,
+		MediaType: row.MediaType,
+		Name:      row.Name,
+		Position:  int(row.Position),
+		CreatedAt: time.Unix(row.CreatedAt, 0).UTC(),
+	}, nil
+}
+
+func (s *Store) CreateCustomList(ctx context.Context, mediaType, name string, now time.Time) (*CustomList, error) {
+	queries := sqlc.New(s.db)
+
+	position, err := queries.NextCustomListPosition(ctx, mediaType)
+	if err != nil {
+		return nil, fmt.Errorf("read next custom list position: %w", err)
+	}
+
+	row, err := queries.InsertCustomList(ctx, sqlc.InsertCustomListParams{
+		MediaType: mediaType,
+		Name:      name,
+		Position:  position,
+		CreatedAt: now.Unix(),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("create custom list: %w", err)
+	}
+
+	return &CustomList{
+		ID:        row.ID,
+		MediaType: row.MediaType,
+		Name:      row.Name,
+		Position:  int(row.Position),
+		CreatedAt: time.Unix(row.CreatedAt, 0).UTC(),
+	}, nil
+}
+
+func (s *Store) RenameCustomList(ctx context.Context, id int64, name string) (bool, error) {
+	changed, err := sqlc.New(s.db).RenameCustomList(ctx, sqlc.RenameCustomListParams{Name: name, ID: id})
+	if err != nil {
+		return false, fmt.Errorf("rename custom list %d: %w", id, err)
+	}
+
+	return changed > 0, nil
+}
+
+func (s *Store) DeleteCustomList(ctx context.Context, id int64) (bool, error) {
+	deleted, err := sqlc.New(s.db).DeleteCustomList(ctx, id)
+	if err != nil {
+		return false, fmt.Errorf("delete custom list %d: %w", id, err)
+	}
+
+	return deleted > 0, nil
+}

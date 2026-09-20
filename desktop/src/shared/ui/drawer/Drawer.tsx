@@ -11,12 +11,23 @@ export interface DrawerProps {
 	open: boolean
 	onOpenChange: (open: boolean) => void
 	title: string
+	description?: ReactNode
+	headerAction?: ReactNode
 	side?: 'right' | 'left' | 'bottom'
 	size?: 'sm' | 'md' | 'lg'
 	children?: ReactNode
 }
 
-export function Drawer({ open, onOpenChange, title, side = 'right', size = 'md', children }: DrawerProps) {
+export function Drawer({
+	open,
+	onOpenChange,
+	title,
+	description,
+	headerAction,
+	side = 'right',
+	size = 'md',
+	children
+}: DrawerProps) {
 	const { t } = useTranslation()
 
 	return (
@@ -29,11 +40,17 @@ export function Drawer({ open, onOpenChange, title, side = 'right', size = 'md',
 					aria-describedby={undefined}
 				>
 					<header className={styles.header}>
-						<Dialog.Title className={styles.title}>{title}</Dialog.Title>
+						<div className={styles.titleRow}>
+							<Dialog.Title className={styles.title}>{title}</Dialog.Title>
 
-						<Dialog.Close className={styles.close} aria-label={t('window.close')}>
-							<Icon name='common/close' size={18} />
-						</Dialog.Close>
+							{headerAction && <div className={styles.headerAction}>{headerAction}</div>}
+
+							<Dialog.Close className={styles.close} aria-label={t('window.close')}>
+								<Icon name='common/close' size={18} />
+							</Dialog.Close>
+						</div>
+
+						{description && <p className={styles.description}>{description}</p>}
 					</header>
 
 					<div className={styles.body}>{children}</div>

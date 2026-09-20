@@ -1,140 +1,266 @@
 import { useNavigate } from '@tanstack/react-router'
+import clsx from 'clsx'
 import { useUnit } from 'effector-react'
 import { useEffect, useMemo, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, PageTransition, Tabs } from '@shared/ui'
+import {
+	Button,
+	Icon,
+	Input,
+	PageTransition,
+	SegmentedControl,
+	SelectDropdown,
+	SelectionGroup
+} from '@shared/ui'
+import type { IconName } from '@shared/ui'
 
 import { aniListAccountModel } from '@entities/anilist-account'
-import { MediaCard } from '@entities/media'
-import { trackerQueries } from '@entities/tracker'
-import type { TrackerEntry, TrackerMediaType } from '@entities/tracker'
+import {
+	LIST_MEDIA_TYPES,
+	listTitleCount,
+	MediaTypeIcon,
+	trackerListsQuery,
+	trackerQueries
+} from '@entities/tracker'
+import type { ListMediaType, TrackerCustomList } from '@entities/tracker'
 
 import { ConnectAniList } from '@features/connect-anilist'
-import { EntryMenu } from '@features/track-media'
+import { ListDrawer, manageListsModel } from '@features/manage-lists'
 
+import { ListCard } from './ListCard'
 import styles from './ListsPage.module.scss'
+import { PinnedShelf } from './PinnedShelf'
 
-const MEDIA_TYPES: readonly TrackerMediaType[] = ['anime', 'manga']
+type Filter = ListMediaType | 'all'
+type SortKey = 'recent' | 'name' | 'size'
+type View = 'grid' | 'rows'
 
-const STATUS_ORDER = ['CURRENT', 'REPEATING', 'PAUSED', 'PLANNING', 'COMPLETED', 'DROPPED'] as const
+const SORT_KEYS: readonly SortKey[] = ['recent', 'name', 'size']
 
-type TrackerStatus = (typeof STATUS_ORDER)[number]
+const VIEWS: readonly View[] = ['grid', 'rows']
 
-function isKnownStatus(status: string): status is TrackerStatus {
-	return (STATUS_ORDER as readonly string[]).includes(status)
+const VIEW_ICONS: Record<View, IconName> = {
+	grid: 'common/library',
+	rows: 'common/list-checks'
 }
 
-function groupByStatus(entries: TrackerEntry[]): [TrackerStatus, TrackerEntry[]][] {
-	const groups = new Map<TrackerStatus, TrackerEntry[]>()
+function changedAt(list: TrackerCustomList): number {
+	return list.updated_at ? Date.parse(list.updated_at) : 0
+}
 
-	for (const entry of entries) {
-		if (!isKnownStatus(entry.status)) {
-			continue
-		}
+function sortLists(lists: TrackerCustomList[], key: SortKey): TrackerCustomList[] {
+	const sorted = lists.slice()
 
-		const group = groups.get(entry.status) ?? []
-		group.push(entry)
-		groups.set(entry.status, group)
+	switch (key) {
+		case 'name':
+			return sorted.sort((a, b) => a.name.localeCompare(b.name))
+		case 'size':
+			return sorted.sort((a, b) => b.count - a.count)
+		default:
+			return sorted.sort((a, b) => changedAt(b) - changedAt(a))
 	}
-
-	return STATUS_ORDER.flatMap(status => {
-		const group = groups.get(status)
-		return group ? [[status, group] as [TrackerStatus, TrackerEntry[]]] : []
-	})
 }
 
 export function ListsPage() {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
-	const [mediaType, setMediaType] = useState<TrackerMediaType>('anime')
 
-	const query = trackerQueries[mediaType]
+	const [connected, sessionLoaded] = useUnit([aniListAccountModel.$connected, aniListAccountModel.$loaded])
 
-	const [connected, loaded, data, pending, error, start] = useUnit([
-		aniListAccountModel.$connected,
-		aniListAccountModel.$loaded,
-		query.$data,
-		query.$pending,
-		query.$error,
-		query.start
+	const [lists, listsPending, listsError, startLists] = useUnit([
+		trackerListsQuery.$data,
+		trackerListsQuery.$pending,
+		trackerListsQuery.$error,
+		trackerListsQuery.start
 	])
+
+	const [animeData, startAnime] = useUnit([trackerQueries.anime.$data, trackerQueries.anime.start])
+	const [mangaData, startManga] = useUnit([trackerQueries.manga.$data, trackerQueries.manga.start])
+
+	const createRequested = useUnit(manageListsModel.createRequested)
+
+	const [filter, setFilter] = useState<Filter>('all')
+	const [search, setSearch] = useState('')
+	const [sort, setSort] = useState<SortKey>('recent')
+	const [view, setView] = useState<View>('grid')
+
+	useEffect(() => {
+		startLists()
+	}, [startLists])
 
 	useEffect(() => {
 		if (connected) {
-			start()
+			startAnime()
+			startManga()
 		}
-	}, [connected, start])
+	}, [connected, startAnime, startManga])
 
-	const groups = useMemo(() => groupByStatus(data?.entries ?? []), [data])
+	const allLists = useMemo(() => lists?.lists ?? [], [lists])
 
-	if (loaded && !connected) {
-		return (
-			<div className={styles.root}>
-				<h1 className={styles.title}>{t('nav.lists')}</h1>
-				<p className={styles.subtitle}>{t('lists.connect')}</p>
+	const entries = useMemo(
+		() => [...(animeData?.entries ?? []), ...(mangaData?.entries ?? [])],
+		[animeData, mangaData]
+	)
 
-				<section className={styles.connect}>
-					<ConnectAniList />
-				</section>
-			</div>
-		)
-	}
+	const visible = useMemo(() => {
+		const needle = search.trim().toLowerCase()
+
+		const matched = allLists.filter(list => {
+			const byType = filter === 'all' || list.media_type === filter
+			const byName = needle === '' || list.name.toLowerCase().includes(needle)
+
+			return byType && byName
+		})
+
+		return sortLists(matched, sort)
+	}, [allLists, filter, search, sort])
+
+	const presentTypes = useMemo(() => {
+		const present = new Set(allLists.map(list => list.media_type))
+
+		return LIST_MEDIA_TYPES.filter(type => present.has(type))
+	}, [allLists])
+
+	const summary = [
+		t('lists.listCount', { count: allLists.length }),
+		t('lists.titleCount', { count: listTitleCount(allLists) }),
+		presentTypes.map(type => t(`lists.mediaType.${type}`)).join(', ')
+	].filter(Boolean)
+
+	const typeOptions = [
+		{ value: 'all' as const, label: t('lists.filterAll') },
+		...LIST_MEDIA_TYPES.map(type => ({
+			value: type,
+			label: t(`lists.mediaType.${type}`),
+			icon: <MediaTypeIcon type={type} size={20} />
+		}))
+	]
+
+	const openMedia = (mediaRef: string) => navigate({ to: '/media/$mediaRef', params: { mediaRef } })
 
 	return (
 		<PageTransition className={styles.root}>
 			<header className={styles.header}>
-				<h1 className={styles.title}>{t('nav.lists')}</h1>
+				<p className={styles.eyebrow}>{t('lists.eyebrow')}</p>
 
-				<Tabs
-					value={mediaType}
-					onValueChange={setMediaType}
-					items={MEDIA_TYPES.map(type => ({ value: type, label: t(`lists.tabs.${type}`) }))}
-				/>
-			</header>
+				<div className={styles.titleRow}>
+					<h1 className={styles.title}>{t('nav.lists')}</h1>
 
-			{data?.stale && <p className={styles.notice}>{t('lists.stale')}</p>}
-
-			{!data && pending && <p className={styles.muted}>{t('lists.loading')}</p>}
-
-			{!data && !pending && error && (
-				<div className={styles.failure}>
-					<p className={styles.muted}>{t('lists.failed')}</p>
-					<Button size='small' onClick={() => start()}>
-						{t('lists.retry')}
+					<Button
+						variant='primary'
+						startIcon={<Icon name='common/plus' size={16} />}
+						onClick={() => createRequested()}
+					>
+						{t('lists.manage.new')}
 					</Button>
 				</div>
+
+				<p className={styles.summary}>{summary.join(' · ')}</p>
+			</header>
+
+			{sessionLoaded && !connected && (
+				<section className={styles.connect}>
+					<p className={styles.connectText}>{t('lists.connect')}</p>
+					<ConnectAniList />
+				</section>
 			)}
 
-			{data && groups.length === 0 && <p className={styles.muted}>{t('lists.empty')}</p>}
+			{connected && entries.length > 0 && (
+				<PinnedShelf
+					entries={entries}
+					onOpen={openMedia}
+					onOpenStatus={status =>
+						navigate({ to: '/lists/$listId', params: { listId: `status:${status}` } })
+					}
+				/>
+			)}
 
-			{groups.map(([status, entries]) => (
-				<section key={status} className={styles.group}>
-					<h2 className={styles.groupTitle}>
-						{t(`lists.status.${mediaType}.${status}`)}
-						<span className={styles.count}>{entries.length}</span>
-					</h2>
+			<section className={styles.section}>
+				<div className={styles.toolbar}>
+					<Input
+						value={search}
+						onChange={event => setSearch(event.target.value)}
+						placeholder={t('lists.search')}
+						startIcon={<Icon name='common/search' size={16} />}
+						className={styles.search}
+					/>
 
-					<ul className={styles.grid}>
-						{entries.map(entry => (
-							<li key={entry.media_ref}>
-								<MediaCard
-									media={entry.media}
-									scoreBadge={entry.score > 0 ? entry.score : undefined}
-									menu={<EntryMenu entry={entry} mediaType={mediaType} />}
-									previewRef={entry.media_ref}
-									onOpen={() =>
-										navigate({
-											to: '/media/$mediaRef',
-											params: { mediaRef: entry.media_ref }
-										})
-									}
-								/>
-							</li>
-						))}
-					</ul>
-				</section>
-			))}
+					<div className={styles.filters}>
+						<SelectionGroup
+							options={typeOptions}
+							value={filter}
+							onValueChange={setFilter}
+							label={t('lists.yours')}
+							className={styles.types}
+						/>
+
+						<div className={styles.tools}>
+							<SelectDropdown
+								value={sort}
+								onChange={next => setSort((next as SortKey) ?? 'recent')}
+								options={SORT_KEYS.map(key => ({
+									value: key,
+									label: t(`lists.sort.${key}`)
+								}))}
+								startIcon={<Icon name='common/sort' size={16} />}
+								className={styles.sort}
+							/>
+
+							<SegmentedControl
+								size='large'
+								items={VIEWS.map(mode => ({
+									value: mode,
+									label: <Icon name={VIEW_ICONS[mode]} size={16} />,
+									ariaLabel: t(`lists.view.${mode}`)
+								}))}
+								value={view}
+								onValueChange={setView}
+							/>
+						</div>
+					</div>
+				</div>
+
+				{listsPending && allLists.length === 0 && (
+					<p className={styles.muted}>{t('lists.loading')}</p>
+				)}
+
+				{listsError && allLists.length === 0 && (
+					<div className={styles.failure}>
+						<p className={styles.muted}>{t('lists.failed')}</p>
+						<Button size='small' onClick={() => startLists()}>
+							{t('lists.retry')}
+						</Button>
+					</div>
+				)}
+
+				<div className={clsx(styles.grid, view === 'rows' && styles.rows)}>
+					{visible.map(list => (
+						<ListCard
+							key={list.id}
+							list={list}
+							view={view}
+							onOpen={() => navigate({ to: '/lists/$listId', params: { listId: list.id } })}
+						/>
+					))}
+
+					<button type='button' className={styles.newCard} onClick={() => createRequested()}>
+						<span className={styles.newIcon}>
+							<Icon name='common/plus' size={20} />
+						</span>
+						<span className={styles.newTitle}>{t('lists.manage.new')}</span>
+						<span className={styles.newHint}>{t('lists.manage.newHint')}</span>
+					</button>
+				</div>
+
+				{!listsPending && visible.length === 0 && (
+					<p className={styles.muted}>
+						{allLists.length === 0 ? t('lists.noLists') : t('lists.noMatches')}
+					</p>
+				)}
+			</section>
+
+			<ListDrawer />
 		</PageTransition>
 	)
 }

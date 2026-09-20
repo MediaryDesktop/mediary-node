@@ -1,0 +1,77 @@
+$padding: 0.125rem;
+
+.root {
+	--option-size: 1.75rem;
+	--shape: 999px;
+	--shape-inner: 999px;
+
+	position: relative;
+	isolation: isolate;
+	display: inline-grid;
+	grid-auto-columns: 1fr;
+	grid-auto-flow: column;
+	padding: $padding;
+	border: 1px solid var(--border);
+	border-radius: var(--shape);
+	background: transparent;
+	-webkit-app-region: no-drag;
+
+	&.large {
+		--option-size: calc(var(--control-height) - #{$padding * 2} - 2px);
+		--shape: var(--radius);
+		--shape-inner: calc(var(--radius) - #{$padding} - 1px);
+	}
+
+	.indicator {
+		position: absolute;
+		top: $padding;
+		bottom: $padding;
+		left: $padding;
+		width: calc((100% - #{$padding * 2}) / var(--segments));
+		border-radius: var(--shape-inner);
+		background: linear-gradient(var(--accent-muted), var(--accent-muted)), var(--bg);
+		transform: translateX(calc(var(--index) * 100%));
+		transition: transform 240ms cubic-bezier(0.32, 0.72, 0, 1);
+		pointer-events: none;
+	}
+
+	.option {
+		position: relative;
+		z-index: 1;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: var(--option-size);
+		height: var(--option-size);
+		padding: 0 0.625rem;
+		border: 0;
+		border-radius: var(--shape-inner);
+		background: transparent;
+		color: var(--text-secondary);
+		font: inherit;
+		font-size: 0.75rem;
+		font-weight: 600;
+		letter-spacing: 0.04em;
+		cursor: pointer;
+		transition: color 160ms;
+
+		&:hover {
+			color: var(--text);
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--accent);
+			outline-offset: 1px;
+		}
+
+		&.active {
+			color: var(--accent-text);
+		}
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.root .indicator {
+		transition: none;
+	}
+}

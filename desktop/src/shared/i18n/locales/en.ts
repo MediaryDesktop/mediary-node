@@ -64,14 +64,83 @@ export const en = {
 		}
 	},
 
+	common: {
+		cancel: 'Cancel'
+	},
+
 	lists: {
-		tabs: {
+		eyebrow: 'Library',
+		listCount_one: '{{count}} list',
+		listCount_few: '{{count}} lists',
+		listCount_many: '{{count}} lists',
+		listCount_other: '{{count}} lists',
+		titleCount_one: '{{count}} title',
+		titleCount_few: '{{count}} titles',
+		titleCount_many: '{{count}} titles',
+		titleCount_other: '{{count}} titles',
+		pinned: 'Pinned',
+		yours: 'Your lists',
+		search: 'Search lists',
+		filterAll: 'All',
+		seeAll: 'See all',
+		noMatches: 'No list matches that search.',
+		noLists: 'You have no lists yet. Create one to group titles any way you like.',
+		mediaType: {
+			movie: 'Movies',
+			series: 'Series',
+			dorama: 'Doramas',
 			anime: 'Anime',
+			book: 'Books',
 			manga: 'Manga'
 		},
-		loading: 'Loading your list…',
+		sort: {
+			label: 'Sort lists',
+			recent: 'Recently updated',
+			name: 'Name',
+			size: 'Most titles'
+		},
+		view: {
+			grid: 'Grid view',
+			rows: 'List view'
+		},
+		card: {
+			empty: 'Empty',
+			updated: 'Updated {{when}}',
+			overflow: '+{{count}}'
+		},
+		shortcut: {
+			watchlist: 'Watchlist',
+			watchlistHint: 'Titles you plan to watch or read',
+			completed: 'Completed',
+			completedHint: 'Everything you finished',
+			current: 'Currently watching'
+		},
+		manage: {
+			new: 'New list',
+			newHint: 'Group titles by mood, genre or anything',
+			createTitle: 'Create list',
+			createSubtitle: 'A list holds one media type, so its titles stay where they belong.',
+			renameTitle: 'Rename list',
+			create: 'Create list',
+			save: 'Save',
+			rename: 'Rename',
+			delete: 'Delete',
+			options: 'List options',
+			nameLabel: 'List name',
+			nameHint: 'You can rename it later.',
+			namePlaceholder: 'e.g. Watch later',
+			typeLabel: 'Media type',
+			typeHintAniList: 'Anime and manga lists are created in your AniList account.',
+			typeHintLocal: 'This list is stored on this computer.',
+			typeLocked: 'A list keeps the media type it was created with.',
+			duplicate: 'A list with that name already exists.',
+			notConnected: 'Connect AniList to create anime and manga lists.',
+			offline: 'AniList is unreachable, so this list cannot be changed right now.',
+			failed: 'Could not save the list. Try again.'
+		},
+		loading: 'Loading your lists…',
 		stale: 'Showing saved data while AniList updates',
-		failed: 'Could not load the list.',
+		failed: 'Could not load your lists.',
 		retry: 'Retry',
 		empty: 'Nothing here yet.',
 		connect: 'Connect AniList to see your lists',

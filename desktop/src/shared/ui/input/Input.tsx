@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import type { InputHTMLAttributes, ReactNode } from 'react'
+import type { InputHTMLAttributes, ReactNode, Ref } from 'react'
 import { useId, useState } from 'react'
 
 import { useTranslation } from '../../i18n'
@@ -15,6 +15,7 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
 	startIcon?: ReactNode
 	revealable?: boolean
 	error?: string
+	ref?: Ref<HTMLInputElement>
 }
 
 export function Input({

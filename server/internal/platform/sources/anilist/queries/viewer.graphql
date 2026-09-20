@@ -12,6 +12,12 @@ query Viewer {
     }
     mediaListOptions {
       scoreFormat
+      animeList {
+        customLists
+      }
+      mangaList {
+        customLists
+      }
     }
   }
 }

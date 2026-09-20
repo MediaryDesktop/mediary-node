@@ -62,14 +62,83 @@ export const uk: Translation = {
 		}
 	},
 
+	common: {
+		cancel: 'Скасувати'
+	},
+
 	lists: {
-		tabs: {
+		eyebrow: 'Бібліотека',
+		listCount_one: '{{count}} список',
+		listCount_few: '{{count}} списки',
+		listCount_many: '{{count}} списків',
+		listCount_other: '{{count}} списку',
+		titleCount_one: '{{count}} тайтл',
+		titleCount_few: '{{count}} тайтли',
+		titleCount_many: '{{count}} тайтлів',
+		titleCount_other: '{{count}} тайтла',
+		pinned: 'Закріплені',
+		yours: 'Ваші списки',
+		search: 'Пошук списків',
+		filterAll: 'Усі',
+		seeAll: 'Показати всі',
+		noMatches: 'За цим запитом немає списків.',
+		noLists: 'Списків поки немає. Створіть перший, щоб групувати тайтли як заманеться.',
+		mediaType: {
+			movie: 'Фільми',
+			series: 'Серіали',
+			dorama: 'Дорами',
 			anime: 'Аніме',
+			book: 'Книги',
 			manga: 'Манга'
 		},
-		loading: 'Завантажуємо ваш список…',
+		sort: {
+			label: 'Сортування',
+			recent: 'Нещодавно оновлені',
+			name: 'За назвою',
+			size: 'Найбільші'
+		},
+		view: {
+			grid: 'Сітка',
+			rows: 'Список'
+		},
+		card: {
+			empty: 'Порожній',
+			updated: 'Оновлено {{when}}',
+			overflow: '+{{count}}'
+		},
+		shortcut: {
+			watchlist: 'Заплановане',
+			watchlistHint: 'Тайтли, які ви плануєте подивитись або прочитати',
+			completed: 'Завершене',
+			completedHint: 'Усе, що ви пройшли до кінця',
+			current: 'Зараз дивлюсь'
+		},
+		manage: {
+			new: 'Новий список',
+			newHint: 'Групуйте тайтли за настроєм, жанром чи будь-чим',
+			createTitle: 'Створити список',
+			createSubtitle: 'Список тримає один тип медіа, тож тайтли лишаються там, де їм місце.',
+			renameTitle: 'Перейменувати список',
+			create: 'Створити список',
+			save: 'Зберегти',
+			rename: 'Перейменувати',
+			delete: 'Видалити',
+			options: 'Дії зі списком',
+			nameLabel: 'Назва списку',
+			nameHint: 'Її можна змінити пізніше.',
+			namePlaceholder: 'Напр. Подивитись пізніше',
+			typeLabel: 'Тип медіа',
+			typeHintAniList: 'Списки аніме й манги створюються у вашому акаунті AniList.',
+			typeHintLocal: 'Цей список зберігається на цьому компʼютері.',
+			typeLocked: 'Список лишається з тим типом медіа, з яким його створили.',
+			duplicate: 'Список із такою назвою вже існує.',
+			notConnected: 'Підключіть AniList, щоб створювати списки аніме й манги.',
+			offline: 'AniList недоступний, тож зараз цей список не змінити.',
+			failed: 'Не вдалося зберегти список. Спробуйте ще раз.'
+		},
+		loading: 'Завантажуємо ваші списки…',
 		stale: 'Показано збережені дані, поки AniList оновлюється',
-		failed: 'Не вдалося завантажити список.',
+		failed: 'Не вдалося завантажити списки.',
 		retry: 'Повторити',
 		empty: 'Тут поки порожньо.',
 		connect: 'Підключіть AniList, щоб побачити свої списки',

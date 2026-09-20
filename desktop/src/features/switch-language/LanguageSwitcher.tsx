@@ -1,8 +1,5 @@
-import clsx from 'clsx'
-
-import { LANGUAGES, useTranslation } from '@shared/i18n'
-
-import styles from './LanguageSwitcher.module.scss'
+import { DEFAULT_LANGUAGE, isLanguage, LANGUAGES, useTranslation } from '@shared/i18n'
+import { SegmentedControl } from '@shared/ui'
 
 export interface LanguageSwitcherProps {
 	className?: string
@@ -11,24 +8,19 @@ export interface LanguageSwitcherProps {
 export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
 	const { t, i18n } = useTranslation()
 
-	return (
-		<div className={clsx(styles.root, className)}>
-			{LANGUAGES.map(language => {
-				const active = i18n.resolvedLanguage === language
+	const active = isLanguage(i18n.resolvedLanguage) ? i18n.resolvedLanguage : DEFAULT_LANGUAGE
 
-				return (
-					<button
-						key={language}
-						type='button'
-						className={clsx(styles.option, active && styles.active)}
-						aria-pressed={active}
-						title={t(`language.${language}`)}
-						onClick={() => void i18n.changeLanguage(language)}
-					>
-						{language}
-					</button>
-				)
-			})}
-		</div>
+	return (
+		<SegmentedControl
+			items={LANGUAGES.map(language => ({
+				value: language,
+				label: language.toUpperCase(),
+				title: t(`language.${language}`)
+			}))}
+			value={active}
+			onValueChange={language => void i18n.changeLanguage(language)}
+			label={t('settings.language.name')}
+			className={className}
+		/>
 	)
 }

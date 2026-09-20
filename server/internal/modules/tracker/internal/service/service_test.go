@@ -7,7 +7,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
+	"slices"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -25,6 +27,39 @@ type fakeAniList struct {
 	server       *httptest.Server
 	rejectTokens atomic.Bool
 	collections  atomic.Int32
+
+	mu         sync.Mutex
+	animeLists []string
+	mangaLists []string
+}
+
+func (f *fakeAniList) customLists() (anime, manga []string) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+
+	return slices.Clone(f.animeLists), slices.Clone(f.mangaLists)
+}
+
+func (f *fakeAniList) setCustomLists(anime, manga []string) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+
+	f.animeLists = slices.Clone(anime)
+	f.mangaLists = slices.Clone(manga)
+}
+
+func (f *fakeAniList) mediaListOptionsJSON() string {
+	anime, manga := f.customLists()
+
+	options := map[string]any{
+		"scoreFormat": "POINT_10_DECIMAL",
+		"animeList":   map[string]any{"customLists": anime},
+		"mangaList":   map[string]any{"customLists": manga},
+	}
+
+	encoded, _ := json.Marshal(options)
+
+	return string(encoded)
 }
 
 func newFakeAniList(t *testing.T) *fakeAniList {
@@ -47,13 +82,33 @@ func (f *fakeAniList) serve(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if strings.Contains(string(body), "UpdateUser") {
+		var request struct {
+			Variables struct {
+				AnimeLists []string `json:"animeLists"`
+				MangaLists []string `json:"mangaLists"`
+			} `json:"variables"`
+		}
+
+		if err := json.Unmarshal(body, &request); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		f.setCustomLists(request.Variables.AnimeLists, request.Variables.MangaLists)
+
+		_, _ = w.Write([]byte(`{"data":{"UpdateUser":{"id":42,"mediaListOptions":` + f.mediaListOptionsJSON() + `}}}`))
+
+		return
+	}
+
 	if strings.Contains(string(body), "MediaListCollection") {
 		f.collections.Add(1)
 		_, _ = w.Write([]byte(collectionFixture))
 		return
 	}
 
-	_, _ = w.Write([]byte(`{"data":{"Viewer":{"id":42,"name":"lukas","siteUrl":"https://anilist.co/user/lukas","mediaListOptions":{"scoreFormat":"POINT_10_DECIMAL"}}}}`))
+	_, _ = w.Write([]byte(`{"data":{"Viewer":{"id":42,"name":"lukas","siteUrl":"https://anilist.co/user/lukas","mediaListOptions":` + f.mediaListOptionsJSON() + `}}}`))
 }
 
 const collectionFixture = `{"data":{"MediaListCollection":{"lists":[

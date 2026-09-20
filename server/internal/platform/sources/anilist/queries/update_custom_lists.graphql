@@ -1,0 +1,16 @@
+mutation UpdateCustomLists($animeLists: [String], $mangaLists: [String]) {
+  UpdateUser(
+    animeListOptions: { customLists: $animeLists }
+    mangaListOptions: { customLists: $mangaLists }
+  ) {
+    id
+    mediaListOptions {
+      animeList {
+        customLists
+      }
+      mangaList {
+        customLists
+      }
+    }
+  }
+}

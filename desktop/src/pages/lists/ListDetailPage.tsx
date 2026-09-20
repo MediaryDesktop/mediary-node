@@ -1,0 +1,135 @@
+import { useNavigate } from '@tanstack/react-router'
+import { useUnit } from 'effector-react'
+import { useEffect, useMemo } from 'react'
+
+import { useTranslation } from '@shared/i18n'
+import { Button, Icon, PageTransition } from '@shared/ui'
+
+import { MediaCard } from '@entities/media'
+import { trackerListsQuery, trackerQueries } from '@entities/tracker'
+import type { TrackerCustomList, TrackerEntry, TrackerMediaType } from '@entities/tracker'
+
+import { ListOptionsMenu } from '@features/manage-lists'
+import { EntryMenu } from '@features/track-media'
+
+import styles from './ListDetailPage.module.scss'
+
+const STATUS_PREFIX = 'status:'
+
+const STATUS_LABELS = {
+	PLANNING: 'lists.shortcut.watchlist',
+	COMPLETED: 'lists.shortcut.completed',
+	CURRENT: 'lists.shortcut.current'
+} as const
+
+type PinnedStatus = keyof typeof STATUS_LABELS
+
+function pinnedStatusOf(listId: string): PinnedStatus | null {
+	if (!listId.startsWith(STATUS_PREFIX)) {
+		return null
+	}
+
+	const status = listId.slice(STATUS_PREFIX.length)
+
+	return status in STATUS_LABELS ? (status as PinnedStatus) : null
+}
+
+export interface ListDetailPageProps {
+	listId: string
+}
+
+export function ListDetailPage({ listId }: ListDetailPageProps) {
+	const { t } = useTranslation()
+	const navigate = useNavigate()
+
+	const [lists, startLists] = useUnit([trackerListsQuery.$data, trackerListsQuery.start])
+	const [animeData, startAnime] = useUnit([trackerQueries.anime.$data, trackerQueries.anime.start])
+	const [mangaData, startManga] = useUnit([trackerQueries.manga.$data, trackerQueries.manga.start])
+
+	useEffect(() => {
+		startLists()
+		startAnime()
+		startManga()
+	}, [startLists, startAnime, startManga])
+
+	const status = pinnedStatusOf(listId)
+
+	const list = useMemo<TrackerCustomList | null>(
+		() => (status ? null : ((lists?.lists ?? []).find(candidate => candidate.id === listId) ?? null)),
+		[lists, listId, status]
+	)
+
+	const entries = useMemo<TrackerEntry[]>(() => {
+		const tracked = [...(animeData?.entries ?? []), ...(mangaData?.entries ?? [])]
+
+		if (status) {
+			return tracked.filter(entry => entry.status === status)
+		}
+
+		if (!list || list.provider !== 'anilist') {
+			return []
+		}
+
+		const collection = list.media_type === 'manga' ? mangaData : animeData
+
+		return (collection?.entries ?? []).filter(entry => entry.custom_lists?.includes(list.name))
+	}, [status, list, animeData, mangaData])
+
+	const title = status ? t(STATUS_LABELS[status]) : (list?.name ?? t('nav.lists'))
+
+	const subtitle = status
+		? t('lists.titleCount', { count: entries.length })
+		: list
+			? `${t(`lists.mediaType.${list.media_type}`)} · ${t('lists.titleCount', { count: list.count })}`
+			: null
+
+	return (
+		<PageTransition className={styles.root}>
+			<header className={styles.header}>
+				<Button
+					variant='ghost'
+					iconOnly
+					aria-label={t('media.back')}
+					onClick={() => navigate({ to: '/lists' })}
+				>
+					<Icon name='common/arrow-left' size={18} />
+				</Button>
+
+				<div className={styles.heading}>
+					<h1 className={styles.title}>{title}</h1>
+					{subtitle && <p className={styles.meta}>{subtitle}</p>}
+				</div>
+
+				{list && <ListOptionsMenu list={list} />}
+			</header>
+
+			{entries.length === 0 ? (
+				<p className={styles.muted}>{t('lists.empty')}</p>
+			) : (
+				<ul className={styles.grid}>
+					{entries.map(entry => (
+						<li key={entry.media_ref}>
+							<MediaCard
+								media={entry.media}
+								scoreBadge={entry.score > 0 ? entry.score : undefined}
+								menu={
+									<EntryMenu
+										entry={entry}
+										mediaType={entry.media_type as TrackerMediaType}
+									/>
+								}
+								previewRef={entry.media_ref}
+								onOpen={() =>
+									navigate({
+										to: '/media/$mediaRef',
+										params: { mediaRef: entry.media_ref }
+									})
+								}
+							/>
+						</li>
+					))}
+				</ul>
+			)}
+		</PageTransition>
+	)
+}

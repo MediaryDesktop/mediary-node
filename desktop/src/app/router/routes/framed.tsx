@@ -4,7 +4,7 @@ import { DiscoverPage } from '@pages/discover'
 import { DownloadsPage } from '@pages/downloads'
 import { HomePage } from '@pages/home'
 import { LibraryPage } from '@pages/library'
-import { ListsPage } from '@pages/lists'
+import { ListDetailPage, ListsPage } from '@pages/lists'
 import { MediaPage } from '@pages/media'
 import { SearchPage } from '@pages/search'
 import { SettingsPage } from '@pages/settings'
@@ -47,6 +47,15 @@ const listsRoute = createRoute({
 	component: ListsPage
 })
 
+const listDetailRoute = createRoute({
+	getParentRoute: () => framedRoute,
+	path: '/lists/$listId',
+	component: function ListDetailRoute() {
+		const { listId } = listDetailRoute.useParams()
+		return <ListDetailPage key={listId} listId={listId} />
+	}
+})
+
 const mediaRoute = createRoute({
 	getParentRoute: () => framedRoute,
 	path: '/media/$mediaRef',
@@ -79,6 +88,7 @@ export const framedTree = framedRoute.addChildren([
 	discoverRoute,
 	searchRoute,
 	listsRoute,
+	listDetailRoute,
 	mediaRoute,
 	libraryRoute,
 	downloadsRoute,

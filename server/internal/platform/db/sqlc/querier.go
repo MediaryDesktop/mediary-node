@@ -13,16 +13,23 @@ type Querier interface {
 	DeleteAniListOutbox(ctx context.Context) error
 	DeleteAniListOutboxEntryIfUnchanged(ctx context.Context, arg DeleteAniListOutboxEntryIfUnchangedParams) (int64, error)
 	DeleteAniListOutboxForOtherAccounts(ctx context.Context, accountID int64) error
+	DeleteCustomList(ctx context.Context, id int64) (int64, error)
 	DeleteSourceCacheOlderThan(ctx context.Context, arg DeleteSourceCacheOlderThanParams) error
 	GetAniListMirror(ctx context.Context, kind string) (AnilistMirror, error)
 	GetAniListOutboxEntry(ctx context.Context, arg GetAniListOutboxEntryParams) (AnilistOutbox, error)
+	GetCustomList(ctx context.Context, id int64) (CustomList, error)
 	// Phase 0 queries, proving `task sqlc` produces compiling Go. Module queries
 	// go in db/queries/<module>.sql.
 	GetNodeMeta(ctx context.Context, key string) (NodeMetum, error)
 	GetSourceCache(ctx context.Context, arg GetSourceCacheParams) (SourceCache, error)
+	InsertCustomList(ctx context.Context, arg InsertCustomListParams) (CustomList, error)
 	ListAniListOutbox(ctx context.Context, accountID int64) ([]AnilistOutbox, error)
+	ListCustomListItems(ctx context.Context, listID int64) ([]CustomListItem, error)
+	ListCustomLists(ctx context.Context) ([]ListCustomListsRow, error)
 	ListNodeMeta(ctx context.Context) ([]NodeMetum, error)
+	NextCustomListPosition(ctx context.Context, mediaType string) (int64, error)
 	RecordAniListOutboxFailure(ctx context.Context, arg RecordAniListOutboxFailureParams) error
+	RenameCustomList(ctx context.Context, arg RenameCustomListParams) (int64, error)
 	UpsertAniListMirror(ctx context.Context, arg UpsertAniListMirrorParams) error
 	UpsertAniListOutboxEntry(ctx context.Context, arg UpsertAniListOutboxEntryParams) error
 	UpsertNodeMeta(ctx context.Context, arg UpsertNodeMetaParams) (NodeMetum, error)

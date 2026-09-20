@@ -62,6 +62,89 @@ components:
         - episode
         - airing_at
       type: object
+    CreateListInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/CreateListInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        media_type:
+          description: "The one media type this list holds. A list never mixes types: anime and manga lists are created in the user's AniList account, the rest in this node."
+          enum:
+            - anime
+            - manga
+            - movie
+            - series
+            - dorama
+            - book
+          type: string
+        name:
+          description: What to call the list.
+          maxLength: 100
+          minLength: 1
+          type: string
+      required:
+        - media_type
+        - name
+      type: object
+    CustomList:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/CustomList.json
+          format: uri
+          readOnly: true
+          type: string
+        count:
+          description: How many titles are in the list.
+          format: int64
+          type: integer
+        covers:
+          description: Up to four cover images, for the list's thumbnail.
+          items:
+            type: string
+          type:
+            - array
+            - "null"
+        id:
+          description: Opaque identifier; pass it back URL-encoded to rename or delete the list.
+          type: string
+        media_type:
+          description: The one media type this list holds.
+          enum:
+            - anime
+            - manga
+            - movie
+            - series
+            - dorama
+            - book
+          type: string
+        name:
+          type: string
+        provider:
+          description: "Where the list lives: anilist or local."
+          enum:
+            - anilist
+            - local
+          type: string
+        updated_at:
+          description: When a title in the list last changed. Absent for an empty list.
+          format: date-time
+          type: string
+      required:
+        - id
+        - provider
+        - media_type
+        - name
+        - count
+        - covers
+      type: object
     Date:
       additionalProperties: false
       properties:
@@ -432,6 +515,34 @@ components:
         - status
         - count
       type: object
+    ListsOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/ListsOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        lists:
+          description: Every custom list the user made, across all media types.
+          items:
+            $ref: "#/components/schemas/CustomList"
+          type:
+            - array
+            - "null"
+        sources:
+          description: Attribution for every field that came from an external source.
+          items:
+            $ref: "#/components/schemas/Source"
+          type:
+            - array
+            - "null"
+      required:
+        - lists
+        - sources
+      type: object
     Media:
       additionalProperties: false
       properties:
@@ -797,6 +908,24 @@ components:
         - title
         - cover_image
         - cover_color
+      type: object
+    RenameListInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/RenameListInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        name:
+          description: The new name.
+          maxLength: 100
+          minLength: 1
+          type: string
+      required:
+        - name
       type: object
     SearchOutputBody:
       additionalProperties: false
@@ -1658,6 +1787,109 @@ paths:
                 $ref: "#/components/schemas/ErrorModel"
           description: Error
       summary: Update a tracker entry
+      tags:
+        - tracker
+  /v1/tracker/lists:
+    get:
+      description: Every list the user made, in one response. Anime and manga lists are read from the node's AniList mirror, so they work offline; the other media types are the node's own. Status lists are not included — those are an entry's status, not a list.
+      operationId: listTrackerLists
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListsOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Custom lists
+      tags:
+        - tracker
+    post:
+      description: An anime or manga list is created in the user's AniList account and needs AniList reachable; the other media types are stored in this node and work offline.
+      operationId: createTrackerList
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateListInputBody"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomList"
+          description: Created
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Create a custom list
+      tags:
+        - tracker
+  /v1/tracker/lists/{id}:
+    delete:
+      description: Removes the list. Titles in it keep their entry and their status; they only lose this list's label.
+      operationId: deleteTrackerList
+      parameters:
+        - description: The list's identifier, as returned by listTrackerLists.
+          in: path
+          name: id
+          required: true
+          schema:
+            description: The list's identifier, as returned by listTrackerLists.
+            examples:
+              - anilist:anime:Rewatch
+            type: string
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Delete a custom list
+      tags:
+        - tracker
+    patch:
+      operationId: renameTrackerList
+      parameters:
+        - description: The list's identifier, as returned by listTrackerLists.
+          in: path
+          name: id
+          required: true
+          schema:
+            description: The list's identifier, as returned by listTrackerLists.
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RenameListInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomList"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Rename a custom list
       tags:
         - tracker
   /v1/tracker/refresh:

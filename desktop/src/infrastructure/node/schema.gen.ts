@@ -269,6 +269,51 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/v1/tracker/lists': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Custom lists
+		 * @description Every list the user made, in one response. Anime and manga lists are read from the node's AniList mirror, so they work offline; the other media types are the node's own. Status lists are not included — those are an entry's status, not a list.
+		 */
+		get: operations['listTrackerLists']
+		put?: never
+		/**
+		 * Create a custom list
+		 * @description An anime or manga list is created in the user's AniList account and needs AniList reachable; the other media types are stored in this node and work offline.
+		 */
+		post: operations['createTrackerList']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/tracker/lists/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		post?: never
+		/**
+		 * Delete a custom list
+		 * @description Removes the list. Titles in it keep their entry and their status; they only lose this list's label.
+		 */
+		delete: operations['deleteTrackerList']
+		options?: never
+		head?: never
+		/** Rename a custom list */
+		patch: operations['renameTrackerList']
+		trace?: never
+	}
 	'/v1/tracker/refresh': {
 		parameters: {
 			query?: never
@@ -323,6 +368,54 @@ export interface components {
 			airing_at: string
 			/** Format: int64 */
 			episode: number
+		}
+		CreateListInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/CreateListInputBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * @description The one media type this list holds. A list never mixes types: anime and manga lists are created in the user's AniList account, the rest in this node.
+			 * @enum {string}
+			 */
+			media_type: 'anime' | 'manga' | 'movie' | 'series' | 'dorama' | 'book'
+			/** @description What to call the list. */
+			name: string
+		}
+		CustomList: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/CustomList.json
+			 */
+			readonly $schema?: string
+			/**
+			 * Format: int64
+			 * @description How many titles are in the list.
+			 */
+			count: number
+			/** @description Up to four cover images, for the list's thumbnail. */
+			covers: string[] | null
+			/** @description Opaque identifier; pass it back URL-encoded to rename or delete the list. */
+			id: string
+			/**
+			 * @description The one media type this list holds.
+			 * @enum {string}
+			 */
+			media_type: 'anime' | 'manga' | 'movie' | 'series' | 'dorama' | 'book'
+			name: string
+			/**
+			 * @description Where the list lives: anilist or local.
+			 * @enum {string}
+			 */
+			provider: 'anilist' | 'local'
+			/**
+			 * Format: date-time
+			 * @description When a title in the list last changed. Absent for an empty list.
+			 */
+			updated_at?: string
 		}
 		Date: {
 			/** Format: int64 */
@@ -511,6 +604,18 @@ export interface components {
 			name: string
 			status: string | null
 		}
+		ListsOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ListsOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description Every custom list the user made, across all media types. */
+			lists: components['schemas']['CustomList'][] | null
+			/** @description Attribution for every field that came from an external source. */
+			sources: components['schemas']['Source'][] | null
+		}
 		Media: {
 			banner_image: string | null
 			/** Format: int64 */
@@ -612,6 +717,16 @@ export interface components {
 			season_year: number | null
 			status: string | null
 			title: components['schemas']['TitleNames']
+		}
+		RenameListInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/RenameListInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The new name. */
+			name: string
 		}
 		SearchOutputBody: {
 			/**
@@ -829,6 +944,8 @@ export interface components {
 export type SchemaAcceptedOutputBody = components['schemas']['AcceptedOutputBody']
 export type SchemaAccount = components['schemas']['Account']
 export type SchemaAiringEpisode = components['schemas']['AiringEpisode']
+export type SchemaCreateListInputBody = components['schemas']['CreateListInputBody']
+export type SchemaCustomList = components['schemas']['CustomList']
 export type SchemaDate = components['schemas']['Date']
 export type SchemaDetailsOutputBody = components['schemas']['DetailsOutputBody']
 export type SchemaEntriesOutputBody = components['schemas']['EntriesOutputBody']
@@ -841,10 +958,12 @@ export type SchemaFilterTag = components['schemas']['FilterTag']
 export type SchemaFuzzyDate = components['schemas']['FuzzyDate']
 export type SchemaHealthOutputBody = components['schemas']['HealthOutputBody']
 export type SchemaList = components['schemas']['List']
+export type SchemaListsOutputBody = components['schemas']['ListsOutputBody']
 export type SchemaMedia = components['schemas']['Media']
 export type SchemaMediaDetails = components['schemas']['MediaDetails']
 export type SchemaMediaSummary = components['schemas']['MediaSummary']
 export type SchemaRelatedMedia = components['schemas']['RelatedMedia']
+export type SchemaRenameListInputBody = components['schemas']['RenameListInputBody']
 export type SchemaSearchOutputBody = components['schemas']['SearchOutputBody']
 export type SchemaSearchPage = components['schemas']['SearchPage']
 export type SchemaSessionOutputBody = components['schemas']['SessionOutputBody']
@@ -1346,6 +1465,134 @@ export interface operations {
 				}
 				content: {
 					'application/json': components['schemas']['Entry']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listTrackerLists: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ListsOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	createTrackerList: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['CreateListInputBody']
+			}
+		}
+		responses: {
+			/** @description Created */
+			201: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['CustomList']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	deleteTrackerList: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description The list's identifier, as returned by listTrackerLists. */
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	renameTrackerList: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description The list's identifier, as returned by listTrackerLists. */
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['RenameListInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['CustomList']
 				}
 			}
 			/** @description Error */

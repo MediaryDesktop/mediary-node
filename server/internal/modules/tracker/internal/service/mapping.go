@@ -37,6 +37,7 @@ func collectionFromAniList(source *anilist.Collection, mediaType MediaType, fetc
 	}
 
 	positions := make(map[int]int)
+	named := make(map[string]bool)
 
 	for _, list := range source.Lists {
 		collection.Lists = append(collection.Lists, List{
@@ -45,6 +46,10 @@ func collectionFromAniList(source *anilist.Collection, mediaType MediaType, fetc
 			Status: list.Status,
 			Count:  len(list.Entries),
 		})
+
+		if list.IsCustomList {
+			named[list.Name] = true
+		}
 
 		for i := range list.Entries {
 			item := &list.Entries[i]
@@ -61,6 +66,15 @@ func collectionFromAniList(source *anilist.Collection, mediaType MediaType, fetc
 				entry.CustomLists = append(entry.CustomLists, list.Name)
 			}
 		}
+	}
+
+	for _, name := range source.CustomListNames(aniListType(mediaType)) {
+		if named[name] {
+			continue
+		}
+
+		named[name] = true
+		collection.Lists = append(collection.Lists, List{Name: name, Custom: true})
 	}
 
 	return collection
