@@ -4,137 +4,18 @@ import { debounce } from 'patronum'
 import { atom } from '@shared/factory'
 
 import { mediaFilterOptionsQuery, mediaSearchQuery } from '@entities/media'
-import type {
-	MediaSearchFormat,
-	MediaSearchQuery,
-	MediaSearchSeason,
-	MediaSearchSort,
-	MediaSearchStatus,
-	MediaSearchType,
-	MediaSummary
-} from '@entities/media'
+import type { MediaSummary } from '@entities/media'
 
-export const SEARCH_TYPES = ['anime', 'manga'] as const satisfies readonly MediaSearchType[]
-
-export const SEARCH_SORTS = [
-	'POPULARITY_DESC',
-	'SEARCH_MATCH',
-	'TRENDING_DESC',
-	'SCORE_DESC',
-	'FAVOURITES_DESC',
-	'START_DATE_DESC',
-	'TITLE_ROMAJI'
-] as const satisfies readonly MediaSearchSort[]
-
-export const SEARCH_FORMATS = {
-	anime: ['TV', 'TV_SHORT', 'MOVIE', 'SPECIAL', 'OVA', 'ONA', 'MUSIC'],
-	manga: ['MANGA', 'NOVEL', 'ONE_SHOT']
-} as const satisfies Record<MediaSearchType, readonly MediaSearchFormat[]>
-
-export const SEARCH_STATUSES = [
-	'RELEASING',
-	'FINISHED',
-	'NOT_YET_RELEASED',
-	'HIATUS',
-	'CANCELLED'
-] as const satisfies readonly MediaSearchStatus[]
-
-export const SEARCH_SEASONS = [
-	'WINTER',
-	'SPRING',
-	'SUMMER',
-	'FALL'
-] as const satisfies readonly MediaSearchSeason[]
-
-export const SEARCH_SCORES = [90, 80, 70, 60, 50] as const
-
-export const EARLIEST_YEAR = 1940
-
-const PER_PAGE = 30
-const CHANGE_PAUSE_MS = 400
-
-const BROWSE_SORT: MediaSearchSort = 'POPULARITY_DESC'
-const RELEVANCE_SORT: MediaSearchSort = 'SEARCH_MATCH'
-
-export interface SearchFilters {
-	type: MediaSearchType
-	sort: MediaSearchSort
-	genres: string[]
-	tags: string[]
-	formats: MediaSearchFormat[]
-	statuses: MediaSearchStatus[]
-	season: MediaSearchSeason | null
-	year: number | null
-	minScore: number | null
-	adult: boolean
-}
-
-const INITIAL_FILTERS: SearchFilters = {
-	type: 'anime',
-	sort: BROWSE_SORT,
-	genres: [],
-	tags: [],
-	formats: [],
-	statuses: [],
-	season: null,
-	year: null,
-	minScore: null,
-	adult: false
-}
-
-function activeGroups(filters: SearchFilters): number {
-	return [
-		filters.genres.length > 0,
-		filters.tags.length > 0,
-		filters.formats.length > 0,
-		filters.statuses.length > 0,
-		filters.season !== null,
-		filters.year !== null,
-		filters.minScore !== null,
-		filters.adult
-	].filter(Boolean).length
-}
-
-function applyPatch(filters: SearchFilters, patch: Partial<SearchFilters>): SearchFilters {
-	const next = { ...filters, ...patch }
-
-	if (patch.type && patch.type !== filters.type) {
-		next.formats = []
-	}
-
-	return next
-}
-
-interface SearchCriteria {
-	title: string
-	filters: SearchFilters
-}
-
-const INITIAL_CRITERIA: SearchCriteria = { title: '', filters: INITIAL_FILTERS }
-
-function sameCriteria(a: SearchCriteria, b: SearchCriteria): boolean {
-	return a.title.trim() === b.title.trim() && JSON.stringify(a.filters) === JSON.stringify(b.filters)
-}
-
-function requestOf(title: string, filters: SearchFilters, page: number): MediaSearchQuery {
-	const query = title.trim()
-
-	return {
-		q: query || undefined,
-		type: filters.type,
-		sort: filters.sort,
-		genres: filters.genres.length > 0 ? filters.genres : undefined,
-		tags: filters.tags.length > 0 ? filters.tags : undefined,
-		formats: filters.formats.length > 0 ? [...filters.formats] : undefined,
-		statuses: filters.statuses.length > 0 ? [...filters.statuses] : undefined,
-		season: filters.season ?? undefined,
-		year: filters.year ?? undefined,
-		min_score: filters.minScore ?? undefined,
-		adult: filters.adult || undefined,
-		page,
-		per_page: PER_PAGE
-	}
-}
+import { BROWSE_SORT, CHANGE_PAUSE_MS, RELEVANCE_SORT } from './config'
+import {
+	activeGroups,
+	applyPatch,
+	INITIAL_CRITERIA,
+	INITIAL_FILTERS,
+	requestOf,
+	sameCriteria
+} from './lib/filters'
+import type { SearchFilters } from './types'
 
 export const searchMediaModel = atom(() => {
 	const pageOpened = createEvent()

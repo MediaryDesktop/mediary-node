@@ -21,7 +21,7 @@ import {
 	listTitleCount,
 	MediaTypeIcon,
 	trackerListsQuery,
-	trackerQueries
+	useTrackedEntries
 } from '@entities/tracker'
 import type { ListMediaType, TrackerCustomList } from '@entities/tracker'
 
@@ -75,9 +75,6 @@ export function ListsPage() {
 		trackerListsQuery.start
 	])
 
-	const [animeData, startAnime] = useUnit([trackerQueries.anime.$data, trackerQueries.anime.start])
-	const [mangaData, startManga] = useUnit([trackerQueries.manga.$data, trackerQueries.manga.start])
-
 	const createRequested = useUnit(manageListsModel.createRequested)
 
 	const [filter, setFilter] = useState<Filter>('all')
@@ -89,19 +86,9 @@ export function ListsPage() {
 		startLists()
 	}, [startLists])
 
-	useEffect(() => {
-		if (connected) {
-			startAnime()
-			startManga()
-		}
-	}, [connected, startAnime, startManga])
+	const entries = useTrackedEntries(connected)
 
 	const allLists = useMemo(() => lists?.lists ?? [], [lists])
-
-	const entries = useMemo(
-		() => [...(animeData?.entries ?? []), ...(mangaData?.entries ?? [])],
-		[animeData, mangaData]
-	)
 
 	const visible = useMemo(() => {
 		const needle = search.trim().toLowerCase()

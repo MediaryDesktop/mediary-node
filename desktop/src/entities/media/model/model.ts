@@ -3,6 +3,7 @@ import { createEffect, createEvent, createStore, sample } from 'effector'
 import type { TFunction } from 'i18next'
 
 import { atom } from '@shared/factory'
+import { firstPresent } from '@shared/lib'
 
 import { fetchMediaDetailsFx, fetchMediaFilterOptionsFx, searchMediaFx } from '../api/api'
 import type { MediaDate, MediaDetails, MediaTitle } from '../api/api'
@@ -72,7 +73,7 @@ export const mediaPreviewModel = atom(() => {
 })
 
 export function mediaTitle(title: MediaTitle): string {
-	return title.user_preferred ?? title.english ?? title.romaji ?? title.native ?? ''
+	return firstPresent(title.user_preferred, title.english, title.romaji, title.native)
 }
 
 export function alternativeTitles(title: MediaTitle): string[] {

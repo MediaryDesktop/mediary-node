@@ -85,6 +85,20 @@ export const en = {
 		seeAll: 'See all',
 		noMatches: 'No list matches that search.',
 		noLists: 'You have no lists yet. Create one to group titles any way you like.',
+		filters: {
+			search: 'Search in this list',
+			anyStatus: 'Any status',
+			anyFormat: 'Any format',
+			noMatches: 'No title in this list matches those filters.',
+			reset: 'Reset',
+			sort: {
+				default: 'List order',
+				title: 'Title',
+				score: 'Your score',
+				progress: 'Progress',
+				updated: 'Recently updated'
+			}
+		},
 		mediaType: {
 			movie: 'Movies',
 			series: 'Series',
@@ -94,7 +108,6 @@ export const en = {
 			manga: 'Manga'
 		},
 		sort: {
-			label: 'Sort lists',
 			recent: 'Recently updated',
 			name: 'Name',
 			size: 'Most titles'
@@ -139,7 +152,6 @@ export const en = {
 			failed: 'Could not save the list. Try again.'
 		},
 		loading: 'Loading your lists…',
-		stale: 'Showing saved data while AniList updates',
 		failed: 'Could not load your lists.',
 		retry: 'Retry',
 		empty: 'Nothing here yet.',
@@ -181,12 +193,10 @@ export const en = {
 
 	media: {
 		back: 'Back',
-		loading: 'Loading title…',
 		failed: 'Could not load this title.',
 		retry: 'Retry',
 		offline: 'Details are unavailable right now. Showing what your list knows.',
 		openOn: 'Open on {{name}}',
-		adult: '18+',
 		editEntry: 'Edit list entry',
 		addToList: 'Add to list',
 		trailer: 'Trailer',
@@ -216,10 +226,7 @@ export const en = {
 			relations: 'Related titles',
 			entry: 'Your list'
 		},
-		readMore: 'Read more',
 		noDescription: 'No description yet.',
-		notInList: 'This title is not in your list yet.',
-		nextEpisode: 'Episode {{episode}} · {{when}}',
 		stats: {
 			averageScore: 'Average score',
 			popularity: 'Members',
@@ -232,7 +239,6 @@ export const en = {
 			chapters: 'Chapters',
 			volumes: 'Volumes',
 			duration: 'Episode length',
-			season: 'Season',
 			start: 'Start',
 			end: 'End',
 			studios: 'Studios',
@@ -338,7 +344,6 @@ export const en = {
 
 	placeholder: {
 		discover: 'Recommendations and fresh releases will live here once the cloud catalog is connected.',
-		lists: 'Your watch statuses, ratings and personal collections.',
 		library: 'Local files scanned by the node and matched against catalog titles.',
 		downloads: 'Torrent providers and the download queue handled by the node.'
 	},

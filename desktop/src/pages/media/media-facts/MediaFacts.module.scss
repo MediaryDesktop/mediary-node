@@ -1,0 +1,40 @@
+.facts {
+	display: flex;
+	flex-direction: column;
+	gap: 0.625rem;
+	margin: 0;
+
+	.fact {
+		display: flex;
+		justify-content: space-between;
+		gap: 1rem;
+		font-size: 0.875rem;
+
+		dt {
+			flex: none;
+			color: var(--text-secondary);
+		}
+
+		dd {
+			margin: 0;
+			font-weight: 600;
+			text-align: right;
+		}
+	}
+}
+
+.synonyms {
+	margin-top: 1rem;
+	padding-top: 1rem;
+	border-top: 1px solid var(--border);
+	font-size: 0.875rem;
+
+	span {
+		color: var(--text-secondary);
+	}
+
+	p {
+		margin: 0.25rem 0 0;
+		font-weight: 600;
+	}
+}

@@ -21,9 +21,9 @@ import {
 	SEARCH_SEASONS,
 	SEARCH_SORTS,
 	SEARCH_STATUSES,
-	SEARCH_TYPES,
-	searchMediaModel
-} from './model'
+	SEARCH_TYPES
+} from './config'
+import { searchMediaModel } from './model'
 import styles from './SearchFilters.module.scss'
 
 function yearOptions(): SelectDropdownOption[] {

@@ -5,26 +5,18 @@ import { useTranslation } from '@shared/i18n'
 import { SelectDropdown } from '@shared/ui'
 
 import { aniListAccountModel } from '@entities/anilist-account'
-import { formatProgress, formatScoreValue, nextScore, trackerModel } from '@entities/tracker'
+import {
+	formatProgress,
+	formatScoreValue,
+	isTrackerStatus,
+	nextScore,
+	TRACKER_STATUSES,
+	trackerModel
+} from '@entities/tracker'
 import type { TrackerEntry, TrackerEntryPatch, TrackerMediaType } from '@entities/tracker'
 
 import styles from './EntryEditor.module.scss'
 import './model'
-
-type TrackerStatus = NonNullable<TrackerEntryPatch['status']>
-
-const STATUSES: readonly TrackerStatus[] = [
-	'CURRENT',
-	'PLANNING',
-	'COMPLETED',
-	'PAUSED',
-	'DROPPED',
-	'REPEATING'
-]
-
-function isStatus(value: string): value is TrackerStatus {
-	return (STATUSES as readonly string[]).includes(value)
-}
 
 export interface EntryEditorProps {
 	entry: TrackerEntry
@@ -50,12 +42,12 @@ export function EntryEditor({ entry, mediaType }: EntryEditorProps) {
 				<SelectDropdown
 					value={entry.status}
 					disabled={busy}
-					options={STATUSES.map(status => ({
+					options={TRACKER_STATUSES.map(status => ({
 						value: status,
 						label: t(`lists.status.${mediaType}.${status}`)
 					}))}
 					onChange={value => {
-						if (value && value !== entry.status && isStatus(value)) {
+						if (value && value !== entry.status && isTrackerStatus(value)) {
 							change({ status: value })
 						}
 					}}

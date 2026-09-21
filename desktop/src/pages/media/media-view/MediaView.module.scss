@@ -1,0 +1,26 @@
+.sections {
+	display: flex;
+	flex-direction: column;
+	gap: 2.5rem;
+	margin-top: 3rem;
+}
+.nextAiring {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem;
+	margin: 1rem 0 0;
+	color: var(--text-secondary);
+	font-size: 1.0625rem;
+
+	.nextAiringEpisode {
+		color: var(--text);
+		font-weight: 600;
+	}
+}
+.fullDescription {
+	margin: 0;
+	color: var(--text-secondary);
+	line-height: 1.7;
+	white-space: pre-line;
+}

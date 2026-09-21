@@ -6,8 +6,9 @@ export type { OtpInputProps, OtpInputVariant } from './otp-input/OtpInput'
 export { WindowControls } from './window-controls/WindowControls'
 export { Logo } from './logo/Logo'
 
-export { useRipple, RIPPLE_HOST_CLASS } from './ripple/useRipple'
-export type { RippleOptions } from './ripple/useRipple'
+export { useRipple } from './ripple/useRipple'
+export { RIPPLE_HOST_CLASS } from './ripple/types'
+export type { RippleOptions } from './ripple/types'
 
 export { RippleButton } from './ripple/RippleButton'
 export type { RippleButtonProps } from './ripple/RippleButton'

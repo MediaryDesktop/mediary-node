@@ -1,7 +1,8 @@
 import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { RIPPLE_HOST_CLASS, useRipple } from './useRipple'
+import { RIPPLE_HOST_CLASS } from './types'
+import { useRipple } from './useRipple'
 
 function mount(options: Parameters<typeof useRipple>[0] = {}) {
 	const host = document.createElement('button')

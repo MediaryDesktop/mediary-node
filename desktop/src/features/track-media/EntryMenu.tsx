@@ -5,22 +5,11 @@ import { useTranslation } from '@shared/i18n'
 import { DropdownMenu, Icon } from '@shared/ui'
 import type { DropdownMenuItem } from '@shared/ui'
 
-import { formatProgress, trackerModel } from '@entities/tracker'
+import { formatProgress, TRACKER_STATUSES, trackerModel } from '@entities/tracker'
 import type { TrackerEntry, TrackerEntryPatch, TrackerMediaType } from '@entities/tracker'
 
 import styles from './EntryMenu.module.scss'
 import './model'
-
-type TrackerStatus = NonNullable<TrackerEntryPatch['status']>
-
-const STATUSES: readonly TrackerStatus[] = [
-	'CURRENT',
-	'PLANNING',
-	'COMPLETED',
-	'PAUSED',
-	'DROPPED',
-	'REPEATING'
-]
 
 export interface EntryMenuProps {
 	entry: TrackerEntry
@@ -56,7 +45,7 @@ export function EntryMenu({ entry, mediaType }: EntryMenuProps) {
 			disabled: busy || entry.progress <= 0,
 			onSelect: () => change({ progress: entry.progress - 1 })
 		},
-		...STATUSES.map(status => ({
+		...TRACKER_STATUSES.map(status => ({
 			id: status,
 			label: t(`lists.status.${mediaType}.${status}`),
 			checked: status === entry.status,

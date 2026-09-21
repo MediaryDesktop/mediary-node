@@ -1,17 +1,20 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { Button, Icon, PageTransition } from '@shared/ui'
 
+import { aniListAccountModel } from '@entities/anilist-account'
 import { MediaCard } from '@entities/media'
-import { trackerListsQuery, trackerQueries } from '@entities/tracker'
+import { trackerListsQuery, useTrackedEntries } from '@entities/tracker'
 import type { TrackerCustomList, TrackerEntry, TrackerMediaType } from '@entities/tracker'
 
 import { ListOptionsMenu } from '@features/manage-lists'
 import { EntryMenu } from '@features/track-media'
 
+import { applyEntryFilters, formatsOf, INITIAL_ENTRY_FILTERS } from './lib/entry-filters'
+import { ListFilters } from './list-filters/ListFilters'
 import styles from './ListDetailPage.module.scss'
 
 const STATUS_PREFIX = 'status:'
@@ -42,15 +45,19 @@ export function ListDetailPage({ listId }: ListDetailPageProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
 
-	const [lists, startLists] = useUnit([trackerListsQuery.$data, trackerListsQuery.start])
-	const [animeData, startAnime] = useUnit([trackerQueries.anime.$data, trackerQueries.anime.start])
-	const [mangaData, startManga] = useUnit([trackerQueries.manga.$data, trackerQueries.manga.start])
+	const [lists, startLists, connected] = useUnit([
+		trackerListsQuery.$data,
+		trackerListsQuery.start,
+		aniListAccountModel.$connected
+	])
+
+	const tracked = useTrackedEntries(connected)
 
 	useEffect(() => {
 		startLists()
-		startAnime()
-		startManga()
-	}, [startLists, startAnime, startManga])
+	}, [startLists])
+
+	const [filters, setFilters] = useState(INITIAL_ENTRY_FILTERS)
 
 	const status = pinnedStatusOf(listId)
 
@@ -60,8 +67,6 @@ export function ListDetailPage({ listId }: ListDetailPageProps) {
 	)
 
 	const entries = useMemo<TrackerEntry[]>(() => {
-		const tracked = [...(animeData?.entries ?? []), ...(mangaData?.entries ?? [])]
-
 		if (status) {
 			return tracked.filter(entry => entry.status === status)
 		}
@@ -70,10 +75,16 @@ export function ListDetailPage({ listId }: ListDetailPageProps) {
 			return []
 		}
 
-		const collection = list.media_type === 'manga' ? mangaData : animeData
+		return tracked.filter(
+			entry => entry.media_type === list.media_type && entry.custom_lists?.includes(list.name)
+		)
+	}, [status, list, tracked])
 
-		return (collection?.entries ?? []).filter(entry => entry.custom_lists?.includes(list.name))
-	}, [status, list, animeData, mangaData])
+	const mediaType: TrackerMediaType =
+		list?.media_type === 'manga' || entries[0]?.media_type === 'manga' ? 'manga' : 'anime'
+
+	const formats = useMemo(() => formatsOf(entries), [entries])
+	const visible = useMemo(() => applyEntryFilters(entries, filters), [entries, filters])
 
 	const title = status ? t(STATUS_LABELS[status]) : (list?.name ?? t('nav.lists'))
 
@@ -103,11 +114,22 @@ export function ListDetailPage({ listId }: ListDetailPageProps) {
 				{list && <ListOptionsMenu list={list} />}
 			</header>
 
-			{entries.length === 0 ? (
-				<p className={styles.muted}>{t('lists.empty')}</p>
+			{entries.length > 0 && (
+				<ListFilters
+					filters={filters}
+					formats={formats}
+					mediaType={mediaType}
+					onChange={setFilters}
+				/>
+			)}
+
+			{visible.length === 0 ? (
+				<p className={styles.muted}>
+					{entries.length === 0 ? t('lists.empty') : t('lists.filters.noMatches')}
+				</p>
 			) : (
 				<ul className={styles.grid}>
-					{entries.map(entry => (
+					{visible.map(entry => (
 						<li key={entry.media_ref}>
 							<MediaCard
 								media={entry.media}
