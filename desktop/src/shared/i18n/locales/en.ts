@@ -69,7 +69,6 @@ export const en = {
 	},
 
 	lists: {
-		eyebrow: 'Library',
 		listCount_one: '{{count}} list',
 		listCount_few: '{{count}} lists',
 		listCount_many: '{{count}} lists',

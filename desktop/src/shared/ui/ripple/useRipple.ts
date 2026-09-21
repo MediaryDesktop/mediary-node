@@ -121,10 +121,16 @@ export function useRipple<T extends HTMLElement = HTMLElement>(options: RippleOp
 		}
 
 		const clips = optionsRef.current.host !== false
+		const position = window.getComputedStyle(host).position
+		const pinsPosition = clips && (!position || position === 'static')
 
 		if (clips) {
 			host.classList.add(RIPPLE_HOST_CLASS)
 			host.style.setProperty('isolation', 'isolate')
+		}
+
+		if (pinsPosition) {
+			host.style.setProperty('position', 'relative')
 		}
 
 		const onMouseDown = (event: MouseEvent) => {
@@ -193,6 +199,10 @@ export function useRipple<T extends HTMLElement = HTMLElement>(options: RippleOp
 			if (clips) {
 				host.classList.remove(RIPPLE_HOST_CLASS)
 				host.style.removeProperty('isolation')
+			}
+
+			if (pinsPosition) {
+				host.style.removeProperty('position')
 			}
 
 			host.removeEventListener('mousedown', onMouseDown)

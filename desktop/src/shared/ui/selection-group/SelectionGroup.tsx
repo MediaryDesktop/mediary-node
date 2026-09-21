@@ -16,6 +16,8 @@ export interface SelectionGroupProps<Value extends string> {
 	value: Value
 	onValueChange: (value: Value) => void
 	label?: string
+	disabled?: boolean
+	stretch?: boolean
 	className?: string
 }
 
@@ -24,10 +26,16 @@ export function SelectionGroup<Value extends string>({
 	value,
 	onValueChange,
 	label,
+	disabled = false,
+	stretch = false,
 	className
 }: SelectionGroupProps<Value>) {
 	return (
-		<div role='group' aria-label={label} className={clsx(styles.group, className)}>
+		<div
+			role='group'
+			aria-label={label}
+			className={clsx(styles.group, stretch && styles.stretch, className)}
+		>
 			{options.map(option => {
 				const active = option.value === value
 
@@ -36,6 +44,7 @@ export function SelectionGroup<Value extends string>({
 						key={option.value}
 						className={clsx(styles.option, active && styles.active)}
 						aria-pressed={active}
+						disabled={disabled}
 						onClick={() => onValueChange(option.value)}
 					>
 						{option.icon}

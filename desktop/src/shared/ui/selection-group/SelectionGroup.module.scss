@@ -3,6 +3,16 @@
 	flex-wrap: wrap;
 	gap: 0.5rem;
 
+	&.stretch {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+
+		.option {
+			justify-content: center;
+			padding: 0 0.75rem;
+		}
+	}
+
 	.option {
 		display: inline-flex;
 		align-items: center;
@@ -23,14 +33,14 @@
 			background-color 160ms,
 			color 160ms;
 
-		&:hover {
-			background: var(--field-hover);
-			color: var(--text);
-		}
-
 		&:focus-visible {
 			outline: 2px solid var(--accent);
 			outline-offset: 2px;
+		}
+
+		&:disabled {
+			cursor: not-allowed;
+			opacity: 0.6;
 		}
 
 		&.active {

@@ -71,12 +71,14 @@ describe('useRipple', () => {
 		host.className = 'item active'
 
 		expect(host.style.isolation).toBe('isolate')
+		expect(host.style.position).toBe('relative')
 	})
 
 	it('leaves the stacking context alone when clipping is turned off', () => {
 		const { host } = mount({ host: false })
 
 		expect(host.style.isolation).toBe('')
+		expect(host.style.position).toBe('')
 	})
 
 	it('grows a ripple on press and removes it after release', () => {

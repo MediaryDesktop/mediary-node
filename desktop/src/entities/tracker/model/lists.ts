@@ -51,9 +51,3 @@ keepFresh(trackerListsQuery, {
 export function listTitleCount(lists: TrackerCustomList[]): number {
 	return lists.reduce((total, list) => total + list.count, 0)
 }
-
-export function listMediaTypesOf(lists: TrackerCustomList[]): ListMediaType[] {
-	const present = new Set(lists.map(list => list.media_type))
-
-	return LIST_MEDIA_TYPES.filter(type => present.has(type))
-}

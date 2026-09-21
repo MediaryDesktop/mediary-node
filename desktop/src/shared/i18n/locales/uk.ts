@@ -67,7 +67,6 @@ export const uk: Translation = {
 	},
 
 	lists: {
-		eyebrow: 'Бібліотека',
 		listCount_one: '{{count}} список',
 		listCount_few: '{{count}} списки',
 		listCount_many: '{{count}} списків',

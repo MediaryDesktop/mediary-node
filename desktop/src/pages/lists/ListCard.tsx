@@ -49,7 +49,7 @@ export function ListCard({ list, view, onOpen }: ListCardProps) {
 					<span className={styles.name}>{list.name}</span>
 					<span className={styles.meta}>{meta.join(' · ')}</span>
 					<span className={styles.badge}>
-						<MediaTypeIcon type={list.media_type} size={16} />
+						<MediaTypeIcon type={list.media_type} size={18} />
 						{t(`lists.mediaType.${list.media_type}`)}
 					</span>
 				</span>

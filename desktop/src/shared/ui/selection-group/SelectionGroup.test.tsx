@@ -34,6 +34,19 @@ describe('SelectionGroup', () => {
 		)
 	})
 
+	it('locks every option when disabled and still shows the chosen one', () => {
+		const onValueChange = vi.fn()
+
+		render(<SelectionGroup options={OPTIONS} value='anime' onValueChange={onValueChange} disabled />)
+
+		expect(screen.getAllByRole('button').every(button => button.hasAttribute('disabled'))).toBe(true)
+		expect(screen.getByRole('button', { name: 'Anime' })).toHaveAttribute('aria-pressed', 'true')
+
+		fireEvent.click(screen.getByRole('button', { name: 'Manga' }))
+
+		expect(onValueChange).not.toHaveBeenCalled()
+	})
+
 	it('offers no selection when the value matches no option', () => {
 		render(<SelectionGroup options={OPTIONS} value={'other' as 'all'} onValueChange={vi.fn()} />)
 

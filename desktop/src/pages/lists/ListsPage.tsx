@@ -103,17 +103,10 @@ export function ListsPage() {
 		return sortLists(matched, sort)
 	}, [allLists, filter, search, sort])
 
-	const presentTypes = useMemo(() => {
-		const present = new Set(allLists.map(list => list.media_type))
-
-		return LIST_MEDIA_TYPES.filter(type => present.has(type))
-	}, [allLists])
-
 	const summary = [
 		t('lists.listCount', { count: allLists.length }),
-		t('lists.titleCount', { count: listTitleCount(allLists) }),
-		presentTypes.map(type => t(`lists.mediaType.${type}`)).join(', ')
-	].filter(Boolean)
+		t('lists.titleCount', { count: listTitleCount(allLists) })
+	]
 
 	const typeOptions = [
 		{ value: 'all' as const, label: t('lists.filterAll') },
@@ -129,21 +122,19 @@ export function ListsPage() {
 	return (
 		<PageTransition className={styles.root}>
 			<header className={styles.header}>
-				<p className={styles.eyebrow}>{t('lists.eyebrow')}</p>
-
-				<div className={styles.titleRow}>
+				<div className={styles.heading}>
 					<h1 className={styles.title}>{t('nav.lists')}</h1>
 
-					<Button
-						variant='primary'
-						startIcon={<Icon name='common/plus' size={16} />}
-						onClick={() => createRequested()}
-					>
-						{t('lists.manage.new')}
-					</Button>
+					<p className={styles.summary}>{summary.join(' · ')}</p>
 				</div>
 
-				<p className={styles.summary}>{summary.join(' · ')}</p>
+				<Button
+					variant='primary'
+					startIcon={<Icon name='common/plus' size={16} />}
+					onClick={() => createRequested()}
+				>
+					{t('lists.manage.new')}
+				</Button>
 			</header>
 
 			{sessionLoaded && !connected && (
@@ -165,13 +156,26 @@ export function ListsPage() {
 
 			<section className={styles.section}>
 				<div className={styles.toolbar}>
-					<Input
-						value={search}
-						onChange={event => setSearch(event.target.value)}
-						placeholder={t('lists.search')}
-						startIcon={<Icon name='common/search' size={16} />}
-						className={styles.search}
-					/>
+					<div className={styles.top}>
+						<Input
+							value={search}
+							onChange={event => setSearch(event.target.value)}
+							placeholder={t('lists.search')}
+							startIcon={<Icon name='common/search' size={16} />}
+							className={styles.search}
+						/>
+
+						<SelectDropdown
+							value={sort}
+							onChange={next => setSort((next as SortKey) ?? 'recent')}
+							options={SORT_KEYS.map(key => ({
+								value: key,
+								label: t(`lists.sort.${key}`)
+							}))}
+							startIcon={<Icon name='common/sort' size={16} />}
+							className={styles.sort}
+						/>
+					</div>
 
 					<div className={styles.filters}>
 						<SelectionGroup
@@ -182,29 +186,16 @@ export function ListsPage() {
 							className={styles.types}
 						/>
 
-						<div className={styles.tools}>
-							<SelectDropdown
-								value={sort}
-								onChange={next => setSort((next as SortKey) ?? 'recent')}
-								options={SORT_KEYS.map(key => ({
-									value: key,
-									label: t(`lists.sort.${key}`)
-								}))}
-								startIcon={<Icon name='common/sort' size={16} />}
-								className={styles.sort}
-							/>
-
-							<SegmentedControl
-								size='large'
-								items={VIEWS.map(mode => ({
-									value: mode,
-									label: <Icon name={VIEW_ICONS[mode]} size={16} />,
-									ariaLabel: t(`lists.view.${mode}`)
-								}))}
-								value={view}
-								onValueChange={setView}
-							/>
-						</div>
+						<SegmentedControl
+							size='large'
+							items={VIEWS.map(mode => ({
+								value: mode,
+								label: <Icon name={VIEW_ICONS[mode]} size={16} />,
+								ariaLabel: t(`lists.view.${mode}`)
+							}))}
+							value={view}
+							onValueChange={setView}
+						/>
 					</div>
 				</div>
 

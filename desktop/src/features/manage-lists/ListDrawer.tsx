@@ -1,13 +1,11 @@
-import clsx from 'clsx'
 import { useUnit } from 'effector-react'
 import { useEffect, useRef } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Drawer, DrawerForm, DrawerSection, Input, RippleButton } from '@shared/ui'
+import { Drawer, DrawerForm, DrawerSection, Input, SelectionGroup } from '@shared/ui'
 
 import { LIST_MEDIA_TYPES, MediaTypeIcon } from '@entities/tracker'
 
-import styles from './ListDrawer.module.scss'
 import { manageListsModel } from './model'
 
 export function ListDrawer() {
@@ -47,12 +45,19 @@ export function ListDrawer() {
 	const renaming = editingID !== null
 	const tracked = mediaType === 'anime' || mediaType === 'manga'
 
+	const typeOptions = LIST_MEDIA_TYPES.map(type => ({
+		value: type,
+		label: t(`lists.mediaType.${type}`),
+		icon: <MediaTypeIcon type={type} size={20} />
+	}))
+
 	return (
 		<Drawer
 			open={open}
 			onOpenChange={next => !next && close()}
 			title={renaming ? t('lists.manage.renameTitle') : t('lists.manage.createTitle')}
 			description={renaming ? undefined : t('lists.manage.createSubtitle')}
+			closable={false}
 		>
 			<DrawerForm
 				onSubmit={submitted}
@@ -84,21 +89,14 @@ export function ListDrawer() {
 								: t('lists.manage.typeHintLocal')
 					}
 				>
-					<div className={styles.types} role='radiogroup' aria-label={t('lists.manage.typeLabel')}>
-						{LIST_MEDIA_TYPES.map(type => (
-							<RippleButton
-								key={type}
-								role='radio'
-								aria-checked={type === mediaType}
-								disabled={submitting || renaming}
-								className={clsx(styles.type, type === mediaType && styles.selected)}
-								onClick={() => mediaTypeChanged(type)}
-							>
-								<MediaTypeIcon type={type} size={24} />
-								{t(`lists.mediaType.${type}`)}
-							</RippleButton>
-						))}
-					</div>
+					<SelectionGroup
+						options={typeOptions}
+						value={mediaType}
+						onValueChange={mediaTypeChanged}
+						label={t('lists.manage.typeLabel')}
+						disabled={submitting || renaming}
+						stretch
+					/>
 				</DrawerSection>
 			</DrawerForm>
 		</Drawer>

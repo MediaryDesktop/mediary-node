@@ -13,6 +13,7 @@ export interface DrawerProps {
 	title: string
 	description?: ReactNode
 	headerAction?: ReactNode
+	closable?: boolean
 	side?: 'right' | 'left' | 'bottom'
 	size?: 'sm' | 'md' | 'lg'
 	children?: ReactNode
@@ -24,6 +25,7 @@ export function Drawer({
 	title,
 	description,
 	headerAction,
+	closable = true,
 	side = 'right',
 	size = 'md',
 	children
@@ -45,9 +47,11 @@ export function Drawer({
 
 							{headerAction && <div className={styles.headerAction}>{headerAction}</div>}
 
-							<Dialog.Close className={styles.close} aria-label={t('window.close')}>
-								<Icon name='common/close' size={18} />
-							</Dialog.Close>
+							{closable && (
+								<Dialog.Close className={styles.close} aria-label={t('window.close')}>
+									<Icon name='common/close' size={18} />
+								</Dialog.Close>
+							)}
 						</div>
 
 						{description && <p className={styles.description}>{description}</p>}

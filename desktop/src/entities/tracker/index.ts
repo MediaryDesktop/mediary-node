@@ -22,7 +22,6 @@ export {
 	createTrackerListMutation,
 	deleteTrackerListMutation,
 	LIST_MEDIA_TYPES,
-	listMediaTypesOf,
 	listTitleCount,
 	renameTrackerListMutation,
 	trackerListsQuery
