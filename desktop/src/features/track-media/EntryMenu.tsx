@@ -1,11 +1,10 @@
-import clsx from 'clsx'
 import { useUnit } from 'effector-react'
 
 import { useTranslation } from '@shared/i18n'
 import { DropdownMenu, Icon } from '@shared/ui'
 import type { DropdownMenuItem } from '@shared/ui'
 
-import { formatProgress, TRACKER_STATUSES, trackerModel } from '@entities/tracker'
+import { TRACKER_STATUSES, trackerModel } from '@entities/tracker'
 import type { TrackerEntry, TrackerEntryPatch, TrackerMediaType } from '@entities/tracker'
 
 import styles from './EntryMenu.module.scss'
@@ -24,11 +23,6 @@ export function EntryMenu({ entry, mediaType }: EntryMenuProps) {
 	const total = mediaType === 'anime' ? entry.media.episodes : entry.media.chapters
 
 	const change = (patch: TrackerEntryPatch) => requestUpdate({ mediaRef: entry.media_ref, patch })
-
-	const progressLabel =
-		mediaType === 'anime'
-			? t('lists.episodes', { progress: formatProgress(entry.progress, total) })
-			: t('lists.chapters', { progress: formatProgress(entry.progress, total) })
 
 	const items: DropdownMenuItem[] = [
 		{
@@ -56,12 +50,11 @@ export function EntryMenu({ entry, mediaType }: EntryMenuProps) {
 
 	return (
 		<DropdownMenu
-			label={entry.sync_pending ? `${progressLabel} · ${t('lists.pending')}` : progressLabel}
 			items={items}
 			trigger={
 				<button
 					type='button'
-					className={clsx(styles.trigger, entry.sync_pending && styles.pending)}
+					className={styles.trigger}
 					aria-label={t('lists.menu')}
 				>
 					<Icon name='common/more-vertical' size={20} />

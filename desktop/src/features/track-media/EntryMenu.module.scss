@@ -11,8 +11,4 @@
 	color: var(--text-secondary);
 	cursor: pointer;
 	outline: none;
-
-	&.pending {
-		color: var(--warning-text);
-	}
 }

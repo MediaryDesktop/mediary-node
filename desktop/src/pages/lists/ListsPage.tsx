@@ -29,9 +29,9 @@ import type { ListMediaType, TrackerCustomList } from '@entities/tracker'
 import { ConnectAniList } from '@features/connect-anilist'
 import { ListDrawer, manageListsModel } from '@features/manage-lists'
 
-import { ListCard } from './ListCard'
+import { ListCard } from './list-card/ListCard'
 import styles from './ListsPage.module.scss'
-import { PinnedShelf } from './PinnedShelf'
+import { PinnedShelf } from './pinned-shelf/PinnedShelf'
 
 type Filter = ListMediaType | 'all'
 type SortKey = 'recent' | 'name' | 'size'

@@ -1,34 +1,73 @@
-@use "../../style/animation/popover-motion" as motion;
+$reveal: cubic-bezier(0.34, 1.05, 0.64, 1);
+$settle: cubic-bezier(0.34, 1.1, 0.64, 1);
 
 .content {
+	--menu-shape: var(--radius-md);
+	--menu-hidden: inset(0 0 100% 60% round var(--menu-shape));
+
 	z-index: 45;
-	min-width: 11rem;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	width: min(220px, calc(100vw - 16px));
 	padding: 4px;
 	border: 1px solid var(--border-strong);
-	border-radius: var(--radius-md);
+	border-radius: var(--menu-shape);
 	background: var(--field);
 	box-shadow: var(--shadow-md);
+	overflow: hidden;
 	-webkit-app-region: no-drag;
 
-	@include motion.popover;
+	&[data-align="start"] {
+		--menu-hidden: inset(0 60% 100% 0 round var(--menu-shape));
+	}
 
-	.label {
-		padding: 0.375rem 0.625rem 0.25rem;
-		color: var(--text-muted);
-		font-size: 0.75rem;
-		font-weight: 600;
-		letter-spacing: 0.02em;
+	&[data-align="center"] {
+		--menu-hidden: inset(0 30% 100% 30% round var(--menu-shape));
+	}
+
+	&[data-side="top"] {
+		--menu-hidden: inset(100% 0 0 60% round var(--menu-shape));
+
+		&[data-align="start"] {
+			--menu-hidden: inset(100% 60% 0 0 round var(--menu-shape));
+		}
+
+		&[data-align="center"] {
+			--menu-hidden: inset(100% 30% 0 30% round var(--menu-shape));
+		}
+	}
+
+	&[data-state="open"] {
+		animation:
+			menu-reveal 280ms $reveal,
+			menu-fade 200ms cubic-bezier(0.4, 0, 0.2, 1);
+
+		.item {
+			animation:
+				menu-item-in 220ms $settle both,
+				menu-fade 180ms ease both;
+			animation-delay: calc(60ms + var(--index, 0) * 32ms);
+		}
+	}
+
+	&[data-state="closed"] {
+		animation: menu-out 140ms ease-in forwards;
 	}
 
 	.item {
+		position: relative;
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
-		padding: 0.4375rem 0.625rem;
-		border-radius: calc(var(--radius) - 4px);
+		flex-shrink: 0;
+		gap: 12px;
+		padding: 12px;
+		border-radius: calc(var(--radius) - 2px);
 		color: var(--text);
-		font-size: 0.875rem;
+		font-size: 14px;
 		outline: none;
+		overflow: hidden;
 		cursor: pointer;
 		user-select: none;
 
@@ -39,10 +78,18 @@
 		&[data-disabled] {
 			color: var(--text-disabled);
 			cursor: default;
+
+			.icon {
+				color: var(--text-disabled);
+			}
 		}
 
 		&.danger {
 			color: var(--danger-text);
+
+			.icon {
+				color: inherit;
+			}
 
 			&[data-highlighted] {
 				background: var(--danger-muted);
@@ -57,11 +104,52 @@
 		.text {
 			flex: 1;
 			min-width: 0;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
 		}
 
 		.check {
 			flex-shrink: 0;
 			color: var(--accent-text);
+		}
+	}
+
+	@keyframes menu-reveal {
+		from {
+			clip-path: var(--menu-hidden);
+		}
+
+		to {
+			clip-path: inset(0 0 0 0 round var(--menu-shape));
+		}
+	}
+
+	@keyframes menu-fade {
+		from {
+			opacity: 0;
+		}
+	}
+
+	@keyframes menu-out {
+		to {
+			opacity: 0;
+		}
+	}
+
+	@keyframes menu-item-in {
+		from {
+			transform: translateX(10px);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		&[data-state] {
+			animation-duration: 1ms;
+
+			.item {
+				animation: none;
+			}
 		}
 	}
 }

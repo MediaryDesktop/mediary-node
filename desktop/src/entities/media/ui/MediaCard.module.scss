@@ -95,9 +95,10 @@
 				display: inline-flex;
 				align-items: center;
 				gap: 0.25rem;
-				padding: 0.1875rem 0.4375rem;
+				padding: 0.2rem 0.5rem;
 				border-radius: 999px;
-				background: var(--overlay);
+				background: #0000005e;
+				backdrop-filter: blur(3px);
 				font-size: 0.75rem;
 				font-weight: 700;
 

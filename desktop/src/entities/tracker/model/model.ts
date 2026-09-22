@@ -80,7 +80,9 @@ export const trackerModel = atom(() => {
 	return {
 		$updating,
 		entryUpdateRequested: updateTrackerEntryMutation.start,
-		entryUpdateFailed: updateTrackerEntryMutation.finished.failure
+		entryUpdated: updateTrackerEntryMutation.finished.success,
+		entryUpdateFailed: updateTrackerEntryMutation.finished.failure,
+		entriesSynced: trackerChanged.filter({ fn: event => event.payload?.reason === 'synced' })
 	}
 })
 

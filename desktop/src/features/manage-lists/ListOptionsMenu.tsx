@@ -38,7 +38,6 @@ export function ListOptionsMenu({ list }: ListOptionsMenuProps) {
 
 	return (
 		<DropdownMenu
-			label={list.name}
 			items={items}
 			trigger={
 				<button type='button' className={styles.trigger} aria-label={t('lists.manage.options')}>

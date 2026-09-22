@@ -159,6 +159,11 @@ export const en = {
 		decrement: 'One less',
 		increment: 'One more',
 		updateFailed: 'Could not save the change. Try again',
+		sync: {
+			progress: 'Syncing with AniList…',
+			done: 'Synced with AniList',
+			delayed: 'Saved on this computer. It will reach AniList once it is reachable'
+		},
 		episodes: 'Ep. {{progress}}',
 		chapters: 'Ch. {{progress}}',
 		editor: {

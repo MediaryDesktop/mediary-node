@@ -157,6 +157,11 @@ export const uk: Translation = {
 		decrement: 'На один менше',
 		increment: 'На один більше',
 		updateFailed: 'Не вдалося зберегти зміну. Спробуйте ще раз',
+		sync: {
+			progress: 'Синхронізація з AniList…',
+			done: 'Синхронізовано з AniList',
+			delayed: 'Збережено на цьому компʼютері. Зміна потрапить в AniList, щойно він стане доступним'
+		},
 		episodes: 'Еп. {{progress}}',
 		chapters: 'Гл. {{progress}}',
 		editor: {

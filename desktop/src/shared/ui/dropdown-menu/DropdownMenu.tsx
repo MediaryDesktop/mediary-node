@@ -1,10 +1,11 @@
 import * as Primitive from '@radix-ui/react-dropdown-menu'
 import clsx from 'clsx'
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { useEffect, useState } from 'react'
 
 import { Icon } from '../icon/Icon'
 import type { IconName } from '../icon/Icon'
+import { useRipple } from '../ripple/useRipple'
 
 import styles from './DropdownMenu.module.scss'
 
@@ -22,10 +23,32 @@ export interface DropdownMenuProps {
 	trigger: ReactNode
 	items: DropdownMenuItem[]
 	align?: 'start' | 'center' | 'end'
-	label?: string
 }
 
-export function DropdownMenu({ trigger, items, align = 'end', label }: DropdownMenuProps) {
+interface MenuItemProps {
+	item: DropdownMenuItem
+	index: number
+}
+
+function MenuItem({ item, index }: MenuItemProps) {
+	const ripple = useRipple<HTMLDivElement>({ disabled: item.disabled })
+
+	return (
+		<Primitive.Item
+			ref={ripple}
+			disabled={item.disabled}
+			onSelect={item.onSelect}
+			className={clsx(styles.item, item.danger && styles.danger)}
+			style={{ '--index': index } as CSSProperties}
+		>
+			{item.icon && <Icon name={item.icon} size={20} className={styles.icon} />}
+			<span className={styles.text}>{item.label}</span>
+			{item.checked && <Icon name='common/check' size={18} className={styles.check} />}
+		</Primitive.Item>
+	)
+}
+
+export function DropdownMenu({ trigger, items, align = 'end' }: DropdownMenuProps) {
 	const [open, setOpen] = useState(false)
 
 	useEffect(() => {
@@ -55,19 +78,8 @@ export function DropdownMenu({ trigger, items, align = 'end', label }: DropdownM
 					collisionPadding={12}
 					className={styles.content}
 				>
-					{label && <Primitive.Label className={styles.label}>{label}</Primitive.Label>}
-
-					{items.map(item => (
-						<Primitive.Item
-							key={item.id}
-							disabled={item.disabled}
-							onSelect={item.onSelect}
-							className={clsx(styles.item, item.danger && styles.danger)}
-						>
-							{item.icon && <Icon name={item.icon} size={16} className={styles.icon} />}
-							<span className={styles.text}>{item.label}</span>
-							{item.checked && <Icon name='common/check' size={16} className={styles.check} />}
-						</Primitive.Item>
+					{items.map((item, index) => (
+						<MenuItem key={item.id} item={item} index={index} />
 					))}
 				</Primitive.Content>
 			</Primitive.Portal>

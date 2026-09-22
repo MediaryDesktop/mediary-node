@@ -25,6 +25,7 @@ export function Toaster({ theme }: ToasterProps) {
 					success: styles.success,
 					error: styles.error,
 					warning: styles.warning,
+					loading: styles.warning,
 					info: styles.info
 				}
 			}}

@@ -129,10 +129,19 @@
 		top: 0.5rem;
 		right: 0.5rem;
 		border-radius: var(--radius-sm);
-		background: color-mix(in srgb, var(--surface) 80%, transparent);
 		opacity: 0;
-		backdrop-filter: blur(4px);
+		background: #0000005e;
+	    backdrop-filter: blur(3px);
 		transition: opacity 160ms ease;
+
+		:global(button) {
+			color: #fff;
+
+			&:hover {
+				background: transparent;
+				color: #fff;
+			}
+		}
 	}
 
 	&.row {
