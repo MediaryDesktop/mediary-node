@@ -238,3 +238,85 @@ func TestAniListListsCarryCoversAndTheirNewestChange(t *testing.T) {
 		}
 	}
 }
+
+func findList(lists []CustomList, name string) *CustomList {
+	for i := range lists {
+		if lists[i].Name == name {
+			return &lists[i]
+		}
+	}
+
+	return nil
+}
+
+func TestDeleteAniListListEmptiesItFirstAndDropsItFromTheMirror(t *testing.T) {
+	fake := newFakeAniList(t)
+	fake.setCustomLists([]string{"Favourites 2025"}, nil)
+
+	h := newHarness(t, fake.server.URL)
+	ctx := context.Background()
+
+	if _, err := h.svc.SignIn(ctx, "token"); err != nil {
+		t.Fatalf("sign in: %v", err)
+	}
+
+	if _, err := h.svc.Entries(ctx, MediaTypeAnime); err != nil {
+		t.Fatalf("entries: %v", err)
+	}
+
+	if err := h.svc.DeleteList(ctx, aniListListID(MediaTypeAnime, "Favourites 2025")); err != nil {
+		t.Fatalf("delete: %v", err)
+	}
+
+	saved, ok := fake.savedMembership()[100]
+	if !ok || len(saved) != 0 {
+		t.Fatalf("the title in the deleted list must be taken out of it, got %v (saved: %v)", saved, ok)
+	}
+
+	lists, err := h.svc.Lists(ctx)
+	if err != nil {
+		t.Fatalf("lists: %v", err)
+	}
+
+	if list := findList(lists, "Favourites 2025"); list != nil {
+		t.Fatalf("the deleted list must be gone without waiting for a refresh, got %+v", list)
+	}
+}
+
+func TestCreatedAniListListStartsEmptyEvenWhenAniListRemembersTheName(t *testing.T) {
+	fake := newFakeAniList(t)
+
+	h := newHarness(t, fake.server.URL)
+	ctx := context.Background()
+
+	if _, err := h.svc.SignIn(ctx, "token"); err != nil {
+		t.Fatalf("sign in: %v", err)
+	}
+
+	if _, err := h.svc.Entries(ctx, MediaTypeAnime); err != nil {
+		t.Fatalf("entries: %v", err)
+	}
+
+	if _, err := h.svc.CreateList(ctx, ListMediaTypeAnime, "Favourites 2025"); err != nil {
+		t.Fatalf("create: %v", err)
+	}
+
+	saved, ok := fake.savedMembership()[100]
+	if !ok || len(saved) != 0 {
+		t.Fatalf("a title left in the name by an earlier list must be taken out, got %v (saved: %v)", saved, ok)
+	}
+
+	lists, err := h.svc.Lists(ctx)
+	if err != nil {
+		t.Fatalf("lists: %v", err)
+	}
+
+	list := findList(lists, "Favourites 2025")
+	if list == nil {
+		t.Fatalf("the created list must show up without waiting for a refresh, got %+v", lists)
+	}
+
+	if list.Count != 0 || len(list.Covers) != 0 {
+		t.Fatalf("a created list must start empty, got %+v", list)
+	}
+}

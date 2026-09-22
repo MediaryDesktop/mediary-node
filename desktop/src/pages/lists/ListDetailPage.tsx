@@ -3,7 +3,7 @@ import { useUnit } from 'effector-react'
 import { useEffect, useMemo, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, Icon, PageTransition } from '@shared/ui'
+import { Button, EmptyState, Icon, PageTransition } from '@shared/ui'
 
 import { aniListAccountModel } from '@entities/anilist-account'
 import { MediaCard } from '@entities/media'
@@ -124,9 +124,7 @@ export function ListDetailPage({ listId }: ListDetailPageProps) {
 			)}
 
 			{visible.length === 0 ? (
-				<p className={styles.muted}>
-					{entries.length === 0 ? t('lists.empty') : t('lists.filters.noMatches')}
-				</p>
+				<EmptyState title={entries.length === 0 ? t('lists.empty') : t('lists.filters.noMatches')} />
 			) : (
 				<ul className={styles.grid}>
 					{visible.map(entry => (

@@ -46,20 +46,20 @@ export const en = {
 		connect: {
 			title: 'AniList',
 			description:
-				'Anime and manga live in your AniList account. Mediary reads and updates them from this computer.',
+				'Anime and manga live in your AniList account. Mediary reads and updates them from this computer',
 			open: 'Get a token on AniList',
 			tokenLabel: 'Access token',
 			tokenPlaceholder: 'Paste the token from AniList',
 			tokenHint:
-				'AniList opens in your browser. Approve access, copy the token it shows and paste it here.',
+				'AniList opens in your browser. Approve access, copy the token it shows and paste it here',
 			submit: 'Connect',
-			notConfigured: 'This build has no AniList client configured, so sign-in is unavailable.',
+			notConfigured: 'This build has no AniList client configured, so sign-in is unavailable',
 			connectedAs: 'Connected as {{name}}',
 			disconnect: 'Disconnect',
 			failure: {
-				rejected: 'AniList did not accept this token. Copy it again and retry.',
-				unreachable: 'AniList is unreachable right now. Check your connection and retry.',
-				unknown: 'Could not connect the account. Try again.'
+				rejected: 'AniList did not accept this token. Copy it again and retry',
+				unreachable: 'AniList is unreachable right now. Check your connection and retry',
+				unknown: 'Could not connect the account. Try again'
 			}
 		}
 	},
@@ -82,13 +82,13 @@ export const en = {
 		search: 'Search lists',
 		filterAll: 'All',
 		seeAll: 'See all',
-		noMatches: 'No list matches that search.',
-		noLists: 'You have no lists yet. Create one to group titles any way you like.',
+		noMatches: 'No list matches that search',
+		noLists: 'No lists yet',
 		filters: {
 			search: 'Search in this list',
 			anyStatus: 'Any status',
 			anyFormat: 'Any format',
-			noMatches: 'No title in this list matches those filters.',
+			noMatches: 'No title in this list matches those filters',
 			reset: 'Reset',
 			sort: {
 				default: 'List order',
@@ -129,9 +129,8 @@ export const en = {
 		},
 		manage: {
 			new: 'New list',
-			newHint: 'Group titles by mood, genre or anything',
 			createTitle: 'Create list',
-			createSubtitle: 'A list holds one media type, so its titles stay where they belong.',
+			createSubtitle: 'A list holds one media type, so its titles stay where they belong',
 			renameTitle: 'Rename list',
 			create: 'Create list',
 			save: 'Save',
@@ -139,27 +138,27 @@ export const en = {
 			delete: 'Delete',
 			options: 'List options',
 			nameLabel: 'List name',
-			nameHint: 'You can rename it later.',
+			nameHint: 'You can rename it later',
 			namePlaceholder: 'e.g. Watch later',
 			typeLabel: 'Media type',
-			typeHintAniList: 'Anime and manga lists are created in your AniList account.',
-			typeHintLocal: 'This list is stored on this computer.',
-			typeLocked: 'A list keeps the media type it was created with.',
-			duplicate: 'A list with that name already exists.',
-			notConnected: 'Connect AniList to create anime and manga lists.',
-			offline: 'AniList is unreachable, so this list cannot be changed right now.',
-			failed: 'Could not save the list. Try again.'
+			typeHintAniList: 'Anime and manga lists are created in your AniList account',
+			typeHintLocal: 'This list is stored on this computer',
+			typeLocked: 'A list keeps the media type it was created with',
+			duplicate: 'A list with that name already exists',
+			notConnected: 'Connect AniList to create anime and manga lists',
+			offline: 'AniList is unreachable, so this list cannot be changed right now',
+			failed: 'Could not save the list. Try again'
 		},
 		loading: 'Loading your lists…',
-		failed: 'Could not load your lists.',
+		failed: 'Could not load your lists',
 		retry: 'Retry',
-		empty: 'Nothing here yet.',
+		empty: 'Nothing here yet',
 		connect: 'Connect AniList to see your lists',
 		pending: 'Not synced yet',
 		menu: 'Title options',
 		decrement: 'One less',
 		increment: 'One more',
-		updateFailed: 'Could not save the change. Try again.',
+		updateFailed: 'Could not save the change. Try again',
 		episodes: 'Ep. {{progress}}',
 		chapters: 'Ch. {{progress}}',
 		editor: {
@@ -192,9 +191,9 @@ export const en = {
 
 	media: {
 		back: 'Back',
-		failed: 'Could not load this title.',
+		failed: 'Could not load this title',
 		retry: 'Retry',
-		offline: 'Details are unavailable right now. Showing what your list knows.',
+		offline: 'Details are unavailable right now. Showing what your list knows',
 		openOn: 'Open on {{name}}',
 		editEntry: 'Edit list entry',
 		addToList: 'Add to list',
@@ -211,7 +210,7 @@ export const en = {
 			notInLibrary: 'Not in your library',
 			episodesNotInLibrary: 'The following episodes are not in your library:',
 			episode: 'Episode {{number}}',
-			metadataUnavailable: 'Episode details are not available yet — the library is still being built.',
+			metadataUnavailable: 'Episode details are not available yet — the library is still being built',
 			andMore: 'And more…'
 		},
 		menu: {
@@ -225,7 +224,7 @@ export const en = {
 			relations: 'Related titles',
 			entry: 'Your list'
 		},
-		noDescription: 'No description yet.',
+		noDescription: 'No description yet',
 		stats: {
 			averageScore: 'Average score',
 			popularity: 'Members',
@@ -311,9 +310,9 @@ export const en = {
 		filters: 'Filters',
 		clear: 'Clear filters',
 		adult: 'Show adult content',
-		empty: 'Nothing matched. Try another title or fewer filters.',
-		failed: 'Could not search right now.',
-		loadMoreFailed: 'Could not load more titles.',
+		empty: 'Nothing found. Try a different name or change the filters',
+		failed: 'Could not search right now',
+		loadMoreFailed: 'Could not load more titles',
 		retry: 'Retry',
 		loadMore: 'Show more',
 		scoreAtLeast: '{{score}}% and above',
@@ -342,23 +341,23 @@ export const en = {
 	},
 
 	placeholder: {
-		discover: 'Recommendations and fresh releases will live here once the cloud catalog is connected.',
-		library: 'Local files scanned by the node and matched against catalog titles.',
-		downloads: 'Torrent providers and the download queue handled by the node.'
+		discover: 'Recommendations and fresh releases will live here once the cloud catalog is connected',
+		library: 'Local files scanned by the node and matched against catalog titles',
+		downloads: 'Torrent providers and the download queue handled by the node'
 	},
 
 	settings: {
 		appearance: {
 			name: 'Appearance',
-			hint: 'Light or dark surface for the whole app.'
+			hint: 'Light or dark surface for the whole app'
 		},
 		language: {
 			name: 'Language',
-			hint: 'Interface language. Catalog titles keep their own languages.'
+			hint: 'Interface language. Catalog titles keep their own languages'
 		},
 		wizard: {
 			name: 'Setup wizard',
-			hint: 'Re-run first-time setup: folders, player, downloads.',
+			hint: 'Re-run first-time setup: folders, player, downloads',
 			action: 'Open wizard'
 		}
 	},
@@ -380,8 +379,8 @@ export const en = {
 			titleLead: 'Your',
 			titleAccent: 'media library',
 			tagline:
-				'Anime, manga, dramas, films, series and books — one catalog, one progress, across every device.',
-			aside: 'An account is only needed for the cloud catalog and sync. The local library, player and downloads work without one.'
+				'Anime, manga, dramas, films, series and books — one catalog, one progress, across every device',
+			aside: 'An account is only needed for the cloud catalog and sync. The local library, player and downloads work without one'
 		},
 		back: 'Go back',
 		or: 'or',
@@ -389,18 +388,18 @@ export const en = {
 		providers: {
 			label: 'Continue with',
 			lastUsed: 'Last used',
-			waiting: 'Waiting for {{provider}} in your browser.',
+			waiting: 'Waiting for {{provider}} in your browser',
 			cancel: 'Cancel',
-			unavailable: 'Could not load sign-in options.',
+			unavailable: 'Could not load sign-in options',
 			reload: 'Try again',
-			failed: 'Could not sign in with {{provider}}. Please try again.'
+			failed: 'Could not sign in with {{provider}}. Please try again'
 		},
 		signIn: {
 			eyebrow: 'Welcome back',
 			title: 'Hi there!',
-			subtitle: 'Choose how you want to sign in.',
+			subtitle: 'Choose how you want to sign in',
 			emailTitle: 'Sign in',
-			emailSubtitle: 'Sign in to continue where you left off.',
+			emailSubtitle: 'Sign in to continue where you left off',
 			submit: 'Sign in',
 			useEmail: 'Sign in with email and password',
 			forgotPassword: 'Forgot password?',
@@ -410,9 +409,9 @@ export const en = {
 		signUp: {
 			eyebrow: 'Join us',
 			title: 'Create an account',
-			subtitle: 'Choose how you want to sign up.',
+			subtitle: 'Choose how you want to sign up',
 			emailTitle: 'Sign up',
-			emailSubtitle: 'A few fields and you are done.',
+			emailSubtitle: 'A few fields and you are done',
 			submit: 'Sign up',
 			useEmail: 'Sign up with email',
 			haveAccount: 'Already have an account?',
@@ -429,7 +428,7 @@ export const en = {
 		verify: {
 			eyebrow: 'Almost there',
 			title: 'Verify your email',
-			description: 'Enter the {{length}}-digit code we sent to {{email}}.',
+			description: 'Enter the {{length}}-digit code we sent to {{email}}',
 			submit: 'Verify email',
 			resendLabel: 'Did not get the code?',
 			resend: 'Send a new one'
@@ -438,14 +437,14 @@ export const en = {
 			eyebrow: 'Account recovery',
 			title: 'Reset password',
 			description:
-				'Enter the address you registered with. If it has an account, a code is already on its way.',
+				'Enter the address you registered with. If it has an account, a code is already on its way',
 			submit: 'Send reset code',
 			backToSignIn: 'Back to sign in'
 		},
 		newPassword: {
 			eyebrow: 'Almost done',
 			title: 'New password',
-			description: 'Enter the code sent to {{email}}, then choose a new password.',
+			description: 'Enter the code sent to {{email}}, then choose a new password',
 			submit: 'Save new password',
 			requestAnother: 'Request a new code',
 			remembered: 'Remembered your password? Sign in'
@@ -484,45 +483,45 @@ export const en = {
 		previous: 'Previous',
 		next: 'Next',
 		finish: 'Finish',
-		pending: 'This step is not built yet.',
+		pending: 'This step is not built yet',
 		steps: {
 			library: {
 				label: 'Local library',
 				title: 'Local library',
 				description:
-					'Choose the folders your files already live in. Mediary scans them and matches what it finds against the catalog.'
+					'Choose the folders your files already live in. Mediary scans them and matches what it finds against the catalog'
 			},
 			player: {
 				label: 'Player',
 				title: 'External media player',
 				description:
-					'Choose your preferred player for anime, films and series. Progress is tracked automatically.'
+					'Choose your preferred player for anime, films and series. Progress is tracked automatically'
 			},
 			downloads: {
 				label: 'Downloads',
 				title: 'Downloading',
-				description: 'Configure your torrent client for downloading.'
+				description: 'Configure your torrent client for downloading'
 			},
 			anilist: {
 				label: 'AniList',
 				title: 'Connect AniList',
 				description:
-					'Anime and manga lists live in your AniList account. Connect it once and Mediary keeps them in sync.'
+					'Anime and manga lists live in your AniList account. Connect it once and Mediary keeps them in sync'
 			},
 			account: {
 				label: 'Backup',
 				title: 'Mediary account',
 				description:
-					'Optional. A Mediary account only keeps a backup of your lists and settings for your other devices.'
+					'Optional. A Mediary account only keeps a backup of your lists and settings for your other devices'
 			},
 			debrid: {
 				label: 'Debrid service',
 				title: 'Debrid service',
-				description: 'Debrid services offer faster downloads and instant streaming from the cloud.'
+				description: 'Debrid services offer faster downloads and instant streaming from the cloud'
 			}
 		},
 		account: {
-			blurb: 'A Mediary account is optional: it only backs up your lists and settings so you can move to another device.',
+			blurb: 'A Mediary account is optional: it only backs up your lists and settings so you can move to another device',
 			google: 'Continue with Google',
 			or: 'or',
 			email: 'Continue with email'
@@ -532,25 +531,25 @@ export const en = {
 			browse: 'Choose a folder',
 			video: {
 				label: 'Video',
-				hint: 'Anime, films and series. Subfolders are scanned too.'
+				hint: 'Anime, films and series. Subfolders are scanned too'
 			},
 			reading: {
 				label: 'Reading',
-				hint: 'Manga, manhwa and books.'
+				hint: 'Manga, manhwa and books'
 			},
-			aside: 'You can skip this and add folders later — the catalog works without a local library.'
+			aside: 'You can skip this and add folders later — the catalog works without a local library'
 		},
 		player: {
-			notice: "Mediary's node comes with a built-in player powered by mpv. You can still configure an external one below.",
+			notice: "Mediary's node comes with a built-in player powered by mpv. You can still configure an external one below",
 			select: {
 				label: 'Desktop media player',
 				mpv: 'MPV (Recommended)',
 				vlc: 'VLC',
 				custom: 'Custom command',
-				hint: 'MPV is recommended for better subtitle rendering and torrent streaming.'
+				hint: 'MPV is recommended for better subtitle rendering and torrent streaming'
 			},
 			install:
-				'On Windows, install MPV using Scoop or Chocolatey. On macOS, install MPV using Homebrew.'
+				'On Windows, install MPV using Scoop or Chocolatey. On macOS, install MPV using Homebrew'
 		},
 		downloading: {
 			client: {
@@ -581,20 +580,20 @@ export const en = {
 	fallback: {
 		notFound: {
 			title: 'This screen does not exist',
-			description: 'The address is wrong, or the screen has been removed.',
+			description: 'The address is wrong, or the screen has been removed',
 			home: 'Back to home'
 		},
 		error: {
 			title: 'Something went wrong',
-			description: 'The screen could not be opened. Try again, or go back to home.',
+			description: 'The screen could not be opened. Try again, or go back to home',
 			retry: 'Try again'
 		}
 	},
 	home: {
-		subtitle: 'Phase 0 skeleton. No catalog yet — this only proves the shell can see the node.',
+		subtitle: 'Phase 0 skeleton. No catalog yet — this only proves the shell can see the node',
 		account: {
 			title: 'Cloud account',
-			anonymous: 'Not signed in — catalog and sync are unavailable.',
+			anonymous: 'Not signed in — catalog and sync are unavailable',
 			signIn: 'Sign in',
 			signOut: 'Sign out'
 		},

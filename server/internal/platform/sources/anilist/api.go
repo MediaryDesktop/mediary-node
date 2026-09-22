@@ -17,6 +17,9 @@ var (
 	//go:embed queries/save_entry.graphql
 	saveEntryMutation string
 
+	//go:embed queries/save_entry_custom_lists.graphql
+	saveEntryCustomListsMutation string
+
 	//go:embed queries/media_list.graphql
 	mediaListQuery string
 
@@ -235,6 +238,37 @@ func (c *Client) SaveEntry(ctx context.Context, change EntryChange) (*ListEntry,
 	}
 
 	return data.SaveMediaListEntry, nil
+}
+
+// SetEntryCustomLists replaces the custom lists one title sits in. AniList keys
+// that membership by list name and keeps it when the name leaves the account's
+// settings, so a list deleted without this comes back full under the same name.
+func (c *Client) SetEntryCustomLists(ctx context.Context, mediaID int, names []string) error {
+	token, err := c.storedToken()
+	if err != nil {
+		return err
+	}
+
+	if names == nil {
+		names = []string{}
+	}
+
+	var data struct {
+		SaveMediaListEntry *struct {
+			ID int `json:"id"`
+		} `json:"SaveMediaListEntry"`
+	}
+
+	variables := map[string]any{"mediaId": mediaID, "customLists": names}
+	if err := c.query(ctx, token, saveEntryCustomListsMutation, variables, &data); err != nil {
+		return err
+	}
+
+	if data.SaveMediaListEntry == nil {
+		return apperr.New(apperr.KindUpstream, "anilist returned no entry for media %d", mediaID)
+	}
+
+	return nil
 }
 
 // UpdateCustomLists rewrites both custom-list arrays on the account. AniList has

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"slices"
 	"strconv"
 	"strings"
@@ -192,7 +193,7 @@ func (s *Service) CreateList(ctx context.Context, mediaType ListMediaType, name 
 		}, nil
 	}
 
-	err = s.rewriteAniListCustomLists(ctx, mediaType, func(names []string) ([]string, error) {
+	err = s.rewriteAniListCustomLists(ctx, mediaType, listChange{to: clean}, func(names []string) ([]string, error) {
 		if slices.Contains(names, clean) {
 			return nil, apperr.New(apperr.KindConflict, "a %s list named %q already exists", mediaType, clean)
 		}
@@ -257,7 +258,7 @@ func (s *Service) RenameList(ctx context.Context, id, name string) (*CustomList,
 		}, nil
 	}
 
-	err = s.rewriteAniListCustomLists(ctx, ref.mediaType, func(names []string) ([]string, error) {
+	err = s.rewriteAniListCustomLists(ctx, ref.mediaType, listChange{from: ref.name, to: clean}, func(names []string) ([]string, error) {
 		at := slices.Index(names, ref.name)
 		if at < 0 {
 			return nil, apperr.New(apperr.KindNotFound, "no such list")
@@ -306,7 +307,7 @@ func (s *Service) DeleteList(ctx context.Context, id string) error {
 		return nil
 	}
 
-	return s.rewriteAniListCustomLists(ctx, ref.mediaType, func(names []string) ([]string, error) {
+	return s.rewriteAniListCustomLists(ctx, ref.mediaType, listChange{from: ref.name}, func(names []string) ([]string, error) {
 		at := slices.Index(names, ref.name)
 		if at < 0 {
 			return nil, apperr.New(apperr.KindNotFound, "no such list")
@@ -316,14 +317,26 @@ func (s *Service) DeleteList(ctx context.Context, id string) error {
 	})
 }
 
+// listChange names the one list a rewrite touches: from alone deletes it, to
+// alone creates it, both rename it.
+type listChange struct {
+	from string
+	to   string
+}
+
 // rewriteAniListCustomLists reads both arrays straight from AniList, applies
 // mutate to the one for mediaType and writes both back. Reading first is what
 // keeps a list created on the AniList site from being erased here: the mutation
 // replaces the whole array, so a stale copy would silently drop everything the
 // node has not seen.
+//
+// AniList keeps a title's membership by name even after the name is gone, so a
+// deleted list is emptied first and a created one is emptied after, or it would
+// come back holding whatever an earlier list of that name held.
 func (s *Service) rewriteAniListCustomLists(
 	ctx context.Context,
 	mediaType ListMediaType,
+	change listChange,
 	mutate func([]string) ([]string, error),
 ) error {
 	connected, err := s.connected()
@@ -353,12 +366,137 @@ func (s *Service) rewriteAniListCustomLists(
 		return err
 	}
 
-	if _, err := s.opts.AniList.UpdateCustomLists(ctx, anime, manga); err != nil {
+	trackerType := mediaType.trackerType()
+
+	if change.to == "" {
+		if err := s.emptyAniListList(ctx, viewer.ID, trackerType, change.from); err != nil {
+			return err
+		}
+	}
+
+	options, err := s.opts.AniList.UpdateCustomLists(ctx, anime, manga)
+	if err != nil {
 		return s.handleRejected(ctx, err)
 	}
 
+	if change.from == "" {
+		if err := s.emptyAniListList(ctx, viewer.ID, trackerType, change.to); err != nil {
+			return err
+		}
+	}
+
+	declared := options.AnimeList.CustomLists
+	if trackerType == MediaTypeManga {
+		declared = options.MangaList.CustomLists
+	}
+
+	if err := s.applyListChange(ctx, trackerType, declared, change); err != nil {
+		return err
+	}
+
 	s.publishLists("changed")
-	s.refreshInBackground(ctx, mediaType.trackerType())
+
+	return nil
+}
+
+// emptyAniListList takes every title out of the named list, leaving the other
+// lists each title sits in as they were.
+func (s *Service) emptyAniListList(ctx context.Context, userID int, mediaType MediaType, name string) error {
+	source, err := s.opts.AniList.Collection(ctx, userID, aniListType(mediaType))
+	if err != nil {
+		return s.handleRejected(ctx, err)
+	}
+
+	membership := make(map[int][]string)
+
+	for _, list := range source.Lists {
+		if !list.IsCustomList {
+			continue
+		}
+
+		for _, entry := range list.Entries {
+			membership[entry.MediaID] = append(membership[entry.MediaID], list.Name)
+		}
+	}
+
+	for mediaID, names := range membership {
+		if !slices.Contains(names, name) {
+			continue
+		}
+
+		remaining := slices.DeleteFunc(slices.Clone(names), func(candidate string) bool {
+			return candidate == name
+		})
+
+		if err := s.opts.AniList.SetEntryCustomLists(ctx, mediaID, remaining); err != nil {
+			return s.handleRejected(ctx, err)
+		}
+	}
+
+	return nil
+}
+
+// applyListChange brings the mirror in line with a rewrite straight away. A
+// refetch right after the mutation can still be served AniList's cached copy,
+// which would show the lists as they were until the next scheduled refresh.
+func (s *Service) applyListChange(ctx context.Context, mediaType MediaType, declared []string, change listChange) error {
+	collection, err := s.mirroredCollection(ctx, mediaType)
+	if err != nil {
+		return err
+	}
+
+	if collection == nil {
+		return nil
+	}
+
+	counts := make(map[string]int)
+
+	for i := range collection.Entries {
+		entry := &collection.Entries[i]
+		kept := []string{}
+
+		for _, name := range entry.CustomLists {
+			switch {
+			case change.from != "" && name == change.from:
+				if change.to == "" {
+					continue
+				}
+				name = change.to
+			case change.from == "" && name == change.to:
+				continue
+			}
+
+			if !slices.Contains(kept, name) {
+				kept = append(kept, name)
+				counts[name]++
+			}
+		}
+
+		entry.CustomLists = kept
+	}
+
+	lists := []List{}
+
+	for _, list := range collection.Lists {
+		if !list.Custom {
+			lists = append(lists, list)
+		}
+	}
+
+	for _, name := range declared {
+		lists = append(lists, List{Name: name, Custom: true, Count: counts[name]})
+	}
+
+	collection.Lists = lists
+
+	payload, err := json.Marshal(collection)
+	if err != nil {
+		return apperr.Wrap(err, apperr.KindInternal, "encode anilist collection")
+	}
+
+	if err := s.store.PutMirror(ctx, string(mediaType), payload, collection.FetchedAt); err != nil {
+		return apperr.Wrap(err, apperr.KindInternal, "store anilist collection")
+	}
 
 	return nil
 }

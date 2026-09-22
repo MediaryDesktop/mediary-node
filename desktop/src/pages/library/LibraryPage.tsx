@@ -1,12 +1,12 @@
 import { useTranslation } from '@shared/i18n'
-import { Placeholder } from '@shared/ui'
+import { EmptyState } from '@shared/ui'
 
 export function LibraryPage() {
 	const { t } = useTranslation()
 
 	return (
-		<Placeholder
-			icon='common/book-open'
+		<EmptyState
+			size='page'
 			title={t('nav.library')}
 			description={t('placeholder.library')}
 		/>

@@ -31,6 +31,19 @@ type fakeAniList struct {
 	mu         sync.Mutex
 	animeLists []string
 	mangaLists []string
+	membership map[int][]string
+}
+
+func (f *fakeAniList) savedMembership() map[int][]string {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+
+	saved := make(map[int][]string, len(f.membership))
+	for mediaID, names := range f.membership {
+		saved[mediaID] = slices.Clone(names)
+	}
+
+	return saved
 }
 
 func (f *fakeAniList) customLists() (anime, manga []string) {
@@ -98,6 +111,31 @@ func (f *fakeAniList) serve(w http.ResponseWriter, r *http.Request) {
 		f.setCustomLists(request.Variables.AnimeLists, request.Variables.MangaLists)
 
 		_, _ = w.Write([]byte(`{"data":{"UpdateUser":{"id":42,"mediaListOptions":` + f.mediaListOptionsJSON() + `}}}`))
+
+		return
+	}
+
+	if strings.Contains(string(body), "SaveEntryCustomLists") {
+		var request struct {
+			Variables struct {
+				MediaID     int      `json:"mediaId"`
+				CustomLists []string `json:"customLists"`
+			} `json:"variables"`
+		}
+
+		if err := json.Unmarshal(body, &request); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		f.mu.Lock()
+		if f.membership == nil {
+			f.membership = make(map[int][]string)
+		}
+		f.membership[request.Variables.MediaID] = request.Variables.CustomLists
+		f.mu.Unlock()
+
+		_, _ = w.Write([]byte(`{"data":{"SaveMediaListEntry":{"id":1}}}`))
 
 		return
 	}

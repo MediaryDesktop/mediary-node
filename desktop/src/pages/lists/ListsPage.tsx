@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from '@shared/i18n'
 import {
 	Button,
+	EmptyState,
 	Icon,
 	Input,
 	PageTransition,
@@ -204,37 +205,31 @@ export function ListsPage() {
 				)}
 
 				{listsError && allLists.length === 0 && (
-					<div className={styles.failure}>
-						<p className={styles.muted}>{t('lists.failed')}</p>
-						<Button size='small' onClick={() => startLists()}>
-							{t('lists.retry')}
-						</Button>
+					<EmptyState
+						title={t('lists.failed')}
+						action={
+							<Button size='small' onClick={() => startLists()}>
+								{t('lists.retry')}
+							</Button>
+						}
+					/>
+				)}
+
+				{visible.length > 0 && (
+					<div className={clsx(styles.grid, view === 'rows' && styles.rows)}>
+						{visible.map(list => (
+							<ListCard
+								key={list.id}
+								list={list}
+								view={view}
+								onOpen={() => navigate({ to: '/lists/$listId', params: { listId: list.id } })}
+							/>
+						))}
 					</div>
 				)}
 
-				<div className={clsx(styles.grid, view === 'rows' && styles.rows)}>
-					{visible.map(list => (
-						<ListCard
-							key={list.id}
-							list={list}
-							view={view}
-							onOpen={() => navigate({ to: '/lists/$listId', params: { listId: list.id } })}
-						/>
-					))}
-
-					<button type='button' className={styles.newCard} onClick={() => createRequested()}>
-						<span className={styles.newIcon}>
-							<Icon name='common/plus' size={20} />
-						</span>
-						<span className={styles.newTitle}>{t('lists.manage.new')}</span>
-						<span className={styles.newHint}>{t('lists.manage.newHint')}</span>
-					</button>
-				</div>
-
-				{!listsPending && visible.length === 0 && (
-					<p className={styles.muted}>
-						{allLists.length === 0 ? t('lists.noLists') : t('lists.noMatches')}
-					</p>
+				{!listsPending && !listsError && visible.length === 0 && (
+					<EmptyState title={allLists.length === 0 ? t('lists.noLists') : t('lists.noMatches')} />
 				)}
 			</section>
 

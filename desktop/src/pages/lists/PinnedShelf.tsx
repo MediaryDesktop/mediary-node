@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Icon, ProgressBar } from '@shared/ui'
+import { EmptyState, Icon, ProgressBar } from '@shared/ui'
 
 import { formatProgress, preferredTitle } from '@entities/tracker'
 import type { TrackerEntry } from '@entities/tracker'
@@ -171,7 +171,11 @@ export function PinnedShelf({ entries, onOpen, onOpenStatus }: PinnedShelfProps)
 							)
 						})}
 
-						{current.length === 0 && <li className={styles.continueEmpty}>{t('lists.empty')}</li>}
+						{current.length === 0 && (
+							<li className={styles.continueEmpty}>
+								<EmptyState size='small' title={t('lists.empty')} />
+							</li>
+						)}
 					</ul>
 				</div>
 			</div>

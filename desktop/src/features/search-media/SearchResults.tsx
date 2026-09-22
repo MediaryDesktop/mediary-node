@@ -2,7 +2,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, Skeleton } from '@shared/ui'
+import { Button, EmptyState, Skeleton } from '@shared/ui'
 
 import { MediaCard } from '@entities/media'
 
@@ -40,17 +40,19 @@ export function SearchResults() {
 
 	if (failed) {
 		return (
-			<div className={styles.notice}>
-				<p className={styles.muted}>{t('search.failed')}</p>
-				<Button size='small' onClick={() => retry()}>
-					{t('search.retry')}
-				</Button>
-			</div>
+			<EmptyState
+				title={t('search.failed')}
+				action={
+					<Button size='small' onClick={() => retry()}>
+						{t('search.retry')}
+					</Button>
+				}
+			/>
 		)
 	}
 
 	if (items.length === 0) {
-		return <p className={styles.muted}>{t('search.empty')}</p>
+		return <EmptyState title={t('search.empty')} />
 	}
 
 	return (

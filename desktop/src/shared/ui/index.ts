@@ -27,7 +27,8 @@ export type { IconName } from './icon/Icon'
 export { SelectDropdown } from './select-dropdown'
 export type { SelectDropdownOption, SelectDropdownProps } from './select-dropdown'
 
-export { Placeholder } from './placeholder/Placeholder'
+export { EmptyState } from './empty-state/EmptyState'
+export type { EmptyStateProps, EmptyStateSize } from './empty-state/EmptyState'
 
 export { Toaster, toast } from './toast'
 
