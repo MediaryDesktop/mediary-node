@@ -1,3 +1,4 @@
+export { DeleteListDialog } from './DeleteListDialog'
 export { ListDrawer } from './ListDrawer'
 export { ListOptionsMenu } from './ListOptionsMenu'
 export type { ListOptionsMenuProps } from './ListOptionsMenu'

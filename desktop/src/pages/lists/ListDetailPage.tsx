@@ -10,7 +10,7 @@ import { MediaCard } from '@entities/media'
 import { trackerListsQuery, useTrackedEntries } from '@entities/tracker'
 import type { TrackerCustomList, TrackerEntry, TrackerMediaType } from '@entities/tracker'
 
-import { ListOptionsMenu } from '@features/manage-lists'
+import { DeleteListDialog, ListDrawer, ListOptionsMenu, manageListsModel } from '@features/manage-lists'
 import { EntryMenu } from '@features/track-media'
 
 import { applyEntryFilters, formatsOf, INITIAL_ENTRY_FILTERS } from './lib/entry-filters'
@@ -45,11 +45,15 @@ export function ListDetailPage({ listId }: ListDetailPageProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
 
-	const [lists, startLists, connected] = useUnit([
+	const [lists, startLists, connected, deleted, deletionHandled] = useUnit([
 		trackerListsQuery.$data,
 		trackerListsQuery.start,
-		aniListAccountModel.$connected
+		aniListAccountModel.$connected,
+		manageListsModel.$deleted,
+		manageListsModel.deletionHandled
 	])
+
+	const leaving = deleted === listId
 
 	const tracked = useTrackedEntries(connected)
 
@@ -95,61 +99,73 @@ export function ListDetailPage({ listId }: ListDetailPageProps) {
 			: null
 
 	return (
-		<PageTransition className={styles.root}>
-			<header className={styles.header}>
-				<Button
-					variant='ghost'
-					iconOnly
-					aria-label={t('media.back')}
-					onClick={() => navigate({ to: '/lists' })}
-				>
-					<Icon name='common/arrow-left' size={18} />
-				</Button>
+		<>
+			<PageTransition
+				className={styles.root}
+				leaving={leaving}
+				onLeft={() => {
+					deletionHandled()
+					navigate({ to: '/lists' })
+				}}
+			>
+				<header className={styles.header}>
+					<Button
+						variant='ghost'
+						iconOnly
+						aria-label={t('media.back')}
+						onClick={() => navigate({ to: '/lists' })}
+					>
+						<Icon name='common/arrow-left' size={18} />
+					</Button>
 
-				<div className={styles.heading}>
-					<h1 className={styles.title}>{title}</h1>
-					{subtitle && <p className={styles.meta}>{subtitle}</p>}
-				</div>
+					<div className={styles.heading}>
+						<h1 className={styles.title}>{title}</h1>
+						{subtitle && <p className={styles.meta}>{subtitle}</p>}
+					</div>
 
-				{list && <ListOptionsMenu list={list} />}
-			</header>
+					{list && <ListOptionsMenu list={list} />}
+				</header>
 
-			{entries.length > 0 && (
-				<ListFilters
-					filters={filters}
-					formats={formats}
-					mediaType={mediaType}
-					onChange={setFilters}
-				/>
-			)}
+				{entries.length > 0 && (
+					<ListFilters
+						filters={filters}
+						formats={formats}
+						mediaType={mediaType}
+						onChange={setFilters}
+					/>
+				)}
 
-			{visible.length === 0 ? (
-				<EmptyState title={entries.length === 0 ? t('lists.empty') : t('lists.filters.noMatches')} />
-			) : (
-				<ul className={styles.grid}>
-					{visible.map(entry => (
-						<li key={entry.media_ref}>
-							<MediaCard
-								media={entry.media}
-								scoreBadge={entry.score > 0 ? entry.score : undefined}
-								menu={
-									<EntryMenu
-										entry={entry}
-										mediaType={entry.media_type as TrackerMediaType}
-									/>
-								}
-								previewRef={entry.media_ref}
-								onOpen={() =>
-									navigate({
-										to: '/media/$mediaRef',
-										params: { mediaRef: entry.media_ref }
-									})
-								}
-							/>
-						</li>
-					))}
-				</ul>
-			)}
-		</PageTransition>
+				{visible.length === 0 ? (
+					<EmptyState title={entries.length === 0 ? t('lists.empty') : t('lists.filters.noMatches')} />
+				) : (
+					<ul className={styles.grid}>
+						{visible.map(entry => (
+							<li key={entry.media_ref}>
+								<MediaCard
+									media={entry.media}
+									scoreBadge={entry.score > 0 ? entry.score : undefined}
+									menu={
+										<EntryMenu
+											entry={entry}
+											mediaType={entry.media_type as TrackerMediaType}
+										/>
+									}
+									previewRef={entry.media_ref}
+									onOpen={() =>
+										navigate({
+											to: '/media/$mediaRef',
+											params: { mediaRef: entry.media_ref }
+										})
+									}
+								/>
+							</li>
+						))}
+					</ul>
+				)}
+			</PageTransition>
+
+			<ListDrawer />
+			<DeleteListDialog />
+		</>
 	)
 }

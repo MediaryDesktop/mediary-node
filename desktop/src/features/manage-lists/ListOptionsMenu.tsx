@@ -32,7 +32,7 @@ export function ListOptionsMenu({ list }: ListOptionsMenuProps) {
 			label: t('lists.manage.delete'),
 			icon: 'common/trash',
 			danger: true,
-			onSelect: () => deleteRequested(list.id)
+			onSelect: () => deleteRequested(list)
 		}
 	]
 

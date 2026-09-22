@@ -27,7 +27,7 @@ import {
 import type { ListMediaType, TrackerCustomList } from '@entities/tracker'
 
 import { ConnectAniList } from '@features/connect-anilist'
-import { ListDrawer, manageListsModel } from '@features/manage-lists'
+import { DeleteListDialog, ListDrawer, manageListsModel } from '@features/manage-lists'
 
 import { ListCard } from './list-card/ListCard'
 import styles from './ListsPage.module.scss'
@@ -234,6 +234,7 @@ export function ListsPage() {
 			</section>
 
 			<ListDrawer />
+			<DeleteListDialog />
 		</PageTransition>
 	)
 }

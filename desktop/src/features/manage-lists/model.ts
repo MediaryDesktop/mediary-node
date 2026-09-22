@@ -37,7 +37,10 @@ export const manageListsModel = atom(() => {
 	const nameChanged = createEvent<string>()
 	const mediaTypeChanged = createEvent<ListMediaType>()
 	const submitted = createEvent()
-	const deleteRequested = createEvent<string>()
+	const deleteRequested = createEvent<TrackerCustomList>()
+	const deleteCancelled = createEvent()
+	const deleteConfirmed = createEvent()
+	const deletionHandled = createEvent()
 
 	const $editingID = createStore<string | null>(null)
 		.on(createRequested, () => null)
@@ -94,7 +97,21 @@ export const manageListsModel = atom(() => {
 		target: drawerClosed
 	})
 
-	sample({ clock: deleteRequested, target: deleteTrackerListMutation.start })
+	const $deleting = createStore<TrackerCustomList | null>(null)
+		.on(deleteRequested, (_, list) => list)
+		.reset(deleteCancelled, deleteTrackerListMutation.finished.finally)
+
+	const $deleted = createStore<string | null>(null)
+		.on(deleteTrackerListMutation.finished.success, (_, { params }) => params)
+		.reset(deleteRequested, deletionHandled)
+
+	sample({
+		clock: deleteConfirmed,
+		source: $deleting,
+		filter: (list): list is TrackerCustomList => list !== null,
+		fn: list => list.id,
+		target: deleteTrackerListMutation.start
+	})
 
 	for (const mutation of [
 		createTrackerListMutation,
@@ -113,12 +130,18 @@ export const manageListsModel = atom(() => {
 		$editingID,
 		$canSubmit,
 		$submitting,
+		$deleting,
+		$deleted,
+		$deletePending: deleteTrackerListMutation.$pending,
 		createRequested,
 		renameRequested,
 		drawerClosed,
 		nameChanged,
 		mediaTypeChanged,
 		submitted,
-		deleteRequested
+		deleteRequested,
+		deleteCancelled,
+		deleteConfirmed,
+		deletionHandled
 	}
 })
