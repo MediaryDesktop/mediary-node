@@ -1,6 +1,11 @@
 package service
 
-import "time"
+import (
+	"time"
+
+	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
+)
 
 type MediaType string
 
@@ -30,6 +35,36 @@ type Date struct {
 	Year  *int `json:"year"`
 	Month *int `json:"month"`
 	Day   *int `json:"day"`
+}
+
+// validate rejects a date AniList would not store. A date with every field
+// empty is how a client clears one, so it passes.
+func (d Date) validate(field string) error {
+	if d.Month != nil && (*d.Month < 1 || *d.Month > 12) {
+		return apperr.Invalid(field, "month must be between 1 and 12")
+	}
+
+	if d.Day != nil && (*d.Day < 1 || *d.Day > 31) {
+		return apperr.Invalid(field, "day must be between 1 and 31")
+	}
+
+	if d.Year != nil && (*d.Year < 1900 || *d.Year > 2200) {
+		return apperr.Invalid(field, "year must be between 1900 and 2200")
+	}
+
+	if d.Year == nil && (d.Month != nil || d.Day != nil) {
+		return apperr.Invalid(field, "a date needs a year")
+	}
+
+	if d.Month == nil && d.Day != nil {
+		return apperr.Invalid(field, "a day needs a month")
+	}
+
+	return nil
+}
+
+func (d Date) aniList() *anilist.FuzzyDate {
+	return &anilist.FuzzyDate{Year: d.Year, Month: d.Month, Day: d.Day}
 }
 
 type Title struct {

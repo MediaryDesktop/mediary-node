@@ -148,6 +148,9 @@ export function ListDetailPage({ listId }: ListDetailPageProps) {
 										<EntryMenu
 											entry={entry}
 											mediaType={entry.media_type as TrackerMediaType}
+											listName={
+												list?.provider === 'anilist' ? list.name : undefined
+											}
 										/>
 									}
 									previewRef={entry.media_ref}

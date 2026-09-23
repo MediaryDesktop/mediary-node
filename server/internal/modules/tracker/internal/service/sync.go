@@ -17,6 +17,7 @@ const (
 	defaultFlushDelay = 1500 * time.Millisecond
 	flushTimeout      = 2 * time.Minute
 	maxFlushAttempts  = 5
+	maxNotesLength    = 10000
 )
 
 var entryStatuses = map[string]bool{
@@ -29,15 +30,20 @@ var entryStatuses = map[string]bool{
 }
 
 type EntryPatch struct {
-	Status          *string `json:"status,omitempty"`
-	Score           *int    `json:"score,omitempty"`
-	Progress        *int    `json:"progress,omitempty"`
-	ProgressVolumes *int    `json:"progress_volumes,omitempty"`
-	Repeat          *int    `json:"repeat,omitempty"`
+	Status          *string   `json:"status,omitempty"`
+	Score           *int      `json:"score,omitempty"`
+	Progress        *int      `json:"progress,omitempty"`
+	ProgressVolumes *int      `json:"progress_volumes,omitempty"`
+	Repeat          *int      `json:"repeat,omitempty"`
+	Notes           *string   `json:"notes,omitempty"`
+	StartedAt       *Date     `json:"started_at,omitempty"`
+	CompletedAt     *Date     `json:"completed_at,omitempty"`
+	CustomLists     *[]string `json:"custom_lists,omitempty"`
 }
 
 func (p EntryPatch) empty() bool {
-	return p.Status == nil && p.Score == nil && p.Progress == nil && p.ProgressVolumes == nil && p.Repeat == nil
+	return p.Status == nil && p.Score == nil && p.Progress == nil && p.ProgressVolumes == nil &&
+		p.Repeat == nil && p.Notes == nil && p.StartedAt == nil && p.CompletedAt == nil && p.CustomLists == nil
 }
 
 func (p EntryPatch) validate() error {
@@ -63,6 +69,39 @@ func (p EntryPatch) validate() error {
 		}
 	}
 
+	if p.Notes != nil && len([]rune(*p.Notes)) > maxNotesLength {
+		return apperr.Invalid("notes", "notes are at most %d characters", maxNotesLength)
+	}
+
+	for field, value := range map[string]*Date{
+		"started_at":   p.StartedAt,
+		"completed_at": p.CompletedAt,
+	} {
+		if value == nil {
+			continue
+		}
+
+		if err := value.validate(field); err != nil {
+			return err
+		}
+	}
+
+	if p.CustomLists != nil {
+		seen := map[string]bool{}
+
+		for _, name := range *p.CustomLists {
+			if strings.TrimSpace(name) == "" {
+				return apperr.Invalid("custom_lists", "a list name cannot be empty")
+			}
+
+			if seen[name] {
+				return apperr.Invalid("custom_lists", "list %q is listed twice", name)
+			}
+
+			seen[name] = true
+		}
+	}
+
 	return nil
 }
 
@@ -81,6 +120,18 @@ func (p EntryPatch) merge(next EntryPatch) EntryPatch {
 	}
 	if next.Repeat != nil {
 		p.Repeat = next.Repeat
+	}
+	if next.Notes != nil {
+		p.Notes = next.Notes
+	}
+	if next.StartedAt != nil {
+		p.StartedAt = next.StartedAt
+	}
+	if next.CompletedAt != nil {
+		p.CompletedAt = next.CompletedAt
+	}
+	if next.CustomLists != nil {
+		p.CustomLists = next.CustomLists
 	}
 
 	return p
@@ -103,17 +154,44 @@ func (p EntryPatch) apply(entry *Entry) {
 	if p.Repeat != nil {
 		entry.Repeat = *p.Repeat
 	}
+	if p.Notes != nil {
+		entry.Notes = *p.Notes
+	}
+	if p.StartedAt != nil {
+		entry.StartedAt = *p.StartedAt
+	}
+	if p.CompletedAt != nil {
+		entry.CompletedAt = *p.CompletedAt
+	}
+	if p.CustomLists != nil {
+		entry.CustomLists = append([]string{}, *p.CustomLists...)
+	}
 }
 
 func (p EntryPatch) change(mediaID int) anilist.EntryChange {
-	return anilist.EntryChange{
+	change := anilist.EntryChange{
 		MediaID:         mediaID,
 		Status:          p.Status,
 		ScoreRaw:        p.Score,
 		Progress:        p.Progress,
 		ProgressVolumes: p.ProgressVolumes,
 		Repeat:          p.Repeat,
+		Notes:           p.Notes,
 	}
+
+	if p.StartedAt != nil {
+		change.StartedAt = p.StartedAt.aniList()
+	}
+
+	if p.CompletedAt != nil {
+		change.CompletedAt = p.CompletedAt.aniList()
+	}
+
+	if p.CustomLists != nil {
+		change.CustomLists = append([]string{}, *p.CustomLists...)
+	}
+
+	return change
 }
 
 func parseMediaRef(mediaRef string) (int, error) {
@@ -161,6 +239,10 @@ func (s *Service) UpdateEntry(ctx context.Context, mediaRef string, patch EntryP
 		return nil, apperr.New(apperr.KindNotFound, "this title is not in your AniList list")
 	}
 
+	if err := s.checkCustomLists(ctx, mediaType, patch); err != nil {
+		return nil, err
+	}
+
 	existing, err := s.store.OutboxEntry(ctx, account.ID, mediaID)
 	if err != nil {
 		return nil, apperr.Wrap(err, apperr.KindInternal, "read pending anilist change")
@@ -205,6 +287,40 @@ func (s *Service) UpdateEntry(ctx context.Context, mediaRef string, patch EntryP
 	s.scheduleFlush(ctx)
 
 	return &view, nil
+}
+
+// checkCustomLists rejects a list AniList does not know about. The mutation
+// takes list names and silently drops the ones the account has not declared, so
+// a typo would look saved until the next refresh took it away again.
+func (s *Service) checkCustomLists(ctx context.Context, mediaType MediaType, patch EntryPatch) error {
+	if patch.CustomLists == nil || len(*patch.CustomLists) == 0 {
+		return nil
+	}
+
+	collection, err := s.mirroredCollection(ctx, mediaType)
+	if err != nil {
+		return err
+	}
+
+	if collection == nil {
+		return nil
+	}
+
+	declared := map[string]bool{}
+
+	for _, list := range collection.Lists {
+		if list.Custom {
+			declared[list.Name] = true
+		}
+	}
+
+	for _, name := range *patch.CustomLists {
+		if !declared[name] {
+			return apperr.Invalid("custom_lists", "no %s list named %q", mediaType, name)
+		}
+	}
+
+	return nil
 }
 
 func decreasesProgress(patch EntryPatch, mirrored *Entry) bool {

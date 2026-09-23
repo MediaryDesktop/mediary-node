@@ -1,0 +1,49 @@
+.stepper {
+	display: flex;
+	align-items: center;
+	gap: 0.625rem;
+
+	.step {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		width: 2.25rem;
+		height: 2.25rem;
+		padding: 0;
+		border: 1px solid var(--border);
+		border-radius: var(--radius);
+		background: var(--surface);
+		color: var(--text);
+		font: inherit;
+		font-size: 1.125rem;
+		line-height: 1;
+		cursor: pointer;
+		transition:
+			background-color 160ms,
+			border-color 160ms;
+
+		&:hover:not(:disabled) {
+			background: var(--surface-hover);
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--accent);
+			outline-offset: 2px;
+		}
+
+		&:disabled {
+			color: var(--text-disabled);
+			cursor: default;
+		}
+	}
+
+	.value {
+		flex: 1;
+		min-width: 0;
+		text-align: center;
+		font-size: 0.9375rem;
+		font-weight: 600;
+		font-variant-numeric: tabular-nums;
+	}
+}

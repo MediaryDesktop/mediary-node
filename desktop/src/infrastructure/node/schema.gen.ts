@@ -908,6 +908,12 @@ export interface components {
 			 * @example https://example.com/schemas/UpdateEntryInputBody.json
 			 */
 			readonly $schema?: string
+			/** @description When the user finished the title. Send every field empty to clear it. */
+			completed_at?: components['schemas']['Date']
+			/** @description The custom lists this title belongs to, by name. The lists left out are the ones it leaves. */
+			custom_lists?: string[]
+			/** @description Private notes only the account owner sees. */
+			notes?: string
 			/**
 			 * Format: int64
 			 * @description Episodes watched or chapters read.
@@ -928,6 +934,8 @@ export interface components {
 			 * @description Score on a 0-100 scale; clients convert from the account's score format.
 			 */
 			score?: number
+			/** @description When the user started the title. Send every field empty to clear it. */
+			started_at?: components['schemas']['Date']
 			/**
 			 * @description New list status.
 			 * @enum {string}

@@ -187,12 +187,16 @@ func (c *Client) Collection(ctx context.Context, userID int, mediaType MediaType
 }
 
 type EntryChange struct {
-	MediaID         int     `json:"mediaId"`
-	Status          *string `json:"status,omitempty"`
-	ScoreRaw        *int    `json:"scoreRaw,omitempty"`
-	Progress        *int    `json:"progress,omitempty"`
-	ProgressVolumes *int    `json:"progressVolumes,omitempty"`
-	Repeat          *int    `json:"repeat,omitempty"`
+	MediaID         int        `json:"mediaId"`
+	Status          *string    `json:"status,omitempty"`
+	ScoreRaw        *int       `json:"scoreRaw,omitempty"`
+	Progress        *int       `json:"progress,omitempty"`
+	ProgressVolumes *int       `json:"progressVolumes,omitempty"`
+	Repeat          *int       `json:"repeat,omitempty"`
+	Notes           *string    `json:"notes,omitempty"`
+	StartedAt       *FuzzyDate `json:"startedAt,omitempty"`
+	CompletedAt     *FuzzyDate `json:"completedAt,omitempty"`
+	CustomLists     []string   `json:"customLists,omitempty"`
 }
 
 type RemoteProgress struct {
@@ -223,6 +227,18 @@ func (c *Client) SaveEntry(ctx context.Context, change EntryChange) (*ListEntry,
 	}
 	if change.Repeat != nil {
 		variables["repeat"] = *change.Repeat
+	}
+	if change.Notes != nil {
+		variables["notes"] = *change.Notes
+	}
+	if change.StartedAt != nil {
+		variables["startedAt"] = *change.StartedAt
+	}
+	if change.CompletedAt != nil {
+		variables["completedAt"] = *change.CompletedAt
+	}
+	if change.CustomLists != nil {
+		variables["customLists"] = change.CustomLists
 	}
 
 	var data struct {

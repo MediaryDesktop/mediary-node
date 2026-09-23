@@ -137,7 +137,8 @@ export const en = {
 			rename: 'Rename',
 			delete: 'Delete',
 			deleteTitle: 'Delete “{{name}}”?',
-			deleteHintAniList: 'The list is removed from your AniList account. The titles in it stay in your lists',
+			deleteHintAniList:
+				'The list is removed from your AniList account. The titles in it stay in your lists',
 			deleteHintLocal: 'The list is removed from this computer. The titles in it stay in your lists',
 			options: 'List options',
 			nameLabel: 'List name',
@@ -152,6 +153,28 @@ export const en = {
 			offline: 'AniList is unreachable, so this list cannot be changed right now',
 			failed: 'Could not save the list. Try again'
 		},
+		manageEntry: {
+			action: 'Manage lists',
+			title: 'Manage lists',
+			save: 'Save changes',
+			statusHint: 'Where this title sits in your AniList lists',
+			lists: 'Lists',
+			listsHint: 'Tap a list to add or remove this title',
+			listsEmpty: 'No custom list for this media type yet'
+		},
+		rateEntry: {
+			action: 'Rate & notes',
+			title: 'Rate & notes',
+			scoreHint: 'Your score in the format your AniList account uses',
+			repeatHint: 'How many times you went through it again',
+			started: 'Started',
+			completed: 'Finished',
+			completedLocked: 'Available once the title is completed, dropped or repeating',
+			notes: 'Notes',
+			notesHint: 'Private notes only you can see',
+			notesPlaceholder: 'Anything you want to remember'
+		},
+		removeFromList: 'Remove from list',
 		loading: 'Loading your lists…',
 		failed: 'Could not load your lists',
 		retry: 'Retry',
@@ -556,8 +579,7 @@ export const en = {
 				custom: 'Custom command',
 				hint: 'MPV is recommended for better subtitle rendering and torrent streaming'
 			},
-			install:
-				'On Windows, install MPV using Scoop or Chocolatey. On macOS, install MPV using Homebrew'
+			install: 'On Windows, install MPV using Scoop or Chocolatey. On macOS, install MPV using Homebrew'
 		},
 		downloading: {
 			client: {

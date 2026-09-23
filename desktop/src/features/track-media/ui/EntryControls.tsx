@@ -6,8 +6,9 @@ import { SelectDropdown } from '@shared/ui'
 import { formatProgress, isTrackerStatus, TRACKER_STATUSES, trackerModel } from '@entities/tracker'
 import type { TrackerEntry, TrackerEntryPatch, TrackerMediaType } from '@entities/tracker'
 
+import '../model/model'
+
 import styles from './EntryControls.module.scss'
-import './model'
 
 export interface EntryControlsProps {
 	entry: TrackerEntry

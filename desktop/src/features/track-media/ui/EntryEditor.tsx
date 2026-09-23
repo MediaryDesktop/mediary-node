@@ -15,8 +15,9 @@ import {
 } from '@entities/tracker'
 import type { TrackerEntry, TrackerEntryPatch, TrackerMediaType } from '@entities/tracker'
 
+import '../model/model'
+
 import styles from './EntryEditor.module.scss'
-import './model'
 
 export interface EntryEditorProps {
 	entry: TrackerEntry

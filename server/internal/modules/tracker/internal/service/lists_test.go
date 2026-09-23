@@ -239,9 +239,9 @@ func TestAniListListsCarryCoversAndTheirNewestChange(t *testing.T) {
 	}
 }
 
-func findList(lists []CustomList, name string) *CustomList {
+func findList(lists []CustomList, mediaType ListMediaType, name string) *CustomList {
 	for i := range lists {
-		if lists[i].Name == name {
+		if lists[i].MediaType == mediaType && lists[i].Name == name {
 			return &lists[i]
 		}
 	}
@@ -278,7 +278,7 @@ func TestDeleteAniListListEmptiesItFirstAndDropsItFromTheMirror(t *testing.T) {
 		t.Fatalf("lists: %v", err)
 	}
 
-	if list := findList(lists, "Favourites 2025"); list != nil {
+	if list := findList(lists, ListMediaTypeAnime, "Favourites 2025"); list != nil {
 		t.Fatalf("the deleted list must be gone without waiting for a refresh, got %+v", list)
 	}
 }
@@ -311,7 +311,7 @@ func TestCreatedAniListListStartsEmptyEvenWhenAniListRemembersTheName(t *testing
 		t.Fatalf("lists: %v", err)
 	}
 
-	list := findList(lists, "Favourites 2025")
+	list := findList(lists, ListMediaTypeAnime, "Favourites 2025")
 	if list == nil {
 		t.Fatalf("the created list must show up without waiting for a refresh, got %+v", lists)
 	}

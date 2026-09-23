@@ -50,6 +50,12 @@ export type { DropdownMenuItem, DropdownMenuProps } from './dropdown-menu/Dropdo
 export { HoverCard } from './hover-card/HoverCard'
 export type { HoverCardProps } from './hover-card/HoverCard'
 
+export { Stepper } from './stepper/Stepper'
+export type { StepperProps } from './stepper/Stepper'
+
+export { Textarea } from './textarea/Textarea'
+export type { TextareaProps } from './textarea/Textarea'
+
 export { Modal } from './modal/Modal'
 export type { ModalProps } from './modal/Modal'
 

@@ -11,7 +11,7 @@ export type InputVariant = 'default' | 'glass'
 
 export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
 	variant?: InputVariant
-	type?: 'text' | 'email' | 'password' | 'number'
+	type?: 'text' | 'email' | 'password' | 'number' | 'date'
 	startIcon?: ReactNode
 	revealable?: boolean
 	error?: string

@@ -347,11 +347,92 @@ func TestUpdateValidation(t *testing.T) {
 		"score above 100":   {"anilist:100", EntryPatch{Score: intPtr(101)}, apperr.KindInvalid},
 		"foreign provider":  {"tmdb:5", EntryPatch{Progress: intPtr(1)}, apperr.KindInvalid},
 		"title not in list": {"anilist:999", EntryPatch{Progress: intPtr(1)}, apperr.KindNotFound},
+		"month out of range": {
+			"anilist:100",
+			EntryPatch{StartedAt: &Date{Year: intPtr(2024), Month: intPtr(13)}},
+			apperr.KindInvalid,
+		},
+		"day without a month": {
+			"anilist:100",
+			EntryPatch{CompletedAt: &Date{Year: intPtr(2024), Day: intPtr(4)}},
+			apperr.KindInvalid,
+		},
+		"the same list twice": {
+			"anilist:100",
+			EntryPatch{CustomLists: &[]string{"Favourites 2025", "Favourites 2025"}},
+			apperr.KindInvalid,
+		},
+		"a list the account does not have": {
+			"anilist:100",
+			EntryPatch{CustomLists: &[]string{"Nowhere"}},
+			apperr.KindInvalid,
+		},
 	}
 
 	for name, tc := range cases {
 		if _, err := h.svc.UpdateEntry(ctx, tc.ref, tc.patch); apperr.KindOf(err) != tc.kind {
 			t.Errorf("%s: want %s, got %v", name, tc.kind, err)
 		}
+	}
+}
+
+func TestUpdateCarriesNotesDatesAndListsToAniList(t *testing.T) {
+	fake := newSyncFake(t)
+	h := newSyncHarness(t, fake.server.URL)
+	h.signIn(t)
+	ctx := context.Background()
+
+	if _, err := h.svc.Entries(ctx, MediaTypeAnime); err != nil {
+		t.Fatalf("entries: %v", err)
+	}
+
+	updated, err := h.svc.UpdateEntry(ctx, "anilist:100", EntryPatch{
+		Notes:       strPtr("rewatch with friends"),
+		StartedAt:   &Date{Year: intPtr(2024), Month: intPtr(3), Day: intPtr(9)},
+		CompletedAt: &Date{},
+		CustomLists: &[]string{"Favourites 2025"},
+	})
+	if err != nil {
+		t.Fatalf("update: %v", err)
+	}
+
+	if updated.Notes != "rewatch with friends" {
+		t.Fatalf("the response must carry the notes, got %q", updated.Notes)
+	}
+
+	if updated.StartedAt.Year == nil || *updated.StartedAt.Year != 2024 {
+		t.Fatalf("the response must carry the start date, got %+v", updated.StartedAt)
+	}
+
+	if len(updated.CustomLists) != 1 || updated.CustomLists[0] != "Favourites 2025" {
+		t.Fatalf("the response must carry the lists, got %v", updated.CustomLists)
+	}
+
+	h.svc.flush(ctx)
+
+	saves := fake.savedCalls()
+	if len(saves) != 1 {
+		t.Fatalf("expected one save, got %v", saves)
+	}
+
+	save := saves[0]
+
+	if save["notes"] != "rewatch with friends" {
+		t.Fatalf("notes must reach anilist, got %v", save["notes"])
+	}
+
+	started, ok := save["startedAt"].(map[string]any)
+	if !ok || started["year"] != float64(2024) || started["day"] != float64(9) {
+		t.Fatalf("the start date must reach anilist, got %v", save["startedAt"])
+	}
+
+	completed, ok := save["completedAt"].(map[string]any)
+	if !ok || completed["year"] != nil {
+		t.Fatalf("an empty date must reach anilist as empty, got %v", save["completedAt"])
+	}
+
+	lists, ok := save["customLists"].([]any)
+	if !ok || len(lists) != 1 || lists[0] != "Favourites 2025" {
+		t.Fatalf("the lists must reach anilist, got %v", save["customLists"])
 	}
 }

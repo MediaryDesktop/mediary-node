@@ -1252,6 +1252,17 @@ components:
           format: uri
           readOnly: true
           type: string
+        completed_at:
+          $ref: "#/components/schemas/Date"
+          description: When the user finished the title. Send every field empty to clear it.
+        custom_lists:
+          description: The custom lists this title belongs to, by name. The lists left out are the ones it leaves.
+          items:
+            type: string
+          type: array
+        notes:
+          description: Private notes only the account owner sees.
+          type: string
         progress:
           description: Episodes watched or chapters read.
           format: int64
@@ -1273,6 +1284,9 @@ components:
           maximum: 100
           minimum: 0
           type: integer
+        started_at:
+          $ref: "#/components/schemas/Date"
+          description: When the user started the title. Send every field empty to clear it.
         status:
           description: New list status.
           enum:

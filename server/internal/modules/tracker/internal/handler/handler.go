@@ -55,11 +55,15 @@ type EntriesOutput struct {
 type UpdateEntryInput struct {
 	MediaRef string `path:"media_ref" example:"anilist:154587" doc:"The entry's media reference, as returned by listTrackerEntries."`
 	Body     struct {
-		Status          *string `json:"status,omitempty" enum:"CURRENT,PLANNING,COMPLETED,DROPPED,PAUSED,REPEATING" doc:"New list status."`
-		Score           *int    `json:"score,omitempty" minimum:"0" maximum:"100" doc:"Score on a 0-100 scale; clients convert from the account's score format."`
-		Progress        *int    `json:"progress,omitempty" minimum:"0" doc:"Episodes watched or chapters read."`
-		ProgressVolumes *int    `json:"progress_volumes,omitempty" minimum:"0" doc:"Volumes read; manga only."`
-		Repeat          *int    `json:"repeat,omitempty" minimum:"0" doc:"How many times the title was rewatched or reread."`
+		Status          *string       `json:"status,omitempty" enum:"CURRENT,PLANNING,COMPLETED,DROPPED,PAUSED,REPEATING" doc:"New list status."`
+		Score           *int          `json:"score,omitempty" minimum:"0" maximum:"100" doc:"Score on a 0-100 scale; clients convert from the account's score format."`
+		Progress        *int          `json:"progress,omitempty" minimum:"0" doc:"Episodes watched or chapters read."`
+		ProgressVolumes *int          `json:"progress_volumes,omitempty" minimum:"0" doc:"Volumes read; manga only."`
+		Repeat          *int          `json:"repeat,omitempty" minimum:"0" doc:"How many times the title was rewatched or reread."`
+		Notes           *string       `json:"notes,omitempty" doc:"Private notes only the account owner sees."`
+		StartedAt       *service.Date `json:"started_at,omitempty" doc:"When the user started the title. Send every field empty to clear it."`
+		CompletedAt     *service.Date `json:"completed_at,omitempty" doc:"When the user finished the title. Send every field empty to clear it."`
+		CustomLists     *[]string     `json:"custom_lists,omitempty" doc:"The custom lists this title belongs to, by name. The lists left out are the ones it leaves."`
 	}
 }
 
@@ -193,6 +197,10 @@ func (h *Handler) Register(api huma.API) {
 			Progress:        in.Body.Progress,
 			ProgressVolumes: in.Body.ProgressVolumes,
 			Repeat:          in.Body.Repeat,
+			Notes:           in.Body.Notes,
+			StartedAt:       in.Body.StartedAt,
+			CompletedAt:     in.Body.CompletedAt,
+			CustomLists:     in.Body.CustomLists,
 		})
 		if err != nil {
 			return nil, httpapi.ToHTTP(err)
