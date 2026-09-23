@@ -6,10 +6,7 @@ import { Icon, Modal } from '@shared/ui'
 
 import { mediaTitle } from '@entities/media'
 import type { MediaDetails, MediaSource } from '@entities/media'
-import { isTrackerMediaType } from '@entities/tracker'
 import type { TrackerEntry } from '@entities/tracker'
-
-import { EntryEditor } from '@features/track-media'
 
 import { resolveSubject } from '../lib/media-view'
 import { LibrarySection } from '../library-section/LibrarySection'
@@ -29,7 +26,6 @@ export interface MediaViewProps {
 export function MediaView({ media, sources, entry }: MediaViewProps) {
 	const { t, i18n } = useTranslation()
 	const [descriptionOpen, setDescriptionOpen] = useState(false)
-	const [entryOpen, setEntryOpen] = useState(false)
 	const [detailsOpen, setDetailsOpen] = useState(false)
 
 	const subject = resolveSubject(media, entry)
@@ -63,7 +59,6 @@ export function MediaView({ media, sources, entry }: MediaViewProps) {
 				mediaType={mediaType}
 				siteUrl={base.site_url}
 				total={total}
-				onEditEntry={() => setEntryOpen(true)}
 				onOpenDetails={() => setDetailsOpen(true)}
 			/>
 
@@ -100,17 +95,6 @@ export function MediaView({ media, sources, entry }: MediaViewProps) {
 			>
 				<p className={styles.fullDescription}>{description || t('media.noDescription')}</p>
 			</Modal>
-
-			{entry && isTrackerMediaType(mediaType) && (
-				<Modal
-					open={entryOpen}
-					onOpenChange={setEntryOpen}
-					title={title}
-					description={t('media.sections.entry')}
-				>
-					<EntryEditor entry={entry} mediaType={mediaType} />
-				</Modal>
-			)}
 
 			{media && (
 				<Modal

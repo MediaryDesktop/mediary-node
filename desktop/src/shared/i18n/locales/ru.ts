@@ -225,7 +225,6 @@ export const ru: Translation = {
 		retry: 'Повторить',
 		offline: 'Подробности сейчас недоступны. Показываем то, что известно из вашего списка',
 		openOn: 'Открыть на {{name}}',
-		editEntry: 'Редактировать запись в списке',
 		addToList: 'Добавить в список',
 		trailer: 'Трейлер',
 		trailerFor: 'Трейлер: {{title}}',
@@ -251,8 +250,7 @@ export const ru: Translation = {
 		sections: {
 			synopsis: 'Описание',
 			details: 'Подробности',
-			relations: 'Связанные тайтлы',
-			entry: 'Ваш список'
+			relations: 'Связанные тайтлы'
 		},
 		noDescription: 'Описания пока нет',
 		stats: {

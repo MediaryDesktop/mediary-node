@@ -7,7 +7,7 @@ import type { DropdownMenuItem } from '@shared/ui'
 import { trackerModel } from '@entities/tracker'
 import type { TrackerEntry, TrackerMediaType } from '@entities/tracker'
 
-import { manageEntryModel, rateEntryModel } from '../model/model'
+import { manageEntryModel, rateEntryModel } from '../../model/model'
 
 import styles from './EntryMenu.module.scss'
 

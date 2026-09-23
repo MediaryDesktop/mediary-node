@@ -224,7 +224,6 @@ export const uk: Translation = {
 		retry: 'Повторити',
 		offline: 'Подробиці зараз недоступні. Показуємо те, що відомо з вашого списку',
 		openOn: 'Відкрити на {{name}}',
-		editEntry: 'Редагувати запис у списку',
 		addToList: 'Додати до списку',
 		trailer: 'Трейлер',
 		trailerFor: 'Трейлер: {{title}}',
@@ -250,8 +249,7 @@ export const uk: Translation = {
 		sections: {
 			synopsis: 'Опис',
 			details: 'Подробиці',
-			relations: 'Повʼязані тайтли',
-			entry: 'Ваш список'
+			relations: 'Повʼязані тайтли'
 		},
 		noDescription: 'Опису поки немає',
 		stats: {

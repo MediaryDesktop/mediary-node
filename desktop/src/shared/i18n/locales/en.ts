@@ -226,7 +226,6 @@ export const en = {
 		retry: 'Retry',
 		offline: 'Details are unavailable right now. Showing what your list knows',
 		openOn: 'Open on {{name}}',
-		editEntry: 'Edit list entry',
 		addToList: 'Add to list',
 		trailer: 'Trailer',
 		trailerFor: 'Trailer for {{title}}',
@@ -252,8 +251,7 @@ export const en = {
 		sections: {
 			synopsis: 'Synopsis',
 			details: 'Details',
-			relations: 'Related titles',
-			entry: 'Your list'
+			relations: 'Related titles'
 		},
 		noDescription: 'No description yet',
 		stats: {

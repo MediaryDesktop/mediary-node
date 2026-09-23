@@ -1,9 +1,14 @@
+import { useUnit } from 'effector-react'
+
 import { useTranslation } from '@shared/i18n'
 import { Button, DropdownMenu, Icon, Tooltip } from '@shared/ui'
+import type { DropdownMenuItem } from '@shared/ui'
 
 import type { MediaSource } from '@entities/media'
 import { isTrackerMediaType } from '@entities/tracker'
 import type { TrackerEntry } from '@entities/tracker'
+
+import { manageEntryModel, rateEntryModel } from '@features/track-media'
 
 import styles from './MediaActions.module.scss'
 
@@ -13,7 +18,6 @@ export interface MediaActionsProps {
 	mediaType: string
 	siteUrl: string
 	total: number | null | undefined
-	onEditEntry: () => void
 	onOpenDetails: () => void
 }
 
@@ -23,22 +27,57 @@ export function MediaActions({
 	mediaType,
 	siteUrl,
 	total,
-	onEditEntry,
 	onOpenDetails
 }: MediaActionsProps) {
 	const { t } = useTranslation()
 
+	const [manageOpened, rateOpened] = useUnit([manageEntryModel.opened, rateEntryModel.opened])
+
+	const trackerType = isTrackerMediaType(mediaType) ? mediaType : null
+	const target = entry && trackerType ? { entry, mediaType: trackerType } : null
+
+	const items: DropdownMenuItem[] = [
+		{
+			id: 'details',
+			label: t('media.menu.details'),
+			icon: 'common/info',
+			onSelect: onOpenDetails
+		},
+		{
+			id: 'anilist',
+			label: t('media.openOn', { name: sources[0]?.name ?? 'AniList' }),
+			icon: 'common/external-link',
+			onSelect: () => window.open(siteUrl, '_blank', 'noreferrer')
+		},
+		{
+			id: 'library',
+			label: t('media.menu.addToLibrary'),
+			icon: 'common/library',
+			disabled: true,
+			onSelect: () => {}
+		}
+	]
+
+	if (target) {
+		items.unshift({
+			id: 'manage',
+			label: t('lists.manageEntry.action'),
+			icon: 'common/folder',
+			onSelect: () => manageOpened(target)
+		})
+	}
+
 	return (
 		<div className={styles.actions}>
 			<div className={styles.actionButtons}>
-				{entry && isTrackerMediaType(mediaType) ? (
-					<Tooltip content={t('media.editEntry')}>
+				{target ? (
+					<Tooltip content={t('lists.rateEntry.action')}>
 						<Button
 							iconOnly
 							variant='ghost'
 							className={styles.iconAction}
-							aria-label={t('media.editEntry')}
-							onClick={onEditEntry}
+							aria-label={t('lists.rateEntry.action')}
+							onClick={() => rateOpened(target)}
 						>
 							<Icon name='common/pencil' size={16} />
 						</Button>
@@ -70,27 +109,7 @@ export function MediaActions({
 							<Icon name='common/more-vertical' size={18} />
 						</Button>
 					}
-					items={[
-						{
-							id: 'details',
-							label: t('media.menu.details'),
-							icon: 'common/info',
-							onSelect: onOpenDetails
-						},
-						{
-							id: 'anilist',
-							label: t('media.openOn', { name: sources[0]?.name ?? 'AniList' }),
-							icon: 'common/external-link',
-							onSelect: () => window.open(siteUrl, '_blank', 'noreferrer')
-						},
-						{
-							id: 'library',
-							label: t('media.menu.addToLibrary'),
-							icon: 'common/library',
-							disabled: true,
-							onSelect: () => {}
-						}
-					]}
+					items={items}
 				/>
 
 				<Tooltip content={t('media.comingSoon')}>
