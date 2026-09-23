@@ -3,7 +3,7 @@ import { useUnit } from 'effector-react'
 import { useEffect, useMemo, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, EmptyState, Icon, PageTransition } from '@shared/ui'
+import { EmptyState, PageHeader, PageTransition } from '@shared/ui'
 
 import { aniListAccountModel } from '@entities/anilist-account'
 import { MediaCard } from '@entities/media'
@@ -108,23 +108,12 @@ export function ListDetailPage({ listId }: ListDetailPageProps) {
 					navigate({ to: '/lists' })
 				}}
 			>
-				<header className={styles.header}>
-					<Button
-						variant='ghost'
-						iconOnly
-						aria-label={t('media.back')}
-						onClick={() => navigate({ to: '/lists' })}
-					>
-						<Icon name='common/arrow-left' size={18} />
-					</Button>
-
-					<div className={styles.heading}>
-						<h1 className={styles.title}>{title}</h1>
-						{subtitle && <p className={styles.meta}>{subtitle}</p>}
-					</div>
-
-					{list && <ListOptionsMenu list={list} />}
-				</header>
+				<PageHeader
+					title={title}
+					subtitle={subtitle}
+					onBack={() => navigate({ to: '/lists' })}
+					rightContent={list && <ListOptionsMenu list={list} />}
+				/>
 
 				{entries.length > 0 && (
 					<ListFilters
@@ -136,7 +125,9 @@ export function ListDetailPage({ listId }: ListDetailPageProps) {
 				)}
 
 				{visible.length === 0 ? (
-					<EmptyState title={entries.length === 0 ? t('lists.empty') : t('lists.filters.noMatches')} />
+					<EmptyState
+						title={entries.length === 0 ? t('lists.empty') : t('lists.filters.noMatches')}
+					/>
 				) : (
 					<ul className={styles.grid}>
 						{visible.map(entry => (
@@ -148,9 +139,7 @@ export function ListDetailPage({ listId }: ListDetailPageProps) {
 										<EntryMenu
 											entry={entry}
 											mediaType={entry.media_type as TrackerMediaType}
-											listName={
-												list?.provider === 'anilist' ? list.name : undefined
-											}
+											listName={list?.provider === 'anilist' ? list.name : undefined}
 										/>
 									}
 									previewRef={entry.media_ref}

@@ -1,7 +1,7 @@
 import { useUnit } from 'effector-react'
 
 import { useTranslation } from '@shared/i18n'
-import { DropdownMenu, Icon } from '@shared/ui'
+import { Button, DropdownMenu, Icon } from '@shared/ui'
 import type { DropdownMenuItem } from '@shared/ui'
 
 import type { TrackerCustomList } from '@entities/tracker'
@@ -40,9 +40,14 @@ export function ListOptionsMenu({ list }: ListOptionsMenuProps) {
 		<DropdownMenu
 			items={items}
 			trigger={
-				<button type='button' className={styles.trigger} aria-label={t('lists.manage.options')}>
+				<Button
+					variant='ghost'
+					size='small'
+					className={styles.trigger}
+					aria-label={t('lists.manage.options')}
+				>
 					<Icon name='common/more-vertical' size={18} />
-				</button>
+				</Button>
 			}
 		/>
 	)

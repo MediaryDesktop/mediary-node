@@ -45,7 +45,6 @@ export const manageListsModel = atom(() => {
 	const $editingID = createStore<string | null>(null)
 		.on(createRequested, () => null)
 		.on(renameRequested, (_, list) => list.id)
-		.reset(drawerClosed)
 
 	const $open = createStore(false)
 		.on([createRequested, renameRequested], () => true)
@@ -55,7 +54,6 @@ export const manageListsModel = atom(() => {
 		.on(nameChanged, (_, name) => name)
 		.on(createRequested, () => '')
 		.on(renameRequested, (_, list) => list.name)
-		.reset(drawerClosed)
 
 	const $mediaType = createStore<ListMediaType>(DEFAULT_MEDIA_TYPE)
 		.on(mediaTypeChanged, (_, mediaType) => mediaType)
@@ -97,8 +95,10 @@ export const manageListsModel = atom(() => {
 		target: drawerClosed
 	})
 
-	const $deleting = createStore<TrackerCustomList | null>(null)
-		.on(deleteRequested, (_, list) => list)
+	const $deleting = createStore<TrackerCustomList | null>(null).on(deleteRequested, (_, list) => list)
+
+	const $deleteOpen = createStore(false)
+		.on(deleteRequested, () => true)
 		.reset(deleteCancelled, deleteTrackerListMutation.finished.finally)
 
 	const $deleted = createStore<string | null>(null)
@@ -131,6 +131,7 @@ export const manageListsModel = atom(() => {
 		$canSubmit,
 		$submitting,
 		$deleting,
+		$deleteOpen,
 		$deleted,
 		$deletePending: deleteTrackerListMutation.$pending,
 		createRequested,

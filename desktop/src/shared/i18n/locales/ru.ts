@@ -333,6 +333,7 @@ export const ru: Translation = {
 	},
 
 	search: {
+		subtitle: 'Находите аниме, мангу, дорамы, фильмы, сериалы и книги',
 		searchPlaceholder: 'Название',
 		searchLabel: 'Поиск по названию',
 		filters: 'Фильтры',

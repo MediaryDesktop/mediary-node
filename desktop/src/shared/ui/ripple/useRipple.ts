@@ -133,14 +133,18 @@ export function useRipple<T extends HTMLElement = HTMLElement>(options: RippleOp
 			host.style.setProperty('position', 'relative')
 		}
 
-		const onMouseDown = (event: MouseEvent) => {
-			if (event.button === 0) {
+		// Pointer events, not mouse events: a control that opens something on press
+		// (Radix's dropdown trigger, for one) calls preventDefault() on pointerdown
+		// to stop the browser from following up with a synthetic mousedown, which
+		// would otherwise leave the ripple never shown for that press.
+		const onPointerDown = (event: PointerEvent) => {
+			if (event.pointerType === 'mouse' && event.button === 0) {
 				handleShow(event, false)
 			}
 		}
 
-		const onMouseUp = (event: MouseEvent) => {
-			if (event.button === 0) {
+		const onPointerUp = (event: PointerEvent) => {
+			if (event.pointerType === 'mouse' && event.button === 0) {
 				handleHide()
 			}
 		}
@@ -183,8 +187,8 @@ export function useRipple<T extends HTMLElement = HTMLElement>(options: RippleOp
 
 		const onDragStart = () => handleHide()
 
-		host.addEventListener('mousedown', onMouseDown)
-		host.addEventListener('mouseup', onMouseUp)
+		host.addEventListener('pointerdown', onPointerDown)
+		host.addEventListener('pointerup', onPointerUp)
 		host.addEventListener('mouseleave', onMouseLeave)
 		host.addEventListener('touchstart', onTouchStart, { passive: true })
 		host.addEventListener('touchend', onTouchEnd, { passive: true })
@@ -205,8 +209,8 @@ export function useRipple<T extends HTMLElement = HTMLElement>(options: RippleOp
 				host.style.removeProperty('position')
 			}
 
-			host.removeEventListener('mousedown', onMouseDown)
-			host.removeEventListener('mouseup', onMouseUp)
+			host.removeEventListener('pointerdown', onPointerDown)
+			host.removeEventListener('pointerup', onPointerUp)
 			host.removeEventListener('mouseleave', onMouseLeave)
 			host.removeEventListener('touchstart', onTouchStart)
 			host.removeEventListener('touchend', onTouchEnd)

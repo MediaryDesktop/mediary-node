@@ -35,7 +35,7 @@ describe('RippleButton', () => {
 
 		expect(ripples(button)).toBe(0)
 
-		fireEvent.mouseDown(button, { button: 0 })
+		fireEvent.pointerDown(button, { button: 0, pointerType: 'mouse' })
 
 		expect(ripples(button)).toBe(1)
 	})
@@ -43,13 +43,13 @@ describe('RippleButton', () => {
 	it('stays still when disabled or when the ripple is turned off', () => {
 		const { rerender } = render(<RippleButton disabled>Anime</RippleButton>)
 
-		fireEvent.mouseDown(screen.getByRole('button'), { button: 0 })
+		fireEvent.pointerDown(screen.getByRole('button'), { button: 0, pointerType: 'mouse' })
 
 		expect(ripples(screen.getByRole('button'))).toBe(0)
 
 		rerender(<RippleButton disableRipple>Anime</RippleButton>)
 
-		fireEvent.mouseDown(screen.getByRole('button'), { button: 0 })
+		fireEvent.pointerDown(screen.getByRole('button'), { button: 0, pointerType: 'mouse' })
 
 		expect(ripples(screen.getByRole('button'))).toBe(0)
 	})

@@ -332,6 +332,7 @@ export const uk: Translation = {
 	},
 
 	search: {
+		subtitle: 'Знаходьте аніме, мангу, дорами, фільми, серіали й книги',
 		searchPlaceholder: 'Назва',
 		searchLabel: 'Пошук за назвою',
 		filters: 'Фільтри',

@@ -9,6 +9,7 @@ import {
 	EmptyState,
 	Icon,
 	Input,
+	PageHeader,
 	PageTransition,
 	SegmentedControl,
 	SelectDropdown,
@@ -122,21 +123,19 @@ export function ListsPage() {
 
 	return (
 		<PageTransition className={styles.root}>
-			<header className={styles.header}>
-				<div className={styles.heading}>
-					<h1 className={styles.title}>{t('nav.lists')}</h1>
-
-					<p className={styles.summary}>{summary.join(' · ')}</p>
-				</div>
-
-				<Button
-					variant='primary'
-					startIcon={<Icon name='common/plus' size={16} />}
-					onClick={() => createRequested()}
-				>
-					{t('lists.manage.new')}
-				</Button>
-			</header>
+			<PageHeader
+				title={t('nav.lists')}
+				subtitle={summary.join(' · ')}
+				rightContent={
+					<Button
+						variant='primary'
+						startIcon={<Icon name='common/plus' size={16} />}
+						onClick={() => createRequested()}
+					>
+						{t('lists.manage.new')}
+					</Button>
+				}
+			/>
 
 			{sessionLoaded && !connected && (
 				<section className={styles.connect}>

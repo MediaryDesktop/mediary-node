@@ -24,13 +24,13 @@ function mount(options: Parameters<typeof useRipple>[0] = {}) {
 
 function press(host: HTMLElement, button = 0) {
 	act(() => {
-		host.dispatchEvent(new MouseEvent('mousedown', { button, bubbles: true }))
+		host.dispatchEvent(new PointerEvent('pointerdown', { button, pointerType: 'mouse', bubbles: true }))
 	})
 }
 
 function release(host: HTMLElement, button = 0) {
 	act(() => {
-		host.dispatchEvent(new MouseEvent('mouseup', { button, bubbles: true }))
+		host.dispatchEvent(new PointerEvent('pointerup', { button, pointerType: 'mouse', bubbles: true }))
 	})
 }
 

@@ -73,8 +73,10 @@ export const manageEntryModel = atom(() => {
 	const listsChanged = createEvent<string[]>()
 	const submitted = createEvent()
 
-	const $target = createStore<EntryTarget | null>(null)
-		.on(opened, (_, target) => target)
+	const $target = createStore<EntryTarget | null>(null).on(opened, (_, target) => target)
+
+	const $open = createStore(false)
+		.on(opened, () => true)
 		.reset(closed)
 
 	const $status = createStore<TrackerStatus>('CURRENT')
@@ -127,7 +129,7 @@ export const manageEntryModel = atom(() => {
 	sample({ clock: opened, target: trackerListsQuery.start })
 
 	return {
-		$open: $target.map(target => target !== null),
+		$open,
 		$target,
 		$status,
 		$lists,
@@ -153,8 +155,10 @@ export const rateEntryModel = atom(() => {
 	const volumesChanged = createEvent<number>()
 	const submitted = createEvent()
 
-	const $target = createStore<EntryTarget | null>(null)
-		.on(opened, (_, target) => target)
+	const $target = createStore<EntryTarget | null>(null).on(opened, (_, target) => target)
+
+	const $open = createStore(false)
+		.on(opened, () => true)
 		.reset(closed)
 
 	const $score = createStore(0)
@@ -257,7 +261,7 @@ export const rateEntryModel = atom(() => {
 	sample({ clock: updateTrackerEntryMutation.finished.success, target: closed })
 
 	return {
-		$open: $target.map(target => target !== null),
+		$open,
 		$target,
 		$score,
 		$notes,

@@ -1,27 +1,4 @@
 .root {
-	.header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 1rem;
-		flex-wrap: wrap;
-		margin-bottom: 2rem;
-
-		.heading {
-			.title {
-				margin: 0;
-				font-size: 2.5rem;
-				font-weight: 700;
-			}
-
-			.summary {
-				margin: 0.1rem 0 0;
-				color: var(--text-secondary);
-				font-size: 1rem;
-			}
-		}
-	}
-
 	.connect {
 		display: flex;
 		flex-direction: column;

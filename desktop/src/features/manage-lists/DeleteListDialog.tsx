@@ -8,8 +8,9 @@ import { manageListsModel } from './model'
 export function DeleteListDialog() {
 	const { t } = useTranslation()
 
-	const [list, pending, cancelled, confirmed] = useUnit([
+	const [list, open, pending, cancelled, confirmed] = useUnit([
 		manageListsModel.$deleting,
+		manageListsModel.$deleteOpen,
 		manageListsModel.$deletePending,
 		manageListsModel.deleteCancelled,
 		manageListsModel.deleteConfirmed
@@ -17,7 +18,7 @@ export function DeleteListDialog() {
 
 	return (
 		<Modal
-			open={list !== null}
+			open={open}
 			onOpenChange={next => !next && cancelled()}
 			size='sm'
 			title={t('lists.manage.deleteTitle', { name: list?.name ?? '' })}

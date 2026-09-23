@@ -59,6 +59,9 @@ export type { TextareaProps } from './textarea/Textarea'
 export { Modal } from './modal/Modal'
 export type { ModalProps } from './modal/Modal'
 
+export { PageHeader } from './page-header/PageHeader'
+export type { PageHeaderProps } from './page-header/PageHeader'
+
 export { PageTransition } from './page-transition/PageTransition'
 export type { PageTransitionProps } from './page-transition/PageTransition'
 

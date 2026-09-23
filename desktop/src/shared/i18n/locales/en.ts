@@ -334,6 +334,7 @@ export const en = {
 	},
 
 	search: {
+		subtitle: 'Find anime, manga, dramas, films, series and books',
 		searchPlaceholder: 'Title',
 		searchLabel: 'Search by title',
 		filters: 'Filters',
