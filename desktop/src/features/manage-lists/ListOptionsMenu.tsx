@@ -6,7 +6,7 @@ import type { DropdownMenuItem } from '@shared/ui'
 
 import type { TrackerCustomList } from '@entities/tracker'
 
-import styles from './ListOptionsMenu.module.scss'
+import style from './ListOptionsMenu.module.scss'
 import { manageListsModel } from './model'
 
 export interface ListOptionsMenuProps {
@@ -40,12 +40,7 @@ export function ListOptionsMenu({ list }: ListOptionsMenuProps) {
 		<DropdownMenu
 			items={items}
 			trigger={
-				<Button
-					variant='ghost'
-					size='small'
-					className={styles.trigger}
-					aria-label={t('lists.manage.options')}
-				>
+				<Button className={style.trigger} variant='glass' aria-label={t('lists.manage.options')}>
 					<Icon name='common/more-vertical' size={18} />
 				</Button>
 			}

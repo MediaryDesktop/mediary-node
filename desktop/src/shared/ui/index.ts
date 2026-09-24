@@ -1,4 +1,6 @@
 export { Button } from './button/Button'
+export { DatePicker } from './date-picker/DatePicker'
+export type { DatePickerProps } from './date-picker/DatePicker'
 export { Input } from './input/Input'
 export type { InputProps, InputVariant } from './input/Input'
 export { OtpInput } from './otp-input/OtpInput'
@@ -67,6 +69,9 @@ export type { PageTransitionProps } from './page-transition/PageTransition'
 
 export { ProgressBar } from './progress-bar/ProgressBar'
 export type { ProgressBarProps } from './progress-bar/ProgressBar'
+
+export { RatingStars } from './rating-stars/RatingStars'
+export type { RatingStarsProps } from './rating-stars/RatingStars'
 
 export { SelectionGroup } from './selection-group/SelectionGroup'
 export type { SelectionGroupOption, SelectionGroupProps } from './selection-group/SelectionGroup'

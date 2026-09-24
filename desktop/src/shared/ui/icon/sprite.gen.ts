@@ -293,13 +293,14 @@ export const sprites = defineSpriteMap([
 				defineSpriteSymbol(['play'], [24]),
 				defineSpriteSymbol(['player'], [24]),
 				defineSpriteSymbol(['plus'], [24]),
+				defineSpriteSymbol(['reset'], [64, '0 0 1920 1920']),
 				defineSpriteSymbol(['restore'], [24]),
 				defineSpriteSymbol(['search'], [24]),
 				defineSpriteSymbol(['settings'], [24]),
 				defineSpriteSymbol(['signal'], [24]),
 				defineSpriteSymbol(['sort'], [24]),
 				defineSpriteSymbol(['sparkles'], [24]),
-				defineSpriteSymbol(['star'], [24]),
+				defineSpriteSymbol(['star'], [12]),
 				defineSpriteSymbol(['sun'], [24]),
 				defineSpriteSymbol(['tag'], [24]),
 				defineSpriteSymbol(['trash'], [24]),
@@ -360,6 +361,7 @@ export type SpritesMeta = {
 		| 'play'
 		| 'player'
 		| 'plus'
+		| 'reset'
 		| 'restore'
 		| 'search'
 		| 'settings'

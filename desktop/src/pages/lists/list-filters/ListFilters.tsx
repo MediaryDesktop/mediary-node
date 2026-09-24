@@ -71,11 +71,15 @@ export function ListFilters({ filters, formats, mediaType, onChange }: ListFilte
 				className={styles.control}
 			/>
 
-			{hasActiveFilters(filters) && (
-				<Button variant='ghost' size='small' onClick={() => onChange(INITIAL_ENTRY_FILTERS)}>
-					{t('lists.filters.reset')}
-				</Button>
-			)}
+			<Button
+				variant='primary'
+				iconOnly
+				disabled={!hasActiveFilters(filters)}
+				aria-label={t('lists.filters.reset')}
+				onClick={() => onChange(INITIAL_ENTRY_FILTERS)}
+			>
+				<Icon name='common/reset' size={16} />
+			</Button>
 		</div>
 	)
 }

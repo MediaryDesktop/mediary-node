@@ -30,28 +30,34 @@ export function PageHeader({
 
 	return (
 		<header className={clsx(styles.header, className)}>
-			{onBack && (
-				<nav className={styles.navigation} aria-label='Page navigation'>
-					<Button
-						type='button'
-						onClick={onBack}
-						variant='control'
-						size='small'
-						iconOnly
-						startIcon={<Icon name='common/arrow-left' size={20} />}
-						aria-label={backLabel ?? t('media.back')}
-						className={styles.backButton}
-					/>
-				</nav>
-			)}
+			<div className={styles.topRow}>
+				{onBack && (
+					<nav className={styles.navigation} aria-label='Page navigation'>
+						<Button
+							type='button'
+							onClick={onBack}
+							variant='control'
+							size='small'
+							iconOnly
+							aria-label={backLabel ?? t('media.back')}
+							className={styles.backButton}
+						>
+							<Icon name='common/arrow-left' size={20} />
+						</Button>
+					</nav>
+				)}
 
-			<div className={styles.content}>
 				<h1 className={styles.title}>{title}</h1>
-				{subtitle && <p className={styles.subtitle}>{subtitle}</p>}
-				{children}
+
+				{rightContent && <div className={styles.rightContent}>{rightContent}</div>}
 			</div>
 
-			{rightContent && <div className={styles.rightContent}>{rightContent}</div>}
+			{(subtitle || children) && (
+				<div className={clsx(styles.content, onBack && styles.withBack)}>
+					{subtitle && <p className={styles.subtitle}>{subtitle}</p>}
+					{children}
+				</div>
+			)}
 		</header>
 	)
 }

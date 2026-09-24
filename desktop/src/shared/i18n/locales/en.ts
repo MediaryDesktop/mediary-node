@@ -166,9 +166,17 @@ export const en = {
 			action: 'Rate & notes',
 			title: 'Rate & notes',
 			scoreHint: 'Your score in the format your AniList account uses',
+			progressHint: 'Kept in sync with your AniList list',
 			repeatHint: 'How many times you went through it again',
-			started: 'Started',
-			completed: 'Finished',
+			started: {
+				anime: 'Started watching',
+				manga: 'Started reading'
+			},
+			dateHint: 'Optional — leave it blank if you are not sure',
+			completed: {
+				anime: 'Finished watching',
+				manga: 'Finished reading'
+			},
 			completedLocked: 'Available once the title is completed, dropped or repeating',
 			notes: 'Notes',
 			notesHint: 'Private notes only you can see',

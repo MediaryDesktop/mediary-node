@@ -133,10 +133,6 @@ export function useRipple<T extends HTMLElement = HTMLElement>(options: RippleOp
 			host.style.setProperty('position', 'relative')
 		}
 
-		// Pointer events, not mouse events: a control that opens something on press
-		// (Radix's dropdown trigger, for one) calls preventDefault() on pointerdown
-		// to stop the browser from following up with a synthetic mousedown, which
-		// would otherwise leave the ripple never shown for that press.
 		const onPointerDown = (event: PointerEvent) => {
 			if (event.pointerType === 'mouse' && event.button === 0) {
 				handleShow(event, false)
