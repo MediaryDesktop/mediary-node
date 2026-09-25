@@ -30,6 +30,13 @@ export const en = {
 		hidePassword: 'Hide password'
 	},
 
+	datePicker: {
+		previousMonth: 'Previous month',
+		nextMonth: 'Next month',
+		previousYear: 'Previous year',
+		nextYear: 'Next year'
+	},
+
 	nav: {
 		label: 'Main navigation',
 		home: 'Home',

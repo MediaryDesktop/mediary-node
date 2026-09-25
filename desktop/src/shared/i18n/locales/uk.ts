@@ -28,6 +28,13 @@ export const uk: Translation = {
 		hidePassword: 'Сховати пароль'
 	},
 
+	datePicker: {
+		previousMonth: 'Попередній місяць',
+		nextMonth: 'Наступний місяць',
+		previousYear: 'Попередній рік',
+		nextYear: 'Наступний рік'
+	},
+
 	nav: {
 		label: 'Головна навігація',
 		home: 'Головна',
