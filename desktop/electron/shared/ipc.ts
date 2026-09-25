@@ -5,6 +5,8 @@ export const IPC = {
 
 	appVersion: 'app:version',
 
+	dialogPickFolder: 'dialog:pick-folder',
+
 	oauthPrepare: 'oauth:prepare',
 	oauthAuthorize: 'oauth:authorize',
 	oauthRelease: 'oauth:release',

@@ -23,6 +23,10 @@ const api = {
 		version: (): Promise<string> => ipcRenderer.invoke(IPC.appVersion)
 	},
 
+	dialog: {
+		pickFolder: (): Promise<string | null> => ipcRenderer.invoke(IPC.dialogPickFolder)
+	},
+
 	oauth: {
 		prepare: (): Promise<OAuthListener> => ipcRenderer.invoke(IPC.oauthPrepare),
 

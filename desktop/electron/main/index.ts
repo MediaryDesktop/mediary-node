@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, shell } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron'
 import { join } from 'node:path'
 
 import { IPC } from '../shared/ipc.js'
@@ -111,6 +111,22 @@ function registerIpc(): void {
 	)
 
 	ipcMain.handle(IPC.trailerHost, () => trailerHostOrigin())
+
+	// The renderer has no filesystem access, so a library folder can only be
+	// chosen through the OS dialog the main process owns.
+	ipcMain.handle(IPC.dialogPickFolder, async (event): Promise<string | null> => {
+		const parent = BrowserWindow.fromWebContents(event.sender)
+
+		const result = parent
+			? await dialog.showOpenDialog(parent, { properties: ['openDirectory'] })
+			: await dialog.showOpenDialog({ properties: ['openDirectory'] })
+
+		if (result.canceled) {
+			return null
+		}
+
+		return result.filePaths[0] ?? null
+	})
 
 	ipcMain.handle(IPC.sessionCanPersist, () => canPersistSession())
 	ipcMain.handle(IPC.sessionRead, () => readStoredSession())

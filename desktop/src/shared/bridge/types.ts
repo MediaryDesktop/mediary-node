@@ -31,6 +31,9 @@ export interface MediaryBridge {
 	app: {
 		version: () => Promise<string>
 	}
+	dialog: {
+		pickFolder: () => Promise<string | null>
+	}
 	oauth: {
 		prepare: () => Promise<OAuthListener>
 		authorize: (consentUrl: string) => Promise<OAuthAuthorization>
