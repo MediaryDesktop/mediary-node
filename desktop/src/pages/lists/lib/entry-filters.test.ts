@@ -2,13 +2,21 @@ import { describe, expect, it } from 'vitest'
 
 import type { TrackerEntry } from '@entities/tracker'
 
-import { ANY, applyEntryFilters, formatsOf, hasActiveFilters, INITIAL_ENTRY_FILTERS } from './entry-filters'
+import {
+	ANY,
+	applyEntryFilters,
+	formatsOf,
+	genresOf,
+	hasActiveFilters,
+	INITIAL_ENTRY_FILTERS
+} from './entry-filters'
 
 function entry(part: {
 	ref: string
 	name: string
 	status?: string
 	format?: string | null
+	genres?: string[]
 	score?: number
 	progress?: number
 	updated?: string
@@ -38,6 +46,8 @@ function entry(part: {
 			volumes: null,
 			season_year: 2024,
 			is_adult: false,
+			genres: part.genres ?? ['Drama'],
+			average_score: 85,
 			cover_image: null,
 			cover_color: null,
 			banner_image: null,
@@ -47,9 +57,33 @@ function entry(part: {
 }
 
 const ENTRIES = [
-	entry({ ref: 'a', name: 'Frieren', status: 'CURRENT', format: 'TV', score: 90, progress: 4 }),
-	entry({ ref: 'b', name: 'Bocchi', status: 'COMPLETED', format: 'TV', score: 70, progress: 12 }),
-	entry({ ref: 'c', name: 'Suzume', status: 'COMPLETED', format: 'MOVIE', score: 80, progress: 1 })
+	entry({
+		ref: 'a',
+		name: 'Frieren',
+		status: 'CURRENT',
+		format: 'TV',
+		genres: ['Adventure', 'Fantasy'],
+		score: 90,
+		progress: 4
+	}),
+	entry({
+		ref: 'b',
+		name: 'Bocchi',
+		status: 'COMPLETED',
+		format: 'TV',
+		genres: ['Comedy', 'Music'],
+		score: 70,
+		progress: 12
+	}),
+	entry({
+		ref: 'c',
+		name: 'Suzume',
+		status: 'COMPLETED',
+		format: 'MOVIE',
+		genres: ['Adventure', 'Drama'],
+		score: 80,
+		progress: 1
+	})
 ]
 
 const refs = (entries: TrackerEntry[]) => entries.map(item => item.media_ref)
@@ -66,6 +100,15 @@ describe('applyEntryFilters', () => {
 		])
 
 		expect(refs(applyEntryFilters(ENTRIES, { ...INITIAL_ENTRY_FILTERS, format: 'MOVIE' }))).toEqual(['c'])
+	})
+
+	it('narrows by genre', () => {
+		expect(refs(applyEntryFilters(ENTRIES, { ...INITIAL_ENTRY_FILTERS, genre: 'Adventure' }))).toEqual([
+			'a',
+			'c'
+		])
+
+		expect(refs(applyEntryFilters(ENTRIES, { ...INITIAL_ENTRY_FILTERS, genre: 'Music' }))).toEqual(['b'])
 	})
 
 	it('matches a title case-insensitively across every name it has', () => {
@@ -98,6 +141,12 @@ describe('applyEntryFilters', () => {
 describe('formatsOf', () => {
 	it('offers each present format once, sorted', () => {
 		expect(formatsOf(ENTRIES)).toEqual(['MOVIE', 'TV'])
+	})
+})
+
+describe('genresOf', () => {
+	it('offers each present genre once, sorted', () => {
+		expect(genresOf(ENTRIES)).toEqual(['Adventure', 'Comedy', 'Drama', 'Fantasy', 'Music'])
 	})
 })
 

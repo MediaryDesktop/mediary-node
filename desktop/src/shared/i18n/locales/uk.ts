@@ -93,6 +93,7 @@ export const uk: Translation = {
 			search: 'Пошук у цьому списку',
 			anyStatus: 'Будь-який статус',
 			anyFormat: 'Будь-який формат',
+			anyGenre: 'Будь-який жанр',
 			noMatches: 'У цьому списку немає тайтлів за такими фільтрами',
 			reset: 'Скинути',
 			sort: {

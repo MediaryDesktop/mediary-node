@@ -75,18 +75,20 @@ type Title struct {
 }
 
 type Media struct {
-	Title       Title   `json:"title"`
-	Format      *string `json:"format"`
-	Status      *string `json:"status"`
-	Episodes    *int    `json:"episodes"`
-	Chapters    *int    `json:"chapters"`
-	Volumes     *int    `json:"volumes"`
-	SeasonYear  *int    `json:"season_year"`
-	IsAdult     bool    `json:"is_adult"`
-	CoverImage  *string `json:"cover_image"`
-	CoverColor  *string `json:"cover_color"`
-	BannerImage *string `json:"banner_image"`
-	SiteURL     string  `json:"site_url"`
+	Title        Title    `json:"title"`
+	Format       *string  `json:"format"`
+	Status       *string  `json:"status"`
+	Episodes     *int     `json:"episodes"`
+	Chapters     *int     `json:"chapters"`
+	Volumes      *int     `json:"volumes"`
+	SeasonYear   *int     `json:"season_year"`
+	IsAdult      bool     `json:"is_adult"`
+	CoverImage   *string  `json:"cover_image"`
+	CoverColor   *string  `json:"cover_color"`
+	BannerImage  *string  `json:"banner_image"`
+	SiteURL      string   `json:"site_url"`
+	Genres       []string `json:"genres"`
+	AverageScore *int     `json:"average_score"`
 }
 
 type Entry struct {

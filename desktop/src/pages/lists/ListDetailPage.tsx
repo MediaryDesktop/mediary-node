@@ -7,13 +7,13 @@ import { EmptyState, PageHeader, PageTransition } from '@shared/ui'
 
 import { aniListAccountModel } from '@entities/anilist-account'
 import { MediaCard } from '@entities/media'
-import { trackerListsQuery, useTrackedEntries } from '@entities/tracker'
+import { entryTracking, trackerListsQuery, useTrackedEntries } from '@entities/tracker'
 import type { TrackerCustomList, TrackerEntry, TrackerMediaType } from '@entities/tracker'
 
 import { DeleteListDialog, ListDrawer, ListOptionsMenu, manageListsModel } from '@features/manage-lists'
 import { EntryMenu } from '@features/track-media'
 
-import { applyEntryFilters, formatsOf, INITIAL_ENTRY_FILTERS } from './lib/entry-filters'
+import { applyEntryFilters, formatsOf, genresOf, INITIAL_ENTRY_FILTERS } from './lib/entry-filters'
 import { ListFilters } from './list-filters/ListFilters'
 import styles from './ListDetailPage.module.scss'
 
@@ -88,6 +88,7 @@ export function ListDetailPage({ listId }: ListDetailPageProps) {
 		list?.media_type === 'manga' || entries[0]?.media_type === 'manga' ? 'manga' : 'anime'
 
 	const formats = useMemo(() => formatsOf(entries), [entries])
+	const genres = useMemo(() => genresOf(entries), [entries])
 	const visible = useMemo(() => applyEntryFilters(entries, filters), [entries, filters])
 
 	const title = status ? t(STATUS_LABELS[status]) : (list?.name ?? t('nav.lists'))
@@ -119,6 +120,7 @@ export function ListDetailPage({ listId }: ListDetailPageProps) {
 					<ListFilters
 						filters={filters}
 						formats={formats}
+						genres={genres}
 						mediaType={mediaType}
 						onChange={setFilters}
 					/>
@@ -134,7 +136,8 @@ export function ListDetailPage({ listId }: ListDetailPageProps) {
 							<li key={entry.media_ref}>
 								<MediaCard
 									media={entry.media}
-									scoreBadge={entry.score > 0 ? entry.score : undefined}
+									scoreBadge={entry.media.average_score ?? undefined}
+									tracking={entryTracking(entry, t)}
 									menu={
 										<EntryMenu
 											entry={entry}

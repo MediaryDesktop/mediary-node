@@ -6,12 +6,17 @@
 	margin-bottom: 1.5rem;
 
 	.search {
-		flex: 1 1 14rem;
-		min-width: 12rem;
+		flex: 1 1 8rem;
+		min-width: 6rem;
 	}
 
-	.control {
-		flex: 0 1 13rem;
-		min-width: 10rem;
+	.control,
+	.sort {
+		flex: 0 1 11rem;
+		min-width: 7rem;
+	}
+
+	.reset {
+		flex: 0 0 auto;
 	}
 }

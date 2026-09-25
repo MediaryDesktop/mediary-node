@@ -111,17 +111,19 @@ func entryFromAniList(item *anilist.ListEntry, mediaType MediaType) Entry {
 				English:       item.Media.Title.English,
 				Native:        item.Media.Title.Native,
 			},
-			Format:      item.Media.Format,
-			Status:      item.Media.Status,
-			Episodes:    item.Media.Episodes,
-			Chapters:    item.Media.Chapters,
-			Volumes:     item.Media.Volumes,
-			SeasonYear:  item.Media.SeasonYear,
-			IsAdult:     item.Media.IsAdult,
-			CoverImage:  cover,
-			CoverColor:  item.Media.CoverImage.Color,
-			BannerImage: item.Media.BannerImage,
-			SiteURL:     item.Media.SiteURL,
+			Format:       item.Media.Format,
+			Status:       item.Media.Status,
+			Episodes:     item.Media.Episodes,
+			Chapters:     item.Media.Chapters,
+			Volumes:      item.Media.Volumes,
+			SeasonYear:   item.Media.SeasonYear,
+			IsAdult:      item.Media.IsAdult,
+			CoverImage:   cover,
+			CoverColor:   item.Media.CoverImage.Color,
+			BannerImage:  item.Media.BannerImage,
+			SiteURL:      item.Media.SiteURL,
+			Genres:       nonNilStrings(item.Media.Genres),
+			AverageScore: item.Media.AverageScore,
 		},
 	}
 }
@@ -142,4 +144,11 @@ func derefString(value *string) string {
 		return ""
 	}
 	return *value
+}
+
+func nonNilStrings(values []string) []string {
+	if values == nil {
+		return []string{}
+	}
+	return values
 }

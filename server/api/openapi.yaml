@@ -546,6 +546,11 @@ components:
     Media:
       additionalProperties: false
       properties:
+        average_score:
+          format: int64
+          type:
+            - integer
+            - "null"
         banner_image:
           type:
             - string
@@ -571,6 +576,12 @@ components:
         format:
           type:
             - string
+            - "null"
+        genres:
+          items:
+            type: string
+          type:
+            - array
             - "null"
         is_adult:
           type: boolean
@@ -605,6 +616,8 @@ components:
         - cover_color
         - banner_image
         - site_url
+        - genres
+        - average_score
       type: object
     MediaDetails:
       additionalProperties: false

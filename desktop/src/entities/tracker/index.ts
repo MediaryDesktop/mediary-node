@@ -15,6 +15,9 @@ export type { MediaTypeIconProps } from './ui/MediaTypeIcon'
 
 export { useTrackedEntries, useTrackedEntry } from './lib/useTrackedEntries'
 
+export { entryTracking } from './lib/tracking'
+export type { EntryTracking } from './lib/tracking'
+
 export { formatScoreValue, nextScore } from './model/score-format'
 export type { ScoreFormat } from './model/score-format'
 

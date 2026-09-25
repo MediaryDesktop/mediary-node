@@ -68,19 +68,21 @@ type FuzzyDate struct {
 }
 
 type Media struct {
-	ID          int     `json:"id"`
-	IDMal       *int    `json:"idMal"`
-	Type        string  `json:"type"`
-	Format      *string `json:"format"`
-	Status      *string `json:"status"`
-	Episodes    *int    `json:"episodes"`
-	Chapters    *int    `json:"chapters"`
-	Volumes     *int    `json:"volumes"`
-	SeasonYear  *int    `json:"seasonYear"`
-	IsAdult     bool    `json:"isAdult"`
-	SiteURL     string  `json:"siteUrl"`
-	BannerImage *string `json:"bannerImage"`
-	Title       struct {
+	ID           int      `json:"id"`
+	IDMal        *int     `json:"idMal"`
+	Type         string   `json:"type"`
+	Format       *string  `json:"format"`
+	Status       *string  `json:"status"`
+	Episodes     *int     `json:"episodes"`
+	Chapters     *int     `json:"chapters"`
+	Volumes      *int     `json:"volumes"`
+	SeasonYear   *int     `json:"seasonYear"`
+	IsAdult      bool     `json:"isAdult"`
+	SiteURL      string   `json:"siteUrl"`
+	BannerImage  *string  `json:"bannerImage"`
+	Genres       []string `json:"genres"`
+	AverageScore *int     `json:"averageScore"`
+	Title        struct {
 		UserPreferred *string `json:"userPreferred"`
 		Romaji        *string `json:"romaji"`
 		English       *string `json:"english"`

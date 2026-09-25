@@ -48,6 +48,8 @@ query Collection($userId: Int, $type: MediaType) {
           isAdult
           siteUrl
           bannerImage
+          genres
+          averageScore
           title {
             userPreferred
             romaji

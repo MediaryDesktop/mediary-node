@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from '@shared/i18n'
 import { Icon } from '@shared/ui'
 
-import { enumLabel, mediaPreviewModel, scoreTone } from '../model/model'
+import { mediaPreviewModel, scoreTone } from '../model/model'
 
 import styles from './MediaPreview.module.scss'
 
@@ -84,14 +84,23 @@ function TrailerFrame({ host, id, title }: TrailerFrameProps) {
 	)
 }
 
+const MAX_GENRES = 3
+
+export interface MediaTracking {
+	statusLabel: string
+	score: number
+	genres: string[] | null
+	year: number | null
+}
+
 export interface MediaPreviewProps {
 	mediaRef: string
 	title: string
 	active: boolean
+	tracking?: MediaTracking | null
 }
 
-export function MediaPreview({ mediaRef, title, active }: MediaPreviewProps) {
-	const { t } = useTranslation()
+export function MediaPreview({ mediaRef, title, active, tracking }: MediaPreviewProps) {
 	const [previews, trailerHost, requestPreview] = useUnit([
 		mediaPreviewModel.$previews,
 		mediaPreviewModel.$trailerHost,
@@ -102,14 +111,47 @@ export function MediaPreview({ mediaRef, title, active }: MediaPreviewProps) {
 	const trailerId = details?.trailer?.site === 'youtube' ? details.trailer.id : null
 
 	useEffect(() => {
-		if (active) {
+		if (active && !tracking) {
 			requestPreview(mediaRef)
 		}
-	}, [active, mediaRef, requestPreview])
+	}, [active, mediaRef, requestPreview, tracking])
+
+	if (tracking) {
+		const genres = (tracking.genres ?? []).slice(0, MAX_GENRES)
+
+		return (
+			<div className={clsx(styles.preview, styles.tracked)} data-theme='dark'>
+				<div className={styles.info}>
+					<span className={styles.status}>{tracking.statusLabel}</span>
+
+					<p className={styles.title}>{title}</p>
+
+					{genres.length > 0 && <p className={styles.genres}>{genres.join(', ')}</p>}
+
+					{(tracking.score > 0 || tracking.year != null) && (
+						<div className={styles.meta}>
+							{tracking.score > 0 && (
+								<span className={styles.personalScore}>
+									<Icon name='common/star' size={13} />
+									{tracking.score / 10}
+								</span>
+							)}
+
+							{tracking.year != null && (
+								<span className={styles.when}>
+									<Icon name='common/calendar' size={13} />
+									{tracking.year}
+								</span>
+							)}
+						</div>
+					)}
+				</div>
+			</div>
+		)
+	}
 
 	const score = details?.mean_score ?? details?.average_score ?? null
-	const season = details?.season ? enumLabel(t, 'season', details.season) : null
-	const when = [season, details?.season_year].filter(Boolean).join(' ')
+	const year = details?.season_year ?? null
 
 	const thumbnail = details?.trailer?.thumbnail ?? null
 	const backdrop = thumbnail ?? details?.banner_image ?? null
@@ -132,7 +174,7 @@ export function MediaPreview({ mediaRef, title, active }: MediaPreviewProps) {
 			<div className={styles.info}>
 				<p className={styles.title}>{title}</p>
 
-				{(score != null || when) && (
+				{(score != null || year != null) && (
 					<div className={styles.meta}>
 						{score != null && (
 							<span className={clsx(styles.score, styles[scoreTone(score)])}>
@@ -141,10 +183,10 @@ export function MediaPreview({ mediaRef, title, active }: MediaPreviewProps) {
 							</span>
 						)}
 
-						{when && (
+						{year != null && (
 							<span className={styles.when}>
 								<Icon name='common/calendar' size={13} />
-								{when}
+								{year}
 							</span>
 						)}
 					</div>

@@ -31,4 +31,24 @@ describe('MediaCard', () => {
 		expect(screen.getByText('SEQUEL')).toBeInTheDocument()
 		expect(screen.getByText('controls')).toBeInTheDocument()
 	})
+
+	it('shows list status, score and up to three genres for a tracked title', () => {
+		render(
+			<MediaCard
+				media={MEDIA}
+				previewRef='anilist:100'
+				tracking={{
+					statusLabel: 'Watching',
+					score: 85,
+					genres: ['Adventure', 'Drama', 'Fantasy', 'Slice of Life'],
+					year: 2023
+				}}
+			/>
+		)
+
+		expect(screen.getByText('Watching')).toBeInTheDocument()
+		expect(screen.getByText('8.5')).toBeInTheDocument()
+		expect(screen.getByText('2023')).toBeInTheDocument()
+		expect(screen.getByText('Adventure, Drama, Fantasy')).toBeInTheDocument()
+	})
 })

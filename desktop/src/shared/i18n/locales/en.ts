@@ -95,6 +95,7 @@ export const en = {
 			search: 'Search in this list',
 			anyStatus: 'Any status',
 			anyFormat: 'Any format',
+			anyGenre: 'Any genre',
 			noMatches: 'No title in this list matches those filters',
 			reset: 'Reset',
 			sort: {

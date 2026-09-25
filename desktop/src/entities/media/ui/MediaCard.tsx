@@ -9,6 +9,7 @@ import { mediaTitle, scoreTone } from '../model/model'
 
 import styles from './MediaCard.module.scss'
 import { MediaPreview } from './MediaPreview'
+import type { MediaTracking } from './MediaPreview'
 
 const CARD_CLIP_PATH_D =
 	'M 0.045,0 L 0.75,0 A 0.045,0.032 0,0,1 0.795,0.032 L 0.795,0.1 A 0.045,0.032 0,0,0 0.84,0.132 L 0.955,0.132 A 0.045,0.032 0,0,1 1,0.164 L 1,0.967 A 0.045,0.032 0,0,1 0.955,1 L 0.045,1 A 0.045,0.032 0,0,1 0,0.968 L 0,0.032 A 0.045,0.032 0,0,1 0.045,0 Z'
@@ -27,6 +28,7 @@ export interface MediaCardProps {
 	menu?: ReactNode
 	children?: ReactNode
 	previewRef?: string
+	tracking?: MediaTracking | null
 	onOpen?: () => void
 	className?: string
 }
@@ -39,6 +41,7 @@ export function MediaCard({
 	menu,
 	children,
 	previewRef,
+	tracking,
 	onOpen,
 	className
 }: MediaCardProps) {
@@ -108,7 +111,12 @@ export function MediaCard({
 
 			{previewRef && (
 				<div className={styles.previewFrame} style={{ clipPath: `url(#${clipPathId})` }}>
-					<MediaPreview mediaRef={previewRef} title={title} active={previewing} />
+					<MediaPreview
+						mediaRef={previewRef}
+						title={title}
+						active={previewing}
+						tracking={tracking}
+					/>
 				</div>
 			)}
 

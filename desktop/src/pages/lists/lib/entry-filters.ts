@@ -11,6 +11,7 @@ export interface EntryFilters {
 	title: string
 	status: TrackerStatus | typeof ANY
 	format: string
+	genre: string
 	sort: EntrySort
 }
 
@@ -18,6 +19,7 @@ export const INITIAL_ENTRY_FILTERS: EntryFilters = {
 	title: '',
 	status: ANY,
 	format: ANY,
+	genre: ANY,
 	sort: 'default'
 }
 
@@ -26,6 +28,7 @@ export function hasActiveFilters(filters: EntryFilters): boolean {
 		filters.title.trim() !== '' ||
 		filters.status !== ANY ||
 		filters.format !== ANY ||
+		filters.genre !== ANY ||
 		filters.sort !== 'default'
 	)
 }
@@ -42,6 +45,18 @@ export function formatsOf(entries: TrackerEntry[]): string[] {
 	}
 
 	return [...formats].sort()
+}
+
+export function genresOf(entries: TrackerEntry[]): string[] {
+	const genres = new Set<string>()
+
+	for (const entry of entries) {
+		for (const genre of entry.media.genres ?? []) {
+			genres.add(genre)
+		}
+	}
+
+	return [...genres].sort()
 }
 
 function compare(a: TrackerEntry, b: TrackerEntry, sort: EntrySort): number {
@@ -68,6 +83,10 @@ export function applyEntryFilters(entries: TrackerEntry[], filters: EntryFilters
 		}
 
 		if (filters.format !== ANY && entry.media.format !== filters.format) {
+			return false
+		}
+
+		if (filters.genre !== ANY && !(entry.media.genres ?? []).includes(filters.genre)) {
 			return false
 		}
 

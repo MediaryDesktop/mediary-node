@@ -13,6 +13,7 @@ export type { MediaEnumGroup, ScoreTone } from './model/model'
 
 export { MediaCard } from './ui/MediaCard'
 export type { MediaCardMedia, MediaCardProps } from './ui/MediaCard'
+export type { MediaTracking } from './ui/MediaPreview'
 
 export { fetchMediaDetailsFx, fetchMediaFilterOptionsFx, searchMediaFx } from './api/api'
 export type {

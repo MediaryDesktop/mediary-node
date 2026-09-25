@@ -13,11 +13,12 @@ import styles from './ListFilters.module.scss'
 export interface ListFiltersProps {
 	filters: EntryFilters
 	formats: string[]
+	genres: string[]
 	mediaType: TrackerMediaType
 	onChange: (filters: EntryFilters) => void
 }
 
-export function ListFilters({ filters, formats, mediaType, onChange }: ListFiltersProps) {
+export function ListFilters({ filters, formats, genres, mediaType, onChange }: ListFiltersProps) {
 	const { t } = useTranslation()
 
 	const patch = (part: Partial<EntryFilters>) => onChange({ ...filters, ...part })
@@ -60,6 +61,18 @@ export function ListFilters({ filters, formats, mediaType, onChange }: ListFilte
 				/>
 			)}
 
+			{genres.length > 1 && (
+				<SelectDropdown
+					value={filters.genre}
+					onChange={next => patch({ genre: next ?? ANY })}
+					options={[
+						{ value: ANY, label: t('lists.filters.anyGenre') },
+						...genres.map(genre => ({ value: genre, label: genre }))
+					]}
+					className={styles.control}
+				/>
+			)}
+
 			<SelectDropdown
 				value={filters.sort}
 				onChange={next => patch({ sort: (next as EntrySort) ?? 'default' })}
@@ -68,7 +81,7 @@ export function ListFilters({ filters, formats, mediaType, onChange }: ListFilte
 					label: t(`lists.filters.sort.${sort}`)
 				}))}
 				startIcon={<Icon name='common/sort' size={16} />}
-				className={styles.control}
+				className={styles.sort}
 			/>
 
 			<Button
@@ -77,6 +90,7 @@ export function ListFilters({ filters, formats, mediaType, onChange }: ListFilte
 				disabled={!hasActiveFilters(filters)}
 				aria-label={t('lists.filters.reset')}
 				onClick={() => onChange(INITIAL_ENTRY_FILTERS)}
+				className={styles.reset}
 			>
 				<Icon name='common/reset' size={16} />
 			</Button>

@@ -72,6 +72,8 @@ const ENTRY: TrackerEntry = {
 		volumes: null,
 		season_year: 2023,
 		is_adult: false,
+		genres: ['Adventure', 'Drama', 'Fantasy'],
+		average_score: 91,
 		cover_image: null,
 		cover_color: null,
 		banner_image: null,

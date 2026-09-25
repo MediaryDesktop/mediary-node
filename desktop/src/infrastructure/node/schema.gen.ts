@@ -617,6 +617,8 @@ export interface components {
 			sources: components['schemas']['Source'][] | null
 		}
 		Media: {
+			/** Format: int64 */
+			average_score: number | null
 			banner_image: string | null
 			/** Format: int64 */
 			chapters: number | null
@@ -625,6 +627,7 @@ export interface components {
 			/** Format: int64 */
 			episodes: number | null
 			format: string | null
+			genres: string[] | null
 			is_adult: boolean
 			/** Format: int64 */
 			season_year: number | null

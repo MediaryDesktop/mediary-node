@@ -93,6 +93,7 @@ export const ru: Translation = {
 			search: 'Поиск в этом списке',
 			anyStatus: 'Любой статус',
 			anyFormat: 'Любой формат',
+			anyGenre: 'Любой жанр',
 			noMatches: 'В этом списке нет тайтлов по таким фильтрам',
 			reset: 'Сбросить',
 			sort: {
