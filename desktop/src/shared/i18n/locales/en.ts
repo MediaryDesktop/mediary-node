@@ -236,6 +236,89 @@ export const en = {
 		}
 	},
 
+	library: {
+		summary: {
+			files_one: '{{count}} file',
+			files_few: '{{count}} files',
+			files_many: '{{count}} files',
+			files_other: '{{count}} files',
+			unmatched_one: '{{count}} unmatched',
+			unmatched_few: '{{count}} unmatched',
+			unmatched_many: '{{count}} unmatched',
+			unmatched_other: '{{count}} unmatched'
+		},
+		empty: {
+			title: 'No library folders yet',
+			description:
+				'Point the node at a folder with your files. It walks subfolders too and matches what it finds against AniList'
+		},
+		root: {
+			add: 'Add folder',
+			remove: 'Stop watching this folder',
+			removeFailed: 'Could not stop watching that folder',
+			failed: 'Could not add that folder',
+			overlap: 'That folder overlaps one the node already watches',
+			files_one: '{{count}} file',
+			files_few: '{{count}} files',
+			files_many: '{{count}} files',
+			files_other: '{{count}} files',
+			missing_one: '{{count}} missing',
+			missing_few: '{{count}} missing',
+			missing_many: '{{count}} missing',
+			missing_other: '{{count}} missing'
+		},
+		scan: {
+			start: 'Scan',
+			running: 'Scanning…',
+			walking: 'Walking folders — {{found}} files found',
+			matching: 'Matching titles — {{matched}} of {{total}}',
+			rootFailed: 'A folder could not be read: {{reason}}'
+		},
+		search: 'Search files',
+		view: {
+			all: 'All',
+			unmatched: 'Unmatched',
+			missing: 'Missing'
+		},
+		loading: 'Reading the library…',
+		failed: 'The node did not return the library',
+		retry: 'Try again',
+		noFiles: 'Nothing scanned yet',
+		noFilesHint: 'Press Scan to walk the folders you added',
+		noMatches: 'No files match this filter',
+		truncated: 'Showing {{shown}} of {{total}} files',
+		file: {
+			missing: 'Missing',
+			matched: 'Matched {{percent}}%',
+			matchedByHand: 'Matched by hand',
+			unmatched: 'Unmatched',
+			match: 'Match',
+			change: 'Change',
+			clear: 'Forget this match',
+			unknownTitle: 'Unrecognized'
+		},
+		form: {
+			series: 'Episode',
+			movie: 'Film',
+			special: 'Special',
+			extra: 'Extra',
+			manga: 'Chapter',
+			book: 'Book'
+		},
+		match: {
+			title: 'What is this file?',
+			loading: 'Asking the source…',
+			loadFailed: 'Could not load candidates',
+			failed: 'Could not save the match',
+			none: 'No candidates',
+			noneHint:
+				'Nothing the source knows is close enough to this name. Renaming the file closer to its title usually helps',
+			tracked: 'On your list',
+			noSource: 'No metadata source is connected',
+			offline: 'The node is unreachable'
+		}
+	},
+
 	media: {
 		back: 'Back',
 		failed: 'Could not load this title',
@@ -388,7 +471,6 @@ export const en = {
 
 	placeholder: {
 		discover: 'Recommendations and fresh releases will live here once the cloud catalog is connected',
-		library: 'Local files scanned by the node and matched against catalog titles',
 		downloads: 'Torrent providers and the download queue handled by the node'
 	},
 

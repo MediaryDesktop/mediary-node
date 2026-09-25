@@ -234,6 +234,89 @@ export const uk: Translation = {
 		}
 	},
 
+	library: {
+		summary: {
+			files_one: '{{count}} файл',
+			files_few: '{{count}} файли',
+			files_many: '{{count}} файлів',
+			files_other: '{{count}} файла',
+			unmatched_one: '{{count}} без тайтла',
+			unmatched_few: '{{count}} без тайтла',
+			unmatched_many: '{{count}} без тайтла',
+			unmatched_other: '{{count}} без тайтла'
+		},
+		empty: {
+			title: 'Тек бібліотеки ще немає',
+			description:
+				'Вкажіть ноді теку з вашими файлами. Вона обійде й підтеки, а знайдене зіставить із AniList'
+		},
+		root: {
+			add: 'Додати теку',
+			remove: 'Прибрати цю теку',
+			removeFailed: 'Не вдалося прибрати теку',
+			failed: 'Не вдалося додати теку',
+			overlap: 'Ця тека перетинається з тією, яку нода вже стежить',
+			files_one: '{{count}} файл',
+			files_few: '{{count}} файли',
+			files_many: '{{count}} файлів',
+			files_other: '{{count}} файла',
+			missing_one: '{{count}} відсутній',
+			missing_few: '{{count}} відсутні',
+			missing_many: '{{count}} відсутніх',
+			missing_other: '{{count}} відсутнього'
+		},
+		scan: {
+			start: 'Сканувати',
+			running: 'Сканування…',
+			walking: 'Обхід тек — знайдено {{found}} файлів',
+			matching: 'Зіставлення тайтлів — {{matched}} з {{total}}',
+			rootFailed: 'Теку не вдалося прочитати: {{reason}}'
+		},
+		search: 'Пошук файлів',
+		view: {
+			all: 'Усі',
+			unmatched: 'Без тайтла',
+			missing: 'Відсутні'
+		},
+		loading: 'Читаємо бібліотеку…',
+		failed: 'Нода не віддала бібліотеку',
+		retry: 'Повторити',
+		noFiles: 'Ще нічого не сканували',
+		noFilesHint: 'Натисніть «Сканувати», щоб нода обійшла додані теки',
+		noMatches: 'Під цей фільтр не підпадає жоден файл',
+		truncated: 'Показано {{shown}} з {{total}} файлів',
+		file: {
+			missing: 'Відсутній',
+			matched: 'Зіставлено {{percent}}%',
+			matchedByHand: 'Зіставлено вручну',
+			unmatched: 'Без тайтла',
+			match: 'Зіставити',
+			change: 'Змінити',
+			clear: 'Забути зіставлення',
+			unknownTitle: 'Не розпізнано'
+		},
+		form: {
+			series: 'Серія',
+			movie: 'Фільм',
+			special: 'Спешл',
+			extra: 'Додаткове',
+			manga: 'Глава',
+			book: 'Книга'
+		},
+		match: {
+			title: 'Що це за файл?',
+			loading: 'Запитуємо джерело…',
+			loadFailed: 'Не вдалося отримати варіанти',
+			failed: 'Не вдалося зберегти зіставлення',
+			none: 'Варіантів немає',
+			noneHint:
+				'Нічого достатньо схожого джерело не знає. Зазвичай допомагає перейменувати файл ближче до назви тайтла',
+			tracked: 'У вашому списку',
+			noSource: 'Джерело метаданих не підключено',
+			offline: 'Нода недоступна'
+		}
+	},
+
 	media: {
 		back: 'Назад',
 		failed: 'Не вдалося завантажити тайтл',
@@ -386,7 +469,6 @@ export const uk: Translation = {
 
 	placeholder: {
 		discover: 'Тут зʼявляться рекомендації та свіжі релізи, щойно буде підключено хмарний каталог',
-		library: 'Локальні файли, які сканує нода і зіставляє з тайтлами каталогу',
 		downloads: 'Джерела торентів і черга завантажень, якою керує нода'
 	},
 
