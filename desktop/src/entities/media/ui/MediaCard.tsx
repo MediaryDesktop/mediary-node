@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import type { ReactNode } from 'react'
-import { useId, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 
 import { Icon } from '@shared/ui'
 
@@ -10,6 +10,16 @@ import { mediaTitle, scoreTone } from '../model/model'
 import styles from './MediaCard.module.scss'
 import { MediaPreview } from './MediaPreview'
 import type { MediaTracking } from './MediaPreview'
+
+function keyboardFocus(target: EventTarget | null) {
+	if (!(target instanceof Element)) return false
+
+	try {
+		return target.matches(':focus-visible')
+	} catch {
+		return false
+	}
+}
 
 const CARD_CLIP_PATH_D =
 	'M 0.045,0 L 0.75,0 A 0.045,0.032 0,0,1 0.795,0.032 L 0.795,0.1 A 0.045,0.032 0,0,0 0.84,0.132 L 0.955,0.132 A 0.045,0.032 0,0,1 1,0.164 L 1,0.967 A 0.045,0.032 0,0,1 0.955,1 L 0.045,1 A 0.045,0.032 0,0,1 0,0.968 L 0,0.032 A 0.045,0.032 0,0,1 0.045,0 Z'
@@ -50,6 +60,33 @@ export function MediaCard({
 	const [hovered, setHovered] = useState(false)
 	const [focused, setFocused] = useState(false)
 	const previewing = Boolean(previewRef) && (hovered || focused)
+	const cardRef = useRef<HTMLDivElement>(null)
+
+	useEffect(() => {
+		if (!hovered) return
+
+		const drop = (event: PointerEvent) => {
+			const node = cardRef.current
+			if (!node) return
+
+			const rect = node.getBoundingClientRect()
+			const inside =
+				event.clientX >= rect.left &&
+				event.clientX <= rect.right &&
+				event.clientY >= rect.top &&
+				event.clientY <= rect.bottom
+
+			if (!inside) setHovered(false)
+		}
+
+		window.addEventListener('pointerup', drop)
+		window.addEventListener('pointercancel', drop)
+
+		return () => {
+			window.removeEventListener('pointerup', drop)
+			window.removeEventListener('pointercancel', drop)
+		}
+	}, [hovered])
 
 	const content = (
 		<>
@@ -83,10 +120,16 @@ export function MediaCard({
 
 	return (
 		<div
+			ref={cardRef}
 			className={clsx(styles.card, previewing && styles.previewing, className)}
+			onPointerDown={event => {
+				if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+					event.currentTarget.releasePointerCapture(event.pointerId)
+				}
+			}}
 			onPointerEnter={() => setHovered(true)}
 			onPointerLeave={() => setHovered(false)}
-			onFocus={() => setFocused(true)}
+			onFocus={event => setFocused(keyboardFocus(event.target))}
 			onBlur={event => {
 				if (!event.currentTarget.contains(event.relatedTarget)) {
 					setFocused(false)
