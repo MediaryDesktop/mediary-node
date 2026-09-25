@@ -18,31 +18,253 @@ func New(svc *service.Service) *Handler {
 	return &Handler{svc: svc}
 }
 
-type StatusOutput struct {
+type RootsOutput struct {
 	Body struct {
-		Module string `json:"module" example:"library" doc:"Module name."`
-		Ready  bool   `json:"ready" doc:"True when the module's dependencies are wired."`
+		Roots []service.Root `json:"roots" doc:"Folders the user gave the node to watch."`
+	}
+}
+
+type AddRootInput struct {
+	Body struct {
+		Path string `json:"path" minLength:"1" maxLength:"4096" example:"D:\\Anime" doc:"Absolute path to an existing folder on this machine."`
+	}
+}
+
+type RootOutput struct {
+	Body struct {
+		Root *service.Root `json:"root" doc:"The root as the node recorded it."`
+	}
+}
+
+type DeleteRootInput struct {
+	ID int64 `path:"id" doc:"Identifier of the root to stop watching."`
+}
+
+type ScanInput struct {
+	Body struct {
+		RootID int64 `json:"root_id,omitempty" doc:"Scan this root alone. Left out or 0 scans every root."`
+	}
+}
+
+type ScanOutput struct {
+	Body struct {
+		Scan service.ScanStatus `json:"scan" doc:"State of the node's single scan slot."`
+	}
+}
+
+type FilesInput struct {
+	RootID        int64  `query:"root_id" doc:"Only files under this root."`
+	Kind          string `query:"kind" enum:"video,manga,book" doc:"Only files whose extension points at this form of media."`
+	Form          string `query:"form" enum:"series,movie,special,extra,manga,book" doc:"Only files whose name reads as this. Use it to leave out openings and extras, which are never episodes."`
+	UnmatchedOnly bool   `query:"unmatched" doc:"Only files that are not matched to a title yet."`
+	Limit         int    `query:"limit" minimum:"1" maximum:"500" default:"100" doc:"Page size."`
+	Offset        int    `query:"offset" minimum:"0" doc:"How many files to skip."`
+}
+
+type FilesOutput struct {
+	Body struct {
+		Files *service.FilePage `json:"files" doc:"One page of scanned files with their matches."`
+	}
+}
+
+type SetMatchInput struct {
+	ID   int64 `path:"id" doc:"Identifier of the file to match."`
+	Body struct {
+		MediaRef string `json:"media_ref" minLength:"3" example:"anilist:154587" doc:"The title this file belongs to, as provider:id."`
+		Season   *int   `json:"season,omitempty" minimum:"0" doc:"Season number, when the title has seasons."`
+		Episode  *int   `json:"episode,omitempty" minimum:"0" doc:"Episode or chapter number within the title."`
+	}
+}
+
+type FileOutput struct {
+	Body struct {
+		File *service.File `json:"file" doc:"The file with its match applied."`
+	}
+}
+
+type DeleteMatchInput struct {
+	ID int64 `path:"id" doc:"Identifier of the file whose match to forget."`
+}
+
+type SuggestionsInput struct {
+	ID int64 `path:"id" doc:"Identifier of the file to find candidates for."`
+}
+
+type SuggestionsOutput struct {
+	Body struct {
+		Suggestions []service.Suggestion `json:"suggestions" doc:"Candidate titles, best first."`
+		Sources     []httpapi.Source     `json:"sources" doc:"Attribution for every field that came from an external source."`
 	}
 }
 
 func (h *Handler) Register(api huma.API) {
 	huma.Register(api, huma.Operation{
-		OperationID: "getLibraryStatus",
+		OperationID: "listLibraryRoots",
 		Method:      http.MethodGet,
-		Path:        "/v1/library/status",
-		Summary:     "Library module status",
-		Description: "Reports whether the library module is wired. Placeholder for phase 0.",
+		Path:        "/v1/library/roots",
+		Summary:     "Library folders",
+		Description: "The folders the node scans, with how many files each holds and when it was last walked.",
 		Tags:        []string{"library"},
-	}, func(ctx context.Context, _ *struct{}) (*StatusOutput, error) {
-		ready, err := h.svc.Status(ctx)
+	}, func(ctx context.Context, _ *struct{}) (*RootsOutput, error) {
+		roots, err := h.svc.Roots(ctx)
 		if err != nil {
 			return nil, httpapi.ToHTTP(err)
 		}
 
-		out := &StatusOutput{}
-		out.Body.Module = "library"
-		out.Body.Ready = ready
+		out := &RootsOutput{}
+		out.Body.Roots = roots
 
 		return out, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID:   "addLibraryRoot",
+		Method:        http.MethodPost,
+		Path:          "/v1/library/roots",
+		Summary:       "Add a library folder",
+		Description:   "The folder has to exist and must not sit inside — or contain — a folder already watched, which would record the same file twice.",
+		Tags:          []string{"library"},
+		DefaultStatus: http.StatusCreated,
+	}, func(ctx context.Context, in *AddRootInput) (*RootOutput, error) {
+		root, err := h.svc.AddRoot(ctx, in.Body.Path)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		out := &RootOutput{}
+		out.Body.Root = root
+
+		return out, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID:   "deleteLibraryRoot",
+		Method:        http.MethodDelete,
+		Path:          "/v1/library/roots/{id}",
+		Summary:       "Stop watching a folder",
+		Description:   "Forgets the folder and everything the node recorded about the files in it, including their matches. Nothing on disk is touched.",
+		Tags:          []string{"library"},
+		DefaultStatus: http.StatusNoContent,
+	}, func(ctx context.Context, in *DeleteRootInput) (*struct{}, error) {
+		if err := h.svc.DeleteRoot(ctx, in.ID); err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return nil, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID:   "startLibraryScan",
+		Method:        http.MethodPost,
+		Path:          "/v1/library/scan",
+		Summary:       "Scan the library",
+		Description:   "Starts a scan and returns at once: walking a large library takes minutes. Progress arrives as library.scan events on the socket. Only one scan runs at a time. Files whose size and modification time did not change are not touched, so a rescan is cheap, and a folder that cannot be read right now is skipped rather than emptied.",
+		Tags:          []string{"library"},
+		DefaultStatus: http.StatusAccepted,
+	}, func(ctx context.Context, in *ScanInput) (*ScanOutput, error) {
+		status, err := h.svc.StartScan(ctx, in.Body.RootID)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		out := &ScanOutput{}
+		out.Body.Scan = *status
+
+		return out, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "getLibraryScan",
+		Method:      http.MethodGet,
+		Path:        "/v1/library/scan",
+		Summary:     "Scan status",
+		Description: "What the running scan has found so far, or the outcome of the last one.",
+		Tags:        []string{"library"},
+	}, func(_ context.Context, _ *struct{}) (*ScanOutput, error) {
+		out := &ScanOutput{}
+		out.Body.Scan = h.svc.ScanState()
+
+		return out, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "listLibraryFiles",
+		Method:      http.MethodGet,
+		Path:        "/v1/library/files",
+		Summary:     "Scanned files",
+		Description: "Files the last scan recorded, with the title each was matched to. A file the scan no longer finds is kept and reported as missing, so an unplugged drive does not take the user's manual matches with it.",
+		Tags:        []string{"library"},
+	}, func(ctx context.Context, in *FilesInput) (*FilesOutput, error) {
+		files, err := h.svc.Files(ctx, service.FileQuery{
+			RootID:        in.RootID,
+			Kind:          in.Kind,
+			MediaForm:     in.Form,
+			UnmatchedOnly: in.UnmatchedOnly,
+			Limit:         in.Limit,
+			Offset:        in.Offset,
+		})
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		out := &FilesOutput{}
+		out.Body.Files = files
+
+		return out, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "listLibraryFileCandidates",
+		Method:      http.MethodGet,
+		Path:        "/v1/library/files/{id}/candidates",
+		Summary:     "What this file could be",
+		Description: "Titles the file's name could refer to, best first, each with how well it fits. This is the other half of the automatic match: what the node would not decide on its own it offers here, for the user to confirm with setLibraryFileMatch. Entries already on the user's own list are marked and come from the node's mirror, so they are offered even while the source is unreachable.",
+		Tags:        []string{"library"},
+	}, func(ctx context.Context, in *SuggestionsInput) (*SuggestionsOutput, error) {
+		suggestions, err := h.svc.Suggestions(ctx, in.ID)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		out := &SuggestionsOutput{}
+		out.Body.Suggestions = suggestions
+		out.Body.Sources = []httpapi.Source{httpapi.AniListSource}
+
+		return out, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "setLibraryFileMatch",
+		Method:      http.MethodPut,
+		Path:        "/v1/library/files/{id}/match",
+		Summary:     "Match a file by hand",
+		Description: "Ties the file to a title the user picked. A manual match outranks anything a later scan works out on its own, so a correction is made once and not after every scan.",
+		Tags:        []string{"library"},
+	}, func(ctx context.Context, in *SetMatchInput) (*FileOutput, error) {
+		file, err := h.svc.SetMatch(ctx, in.ID, in.Body.MediaRef, in.Body.Season, in.Body.Episode)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		out := &FileOutput{}
+		out.Body.File = file
+
+		return out, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID:   "deleteLibraryFileMatch",
+		Method:        http.MethodDelete,
+		Path:          "/v1/library/files/{id}/match",
+		Summary:       "Forget a file's match",
+		Description:   "Leaves the file unmatched so the next scan can work it out again.",
+		Tags:          []string{"library"},
+		DefaultStatus: http.StatusNoContent,
+	}, func(ctx context.Context, in *DeleteMatchInput) (*struct{}, error) {
+		if err := h.svc.DeleteMatch(ctx, in.ID); err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return nil, nil
 	})
 }

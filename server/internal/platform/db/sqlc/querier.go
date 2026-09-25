@@ -9,29 +9,55 @@ import (
 )
 
 type Querier interface {
+	ClearLibraryFileMissing(ctx context.Context, arg ClearLibraryFileMissingParams) error
+	CountLibraryFiles(ctx context.Context, arg CountLibraryFilesParams) (int64, error)
 	DeleteAniListMirror(ctx context.Context) error
 	DeleteAniListOutbox(ctx context.Context) error
 	DeleteAniListOutboxEntryIfUnchanged(ctx context.Context, arg DeleteAniListOutboxEntryIfUnchangedParams) (int64, error)
 	DeleteAniListOutboxForOtherAccounts(ctx context.Context, accountID int64) error
 	DeleteCustomList(ctx context.Context, id int64) (int64, error)
+	DeleteFileMatch(ctx context.Context, fileID int64) (int64, error)
+	DeleteLibraryRoot(ctx context.Context, id int64) (int64, error)
 	DeleteSourceCacheOlderThan(ctx context.Context, arg DeleteSourceCacheOlderThanParams) error
 	GetAniListMirror(ctx context.Context, kind string) (AnilistMirror, error)
 	GetAniListOutboxEntry(ctx context.Context, arg GetAniListOutboxEntryParams) (AnilistOutbox, error)
 	GetCustomList(ctx context.Context, id int64) (CustomList, error)
+	GetLibraryFile(ctx context.Context, id int64) (GetLibraryFileRow, error)
+	GetLibraryRoot(ctx context.Context, id int64) (LibraryRoot, error)
 	// Phase 0 queries, proving `task sqlc` produces compiling Go. Module queries
 	// go in db/queries/<module>.sql.
 	GetNodeMeta(ctx context.Context, key string) (NodeMetum, error)
 	GetSourceCache(ctx context.Context, arg GetSourceCacheParams) (SourceCache, error)
 	InsertCustomList(ctx context.Context, arg InsertCustomListParams) (CustomList, error)
+	InsertLibraryFile(ctx context.Context, arg InsertLibraryFileParams) (int64, error)
+	InsertLibraryRoot(ctx context.Context, arg InsertLibraryRootParams) (LibraryRoot, error)
 	ListAniListOutbox(ctx context.Context, accountID int64) ([]AnilistOutbox, error)
 	ListCustomListItems(ctx context.Context, listID int64) ([]CustomListItem, error)
 	ListCustomLists(ctx context.Context) ([]ListCustomListsRow, error)
+	// The scan reads every known file of a root once, then walks the filesystem and
+	// compares in memory: one query instead of a lookup per file.
+	ListLibraryFileStates(ctx context.Context, rootID int64) ([]ListLibraryFileStatesRow, error)
+	ListLibraryFiles(ctx context.Context, arg ListLibraryFilesParams) ([]ListLibraryFilesRow, error)
+	ListLibraryRoots(ctx context.Context) ([]ListLibraryRootsRow, error)
 	ListNodeMeta(ctx context.Context) ([]NodeMetum, error)
+	// Files the matcher still has to work out, ordered so that every episode of one
+	// title arrives together: the candidates are then looked up once per title
+	// instead of once per file.
+	ListUnmatchedFiles(ctx context.Context, limit int64) ([]ListUnmatchedFilesRow, error)
+	MarkLibraryFileMissing(ctx context.Context, arg MarkLibraryFileMissingParams) error
 	NextCustomListPosition(ctx context.Context, mediaType string) (int64, error)
 	RecordAniListOutboxFailure(ctx context.Context, arg RecordAniListOutboxFailureParams) error
 	RenameCustomList(ctx context.Context, arg RenameCustomListParams) (int64, error)
+	TouchLibraryRoot(ctx context.Context, arg TouchLibraryRootParams) error
+	UpdateLibraryFile(ctx context.Context, arg UpdateLibraryFileParams) error
+	// Only the parsed columns: the file itself did not change, a newer parser reads
+	// its name differently.
+	UpdateLibraryFileParse(ctx context.Context, arg UpdateLibraryFileParseParams) error
 	UpsertAniListMirror(ctx context.Context, arg UpsertAniListMirrorParams) error
 	UpsertAniListOutboxEntry(ctx context.Context, arg UpsertAniListOutboxEntryParams) error
+	// A manual match is the user's decision, so an automatic one never replaces it.
+	UpsertAutoFileMatch(ctx context.Context, arg UpsertAutoFileMatchParams) error
+	UpsertManualFileMatch(ctx context.Context, arg UpsertManualFileMatchParams) error
 	UpsertNodeMeta(ctx context.Context, arg UpsertNodeMetaParams) (NodeMetum, error)
 	UpsertSourceCache(ctx context.Context, arg UpsertSourceCacheParams) error
 }
