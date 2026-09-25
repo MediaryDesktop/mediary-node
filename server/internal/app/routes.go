@@ -33,15 +33,38 @@ type Deps struct {
 	AniListClientID     string
 	AniListAuthorizeURL string
 	AniListRefresh      time.Duration
+
+	LibraryFollowSymlinks bool
 }
 
 func Register(api huma.API, deps Deps) {
 	httpapi.RegisterHealth(api, deps.Build, deps.Linked)
 
+	trackerModule := tracker.New(tracker.Deps{
+		DB:                  deps.DB,
+		Logger:              moduleLogger(deps.Logger, "tracker"),
+		Events:              deps.Events,
+		AniList:             deps.AniList,
+		AniListClientID:     deps.AniListClientID,
+		AniListAuthorizeURL: deps.AniListAuthorizeURL,
+		RefreshInterval:     deps.AniListRefresh,
+	})
+	trackerModule.Register(api)
+
+	// The library matches files against titles; the tracker knows which titles the
+	// user follows. Joining them is this file's job, so that neither module has to
+	// know the other exists.
+	var titles library.TitleSource
+	if deps.AniList != nil {
+		titles = titleSource{tracker: trackerModule, aniList: deps.AniList}
+	}
+
 	library.New(library.Deps{
-		DB:     deps.DB,
-		Logger: moduleLogger(deps.Logger, "library"),
-		Events: deps.Events,
+		DB:             deps.DB,
+		Logger:         moduleLogger(deps.Logger, "library"),
+		Events:         deps.Events,
+		FollowSymlinks: deps.LibraryFollowSymlinks,
+		Titles:         titles,
 	}).Register(api)
 
 	torrent.New(torrent.Deps{
@@ -65,16 +88,6 @@ func Register(api huma.API, deps Deps) {
 		DB:      deps.DB,
 		Logger:  moduleLogger(deps.Logger, "media"),
 		AniList: deps.AniList,
-	}).Register(api)
-
-	tracker.New(tracker.Deps{
-		DB:                  deps.DB,
-		Logger:              moduleLogger(deps.Logger, "tracker"),
-		Events:              deps.Events,
-		AniList:             deps.AniList,
-		AniListClientID:     deps.AniListClientID,
-		AniListAuthorizeURL: deps.AniListAuthorizeURL,
-		RefreshInterval:     deps.AniListRefresh,
 	}).Register(api)
 
 	sync.New(sync.Deps{

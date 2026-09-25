@@ -101,6 +101,8 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 		AniListClientID:     cfg.AniList.ClientID,
 		AniListAuthorizeURL: cfg.AniList.AuthorizeURL,
 		AniListRefresh:      cfg.AniList.RefreshInterval,
+
+		LibraryFollowSymlinks: cfg.Library.FollowSymlinks,
 	})
 
 	if mux, ok := router.(*chi.Mux); ok {

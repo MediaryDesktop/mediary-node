@@ -69,7 +69,7 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
-	'/v1/library/status': {
+	'/v1/library/files': {
 		parameters: {
 			query?: never
 			header?: never
@@ -77,12 +77,124 @@ export interface paths {
 			cookie?: never
 		}
 		/**
-		 * Library module status
-		 * @description Reports whether the library module is wired. Placeholder for phase 0.
+		 * Scanned files
+		 * @description Files the last scan recorded, with the title each was matched to. A file the scan no longer finds is kept and reported as missing, so an unplugged drive does not take the user's manual matches with it.
 		 */
-		get: operations['getLibraryStatus']
+		get: operations['listLibraryFiles']
 		put?: never
 		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/library/files/{id}/candidates': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * What this file could be
+		 * @description Titles the file's name could refer to, best first, each with how well it fits. This is the other half of the automatic match: what the node would not decide on its own it offers here, for the user to confirm with setLibraryFileMatch. Entries already on the user's own list are marked and come from the node's mirror, so they are offered even while the source is unreachable.
+		 */
+		get: operations['listLibraryFileCandidates']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/library/files/{id}/match': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		/**
+		 * Match a file by hand
+		 * @description Ties the file to a title the user picked. A manual match outranks anything a later scan works out on its own, so a correction is made once and not after every scan.
+		 */
+		put: operations['setLibraryFileMatch']
+		post?: never
+		/**
+		 * Forget a file's match
+		 * @description Leaves the file unmatched so the next scan can work it out again.
+		 */
+		delete: operations['deleteLibraryFileMatch']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/library/roots': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Library folders
+		 * @description The folders the node scans, with how many files each holds and when it was last walked.
+		 */
+		get: operations['listLibraryRoots']
+		put?: never
+		/**
+		 * Add a library folder
+		 * @description The folder has to exist and must not sit inside — or contain — a folder already watched, which would record the same file twice.
+		 */
+		post: operations['addLibraryRoot']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/library/roots/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		post?: never
+		/**
+		 * Stop watching a folder
+		 * @description Forgets the folder and everything the node recorded about the files in it, including their matches. Nothing on disk is touched.
+		 */
+		delete: operations['deleteLibraryRoot']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/library/scan': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Scan status
+		 * @description What the running scan has found so far, or the outcome of the last one.
+		 */
+		get: operations['getLibraryScan']
+		put?: never
+		/**
+		 * Scan the library
+		 * @description Starts a scan and returns at once: walking a large library takes minutes. Progress arrives as library.scan events on the socket. Only one scan runs at a time. Files whose size and modification time did not change are not touched, so a rescan is cheap, and a folder that cannot be read right now is skipped rather than emptied.
+		 */
+		post: operations['startLibraryScan']
 		delete?: never
 		options?: never
 		head?: never
@@ -363,6 +475,19 @@ export interface components {
 			score_format: string
 			site_url: string
 		}
+		AddRootInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/AddRootInputBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * @description Absolute path to an existing folder on this machine.
+			 * @example D:\Anime
+			 */
+			path: string
+		}
 		AiringEpisode: {
 			/** Format: date-time */
 			airing_at: string
@@ -536,6 +661,82 @@ export interface components {
 			 */
 			type: string
 		}
+		File: {
+			/**
+			 * Format: int64
+			 * @description Identifier of the file, stable while its path does not change.
+			 */
+			id: number
+			/**
+			 * @description Form of media the extension points at.
+			 * @enum {string}
+			 */
+			kind: 'video' | 'manga' | 'book'
+			/** @description What the file was matched to. Absent while unmatched. */
+			match?: components['schemas']['Match']
+			/** @description True when the last scan did not find the file where it used to be. */
+			missing: boolean
+			/**
+			 * Format: date-time
+			 * @description Modification time the last scan saw.
+			 */
+			modified_at: string
+			/** @description What the file's name says. Present whether or not the file is matched. */
+			parsed: components['schemas']['Parsed']
+			/** @description Absolute path, for the player and for revealing the file. */
+			path: string
+			/** @description Path relative to the root, with forward slashes. */
+			rel_path: string
+			/**
+			 * Format: int64
+			 * @description Root the file was found under.
+			 */
+			root_id: number
+			/**
+			 * Format: int64
+			 * @description Size on disk.
+			 */
+			size_bytes: number
+		}
+		FileOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/FileOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The file with its match applied. */
+			file: components['schemas']['File']
+		}
+		FilePage: {
+			/** @description One page of files. */
+			items: components['schemas']['File'][] | null
+			/**
+			 * Format: int64
+			 * @description Page size that was applied.
+			 */
+			limit: number
+			/**
+			 * Format: int64
+			 * @description Offset that was applied.
+			 */
+			offset: number
+			/**
+			 * Format: int64
+			 * @description How many files match the filter in total.
+			 */
+			total: number
+		}
+		FilesOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/FilesOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description One page of scanned files with their matches. */
+			files: components['schemas']['FilePage']
+		}
 		FilterOptions: {
 			/** Format: date-time */
 			fetched_at: string
@@ -615,6 +816,30 @@ export interface components {
 			lists: components['schemas']['CustomList'][] | null
 			/** @description Attribution for every field that came from an external source. */
 			sources: components['schemas']['Source'][] | null
+		}
+		Match: {
+			/**
+			 * Format: double
+			 * @description How sure the matcher was, from 0 to 1. A manual match is always 1.
+			 */
+			confidence: number
+			/**
+			 * Format: int64
+			 * @description Episode or chapter number within the title.
+			 */
+			episode?: number
+			/** @description The title this file belongs to, as provider:id. */
+			media_ref: string
+			/**
+			 * Format: int64
+			 * @description Season number, when the title has seasons.
+			 */
+			season?: number
+			/**
+			 * @description Who decided the match. A manual one is never overwritten by a scan.
+			 * @enum {string}
+			 */
+			source: 'auto' | 'manual'
 		}
 		Media: {
 			/** Format: int64 */
@@ -709,6 +934,40 @@ export interface components {
 			/** Format: int64 */
 			volumes: number | null
 		}
+		Parsed: {
+			/**
+			 * Format: int64
+			 * @description Chapter number, for comics.
+			 */
+			chapter?: number
+			/**
+			 * Format: int64
+			 * @description Episode number found in the name.
+			 */
+			episode?: number
+			/**
+			 * @description What the name says the file holds. An extra — an opening, an ending, a trailer — is never tracked as an episode.
+			 * @enum {string}
+			 */
+			form?: 'series' | 'movie' | 'special' | 'extra' | 'manga' | 'book'
+			/**
+			 * Format: int64
+			 * @description Season found in the name or on a folder.
+			 */
+			season?: number
+			/** @description Title read from the file name, or from the closest folder that names one. */
+			title?: string
+			/**
+			 * Format: int64
+			 * @description Volume number, for comics.
+			 */
+			volume?: number
+			/**
+			 * Format: int64
+			 * @description Year found in the name.
+			 */
+			year?: number
+		}
 		RelatedMedia: {
 			cover_color: string | null
 			cover_image: string | null
@@ -730,6 +989,165 @@ export interface components {
 			readonly $schema?: string
 			/** @description The new name. */
 			name: string
+		}
+		Root: {
+			/**
+			 * Format: date-time
+			 * @description When the user added the root.
+			 */
+			added_at: string
+			/**
+			 * Format: int64
+			 * @description Media files currently present under the root.
+			 */
+			file_count: number
+			/**
+			 * Format: int64
+			 * @description Identifier of the root, stable across scans.
+			 */
+			id: number
+			/**
+			 * Format: date-time
+			 * @description When the root was last walked. Absent until the first scan.
+			 */
+			last_scan_at?: string
+			/**
+			 * Format: int64
+			 * @description Files the last scan did not find. Their matches are kept in case the drive comes back.
+			 */
+			missing_count: number
+			/** @description Absolute path on this machine. */
+			path: string
+		}
+		RootOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/RootOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The root as the node recorded it. */
+			root: components['schemas']['Root']
+		}
+		RootsOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/RootsOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description Folders the user gave the node to watch. */
+			roots: components['schemas']['Root'][] | null
+		}
+		ScanInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ScanInputBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * Format: int64
+			 * @description Scan this root alone. Left out or 0 scans every root.
+			 */
+			root_id?: number
+		}
+		ScanOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ScanOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description State of the node's single scan slot. */
+			scan: components['schemas']['ScanStatus']
+		}
+		ScanRootResult: {
+			/**
+			 * Format: int64
+			 * @description Files recorded for the first time.
+			 */
+			added: number
+			/**
+			 * Format: int64
+			 * @description Known files whose size or modification time moved.
+			 */
+			changed: number
+			/** @description Why this root could not be scanned. The other roots are still scanned. */
+			error?: string
+			/**
+			 * Format: int64
+			 * @description Media files seen on disk.
+			 */
+			found: number
+			/**
+			 * Format: int64
+			 * @description Files that were recorded before and are gone now.
+			 */
+			missing: number
+			/** @description Absolute path of the root. */
+			path: string
+			/**
+			 * Format: int64
+			 * @description Untouched files whose names a newer parser read again.
+			 */
+			reparsed: number
+			/**
+			 * Format: int64
+			 * @description Root this result belongs to.
+			 */
+			root_id: number
+		}
+		ScanStatus: {
+			/**
+			 * Format: int64
+			 * @description Files recorded for the first time.
+			 */
+			added: number
+			/**
+			 * Format: int64
+			 * @description Known files whose size or modification time moved.
+			 */
+			changed: number
+			/**
+			 * Format: int64
+			 * @description Unmatched files the scan tried to match, including ones left over from earlier scans.
+			 */
+			considered: number
+			/**
+			 * Format: date-time
+			 * @description When the last scan finished. Absent while one is running.
+			 */
+			finished_at?: string
+			/**
+			 * Format: int64
+			 * @description Media files seen on disk across all scanned roots.
+			 */
+			found: number
+			/**
+			 * Format: int64
+			 * @description Files matched to a title without asking the user. The rest keep their suggestions for confirmation.
+			 */
+			matched: number
+			/**
+			 * Format: int64
+			 * @description Files that were recorded before and are gone now.
+			 */
+			missing: number
+			/**
+			 * Format: int64
+			 * @description Untouched files whose names a newer parser read again.
+			 */
+			reparsed: number
+			/** @description Per-root outcome of the current or last scan. */
+			roots: components['schemas']['ScanRootResult'][] | null
+			/** @description True while a scan is walking the filesystem. */
+			running: boolean
+			/**
+			 * Format: date-time
+			 * @description When the current or last scan started.
+			 */
+			started_at?: string
 		}
 		SearchOutputBody: {
 			/**
@@ -767,6 +1185,29 @@ export interface components {
 			/** @description Whether an AniList access token is stored in this node. */
 			connected: boolean
 		}
+		SetMatchInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/SetMatchInputBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * Format: int64
+			 * @description Episode or chapter number within the title.
+			 */
+			episode?: number
+			/**
+			 * @description The title this file belongs to, as provider:id.
+			 * @example anilist:154587
+			 */
+			media_ref: string
+			/**
+			 * Format: int64
+			 * @description Season number, when the title has seasons.
+			 */
+			season?: number
+		}
 		SignInInputBody: {
 			/**
 			 * Format: uri
@@ -803,7 +1244,7 @@ export interface components {
 			readonly $schema?: string
 			/**
 			 * @description Module name.
-			 * @example library
+			 * @example torrent
 			 */
 			module: string
 			/** @description True when the module's dependencies are wired. */
@@ -818,7 +1259,7 @@ export interface components {
 			readonly $schema?: string
 			/**
 			 * @description Module name.
-			 * @example torrent
+			 * @example playback
 			 */
 			module: string
 			/** @description True when the module's dependencies are wired. */
@@ -833,7 +1274,7 @@ export interface components {
 			readonly $schema?: string
 			/**
 			 * @description Module name.
-			 * @example playback
+			 * @example reader
 			 */
 			module: string
 			/** @description True when the module's dependencies are wired. */
@@ -848,7 +1289,7 @@ export interface components {
 			readonly $schema?: string
 			/**
 			 * @description Module name.
-			 * @example reader
+			 * @example sync
 			 */
 			module: string
 			/** @description True when the module's dependencies are wired. */
@@ -863,26 +1304,43 @@ export interface components {
 			readonly $schema?: string
 			/**
 			 * @description Module name.
-			 * @example sync
-			 */
-			module: string
-			/** @description True when the module's dependencies are wired. */
-			ready: boolean
-		}
-		StatusOutputBody5: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/StatusOutputBody5.json
-			 */
-			readonly $schema?: string
-			/**
-			 * @description Module name.
 			 * @example extension
 			 */
 			module: string
 			/** @description True when the module's dependencies are wired. */
 			ready: boolean
+		}
+		Suggestion: {
+			/**
+			 * Format: double
+			 * @description How well this entry fits the file's name, from 0 to 1.
+			 */
+			confidence: number
+			/** @description The source's format: TV, MOVIE, OVA, MANGA and so on. */
+			format?: string
+			/** @description Reference to pass to setLibraryFileMatch. */
+			media_ref: string
+			/** @description The title as the source spells it. */
+			title: string
+			/** @description True when the entry is already on the user's own list. */
+			tracked: boolean
+			/**
+			 * Format: int64
+			 * @description Year the entry is listed under.
+			 */
+			year?: number
+		}
+		SuggestionsOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/SuggestionsOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description Attribution for every field that came from an external source. */
+			sources: components['schemas']['Source'][] | null
+			/** @description Candidate titles, best first. */
+			suggestions: components['schemas']['Suggestion'][] | null
 		}
 		Title: {
 			english: string | null
@@ -954,6 +1412,7 @@ export interface components {
 }
 export type SchemaAcceptedOutputBody = components['schemas']['AcceptedOutputBody']
 export type SchemaAccount = components['schemas']['Account']
+export type SchemaAddRootInputBody = components['schemas']['AddRootInputBody']
 export type SchemaAiringEpisode = components['schemas']['AiringEpisode']
 export type SchemaCreateListInputBody = components['schemas']['CreateListInputBody']
 export type SchemaCustomList = components['schemas']['CustomList']
@@ -963,6 +1422,10 @@ export type SchemaEntriesOutputBody = components['schemas']['EntriesOutputBody']
 export type SchemaEntry = components['schemas']['Entry']
 export type SchemaErrorDetail = components['schemas']['ErrorDetail']
 export type SchemaErrorModel = components['schemas']['ErrorModel']
+export type SchemaFile = components['schemas']['File']
+export type SchemaFileOutputBody = components['schemas']['FileOutputBody']
+export type SchemaFilePage = components['schemas']['FilePage']
+export type SchemaFilesOutputBody = components['schemas']['FilesOutputBody']
 export type SchemaFilterOptions = components['schemas']['FilterOptions']
 export type SchemaFilterOptionsOutputBody = components['schemas']['FilterOptionsOutputBody']
 export type SchemaFilterTag = components['schemas']['FilterTag']
@@ -970,14 +1433,24 @@ export type SchemaFuzzyDate = components['schemas']['FuzzyDate']
 export type SchemaHealthOutputBody = components['schemas']['HealthOutputBody']
 export type SchemaList = components['schemas']['List']
 export type SchemaListsOutputBody = components['schemas']['ListsOutputBody']
+export type SchemaMatch = components['schemas']['Match']
 export type SchemaMedia = components['schemas']['Media']
 export type SchemaMediaDetails = components['schemas']['MediaDetails']
 export type SchemaMediaSummary = components['schemas']['MediaSummary']
+export type SchemaParsed = components['schemas']['Parsed']
 export type SchemaRelatedMedia = components['schemas']['RelatedMedia']
 export type SchemaRenameListInputBody = components['schemas']['RenameListInputBody']
+export type SchemaRoot = components['schemas']['Root']
+export type SchemaRootOutputBody = components['schemas']['RootOutputBody']
+export type SchemaRootsOutputBody = components['schemas']['RootsOutputBody']
+export type SchemaScanInputBody = components['schemas']['ScanInputBody']
+export type SchemaScanOutputBody = components['schemas']['ScanOutputBody']
+export type SchemaScanRootResult = components['schemas']['ScanRootResult']
+export type SchemaScanStatus = components['schemas']['ScanStatus']
 export type SchemaSearchOutputBody = components['schemas']['SearchOutputBody']
 export type SchemaSearchPage = components['schemas']['SearchPage']
 export type SchemaSessionOutputBody = components['schemas']['SessionOutputBody']
+export type SchemaSetMatchInputBody = components['schemas']['SetMatchInputBody']
 export type SchemaSignInInputBody = components['schemas']['SignInInputBody']
 export type SchemaSource = components['schemas']['Source']
 export type SchemaStatusOutputBody = components['schemas']['StatusOutputBody']
@@ -985,7 +1458,8 @@ export type SchemaStatusOutputBody1 = components['schemas']['StatusOutputBody1']
 export type SchemaStatusOutputBody2 = components['schemas']['StatusOutputBody2']
 export type SchemaStatusOutputBody3 = components['schemas']['StatusOutputBody3']
 export type SchemaStatusOutputBody4 = components['schemas']['StatusOutputBody4']
-export type SchemaStatusOutputBody5 = components['schemas']['StatusOutputBody5']
+export type SchemaSuggestion = components['schemas']['Suggestion']
+export type SchemaSuggestionsOutputBody = components['schemas']['SuggestionsOutputBody']
 export type SchemaTitle = components['schemas']['Title']
 export type SchemaTitleNames = components['schemas']['TitleNames']
 export type SchemaTrailer = components['schemas']['Trailer']
@@ -1096,7 +1570,7 @@ export interface operations {
 					[name: string]: unknown
 				}
 				content: {
-					'application/json': components['schemas']['StatusOutputBody5']
+					'application/json': components['schemas']['StatusOutputBody4']
 				}
 			}
 			/** @description Error */
@@ -1139,7 +1613,147 @@ export interface operations {
 			}
 		}
 	}
-	getLibraryStatus: {
+	listLibraryFiles: {
+		parameters: {
+			query?: {
+				/** @description Only files under this root. */
+				root_id?: number
+				/** @description Only files whose extension points at this form of media. */
+				kind?: 'video' | 'manga' | 'book'
+				/** @description Only files whose name reads as this. Use it to leave out openings and extras, which are never episodes. */
+				form?: 'series' | 'movie' | 'special' | 'extra' | 'manga' | 'book'
+				/** @description Only files that are not matched to a title yet. */
+				unmatched?: boolean
+				/** @description Page size. */
+				limit?: number
+				/** @description How many files to skip. */
+				offset?: number
+			}
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['FilesOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listLibraryFileCandidates: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Identifier of the file to find candidates for. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['SuggestionsOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	setLibraryFileMatch: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Identifier of the file to match. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['SetMatchInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['FileOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	deleteLibraryFileMatch: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Identifier of the file whose match to forget. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listLibraryRoots: {
 		parameters: {
 			query?: never
 			header?: never
@@ -1154,7 +1768,132 @@ export interface operations {
 					[name: string]: unknown
 				}
 				content: {
-					'application/json': components['schemas']['StatusOutputBody']
+					'application/json': components['schemas']['RootsOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	addLibraryRoot: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['AddRootInputBody']
+			}
+		}
+		responses: {
+			/** @description Created */
+			201: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['RootOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	deleteLibraryRoot: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Identifier of the root to stop watching. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getLibraryScan: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ScanOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	startLibraryScan: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['ScanInputBody']
+			}
+		}
+		responses: {
+			/** @description Accepted */
+			202: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ScanOutputBody']
 				}
 			}
 			/** @description Error */
@@ -1320,7 +2059,7 @@ export interface operations {
 					[name: string]: unknown
 				}
 				content: {
-					'application/json': components['schemas']['StatusOutputBody2']
+					'application/json': components['schemas']['StatusOutputBody1']
 				}
 			}
 			/** @description Error */
@@ -1349,7 +2088,7 @@ export interface operations {
 					[name: string]: unknown
 				}
 				content: {
-					'application/json': components['schemas']['StatusOutputBody3']
+					'application/json': components['schemas']['StatusOutputBody2']
 				}
 			}
 			/** @description Error */
@@ -1378,7 +2117,7 @@ export interface operations {
 					[name: string]: unknown
 				}
 				content: {
-					'application/json': components['schemas']['StatusOutputBody4']
+					'application/json': components['schemas']['StatusOutputBody3']
 				}
 			}
 			/** @description Error */
@@ -1407,7 +2146,7 @@ export interface operations {
 					[name: string]: unknown
 				}
 				content: {
-					'application/json': components['schemas']['StatusOutputBody1']
+					'application/json': components['schemas']['StatusOutputBody']
 				}
 			}
 			/** @description Error */

@@ -49,6 +49,26 @@ components:
         - score_format
         - display_adult_content
       type: object
+    AddRootInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/AddRootInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        path:
+          description: Absolute path to an existing folder on this machine.
+          examples:
+            - D:\Anime
+          maxLength: 4096
+          minLength: 1
+          type: string
+      required:
+        - path
+      type: object
     AiringEpisode:
       additionalProperties: false
       properties:
@@ -371,6 +391,118 @@ components:
           format: uri
           type: string
       type: object
+    File:
+      additionalProperties: false
+      properties:
+        id:
+          description: Identifier of the file, stable while its path does not change.
+          format: int64
+          type: integer
+        kind:
+          description: Form of media the extension points at.
+          enum:
+            - video
+            - manga
+            - book
+          type: string
+        match:
+          $ref: "#/components/schemas/Match"
+          description: What the file was matched to. Absent while unmatched.
+        missing:
+          description: True when the last scan did not find the file where it used to be.
+          type: boolean
+        modified_at:
+          description: Modification time the last scan saw.
+          format: date-time
+          type: string
+        parsed:
+          $ref: "#/components/schemas/Parsed"
+          description: What the file's name says. Present whether or not the file is matched.
+        path:
+          description: Absolute path, for the player and for revealing the file.
+          type: string
+        rel_path:
+          description: Path relative to the root, with forward slashes.
+          type: string
+        root_id:
+          description: Root the file was found under.
+          format: int64
+          type: integer
+        size_bytes:
+          description: Size on disk.
+          format: int64
+          type: integer
+      required:
+        - id
+        - root_id
+        - path
+        - rel_path
+        - kind
+        - size_bytes
+        - modified_at
+        - missing
+        - parsed
+      type: object
+    FileOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/FileOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        file:
+          $ref: "#/components/schemas/File"
+          description: The file with its match applied.
+      required:
+        - file
+      type: object
+    FilePage:
+      additionalProperties: false
+      properties:
+        items:
+          description: One page of files.
+          items:
+            $ref: "#/components/schemas/File"
+          type:
+            - array
+            - "null"
+        limit:
+          description: Page size that was applied.
+          format: int64
+          type: integer
+        offset:
+          description: Offset that was applied.
+          format: int64
+          type: integer
+        total:
+          description: How many files match the filter in total.
+          format: int64
+          type: integer
+      required:
+        - items
+        - total
+        - limit
+        - offset
+      type: object
+    FilesOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/FilesOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        files:
+          $ref: "#/components/schemas/FilePage"
+          description: One page of scanned files with their matches.
+      required:
+        - files
+      type: object
     FilterOptions:
       additionalProperties: false
       properties:
@@ -542,6 +674,35 @@ components:
       required:
         - lists
         - sources
+      type: object
+    Match:
+      additionalProperties: false
+      properties:
+        confidence:
+          description: How sure the matcher was, from 0 to 1. A manual match is always 1.
+          format: double
+          type: number
+        episode:
+          description: Episode or chapter number within the title.
+          format: int64
+          type: integer
+        media_ref:
+          description: The title this file belongs to, as provider:id.
+          type: string
+        season:
+          description: Season number, when the title has seasons.
+          format: int64
+          type: integer
+        source:
+          description: Who decided the match. A manual one is never overwritten by a scan.
+          enum:
+            - auto
+            - manual
+          type: string
+      required:
+        - media_ref
+        - confidence
+        - source
       type: object
     Media:
       additionalProperties: false
@@ -879,6 +1040,43 @@ components:
         - site_url
         - next_airing_episode
       type: object
+    Parsed:
+      additionalProperties: false
+      properties:
+        chapter:
+          description: Chapter number, for comics.
+          format: int64
+          type: integer
+        episode:
+          description: Episode number found in the name.
+          format: int64
+          type: integer
+        form:
+          description: What the name says the file holds. An extra — an opening, an ending, a trailer — is never tracked as an episode.
+          enum:
+            - series
+            - movie
+            - special
+            - extra
+            - manga
+            - book
+          type: string
+        season:
+          description: Season found in the name or on a folder.
+          format: int64
+          type: integer
+        title:
+          description: Title read from the file name, or from the closest folder that names one.
+          type: string
+        volume:
+          description: Volume number, for comics.
+          format: int64
+          type: integer
+        year:
+          description: Year found in the name.
+          format: int64
+          type: integer
+      type: object
     RelatedMedia:
       additionalProperties: false
       properties:
@@ -939,6 +1137,208 @@ components:
           type: string
       required:
         - name
+      type: object
+    Root:
+      additionalProperties: false
+      properties:
+        added_at:
+          description: When the user added the root.
+          format: date-time
+          type: string
+        file_count:
+          description: Media files currently present under the root.
+          format: int64
+          type: integer
+        id:
+          description: Identifier of the root, stable across scans.
+          format: int64
+          type: integer
+        last_scan_at:
+          description: When the root was last walked. Absent until the first scan.
+          format: date-time
+          type: string
+        missing_count:
+          description: Files the last scan did not find. Their matches are kept in case the drive comes back.
+          format: int64
+          type: integer
+        path:
+          description: Absolute path on this machine.
+          type: string
+      required:
+        - id
+        - path
+        - added_at
+        - file_count
+        - missing_count
+      type: object
+    RootOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/RootOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        root:
+          $ref: "#/components/schemas/Root"
+          description: The root as the node recorded it.
+      required:
+        - root
+      type: object
+    RootsOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/RootsOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        roots:
+          description: Folders the user gave the node to watch.
+          items:
+            $ref: "#/components/schemas/Root"
+          type:
+            - array
+            - "null"
+      required:
+        - roots
+      type: object
+    ScanInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/ScanInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        root_id:
+          description: Scan this root alone. Left out or 0 scans every root.
+          format: int64
+          type: integer
+      type: object
+    ScanOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/ScanOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        scan:
+          $ref: "#/components/schemas/ScanStatus"
+          description: State of the node's single scan slot.
+      required:
+        - scan
+      type: object
+    ScanRootResult:
+      additionalProperties: false
+      properties:
+        added:
+          description: Files recorded for the first time.
+          format: int64
+          type: integer
+        changed:
+          description: Known files whose size or modification time moved.
+          format: int64
+          type: integer
+        error:
+          description: Why this root could not be scanned. The other roots are still scanned.
+          type: string
+        found:
+          description: Media files seen on disk.
+          format: int64
+          type: integer
+        missing:
+          description: Files that were recorded before and are gone now.
+          format: int64
+          type: integer
+        path:
+          description: Absolute path of the root.
+          type: string
+        reparsed:
+          description: Untouched files whose names a newer parser read again.
+          format: int64
+          type: integer
+        root_id:
+          description: Root this result belongs to.
+          format: int64
+          type: integer
+      required:
+        - root_id
+        - path
+        - found
+        - added
+        - changed
+        - reparsed
+        - missing
+      type: object
+    ScanStatus:
+      additionalProperties: false
+      properties:
+        added:
+          description: Files recorded for the first time.
+          format: int64
+          type: integer
+        changed:
+          description: Known files whose size or modification time moved.
+          format: int64
+          type: integer
+        considered:
+          description: Unmatched files the scan tried to match, including ones left over from earlier scans.
+          format: int64
+          type: integer
+        finished_at:
+          description: When the last scan finished. Absent while one is running.
+          format: date-time
+          type: string
+        found:
+          description: Media files seen on disk across all scanned roots.
+          format: int64
+          type: integer
+        matched:
+          description: Files matched to a title without asking the user. The rest keep their suggestions for confirmation.
+          format: int64
+          type: integer
+        missing:
+          description: Files that were recorded before and are gone now.
+          format: int64
+          type: integer
+        reparsed:
+          description: Untouched files whose names a newer parser read again.
+          format: int64
+          type: integer
+        roots:
+          description: Per-root outcome of the current or last scan.
+          items:
+            $ref: "#/components/schemas/ScanRootResult"
+          type:
+            - array
+            - "null"
+        running:
+          description: True while a scan is walking the filesystem.
+          type: boolean
+        started_at:
+          description: When the current or last scan started.
+          format: date-time
+          type: string
+      required:
+        - running
+        - roots
+        - found
+        - added
+        - changed
+        - reparsed
+        - missing
+        - considered
+        - matched
       type: object
     SearchOutputBody:
       additionalProperties: false
@@ -1013,6 +1413,35 @@ components:
       required:
         - connected
       type: object
+    SetMatchInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/SetMatchInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        episode:
+          description: Episode or chapter number within the title.
+          format: int64
+          minimum: 0
+          type: integer
+        media_ref:
+          description: The title this file belongs to, as provider:id.
+          examples:
+            - anilist:154587
+          minLength: 3
+          type: string
+        season:
+          description: Season number, when the title has seasons.
+          format: int64
+          minimum: 0
+          type: integer
+      required:
+        - media_ref
+      type: object
     SignInInputBody:
       additionalProperties: false
       properties:
@@ -1067,7 +1496,7 @@ components:
         module:
           description: Module name.
           examples:
-            - library
+            - torrent
           type: string
         ready:
           description: True when the module's dependencies are wired.
@@ -1089,7 +1518,7 @@ components:
         module:
           description: Module name.
           examples:
-            - torrent
+            - playback
           type: string
         ready:
           description: True when the module's dependencies are wired.
@@ -1111,7 +1540,7 @@ components:
         module:
           description: Module name.
           examples:
-            - playback
+            - reader
           type: string
         ready:
           description: True when the module's dependencies are wired.
@@ -1133,7 +1562,7 @@ components:
         module:
           description: Module name.
           examples:
-            - reader
+            - sync
           type: string
         ready:
           description: True when the module's dependencies are wired.
@@ -1155,28 +1584,6 @@ components:
         module:
           description: Module name.
           examples:
-            - sync
-          type: string
-        ready:
-          description: True when the module's dependencies are wired.
-          type: boolean
-      required:
-        - module
-        - ready
-      type: object
-    StatusOutputBody5:
-      additionalProperties: false
-      properties:
-        $schema:
-          description: A URL to the JSON Schema for this object.
-          examples:
-            - https://example.com/schemas/StatusOutputBody5.json
-          format: uri
-          readOnly: true
-          type: string
-        module:
-          description: Module name.
-          examples:
             - extension
           type: string
         ready:
@@ -1185,6 +1592,63 @@ components:
       required:
         - module
         - ready
+      type: object
+    Suggestion:
+      additionalProperties: false
+      properties:
+        confidence:
+          description: How well this entry fits the file's name, from 0 to 1.
+          format: double
+          type: number
+        format:
+          description: "The source's format: TV, MOVIE, OVA, MANGA and so on."
+          type: string
+        media_ref:
+          description: Reference to pass to setLibraryFileMatch.
+          type: string
+        title:
+          description: The title as the source spells it.
+          type: string
+        tracked:
+          description: True when the entry is already on the user's own list.
+          type: boolean
+        year:
+          description: Year the entry is listed under.
+          format: int64
+          type: integer
+      required:
+        - media_ref
+        - title
+        - confidence
+        - tracked
+      type: object
+    SuggestionsOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/SuggestionsOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        sources:
+          description: Attribution for every field that came from an external source.
+          items:
+            $ref: "#/components/schemas/Source"
+          type:
+            - array
+            - "null"
+        suggestions:
+          description: Candidate titles, best first.
+          items:
+            $ref: "#/components/schemas/Suggestion"
+          type:
+            - array
+            - "null"
+      required:
+        - suggestions
+        - sources
       type: object
     Title:
       additionalProperties: false
@@ -1391,7 +1855,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/StatusOutputBody5"
+                $ref: "#/components/schemas/StatusOutputBody4"
           description: OK
         default:
           content:
@@ -1422,16 +1886,77 @@ paths:
       summary: Node health
       tags:
         - health
-  /v1/library/status:
+  /v1/library/files:
     get:
-      description: Reports whether the library module is wired. Placeholder for phase 0.
-      operationId: getLibraryStatus
+      description: Files the last scan recorded, with the title each was matched to. A file the scan no longer finds is kept and reported as missing, so an unplugged drive does not take the user's manual matches with it.
+      operationId: listLibraryFiles
+      parameters:
+        - description: Only files under this root.
+          explode: false
+          in: query
+          name: root_id
+          schema:
+            description: Only files under this root.
+            format: int64
+            type: integer
+        - description: Only files whose extension points at this form of media.
+          explode: false
+          in: query
+          name: kind
+          schema:
+            description: Only files whose extension points at this form of media.
+            enum:
+              - video
+              - manga
+              - book
+            type: string
+        - description: Only files whose name reads as this. Use it to leave out openings and extras, which are never episodes.
+          explode: false
+          in: query
+          name: form
+          schema:
+            description: Only files whose name reads as this. Use it to leave out openings and extras, which are never episodes.
+            enum:
+              - series
+              - movie
+              - special
+              - extra
+              - manga
+              - book
+            type: string
+        - description: Only files that are not matched to a title yet.
+          explode: false
+          in: query
+          name: unmatched
+          schema:
+            description: Only files that are not matched to a title yet.
+            type: boolean
+        - description: Page size.
+          explode: false
+          in: query
+          name: limit
+          schema:
+            default: 100
+            description: Page size.
+            format: int64
+            maximum: 500
+            minimum: 1
+            type: integer
+        - description: How many files to skip.
+          explode: false
+          in: query
+          name: offset
+          schema:
+            description: How many files to skip.
+            format: int64
+            minimum: 0
+            type: integer
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/StatusOutputBody"
+                $ref: "#/components/schemas/FilesOutputBody"
           description: OK
         default:
           content:
@@ -1439,7 +1964,210 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorModel"
           description: Error
-      summary: Library module status
+      summary: Scanned files
+      tags:
+        - library
+  /v1/library/files/{id}/candidates:
+    get:
+      description: "Titles the file's name could refer to, best first, each with how well it fits. This is the other half of the automatic match: what the node would not decide on its own it offers here, for the user to confirm with setLibraryFileMatch. Entries already on the user's own list are marked and come from the node's mirror, so they are offered even while the source is unreachable."
+      operationId: listLibraryFileCandidates
+      parameters:
+        - description: Identifier of the file to find candidates for.
+          in: path
+          name: id
+          required: true
+          schema:
+            description: Identifier of the file to find candidates for.
+            format: int64
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuggestionsOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: What this file could be
+      tags:
+        - library
+  /v1/library/files/{id}/match:
+    delete:
+      description: Leaves the file unmatched so the next scan can work it out again.
+      operationId: deleteLibraryFileMatch
+      parameters:
+        - description: Identifier of the file whose match to forget.
+          in: path
+          name: id
+          required: true
+          schema:
+            description: Identifier of the file whose match to forget.
+            format: int64
+            type: integer
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Forget a file's match
+      tags:
+        - library
+    put:
+      description: Ties the file to a title the user picked. A manual match outranks anything a later scan works out on its own, so a correction is made once and not after every scan.
+      operationId: setLibraryFileMatch
+      parameters:
+        - description: Identifier of the file to match.
+          in: path
+          name: id
+          required: true
+          schema:
+            description: Identifier of the file to match.
+            format: int64
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetMatchInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FileOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Match a file by hand
+      tags:
+        - library
+  /v1/library/roots:
+    get:
+      description: The folders the node scans, with how many files each holds and when it was last walked.
+      operationId: listLibraryRoots
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RootsOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Library folders
+      tags:
+        - library
+    post:
+      description: The folder has to exist and must not sit inside — or contain — a folder already watched, which would record the same file twice.
+      operationId: addLibraryRoot
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddRootInputBody"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RootOutputBody"
+          description: Created
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Add a library folder
+      tags:
+        - library
+  /v1/library/roots/{id}:
+    delete:
+      description: Forgets the folder and everything the node recorded about the files in it, including their matches. Nothing on disk is touched.
+      operationId: deleteLibraryRoot
+      parameters:
+        - description: Identifier of the root to stop watching.
+          in: path
+          name: id
+          required: true
+          schema:
+            description: Identifier of the root to stop watching.
+            format: int64
+            type: integer
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Stop watching a folder
+      tags:
+        - library
+  /v1/library/scan:
+    get:
+      description: What the running scan has found so far, or the outcome of the last one.
+      operationId: getLibraryScan
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Scan status
+      tags:
+        - library
+    post:
+      description: "Starts a scan and returns at once: walking a large library takes minutes. Progress arrives as library.scan events on the socket. Only one scan runs at a time. Files whose size and modification time did not change are not touched, so a rescan is cheap, and a folder that cannot be read right now is skipped rather than emptied."
+      operationId: startLibraryScan
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScanInputBody"
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanOutputBody"
+          description: Accepted
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Scan the library
       tags:
         - library
   /v1/media/filter-options:
@@ -1677,7 +2405,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/StatusOutputBody2"
+                $ref: "#/components/schemas/StatusOutputBody1"
           description: OK
         default:
           content:
@@ -1697,7 +2425,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/StatusOutputBody3"
+                $ref: "#/components/schemas/StatusOutputBody2"
           description: OK
         default:
           content:
@@ -1717,7 +2445,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/StatusOutputBody4"
+                $ref: "#/components/schemas/StatusOutputBody3"
           description: OK
         default:
           content:
@@ -1737,7 +2465,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/StatusOutputBody1"
+                $ref: "#/components/schemas/StatusOutputBody"
           description: OK
         default:
           content:
