@@ -1,3 +1,5 @@
+import clsx from 'clsx'
+
 import { useTranslation } from '@shared/i18n'
 import { Badge, Icon, Tooltip } from '@shared/ui'
 import type { IconName } from '@shared/ui'
@@ -18,11 +20,13 @@ const FORM_ICONS: Record<LibraryMediaForm, IconName> = {
 
 export interface LibraryFileRowProps {
 	file: LibraryFile
+	playing?: boolean
+	onPlay?: (file: LibraryFile) => void
 	onMatch?: (file: LibraryFile) => void
 	onClearMatch?: (file: LibraryFile) => void
 }
 
-export function LibraryFileRow({ file, onMatch, onClearMatch }: LibraryFileRowProps) {
+export function LibraryFileRow({ file, playing, onPlay, onMatch, onClearMatch }: LibraryFileRowProps) {
 	const { t } = useTranslation()
 
 	const form = file.parsed.form
@@ -30,8 +34,21 @@ export function LibraryFileRow({ file, onMatch, onClearMatch }: LibraryFileRowPr
 	const match = file.match
 
 	return (
-		<article className={styles.row}>
-			<Icon name={form ? FORM_ICONS[form] : 'common/database'} size={20} className={styles.icon} />
+		<article className={clsx(styles.row, playing && styles.playing)}>
+			{onPlay && file.kind === 'video' && !file.missing ? (
+				<Tooltip content={t('library.file.play')}>
+					<button
+						type='button'
+						className={styles.play}
+						aria-label={t('library.file.play')}
+						onClick={() => onPlay(file)}
+					>
+						<Icon name='common/play' size={16} />
+					</button>
+				</Tooltip>
+			) : (
+				<Icon name={form ? FORM_ICONS[form] : 'common/database'} size={20} className={styles.icon} />
+			)}
 
 			<div className={styles.body}>
 				<p className={styles.title}>

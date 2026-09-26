@@ -1,6 +1,7 @@
 package library
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -21,6 +22,11 @@ type (
 	TitleSource    = service.TitleSource
 )
 
+// PlayableFile is the module's read-only port onto one scanned file, for the parts
+// of the node that open files — the player above all. Wired by internal/app; no
+// module imports another.
+type PlayableFile = service.PlayableFile
+
 type Deps struct {
 	DB     *sql.DB
 	Logger zerolog.Logger
@@ -37,13 +43,20 @@ func New(deps Deps) *Module {
 		Titles:         deps.Titles,
 	})
 
-	return &Module{handler: handler.New(svc)}
+	return &Module{handler: handler.New(svc), svc: svc}
 }
 
 type Module struct {
 	handler *handler.Handler
+	svc     *service.Service
 }
 
 func (m *Module) Register(api huma.API) {
 	m.handler.Register(api)
+}
+
+// Playable resolves a scanned file for whoever has to open it. It returns nil when
+// no such file was scanned.
+func (m *Module) Playable(ctx context.Context, fileID int64) (*PlayableFile, error) {
+	return m.svc.Playable(ctx, fileID)
 }

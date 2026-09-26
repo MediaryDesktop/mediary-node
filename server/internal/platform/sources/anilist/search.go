@@ -54,6 +54,7 @@ type MediaSummary struct {
 	AverageScore *int      `json:"averageScore"`
 	Popularity   *int      `json:"popularity"`
 	Genres       []string  `json:"genres"`
+	Synonyms     []string  `json:"synonyms"`
 	IsAdult      bool      `json:"isAdult"`
 	SiteURL      string    `json:"siteUrl"`
 	BannerImage  *string   `json:"bannerImage"`

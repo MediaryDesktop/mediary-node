@@ -73,7 +73,7 @@ func (s titleSource) Search(ctx context.Context, query, mediaType string) ([]lib
 
 		candidates = append(candidates, library.TitleCandidate{
 			MediaRef: fmt.Sprintf("anilist:%d", media.ID),
-			Titles:   spellings(media.Title),
+			Titles:   append(spellings(media.Title), media.Synonyms...),
 			Format:   value(media.Format),
 			Year:     media.SeasonYear,
 			Episodes: count,
@@ -84,6 +84,9 @@ func (s titleSource) Search(ctx context.Context, query, mediaType string) ([]lib
 }
 
 // spellings orders the titles the way a release group is likely to write them.
+// The source's synonyms are appended by the caller: they carry the localized names
+// a user's own folders are likely to use, and the matcher weighs them lower than
+// the main titles on purpose.
 func spellings(title anilist.Titles) []string {
 	ordered := make([]string, 0, 4)
 

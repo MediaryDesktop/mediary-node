@@ -15,9 +15,41 @@
 		background: var(--surface-hover);
 	}
 
+	&.playing {
+		border-color: var(--accent);
+	}
+
 	.icon {
 		flex: none;
 		color: var(--text-muted);
+	}
+
+	.play {
+		display: inline-flex;
+		flex: none;
+		align-items: center;
+		justify-content: center;
+		width: 1.75rem;
+		height: 1.75rem;
+		padding: 0;
+		border: 1px solid var(--border);
+		border-radius: 50%;
+		background: none;
+		color: var(--text-muted);
+		cursor: pointer;
+		transition:
+			border-color 160ms ease,
+			color 160ms ease;
+
+		&:hover {
+			border-color: var(--accent);
+			color: var(--accent-text);
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--accent);
+			outline-offset: 2px;
+		}
 	}
 
 	.body {

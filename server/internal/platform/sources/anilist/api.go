@@ -82,6 +82,7 @@ type Media struct {
 	BannerImage  *string  `json:"bannerImage"`
 	Genres       []string `json:"genres"`
 	AverageScore *int     `json:"averageScore"`
+	Synonyms     []string `json:"synonyms"`
 	Title        struct {
 		UserPreferred *string `json:"userPreferred"`
 		Romaji        *string `json:"romaji"`

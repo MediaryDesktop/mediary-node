@@ -50,6 +50,7 @@ query Collection($userId: Int, $type: MediaType) {
           bannerImage
           genres
           averageScore
+          synonyms
           title {
             userPreferred
             romaji

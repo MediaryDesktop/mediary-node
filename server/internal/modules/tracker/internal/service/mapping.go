@@ -123,6 +123,7 @@ func entryFromAniList(item *anilist.ListEntry, mediaType MediaType) Entry {
 			BannerImage:  item.Media.BannerImage,
 			SiteURL:      item.Media.SiteURL,
 			Genres:       nonNilStrings(item.Media.Genres),
+			Synonyms:     item.Media.Synonyms,
 			AverageScore: item.Media.AverageScore,
 		},
 	}

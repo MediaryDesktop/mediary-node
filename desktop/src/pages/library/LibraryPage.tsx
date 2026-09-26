@@ -20,6 +20,7 @@ import {
 	libraryRootsQuery,
 	libraryScanQuery
 } from '@entities/library-item'
+import { playbackModel } from '@entities/playback'
 
 import { MatchFileDrawer, matchFileModel } from '@features/match-library-file'
 
@@ -57,6 +58,8 @@ export function LibraryPage() {
 
 	const matchRequested = useUnit(matchFileModel.requested)
 
+	const [playing, playRequested] = useUnit([playbackModel.$session, playbackModel.playRequested])
+
 	const [view, setView] = useState<LibraryView>('all')
 	const [search, setSearch] = useState('')
 
@@ -78,6 +81,12 @@ export function LibraryPage() {
 			),
 			libraryModel.rootDeleteFailed.watch(() =>
 				toast.error(t('library.root.removeFailed'), { id: 'library-root-remove-failed' })
+			),
+
+			// The node says why it cannot play a file — mpv missing, the file gone —
+			// and that sentence is more useful than anything this page could invent.
+			playbackModel.playFailed.watch(({ error }) =>
+				toast.error(error.body?.detail ?? t('playback.failed'), { id: 'playback-failed' })
 			)
 		]
 
@@ -186,7 +195,12 @@ export function LibraryPage() {
 				{filesPending && files.length === 0 && <p className={styles.muted}>{t('library.loading')}</p>}
 
 				{visible.length > 0 && (
-					<LibraryFiles files={visible} onMatch={file => matchRequested(file)} />
+					<LibraryFiles
+						files={visible}
+						playingFileID={playing?.file_id}
+						onPlay={file => playRequested(file.id)}
+						onMatch={file => matchRequested(file)}
+					/>
 				)}
 
 				{!filesPending && !filesError && visible.length === 0 && (

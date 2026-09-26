@@ -82,6 +82,31 @@ components:
         - episode
         - airing_at
       type: object
+    ControlInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/ControlInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        action:
+          description: What to do with the open player.
+          enum:
+            - pause
+            - resume
+            - seek
+          type: string
+        position:
+          description: Seconds from the start, for a seek.
+          format: double
+          minimum: 0
+          type: number
+      required:
+        - action
+      type: object
     CreateListInputBody:
       additionalProperties: false
       properties:
@@ -757,6 +782,12 @@ components:
           type:
             - string
             - "null"
+        synonyms:
+          items:
+            type: string
+          type:
+            - array
+            - "null"
         title:
           $ref: "#/components/schemas/Title"
         volumes:
@@ -1076,6 +1107,82 @@ components:
           description: Year found in the name.
           format: int64
           type: integer
+      type: object
+    PlaybackOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/PlaybackOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        playback:
+          $ref: "#/components/schemas/PlaybackStatus"
+          description: What the node's single player slot is doing.
+      required:
+        - playback
+      type: object
+    PlaybackSession:
+      additionalProperties: false
+      properties:
+        duration:
+          description: Length of the file, in seconds. Zero until the player reports it.
+          format: double
+          type: number
+        episode:
+          description: Episode number within that title.
+          format: int64
+          type: integer
+        file_id:
+          description: Library file being played.
+          format: int64
+          type: integer
+        media_ref:
+          description: Title this file is matched to. Absent while unmatched.
+          type: string
+        path:
+          description: Absolute path mpv was given.
+          type: string
+        paused:
+          description: True while the player is paused.
+          type: boolean
+        position:
+          description: Where the player is, in seconds.
+          format: double
+          type: number
+        started_at:
+          description: When playback started.
+          format: date-time
+          type: string
+        title:
+          description: Title as the library reads it, for the UI.
+          type: string
+        watched:
+          description: True once this session counted as watched and the tracker was told.
+          type: boolean
+      required:
+        - file_id
+        - path
+        - title
+        - position
+        - duration
+        - paused
+        - watched
+        - started_at
+      type: object
+    PlaybackStatus:
+      additionalProperties: false
+      properties:
+        playing:
+          description: True while a player is open.
+          type: boolean
+        session:
+          $ref: "#/components/schemas/PlaybackSession"
+          description: The open session. Absent when nothing is playing.
+      required:
+        - playing
       type: object
     RelatedMedia:
       additionalProperties: false
@@ -1483,6 +1590,23 @@ components:
         - name
         - url
       type: object
+    StartInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/StartInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        file_id:
+          description: Library file to play, as listed by listLibraryFiles.
+          format: int64
+          type: integer
+      required:
+        - file_id
+      type: object
     StatusOutputBody:
       additionalProperties: false
       properties:
@@ -1518,7 +1642,7 @@ components:
         module:
           description: Module name.
           examples:
-            - playback
+            - reader
           type: string
         ready:
           description: True when the module's dependencies are wired.
@@ -1540,7 +1664,7 @@ components:
         module:
           description: Module name.
           examples:
-            - reader
+            - sync
           type: string
         ready:
           description: True when the module's dependencies are wired.
@@ -1556,28 +1680,6 @@ components:
           description: A URL to the JSON Schema for this object.
           examples:
             - https://example.com/schemas/StatusOutputBody3.json
-          format: uri
-          readOnly: true
-          type: string
-        module:
-          description: Module name.
-          examples:
-            - sync
-          type: string
-        ready:
-          description: True when the module's dependencies are wired.
-          type: boolean
-      required:
-        - module
-        - ready
-      type: object
-    StatusOutputBody4:
-      additionalProperties: false
-      properties:
-        $schema:
-          description: A URL to the JSON Schema for this object.
-          examples:
-            - https://example.com/schemas/StatusOutputBody4.json
           format: uri
           readOnly: true
           type: string
@@ -1855,7 +1957,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/StatusOutputBody4"
+                $ref: "#/components/schemas/StatusOutputBody3"
           description: OK
         default:
           content:
@@ -2396,16 +2498,16 @@ paths:
       summary: Title details
       tags:
         - media
-  /v1/playback/status:
-    get:
-      description: Reports whether the playback module is wired. Placeholder for phase 0.
-      operationId: getPlaybackStatus
+  /v1/playback:
+    delete:
+      description: Ends the session. Whatever was already recorded as watched stays recorded.
+      operationId: stopPlayback
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/StatusOutputBody1"
+                $ref: "#/components/schemas/PlaybackOutputBody"
           description: OK
         default:
           content:
@@ -2413,7 +2515,77 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorModel"
           description: Error
-      summary: Playback module status
+      summary: Close the player
+      tags:
+        - playback
+    get:
+      description: The node plays one file at a time. Position and duration come from the player itself and arrive as playback events on the socket; this is the state to start from.
+      operationId: getPlayback
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlaybackOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: What is playing
+      tags:
+        - playback
+    post:
+      description: Opens the player on a scanned file. Starting a second file replaces the first — the node keeps one window. A matched file is marked watched once it is far enough through, and the tracker decides what that means for the user's list.
+      operationId: startPlayback
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StartInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlaybackOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Play a library file
+      tags:
+        - playback
+  /v1/playback/command:
+    post:
+      description: "Pause, resume or jump. Deliberately small: the player's own window is in front of the user, and duplicating its controls would only add ways for the two to disagree."
+      operationId: controlPlayback
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ControlInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlaybackOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Steer the open player
       tags:
         - playback
   /v1/reader/status:
@@ -2425,7 +2597,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/StatusOutputBody2"
+                $ref: "#/components/schemas/StatusOutputBody1"
           description: OK
         default:
           content:
@@ -2445,7 +2617,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/StatusOutputBody3"
+                $ref: "#/components/schemas/StatusOutputBody2"
           description: OK
         default:
           content:

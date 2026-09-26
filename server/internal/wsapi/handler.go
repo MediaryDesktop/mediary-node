@@ -31,7 +31,6 @@ func New(hub *events.Hub, logger zerolog.Logger, allowedOrigins []string) *Handl
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	conn, err := websocket.Accept(w, r, &websocket.AcceptOptions{
-
 		OriginPatterns: h.allowedOrigins,
 
 		CompressionMode: websocket.CompressionDisabled,

@@ -261,7 +261,7 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
-	'/v1/playback/status': {
+	'/v1/playback': {
 		parameters: {
 			query?: never
 			header?: never
@@ -269,12 +269,40 @@ export interface paths {
 			cookie?: never
 		}
 		/**
-		 * Playback module status
-		 * @description Reports whether the playback module is wired. Placeholder for phase 0.
+		 * What is playing
+		 * @description The node plays one file at a time. Position and duration come from the player itself and arrive as playback events on the socket; this is the state to start from.
 		 */
-		get: operations['getPlaybackStatus']
+		get: operations['getPlayback']
 		put?: never
-		post?: never
+		/**
+		 * Play a library file
+		 * @description Opens the player on a scanned file. Starting a second file replaces the first — the node keeps one window. A matched file is marked watched once it is far enough through, and the tracker decides what that means for the user's list.
+		 */
+		post: operations['startPlayback']
+		/**
+		 * Close the player
+		 * @description Ends the session. Whatever was already recorded as watched stays recorded.
+		 */
+		delete: operations['stopPlayback']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/playback/command': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Steer the open player
+		 * @description Pause, resume or jump. Deliberately small: the player's own window is in front of the user, and duplicating its controls would only add ways for the two to disagree.
+		 */
+		post: operations['controlPlayback']
 		delete?: never
 		options?: never
 		head?: never
@@ -493,6 +521,24 @@ export interface components {
 			airing_at: string
 			/** Format: int64 */
 			episode: number
+		}
+		ControlInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ControlInputBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * @description What to do with the open player.
+			 * @enum {string}
+			 */
+			action: 'pause' | 'resume' | 'seek'
+			/**
+			 * Format: double
+			 * @description Seconds from the start, for a seek.
+			 */
+			position?: number
 		}
 		CreateListInputBody: {
 			/**
@@ -968,6 +1014,59 @@ export interface components {
 			 */
 			year?: number
 		}
+		PlaybackOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/PlaybackOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description What the node's single player slot is doing. */
+			playback: components['schemas']['PlaybackStatus']
+		}
+		PlaybackSession: {
+			/**
+			 * Format: double
+			 * @description Length of the file, in seconds. Zero until the player reports it.
+			 */
+			duration: number
+			/**
+			 * Format: int64
+			 * @description Episode number within that title.
+			 */
+			episode?: number
+			/**
+			 * Format: int64
+			 * @description Library file being played.
+			 */
+			file_id: number
+			/** @description Title this file is matched to. Absent while unmatched. */
+			media_ref?: string
+			/** @description Absolute path mpv was given. */
+			path: string
+			/** @description True while the player is paused. */
+			paused: boolean
+			/**
+			 * Format: double
+			 * @description Where the player is, in seconds.
+			 */
+			position: number
+			/**
+			 * Format: date-time
+			 * @description When playback started.
+			 */
+			started_at: string
+			/** @description Title as the library reads it, for the UI. */
+			title: string
+			/** @description True once this session counted as watched and the tracker was told. */
+			watched: boolean
+		}
+		PlaybackStatus: {
+			/** @description True while a player is open. */
+			playing: boolean
+			/** @description The open session. Absent when nothing is playing. */
+			session?: components['schemas']['PlaybackSession']
+		}
 		RelatedMedia: {
 			cover_color: string | null
 			cover_image: string | null
@@ -1235,6 +1334,19 @@ export interface components {
 			 */
 			url: string
 		}
+		StartInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/StartInputBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * Format: int64
+			 * @description Library file to play, as listed by listLibraryFiles.
+			 */
+			file_id: number
+		}
 		StatusOutputBody: {
 			/**
 			 * Format: uri
@@ -1259,7 +1371,7 @@ export interface components {
 			readonly $schema?: string
 			/**
 			 * @description Module name.
-			 * @example playback
+			 * @example reader
 			 */
 			module: string
 			/** @description True when the module's dependencies are wired. */
@@ -1274,7 +1386,7 @@ export interface components {
 			readonly $schema?: string
 			/**
 			 * @description Module name.
-			 * @example reader
+			 * @example sync
 			 */
 			module: string
 			/** @description True when the module's dependencies are wired. */
@@ -1285,21 +1397,6 @@ export interface components {
 			 * Format: uri
 			 * @description A URL to the JSON Schema for this object.
 			 * @example https://example.com/schemas/StatusOutputBody3.json
-			 */
-			readonly $schema?: string
-			/**
-			 * @description Module name.
-			 * @example sync
-			 */
-			module: string
-			/** @description True when the module's dependencies are wired. */
-			ready: boolean
-		}
-		StatusOutputBody4: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/StatusOutputBody4.json
 			 */
 			readonly $schema?: string
 			/**
@@ -1414,6 +1511,7 @@ export type SchemaAcceptedOutputBody = components['schemas']['AcceptedOutputBody
 export type SchemaAccount = components['schemas']['Account']
 export type SchemaAddRootInputBody = components['schemas']['AddRootInputBody']
 export type SchemaAiringEpisode = components['schemas']['AiringEpisode']
+export type SchemaControlInputBody = components['schemas']['ControlInputBody']
 export type SchemaCreateListInputBody = components['schemas']['CreateListInputBody']
 export type SchemaCustomList = components['schemas']['CustomList']
 export type SchemaDate = components['schemas']['Date']
@@ -1438,6 +1536,9 @@ export type SchemaMedia = components['schemas']['Media']
 export type SchemaMediaDetails = components['schemas']['MediaDetails']
 export type SchemaMediaSummary = components['schemas']['MediaSummary']
 export type SchemaParsed = components['schemas']['Parsed']
+export type SchemaPlaybackOutputBody = components['schemas']['PlaybackOutputBody']
+export type SchemaPlaybackSession = components['schemas']['PlaybackSession']
+export type SchemaPlaybackStatus = components['schemas']['PlaybackStatus']
 export type SchemaRelatedMedia = components['schemas']['RelatedMedia']
 export type SchemaRenameListInputBody = components['schemas']['RenameListInputBody']
 export type SchemaRoot = components['schemas']['Root']
@@ -1453,11 +1554,11 @@ export type SchemaSessionOutputBody = components['schemas']['SessionOutputBody']
 export type SchemaSetMatchInputBody = components['schemas']['SetMatchInputBody']
 export type SchemaSignInInputBody = components['schemas']['SignInInputBody']
 export type SchemaSource = components['schemas']['Source']
+export type SchemaStartInputBody = components['schemas']['StartInputBody']
 export type SchemaStatusOutputBody = components['schemas']['StatusOutputBody']
 export type SchemaStatusOutputBody1 = components['schemas']['StatusOutputBody1']
 export type SchemaStatusOutputBody2 = components['schemas']['StatusOutputBody2']
 export type SchemaStatusOutputBody3 = components['schemas']['StatusOutputBody3']
-export type SchemaStatusOutputBody4 = components['schemas']['StatusOutputBody4']
 export type SchemaSuggestion = components['schemas']['Suggestion']
 export type SchemaSuggestionsOutputBody = components['schemas']['SuggestionsOutputBody']
 export type SchemaTitle = components['schemas']['Title']
@@ -1570,7 +1671,7 @@ export interface operations {
 					[name: string]: unknown
 				}
 				content: {
-					'application/json': components['schemas']['StatusOutputBody4']
+					'application/json': components['schemas']['StatusOutputBody3']
 				}
 			}
 			/** @description Error */
@@ -2044,7 +2145,7 @@ export interface operations {
 			}
 		}
 	}
-	getPlaybackStatus: {
+	getPlayback: {
 		parameters: {
 			query?: never
 			header?: never
@@ -2059,7 +2160,102 @@ export interface operations {
 					[name: string]: unknown
 				}
 				content: {
-					'application/json': components['schemas']['StatusOutputBody1']
+					'application/json': components['schemas']['PlaybackOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	startPlayback: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['StartInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['PlaybackOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	stopPlayback: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['PlaybackOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	controlPlayback: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['ControlInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['PlaybackOutputBody']
 				}
 			}
 			/** @description Error */
@@ -2088,7 +2284,7 @@ export interface operations {
 					[name: string]: unknown
 				}
 				content: {
-					'application/json': components['schemas']['StatusOutputBody2']
+					'application/json': components['schemas']['StatusOutputBody1']
 				}
 			}
 			/** @description Error */
@@ -2117,7 +2313,7 @@ export interface operations {
 					[name: string]: unknown
 				}
 				content: {
-					'application/json': components['schemas']['StatusOutputBody3']
+					'application/json': components['schemas']['StatusOutputBody2']
 				}
 			}
 			/** @description Error */

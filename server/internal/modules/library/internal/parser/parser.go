@@ -15,6 +15,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"unicode"
 
 	habari "github.com/5rahim/habari"
 
@@ -24,7 +25,7 @@ import (
 // Version is stored next to every parsed row. Bumping it makes the next scan
 // re-parse names recorded by an older build, without re-reading the files: a
 // better parser is worth nothing if the library keeps the old answers.
-const Version = 1
+const Version = 2
 
 // Form is what the file holds, as far as its name tells. Unlike scanner.Kind,
 // which only looks at the extension, this separates an episode from a movie and
@@ -102,6 +103,68 @@ var folderForms = map[string]Form{
 	"movie": FormMovie, "movies": FormMovie, "film": FormMovie, "films": FormMovie,
 }
 
+// What "season" and "volume" are called in the languages a library is likely to be
+// organized in. A folder named for one is a shelf, and the title stands above it —
+// which habari cannot tell us, because release groups write in english and its
+// vocabulary follows them. A user's own folders are in the user's own language.
+var shelfWords = map[string]struct{}{
+	"season": {}, "seasons": {}, "series": {},
+	"сезон": {}, "сезона": {}, "сезону": {}, "сезонов": {}, "сезоны": {}, "сезони": {}, "сезонів": {},
+	"saison": {}, "staffel": {}, "temporada": {}, "temporadas": {}, "stagione": {},
+	"sezon": {}, "sezona": {}, "sezóna": {}, "säsong": {}, "kausi": {}, "évad": {},
+	"seizoen": {}, "sæson": {}, "sesong": {},
+	"시즌": {}, "期": {}, "第": {}, "シーズン": {}, "季": {},
+
+	"volume": {}, "volumes": {}, "vol": {}, "том": {}, "тому": {}, "томов": {},
+	"tome": {}, "band": {}, "bände": {},
+}
+
+// Seasons and volumes stop well before this. The ceiling is what keeps a folder
+// named "86" — a real title — from being read as season eighty-six.
+const maxShelfNumber = 50
+
+var shelfDigits = regexp.MustCompile(`\d{1,4}`)
+
+// shelfFolder reads a folder whose whole name is a season or volume marker:
+// "Season 2", "2 сезон", "Staffel 2", "第2期", or a bare "2". Everything such a
+// folder has to say is its number, so the title comes from above it.
+//
+// The rule is deliberately narrow — one number and, at most, one word that names a
+// shelf — so that "Konosuba 2" and "Steins;Gate 0" keep being titles.
+func shelfFolder(name string) (number *int, isShelf bool) {
+	lowered := strings.ToLower(strings.TrimSpace(name))
+
+	digits := shelfDigits.FindString(lowered)
+	if digits == "" {
+		return nil, false
+	}
+
+	value := parseNumber(digits)
+	if value == nil || *value < 1 || *value > maxShelfNumber {
+		return nil, false
+	}
+
+	words := strings.FieldsFunc(shelfDigits.ReplaceAllString(lowered, " "), func(symbol rune) bool {
+		return !unicode.IsLetter(symbol)
+	})
+
+	// Nothing but the number is left: a folder called just "2" beside a titled one
+	// is a season, and a title made of one small number could not be searched for
+	// anyway. Two words is the ceiling because Japanese writes the marker on both
+	// sides of the number — 第2期.
+	if len(words) > 2 {
+		return nil, false
+	}
+
+	for _, word := range words {
+		if _, ok := shelfWords[word]; !ok {
+			return nil, false
+		}
+	}
+
+	return value, true
+}
+
 func Parse(relPath string, kind scanner.Kind) Result {
 	dirs, filename := splitPath(relPath)
 
@@ -123,6 +186,10 @@ type folder struct {
 	season   *int
 	year     *int
 	types    []string
+
+	// shelf marks a folder that organizes a title rather than naming one:
+	// Specials, Extras, Season 2, 2 сезон.
+	shelf bool
 }
 
 func parseVideo(dirs []string, filename string) Result {
@@ -248,6 +315,18 @@ func parseManga(dirs []string, filename string) Result {
 		result.Title = closestFolderTitle(folders)
 	}
 
+	// Comics are usually filed by volume — Berserk/Том 1/ch001.cbz — and the file
+	// inside such a folder repeats only its chapter.
+	if result.Volume == nil {
+		for i := len(folders) - 1; i >= 0; i-- {
+			if folders[i].shelf && folders[i].season != nil {
+				result.Volume = folders[i].season
+
+				break
+			}
+		}
+	}
+
 	return result
 }
 
@@ -289,27 +368,39 @@ func parseFolders(dirs []string) []folder {
 		}
 
 		meta := habari.Parse(dir)
-		folders = append(folders, folder{
+		shelfNumber, isShelf := shelfFolder(dir)
+
+		current := folder{
 			original: dir,
 			title:    cleanTitle(meta.Title, meta.AnimeType),
 			season:   firstNumber(meta.SeasonNumber...),
 			year:     firstNumber(meta.Year),
 			types:    meta.AnimeType,
-		})
+			shelf:    isShelf,
+		}
+
+		if current.season == nil {
+			current.season = shelfNumber
+		}
+
+		if _, named := folderForms[strings.ToLower(strings.TrimSpace(dir))]; named {
+			current.shelf = true
+		}
+
+		folders = append(folders, current)
 	}
 
 	return folders
 }
 
 // closestFolderTitle walks up from the file: the folder next to it names the
-// title more often than the one at the top of the library.
+// title more often than the one at the top of the library — unless that folder
+// only organizes the title, in which case the name is one step further up.
 func closestFolderTitle(folders []folder) string {
 	for i := len(folders) - 1; i >= 0; i-- {
 		title := folders[i].title
-		if title == "" || isIgnoredTitle(title) {
-			continue
-		}
-		if _, isShelf := folderForms[strings.ToLower(strings.TrimSpace(folders[i].original))]; isShelf {
+
+		if title == "" || isIgnoredTitle(title) || folders[i].shelf {
 			continue
 		}
 
@@ -350,8 +441,10 @@ func cleanTitle(title string, reportedTypes []string) string {
 	return cleaned
 }
 
-// nearestIsShelf reports whether the folder holding the file is a shelf such as
-// Specials or Extras rather than a title.
+// nearestIsShelf reports whether the folder holding the file is one of the named
+// shelves — Specials, Extras — whose files are named after themselves rather than
+// after the title. A season folder is not one of those: "Season 2/Show - 01.mkv"
+// still names the show, and the file is the better source.
 func nearestIsShelf(folders []folder) bool {
 	if len(folders) == 0 {
 		return false

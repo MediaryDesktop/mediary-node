@@ -291,6 +291,7 @@ export const ru: Translation = {
 			matched: 'Сопоставлено {{percent}}%',
 			matchedByHand: 'Сопоставлено вручную',
 			unmatched: 'Без тайтла',
+			play: 'Смотреть',
 			match: 'Сопоставить',
 			change: 'Изменить',
 			clear: 'Забыть сопоставление',
@@ -466,6 +467,15 @@ export const ru: Translation = {
 			statuses: 'Любой статус',
 			score: 'Любая оценка'
 		}
+	},
+
+	playback: {
+		episode: 'Серия {{number}}',
+		watched: 'Зачтено как просмотренное',
+		pause: 'Пауза',
+		resume: 'Продолжить',
+		stop: 'Закрыть плеер',
+		failed: 'Не удалось запустить плеер'
 	},
 
 	placeholder: {

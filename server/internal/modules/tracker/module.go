@@ -56,3 +56,10 @@ func (m *Module) Register(api huma.API) {
 func (m *Module) TrackedTitles(ctx context.Context, mediaType string) ([]TrackedTitle, error) {
 	return m.svc.TrackedTitles(ctx, service.MediaType(mediaType))
 }
+
+// MarkWatched records an episode as watched, for the player. It takes the same path
+// as a user's own edit, including the offline queue and the rule against lowering
+// progress the user already has elsewhere.
+func (m *Module) MarkWatched(ctx context.Context, mediaRef string, episode int) error {
+	return m.svc.MarkWatched(ctx, mediaRef, episode)
+}

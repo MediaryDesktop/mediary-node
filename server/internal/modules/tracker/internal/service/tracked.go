@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+
+	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
 )
 
 // TrackedTitle is one entry of the user's collection, reduced to what it takes to
@@ -41,7 +43,7 @@ func (s *Service) TrackedTitles(ctx context.Context, mediaType MediaType) ([]Tra
 
 		titles = append(titles, TrackedTitle{
 			MediaRef: entry.MediaRef,
-			Titles:   spellings(entry.Media.Title),
+			Titles:   append(spellings(entry.Media.Title), entry.Media.Synonyms...),
 			Format:   value(entry.Media.Format),
 			Year:     entry.Media.SeasonYear,
 			Episodes: count,
@@ -51,9 +53,25 @@ func (s *Service) TrackedTitles(ctx context.Context, mediaType MediaType) ([]Tra
 	return titles, nil
 }
 
+// MarkWatched records that an episode was watched. It is the same path a user's own
+// edit takes, deliberately: the rule that progress is never silently lowered — and
+// the queue that carries the change while AniList is unreachable — already live
+// there, and a second way in would be a second place for them to be forgotten.
+func (s *Service) MarkWatched(ctx context.Context, mediaRef string, episode int) error {
+	if episode <= 0 {
+		return apperr.Invalid("episode", "an episode number starts at 1")
+	}
+
+	_, err := s.UpdateEntry(ctx, mediaRef, EntryPatch{Progress: &episode})
+
+	return err
+}
+
 // spellings orders the titles by how a release group is likely to write them:
 // romaji first, then english, then native. userPreferred is left out — it is one
-// of the three under another name.
+// of the three under another name. The source's synonyms follow, and they are what
+// lets a library named in the user's own language be recognized at all: AniList
+// carries those spellings, and nothing else here does.
 func spellings(title Title) []string {
 	ordered := make([]string, 0, 3)
 

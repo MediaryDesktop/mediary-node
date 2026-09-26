@@ -12,10 +12,12 @@ import styles from './LibraryFiles.module.scss'
 
 export interface LibraryFilesProps {
 	files: LibraryFile[]
+	playingFileID?: number
+	onPlay: (file: LibraryFile) => void
 	onMatch: (file: LibraryFile) => void
 }
 
-export function LibraryFiles({ files, onMatch }: LibraryFilesProps) {
+export function LibraryFiles({ files, playingFileID, onPlay, onMatch }: LibraryFilesProps) {
 	const { t } = useTranslation()
 
 	const clearMatch = useUnit(deleteLibraryMatchMutation.start)
@@ -38,6 +40,8 @@ export function LibraryFiles({ files, onMatch }: LibraryFilesProps) {
 							<LibraryFileRow
 								key={file.id}
 								file={file}
+								playing={file.id === playingFileID}
+								onPlay={onPlay}
 								onMatch={onMatch}
 								onClearMatch={target => clearMatch(target.id)}
 							/>

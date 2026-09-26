@@ -71,6 +71,30 @@ describe('LibraryFileRow', () => {
 		expect(screen.queryByText('Unmatched')).toBeNull()
 	})
 
+	it('offers to play a video file', () => {
+		const onPlay = vi.fn()
+
+		render(<LibraryFileRow file={file()} onPlay={onPlay} />)
+
+		fireEvent.click(screen.getByRole('button', { name: 'Play' }))
+
+		expect(onPlay).toHaveBeenCalledTimes(1)
+	})
+
+	// There is nothing to open for a chapter or a book yet, and a button that does
+	// nothing is worse than no button.
+	it('does not offer to play what the node cannot play', () => {
+		render(<LibraryFileRow file={file({ kind: 'manga' })} onPlay={vi.fn()} />)
+
+		expect(screen.queryByRole('button', { name: 'Play' })).toBeNull()
+	})
+
+	it('does not offer to play a file the last scan did not find', () => {
+		render(<LibraryFileRow file={file({ missing: true })} onPlay={vi.fn()} />)
+
+		expect(screen.queryByRole('button', { name: 'Play' })).toBeNull()
+	})
+
 	it('flags a file the last scan did not find', () => {
 		render(<LibraryFileRow file={file({ missing: true })} />)
 

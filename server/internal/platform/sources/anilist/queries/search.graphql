@@ -38,6 +38,7 @@ query SearchMedia(
       idMal
       type
       format
+      synonyms
       status(version: 2)
       episodes
       chapters

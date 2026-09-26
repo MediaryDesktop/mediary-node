@@ -88,6 +88,7 @@ type Media struct {
 	BannerImage  *string  `json:"banner_image"`
 	SiteURL      string   `json:"site_url"`
 	Genres       []string `json:"genres"`
+	Synonyms     []string `json:"synonyms,omitempty"`
 	AverageScore *int     `json:"average_score"`
 }
 

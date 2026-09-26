@@ -35,6 +35,9 @@ type Deps struct {
 	AniListRefresh      time.Duration
 
 	LibraryFollowSymlinks bool
+
+	MPVPath string
+	DataDir string
 }
 
 func Register(api huma.API, deps Deps) {
@@ -59,13 +62,14 @@ func Register(api huma.API, deps Deps) {
 		titles = titleSource{tracker: trackerModule, aniList: deps.AniList}
 	}
 
-	library.New(library.Deps{
+	libraryModule := library.New(library.Deps{
 		DB:             deps.DB,
 		Logger:         moduleLogger(deps.Logger, "library"),
 		Events:         deps.Events,
 		FollowSymlinks: deps.LibraryFollowSymlinks,
 		Titles:         titles,
-	}).Register(api)
+	})
+	libraryModule.Register(api)
 
 	torrent.New(torrent.Deps{
 		DB:     deps.DB,
@@ -73,10 +77,15 @@ func Register(api huma.API, deps Deps) {
 		Events: deps.Events,
 	}).Register(api)
 
+	// The player opens files the library scanned and reports what was watched to the
+	// tracker. Both edges are ports, joined here: playback knows neither module.
 	playback.New(playback.Deps{
-		DB:     deps.DB,
-		Logger: moduleLogger(deps.Logger, "playback"),
-		Events: deps.Events,
+		Logger:   moduleLogger(deps.Logger, "playback"),
+		Events:   deps.Events,
+		MPVPath:  deps.MPVPath,
+		DataDir:  deps.DataDir,
+		Library:  playableFiles{library: libraryModule},
+		Progress: watchedEpisodes{tracker: trackerModule},
 	}).Register(api)
 
 	reader.New(reader.Deps{

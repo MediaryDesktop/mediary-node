@@ -108,6 +108,8 @@ func TestParseVideoNames(t *testing.T) {
 		},
 	}
 
+	cases = append(cases, seasonFolderCases()...)
+
 	for _, want := range cases {
 		t.Run(want.relPath, func(t *testing.T) {
 			got := Parse(want.relPath, want.kind)
@@ -122,6 +124,60 @@ func TestParseVideoNames(t *testing.T) {
 			assertNumber(t, "episode", got.Episode, want.episode)
 			assertNumber(t, "year", got.Year, want.year)
 		})
+	}
+}
+
+// A season folder is named in the user's own language, not in the english release
+// groups write in, and the file inside it often carries nothing but its number.
+// Reading such a folder as the title is how a whole season ends up searched for as
+// "2 сезон".
+func seasonFolderCases() []expectation {
+	return []expectation{
+		{
+			relPath: "Клинок, рассекающий демонов/2 сезон/s02e10_720.mp4",
+			kind:    scanner.KindVideo,
+			form:    FormSeries, title: "Клинок, рассекающий демонов", season: number(2), episode: number(10),
+		},
+		{
+			relPath: "Клинок, рассекающий демонов/Сезон 1/s01e03.mkv",
+			kind:    scanner.KindVideo,
+			form:    FormSeries, title: "Клинок, рассекающий демонов", season: number(1), episode: number(3),
+		},
+		{
+			relPath: "Attack on Titan/Staffel 2/ep05.mkv",
+			kind:    scanner.KindVideo,
+			form:    FormSeries, title: "Attack on Titan", season: number(2), episode: number(5),
+		},
+		{
+			// Japanese writes the marker on both sides of the number.
+			relPath: "進撃の巨人/第2期/05.mkv",
+			kind:    scanner.KindVideo,
+			form:    FormSeries, title: "進撃の巨人", season: number(2), episode: number(5),
+		},
+		{
+			// A folder that is only a number, next to one that names the show.
+			relPath: "Frieren/2/- 04.mkv",
+			kind:    scanner.KindVideo,
+			form:    FormSeries, title: "Frieren", season: number(2), episode: number(4),
+		},
+		{
+			// The number belongs to the title here, and no word says otherwise.
+			relPath: "Konosuba 2/ep 03.mkv",
+			kind:    scanner.KindVideo,
+			form:    FormSeries, title: "Konosuba 2", episode: number(3),
+		},
+		{
+			relPath: "Steins;Gate 0/ep 01.mkv",
+			kind:    scanner.KindVideo,
+			form:    FormSeries, title: "Steins;Gate 0", episode: number(1),
+		},
+		{
+			// Past the ceiling no season exists, so the folder is left alone rather
+			// than read as season sixty.
+			relPath: "Show/60/- 01.mkv",
+			kind:    scanner.KindVideo,
+			form:    FormSeries, title: "Show", episode: number(1),
+		},
 	}
 }
 
@@ -157,6 +213,13 @@ func TestParseComicAndBookNames(t *testing.T) {
 			relPath: "Manga/Solo Leveling/Solo Leveling Ch.179.cbz",
 			kind:    scanner.KindManga,
 			form:    FormManga, title: "Solo Leveling", chapter: number(179),
+		},
+		{
+			// Comics are filed by volume, and the file inside repeats only its
+			// chapter — in whatever language the shelf is named.
+			relPath: "Manga/Berserk/Том 1/ch001.cbz",
+			kind:    scanner.KindManga,
+			form:    FormManga, title: "Berserk", volume: number(1), chapter: number(1),
 		},
 		{
 			relPath: "Books/Dune [Frank Herbert].epub",

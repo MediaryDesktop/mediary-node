@@ -290,6 +290,7 @@ export const uk: Translation = {
 			matched: 'Зіставлено {{percent}}%',
 			matchedByHand: 'Зіставлено вручну',
 			unmatched: 'Без тайтла',
+			play: 'Дивитись',
 			match: 'Зіставити',
 			change: 'Змінити',
 			clear: 'Забути зіставлення',
@@ -465,6 +466,15 @@ export const uk: Translation = {
 			statuses: 'Будь-який статус',
 			score: 'Будь-яка оцінка'
 		}
+	},
+
+	playback: {
+		episode: 'Серія {{number}}',
+		watched: 'Зараховано як переглянуте',
+		pause: 'Пауза',
+		resume: 'Продовжити',
+		stop: 'Закрити плеєр',
+		failed: 'Не вдалося запустити плеєр'
 	},
 
 	placeholder: {

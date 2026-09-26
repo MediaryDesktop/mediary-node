@@ -292,6 +292,7 @@ export const en = {
 			matched: 'Matched {{percent}}%',
 			matchedByHand: 'Matched by hand',
 			unmatched: 'Unmatched',
+			play: 'Play',
 			match: 'Match',
 			change: 'Change',
 			clear: 'Forget this match',
@@ -467,6 +468,15 @@ export const en = {
 			statuses: 'Any status',
 			score: 'Any score'
 		}
+	},
+
+	playback: {
+		episode: 'Episode {{number}}',
+		watched: 'Counted as watched',
+		pause: 'Pause',
+		resume: 'Resume',
+		stop: 'Close the player',
+		failed: 'Could not start the player'
 	},
 
 	placeholder: {

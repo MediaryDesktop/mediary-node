@@ -103,6 +103,9 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 		AniListRefresh:      cfg.AniList.RefreshInterval,
 
 		LibraryFollowSymlinks: cfg.Library.FollowSymlinks,
+
+		MPVPath: cfg.Playback.MPVPath,
+		DataDir: cfg.DataDir,
 	})
 
 	if mux, ok := router.(*chi.Mux); ok {
