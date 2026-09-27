@@ -5,10 +5,6 @@ export type LibraryView = 'all' | 'unmatched' | 'missing'
 
 export const LIBRARY_VIEWS: readonly LibraryView[] = ['all', 'unmatched', 'missing']
 
-export type LibraryLayout = 'grid' | 'rows'
-
-export const LIBRARY_LAYOUTS: readonly LibraryLayout[] = ['grid', 'rows']
-
 export function matchesView(file: LibraryFile, view: LibraryView): boolean {
 	switch (view) {
 		case 'unmatched':

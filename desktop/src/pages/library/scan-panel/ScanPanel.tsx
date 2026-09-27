@@ -7,6 +7,7 @@ import { Icon, ProgressBar } from '@shared/ui'
 
 import type { LibraryScan, ScanActivity, ScanPhase } from '@entities/library-item'
 
+import { ReelLoader } from './reel-loader/ReelLoader'
 import styles from './ScanPanel.module.scss'
 
 // How many unreadable folders the panel lists before it offers the rest. A drive
@@ -23,6 +24,8 @@ const PHASE_LABELS = {
 export interface ScanPanelProps {
 	activity: ScanActivity | null
 	scan: LibraryScan | null
+	total: number
+	unmatched: number
 }
 
 interface Failure {
@@ -53,7 +56,7 @@ function progressOf(activity: ScanActivity | null, scan: LibraryScan | null): nu
 	return max > 0 ? Math.round((Math.min(value, max) / max) * 100) : null
 }
 
-export function ScanPanel({ activity, scan }: ScanPanelProps) {
+export function ScanPanel({ activity, scan, total, unmatched }: ScanPanelProps) {
 	const { t, i18n } = useTranslation()
 
 	const [showAll, setShowAll] = useState(false)
@@ -64,6 +67,12 @@ export function ScanPanel({ activity, scan }: ScanPanelProps) {
 	const rest = failures.length - shown.length
 
 	const percent = progressOf(activity, scan)
+
+	const stats = [
+		t('library.summary.files', { count: total }),
+		t('library.summary.unmatched', { count: unmatched }),
+		t('library.scan.matchedFiles', { count: scan?.matched ?? 0 })
+	].join(' · ')
 
 	// What the last scan changed. It fills the column that the unreadable folders
 	// would otherwise own, so the panel keeps its shape whether or not anything
@@ -77,16 +86,14 @@ export function ScanPanel({ activity, scan }: ScanPanelProps) {
 	return (
 		<section className={styles.panel}>
 			<div className={styles.activity}>
-				<span className={clsx(styles.badge, activity === null && styles.idle)}>
-					<Icon
-						name='common/reset'
-						size={20}
-						className={clsx(activity !== null && styles.spinner)}
-					/>
-				</span>
-
+				<div className={styles.loader}>
+					<ReelLoader spinning={activity !== null} />
+				</div>
+				
 				<div className={styles.body}>
 					<p className={styles.title}>{t('library.scan.title')}</p>
+
+					<p className={styles.stats}>{stats}</p>
 
 					<p className={styles.phase}>
 						{activity ? runningLine(activity) : idleLine(scan, i18n.language)}
@@ -181,10 +188,6 @@ export function ScanPanel({ activity, scan }: ScanPanelProps) {
 			return t('library.scan.neverRun')
 		}
 
-		return [
-			t('library.scan.finished', { when: formatRelativeTime(last.finished_at, locale) }),
-			t('library.scan.foundFiles', { count: last.found }),
-			t('library.scan.matchedFiles', { count: last.matched })
-		].join(' · ')
+		return t('library.scan.finished', { when: formatRelativeTime(last.finished_at, locale) })
 	}
 }

@@ -7,7 +7,6 @@ import { deleteLibraryMatchMutation } from '@entities/library-item'
 import type { LibraryFile, LibraryTitle } from '@entities/library-item'
 
 import { groupFiles, titleIndex } from '../lib/library-view'
-import type { LibraryLayout } from '../lib/library-view'
 
 import styles from './LibraryFiles.module.scss'
 import { TitleGroup } from './TitleGroup'
@@ -15,13 +14,12 @@ import { TitleGroup } from './TitleGroup'
 export interface LibraryFilesProps {
 	files: LibraryFile[]
 	titles: LibraryTitle[] | undefined
-	layout: LibraryLayout
 	playingFileID?: number
 	onPlay: (file: LibraryFile) => void
 	onMatch: (file: LibraryFile) => void
 }
 
-export function LibraryFiles({ files, titles, layout, playingFileID, onPlay, onMatch }: LibraryFilesProps) {
+export function LibraryFiles({ files, titles, playingFileID, onPlay, onMatch }: LibraryFilesProps) {
 	const { t } = useTranslation()
 
 	const clearMatch = useUnit(deleteLibraryMatchMutation.start)
@@ -37,7 +35,6 @@ export function LibraryFiles({ files, titles, layout, playingFileID, onPlay, onM
 				<TitleGroup
 					key={group.key}
 					group={group}
-					compact={layout === 'rows'}
 					playingFileID={playingFileID}
 					onPlay={onPlay}
 					onMatch={onMatch}

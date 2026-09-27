@@ -7,14 +7,6 @@
 	border-radius: var(--radius);
 	background: var(--surface);
 
-	&.compact {
-		padding: 0.5rem 0.75rem;
-
-		.title {
-			font-size: 0.875rem;
-		}
-	}
-
 	// A cover is drawn 2:3 by every source there is. Letting the card's height
 	// decide the poster's stretches a show with many episodes into a ribbon, so
 	// the shape is fixed here and the card grows past it.
@@ -45,9 +37,6 @@
 		gap: 0.5rem;
 	}
 
-	// The badge and the chevron sit against the top of the card, level with the
-	// title, rather than centred against a heading whose second line they have
-	// nothing to do with.
 	.header {
 		display: flex;
 		align-items: flex-start;
@@ -97,38 +86,6 @@
 			}
 		}
 
-		.toggle {
-			display: inline-flex;
-			flex: none;
-			align-items: center;
-			justify-content: center;
-			width: 1.75rem;
-			height: 1.75rem;
-			padding: 0;
-			border: 0;
-			border-radius: var(--radius-sm);
-			background: none;
-			color: var(--text-muted);
-			cursor: pointer;
-
-			&:hover {
-				background: var(--surface-hover);
-				color: var(--text);
-			}
-
-			&:focus-visible {
-				outline: 2px solid var(--accent);
-				outline-offset: 2px;
-			}
-
-			.chevron {
-				transition: transform 180ms ease;
-
-				&.up {
-					transform: rotate(180deg);
-				}
-			}
-		}
 	}
 
 	.rows {

@@ -17,24 +17,15 @@ const PREVIEW_ROWS = 3
 
 export interface TitleGroupProps {
 	group: FileGroup
-	compact?: boolean
 	playingFileID?: number
 	onPlay: (file: LibraryFile) => void
 	onMatch: (file: LibraryFile) => void
 	onClearMatch: (file: LibraryFile) => void
 }
 
-export function TitleGroup({
-	group,
-	compact,
-	playingFileID,
-	onPlay,
-	onMatch,
-	onClearMatch
-}: TitleGroupProps) {
+export function TitleGroup({ group, playingFileID, onPlay, onMatch, onClearMatch }: TitleGroupProps) {
 	const { t } = useTranslation()
 
-	const [open, setOpen] = useState(true)
 	const [expanded, setExpanded] = useState(false)
 
 	const cover = group.title_info?.cover_image
@@ -57,16 +48,10 @@ export function TitleGroup({
 	const meta = [seasons, t('library.group.episodes', { count: group.files.length })].filter(Boolean)
 
 	return (
-		<article className={clsx(styles.group, compact && styles.compact)}>
-			{!compact && (
-				<span className={styles.poster} style={{ background: color ?? undefined }}>
-					{cover ? (
-						<img src={cover} alt='' loading='lazy' />
-					) : (
-						<Icon name='common/database' size={20} />
-					)}
-				</span>
-			)}
+		<article className={styles.group}>
+			<span className={styles.poster} style={{ background: color ?? undefined }}>
+				{cover ? <img src={cover} alt='' loading='lazy' /> : <Icon name='common/database' size={20} />}
+			</span>
 
 			<div className={styles.content}>
 				<header className={styles.header}>
@@ -80,49 +65,31 @@ export function TitleGroup({
 						<Icon name={group.matched ? 'common/check' : 'common/info'} size={12} />
 						{group.matched ? t('library.group.matched') : t('library.group.unmatched')}
 					</span>
-
-					<button
-						type='button'
-						className={styles.toggle}
-						aria-expanded={open}
-						aria-label={open ? t('library.group.collapse') : t('library.group.expand')}
-						onClick={() => setOpen(current => !current)}
-					>
-						<Icon
-							name='common/chevron-down'
-							size={18}
-							className={clsx(styles.chevron, open && styles.up)}
-						/>
-					</button>
 				</header>
 
-				{open && (
-					<div className={styles.rows}>
-						{shown.map(file => (
-							<LibraryFileRow
-								key={file.id}
-								file={file}
-								playing={file.id === playingFileID}
-								onPlay={onPlay}
-								onMatch={onMatch}
-								onClearMatch={onClearMatch}
-							/>
-						))}
+				<div className={styles.rows}>
+					{shown.map(file => (
+						<LibraryFileRow
+							key={file.id}
+							file={file}
+							playing={file.id === playingFileID}
+							onPlay={onPlay}
+							onMatch={onMatch}
+							onClearMatch={onClearMatch}
+						/>
+					))}
 
-						{(rest > 0 || expanded) && (
-							<button
-								type='button'
-								className={styles.more}
-								onClick={() => setExpanded(current => !current)}
-							>
-								<Icon name={expanded ? 'common/close' : 'common/plus'} size={14} />
-								{expanded
-									? t('library.group.less')
-									: t('library.group.more', { count: rest })}
-							</button>
-						)}
-					</div>
-				)}
+					{(rest > 0 || expanded) && (
+						<button
+							type='button'
+							className={styles.more}
+							onClick={() => setExpanded(current => !current)}
+						>
+							<Icon name={expanded ? 'common/close' : 'common/plus'} size={14} />
+							{expanded ? t('library.group.less') : t('library.group.more', { count: rest })}
+						</button>
+					)}
+				</div>
 			</div>
 		</article>
 	)

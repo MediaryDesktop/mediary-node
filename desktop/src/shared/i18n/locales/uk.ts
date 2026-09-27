@@ -41,7 +41,7 @@ export const uk: Translation = {
 		discover: 'Огляд',
 		search: 'Пошук',
 		lists: 'Мої списки',
-		library: 'Бібліотека',
+		library: 'Локальна бібліотека',
 		downloads: 'Завантаження',
 		settings: 'Налаштування',
 		signIn: 'Увійти'
@@ -235,6 +235,7 @@ export const uk: Translation = {
 	},
 
 	library: {
+		description: 'Керування локальними файлами, теками та зіставленнями тайтлів',
 		summary: {
 			files_one: '{{count}} файл',
 			files_few: '{{count}} файли',
@@ -248,7 +249,7 @@ export const uk: Translation = {
 		empty: {
 			title: 'Тек бібліотеки ще немає',
 			description:
-				'Вкажіть ноді теку з вашими файлами. Вона обійде й підтеки, а знайдене зіставить із AniList'
+				'Вкажіть ноді теку з вашими файлами. Вона обійде й підтеки, а знайдене автоматично доповнить деталями'
 		},
 		root: {
 			add: 'Додати теку',
@@ -311,10 +312,6 @@ export const uk: Translation = {
 			unmatched: 'Без тайтла',
 			missing: 'Відсутні'
 		},
-		layout: {
-			grid: 'Картки',
-			rows: 'Компактно'
-		},
 		group: {
 			matched: 'Зіставлено',
 			unmatched: 'Без тайтла',
@@ -331,9 +328,7 @@ export const uk: Translation = {
 			more_few: 'ще {{count}} серії',
 			more_many: 'ще {{count}} серій',
 			more_other: 'ще {{count}} серії',
-			less: 'Згорнути',
-			collapse: 'Згорнути',
-			expand: 'Розгорнути'
+			less: 'Згорнути'
 		},
 		loading: 'Читаємо бібліотеку…',
 		failed: 'Нода не віддала бібліотеку',

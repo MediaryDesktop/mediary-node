@@ -43,7 +43,7 @@ export const en = {
 		discover: 'Discover',
 		search: 'Search',
 		lists: 'My lists',
-		library: 'Library',
+		library: 'Local library',
 		downloads: 'Downloads',
 		settings: 'Settings',
 		signIn: 'Sign in'
@@ -237,6 +237,7 @@ export const en = {
 	},
 
 	library: {
+		description: 'Managing local files, folders, and title mappings',
 		summary: {
 			files_one: '{{count}} file',
 			files_few: '{{count}} files',
@@ -250,7 +251,7 @@ export const en = {
 		empty: {
 			title: 'No library folders yet',
 			description:
-				'Point the node at a folder with your files. It walks subfolders too and matches what it finds against AniList'
+				'Point the node at a folder with your files. It walks subfolders too and matches what it finds to fill in the details automatically'
 		},
 		root: {
 			add: 'Add folder',
@@ -313,10 +314,6 @@ export const en = {
 			unmatched: 'Unmatched',
 			missing: 'Missing'
 		},
-		layout: {
-			grid: 'Cards',
-			rows: 'Compact'
-		},
 		group: {
 			matched: 'Matched',
 			unmatched: 'Unmatched',
@@ -333,9 +330,7 @@ export const en = {
 			more_few: '{{count}} more episodes',
 			more_many: '{{count}} more episodes',
 			more_other: '{{count}} more episodes',
-			less: 'Show fewer',
-			collapse: 'Collapse',
-			expand: 'Expand'
+			less: 'Show fewer'
 		},
 		loading: 'Reading the library…',
 		failed: 'The node did not return the library',

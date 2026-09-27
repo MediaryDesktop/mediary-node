@@ -17,29 +17,8 @@
 		align-items: flex-start;
 		gap: 1rem;
 
-		.badge {
-			display: inline-flex;
-			flex: none;
-			align-items: center;
-			justify-content: center;
-			width: 2.75rem;
-			height: 2.75rem;
-			border: 1px solid var(--accent-border);
-			border-radius: 50%;
-			background: var(--accent-muted);
-			color: var(--accent-text);
-
-			// The panel stays on the page between scans, and a badge that keeps
-			// its alarm colour while nothing runs would cry wolf.
-			&.idle {
-				border-color: var(--border);
-				background: var(--bg-subtle);
-				color: var(--text-muted);
-			}
-
-			.spinner {
-				animation: spin 1.4s linear infinite;
-			}
+		.loader{
+			margin-top: 8px;
 		}
 
 		.body {
@@ -49,8 +28,15 @@
 			.title {
 				margin: 0;
 				color: var(--text);
-				font-size: 0.9375rem;
+				font-size: 1.4rem;
 				font-weight: 600;
+			}
+
+			.stats {
+				margin: 0.25rem 0 0;
+				color: var(--text);
+				font-size: 0.9rem;
+				font-weight: 500;
 			}
 
 			.phase {
@@ -196,11 +182,5 @@
 				}
 			}
 		}
-	}
-}
-
-@keyframes spin {
-	to {
-		transform: rotate(360deg);
 	}
 }

@@ -31,7 +31,7 @@ describe('ScanPanel', () => {
 	// The panel is part of the page, not something that appears while a scan runs:
 	// a library with nothing to report still has to say so.
 	it('stays on the page when nothing is running', () => {
-		render(<ScanPanel activity={null} scan={scan()} />)
+		render(<ScanPanel activity={null} scan={scan()} total={0} unmatched={0} />)
 
 		expect(screen.getByText('Scanning the library')).toBeInTheDocument()
 		expect(screen.getByText('Not scanned yet')).toBeInTheDocument()
@@ -42,10 +42,13 @@ describe('ScanPanel', () => {
 			<ScanPanel
 				activity={null}
 				scan={scan({ finished_at: new Date().toISOString(), found: 2348, matched: 2224 })}
+				total={2348}
+				unmatched={124}
 			/>
 		)
 
-		expect(screen.getByText(/2348 files found/)).toBeInTheDocument()
+		expect(screen.getByText(/2348 files/)).toBeInTheDocument()
+		expect(screen.getByText(/124 unmatched/)).toBeInTheDocument()
 		expect(screen.getByText(/2224 matched/)).toBeInTheDocument()
 		expect(screen.getByText('100%')).toBeInTheDocument()
 	})
@@ -56,6 +59,8 @@ describe('ScanPanel', () => {
 			<ScanPanel
 				activity={activity({ phase: 'probing', done: 3, total: 4, rootsDone: 1, rootsTotal: 1 })}
 				scan={scan({ running: true })}
+				total={0}
+				unmatched={0}
 			/>
 		)
 
@@ -72,6 +77,8 @@ describe('ScanPanel', () => {
 			<ScanPanel
 				activity={null}
 				scan={scan({ finished_at: new Date().toISOString(), added: 98, changed: 2, missing: 1 })}
+				total={0}
+				unmatched={0}
 			/>
 		)
 
@@ -85,6 +92,8 @@ describe('ScanPanel', () => {
 			<ScanPanel
 				activity={activity({ phase: 'matching', done: 3, total: 5, rootsDone: 5, rootsTotal: 5 })}
 				scan={scan({ running: true })}
+				total={0}
+				unmatched={0}
 			/>
 		)
 
@@ -111,6 +120,8 @@ describe('ScanPanel', () => {
 						probed: 0
 					}))
 				})}
+				total={0}
+				unmatched={0}
 			/>
 		)
 

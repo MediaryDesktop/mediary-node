@@ -41,7 +41,7 @@ export const ru: Translation = {
 		discover: 'Обзор',
 		search: 'Поиск',
 		lists: 'Мои списки',
-		library: 'Библиотека',
+		library: 'Локальная библиотека',
 		downloads: 'Загрузки',
 		settings: 'Настройки',
 		signIn: 'Войти'
@@ -236,6 +236,7 @@ export const ru: Translation = {
 	},
 
 	library: {
+		description: 'Управление локальными файлами, папками и сопоставлениями тайтлов',
 		summary: {
 			files_one: '{{count}} файл',
 			files_few: '{{count}} файла',
@@ -249,7 +250,7 @@ export const ru: Translation = {
 		empty: {
 			title: 'Папок библиотеки пока нет',
 			description:
-				'Укажите ноде папку с вашими файлами. Она обойдёт и подпапки, а найденное сопоставит с AniList'
+				'Укажите ноде папку с вашими файлами. Она обойдёт и подпапки, а найденное автоматически дополнит деталями'
 		},
 		root: {
 			add: 'Добавить папку',
@@ -312,10 +313,6 @@ export const ru: Translation = {
 			unmatched: 'Без тайтла',
 			missing: 'Отсутствуют'
 		},
-		layout: {
-			grid: 'Карточки',
-			rows: 'Компактно'
-		},
 		group: {
 			matched: 'Сопоставлено',
 			unmatched: 'Без тайтла',
@@ -332,9 +329,7 @@ export const ru: Translation = {
 			more_few: 'ещё {{count}} серии',
 			more_many: 'ещё {{count}} серий',
 			more_other: 'ещё {{count}} серии',
-			less: 'Свернуть',
-			collapse: 'Свернуть',
-			expand: 'Развернуть'
+			less: 'Свернуть'
 		},
 		loading: 'Читаем библиотеку…',
 		failed: 'Нода не вернула библиотеку',

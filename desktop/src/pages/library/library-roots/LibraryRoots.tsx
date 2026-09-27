@@ -1,7 +1,7 @@
 import { useUnit } from 'effector-react'
 
 import { useTranslation } from '@shared/i18n'
-import { DropdownMenu, Icon, Tooltip } from '@shared/ui'
+import { DropdownMenu, Icon } from '@shared/ui'
 
 import { deleteLibraryRootMutation, libraryModel } from '@entities/library-item'
 import type { LibraryRoot } from '@entities/library-item'
@@ -84,18 +84,6 @@ export function LibraryRoots({ roots, scanning }: LibraryRootsProps) {
 								</button>
 							}
 						/>
-
-						<Tooltip content={t('library.root.remove')}>
-							<button
-								type='button'
-								className={styles.remove}
-								aria-label={t('library.root.remove')}
-								disabled={removing}
-								onClick={() => remove(root.id)}
-							>
-								<Icon name='common/trash' size={16} />
-							</button>
-						</Tooltip>
 					</article>
 				))}
 			</div>
