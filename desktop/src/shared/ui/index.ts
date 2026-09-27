@@ -73,6 +73,9 @@ export type { ProgressBarProps } from './progress-bar/ProgressBar'
 export { RatingStars } from './rating-stars/RatingStars'
 export type { RatingStarsProps } from './rating-stars/RatingStars'
 
+export { ReelLoader } from './reel-loader/ReelLoader'
+export type { ReelLoaderProps } from './reel-loader/ReelLoader'
+
 export { SelectionGroup } from './selection-group/SelectionGroup'
 export type { SelectionGroupOption, SelectionGroupProps } from './selection-group/SelectionGroup'
 
