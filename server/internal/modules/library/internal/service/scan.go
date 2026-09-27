@@ -96,6 +96,10 @@ func (s *Service) scanTargets(ctx context.Context, rootID int64) ([]store.Root, 
 }
 
 func (s *Service) runScan(ctx context.Context, roots []store.Root) {
+	s.mu.Lock()
+	startedAt := *s.scan.StartedAt
+	s.mu.Unlock()
+
 	s.publishScan("started", map[string]any{"roots_total": len(roots), "roots_done": 0})
 
 	changed := false
@@ -137,6 +141,7 @@ func (s *Service) runScan(ctx context.Context, roots []store.Root) {
 	outcome := s.matchFiles(ctx)
 
 	finishedAt := s.opts.Now()
+	partial := ctx.Err() != nil
 
 	s.mu.Lock()
 	s.scan.Running = false
@@ -145,6 +150,8 @@ func (s *Service) runScan(ctx context.Context, roots []store.Root) {
 	s.scan.Matched = outcome.Matched
 	status := s.snapshotLocked()
 	s.mu.Unlock()
+
+	s.recordScanRun(status, outcome, startedAt, finishedAt, partial)
 
 	s.publishScan("finished", map[string]any{
 		"roots_total": status.RootsTotal,

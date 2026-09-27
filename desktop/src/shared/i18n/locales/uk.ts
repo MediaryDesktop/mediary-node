@@ -306,6 +306,17 @@ export const uk: Translation = {
 			failures: 'Теки, які не вдалося прочитати',
 			rootFailed: 'Теку не вдалося прочитати: {{reason}}'
 		},
+		history: {
+			action: 'Історія',
+			title: 'Історія сканувань',
+			description: 'Усі скани, які виконала нода',
+			empty: 'Сканувань ще не було',
+			partial: 'Перервано',
+			matchedTitle: 'Зіставлені тайтли',
+			unmatchedTitle: 'Не вдалося зіставити',
+			notYetOnYourList: 'Ще не у вашому списку',
+			nothingToShow: 'Цей скан не має що показати'
+		},
 		search: 'Пошук за назвою, тайтлом, файлом…',
 		view: {
 			all: 'Усі',

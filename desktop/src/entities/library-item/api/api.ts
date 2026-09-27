@@ -11,6 +11,11 @@ export type LibraryScanRoot = NodeSchemas['ScanRootResult']
 export type LibrarySuggestion = NodeSchemas['Suggestion']
 export type LibraryTitle = NodeSchemas['MatchedTitle']
 export type LibraryCounts = NodeSchemas['Counts']
+export type LibraryScanRunSummary = NodeSchemas['ScanRunSummary']
+export type LibraryScanRunDetail = NodeSchemas['ScanRunDetail']
+export type LibraryScanHistoryPage = NodeSchemas['ScanHistoryPage']
+export type LibraryScanRunGroup = NodeSchemas['ScanRunGroupDetail']
+export type LibraryScanRunFileLog = NodeSchemas['ScanRunFileLogDetail']
 
 export type LibraryFileKind = LibraryFile['kind']
 export type LibraryMediaForm = NonNullable<LibraryFileParsed['form']>
@@ -94,3 +99,22 @@ export const fetchLibraryCandidatesFx = createNodeRequestFx<number, NodeSchemas[
 		timeout: 20_000
 	})
 )
+
+export interface LibraryScanHistoryQuery {
+	from?: string
+	to?: string
+	limit?: number
+	offset?: number
+}
+
+export const fetchLibraryScanHistoryFx = createNodeRequestFx<
+	LibraryScanHistoryQuery,
+	NodeSchemas['ScanHistoryOutputBody']
+>(query => ({
+	url: '/v1/library/scan/history',
+	query: { from: query.from, to: query.to, limit: query.limit, offset: query.offset }
+}))
+
+export const fetchLibraryScanRunFx = createNodeRequestFx<number, NodeSchemas['ScanRunOutputBody']>(id => ({
+	url: `/v1/library/scan/history/${id}`
+}))

@@ -85,6 +85,55 @@ type NodeMetum struct {
 	UpdatedAt int64  `json:"updated_at"`
 }
 
+type ScanRun struct {
+	ID         int64  `json:"id"`
+	StartedAt  int64  `json:"started_at"`
+	FinishedAt int64  `json:"finished_at"`
+	Status     string `json:"status"`
+	RootsTotal int64  `json:"roots_total"`
+	Found      int64  `json:"found"`
+	Added      int64  `json:"added"`
+	Changed    int64  `json:"changed"`
+	Reparsed   int64  `json:"reparsed"`
+	Missing    int64  `json:"missing"`
+	Probed     int64  `json:"probed"`
+	Considered int64  `json:"considered"`
+	Matched    int64  `json:"matched"`
+}
+
+type ScanRunFileLog struct {
+	ID          int64           `json:"id"`
+	ScanRunID   int64           `json:"scan_run_id"`
+	FileID      sql.NullInt64   `json:"file_id"`
+	RelPath     string          `json:"rel_path"`
+	ParsedTitle sql.NullString  `json:"parsed_title"`
+	Outcome     string          `json:"outcome"`
+	MediaRef    sql.NullString  `json:"media_ref"`
+	Confidence  sql.NullFloat64 `json:"confidence"`
+}
+
+type ScanRunGroup struct {
+	ID        int64  `json:"id"`
+	ScanRunID int64  `json:"scan_run_id"`
+	MediaRef  string `json:"media_ref"`
+	FileCount int64  `json:"file_count"`
+	Tracked   int64  `json:"tracked"`
+}
+
+type ScanRunRoot struct {
+	ID        int64          `json:"id"`
+	ScanRunID int64          `json:"scan_run_id"`
+	RootID    sql.NullInt64  `json:"root_id"`
+	RootPath  string         `json:"root_path"`
+	Found     int64          `json:"found"`
+	Added     int64          `json:"added"`
+	Changed   int64          `json:"changed"`
+	Reparsed  int64          `json:"reparsed"`
+	Missing   int64          `json:"missing"`
+	Probed    int64          `json:"probed"`
+	Error     sql.NullString `json:"error"`
+}
+
 type SourceCache struct {
 	Provider   string `json:"provider"`
 	ExternalID string `json:"external_id"`

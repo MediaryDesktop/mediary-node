@@ -1387,6 +1387,50 @@ components:
       required:
         - roots
       type: object
+    ScanHistoryOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/ScanHistoryOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        history:
+          $ref: "#/components/schemas/ScanHistoryPage"
+          description: One page of past scans, newest first.
+      required:
+        - history
+      type: object
+    ScanHistoryPage:
+      additionalProperties: false
+      properties:
+        items:
+          description: One page of past scans, newest first.
+          items:
+            $ref: "#/components/schemas/ScanRunSummary"
+          type:
+            - array
+            - "null"
+        limit:
+          description: Page size that was applied.
+          format: int64
+          type: integer
+        offset:
+          description: Offset that was applied.
+          format: int64
+          type: integer
+        total:
+          description: How many scans match the filter in total.
+          format: int64
+          type: integer
+      required:
+        - items
+        - total
+        - limit
+        - offset
+      type: object
     ScanInputBody:
       additionalProperties: false
       properties:
@@ -1464,6 +1508,265 @@ components:
         - reparsed
         - missing
         - probed
+      type: object
+    ScanRunDetail:
+      additionalProperties: false
+      properties:
+        added:
+          description: Files recorded for the first time.
+          format: int64
+          type: integer
+        changed:
+          description: Known files whose size or modification time moved.
+          format: int64
+          type: integer
+        considered:
+          description: Unmatched files the scan tried to match.
+          format: int64
+          type: integer
+        finished_at:
+          description: When the scan finished.
+          format: date-time
+          type: string
+        found:
+          description: Media files seen on disk across all scanned roots.
+          format: int64
+          type: integer
+        groups:
+          description: Titles this scan matched files to.
+          items:
+            $ref: "#/components/schemas/ScanRunGroupDetail"
+          type:
+            - array
+            - "null"
+        id:
+          description: Identifier of this scan run.
+          format: int64
+          type: integer
+        matched:
+          description: Files matched to a title without asking the user.
+          format: int64
+          type: integer
+        missing:
+          description: Files that were recorded before and were gone this time.
+          format: int64
+          type: integer
+        roots:
+          description: Per-root outcome of this scan.
+          items:
+            $ref: "#/components/schemas/ScanRunRootDetail"
+          type:
+            - array
+            - "null"
+        roots_total:
+          description: Folders this scan covered.
+          format: int64
+          type: integer
+        started_at:
+          description: When the scan started.
+          format: date-time
+          type: string
+        status:
+          description: Partial when the scan was interrupted before it walked every root.
+          enum:
+            - completed
+            - partial
+          type: string
+        unmatched_files:
+          description: Files this scan looked at but could not match.
+          items:
+            $ref: "#/components/schemas/ScanRunFileLogDetail"
+          type:
+            - array
+            - "null"
+      required:
+        - roots
+        - groups
+        - unmatched_files
+        - id
+        - started_at
+        - finished_at
+        - status
+        - roots_total
+        - found
+        - added
+        - changed
+        - missing
+        - considered
+        - matched
+      type: object
+    ScanRunFileLogDetail:
+      additionalProperties: false
+      properties:
+        confidence:
+          description: The best candidate's score, however far short of matching. Absent when there was nothing to compare against.
+          format: double
+          type: number
+        file_id:
+          description: The file, when it has not since been deleted.
+          format: int64
+          type: integer
+        parsed_title:
+          description: Title read from the name at the time of the scan.
+          type: string
+        rel_path:
+          description: Path relative to its root at the time of the scan.
+          type: string
+      required:
+        - rel_path
+      type: object
+    ScanRunGroupDetail:
+      additionalProperties: false
+      properties:
+        file_count:
+          description: Files this scan matched to the title.
+          format: int64
+          type: integer
+        media_ref:
+          description: The title, as provider:id.
+          type: string
+        title:
+          $ref: "#/components/schemas/MatchedTitle"
+          description: The title's name and poster, when the node can still describe it.
+        tracked:
+          description: False when the match came from a search rather than the user's own list.
+          type: boolean
+      required:
+        - media_ref
+        - file_count
+        - tracked
+      type: object
+    ScanRunOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/ScanRunOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        run:
+          $ref: "#/components/schemas/ScanRunDetail"
+          description: The scan run in full.
+        sources:
+          description: Attribution for every field that came from an external source.
+          items:
+            $ref: "#/components/schemas/Source"
+          type:
+            - array
+            - "null"
+      required:
+        - run
+        - sources
+      type: object
+    ScanRunRootDetail:
+      additionalProperties: false
+      properties:
+        added:
+          description: Files recorded for the first time.
+          format: int64
+          type: integer
+        changed:
+          description: Known files whose size or modification time moved.
+          format: int64
+          type: integer
+        error:
+          description: Why this root could not be scanned.
+          type: string
+        found:
+          description: Media files seen on disk.
+          format: int64
+          type: integer
+        missing:
+          description: Files that were recorded before and were gone this time.
+          format: int64
+          type: integer
+        probed:
+          description: Files whose container was opened to read how long they run.
+          format: int64
+          type: integer
+        reparsed:
+          description: Untouched files whose names a newer parser read again.
+          format: int64
+          type: integer
+        root_id:
+          description: The root, when it has not since been removed.
+          format: int64
+          type: integer
+        root_path:
+          description: Path the scan walked.
+          type: string
+      required:
+        - root_path
+        - found
+        - added
+        - changed
+        - reparsed
+        - missing
+        - probed
+      type: object
+    ScanRunSummary:
+      additionalProperties: false
+      properties:
+        added:
+          description: Files recorded for the first time.
+          format: int64
+          type: integer
+        changed:
+          description: Known files whose size or modification time moved.
+          format: int64
+          type: integer
+        considered:
+          description: Unmatched files the scan tried to match.
+          format: int64
+          type: integer
+        finished_at:
+          description: When the scan finished.
+          format: date-time
+          type: string
+        found:
+          description: Media files seen on disk across all scanned roots.
+          format: int64
+          type: integer
+        id:
+          description: Identifier of this scan run.
+          format: int64
+          type: integer
+        matched:
+          description: Files matched to a title without asking the user.
+          format: int64
+          type: integer
+        missing:
+          description: Files that were recorded before and were gone this time.
+          format: int64
+          type: integer
+        roots_total:
+          description: Folders this scan covered.
+          format: int64
+          type: integer
+        started_at:
+          description: When the scan started.
+          format: date-time
+          type: string
+        status:
+          description: Partial when the scan was interrupted before it walked every root.
+          enum:
+            - completed
+            - partial
+          type: string
+      required:
+        - id
+        - started_at
+        - finished_at
+        - status
+        - roots_total
+        - found
+        - added
+        - changed
+        - missing
+        - considered
+        - matched
       type: object
     ScanStatus:
       additionalProperties: false
@@ -2363,6 +2666,92 @@ paths:
                 $ref: "#/components/schemas/ErrorModel"
           description: Error
       summary: Scan the library
+      tags:
+        - library
+  /v1/library/scan/history:
+    get:
+      description: Every scan the node has run, newest first, kept independently of the single current-scan slot so a scan from days ago is still readable.
+      operationId: listLibraryScanHistory
+      parameters:
+        - description: Only scans started at or after this time. Left out for no lower bound.
+          explode: false
+          in: query
+          name: from
+          schema:
+            description: Only scans started at or after this time. Left out for no lower bound.
+            format: date-time
+            type: string
+        - description: Only scans started at or before this time. Left out for no upper bound.
+          explode: false
+          in: query
+          name: to
+          schema:
+            description: Only scans started at or before this time. Left out for no upper bound.
+            format: date-time
+            type: string
+        - description: Page size.
+          explode: false
+          in: query
+          name: limit
+          schema:
+            default: 100
+            description: Page size.
+            format: int64
+            maximum: 500
+            minimum: 1
+            type: integer
+        - description: How many scans to skip.
+          explode: false
+          in: query
+          name: offset
+          schema:
+            description: How many scans to skip.
+            format: int64
+            minimum: 0
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanHistoryOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Past scans
+      tags:
+        - library
+  /v1/library/scan/history/{id}:
+    get:
+      description: What one scan matched, grouped by title, and every file it looked at but could not match.
+      operationId: getLibraryScanHistoryRun
+      parameters:
+        - description: Identifier of the scan run.
+          in: path
+          name: id
+          required: true
+          schema:
+            description: Identifier of the scan run.
+            format: int64
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanRunOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: One past scan
       tags:
         - library
   /v1/media/filter-options:

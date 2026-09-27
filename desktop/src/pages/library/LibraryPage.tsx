@@ -1,3 +1,4 @@
+import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
 import { useEffect, useMemo, useState } from 'react'
 
@@ -33,6 +34,7 @@ import { ScanPanel } from './scan-panel/ScanPanel'
 
 export function LibraryPage() {
 	const { t } = useTranslation()
+	const navigate = useNavigate()
 
 	const [roots, rootsPending, startRoots] = useUnit([
 		libraryRootsQuery.$data,
@@ -155,6 +157,13 @@ export function LibraryPage() {
 							onClick={() => scanRequested(0)}
 						>
 							{scanning ? t('library.scan.running') : t('library.scan.start')}
+						</Button>
+
+						<Button
+							startIcon={<Icon name='common/clock' size={16} />}
+							onClick={() => navigate({ to: '/library/history' })}
+						>
+							{t('library.history.action')}
 						</Button>
 					</div>
 				}

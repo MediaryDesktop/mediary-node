@@ -125,3 +125,81 @@ type ScanStatus struct {
 	Considered int `json:"considered" doc:"Unmatched files the scan tried to match, including ones left over from earlier scans."`
 	Matched    int `json:"matched" doc:"Files matched to a title without asking the user. The rest keep their suggestions for confirmation."`
 }
+
+// ScanRunSummary is one past scan as a history list shows it — enough to pick
+// which one to open, without the per-file detail only the detail view needs.
+type ScanRunSummary struct {
+	ID         int64     `json:"id" doc:"Identifier of this scan run."`
+	StartedAt  time.Time `json:"started_at" doc:"When the scan started."`
+	FinishedAt time.Time `json:"finished_at" doc:"When the scan finished."`
+	Status     string    `json:"status" enum:"completed,partial" doc:"Partial when the scan was interrupted before it walked every root."`
+
+	RootsTotal int `json:"roots_total" doc:"Folders this scan covered."`
+	Found      int `json:"found" doc:"Media files seen on disk across all scanned roots."`
+	Added      int `json:"added" doc:"Files recorded for the first time."`
+	Changed    int `json:"changed" doc:"Known files whose size or modification time moved."`
+	Missing    int `json:"missing" doc:"Files that were recorded before and were gone this time."`
+	Considered int `json:"considered" doc:"Unmatched files the scan tried to match."`
+	Matched    int `json:"matched" doc:"Files matched to a title without asking the user."`
+}
+
+type ScanHistoryQuery struct {
+	From   *time.Time
+	To     *time.Time
+	Limit  int
+	Offset int
+}
+
+type ScanHistoryPage struct {
+	Items  []ScanRunSummary `json:"items" doc:"One page of past scans, newest first."`
+	Total  int              `json:"total" doc:"How many scans match the filter in total."`
+	Limit  int              `json:"limit" doc:"Page size that was applied."`
+	Offset int              `json:"offset" doc:"Offset that was applied."`
+}
+
+// ScanRunRootDetail is one root's outcome from a past scan. RootID and RootPath
+// are what the scan saw at the time — a root removed since is still named here.
+type ScanRunRootDetail struct {
+	RootID   *int64 `json:"root_id,omitempty" doc:"The root, when it has not since been removed."`
+	RootPath string `json:"root_path" doc:"Path the scan walked."`
+
+	Found    int `json:"found" doc:"Media files seen on disk."`
+	Added    int `json:"added" doc:"Files recorded for the first time."`
+	Changed  int `json:"changed" doc:"Known files whose size or modification time moved."`
+	Reparsed int `json:"reparsed" doc:"Untouched files whose names a newer parser read again."`
+	Missing  int `json:"missing" doc:"Files that were recorded before and were gone this time."`
+	Probed   int `json:"probed" doc:"Files whose container was opened to read how long they run."`
+
+	Error string `json:"error,omitempty" doc:"Why this root could not be scanned."`
+}
+
+// ScanRunGroupDetail is one title a scan matched files to. Tracked mirrors
+// whether the match came off the user's own list or from a fresh search — the
+// closest equivalent to "not yet on your list" that makes sense across every
+// kind of media this library holds, not only what one particular source tracks.
+type ScanRunGroupDetail struct {
+	MediaRef  string        `json:"media_ref" doc:"The title, as provider:id."`
+	FileCount int           `json:"file_count" doc:"Files this scan matched to the title."`
+	Tracked   bool          `json:"tracked" doc:"False when the match came from a search rather than the user's own list."`
+	Title     *MatchedTitle `json:"title,omitempty" doc:"The title's name and poster, when the node can still describe it."`
+}
+
+// ScanRunFileLogDetail is what a scan made of one file it could not match.
+// RelPath and ParsedTitle are snapshots from the time of the scan, so the entry
+// still means something once the file itself is gone.
+type ScanRunFileLogDetail struct {
+	FileID      *int64   `json:"file_id,omitempty" doc:"The file, when it has not since been deleted."`
+	RelPath     string   `json:"rel_path" doc:"Path relative to its root at the time of the scan."`
+	ParsedTitle string   `json:"parsed_title,omitempty" doc:"Title read from the name at the time of the scan."`
+	Confidence  *float64 `json:"confidence,omitempty" doc:"The best candidate's score, however far short of matching. Absent when there was nothing to compare against."`
+}
+
+// ScanRunDetail is one past scan in full: its totals, what happened to every
+// root, and what it made of every file — matched, grouped by title, or not.
+type ScanRunDetail struct {
+	ScanRunSummary
+
+	Roots          []ScanRunRootDetail    `json:"roots" doc:"Per-root outcome of this scan."`
+	Groups         []ScanRunGroupDetail   `json:"groups" doc:"Titles this scan matched files to."`
+	UnmatchedFiles []ScanRunFileLogDetail `json:"unmatched_files" doc:"Files this scan looked at but could not match."`
+}

@@ -308,6 +308,17 @@ export const en = {
 			failures: 'Folders that could not be read',
 			rootFailed: 'A folder could not be read: {{reason}}'
 		},
+		history: {
+			action: 'History',
+			title: 'Scan history',
+			description: 'Every scan the node has run',
+			empty: 'No scans yet',
+			partial: 'Interrupted',
+			matchedTitle: 'Matched titles',
+			unmatchedTitle: 'Could not match',
+			notYetOnYourList: 'Not yet on your list',
+			nothingToShow: 'This scan found nothing to report'
+		},
 		search: 'Search by title, name or file…',
 		view: {
 			all: 'All',

@@ -490,8 +490,8 @@ func (q *Queries) ListLibraryRoots(ctx context.Context) ([]ListLibraryRootsRow, 
 }
 
 const listUnmatchedFiles = `-- name: ListUnmatchedFiles :many
-SELECT f.id, f.kind, f.media_form, f.parsed_title, f.parsed_year, f.parsed_season,
-       f.parsed_episode, f.parsed_chapter, f.parsed_volume
+SELECT f.id, f.rel_path, f.kind, f.media_form, f.parsed_title, f.parsed_year,
+       f.parsed_season, f.parsed_episode, f.parsed_chapter, f.parsed_volume
 FROM library_file f
          LEFT JOIN file_match m ON m.file_id = f.id
 WHERE m.file_id IS NULL
@@ -507,6 +507,7 @@ LIMIT ?
 
 type ListUnmatchedFilesRow struct {
 	ID            int64          `json:"id"`
+	RelPath       string         `json:"rel_path"`
 	Kind          string         `json:"kind"`
 	MediaForm     sql.NullString `json:"media_form"`
 	ParsedTitle   sql.NullString `json:"parsed_title"`
@@ -531,6 +532,7 @@ func (q *Queries) ListUnmatchedFiles(ctx context.Context, limit int64) ([]ListUn
 		var i ListUnmatchedFilesRow
 		if err := rows.Scan(
 			&i.ID,
+			&i.RelPath,
 			&i.Kind,
 			&i.MediaForm,
 			&i.ParsedTitle,

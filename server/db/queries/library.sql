@@ -153,8 +153,8 @@ WHERE f.id = ?;
 -- title arrives together: the candidates are then looked up once per title
 -- instead of once per file.
 -- name: ListUnmatchedFiles :many
-SELECT f.id, f.kind, f.media_form, f.parsed_title, f.parsed_year, f.parsed_season,
-       f.parsed_episode, f.parsed_chapter, f.parsed_volume
+SELECT f.id, f.rel_path, f.kind, f.media_form, f.parsed_title, f.parsed_year,
+       f.parsed_season, f.parsed_episode, f.parsed_chapter, f.parsed_volume
 FROM library_file f
          LEFT JOIN file_match m ON m.file_id = f.id
 WHERE m.file_id IS NULL

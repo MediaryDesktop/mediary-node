@@ -97,6 +97,34 @@ func (s *Service) Suggestions(ctx context.Context, fileID int64) ([]Suggestion, 
 type matchOutcome struct {
 	Considered int
 	Matched    int
+
+	// Groups and FileLogs are what a scan_run keeps for the history page: which
+	// titles it settled on, and what it made of every file it looked at, matched
+	// or not.
+	Groups   []matchGroupOutcome
+	FileLogs []matchFileOutcome
+}
+
+// matchGroupOutcome is one title the matcher settled on during this run.
+// Tracked mirrors matcher.Candidate.Tracked: false means the matcher found the
+// title on its own from a search, not off the user's own list.
+type matchGroupOutcome struct {
+	MediaRef  string
+	FileCount int
+	Tracked   bool
+}
+
+// matchFileOutcome is what the matcher made of one file. Confidence is the best
+// candidate's score whether or not it cleared the threshold — for an unmatched
+// file that is the closest answer to "why didn't this work", and it is nil only
+// when there was nothing to compare against at all.
+type matchFileOutcome struct {
+	FileID      int64
+	RelPath     string
+	ParsedTitle string
+	Matched     bool
+	MediaRef    string
+	Confidence  *float64
 }
 
 // matchFiles works through the files no one has matched yet. Files of one title
@@ -132,17 +160,32 @@ func (s *Service) matchFiles(ctx context.Context) matchOutcome {
 			continue
 		}
 
-		match := s.bestForGroup(ctx, group, mediaType, trackedByType)
-		if match == nil {
+		best, matched := s.bestForGroup(ctx, group, mediaType, trackedByType)
+		if !matched {
+			for _, file := range group.files {
+				outcome.FileLogs = append(outcome.FileLogs, matchFileOutcome{
+					FileID:      file.ID,
+					RelPath:     file.RelPath,
+					ParsedTitle: file.Parsed.Title,
+					Confidence:  scoreOf(best),
+				})
+			}
+
 			continue
 		}
 
+		outcome.Groups = append(outcome.Groups, matchGroupOutcome{
+			MediaRef:  best.Candidate.MediaRef,
+			FileCount: len(group.files),
+			Tracked:   best.Candidate.Tracked,
+		})
+
 		for _, file := range group.files {
 			stored := store.Match{
-				MediaRef:   match.Candidate.MediaRef,
+				MediaRef:   best.Candidate.MediaRef,
 				Season:     file.Parsed.Season,
 				Episode:    episodeOrChapter(file.Parsed),
-				Confidence: match.Confidence,
+				Confidence: best.Confidence,
 			}
 
 			if err := s.store.SetAutoMatch(ctx, file.ID, stored, s.opts.Now()); err != nil {
@@ -152,6 +195,14 @@ func (s *Service) matchFiles(ctx context.Context) matchOutcome {
 			}
 
 			outcome.Matched++
+			outcome.FileLogs = append(outcome.FileLogs, matchFileOutcome{
+				FileID:      file.ID,
+				RelPath:     file.RelPath,
+				ParsedTitle: file.Parsed.Title,
+				Matched:     true,
+				MediaRef:    best.Candidate.MediaRef,
+				Confidence:  &best.Confidence,
+			})
 		}
 
 		s.publishScan("matching", map[string]any{
@@ -164,12 +215,16 @@ func (s *Service) matchFiles(ctx context.Context) matchOutcome {
 	return outcome
 }
 
+// bestForGroup ranks a group's candidates and reports whether the best one
+// cleared the automatic threshold. It hands back the best score either way — a
+// rejected candidate is still the answer to why a file did not match — so the
+// caller decides what to do with a look that fell short.
 func (s *Service) bestForGroup(
 	ctx context.Context,
 	group unmatchedGroup,
 	mediaType string,
 	trackedByType map[string][]matcher.Candidate,
-) *matcher.Scored {
+) (best *matcher.Scored, matched bool) {
 	target := matcher.File{
 		Title:   group.title,
 		Form:    group.form,
@@ -183,7 +238,7 @@ func (s *Service) bestForGroup(
 		s.logger.Warn().Err(err).Msg("read tracked titles")
 	}
 
-	best := firstScored(matcher.Rank(target, tracked))
+	best = firstScored(matcher.Rank(target, tracked))
 
 	// The user's own list answers most files, and it answers them offline. The
 	// source is only asked about what the list could not explain.
@@ -200,11 +255,17 @@ func (s *Service) bestForGroup(
 		}
 	}
 
-	if best == nil || best.Confidence < matcher.AutoThreshold {
+	return best, best != nil && best.Confidence >= matcher.AutoThreshold
+}
+
+func scoreOf(scored *matcher.Scored) *float64 {
+	if scored == nil {
 		return nil
 	}
 
-	return best
+	confidence := scored.Confidence
+
+	return &confidence
 }
 
 func (s *Service) trackedCandidates(

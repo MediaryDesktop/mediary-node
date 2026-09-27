@@ -14,6 +14,8 @@ import {
 	fetchLibraryFilesFx,
 	fetchLibraryRootsFx,
 	fetchLibraryScanFx,
+	fetchLibraryScanHistoryFx,
+	fetchLibraryScanRunFx,
 	setLibraryMatchFx,
 	startLibraryScanFx
 } from '../api/api'
@@ -46,6 +48,13 @@ export const libraryFilesQuery = createQuery({
 })
 
 export const libraryScanQuery = createQuery({ effect: fetchLibraryScanFx, name: 'libraryScan' })
+
+export const libraryScanHistoryQuery = createQuery({
+	effect: fetchLibraryScanHistoryFx,
+	name: 'libraryScanHistory'
+})
+
+export const libraryScanRunQuery = createQuery({ effect: fetchLibraryScanRunFx, name: 'libraryScanRun' })
 
 export const libraryCandidatesQuery = createQuery({
 	effect: fetchLibraryCandidatesFx,
@@ -85,6 +94,8 @@ keepFresh(libraryFilesQuery, {
 })
 
 keepFresh(libraryScanQuery, { triggers: [scanStarted, scanFinished] })
+
+keepFresh(libraryScanHistoryQuery, { triggers: [scanFinished] })
 
 export type ScanPhase = 'scanning' | 'probing' | 'matching'
 

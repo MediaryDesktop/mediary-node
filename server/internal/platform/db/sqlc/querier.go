@@ -15,6 +15,7 @@ type Querier interface {
 	// from the same snapshot.
 	CountLibraryFileStates(ctx context.Context, arg CountLibraryFileStatesParams) (CountLibraryFileStatesRow, error)
 	CountLibraryFiles(ctx context.Context, arg CountLibraryFilesParams) (int64, error)
+	CountScanRuns(ctx context.Context, arg CountScanRunsParams) (int64, error)
 	DeleteAniListMirror(ctx context.Context) error
 	DeleteAniListOutbox(ctx context.Context) error
 	DeleteAniListOutboxEntryIfUnchanged(ctx context.Context, arg DeleteAniListOutboxEntryIfUnchangedParams) (int64, error)
@@ -31,10 +32,15 @@ type Querier interface {
 	// Phase 0 queries, proving `task sqlc` produces compiling Go. Module queries
 	// go in db/queries/<module>.sql.
 	GetNodeMeta(ctx context.Context, key string) (NodeMetum, error)
+	GetScanRun(ctx context.Context, id int64) (ScanRun, error)
 	GetSourceCache(ctx context.Context, arg GetSourceCacheParams) (SourceCache, error)
 	InsertCustomList(ctx context.Context, arg InsertCustomListParams) (CustomList, error)
 	InsertLibraryFile(ctx context.Context, arg InsertLibraryFileParams) (int64, error)
 	InsertLibraryRoot(ctx context.Context, arg InsertLibraryRootParams) (LibraryRoot, error)
+	InsertScanRun(ctx context.Context, arg InsertScanRunParams) (int64, error)
+	InsertScanRunFileLog(ctx context.Context, arg InsertScanRunFileLogParams) error
+	InsertScanRunGroup(ctx context.Context, arg InsertScanRunGroupParams) error
+	InsertScanRunRoot(ctx context.Context, arg InsertScanRunRootParams) error
 	ListAniListOutbox(ctx context.Context, accountID int64) ([]AnilistOutbox, error)
 	ListCustomListItems(ctx context.Context, listID int64) ([]CustomListItem, error)
 	ListCustomLists(ctx context.Context) ([]ListCustomListsRow, error)
@@ -44,12 +50,19 @@ type Querier interface {
 	ListLibraryFiles(ctx context.Context, arg ListLibraryFilesParams) ([]ListLibraryFilesRow, error)
 	ListLibraryRoots(ctx context.Context) ([]ListLibraryRootsRow, error)
 	ListNodeMeta(ctx context.Context) ([]NodeMetum, error)
+	ListScanRunFileLogs(ctx context.Context, scanRunID int64) ([]ScanRunFileLog, error)
+	ListScanRunGroups(ctx context.Context, scanRunID int64) ([]ScanRunGroup, error)
+	ListScanRunRoots(ctx context.Context, scanRunID int64) ([]ScanRunRoot, error)
+	ListScanRuns(ctx context.Context, arg ListScanRunsParams) ([]ScanRun, error)
 	// Files the matcher still has to work out, ordered so that every episode of one
 	// title arrives together: the candidates are then looked up once per title
 	// instead of once per file.
 	ListUnmatchedFiles(ctx context.Context, limit int64) ([]ListUnmatchedFilesRow, error)
 	MarkLibraryFileMissing(ctx context.Context, arg MarkLibraryFileMissingParams) error
 	NextCustomListPosition(ctx context.Context, mediaType string) (int64, error)
+	// A local database has no reason to grow scan history forever; the newest runs
+	// are the only ones anyone comes back to read.
+	PruneScanRuns(ctx context.Context, limit int64) error
 	RecordAniListOutboxFailure(ctx context.Context, arg RecordAniListOutboxFailureParams) error
 	RenameCustomList(ctx context.Context, arg RenameCustomListParams) (int64, error)
 	TouchLibraryRoot(ctx context.Context, arg TouchLibraryRootParams) error

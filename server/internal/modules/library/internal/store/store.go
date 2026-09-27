@@ -438,11 +438,13 @@ func (s *Store) File(ctx context.Context, id int64) (*File, error) {
 }
 
 // Unmatched is a file waiting for the matcher, with everything the matcher needs
-// and nothing else.
+// and nothing else. RelPath is not for matching — it is what a scan_run_file_log
+// snapshots so a scan's history still names the file after it is gone.
 type Unmatched struct {
-	ID     int64
-	Kind   string
-	Parsed Parsed
+	ID      int64
+	RelPath string
+	Kind    string
+	Parsed  Parsed
 }
 
 func (s *Store) UnmatchedFiles(ctx context.Context, limit int) ([]Unmatched, error) {
@@ -456,8 +458,9 @@ func (s *Store) UnmatchedFiles(ctx context.Context, limit int) ([]Unmatched, err
 		row := &rows[i]
 
 		files = append(files, Unmatched{
-			ID:   row.ID,
-			Kind: row.Kind,
+			ID:      row.ID,
+			RelPath: row.RelPath,
+			Kind:    row.Kind,
 			Parsed: parsedFrom(row.MediaForm, row.ParsedTitle, row.ParsedYear,
 				row.ParsedSeason, row.ParsedEpisode, row.ParsedChapter, row.ParsedVolume),
 		})

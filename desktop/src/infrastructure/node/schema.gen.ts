@@ -4,2660 +4,2989 @@
  */
 
 export interface paths {
-	'/v1/anilist/session': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		/** AniList connection */
-		get: operations['getAniListSession']
-		/**
-		 * Connect an AniList account
-		 * @description Validates the token against AniList before storing it, then starts fetching both collections in the background.
-		 */
-		put: operations['connectAniList']
-		post?: never
-		/**
-		 * Disconnect the AniList account
-		 * @description Forgets the token and deletes the mirrored collections.
-		 */
-		delete: operations['disconnectAniList']
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/v1/extension/status': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		/**
-		 * Extension module status
-		 * @description Reports whether the extension module is wired. Placeholder for phase 0.
-		 */
-		get: operations['getExtensionStatus']
-		put?: never
-		post?: never
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/v1/health': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		/**
-		 * Node health
-		 * @description Reports liveness, the running build and whether a cloud account is paired.
-		 */
-		get: operations['getNodeHealth']
-		put?: never
-		post?: never
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/v1/library/files': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		/**
-		 * Scanned files
-		 * @description Files the last scan recorded, with the title each was matched to. A file the scan no longer finds is kept and reported as missing, so an unplugged drive does not take the user's manual matches with it.
-		 */
-		get: operations['listLibraryFiles']
-		put?: never
-		post?: never
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/v1/library/files/{id}/candidates': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		/**
-		 * What this file could be
-		 * @description Titles the file's name could refer to, best first, each with how well it fits. This is the other half of the automatic match: what the node would not decide on its own it offers here, for the user to confirm with setLibraryFileMatch. Entries already on the user's own list are marked and come from the node's mirror, so they are offered even while the source is unreachable.
-		 */
-		get: operations['listLibraryFileCandidates']
-		put?: never
-		post?: never
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/v1/library/files/{id}/match': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		get?: never
-		/**
-		 * Match a file by hand
-		 * @description Ties the file to a title the user picked. A manual match outranks anything a later scan works out on its own, so a correction is made once and not after every scan.
-		 */
-		put: operations['setLibraryFileMatch']
-		post?: never
-		/**
-		 * Forget a file's match
-		 * @description Leaves the file unmatched so the next scan can work it out again.
-		 */
-		delete: operations['deleteLibraryFileMatch']
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/v1/library/roots': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		/**
-		 * Library folders
-		 * @description The folders the node scans, with how many files each holds and when it was last walked.
-		 */
-		get: operations['listLibraryRoots']
-		put?: never
-		/**
-		 * Add a library folder
-		 * @description The folder has to exist and must not sit inside — or contain — a folder already watched, which would record the same file twice.
-		 */
-		post: operations['addLibraryRoot']
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/v1/library/roots/{id}': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		get?: never
-		put?: never
-		post?: never
-		/**
-		 * Stop watching a folder
-		 * @description Forgets the folder and everything the node recorded about the files in it, including their matches. Nothing on disk is touched.
-		 */
-		delete: operations['deleteLibraryRoot']
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/v1/library/scan': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		/**
-		 * Scan status
-		 * @description What the running scan has found so far, or the outcome of the last one.
-		 */
-		get: operations['getLibraryScan']
-		put?: never
-		/**
-		 * Scan the library
-		 * @description Starts a scan and returns at once: walking a large library takes minutes. Progress arrives as library.scan events on the socket. Only one scan runs at a time. Files whose size and modification time did not change are not touched, so a rescan is cheap, and a folder that cannot be read right now is skipped rather than emptied.
-		 */
-		post: operations['startLibraryScan']
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/v1/media/filter-options': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		/**
-		 * Genres and tags to filter by
-		 * @description The source's own vocabulary, kept for at most a day. Formats, statuses and seasons are fixed enums of searchMedia and are not repeated here.
-		 */
-		get: operations['getMediaFilterOptions']
-		put?: never
-		post?: never
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/v1/media/search': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		/**
-		 * Search titles
-		 * @description Asks the source that owns this kind of media, on demand and never in the background. Results are not stored: only a title the user opens is cached, and only for as long as the source's terms allow.
-		 */
-		get: operations['searchMedia']
-		put?: never
-		post?: never
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/v1/media/{media_ref}': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		/**
-		 * Title details
-		 * @description Fetched from the source on demand and kept for at most a day, as the source's terms allow. Past that the node asks again; while the source is unreachable the request fails, and clients fall back to what the user's own list already knows about the title.
-		 */
-		get: operations['getMediaDetails']
-		put?: never
-		post?: never
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/v1/playback': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		/**
-		 * What is playing
-		 * @description The node plays one file at a time. Position and duration come from the player itself and arrive as playback events on the socket; this is the state to start from.
-		 */
-		get: operations['getPlayback']
-		put?: never
-		/**
-		 * Play a library file
-		 * @description Opens the player on a scanned file. Starting a second file replaces the first — the node keeps one window. A matched file is marked watched once it is far enough through, and the tracker decides what that means for the user's list.
-		 */
-		post: operations['startPlayback']
-		/**
-		 * Close the player
-		 * @description Ends the session. Whatever was already recorded as watched stays recorded.
-		 */
-		delete: operations['stopPlayback']
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/v1/playback/command': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		get?: never
-		put?: never
-		/**
-		 * Steer the open player
-		 * @description Pause, resume or jump. Deliberately small: the player's own window is in front of the user, and duplicating its controls would only add ways for the two to disagree.
-		 */
-		post: operations['controlPlayback']
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/v1/reader/status': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		/**
-		 * Reader module status
-		 * @description Reports whether the reader module is wired. Placeholder for phase 0.
-		 */
-		get: operations['getReaderStatus']
-		put?: never
-		post?: never
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/v1/sync/status': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		/**
-		 * Sync module status
-		 * @description Reports whether the sync module is wired. Placeholder for phase 0.
-		 */
-		get: operations['getSyncStatus']
-		put?: never
-		post?: never
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/v1/torrent/status': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		/**
-		 * Torrent module status
-		 * @description Reports whether the torrent module is wired. Placeholder for phase 0.
-		 */
-		get: operations['getTorrentStatus']
-		put?: never
-		post?: never
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/v1/tracker/entries': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		/**
-		 * Tracker entries
-		 * @description Served from the node's mirror, so it works offline. A stale mirror is returned immediately while a refresh runs; a `tracker` event announces the result.
-		 */
-		get: operations['listTrackerEntries']
-		put?: never
-		post?: never
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/v1/tracker/entries/{media_ref}': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		get?: never
-		/**
-		 * Update a tracker entry
-		 * @description Applies the change locally and queues it for AniList, so it works offline. The returned entry already carries the change with `sync_pending: true`; a `tracker` event with reason `synced` follows once AniList has it. A progress lower than what AniList already holds is only sent when it is lower than what the user saw — so an older offline edit never rolls back progress made on another device.
-		 */
-		put: operations['updateTrackerEntry']
-		post?: never
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/v1/tracker/lists': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		/**
-		 * Custom lists
-		 * @description Every list the user made, in one response. Anime and manga lists are read from the node's AniList mirror, so they work offline; the other media types are the node's own. Status lists are not included — those are an entry's status, not a list.
-		 */
-		get: operations['listTrackerLists']
-		put?: never
-		/**
-		 * Create a custom list
-		 * @description An anime or manga list is created in the user's AniList account and needs AniList reachable; the other media types are stored in this node and work offline.
-		 */
-		post: operations['createTrackerList']
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/v1/tracker/lists/{id}': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		get?: never
-		put?: never
-		post?: never
-		/**
-		 * Delete a custom list
-		 * @description Removes the list. Titles in it keep their entry and their status; they only lose this list's label.
-		 */
-		delete: operations['deleteTrackerList']
-		options?: never
-		head?: never
-		/** Rename a custom list */
-		patch: operations['renameTrackerList']
-		trace?: never
-	}
-	'/v1/tracker/refresh': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		get?: never
-		put?: never
-		/**
-		 * Refresh tracker entries
-		 * @description Starts a background refresh; the result arrives as a `tracker` event.
-		 */
-		post: operations['refreshTrackerEntries']
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
+    "/v1/anilist/session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** AniList connection */
+        get: operations["getAniListSession"];
+        /**
+         * Connect an AniList account
+         * @description Validates the token against AniList before storing it, then starts fetching both collections in the background.
+         */
+        put: operations["connectAniList"];
+        post?: never;
+        /**
+         * Disconnect the AniList account
+         * @description Forgets the token and deletes the mirrored collections.
+         */
+        delete: operations["disconnectAniList"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/extension/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Extension module status
+         * @description Reports whether the extension module is wired. Placeholder for phase 0.
+         */
+        get: operations["getExtensionStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Node health
+         * @description Reports liveness, the running build and whether a cloud account is paired.
+         */
+        get: operations["getNodeHealth"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/library/files": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Scanned files
+         * @description Files the last scan recorded, with the title each was matched to. A file the scan no longer finds is kept and reported as missing, so an unplugged drive does not take the user's manual matches with it.
+         */
+        get: operations["listLibraryFiles"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/library/files/{id}/candidates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * What this file could be
+         * @description Titles the file's name could refer to, best first, each with how well it fits. This is the other half of the automatic match: what the node would not decide on its own it offers here, for the user to confirm with setLibraryFileMatch. Entries already on the user's own list are marked and come from the node's mirror, so they are offered even while the source is unreachable.
+         */
+        get: operations["listLibraryFileCandidates"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/library/files/{id}/match": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Match a file by hand
+         * @description Ties the file to a title the user picked. A manual match outranks anything a later scan works out on its own, so a correction is made once and not after every scan.
+         */
+        put: operations["setLibraryFileMatch"];
+        post?: never;
+        /**
+         * Forget a file's match
+         * @description Leaves the file unmatched so the next scan can work it out again.
+         */
+        delete: operations["deleteLibraryFileMatch"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/library/roots": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Library folders
+         * @description The folders the node scans, with how many files each holds and when it was last walked.
+         */
+        get: operations["listLibraryRoots"];
+        put?: never;
+        /**
+         * Add a library folder
+         * @description The folder has to exist and must not sit inside — or contain — a folder already watched, which would record the same file twice.
+         */
+        post: operations["addLibraryRoot"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/library/roots/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Stop watching a folder
+         * @description Forgets the folder and everything the node recorded about the files in it, including their matches. Nothing on disk is touched.
+         */
+        delete: operations["deleteLibraryRoot"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/library/scan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Scan status
+         * @description What the running scan has found so far, or the outcome of the last one.
+         */
+        get: operations["getLibraryScan"];
+        put?: never;
+        /**
+         * Scan the library
+         * @description Starts a scan and returns at once: walking a large library takes minutes. Progress arrives as library.scan events on the socket. Only one scan runs at a time. Files whose size and modification time did not change are not touched, so a rescan is cheap, and a folder that cannot be read right now is skipped rather than emptied.
+         */
+        post: operations["startLibraryScan"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/library/scan/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Past scans
+         * @description Every scan the node has run, newest first, kept independently of the single current-scan slot so a scan from days ago is still readable.
+         */
+        get: operations["listLibraryScanHistory"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/library/scan/history/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * One past scan
+         * @description What one scan matched, grouped by title, and every file it looked at but could not match.
+         */
+        get: operations["getLibraryScanHistoryRun"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/media/filter-options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Genres and tags to filter by
+         * @description The source's own vocabulary, kept for at most a day. Formats, statuses and seasons are fixed enums of searchMedia and are not repeated here.
+         */
+        get: operations["getMediaFilterOptions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/media/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search titles
+         * @description Asks the source that owns this kind of media, on demand and never in the background. Results are not stored: only a title the user opens is cached, and only for as long as the source's terms allow.
+         */
+        get: operations["searchMedia"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/media/{media_ref}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Title details
+         * @description Fetched from the source on demand and kept for at most a day, as the source's terms allow. Past that the node asks again; while the source is unreachable the request fails, and clients fall back to what the user's own list already knows about the title.
+         */
+        get: operations["getMediaDetails"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/playback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * What is playing
+         * @description The node plays one file at a time. Position and duration come from the player itself and arrive as playback events on the socket; this is the state to start from.
+         */
+        get: operations["getPlayback"];
+        put?: never;
+        /**
+         * Play a library file
+         * @description Opens the player on a scanned file. Starting a second file replaces the first — the node keeps one window. A matched file is marked watched once it is far enough through, and the tracker decides what that means for the user's list.
+         */
+        post: operations["startPlayback"];
+        /**
+         * Close the player
+         * @description Ends the session. Whatever was already recorded as watched stays recorded.
+         */
+        delete: operations["stopPlayback"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/playback/command": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Steer the open player
+         * @description Pause, resume or jump. Deliberately small: the player's own window is in front of the user, and duplicating its controls would only add ways for the two to disagree.
+         */
+        post: operations["controlPlayback"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/reader/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Reader module status
+         * @description Reports whether the reader module is wired. Placeholder for phase 0.
+         */
+        get: operations["getReaderStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/sync/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Sync module status
+         * @description Reports whether the sync module is wired. Placeholder for phase 0.
+         */
+        get: operations["getSyncStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/torrent/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Torrent module status
+         * @description Reports whether the torrent module is wired. Placeholder for phase 0.
+         */
+        get: operations["getTorrentStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/tracker/entries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Tracker entries
+         * @description Served from the node's mirror, so it works offline. A stale mirror is returned immediately while a refresh runs; a `tracker` event announces the result.
+         */
+        get: operations["listTrackerEntries"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/tracker/entries/{media_ref}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Update a tracker entry
+         * @description Applies the change locally and queues it for AniList, so it works offline. The returned entry already carries the change with `sync_pending: true`; a `tracker` event with reason `synced` follows once AniList has it. A progress lower than what AniList already holds is only sent when it is lower than what the user saw — so an older offline edit never rolls back progress made on another device.
+         */
+        put: operations["updateTrackerEntry"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/tracker/lists": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Custom lists
+         * @description Every list the user made, in one response. Anime and manga lists are read from the node's AniList mirror, so they work offline; the other media types are the node's own. Status lists are not included — those are an entry's status, not a list.
+         */
+        get: operations["listTrackerLists"];
+        put?: never;
+        /**
+         * Create a custom list
+         * @description An anime or manga list is created in the user's AniList account and needs AniList reachable; the other media types are stored in this node and work offline.
+         */
+        post: operations["createTrackerList"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/tracker/lists/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete a custom list
+         * @description Removes the list. Titles in it keep their entry and their status; they only lose this list's label.
+         */
+        delete: operations["deleteTrackerList"];
+        options?: never;
+        head?: never;
+        /** Rename a custom list */
+        patch: operations["renameTrackerList"];
+        trace?: never;
+    };
+    "/v1/tracker/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Refresh tracker entries
+         * @description Starts a background refresh; the result arrives as a `tracker` event.
+         */
+        post: operations["refreshTrackerEntries"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
-export type webhooks = Record<string, never>
+export type webhooks = Record<string, never>;
 export interface components {
-	schemas: {
-		AcceptedOutputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/AcceptedOutputBody.json
-			 */
-			readonly $schema?: string
-			/** @description The refresh was started or is already running. */
-			accepted: boolean
-		}
-		Account: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/Account.json
-			 */
-			readonly $schema?: string
-			avatar_url: string | null
-			display_adult_content: boolean
-			/** Format: int64 */
-			id: number
-			name: string
-			score_format: string
-			site_url: string
-		}
-		AddRootInputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/AddRootInputBody.json
-			 */
-			readonly $schema?: string
-			/**
-			 * @description Absolute path to an existing folder on this machine.
-			 * @example D:\Anime
-			 */
-			path: string
-		}
-		AiringEpisode: {
-			/** Format: date-time */
-			airing_at: string
-			/** Format: int64 */
-			episode: number
-		}
-		ControlInputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/ControlInputBody.json
-			 */
-			readonly $schema?: string
-			/**
-			 * @description What to do with the open player.
-			 * @enum {string}
-			 */
-			action: 'pause' | 'resume' | 'seek'
-			/**
-			 * Format: double
-			 * @description Seconds from the start, for a seek.
-			 */
-			position?: number
-		}
-		Counts: {
-			/**
-			 * Format: int64
-			 * @description Of those, files the last scan did not find.
-			 */
-			missing: number
-			/**
-			 * Format: int64
-			 * @description Files the filter matches.
-			 */
-			total: number
-			/**
-			 * Format: int64
-			 * @description Of those, files that belong to no title yet.
-			 */
-			unmatched: number
-		}
-		CreateListInputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/CreateListInputBody.json
-			 */
-			readonly $schema?: string
-			/**
-			 * @description The one media type this list holds. A list never mixes types: anime and manga lists are created in the user's AniList account, the rest in this node.
-			 * @enum {string}
-			 */
-			media_type: 'anime' | 'manga' | 'movie' | 'series' | 'dorama' | 'book'
-			/** @description What to call the list. */
-			name: string
-		}
-		CustomList: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/CustomList.json
-			 */
-			readonly $schema?: string
-			/**
-			 * Format: int64
-			 * @description How many titles are in the list.
-			 */
-			count: number
-			/** @description Up to four cover images, for the list's thumbnail. */
-			covers: string[] | null
-			/** @description Opaque identifier; pass it back URL-encoded to rename or delete the list. */
-			id: string
-			/**
-			 * @description The one media type this list holds.
-			 * @enum {string}
-			 */
-			media_type: 'anime' | 'manga' | 'movie' | 'series' | 'dorama' | 'book'
-			name: string
-			/**
-			 * @description Where the list lives: anilist or local.
-			 * @enum {string}
-			 */
-			provider: 'anilist' | 'local'
-			/**
-			 * Format: date-time
-			 * @description When a title in the list last changed. Absent for an empty list.
-			 */
-			updated_at?: string
-		}
-		Date: {
-			/** Format: int64 */
-			day: number | null
-			/** Format: int64 */
-			month: number | null
-			/** Format: int64 */
-			year: number | null
-		}
-		DetailsOutputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/DetailsOutputBody.json
-			 */
-			readonly $schema?: string
-			/** @description Everything a title page shows about the title itself. */
-			media: components['schemas']['MediaDetails']
-			/** @description Attribution for every field that came from an external source. */
-			sources: components['schemas']['Source'][] | null
-		}
-		EntriesOutputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/EntriesOutputBody.json
-			 */
-			readonly $schema?: string
-			/** @description One entry per title, in AniList's list order. */
-			entries: components['schemas']['Entry'][] | null
-			/**
-			 * Format: date-time
-			 * @description When AniList last answered for this collection.
-			 */
-			fetched_at: string
-			/** @description Status and custom lists with their sizes. */
-			lists: components['schemas']['List'][] | null
-			/** @description The collection this response describes. */
-			media_type: string
-			/** @description Attribution for every field that came from an external source. */
-			sources: components['schemas']['Source'][] | null
-			/** @description True when the data is older than the refresh interval; a refresh is already running. */
-			stale: boolean
-		}
-		Entry: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/Entry.json
-			 */
-			readonly $schema?: string
-			completed_at: components['schemas']['Date']
-			custom_lists: string[] | null
-			media: components['schemas']['Media']
-			media_ref: string
-			media_type: string
-			notes: string
-			private: boolean
-			/** Format: int64 */
-			progress: number
-			/** Format: int64 */
-			progress_volumes: number | null
-			provider: string
-			/** Format: int64 */
-			repeat: number
-			/** Format: int64 */
-			score: number
-			started_at: components['schemas']['Date']
-			status: string
-			sync_pending: boolean
-			/** Format: date-time */
-			updated_at: string
-		}
-		ErrorDetail: {
-			/** @description Where the error occurred, e.g. 'body.items[3].tags' or 'path.thing-id' */
-			location?: string
-			/** @description Error message text */
-			message?: string
-			/** @description The value at the given location */
-			value?: unknown
-		}
-		ErrorModel: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/ErrorModel.json
-			 */
-			readonly $schema?: string
-			/**
-			 * @description A human-readable explanation specific to this occurrence of the problem.
-			 * @example Property foo is required but is missing.
-			 */
-			detail?: string
-			/** @description Optional list of individual error details */
-			errors?: components['schemas']['ErrorDetail'][] | null
-			/**
-			 * Format: uri
-			 * @description A URI reference that identifies the specific occurrence of the problem.
-			 * @example https://example.com/error-log/abc123
-			 */
-			instance?: string
-			/**
-			 * Format: int64
-			 * @description HTTP status code
-			 * @example 400
-			 */
-			status?: number
-			/**
-			 * @description A short, human-readable summary of the problem type. This value should not change between occurrences of the error.
-			 * @example Bad Request
-			 */
-			title?: string
-			/**
-			 * Format: uri
-			 * @description A URI reference to human-readable documentation for the error.
-			 * @default about:blank
-			 * @example https://example.com/errors/example
-			 */
-			type: string
-		}
-		File: {
-			/**
-			 * Format: int64
-			 * @description How long the file runs, read out of its container during the scan. Absent for a container the node cannot read and for everything that is not video.
-			 */
-			duration_seconds?: number
-			/**
-			 * Format: int64
-			 * @description Identifier of the file, stable while its path does not change.
-			 */
-			id: number
-			/**
-			 * @description Form of media the extension points at.
-			 * @enum {string}
-			 */
-			kind: 'video' | 'manga' | 'book'
-			/** @description What the file was matched to. Absent while unmatched. */
-			match?: components['schemas']['Match']
-			/** @description True when the last scan did not find the file where it used to be. */
-			missing: boolean
-			/**
-			 * Format: date-time
-			 * @description Modification time the last scan saw.
-			 */
-			modified_at: string
-			/** @description What the file's name says. Present whether or not the file is matched. */
-			parsed: components['schemas']['Parsed']
-			/** @description Absolute path, for the player and for revealing the file. */
-			path: string
-			/** @description Path relative to the root, with forward slashes. */
-			rel_path: string
-			/**
-			 * Format: int64
-			 * @description Root the file was found under.
-			 */
-			root_id: number
-			/**
-			 * Format: int64
-			 * @description Size on disk.
-			 */
-			size_bytes: number
-		}
-		FileOutputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/FileOutputBody.json
-			 */
-			readonly $schema?: string
-			/** @description The file with its match applied. */
-			file: components['schemas']['File']
-		}
-		FilePage: {
-			/** @description Totals for the whole library behind the filters over the list. */
-			counts: components['schemas']['Counts']
-			/** @description One page of files. */
-			items: components['schemas']['File'][] | null
-			/**
-			 * Format: int64
-			 * @description Page size that was applied.
-			 */
-			limit: number
-			/**
-			 * Format: int64
-			 * @description Offset that was applied.
-			 */
-			offset: number
-			/** @description Every title the files on this page are matched to, once each. */
-			titles: components['schemas']['MatchedTitle'][] | null
-			/**
-			 * Format: int64
-			 * @description How many files match the filter in total.
-			 */
-			total: number
-		}
-		FilesOutputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/FilesOutputBody.json
-			 */
-			readonly $schema?: string
-			/** @description One page of scanned files with their matches. */
-			files: components['schemas']['FilePage']
-		}
-		FilterOptions: {
-			/** Format: date-time */
-			fetched_at: string
-			genres: string[] | null
-			tags: components['schemas']['FilterTag'][] | null
-		}
-		FilterOptionsOutputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/FilterOptionsOutputBody.json
-			 */
-			readonly $schema?: string
-			/** @description The vocabulary the filter panel offers. */
-			options: components['schemas']['FilterOptions']
-			/** @description Attribution for every field that came from an external source. */
-			sources: components['schemas']['Source'][] | null
-		}
-		FilterTag: {
-			category: string
-			is_adult: boolean
-			name: string
-		}
-		FuzzyDate: {
-			/** Format: int64 */
-			day: number | null
-			/** Format: int64 */
-			month: number | null
-			/** Format: int64 */
-			year: number | null
-		}
-		HealthOutputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/HealthOutputBody.json
-			 */
-			readonly $schema?: string
-			/**
-			 * @description Build timestamp.
-			 * @example 2026-08-27T12:00:00Z
-			 */
-			built: string
-			/**
-			 * @description Git commit the build came from.
-			 * @example abc1234
-			 */
-			commit: string
-			/** @description True when the node is paired with a cloud account. */
-			linked: boolean
-			/**
-			 * @description Node status.
-			 * @example ok
-			 */
-			status: string
-			/**
-			 * @description Semantic version of the running build.
-			 * @example 0.1.0
-			 */
-			version: string
-		}
-		List: {
-			/** Format: int64 */
-			count: number
-			custom: boolean
-			name: string
-			status: string | null
-		}
-		ListsOutputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/ListsOutputBody.json
-			 */
-			readonly $schema?: string
-			/** @description Every custom list the user made, across all media types. */
-			lists: components['schemas']['CustomList'][] | null
-			/** @description Attribution for every field that came from an external source. */
-			sources: components['schemas']['Source'][] | null
-		}
-		Match: {
-			/**
-			 * Format: double
-			 * @description How sure the matcher was, from 0 to 1. A manual match is always 1.
-			 */
-			confidence: number
-			/**
-			 * Format: int64
-			 * @description Episode or chapter number within the title.
-			 */
-			episode?: number
-			/** @description The title this file belongs to, as provider:id. */
-			media_ref: string
-			/**
-			 * Format: int64
-			 * @description Season number, when the title has seasons.
-			 */
-			season?: number
-			/**
-			 * @description Who decided the match. A manual one is never overwritten by a scan.
-			 * @enum {string}
-			 */
-			source: 'auto' | 'manual'
-		}
-		MatchedTitle: {
-			/** @description Dominant colour of the poster, for a placeholder while it loads. */
-			cover_color?: string
-			/** @description Poster for the title. */
-			cover_image?: string
-			/**
-			 * Format: int64
-			 * @description Episodes the title has in total, or chapters for a comic.
-			 */
-			episodes?: number
-			/** @description TV, MOVIE, OVA and so on, as the source names it. */
-			format?: string
-			/** @description The title, as provider:id. */
-			media_ref: string
-			/**
-			 * @description Which catalog the title comes from.
-			 * @enum {string}
-			 */
-			media_type?: 'anime' | 'manga'
-			/** @description The title as the user's source spells it. */
-			title: string
-		}
-		Media: {
-			/** Format: int64 */
-			average_score: number | null
-			banner_image: string | null
-			/** Format: int64 */
-			chapters: number | null
-			cover_color: string | null
-			cover_image: string | null
-			/** Format: int64 */
-			episodes: number | null
-			format: string | null
-			genres: string[] | null
-			is_adult: boolean
-			/** Format: int64 */
-			season_year: number | null
-			site_url: string
-			status: string | null
-			synonyms?: string[] | null
-			title: components['schemas']['Title']
-			/** Format: int64 */
-			volumes: number | null
-		}
-		MediaDetails: {
-			/** Format: int64 */
-			average_score: number | null
-			banner_image: string | null
-			/** Format: int64 */
-			chapters: number | null
-			country_of_origin: string | null
-			cover_color: string | null
-			cover_image: string | null
-			description: string
-			/** Format: int64 */
-			duration: number | null
-			end_date: components['schemas']['FuzzyDate']
-			/** Format: int64 */
-			episodes: number | null
-			/** Format: int64 */
-			favourites: number | null
-			/** Format: date-time */
-			fetched_at: string
-			format: string | null
-			genres: string[] | null
-			is_adult: boolean
-			/** Format: int64 */
-			mean_score: number | null
-			media_ref: string
-			media_type: string
-			next_airing_episode: components['schemas']['AiringEpisode']
-			/** Format: int64 */
-			popularity: number | null
-			relations: components['schemas']['RelatedMedia'][] | null
-			season: string | null
-			/** Format: int64 */
-			season_year: number | null
-			site_url: string
-			source: string | null
-			start_date: components['schemas']['FuzzyDate']
-			status: string | null
-			studios: string[] | null
-			synonyms: string[] | null
-			title: components['schemas']['TitleNames']
-			trailer: components['schemas']['Trailer']
-			/** Format: int64 */
-			volumes: number | null
-		}
-		MediaSummary: {
-			/** Format: int64 */
-			average_score: number | null
-			banner_image: string | null
-			/** Format: int64 */
-			chapters: number | null
-			cover_color: string | null
-			cover_image: string | null
-			/** Format: int64 */
-			episodes: number | null
-			format: string | null
-			genres: string[] | null
-			is_adult: boolean
-			media_ref: string
-			media_type: string
-			next_airing_episode: components['schemas']['AiringEpisode']
-			/** Format: int64 */
-			popularity: number | null
-			season: string | null
-			/** Format: int64 */
-			season_year: number | null
-			site_url: string
-			start_date: components['schemas']['FuzzyDate']
-			status: string | null
-			title: components['schemas']['TitleNames']
-			/** Format: int64 */
-			volumes: number | null
-		}
-		Parsed: {
-			/**
-			 * Format: int64
-			 * @description Chapter number, for comics.
-			 */
-			chapter?: number
-			/**
-			 * Format: int64
-			 * @description Episode number found in the name.
-			 */
-			episode?: number
-			/**
-			 * @description What the name says the file holds. An extra — an opening, an ending, a trailer — is never tracked as an episode.
-			 * @enum {string}
-			 */
-			form?: 'series' | 'movie' | 'special' | 'extra' | 'manga' | 'book'
-			/**
-			 * Format: int64
-			 * @description Season found in the name or on a folder.
-			 */
-			season?: number
-			/** @description Title read from the file name, or from the closest folder that names one. */
-			title?: string
-			/**
-			 * Format: int64
-			 * @description Volume number, for comics.
-			 */
-			volume?: number
-			/**
-			 * Format: int64
-			 * @description Year found in the name.
-			 */
-			year?: number
-		}
-		PlaybackOutputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/PlaybackOutputBody.json
-			 */
-			readonly $schema?: string
-			/** @description What the node's single player slot is doing. */
-			playback: components['schemas']['PlaybackStatus']
-		}
-		PlaybackSession: {
-			/**
-			 * Format: double
-			 * @description Length of the file, in seconds. Zero until the player reports it.
-			 */
-			duration: number
-			/**
-			 * Format: int64
-			 * @description Episode number within that title.
-			 */
-			episode?: number
-			/**
-			 * Format: int64
-			 * @description Library file being played.
-			 */
-			file_id: number
-			/** @description Title this file is matched to. Absent while unmatched. */
-			media_ref?: string
-			/** @description Absolute path mpv was given. */
-			path: string
-			/** @description True while the player is paused. */
-			paused: boolean
-			/**
-			 * Format: double
-			 * @description Where the player is, in seconds.
-			 */
-			position: number
-			/**
-			 * Format: date-time
-			 * @description When playback started.
-			 */
-			started_at: string
-			/** @description Title as the library reads it, for the UI. */
-			title: string
-			/** @description True once this session counted as watched and the tracker was told. */
-			watched: boolean
-		}
-		PlaybackStatus: {
-			/** @description True while a player is open. */
-			playing: boolean
-			/** @description The open session. Absent when nothing is playing. */
-			session?: components['schemas']['PlaybackSession']
-		}
-		RelatedMedia: {
-			cover_color: string | null
-			cover_image: string | null
-			format: string | null
-			media_ref: string
-			media_type: string
-			relation_type: string
-			/** Format: int64 */
-			season_year: number | null
-			status: string | null
-			title: components['schemas']['TitleNames']
-		}
-		RenameListInputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/RenameListInputBody.json
-			 */
-			readonly $schema?: string
-			/** @description The new name. */
-			name: string
-		}
-		Root: {
-			/**
-			 * Format: date-time
-			 * @description When the user added the root.
-			 */
-			added_at: string
-			/**
-			 * Format: int64
-			 * @description Media files currently present under the root.
-			 */
-			file_count: number
-			/**
-			 * Format: int64
-			 * @description Identifier of the root, stable across scans.
-			 */
-			id: number
-			/**
-			 * Format: date-time
-			 * @description When the root was last walked. Absent until the first scan.
-			 */
-			last_scan_at?: string
-			/**
-			 * Format: int64
-			 * @description Files the last scan did not find. Their matches are kept in case the drive comes back.
-			 */
-			missing_count: number
-			/** @description Absolute path on this machine. */
-			path: string
-			/**
-			 * Format: int64
-			 * @description Files under this root that belong to no title yet. Openings and other extras are left out: they belong to none by design.
-			 */
-			unmatched_count: number
-		}
-		RootOutputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/RootOutputBody.json
-			 */
-			readonly $schema?: string
-			/** @description The root as the node recorded it. */
-			root: components['schemas']['Root']
-		}
-		RootsOutputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/RootsOutputBody.json
-			 */
-			readonly $schema?: string
-			/** @description Folders the user gave the node to watch. */
-			roots: components['schemas']['Root'][] | null
-		}
-		ScanInputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/ScanInputBody.json
-			 */
-			readonly $schema?: string
-			/**
-			 * Format: int64
-			 * @description Scan this root alone. Left out or 0 scans every root.
-			 */
-			root_id?: number
-		}
-		ScanOutputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/ScanOutputBody.json
-			 */
-			readonly $schema?: string
-			/** @description State of the node's single scan slot. */
-			scan: components['schemas']['ScanStatus']
-		}
-		ScanRootResult: {
-			/**
-			 * Format: int64
-			 * @description Files recorded for the first time.
-			 */
-			added: number
-			/**
-			 * Format: int64
-			 * @description Known files whose size or modification time moved.
-			 */
-			changed: number
-			/** @description Why this root could not be scanned. The other roots are still scanned. */
-			error?: string
-			/**
-			 * Format: int64
-			 * @description Media files seen on disk.
-			 */
-			found: number
-			/**
-			 * Format: int64
-			 * @description Files that were recorded before and are gone now.
-			 */
-			missing: number
-			/** @description Absolute path of the root. */
-			path: string
-			/**
-			 * Format: int64
-			 * @description Files whose container was opened to read how long they run.
-			 */
-			probed: number
-			/**
-			 * Format: int64
-			 * @description Untouched files whose names a newer parser read again.
-			 */
-			reparsed: number
-			/**
-			 * Format: int64
-			 * @description Root this result belongs to.
-			 */
-			root_id: number
-		}
-		ScanStatus: {
-			/**
-			 * Format: int64
-			 * @description Files recorded for the first time.
-			 */
-			added: number
-			/**
-			 * Format: int64
-			 * @description Known files whose size or modification time moved.
-			 */
-			changed: number
-			/**
-			 * Format: int64
-			 * @description Unmatched files the scan tried to match, including ones left over from earlier scans.
-			 */
-			considered: number
-			/**
-			 * Format: date-time
-			 * @description When the last scan finished. Absent while one is running.
-			 */
-			finished_at?: string
-			/**
-			 * Format: int64
-			 * @description Media files seen on disk across all scanned roots.
-			 */
-			found: number
-			/**
-			 * Format: int64
-			 * @description Files matched to a title without asking the user. The rest keep their suggestions for confirmation.
-			 */
-			matched: number
-			/**
-			 * Format: int64
-			 * @description Files that were recorded before and are gone now.
-			 */
-			missing: number
-			/**
-			 * Format: int64
-			 * @description Files whose container was opened to read how long they run.
-			 */
-			probed: number
-			/**
-			 * Format: int64
-			 * @description Untouched files whose names a newer parser read again.
-			 */
-			reparsed: number
-			/** @description Per-root outcome of the current or last scan. */
-			roots: components['schemas']['ScanRootResult'][] | null
-			/**
-			 * Format: int64
-			 * @description Folders it has finished with.
-			 */
-			roots_done: number
-			/**
-			 * Format: int64
-			 * @description Folders this scan covers.
-			 */
-			roots_total: number
-			/** @description True while a scan is walking the filesystem. */
-			running: boolean
-			/**
-			 * Format: date-time
-			 * @description When the current or last scan started.
-			 */
-			started_at?: string
-		}
-		SearchOutputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/SearchOutputBody.json
-			 */
-			readonly $schema?: string
-			/** @description One page of titles, plus what it takes to ask for the next. */
-			results: components['schemas']['SearchPage']
-			/** @description Attribution for every field that came from an external source. */
-			sources: components['schemas']['Source'][] | null
-		}
-		SearchPage: {
-			has_next_page: boolean
-			items: components['schemas']['MediaSummary'][] | null
-			/** Format: int64 */
-			page: number
-			/** Format: int64 */
-			per_page: number
-			/** Format: int64 */
-			total: number
-		}
-		SessionOutputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/SessionOutputBody.json
-			 */
-			readonly $schema?: string
-			/** @description The connected account. Absent while AniList is unreachable and the account was never mirrored. */
-			account?: components['schemas']['Account']
-			/** @description Where to send the user to grant access. Absent when the node has no AniList client id configured. */
-			authorize_url?: string
-			/** @description Whether an AniList access token is stored in this node. */
-			connected: boolean
-		}
-		SetMatchInputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/SetMatchInputBody.json
-			 */
-			readonly $schema?: string
-			/**
-			 * Format: int64
-			 * @description Episode or chapter number within the title.
-			 */
-			episode?: number
-			/**
-			 * @description The title this file belongs to, as provider:id.
-			 * @example anilist:154587
-			 */
-			media_ref: string
-			/**
-			 * Format: int64
-			 * @description Season number, when the title has seasons.
-			 */
-			season?: number
-		}
-		SignInInputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/SignInInputBody.json
-			 */
-			readonly $schema?: string
-			/** @description Token from AniList's implicit grant. */
-			access_token: string
-		}
-		Source: {
-			/**
-			 * @description Stable source identifier.
-			 * @example anilist
-			 */
-			id: string
-			/**
-			 * @description Name to show next to the data.
-			 * @example AniList
-			 */
-			name: string
-			/**
-			 * @description Where the attribution links to.
-			 * @example https://anilist.co
-			 */
-			url: string
-		}
-		StartInputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/StartInputBody.json
-			 */
-			readonly $schema?: string
-			/**
-			 * Format: int64
-			 * @description Library file to play, as listed by listLibraryFiles.
-			 */
-			file_id: number
-		}
-		StatusOutputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/StatusOutputBody.json
-			 */
-			readonly $schema?: string
-			/**
-			 * @description Module name.
-			 * @example torrent
-			 */
-			module: string
-			/** @description True when the module's dependencies are wired. */
-			ready: boolean
-		}
-		StatusOutputBody1: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/StatusOutputBody1.json
-			 */
-			readonly $schema?: string
-			/**
-			 * @description Module name.
-			 * @example reader
-			 */
-			module: string
-			/** @description True when the module's dependencies are wired. */
-			ready: boolean
-		}
-		StatusOutputBody2: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/StatusOutputBody2.json
-			 */
-			readonly $schema?: string
-			/**
-			 * @description Module name.
-			 * @example sync
-			 */
-			module: string
-			/** @description True when the module's dependencies are wired. */
-			ready: boolean
-		}
-		StatusOutputBody3: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/StatusOutputBody3.json
-			 */
-			readonly $schema?: string
-			/**
-			 * @description Module name.
-			 * @example extension
-			 */
-			module: string
-			/** @description True when the module's dependencies are wired. */
-			ready: boolean
-		}
-		Suggestion: {
-			/**
-			 * Format: double
-			 * @description How well this entry fits the file's name, from 0 to 1.
-			 */
-			confidence: number
-			/** @description The source's format: TV, MOVIE, OVA, MANGA and so on. */
-			format?: string
-			/** @description Reference to pass to setLibraryFileMatch. */
-			media_ref: string
-			/** @description The title as the source spells it. */
-			title: string
-			/** @description True when the entry is already on the user's own list. */
-			tracked: boolean
-			/**
-			 * Format: int64
-			 * @description Year the entry is listed under.
-			 */
-			year?: number
-		}
-		SuggestionsOutputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/SuggestionsOutputBody.json
-			 */
-			readonly $schema?: string
-			/** @description Attribution for every field that came from an external source. */
-			sources: components['schemas']['Source'][] | null
-			/** @description Candidate titles, best first. */
-			suggestions: components['schemas']['Suggestion'][] | null
-		}
-		Title: {
-			english: string | null
-			native: string | null
-			romaji: string | null
-			user_preferred: string | null
-		}
-		TitleNames: {
-			english: string | null
-			native: string | null
-			romaji: string | null
-			user_preferred: string | null
-		}
-		Trailer: {
-			/** @description Video id on the hosting site. */
-			id: string
-			/** @description Where the video lives, e.g. youtube or dailymotion. */
-			site: string
-			/** @description Preview frame for the trailer. */
-			thumbnail: string | null
-		}
-		UpdateEntryInputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/UpdateEntryInputBody.json
-			 */
-			readonly $schema?: string
-			/** @description When the user finished the title. Send every field empty to clear it. */
-			completed_at?: components['schemas']['Date']
-			/** @description The custom lists this title belongs to, by name. The lists left out are the ones it leaves. */
-			custom_lists?: string[]
-			/** @description Private notes only the account owner sees. */
-			notes?: string
-			/**
-			 * Format: int64
-			 * @description Episodes watched or chapters read.
-			 */
-			progress?: number
-			/**
-			 * Format: int64
-			 * @description Volumes read; manga only.
-			 */
-			progress_volumes?: number
-			/**
-			 * Format: int64
-			 * @description How many times the title was rewatched or reread.
-			 */
-			repeat?: number
-			/**
-			 * Format: int64
-			 * @description Score on a 0-100 scale; clients convert from the account's score format.
-			 */
-			score?: number
-			/** @description When the user started the title. Send every field empty to clear it. */
-			started_at?: components['schemas']['Date']
-			/**
-			 * @description New list status.
-			 * @enum {string}
-			 */
-			status?: 'CURRENT' | 'PLANNING' | 'COMPLETED' | 'DROPPED' | 'PAUSED' | 'REPEATING'
-		}
-	}
-	responses: never
-	parameters: never
-	requestBodies: never
-	headers: never
-	pathItems: never
+    schemas: {
+        AcceptedOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/AcceptedOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description The refresh was started or is already running. */
+            accepted: boolean;
+        };
+        Account: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/Account.json
+             */
+            readonly $schema?: string;
+            avatar_url: string | null;
+            display_adult_content: boolean;
+            /** Format: int64 */
+            id: number;
+            name: string;
+            score_format: string;
+            site_url: string;
+        };
+        AddRootInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/AddRootInputBody.json
+             */
+            readonly $schema?: string;
+            /**
+             * @description Absolute path to an existing folder on this machine.
+             * @example D:\Anime
+             */
+            path: string;
+        };
+        AiringEpisode: {
+            /** Format: date-time */
+            airing_at: string;
+            /** Format: int64 */
+            episode: number;
+        };
+        ControlInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/ControlInputBody.json
+             */
+            readonly $schema?: string;
+            /**
+             * @description What to do with the open player.
+             * @enum {string}
+             */
+            action: "pause" | "resume" | "seek";
+            /**
+             * Format: double
+             * @description Seconds from the start, for a seek.
+             */
+            position?: number;
+        };
+        Counts: {
+            /**
+             * Format: int64
+             * @description Of those, files the last scan did not find.
+             */
+            missing: number;
+            /**
+             * Format: int64
+             * @description Files the filter matches.
+             */
+            total: number;
+            /**
+             * Format: int64
+             * @description Of those, files that belong to no title yet.
+             */
+            unmatched: number;
+        };
+        CreateListInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/CreateListInputBody.json
+             */
+            readonly $schema?: string;
+            /**
+             * @description The one media type this list holds. A list never mixes types: anime and manga lists are created in the user's AniList account, the rest in this node.
+             * @enum {string}
+             */
+            media_type: "anime" | "manga" | "movie" | "series" | "dorama" | "book";
+            /** @description What to call the list. */
+            name: string;
+        };
+        CustomList: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/CustomList.json
+             */
+            readonly $schema?: string;
+            /**
+             * Format: int64
+             * @description How many titles are in the list.
+             */
+            count: number;
+            /** @description Up to four cover images, for the list's thumbnail. */
+            covers: string[] | null;
+            /** @description Opaque identifier; pass it back URL-encoded to rename or delete the list. */
+            id: string;
+            /**
+             * @description The one media type this list holds.
+             * @enum {string}
+             */
+            media_type: "anime" | "manga" | "movie" | "series" | "dorama" | "book";
+            name: string;
+            /**
+             * @description Where the list lives: anilist or local.
+             * @enum {string}
+             */
+            provider: "anilist" | "local";
+            /**
+             * Format: date-time
+             * @description When a title in the list last changed. Absent for an empty list.
+             */
+            updated_at?: string;
+        };
+        Date: {
+            /** Format: int64 */
+            day: number | null;
+            /** Format: int64 */
+            month: number | null;
+            /** Format: int64 */
+            year: number | null;
+        };
+        DetailsOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/DetailsOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Everything a title page shows about the title itself. */
+            media: components["schemas"]["MediaDetails"];
+            /** @description Attribution for every field that came from an external source. */
+            sources: components["schemas"]["Source"][] | null;
+        };
+        EntriesOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/EntriesOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description One entry per title, in AniList's list order. */
+            entries: components["schemas"]["Entry"][] | null;
+            /**
+             * Format: date-time
+             * @description When AniList last answered for this collection.
+             */
+            fetched_at: string;
+            /** @description Status and custom lists with their sizes. */
+            lists: components["schemas"]["List"][] | null;
+            /** @description The collection this response describes. */
+            media_type: string;
+            /** @description Attribution for every field that came from an external source. */
+            sources: components["schemas"]["Source"][] | null;
+            /** @description True when the data is older than the refresh interval; a refresh is already running. */
+            stale: boolean;
+        };
+        Entry: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/Entry.json
+             */
+            readonly $schema?: string;
+            completed_at: components["schemas"]["Date"];
+            custom_lists: string[] | null;
+            media: components["schemas"]["Media"];
+            media_ref: string;
+            media_type: string;
+            notes: string;
+            private: boolean;
+            /** Format: int64 */
+            progress: number;
+            /** Format: int64 */
+            progress_volumes: number | null;
+            provider: string;
+            /** Format: int64 */
+            repeat: number;
+            /** Format: int64 */
+            score: number;
+            started_at: components["schemas"]["Date"];
+            status: string;
+            sync_pending: boolean;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        ErrorDetail: {
+            /** @description Where the error occurred, e.g. 'body.items[3].tags' or 'path.thing-id' */
+            location?: string;
+            /** @description Error message text */
+            message?: string;
+            /** @description The value at the given location */
+            value?: unknown;
+        };
+        ErrorModel: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/ErrorModel.json
+             */
+            readonly $schema?: string;
+            /**
+             * @description A human-readable explanation specific to this occurrence of the problem.
+             * @example Property foo is required but is missing.
+             */
+            detail?: string;
+            /** @description Optional list of individual error details */
+            errors?: components["schemas"]["ErrorDetail"][] | null;
+            /**
+             * Format: uri
+             * @description A URI reference that identifies the specific occurrence of the problem.
+             * @example https://example.com/error-log/abc123
+             */
+            instance?: string;
+            /**
+             * Format: int64
+             * @description HTTP status code
+             * @example 400
+             */
+            status?: number;
+            /**
+             * @description A short, human-readable summary of the problem type. This value should not change between occurrences of the error.
+             * @example Bad Request
+             */
+            title?: string;
+            /**
+             * Format: uri
+             * @description A URI reference to human-readable documentation for the error.
+             * @default about:blank
+             * @example https://example.com/errors/example
+             */
+            type: string;
+        };
+        File: {
+            /**
+             * Format: int64
+             * @description How long the file runs, read out of its container during the scan. Absent for a container the node cannot read and for everything that is not video.
+             */
+            duration_seconds?: number;
+            /**
+             * Format: int64
+             * @description Identifier of the file, stable while its path does not change.
+             */
+            id: number;
+            /**
+             * @description Form of media the extension points at.
+             * @enum {string}
+             */
+            kind: "video" | "manga" | "book";
+            /** @description What the file was matched to. Absent while unmatched. */
+            match?: components["schemas"]["Match"];
+            /** @description True when the last scan did not find the file where it used to be. */
+            missing: boolean;
+            /**
+             * Format: date-time
+             * @description Modification time the last scan saw.
+             */
+            modified_at: string;
+            /** @description What the file's name says. Present whether or not the file is matched. */
+            parsed: components["schemas"]["Parsed"];
+            /** @description Absolute path, for the player and for revealing the file. */
+            path: string;
+            /** @description Path relative to the root, with forward slashes. */
+            rel_path: string;
+            /**
+             * Format: int64
+             * @description Root the file was found under.
+             */
+            root_id: number;
+            /**
+             * Format: int64
+             * @description Size on disk.
+             */
+            size_bytes: number;
+        };
+        FileOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/FileOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description The file with its match applied. */
+            file: components["schemas"]["File"];
+        };
+        FilePage: {
+            /** @description Totals for the whole library behind the filters over the list. */
+            counts: components["schemas"]["Counts"];
+            /** @description One page of files. */
+            items: components["schemas"]["File"][] | null;
+            /**
+             * Format: int64
+             * @description Page size that was applied.
+             */
+            limit: number;
+            /**
+             * Format: int64
+             * @description Offset that was applied.
+             */
+            offset: number;
+            /** @description Every title the files on this page are matched to, once each. */
+            titles: components["schemas"]["MatchedTitle"][] | null;
+            /**
+             * Format: int64
+             * @description How many files match the filter in total.
+             */
+            total: number;
+        };
+        FilesOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/FilesOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description One page of scanned files with their matches. */
+            files: components["schemas"]["FilePage"];
+        };
+        FilterOptions: {
+            /** Format: date-time */
+            fetched_at: string;
+            genres: string[] | null;
+            tags: components["schemas"]["FilterTag"][] | null;
+        };
+        FilterOptionsOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/FilterOptionsOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description The vocabulary the filter panel offers. */
+            options: components["schemas"]["FilterOptions"];
+            /** @description Attribution for every field that came from an external source. */
+            sources: components["schemas"]["Source"][] | null;
+        };
+        FilterTag: {
+            category: string;
+            is_adult: boolean;
+            name: string;
+        };
+        FuzzyDate: {
+            /** Format: int64 */
+            day: number | null;
+            /** Format: int64 */
+            month: number | null;
+            /** Format: int64 */
+            year: number | null;
+        };
+        HealthOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/HealthOutputBody.json
+             */
+            readonly $schema?: string;
+            /**
+             * @description Build timestamp.
+             * @example 2026-08-27T12:00:00Z
+             */
+            built: string;
+            /**
+             * @description Git commit the build came from.
+             * @example abc1234
+             */
+            commit: string;
+            /** @description True when the node is paired with a cloud account. */
+            linked: boolean;
+            /**
+             * @description Node status.
+             * @example ok
+             */
+            status: string;
+            /**
+             * @description Semantic version of the running build.
+             * @example 0.1.0
+             */
+            version: string;
+        };
+        List: {
+            /** Format: int64 */
+            count: number;
+            custom: boolean;
+            name: string;
+            status: string | null;
+        };
+        ListsOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/ListsOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Every custom list the user made, across all media types. */
+            lists: components["schemas"]["CustomList"][] | null;
+            /** @description Attribution for every field that came from an external source. */
+            sources: components["schemas"]["Source"][] | null;
+        };
+        Match: {
+            /**
+             * Format: double
+             * @description How sure the matcher was, from 0 to 1. A manual match is always 1.
+             */
+            confidence: number;
+            /**
+             * Format: int64
+             * @description Episode or chapter number within the title.
+             */
+            episode?: number;
+            /** @description The title this file belongs to, as provider:id. */
+            media_ref: string;
+            /**
+             * Format: int64
+             * @description Season number, when the title has seasons.
+             */
+            season?: number;
+            /**
+             * @description Who decided the match. A manual one is never overwritten by a scan.
+             * @enum {string}
+             */
+            source: "auto" | "manual";
+        };
+        MatchedTitle: {
+            /** @description Dominant colour of the poster, for a placeholder while it loads. */
+            cover_color?: string;
+            /** @description Poster for the title. */
+            cover_image?: string;
+            /**
+             * Format: int64
+             * @description Episodes the title has in total, or chapters for a comic.
+             */
+            episodes?: number;
+            /** @description TV, MOVIE, OVA and so on, as the source names it. */
+            format?: string;
+            /** @description The title, as provider:id. */
+            media_ref: string;
+            /**
+             * @description Which catalog the title comes from.
+             * @enum {string}
+             */
+            media_type?: "anime" | "manga";
+            /** @description The title as the user's source spells it. */
+            title: string;
+        };
+        Media: {
+            /** Format: int64 */
+            average_score: number | null;
+            banner_image: string | null;
+            /** Format: int64 */
+            chapters: number | null;
+            cover_color: string | null;
+            cover_image: string | null;
+            /** Format: int64 */
+            episodes: number | null;
+            format: string | null;
+            genres: string[] | null;
+            is_adult: boolean;
+            /** Format: int64 */
+            season_year: number | null;
+            site_url: string;
+            status: string | null;
+            synonyms?: string[] | null;
+            title: components["schemas"]["Title"];
+            /** Format: int64 */
+            volumes: number | null;
+        };
+        MediaDetails: {
+            /** Format: int64 */
+            average_score: number | null;
+            banner_image: string | null;
+            /** Format: int64 */
+            chapters: number | null;
+            country_of_origin: string | null;
+            cover_color: string | null;
+            cover_image: string | null;
+            description: string;
+            /** Format: int64 */
+            duration: number | null;
+            end_date: components["schemas"]["FuzzyDate"];
+            /** Format: int64 */
+            episodes: number | null;
+            /** Format: int64 */
+            favourites: number | null;
+            /** Format: date-time */
+            fetched_at: string;
+            format: string | null;
+            genres: string[] | null;
+            is_adult: boolean;
+            /** Format: int64 */
+            mean_score: number | null;
+            media_ref: string;
+            media_type: string;
+            next_airing_episode: components["schemas"]["AiringEpisode"];
+            /** Format: int64 */
+            popularity: number | null;
+            relations: components["schemas"]["RelatedMedia"][] | null;
+            season: string | null;
+            /** Format: int64 */
+            season_year: number | null;
+            site_url: string;
+            source: string | null;
+            start_date: components["schemas"]["FuzzyDate"];
+            status: string | null;
+            studios: string[] | null;
+            synonyms: string[] | null;
+            title: components["schemas"]["TitleNames"];
+            trailer: components["schemas"]["Trailer"];
+            /** Format: int64 */
+            volumes: number | null;
+        };
+        MediaSummary: {
+            /** Format: int64 */
+            average_score: number | null;
+            banner_image: string | null;
+            /** Format: int64 */
+            chapters: number | null;
+            cover_color: string | null;
+            cover_image: string | null;
+            /** Format: int64 */
+            episodes: number | null;
+            format: string | null;
+            genres: string[] | null;
+            is_adult: boolean;
+            media_ref: string;
+            media_type: string;
+            next_airing_episode: components["schemas"]["AiringEpisode"];
+            /** Format: int64 */
+            popularity: number | null;
+            season: string | null;
+            /** Format: int64 */
+            season_year: number | null;
+            site_url: string;
+            start_date: components["schemas"]["FuzzyDate"];
+            status: string | null;
+            title: components["schemas"]["TitleNames"];
+            /** Format: int64 */
+            volumes: number | null;
+        };
+        Parsed: {
+            /**
+             * Format: int64
+             * @description Chapter number, for comics.
+             */
+            chapter?: number;
+            /**
+             * Format: int64
+             * @description Episode number found in the name.
+             */
+            episode?: number;
+            /**
+             * @description What the name says the file holds. An extra — an opening, an ending, a trailer — is never tracked as an episode.
+             * @enum {string}
+             */
+            form?: "series" | "movie" | "special" | "extra" | "manga" | "book";
+            /**
+             * Format: int64
+             * @description Season found in the name or on a folder.
+             */
+            season?: number;
+            /** @description Title read from the file name, or from the closest folder that names one. */
+            title?: string;
+            /**
+             * Format: int64
+             * @description Volume number, for comics.
+             */
+            volume?: number;
+            /**
+             * Format: int64
+             * @description Year found in the name.
+             */
+            year?: number;
+        };
+        PlaybackOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/PlaybackOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description What the node's single player slot is doing. */
+            playback: components["schemas"]["PlaybackStatus"];
+        };
+        PlaybackSession: {
+            /**
+             * Format: double
+             * @description Length of the file, in seconds. Zero until the player reports it.
+             */
+            duration: number;
+            /**
+             * Format: int64
+             * @description Episode number within that title.
+             */
+            episode?: number;
+            /**
+             * Format: int64
+             * @description Library file being played.
+             */
+            file_id: number;
+            /** @description Title this file is matched to. Absent while unmatched. */
+            media_ref?: string;
+            /** @description Absolute path mpv was given. */
+            path: string;
+            /** @description True while the player is paused. */
+            paused: boolean;
+            /**
+             * Format: double
+             * @description Where the player is, in seconds.
+             */
+            position: number;
+            /**
+             * Format: date-time
+             * @description When playback started.
+             */
+            started_at: string;
+            /** @description Title as the library reads it, for the UI. */
+            title: string;
+            /** @description True once this session counted as watched and the tracker was told. */
+            watched: boolean;
+        };
+        PlaybackStatus: {
+            /** @description True while a player is open. */
+            playing: boolean;
+            /** @description The open session. Absent when nothing is playing. */
+            session?: components["schemas"]["PlaybackSession"];
+        };
+        RelatedMedia: {
+            cover_color: string | null;
+            cover_image: string | null;
+            format: string | null;
+            media_ref: string;
+            media_type: string;
+            relation_type: string;
+            /** Format: int64 */
+            season_year: number | null;
+            status: string | null;
+            title: components["schemas"]["TitleNames"];
+        };
+        RenameListInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/RenameListInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description The new name. */
+            name: string;
+        };
+        Root: {
+            /**
+             * Format: date-time
+             * @description When the user added the root.
+             */
+            added_at: string;
+            /**
+             * Format: int64
+             * @description Media files currently present under the root.
+             */
+            file_count: number;
+            /**
+             * Format: int64
+             * @description Identifier of the root, stable across scans.
+             */
+            id: number;
+            /**
+             * Format: date-time
+             * @description When the root was last walked. Absent until the first scan.
+             */
+            last_scan_at?: string;
+            /**
+             * Format: int64
+             * @description Files the last scan did not find. Their matches are kept in case the drive comes back.
+             */
+            missing_count: number;
+            /** @description Absolute path on this machine. */
+            path: string;
+            /**
+             * Format: int64
+             * @description Files under this root that belong to no title yet. Openings and other extras are left out: they belong to none by design.
+             */
+            unmatched_count: number;
+        };
+        RootOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/RootOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description The root as the node recorded it. */
+            root: components["schemas"]["Root"];
+        };
+        RootsOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/RootsOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Folders the user gave the node to watch. */
+            roots: components["schemas"]["Root"][] | null;
+        };
+        ScanHistoryOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/ScanHistoryOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description One page of past scans, newest first. */
+            history: components["schemas"]["ScanHistoryPage"];
+        };
+        ScanHistoryPage: {
+            /** @description One page of past scans, newest first. */
+            items: components["schemas"]["ScanRunSummary"][] | null;
+            /**
+             * Format: int64
+             * @description Page size that was applied.
+             */
+            limit: number;
+            /**
+             * Format: int64
+             * @description Offset that was applied.
+             */
+            offset: number;
+            /**
+             * Format: int64
+             * @description How many scans match the filter in total.
+             */
+            total: number;
+        };
+        ScanInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/ScanInputBody.json
+             */
+            readonly $schema?: string;
+            /**
+             * Format: int64
+             * @description Scan this root alone. Left out or 0 scans every root.
+             */
+            root_id?: number;
+        };
+        ScanOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/ScanOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description State of the node's single scan slot. */
+            scan: components["schemas"]["ScanStatus"];
+        };
+        ScanRootResult: {
+            /**
+             * Format: int64
+             * @description Files recorded for the first time.
+             */
+            added: number;
+            /**
+             * Format: int64
+             * @description Known files whose size or modification time moved.
+             */
+            changed: number;
+            /** @description Why this root could not be scanned. The other roots are still scanned. */
+            error?: string;
+            /**
+             * Format: int64
+             * @description Media files seen on disk.
+             */
+            found: number;
+            /**
+             * Format: int64
+             * @description Files that were recorded before and are gone now.
+             */
+            missing: number;
+            /** @description Absolute path of the root. */
+            path: string;
+            /**
+             * Format: int64
+             * @description Files whose container was opened to read how long they run.
+             */
+            probed: number;
+            /**
+             * Format: int64
+             * @description Untouched files whose names a newer parser read again.
+             */
+            reparsed: number;
+            /**
+             * Format: int64
+             * @description Root this result belongs to.
+             */
+            root_id: number;
+        };
+        ScanRunDetail: {
+            /**
+             * Format: int64
+             * @description Files recorded for the first time.
+             */
+            added: number;
+            /**
+             * Format: int64
+             * @description Known files whose size or modification time moved.
+             */
+            changed: number;
+            /**
+             * Format: int64
+             * @description Unmatched files the scan tried to match.
+             */
+            considered: number;
+            /**
+             * Format: date-time
+             * @description When the scan finished.
+             */
+            finished_at: string;
+            /**
+             * Format: int64
+             * @description Media files seen on disk across all scanned roots.
+             */
+            found: number;
+            /** @description Titles this scan matched files to. */
+            groups: components["schemas"]["ScanRunGroupDetail"][] | null;
+            /**
+             * Format: int64
+             * @description Identifier of this scan run.
+             */
+            id: number;
+            /**
+             * Format: int64
+             * @description Files matched to a title without asking the user.
+             */
+            matched: number;
+            /**
+             * Format: int64
+             * @description Files that were recorded before and were gone this time.
+             */
+            missing: number;
+            /** @description Per-root outcome of this scan. */
+            roots: components["schemas"]["ScanRunRootDetail"][] | null;
+            /**
+             * Format: int64
+             * @description Folders this scan covered.
+             */
+            roots_total: number;
+            /**
+             * Format: date-time
+             * @description When the scan started.
+             */
+            started_at: string;
+            /**
+             * @description Partial when the scan was interrupted before it walked every root.
+             * @enum {string}
+             */
+            status: "completed" | "partial";
+            /** @description Files this scan looked at but could not match. */
+            unmatched_files: components["schemas"]["ScanRunFileLogDetail"][] | null;
+        };
+        ScanRunFileLogDetail: {
+            /**
+             * Format: double
+             * @description The best candidate's score, however far short of matching. Absent when there was nothing to compare against.
+             */
+            confidence?: number;
+            /**
+             * Format: int64
+             * @description The file, when it has not since been deleted.
+             */
+            file_id?: number;
+            /** @description Title read from the name at the time of the scan. */
+            parsed_title?: string;
+            /** @description Path relative to its root at the time of the scan. */
+            rel_path: string;
+        };
+        ScanRunGroupDetail: {
+            /**
+             * Format: int64
+             * @description Files this scan matched to the title.
+             */
+            file_count: number;
+            /** @description The title, as provider:id. */
+            media_ref: string;
+            /** @description The title's name and poster, when the node can still describe it. */
+            title?: components["schemas"]["MatchedTitle"];
+            /** @description False when the match came from a search rather than the user's own list. */
+            tracked: boolean;
+        };
+        ScanRunOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/ScanRunOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description The scan run in full. */
+            run: components["schemas"]["ScanRunDetail"];
+            /** @description Attribution for every field that came from an external source. */
+            sources: components["schemas"]["Source"][] | null;
+        };
+        ScanRunRootDetail: {
+            /**
+             * Format: int64
+             * @description Files recorded for the first time.
+             */
+            added: number;
+            /**
+             * Format: int64
+             * @description Known files whose size or modification time moved.
+             */
+            changed: number;
+            /** @description Why this root could not be scanned. */
+            error?: string;
+            /**
+             * Format: int64
+             * @description Media files seen on disk.
+             */
+            found: number;
+            /**
+             * Format: int64
+             * @description Files that were recorded before and were gone this time.
+             */
+            missing: number;
+            /**
+             * Format: int64
+             * @description Files whose container was opened to read how long they run.
+             */
+            probed: number;
+            /**
+             * Format: int64
+             * @description Untouched files whose names a newer parser read again.
+             */
+            reparsed: number;
+            /**
+             * Format: int64
+             * @description The root, when it has not since been removed.
+             */
+            root_id?: number;
+            /** @description Path the scan walked. */
+            root_path: string;
+        };
+        ScanRunSummary: {
+            /**
+             * Format: int64
+             * @description Files recorded for the first time.
+             */
+            added: number;
+            /**
+             * Format: int64
+             * @description Known files whose size or modification time moved.
+             */
+            changed: number;
+            /**
+             * Format: int64
+             * @description Unmatched files the scan tried to match.
+             */
+            considered: number;
+            /**
+             * Format: date-time
+             * @description When the scan finished.
+             */
+            finished_at: string;
+            /**
+             * Format: int64
+             * @description Media files seen on disk across all scanned roots.
+             */
+            found: number;
+            /**
+             * Format: int64
+             * @description Identifier of this scan run.
+             */
+            id: number;
+            /**
+             * Format: int64
+             * @description Files matched to a title without asking the user.
+             */
+            matched: number;
+            /**
+             * Format: int64
+             * @description Files that were recorded before and were gone this time.
+             */
+            missing: number;
+            /**
+             * Format: int64
+             * @description Folders this scan covered.
+             */
+            roots_total: number;
+            /**
+             * Format: date-time
+             * @description When the scan started.
+             */
+            started_at: string;
+            /**
+             * @description Partial when the scan was interrupted before it walked every root.
+             * @enum {string}
+             */
+            status: "completed" | "partial";
+        };
+        ScanStatus: {
+            /**
+             * Format: int64
+             * @description Files recorded for the first time.
+             */
+            added: number;
+            /**
+             * Format: int64
+             * @description Known files whose size or modification time moved.
+             */
+            changed: number;
+            /**
+             * Format: int64
+             * @description Unmatched files the scan tried to match, including ones left over from earlier scans.
+             */
+            considered: number;
+            /**
+             * Format: date-time
+             * @description When the last scan finished. Absent while one is running.
+             */
+            finished_at?: string;
+            /**
+             * Format: int64
+             * @description Media files seen on disk across all scanned roots.
+             */
+            found: number;
+            /**
+             * Format: int64
+             * @description Files matched to a title without asking the user. The rest keep their suggestions for confirmation.
+             */
+            matched: number;
+            /**
+             * Format: int64
+             * @description Files that were recorded before and are gone now.
+             */
+            missing: number;
+            /**
+             * Format: int64
+             * @description Files whose container was opened to read how long they run.
+             */
+            probed: number;
+            /**
+             * Format: int64
+             * @description Untouched files whose names a newer parser read again.
+             */
+            reparsed: number;
+            /** @description Per-root outcome of the current or last scan. */
+            roots: components["schemas"]["ScanRootResult"][] | null;
+            /**
+             * Format: int64
+             * @description Folders it has finished with.
+             */
+            roots_done: number;
+            /**
+             * Format: int64
+             * @description Folders this scan covers.
+             */
+            roots_total: number;
+            /** @description True while a scan is walking the filesystem. */
+            running: boolean;
+            /**
+             * Format: date-time
+             * @description When the current or last scan started.
+             */
+            started_at?: string;
+        };
+        SearchOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/SearchOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description One page of titles, plus what it takes to ask for the next. */
+            results: components["schemas"]["SearchPage"];
+            /** @description Attribution for every field that came from an external source. */
+            sources: components["schemas"]["Source"][] | null;
+        };
+        SearchPage: {
+            has_next_page: boolean;
+            items: components["schemas"]["MediaSummary"][] | null;
+            /** Format: int64 */
+            page: number;
+            /** Format: int64 */
+            per_page: number;
+            /** Format: int64 */
+            total: number;
+        };
+        SessionOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/SessionOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description The connected account. Absent while AniList is unreachable and the account was never mirrored. */
+            account?: components["schemas"]["Account"];
+            /** @description Where to send the user to grant access. Absent when the node has no AniList client id configured. */
+            authorize_url?: string;
+            /** @description Whether an AniList access token is stored in this node. */
+            connected: boolean;
+        };
+        SetMatchInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/SetMatchInputBody.json
+             */
+            readonly $schema?: string;
+            /**
+             * Format: int64
+             * @description Episode or chapter number within the title.
+             */
+            episode?: number;
+            /**
+             * @description The title this file belongs to, as provider:id.
+             * @example anilist:154587
+             */
+            media_ref: string;
+            /**
+             * Format: int64
+             * @description Season number, when the title has seasons.
+             */
+            season?: number;
+        };
+        SignInInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/SignInInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Token from AniList's implicit grant. */
+            access_token: string;
+        };
+        Source: {
+            /**
+             * @description Stable source identifier.
+             * @example anilist
+             */
+            id: string;
+            /**
+             * @description Name to show next to the data.
+             * @example AniList
+             */
+            name: string;
+            /**
+             * @description Where the attribution links to.
+             * @example https://anilist.co
+             */
+            url: string;
+        };
+        StartInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/StartInputBody.json
+             */
+            readonly $schema?: string;
+            /**
+             * Format: int64
+             * @description Library file to play, as listed by listLibraryFiles.
+             */
+            file_id: number;
+        };
+        StatusOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/StatusOutputBody.json
+             */
+            readonly $schema?: string;
+            /**
+             * @description Module name.
+             * @example torrent
+             */
+            module: string;
+            /** @description True when the module's dependencies are wired. */
+            ready: boolean;
+        };
+        StatusOutputBody1: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/StatusOutputBody1.json
+             */
+            readonly $schema?: string;
+            /**
+             * @description Module name.
+             * @example reader
+             */
+            module: string;
+            /** @description True when the module's dependencies are wired. */
+            ready: boolean;
+        };
+        StatusOutputBody2: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/StatusOutputBody2.json
+             */
+            readonly $schema?: string;
+            /**
+             * @description Module name.
+             * @example sync
+             */
+            module: string;
+            /** @description True when the module's dependencies are wired. */
+            ready: boolean;
+        };
+        StatusOutputBody3: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/StatusOutputBody3.json
+             */
+            readonly $schema?: string;
+            /**
+             * @description Module name.
+             * @example extension
+             */
+            module: string;
+            /** @description True when the module's dependencies are wired. */
+            ready: boolean;
+        };
+        Suggestion: {
+            /**
+             * Format: double
+             * @description How well this entry fits the file's name, from 0 to 1.
+             */
+            confidence: number;
+            /** @description The source's format: TV, MOVIE, OVA, MANGA and so on. */
+            format?: string;
+            /** @description Reference to pass to setLibraryFileMatch. */
+            media_ref: string;
+            /** @description The title as the source spells it. */
+            title: string;
+            /** @description True when the entry is already on the user's own list. */
+            tracked: boolean;
+            /**
+             * Format: int64
+             * @description Year the entry is listed under.
+             */
+            year?: number;
+        };
+        SuggestionsOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/SuggestionsOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Attribution for every field that came from an external source. */
+            sources: components["schemas"]["Source"][] | null;
+            /** @description Candidate titles, best first. */
+            suggestions: components["schemas"]["Suggestion"][] | null;
+        };
+        Title: {
+            english: string | null;
+            native: string | null;
+            romaji: string | null;
+            user_preferred: string | null;
+        };
+        TitleNames: {
+            english: string | null;
+            native: string | null;
+            romaji: string | null;
+            user_preferred: string | null;
+        };
+        Trailer: {
+            /** @description Video id on the hosting site. */
+            id: string;
+            /** @description Where the video lives, e.g. youtube or dailymotion. */
+            site: string;
+            /** @description Preview frame for the trailer. */
+            thumbnail: string | null;
+        };
+        UpdateEntryInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/UpdateEntryInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description When the user finished the title. Send every field empty to clear it. */
+            completed_at?: components["schemas"]["Date"];
+            /** @description The custom lists this title belongs to, by name. The lists left out are the ones it leaves. */
+            custom_lists?: string[];
+            /** @description Private notes only the account owner sees. */
+            notes?: string;
+            /**
+             * Format: int64
+             * @description Episodes watched or chapters read.
+             */
+            progress?: number;
+            /**
+             * Format: int64
+             * @description Volumes read; manga only.
+             */
+            progress_volumes?: number;
+            /**
+             * Format: int64
+             * @description How many times the title was rewatched or reread.
+             */
+            repeat?: number;
+            /**
+             * Format: int64
+             * @description Score on a 0-100 scale; clients convert from the account's score format.
+             */
+            score?: number;
+            /** @description When the user started the title. Send every field empty to clear it. */
+            started_at?: components["schemas"]["Date"];
+            /**
+             * @description New list status.
+             * @enum {string}
+             */
+            status?: "CURRENT" | "PLANNING" | "COMPLETED" | "DROPPED" | "PAUSED" | "REPEATING";
+        };
+    };
+    responses: never;
+    parameters: never;
+    requestBodies: never;
+    headers: never;
+    pathItems: never;
 }
-export type SchemaAcceptedOutputBody = components['schemas']['AcceptedOutputBody']
-export type SchemaAccount = components['schemas']['Account']
-export type SchemaAddRootInputBody = components['schemas']['AddRootInputBody']
-export type SchemaAiringEpisode = components['schemas']['AiringEpisode']
-export type SchemaControlInputBody = components['schemas']['ControlInputBody']
-export type SchemaCounts = components['schemas']['Counts']
-export type SchemaCreateListInputBody = components['schemas']['CreateListInputBody']
-export type SchemaCustomList = components['schemas']['CustomList']
-export type SchemaDate = components['schemas']['Date']
-export type SchemaDetailsOutputBody = components['schemas']['DetailsOutputBody']
-export type SchemaEntriesOutputBody = components['schemas']['EntriesOutputBody']
-export type SchemaEntry = components['schemas']['Entry']
-export type SchemaErrorDetail = components['schemas']['ErrorDetail']
-export type SchemaErrorModel = components['schemas']['ErrorModel']
-export type SchemaFile = components['schemas']['File']
-export type SchemaFileOutputBody = components['schemas']['FileOutputBody']
-export type SchemaFilePage = components['schemas']['FilePage']
-export type SchemaFilesOutputBody = components['schemas']['FilesOutputBody']
-export type SchemaFilterOptions = components['schemas']['FilterOptions']
-export type SchemaFilterOptionsOutputBody = components['schemas']['FilterOptionsOutputBody']
-export type SchemaFilterTag = components['schemas']['FilterTag']
-export type SchemaFuzzyDate = components['schemas']['FuzzyDate']
-export type SchemaHealthOutputBody = components['schemas']['HealthOutputBody']
-export type SchemaList = components['schemas']['List']
-export type SchemaListsOutputBody = components['schemas']['ListsOutputBody']
-export type SchemaMatch = components['schemas']['Match']
-export type SchemaMatchedTitle = components['schemas']['MatchedTitle']
-export type SchemaMedia = components['schemas']['Media']
-export type SchemaMediaDetails = components['schemas']['MediaDetails']
-export type SchemaMediaSummary = components['schemas']['MediaSummary']
-export type SchemaParsed = components['schemas']['Parsed']
-export type SchemaPlaybackOutputBody = components['schemas']['PlaybackOutputBody']
-export type SchemaPlaybackSession = components['schemas']['PlaybackSession']
-export type SchemaPlaybackStatus = components['schemas']['PlaybackStatus']
-export type SchemaRelatedMedia = components['schemas']['RelatedMedia']
-export type SchemaRenameListInputBody = components['schemas']['RenameListInputBody']
-export type SchemaRoot = components['schemas']['Root']
-export type SchemaRootOutputBody = components['schemas']['RootOutputBody']
-export type SchemaRootsOutputBody = components['schemas']['RootsOutputBody']
-export type SchemaScanInputBody = components['schemas']['ScanInputBody']
-export type SchemaScanOutputBody = components['schemas']['ScanOutputBody']
-export type SchemaScanRootResult = components['schemas']['ScanRootResult']
-export type SchemaScanStatus = components['schemas']['ScanStatus']
-export type SchemaSearchOutputBody = components['schemas']['SearchOutputBody']
-export type SchemaSearchPage = components['schemas']['SearchPage']
-export type SchemaSessionOutputBody = components['schemas']['SessionOutputBody']
-export type SchemaSetMatchInputBody = components['schemas']['SetMatchInputBody']
-export type SchemaSignInInputBody = components['schemas']['SignInInputBody']
-export type SchemaSource = components['schemas']['Source']
-export type SchemaStartInputBody = components['schemas']['StartInputBody']
-export type SchemaStatusOutputBody = components['schemas']['StatusOutputBody']
-export type SchemaStatusOutputBody1 = components['schemas']['StatusOutputBody1']
-export type SchemaStatusOutputBody2 = components['schemas']['StatusOutputBody2']
-export type SchemaStatusOutputBody3 = components['schemas']['StatusOutputBody3']
-export type SchemaSuggestion = components['schemas']['Suggestion']
-export type SchemaSuggestionsOutputBody = components['schemas']['SuggestionsOutputBody']
-export type SchemaTitle = components['schemas']['Title']
-export type SchemaTitleNames = components['schemas']['TitleNames']
-export type SchemaTrailer = components['schemas']['Trailer']
-export type SchemaUpdateEntryInputBody = components['schemas']['UpdateEntryInputBody']
-export type $defs = Record<string, never>
+export type SchemaAcceptedOutputBody = components['schemas']['AcceptedOutputBody'];
+export type SchemaAccount = components['schemas']['Account'];
+export type SchemaAddRootInputBody = components['schemas']['AddRootInputBody'];
+export type SchemaAiringEpisode = components['schemas']['AiringEpisode'];
+export type SchemaControlInputBody = components['schemas']['ControlInputBody'];
+export type SchemaCounts = components['schemas']['Counts'];
+export type SchemaCreateListInputBody = components['schemas']['CreateListInputBody'];
+export type SchemaCustomList = components['schemas']['CustomList'];
+export type SchemaDate = components['schemas']['Date'];
+export type SchemaDetailsOutputBody = components['schemas']['DetailsOutputBody'];
+export type SchemaEntriesOutputBody = components['schemas']['EntriesOutputBody'];
+export type SchemaEntry = components['schemas']['Entry'];
+export type SchemaErrorDetail = components['schemas']['ErrorDetail'];
+export type SchemaErrorModel = components['schemas']['ErrorModel'];
+export type SchemaFile = components['schemas']['File'];
+export type SchemaFileOutputBody = components['schemas']['FileOutputBody'];
+export type SchemaFilePage = components['schemas']['FilePage'];
+export type SchemaFilesOutputBody = components['schemas']['FilesOutputBody'];
+export type SchemaFilterOptions = components['schemas']['FilterOptions'];
+export type SchemaFilterOptionsOutputBody = components['schemas']['FilterOptionsOutputBody'];
+export type SchemaFilterTag = components['schemas']['FilterTag'];
+export type SchemaFuzzyDate = components['schemas']['FuzzyDate'];
+export type SchemaHealthOutputBody = components['schemas']['HealthOutputBody'];
+export type SchemaList = components['schemas']['List'];
+export type SchemaListsOutputBody = components['schemas']['ListsOutputBody'];
+export type SchemaMatch = components['schemas']['Match'];
+export type SchemaMatchedTitle = components['schemas']['MatchedTitle'];
+export type SchemaMedia = components['schemas']['Media'];
+export type SchemaMediaDetails = components['schemas']['MediaDetails'];
+export type SchemaMediaSummary = components['schemas']['MediaSummary'];
+export type SchemaParsed = components['schemas']['Parsed'];
+export type SchemaPlaybackOutputBody = components['schemas']['PlaybackOutputBody'];
+export type SchemaPlaybackSession = components['schemas']['PlaybackSession'];
+export type SchemaPlaybackStatus = components['schemas']['PlaybackStatus'];
+export type SchemaRelatedMedia = components['schemas']['RelatedMedia'];
+export type SchemaRenameListInputBody = components['schemas']['RenameListInputBody'];
+export type SchemaRoot = components['schemas']['Root'];
+export type SchemaRootOutputBody = components['schemas']['RootOutputBody'];
+export type SchemaRootsOutputBody = components['schemas']['RootsOutputBody'];
+export type SchemaScanHistoryOutputBody = components['schemas']['ScanHistoryOutputBody'];
+export type SchemaScanHistoryPage = components['schemas']['ScanHistoryPage'];
+export type SchemaScanInputBody = components['schemas']['ScanInputBody'];
+export type SchemaScanOutputBody = components['schemas']['ScanOutputBody'];
+export type SchemaScanRootResult = components['schemas']['ScanRootResult'];
+export type SchemaScanRunDetail = components['schemas']['ScanRunDetail'];
+export type SchemaScanRunFileLogDetail = components['schemas']['ScanRunFileLogDetail'];
+export type SchemaScanRunGroupDetail = components['schemas']['ScanRunGroupDetail'];
+export type SchemaScanRunOutputBody = components['schemas']['ScanRunOutputBody'];
+export type SchemaScanRunRootDetail = components['schemas']['ScanRunRootDetail'];
+export type SchemaScanRunSummary = components['schemas']['ScanRunSummary'];
+export type SchemaScanStatus = components['schemas']['ScanStatus'];
+export type SchemaSearchOutputBody = components['schemas']['SearchOutputBody'];
+export type SchemaSearchPage = components['schemas']['SearchPage'];
+export type SchemaSessionOutputBody = components['schemas']['SessionOutputBody'];
+export type SchemaSetMatchInputBody = components['schemas']['SetMatchInputBody'];
+export type SchemaSignInInputBody = components['schemas']['SignInInputBody'];
+export type SchemaSource = components['schemas']['Source'];
+export type SchemaStartInputBody = components['schemas']['StartInputBody'];
+export type SchemaStatusOutputBody = components['schemas']['StatusOutputBody'];
+export type SchemaStatusOutputBody1 = components['schemas']['StatusOutputBody1'];
+export type SchemaStatusOutputBody2 = components['schemas']['StatusOutputBody2'];
+export type SchemaStatusOutputBody3 = components['schemas']['StatusOutputBody3'];
+export type SchemaSuggestion = components['schemas']['Suggestion'];
+export type SchemaSuggestionsOutputBody = components['schemas']['SuggestionsOutputBody'];
+export type SchemaTitle = components['schemas']['Title'];
+export type SchemaTitleNames = components['schemas']['TitleNames'];
+export type SchemaTrailer = components['schemas']['Trailer'];
+export type SchemaUpdateEntryInputBody = components['schemas']['UpdateEntryInputBody'];
+export type $defs = Record<string, never>;
 export interface operations {
-	getAniListSession: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['SessionOutputBody']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	connectAniList: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['SignInInputBody']
-			}
-		}
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['Account']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	disconnectAniList: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			/** @description No Content */
-			204: {
-				headers: {
-					[name: string]: unknown
-				}
-				content?: never
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	getExtensionStatus: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['StatusOutputBody3']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	getNodeHealth: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['HealthOutputBody']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	listLibraryFiles: {
-		parameters: {
-			query?: {
-				/** @description Only files under this root. */
-				root_id?: number
-				/** @description Only files whose extension points at this form of media. */
-				kind?: 'video' | 'manga' | 'book'
-				/** @description Only files whose name reads as this. Use it to leave out openings and extras, which are never episodes. */
-				form?: 'series' | 'movie' | 'special' | 'extra' | 'manga' | 'book'
-				/** @description Only files that are not matched to a title yet. */
-				unmatched?: boolean
-				/** @description Page size. */
-				limit?: number
-				/** @description How many files to skip. */
-				offset?: number
-			}
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['FilesOutputBody']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	listLibraryFileCandidates: {
-		parameters: {
-			query?: never
-			header?: never
-			path: {
-				/** @description Identifier of the file to find candidates for. */
-				id: number
-			}
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['SuggestionsOutputBody']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	setLibraryFileMatch: {
-		parameters: {
-			query?: never
-			header?: never
-			path: {
-				/** @description Identifier of the file to match. */
-				id: number
-			}
-			cookie?: never
-		}
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['SetMatchInputBody']
-			}
-		}
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['FileOutputBody']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	deleteLibraryFileMatch: {
-		parameters: {
-			query?: never
-			header?: never
-			path: {
-				/** @description Identifier of the file whose match to forget. */
-				id: number
-			}
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			/** @description No Content */
-			204: {
-				headers: {
-					[name: string]: unknown
-				}
-				content?: never
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	listLibraryRoots: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['RootsOutputBody']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	addLibraryRoot: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['AddRootInputBody']
-			}
-		}
-		responses: {
-			/** @description Created */
-			201: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['RootOutputBody']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	deleteLibraryRoot: {
-		parameters: {
-			query?: never
-			header?: never
-			path: {
-				/** @description Identifier of the root to stop watching. */
-				id: number
-			}
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			/** @description No Content */
-			204: {
-				headers: {
-					[name: string]: unknown
-				}
-				content?: never
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	getLibraryScan: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['ScanOutputBody']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	startLibraryScan: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['ScanInputBody']
-			}
-		}
-		responses: {
-			/** @description Accepted */
-			202: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['ScanOutputBody']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	getMediaFilterOptions: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['FilterOptionsOutputBody']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	searchMedia: {
-		parameters: {
-			query?: {
-				/** @description Free text to match against every title the source knows. Empty browses by the filters alone. */
-				q?: string
-				/** @description Which catalog to search. Every source owns one kind of media, so this also picks the source. */
-				type?: 'anime' | 'manga'
-				/** @description Order of the results. Left out it means relevance while searching and popularity while browsing. */
-				sort?:
-					| 'SEARCH_MATCH'
-					| 'POPULARITY_DESC'
-					| 'TRENDING_DESC'
-					| 'SCORE_DESC'
-					| 'FAVOURITES_DESC'
-					| 'START_DATE_DESC'
-					| 'TITLE_ROMAJI'
-				/** @description Genres a title must all have, as listed by getMediaFilterOptions. */
-				genres?: string[] | null
-				/** @description Tags a title must all have, as listed by getMediaFilterOptions. */
-				tags?: string[] | null
-				/** @description Any of these formats. */
-				formats?:
-					| (
-							| 'TV'
-							| 'TV_SHORT'
-							| 'MOVIE'
-							| 'SPECIAL'
-							| 'OVA'
-							| 'ONA'
-							| 'MUSIC'
-							| 'MANGA'
-							| 'NOVEL'
-							| 'ONE_SHOT'
-					  )[]
-					| null
-				/** @description Any of these release statuses. */
-				statuses?: ('FINISHED' | 'RELEASING' | 'NOT_YET_RELEASED' | 'CANCELLED' | 'HIATUS')[] | null
-				/** @description Season the title started in. */
-				season?: 'WINTER' | 'SPRING' | 'SUMMER' | 'FALL'
-				/** @description Year the title started in. */
-				year?: number
-				/** @description Keep titles scored above this, on a 0-100 scale. */
-				min_score?: number
-				/** @description Include adult titles. They are left out unless this is set, and the source hides them entirely from a node with no account connected. */
-				adult?: boolean
-				/** @description Which page of results to return. */
-				page?: number
-				/** @description How many titles per page. */
-				per_page?: number
-			}
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['SearchOutputBody']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	getMediaDetails: {
-		parameters: {
-			query?: never
-			header?: never
-			path: {
-				/** @description The title's media reference. */
-				media_ref: string
-			}
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['DetailsOutputBody']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	getPlayback: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['PlaybackOutputBody']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	startPlayback: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['StartInputBody']
-			}
-		}
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['PlaybackOutputBody']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	stopPlayback: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['PlaybackOutputBody']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	controlPlayback: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['ControlInputBody']
-			}
-		}
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['PlaybackOutputBody']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	getReaderStatus: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['StatusOutputBody1']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	getSyncStatus: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['StatusOutputBody2']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	getTorrentStatus: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['StatusOutputBody']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	listTrackerEntries: {
-		parameters: {
-			query: {
-				/** @description Which collection to read. */
-				type: 'anime' | 'manga'
-			}
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['EntriesOutputBody']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	updateTrackerEntry: {
-		parameters: {
-			query?: never
-			header?: never
-			path: {
-				/** @description The entry's media reference, as returned by listTrackerEntries. */
-				media_ref: string
-			}
-			cookie?: never
-		}
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['UpdateEntryInputBody']
-			}
-		}
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['Entry']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	listTrackerLists: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['ListsOutputBody']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	createTrackerList: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['CreateListInputBody']
-			}
-		}
-		responses: {
-			/** @description Created */
-			201: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['CustomList']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	deleteTrackerList: {
-		parameters: {
-			query?: never
-			header?: never
-			path: {
-				/** @description The list's identifier, as returned by listTrackerLists. */
-				id: string
-			}
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			/** @description No Content */
-			204: {
-				headers: {
-					[name: string]: unknown
-				}
-				content?: never
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	renameTrackerList: {
-		parameters: {
-			query?: never
-			header?: never
-			path: {
-				/** @description The list's identifier, as returned by listTrackerLists. */
-				id: string
-			}
-			cookie?: never
-		}
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['RenameListInputBody']
-			}
-		}
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['CustomList']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	refreshTrackerEntries: {
-		parameters: {
-			query: {
-				/** @description Which collection to read. */
-				type: 'anime' | 'manga'
-			}
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			/** @description Accepted */
-			202: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['AcceptedOutputBody']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
+    getAniListSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    connectAniList: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SignInInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Account"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    disconnectAniList: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getExtensionStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StatusOutputBody3"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getNodeHealth: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HealthOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listLibraryFiles: {
+        parameters: {
+            query?: {
+                /** @description Only files under this root. */
+                root_id?: number;
+                /** @description Only files whose extension points at this form of media. */
+                kind?: "video" | "manga" | "book";
+                /** @description Only files whose name reads as this. Use it to leave out openings and extras, which are never episodes. */
+                form?: "series" | "movie" | "special" | "extra" | "manga" | "book";
+                /** @description Only files that are not matched to a title yet. */
+                unmatched?: boolean;
+                /** @description Page size. */
+                limit?: number;
+                /** @description How many files to skip. */
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FilesOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listLibraryFileCandidates: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifier of the file to find candidates for. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SuggestionsOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    setLibraryFileMatch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifier of the file to match. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetMatchInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FileOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    deleteLibraryFileMatch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifier of the file whose match to forget. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listLibraryRoots: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RootsOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    addLibraryRoot: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddRootInputBody"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RootOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    deleteLibraryRoot: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifier of the root to stop watching. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getLibraryScan: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScanOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    startLibraryScan: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScanInputBody"];
+            };
+        };
+        responses: {
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScanOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listLibraryScanHistory: {
+        parameters: {
+            query?: {
+                /** @description Only scans started at or after this time. Left out for no lower bound. */
+                from?: string;
+                /** @description Only scans started at or before this time. Left out for no upper bound. */
+                to?: string;
+                /** @description Page size. */
+                limit?: number;
+                /** @description How many scans to skip. */
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScanHistoryOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getLibraryScanHistoryRun: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifier of the scan run. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScanRunOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getMediaFilterOptions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FilterOptionsOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    searchMedia: {
+        parameters: {
+            query?: {
+                /** @description Free text to match against every title the source knows. Empty browses by the filters alone. */
+                q?: string;
+                /** @description Which catalog to search. Every source owns one kind of media, so this also picks the source. */
+                type?: "anime" | "manga";
+                /** @description Order of the results. Left out it means relevance while searching and popularity while browsing. */
+                sort?: "SEARCH_MATCH" | "POPULARITY_DESC" | "TRENDING_DESC" | "SCORE_DESC" | "FAVOURITES_DESC" | "START_DATE_DESC" | "TITLE_ROMAJI";
+                /** @description Genres a title must all have, as listed by getMediaFilterOptions. */
+                genres?: string[] | null;
+                /** @description Tags a title must all have, as listed by getMediaFilterOptions. */
+                tags?: string[] | null;
+                /** @description Any of these formats. */
+                formats?: ("TV" | "TV_SHORT" | "MOVIE" | "SPECIAL" | "OVA" | "ONA" | "MUSIC" | "MANGA" | "NOVEL" | "ONE_SHOT")[] | null;
+                /** @description Any of these release statuses. */
+                statuses?: ("FINISHED" | "RELEASING" | "NOT_YET_RELEASED" | "CANCELLED" | "HIATUS")[] | null;
+                /** @description Season the title started in. */
+                season?: "WINTER" | "SPRING" | "SUMMER" | "FALL";
+                /** @description Year the title started in. */
+                year?: number;
+                /** @description Keep titles scored above this, on a 0-100 scale. */
+                min_score?: number;
+                /** @description Include adult titles. They are left out unless this is set, and the source hides them entirely from a node with no account connected. */
+                adult?: boolean;
+                /** @description Which page of results to return. */
+                page?: number;
+                /** @description How many titles per page. */
+                per_page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getMediaDetails: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The title's media reference. */
+                media_ref: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DetailsOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getPlayback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlaybackOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    startPlayback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StartInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlaybackOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    stopPlayback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlaybackOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    controlPlayback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ControlInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlaybackOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getReaderStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StatusOutputBody1"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getSyncStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StatusOutputBody2"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getTorrentStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StatusOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listTrackerEntries: {
+        parameters: {
+            query: {
+                /** @description Which collection to read. */
+                type: "anime" | "manga";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EntriesOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    updateTrackerEntry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The entry's media reference, as returned by listTrackerEntries. */
+                media_ref: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateEntryInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Entry"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listTrackerLists: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListsOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    createTrackerList: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateListInputBody"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomList"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    deleteTrackerList: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The list's identifier, as returned by listTrackerLists. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    renameTrackerList: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The list's identifier, as returned by listTrackerLists. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RenameListInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomList"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    refreshTrackerEntries: {
+        parameters: {
+            query: {
+                /** @description Which collection to read. */
+                type: "anime" | "manga";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AcceptedOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
 }

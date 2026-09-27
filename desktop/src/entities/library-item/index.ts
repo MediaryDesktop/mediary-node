@@ -13,7 +13,9 @@ export {
 	libraryFilesQuery,
 	libraryModel,
 	libraryRootsQuery,
+	libraryScanHistoryQuery,
 	libraryScanQuery,
+	libraryScanRunQuery,
 	LIBRARY_PAGE_SIZE,
 	setLibraryMatchMutation,
 	startLibraryScanMutation
@@ -34,6 +36,11 @@ export type {
 	LibraryMediaForm,
 	LibraryRoot,
 	LibraryScan,
+	LibraryScanHistoryPage,
+	LibraryScanRunDetail,
+	LibraryScanRunFileLog,
+	LibraryScanRunGroup,
+	LibraryScanRunSummary,
 	LibrarySuggestion,
 	LibraryTitle,
 	SetLibraryMatchParams

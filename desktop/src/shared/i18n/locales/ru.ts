@@ -307,6 +307,17 @@ export const ru: Translation = {
 			failures: 'Папки, которые не удалось прочитать',
 			rootFailed: 'Папку не удалось прочитать: {{reason}}'
 		},
+		history: {
+			action: 'История',
+			title: 'История сканирований',
+			description: 'Все сканирования, которые выполнила нода',
+			empty: 'Сканирований ещё не было',
+			partial: 'Прервано',
+			matchedTitle: 'Сопоставленные тайтлы',
+			unmatchedTitle: 'Не удалось сопоставить',
+			notYetOnYourList: 'Ещё не в вашем списке',
+			nothingToShow: 'Этому сканированию нечего показать'
+		},
 		search: 'Поиск по названию, тайтлу, файлу…',
 		view: {
 			all: 'Все',

@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/danielgtaylor/huma/v2"
 
@@ -94,6 +95,30 @@ type SuggestionsOutput struct {
 	Body struct {
 		Suggestions []service.Suggestion `json:"suggestions" doc:"Candidate titles, best first."`
 		Sources     []httpapi.Source     `json:"sources" doc:"Attribution for every field that came from an external source."`
+	}
+}
+
+type ScanHistoryInput struct {
+	From   time.Time `query:"from" doc:"Only scans started at or after this time. Left out for no lower bound."`
+	To     time.Time `query:"to" doc:"Only scans started at or before this time. Left out for no upper bound."`
+	Limit  int       `query:"limit" minimum:"1" maximum:"500" default:"100" doc:"Page size."`
+	Offset int       `query:"offset" minimum:"0" doc:"How many scans to skip."`
+}
+
+type ScanHistoryOutput struct {
+	Body struct {
+		History *service.ScanHistoryPage `json:"history" doc:"One page of past scans, newest first."`
+	}
+}
+
+type ScanRunInput struct {
+	ID int64 `path:"id" doc:"Identifier of the scan run."`
+}
+
+type ScanRunOutput struct {
+	Body struct {
+		Run     *service.ScanRunDetail `json:"run" doc:"The scan run in full."`
+		Sources []httpapi.Source       `json:"sources" doc:"Attribution for every field that came from an external source."`
 	}
 }
 
@@ -267,4 +292,59 @@ func (h *Handler) Register(api huma.API) {
 
 		return nil, nil
 	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "listLibraryScanHistory",
+		Method:      http.MethodGet,
+		Path:        "/v1/library/scan/history",
+		Summary:     "Past scans",
+		Description: "Every scan the node has run, newest first, kept independently of the single current-scan slot so a scan from days ago is still readable.",
+		Tags:        []string{"library"},
+	}, func(ctx context.Context, in *ScanHistoryInput) (*ScanHistoryOutput, error) {
+		history, err := h.svc.ScanHistory(ctx, service.ScanHistoryQuery{
+			From:   optionalTime(in.From),
+			To:     optionalTime(in.To),
+			Limit:  in.Limit,
+			Offset: in.Offset,
+		})
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		out := &ScanHistoryOutput{}
+		out.Body.History = history
+
+		return out, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "getLibraryScanHistoryRun",
+		Method:      http.MethodGet,
+		Path:        "/v1/library/scan/history/{id}",
+		Summary:     "One past scan",
+		Description: "What one scan matched, grouped by title, and every file it looked at but could not match.",
+		Tags:        []string{"library"},
+	}, func(ctx context.Context, in *ScanRunInput) (*ScanRunOutput, error) {
+		run, err := h.svc.ScanRun(ctx, in.ID)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		out := &ScanRunOutput{}
+		out.Body.Run = run
+		out.Body.Sources = []httpapi.Source{httpapi.AniListSource}
+
+		return out, nil
+	})
+}
+
+// optionalTime turns a query parameter's zero value back into "left out": huma
+// has no pointer support for query params, so the zero time plays the same role
+// the numeric filters elsewhere play with 0.
+func optionalTime(value time.Time) *time.Time {
+	if value.IsZero() {
+		return nil
+	}
+
+	return &value
 }

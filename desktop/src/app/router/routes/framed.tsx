@@ -3,7 +3,7 @@ import { createRoute, Outlet } from '@tanstack/react-router'
 import { DiscoverPage } from '@pages/discover'
 import { DownloadsPage } from '@pages/downloads'
 import { HomePage } from '@pages/home'
-import { LibraryPage } from '@pages/library'
+import { LibraryPage, ScanHistoryPage } from '@pages/library'
 import { ListDetailPage, ListsPage } from '@pages/lists'
 import { MediaPage } from '@pages/media'
 import { SearchPage } from '@pages/search'
@@ -71,6 +71,12 @@ const libraryRoute = createRoute({
 	component: LibraryPage
 })
 
+const scanHistoryRoute = createRoute({
+	getParentRoute: () => framedRoute,
+	path: '/library/history',
+	component: ScanHistoryPage
+})
+
 const downloadsRoute = createRoute({
 	getParentRoute: () => framedRoute,
 	path: '/downloads',
@@ -91,6 +97,7 @@ export const framedTree = framedRoute.addChildren([
 	listDetailRoute,
 	mediaRoute,
 	libraryRoute,
+	scanHistoryRoute,
 	downloadsRoute,
 	settingsRoute
 ])
