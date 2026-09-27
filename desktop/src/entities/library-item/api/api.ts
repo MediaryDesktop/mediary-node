@@ -9,6 +9,8 @@ export type LibraryFileMatch = NodeSchemas['Match']
 export type LibraryScan = NodeSchemas['ScanStatus']
 export type LibraryScanRoot = NodeSchemas['ScanRootResult']
 export type LibrarySuggestion = NodeSchemas['Suggestion']
+export type LibraryTitle = NodeSchemas['MatchedTitle']
+export type LibraryCounts = NodeSchemas['Counts']
 
 export type LibraryFileKind = LibraryFile['kind']
 export type LibraryMediaForm = NonNullable<LibraryFileParsed['form']>

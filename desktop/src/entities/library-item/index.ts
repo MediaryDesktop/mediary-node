@@ -2,7 +2,10 @@ export {
 	addLibraryRootMutation,
 	deleteLibraryMatchMutation,
 	deleteLibraryRootMutation,
+	fileDuration,
+	fileName,
 	fileNumber,
+	fileSeason,
 	fileTitle,
 	isMatched,
 	isTrackable,
@@ -16,12 +19,13 @@ export {
 	startLibraryScanMutation
 } from './model/model'
 
-export type { ScanActivity } from './model/model'
+export type { ScanActivity, ScanPhase } from './model/model'
 
 export { LibraryFileRow } from './ui/LibraryFileRow'
 export type { LibraryFileRowProps } from './ui/LibraryFileRow'
 
 export type {
+	LibraryCounts,
 	LibraryFile,
 	LibraryFileKind,
 	LibraryFileMatch,
@@ -31,5 +35,6 @@ export type {
 	LibraryRoot,
 	LibraryScan,
 	LibrarySuggestion,
+	LibraryTitle,
 	SetLibraryMatchParams
 } from './api/api'

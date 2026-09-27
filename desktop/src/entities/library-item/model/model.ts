@@ -2,6 +2,7 @@ import { createMutation, createQuery, keepFresh } from '@farfetched/core'
 import { attach, createEffect, createEvent, createStore, sample } from 'effector'
 
 import { atom } from '@shared/factory'
+import { formatDuration } from '@shared/lib'
 
 import { nodeTopic } from '@infra/node'
 
@@ -32,6 +33,8 @@ function scanPhase(phase: string) {
 
 const scanStarted = scanPhase('started')
 const scanProgressed = scanPhase('progress')
+const scanRootDone = scanPhase('root')
+const scanProbing = scanPhase('probing')
 const scanMatching = scanPhase('matching')
 const scanFinished = scanPhase('finished')
 
@@ -83,17 +86,27 @@ keepFresh(libraryFilesQuery, {
 
 keepFresh(libraryScanQuery, { triggers: [scanStarted, scanFinished] })
 
+export type ScanPhase = 'scanning' | 'probing' | 'matching'
+
 export interface ScanActivity {
-	phase: 'scanning' | 'matching'
+	phase: ScanPhase
+
 	found: number
-	matched: number
+
+	// done and total belong to whichever phase is running: files probed of files
+	// to probe, then titles matched of titles to match. One pair rather than a
+	// pair per phase, because the bar only ever shows one of them.
+	done: number
 	total: number
+
+	rootsDone: number
+	rootsTotal: number
 }
 
-function activityNumber(payload: Record<string, unknown> | undefined, key: string): number {
+function activityNumber(payload: Record<string, unknown> | undefined, key: string, fallback = 0): number {
 	const value = payload?.[key]
 
-	return typeof value === 'number' ? value : 0
+	return typeof value === 'number' ? value : fallback
 }
 
 export const libraryModel = atom(() => {
@@ -126,19 +139,46 @@ export const libraryModel = atom(() => {
 	// Progress is read off the events rather than refetched: during a scan they
 	// arrive several times a second, and the node already says everything the
 	// header needs.
+	const idle: ScanActivity = {
+		phase: 'scanning',
+		found: 0,
+		done: 0,
+		total: 0,
+		rootsDone: 0,
+		rootsTotal: 0
+	}
+
 	const $activity = createStore<ScanActivity | null>(null)
-		.on(scanStarted, () => ({ phase: 'scanning' as const, found: 0, matched: 0, total: 0 }))
-		.on(scanProgressed, (current, event) => ({
+		.on(scanStarted, (_, event) => ({
+			...idle,
+			rootsTotal: activityNumber(event.payload, 'roots_total')
+		}))
+		.on([scanProgressed, scanRootDone], (current, event) => ({
+			...(current ?? idle),
 			phase: 'scanning' as const,
-			found: activityNumber(event.payload, 'found'),
-			matched: current?.matched ?? 0,
-			total: current?.total ?? 0
+			found: activityNumber(event.payload, 'found', current?.found ?? 0),
+			done: 0,
+			total: 0,
+			rootsDone: activityNumber(event.payload, 'roots_done'),
+			rootsTotal: activityNumber(event.payload, 'roots_total')
+		}))
+		.on(scanProbing, (current, event) => ({
+			...(current ?? idle),
+			phase: 'probing' as const,
+			done: activityNumber(event.payload, 'probed'),
+			total: activityNumber(event.payload, 'total'),
+			rootsDone: activityNumber(event.payload, 'roots_done'),
+			rootsTotal: activityNumber(event.payload, 'roots_total')
 		}))
 		.on(scanMatching, (current, event) => ({
+			...(current ?? idle),
 			phase: 'matching' as const,
-			found: current?.found ?? 0,
-			matched: activityNumber(event.payload, 'matched'),
-			total: activityNumber(event.payload, 'total')
+			done: activityNumber(event.payload, 'matched'),
+			total: activityNumber(event.payload, 'total'),
+
+			// Matching runs once every folder is walked, so the folder count is
+			// complete by definition.
+			rootsDone: current?.rootsTotal ?? 0
 		}))
 		.reset(scanFinished, libraryScanQuery.finished.success)
 
@@ -169,6 +209,28 @@ export function fileTitle(file: LibraryFile): string {
 	return parsed && parsed !== '' ? parsed : file.rel_path
 }
 
+// The file's own name, which is what a row about a file should say. rel_path is
+// the whole path under the root, and a list of episodes repeats the folder part
+// of it on every line for nothing.
+export function fileName(file: LibraryFile): string {
+	const parts = file.rel_path.split('/')
+
+	return parts[parts.length - 1] || file.rel_path
+}
+
 export function fileNumber(file: LibraryFile): number | null {
 	return file.parsed.episode ?? file.parsed.chapter ?? null
+}
+
+// Which season the file belongs to. The match is asked first because it is what
+// the user or the matcher settled on; the name is what the scan read off the file
+// itself, which for "s02e01_720.mp4" already says season two.
+export function fileSeason(file: LibraryFile): number | null {
+	return file.match?.season ?? file.parsed.season ?? null
+}
+
+// How long the file runs, as the scan read it out of the container. A container
+// the node cannot read leaves this empty, and the row simply shows no time.
+export function fileDuration(file: LibraryFile): string | null {
+	return file.duration_seconds ? formatDuration(file.duration_seconds) : null
 }

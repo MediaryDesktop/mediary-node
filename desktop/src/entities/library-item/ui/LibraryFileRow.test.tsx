@@ -21,40 +21,90 @@ function file(overrides: Partial<LibraryFile> = {}): LibraryFile {
 }
 
 describe('LibraryFileRow', () => {
-	it('shows the title, the number and the path the scan recorded', () => {
+	// The card above the rows carries the title, so a row repeating it on every
+	// line would say the same thing eighty times.
+	it('shows the file name rather than the folder it sits in', () => {
 		render(<LibraryFileRow file={file()} />)
 
-		expect(screen.getByText('Frieren')).toBeInTheDocument()
-		expect(screen.getByText('#1')).toBeInTheDocument()
-		expect(screen.getByText('Frieren/ep 01.mkv')).toBeInTheDocument()
+		expect(screen.getByText('ep 01.mkv')).toBeInTheDocument()
+		expect(screen.queryByText('Frieren/ep 01.mkv')).toBeNull()
 	})
 
-	it('says how sure an automatic match was', () => {
+	// "s02e01_720.mp4" says which season it is, and the scan already read it off
+	// the name: the row must not make the user open the file to find out.
+	it('numbers the season and the episode the scan read off the name', () => {
 		render(
 			<LibraryFileRow
-				file={file({ match: { media_ref: 'anilist:154587', confidence: 0.93, source: 'auto' } })}
+				file={file({ parsed: { form: 'series', title: 'Frieren', season: 2, episode: 1 } })}
 			/>
 		)
 
-		expect(screen.getByText('Matched 93%')).toBeInTheDocument()
+		expect(screen.getByText('Season 2 · Episode 1')).toBeInTheDocument()
+	})
+
+	it('shows only the episode for a file whose name says nothing about seasons', () => {
+		render(<LibraryFileRow file={file()} />)
+
+		expect(screen.getByText('Episode 1')).toBeInTheDocument()
+	})
+
+	it('prefers the season the match settled on over the one in the name', () => {
+		render(
+			<LibraryFileRow
+				file={file({
+					parsed: { form: 'series', title: 'Frieren', season: 2, episode: 1 },
+					match: { media_ref: 'anilist:154587', confidence: 1, source: 'manual', season: 3 }
+				})}
+			/>
+		)
+
+		expect(screen.getByText('Season 3 · Episode 1')).toBeInTheDocument()
+	})
+
+	it('numbers a comic by its chapter', () => {
+		render(<LibraryFileRow file={file({ kind: 'manga', parsed: { form: 'manga', chapter: 12 } })} />)
+
+		expect(screen.getByText('Chapter 12')).toBeInTheDocument()
+	})
+
+	it('shows how long the file runs as a clock reading', () => {
+		render(<LibraryFileRow file={file({ duration_seconds: 1437 })} />)
+
+		expect(screen.getByText('23:57')).toBeInTheDocument()
+	})
+
+	it('shows no time for a container the node could not read', () => {
+		render(<LibraryFileRow file={file()} />)
+
+		expect(screen.queryByText(/^\d+:\d\d$/)).toBeNull()
+	})
+
+	it('says how sure an automatic match was on the control that changes it', () => {
+		render(
+			<LibraryFileRow
+				file={file({ match: { media_ref: 'anilist:154587', confidence: 0.93, source: 'auto' } })}
+				onMatch={vi.fn()}
+			/>
+		)
+
+		expect(screen.getByRole('button', { name: 'Change' })).toHaveAttribute('title', 'Matched 93%')
 	})
 
 	it('marks a match the user made themselves', () => {
 		render(
 			<LibraryFileRow
 				file={file({ match: { media_ref: 'anilist:154587', confidence: 1, source: 'manual' } })}
+				onMatch={vi.fn()}
 			/>
 		)
 
-		expect(screen.getByText('Matched by hand')).toBeInTheDocument()
+		expect(screen.getByRole('button', { name: 'Change' })).toHaveAttribute('title', 'Matched by hand')
 	})
 
 	it('offers to match a file that has no title yet', () => {
 		const onMatch = vi.fn()
 
 		render(<LibraryFileRow file={file()} onMatch={onMatch} />)
-
-		expect(screen.getByText('Unmatched')).toBeInTheDocument()
 
 		fireEvent.click(screen.getByRole('button', { name: 'Match' }))
 
@@ -68,7 +118,6 @@ describe('LibraryFileRow', () => {
 		)
 
 		expect(screen.queryByRole('button', { name: 'Match' })).toBeNull()
-		expect(screen.queryByText('Unmatched')).toBeNull()
 	})
 
 	it('offers to play a video file', () => {

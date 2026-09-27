@@ -3,51 +3,46 @@ import { useMemo } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 
-import { deleteLibraryMatchMutation, LibraryFileRow } from '@entities/library-item'
-import type { LibraryFile } from '@entities/library-item'
+import { deleteLibraryMatchMutation } from '@entities/library-item'
+import type { LibraryFile, LibraryTitle } from '@entities/library-item'
 
-import { groupFiles } from '../lib/library-view'
+import { groupFiles, titleIndex } from '../lib/library-view'
+import type { LibraryLayout } from '../lib/library-view'
 
 import styles from './LibraryFiles.module.scss'
+import { TitleGroup } from './TitleGroup'
 
 export interface LibraryFilesProps {
 	files: LibraryFile[]
+	titles: LibraryTitle[] | undefined
+	layout: LibraryLayout
 	playingFileID?: number
 	onPlay: (file: LibraryFile) => void
 	onMatch: (file: LibraryFile) => void
 }
 
-export function LibraryFiles({ files, playingFileID, onPlay, onMatch }: LibraryFilesProps) {
+export function LibraryFiles({ files, titles, layout, playingFileID, onPlay, onMatch }: LibraryFilesProps) {
 	const { t } = useTranslation()
 
 	const clearMatch = useUnit(deleteLibraryMatchMutation.start)
 
-	const groups = useMemo(() => groupFiles(files, t('library.file.unknownTitle')), [files, t])
+	const groups = useMemo(
+		() => groupFiles(files, titleIndex(titles), t('library.file.unknownTitle')),
+		[files, titles, t]
+	)
 
 	return (
 		<div className={styles.groups}>
 			{groups.map(group => (
-				<section key={group.key} className={styles.group}>
-					<header className={styles.heading}>
-						<h3 className={styles.title}>{group.title}</h3>
-						<span className={styles.count}>
-							{t('library.summary.files', { count: group.files.length })}
-						</span>
-					</header>
-
-					<div className={styles.rows}>
-						{group.files.map(file => (
-							<LibraryFileRow
-								key={file.id}
-								file={file}
-								playing={file.id === playingFileID}
-								onPlay={onPlay}
-								onMatch={onMatch}
-								onClearMatch={target => clearMatch(target.id)}
-							/>
-						))}
-					</div>
-				</section>
+				<TitleGroup
+					key={group.key}
+					group={group}
+					compact={layout === 'rows'}
+					playingFileID={playingFileID}
+					onPlay={onPlay}
+					onMatch={onMatch}
+					onClearMatch={file => clearMatch(file.id)}
+				/>
 			))}
 		</div>
 	)

@@ -17,6 +17,13 @@ type TrackedTitle struct {
 
 	// Episodes the entry has, or chapters for a comic.
 	Episodes *int
+
+	// What it takes to show the title rather than only recognize it: the name the
+	// user reads everywhere else, the poster they already see in their lists, and
+	// the colour behind it while it loads.
+	Display    string
+	CoverImage *string
+	CoverColor *string
 }
 
 // TrackedTitles lists the user's own collection by title, from the mirror only.
@@ -42,11 +49,14 @@ func (s *Service) TrackedTitles(ctx context.Context, mediaType MediaType) ([]Tra
 		}
 
 		titles = append(titles, TrackedTitle{
-			MediaRef: entry.MediaRef,
-			Titles:   append(spellings(entry.Media.Title), entry.Media.Synonyms...),
-			Format:   value(entry.Media.Format),
-			Year:     entry.Media.SeasonYear,
-			Episodes: count,
+			MediaRef:   entry.MediaRef,
+			Titles:     append(spellings(entry.Media.Title), entry.Media.Synonyms...),
+			Format:     value(entry.Media.Format),
+			Year:       entry.Media.SeasonYear,
+			Episodes:   count,
+			Display:    displayTitle(entry.Media.Title),
+			CoverImage: entry.Media.CoverImage,
+			CoverColor: entry.Media.CoverColor,
 		})
 	}
 
@@ -82,6 +92,18 @@ func spellings(title Title) []string {
 	}
 
 	return ordered
+}
+
+// displayTitle is the spelling the rest of the app shows: the one the user chose
+// in their account, falling back the way the source itself does.
+func displayTitle(title Title) string {
+	for _, spelling := range []*string{title.UserPreferred, title.Romaji, title.English, title.Native} {
+		if spelling != nil && *spelling != "" {
+			return *spelling
+		}
+	}
+
+	return ""
 }
 
 func value(pointer *string) string {

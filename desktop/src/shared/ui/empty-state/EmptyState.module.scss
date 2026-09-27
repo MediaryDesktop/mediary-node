@@ -12,10 +12,6 @@
 	padding: 1.5rem;
 	text-align: center;
 
-	&.page {
-		min-height: calc(100vh - var(--page-inset-top, 0px) - 2rem);
-	}
-
 	&.small {
 		gap: 0.25rem;
 		min-height: 0;

@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"encoding/binary"
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -484,5 +486,188 @@ func TestDiffFilesReparsesRowsLeftByAnOlderParser(t *testing.T) {
 	}
 	if changes.Reparsed[0].Parsed.Title != "Frieren" || changes.Reparsed[0].Parsed.Version != parser.Version {
 		t.Errorf("reparsed row = %+v, want the current parser's reading", changes.Reparsed[0].Parsed)
+	}
+}
+
+// The page the library shows needs three numbers the page itself cannot work
+// out: it holds at most one page of files, and the tabs above it count the whole
+// library.
+func TestFilesCountsTheWholeLibraryNotThePage(t *testing.T) {
+	h := newHarness(t)
+	root := t.TempDir()
+
+	writeFile(t, filepath.Join(root, "Frieren", "Frieren - 01.mkv"), "one")
+	writeFile(t, filepath.Join(root, "Frieren", "Frieren - 02.mkv"), "two")
+	writeFile(t, filepath.Join(root, "Frieren", "Frieren NCOP1.mkv"), "opening")
+
+	h.addRoot(t, root)
+	h.scan(t, 0)
+
+	page, err := h.svc.Files(context.Background(), FileQuery{Limit: 1})
+	if err != nil {
+		t.Fatalf("list files: %v", err)
+	}
+
+	if len(page.Items) != 1 {
+		t.Fatalf("page holds %d files, want the 1 that was asked for", len(page.Items))
+	}
+	if page.Counts.Total != 3 {
+		t.Errorf("counts.total = %d, want every file in the library", page.Counts.Total)
+	}
+
+	// The opening belongs to no title by design, so counting it as waiting for one
+	// would leave a number the user can never bring down to zero.
+	if page.Counts.Unmatched != 2 {
+		t.Errorf("counts.unmatched = %d, want the two episodes without the opening", page.Counts.Unmatched)
+	}
+	if page.Counts.Missing != 0 {
+		t.Errorf("counts.missing = %d, want none", page.Counts.Missing)
+	}
+}
+
+func TestFilesCountsFilesTheScanNoLongerFinds(t *testing.T) {
+	h := newHarness(t)
+	root := t.TempDir()
+
+	path := filepath.Join(root, "Frieren", "Frieren - 01.mkv")
+	writeFile(t, path, "one")
+
+	h.addRoot(t, root)
+	h.scan(t, 0)
+
+	if err := os.Remove(path); err != nil {
+		t.Fatalf("remove file: %v", err)
+	}
+
+	h.scan(t, 0)
+
+	page, err := h.svc.Files(context.Background(), FileQuery{})
+	if err != nil {
+		t.Fatalf("list files: %v", err)
+	}
+
+	if page.Counts.Missing != 1 {
+		t.Errorf("counts.missing = %d, want the file that went away", page.Counts.Missing)
+	}
+}
+
+func TestFilesNamesTheTitlesItsMatchedFilesBelongTo(t *testing.T) {
+	h := newHarness(t)
+	root := t.TempDir()
+
+	writeFile(t, filepath.Join(root, "Frieren", "Frieren - 01.mkv"), "one")
+	writeFile(t, filepath.Join(root, "Frieren", "Frieren - 02.mkv"), "two")
+
+	h.addRoot(t, root)
+	h.scan(t, 0)
+
+	cover := "https://img/frieren.jpg"
+	h.titles.described = []TitleDescription{
+		{MediaRef: "anilist:154587", MediaType: "anime", Title: "Sousou no Frieren", CoverImage: &cover},
+	}
+
+	for _, file := range h.files(t) {
+		if _, err := h.svc.SetMatch(context.Background(), file.ID, "anilist:154587", nil, nil); err != nil {
+			t.Fatalf("match file %d: %v", file.ID, err)
+		}
+	}
+
+	page, err := h.svc.Files(context.Background(), FileQuery{})
+	if err != nil {
+		t.Fatalf("list files: %v", err)
+	}
+
+	// Two files, one title: a list of episodes must not become a request, or a
+	// row, per episode.
+	if len(page.Titles) != 1 {
+		t.Fatalf("page carries %d titles, want the one both files share", len(page.Titles))
+	}
+	if page.Titles[0].Title != "Sousou no Frieren" || page.Titles[0].CoverImage == nil {
+		t.Errorf("title = %+v, want the name and poster the node already holds", page.Titles[0])
+	}
+}
+
+// A source that cannot answer costs the list its posters, never its files.
+func TestFilesStillListWhenTheTitlesCannotBeNamed(t *testing.T) {
+	h := newHarness(t)
+	root := t.TempDir()
+
+	writeFile(t, filepath.Join(root, "Frieren", "Frieren - 01.mkv"), "one")
+
+	h.addRoot(t, root)
+	h.scan(t, 0)
+
+	file := h.files(t)[0]
+	if _, err := h.svc.SetMatch(context.Background(), file.ID, "anilist:154587", nil, nil); err != nil {
+		t.Fatalf("match file: %v", err)
+	}
+
+	h.titles.describeErr = errors.New("anilist mirror unreadable")
+
+	page, err := h.svc.Files(context.Background(), FileQuery{})
+	if err != nil {
+		t.Fatalf("list files: %v", err)
+	}
+
+	if len(page.Items) != 1 {
+		t.Fatalf("page holds %d files, want the one that was scanned", len(page.Items))
+	}
+	if len(page.Titles) != 0 {
+		t.Errorf("page carries %d titles, want none it could not read", len(page.Titles))
+	}
+}
+
+// mp4 is the smallest container the prober reads, so it is what the scan is
+// tested against: ftyp, then a movie header saying 1437 units at 1000 a second.
+func mp4(seconds uint32) string {
+	mvhd := make([]byte, 20)
+	binary.BigEndian.PutUint32(mvhd[12:16], 1000)
+	binary.BigEndian.PutUint32(mvhd[16:20], seconds*1000)
+
+	box := func(kind string, body []byte) []byte {
+		head := make([]byte, 8, 8+len(body))
+		binary.BigEndian.PutUint32(head[:4], uint32(len(body)+8))
+		copy(head[4:8], kind)
+
+		return append(head, body...)
+	}
+
+	return string(append(box("ftyp", []byte("isom")), box("moov", box("mvhd", mvhd))...))
+}
+
+func TestScanReadsHowLongVideoFilesRun(t *testing.T) {
+	h := newHarness(t)
+	root := t.TempDir()
+
+	writeFile(t, filepath.Join(root, "Frieren", "Frieren - 01.mp4"), mp4(1437))
+
+	// A container the prober does not read is not a failure, it is a file with no
+	// duration — and it must not be reopened on every later scan either.
+	writeFile(t, filepath.Join(root, "Frieren", "Frieren - 02.avi"), "not really an avi")
+
+	h.addRoot(t, root)
+
+	status := h.scan(t, 0)
+	if status.Probed != 2 {
+		t.Errorf("scan probed %d files, want both video files looked at once", status.Probed)
+	}
+
+	files := h.files(t)
+	if len(files) != 2 {
+		t.Fatalf("recorded %d files, want 2", len(files))
+	}
+
+	if files[0].DurationSeconds == nil || *files[0].DurationSeconds != 1437 {
+		t.Errorf("duration = %v, want the 1437 seconds the header says", files[0].DurationSeconds)
+	}
+	if files[1].DurationSeconds != nil {
+		t.Errorf("duration = %v, want nothing for a container the node cannot read", files[1].DurationSeconds)
+	}
+
+	h.now = h.now.Add(time.Hour)
+
+	rescan := h.scan(t, 0)
+	if rescan.Probed != 0 {
+		t.Errorf("rescan probed %d files, want none reopened for an unchanged library", rescan.Probed)
 	}
 }

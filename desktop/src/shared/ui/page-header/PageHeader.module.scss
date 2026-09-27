@@ -22,6 +22,24 @@
 		margin-top: 2px;
 	}
 
+	.icon {
+		display: inline-flex;
+		flex-shrink: 0;
+		align-items: center;
+		justify-content: center;
+		width: 3rem;
+		height: 3rem;
+		border: 1px solid var(--border);
+		border-radius: var(--radius-md);
+		background: var(--surface);
+		color: var(--text-secondary);
+
+		@media (max-width: 768px) {
+			width: 2.5rem;
+			height: 2.5rem;
+		}
+	}
+
 	.title {
 		flex: 1;
 		font-size: 44px;
@@ -48,9 +66,17 @@
 			margin-left: calc(var(--control-height-sm) + 20px);
 		}
 
+		&.withIcon {
+			margin-left: calc(3rem + 20px);
+		}
+
 		@media (max-width: 768px) {
 			&.withBack {
 				margin-left: calc(var(--control-height-sm) + 16px);
+			}
+
+			&.withIcon {
+				margin-left: calc(2.5rem + 16px);
 			}
 		}
 	}

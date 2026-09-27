@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
-import type { LibraryFile } from '@entities/library-item'
+import type { LibraryFile, LibraryTitle } from '@entities/library-item'
 
-import { groupFiles, unmatchedCount, visibleFiles } from './library-view'
+import { groupFiles, titleIndex, unmatchedCount, visibleFiles } from './library-view'
 
 interface FileOptions {
 	id: number
@@ -10,11 +10,21 @@ interface FileOptions {
 	title?: string
 	form?: NonNullable<LibraryFile['parsed']['form']>
 	episode?: number
+	season?: number
 	mediaRef?: string
 	missing?: boolean
 }
 
-function file({ id, relPath, title, form = 'series', episode, mediaRef, missing }: FileOptions): LibraryFile {
+function file({
+	id,
+	relPath,
+	title,
+	form = 'series',
+	episode,
+	season,
+	mediaRef,
+	missing
+}: FileOptions): LibraryFile {
 	return {
 		id,
 		root_id: 1,
@@ -24,10 +34,8 @@ function file({ id, relPath, title, form = 'series', episode, mediaRef, missing 
 		size_bytes: 100,
 		modified_at: '2026-01-01T00:00:00Z',
 		missing: missing ?? false,
-		parsed: { form, title, episode },
-		match: mediaRef
-			? { media_ref: mediaRef, confidence: 1, source: 'auto', episode, season: undefined }
-			: undefined
+		parsed: { form, title, episode, season },
+		match: mediaRef ? { media_ref: mediaRef, confidence: 1, source: 'auto', episode, season } : undefined
 	}
 }
 
@@ -82,7 +90,7 @@ describe('visibleFiles', () => {
 
 describe('groupFiles', () => {
 	it('keeps episodes of one title together and in order', () => {
-		const [group] = groupFiles([frieren2, frieren1], 'Unrecognized')
+		const [group] = groupFiles([frieren2, frieren1], new Map(), 'Unrecognized')
 
 		expect(group?.title).toBe('Frieren')
 		expect(group?.files.map(item => item.id)).toEqual([1, 2])
@@ -91,12 +99,88 @@ describe('groupFiles', () => {
 	it('keeps a matched title apart from an unmatched one of the same name', () => {
 		const sameName = file({ id: 6, relPath: 'Elsewhere/ep 01.mkv', title: 'Frieren', episode: 1 })
 
-		expect(groupFiles([frieren1, sameName], 'Unrecognized')).toHaveLength(2)
+		expect(groupFiles([frieren1, sameName], new Map(), 'Unrecognized')).toHaveLength(2)
 	})
 
 	it('falls back for a file whose name says nothing', () => {
 		const nameless = file({ id: 7, relPath: 'random.mkv' })
 
-		expect(groupFiles([nameless], 'Unrecognized')[0]?.title).toBe('Unrecognized')
+		expect(groupFiles([nameless], new Map(), 'Unrecognized')[0]?.title).toBe('Unrecognized')
+	})
+})
+
+describe('groupFiles with what the node knows about the titles', () => {
+	const described: LibraryTitle[] = [
+		{
+			media_ref: 'anilist:154587',
+			media_type: 'anime',
+			title: 'Sousou no Frieren',
+			cover_image: 'https://img/frieren.jpg'
+		}
+	]
+
+	it('names a group after the title it was matched to, not after the folder', () => {
+		const [group] = groupFiles([frieren1], titleIndex(described), 'Unrecognized')
+
+		expect(group?.title).toBe('Sousou no Frieren')
+		expect(group?.title_info?.cover_image).toBe('https://img/frieren.jpg')
+	})
+
+	it('falls back to the name on disk for a title the node has never fetched', () => {
+		const [group] = groupFiles([frieren1], titleIndex([]), 'Unrecognized')
+
+		expect(group?.title).toBe('Frieren')
+		expect(group?.title_info).toBeUndefined()
+	})
+
+	it('lists the seasons its files belong to, in order and without repeats', () => {
+		const seasons = [2, 1, 2].map((season, index) =>
+			file({
+				id: 40 + index,
+				relPath: `Frieren/S0${season}/ep 0${index + 1}.mkv`,
+				title: 'Frieren',
+				episode: index + 1,
+				season,
+				mediaRef: 'anilist:154587'
+			})
+		)
+
+		const [group] = groupFiles(seasons, titleIndex(described), 'Unrecognized')
+
+		expect(group?.seasons).toEqual([1, 2])
+	})
+
+	// The numbers, not how many: a show filed entirely as "s02e…" has one season,
+	// and reporting that as "1 season" would read as season one.
+	it('keeps the season number of a show that has only one', () => {
+		const files = [1, 2].map(episode =>
+			file({
+				id: 20 + episode,
+				relPath: `Kimetsu/s02e0${episode}_720.mp4`,
+				title: 'Kimetsu no Yaiba',
+				season: 2,
+				episode
+			})
+		)
+
+		expect(groupFiles(files, titleIndex([]), 'Unrecognized')[0]?.seasons).toEqual([2])
+	})
+
+	it('says nothing about seasons when no file names one', () => {
+		const nameless = file({ id: 30, relPath: 'Movie/film.mkv', title: 'Film', form: 'movie' })
+
+		expect(groupFiles([nameless], titleIndex([]), 'Unrecognized')[0]?.seasons).toEqual([])
+	})
+
+	// A card that says "matched" while some of its files are not would send the
+	// user looking for the ones that are missing a title.
+	it('calls a group matched only when every file in it is', () => {
+		const unmatched = file({ id: 10, relPath: 'Frieren/ep 03.mkv', title: 'Frieren', episode: 3 })
+
+		const [matched] = groupFiles([frieren1], titleIndex(described), 'Unrecognized')
+		const [partial] = groupFiles([unmatched], titleIndex(described), 'Unrecognized')
+
+		expect(matched?.matched).toBe(true)
+		expect(partial?.matched).toBe(false)
 	})
 })

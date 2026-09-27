@@ -24,8 +24,9 @@ type Root struct {
 	AddedAt    time.Time
 	LastScanAt *time.Time
 
-	FileCount    int
-	MissingCount int
+	FileCount      int
+	MissingCount   int
+	UnmatchedCount int
 }
 
 type FileState struct {
@@ -36,6 +37,7 @@ type FileState struct {
 	Mtime         time.Time
 	Missing       bool
 	ParserVersion int
+	ProbeVersion  int
 }
 
 // Parsed is what the file's name says, as the parser read it.
@@ -65,6 +67,9 @@ type File struct {
 	MissingSince *time.Time
 	Parsed       Parsed
 	Match        *Match
+
+	// Duration is absent for a file whose container the prober does not read.
+	Duration *time.Duration
 }
 
 type Match struct {
@@ -84,12 +89,13 @@ func (s *Store) Roots(ctx context.Context) ([]Root, error) {
 	roots := make([]Root, 0, len(rows))
 	for _, row := range rows {
 		roots = append(roots, Root{
-			ID:           row.ID,
-			Path:         row.Path,
-			AddedAt:      time.Unix(row.AddedAt, 0).UTC(),
-			LastScanAt:   optionalTime(row.LastScanAt),
-			FileCount:    int(row.FileCount),
-			MissingCount: int(row.MissingCount),
+			ID:             row.ID,
+			Path:           row.Path,
+			AddedAt:        time.Unix(row.AddedAt, 0).UTC(),
+			LastScanAt:     optionalTime(row.LastScanAt),
+			FileCount:      int(row.FileCount),
+			MissingCount:   int(row.MissingCount),
+			UnmatchedCount: int(row.UnmatchedCount),
 		})
 	}
 
@@ -156,6 +162,7 @@ func (s *Store) FileStates(ctx context.Context, rootID int64) ([]FileState, erro
 			Mtime:         time.UnixMilli(row.Mtime).UTC(),
 			Missing:       row.MissingSince.Valid,
 			ParserVersion: int(row.ParserVersion),
+			ProbeVersion:  int(row.ProbeVersion),
 		})
 	}
 
@@ -169,21 +176,38 @@ type Added struct {
 	Size    int64
 	Mtime   time.Time
 	Parsed  Parsed
+	Probe   Probe
 }
 
 // Changed is a known file whose size or modification time moved.
 type Changed struct {
-	ID     int64
-	Kind   string
-	Size   int64
-	Mtime  time.Time
-	Parsed Parsed
+	ID      int64
+	RelPath string
+	Kind    string
+	Size    int64
+	Mtime   time.Time
+	Parsed  Parsed
+	Probe   Probe
 }
 
 // Reparsed is an untouched file whose name a newer parser reads differently.
 type Reparsed struct {
 	ID     int64
 	Parsed Parsed
+}
+
+// Probe is what the prober made of a file's container. A nil Duration is an
+// answer too — the version is still written, so the file is not reopened on
+// every scan for a container this build cannot read.
+type Probe struct {
+	Duration *time.Duration
+	Version  int
+}
+
+// Probed is an untouched file a newer prober looked at again.
+type Probed struct {
+	ID    int64
+	Probe Probe
 }
 
 // ScanChanges is the whole difference between a root's rows and its filesystem.
@@ -193,13 +217,14 @@ type ScanChanges struct {
 	Added    []Added
 	Changed  []Changed
 	Reparsed []Reparsed
+	Probed   []Probed
 	Returned []int64
 	Missing  []int64
 }
 
 func (c ScanChanges) Empty() bool {
 	return len(c.Added) == 0 && len(c.Changed) == 0 && len(c.Reparsed) == 0 &&
-		len(c.Returned) == 0 && len(c.Missing) == 0
+		len(c.Probed) == 0 && len(c.Returned) == 0 && len(c.Missing) == 0
 }
 
 func (s *Store) ApplyScan(ctx context.Context, rootID int64, changes ScanChanges, now time.Time) error {
@@ -231,6 +256,9 @@ func (s *Store) ApplyScan(ctx context.Context, rootID int64, changes ScanChanges
 			ParsedChapter: parsed.ParsedChapter,
 			ParsedVolume:  parsed.ParsedVolume,
 			ParserVersion: parsed.ParserVersion,
+
+			DurationSeconds: probeSeconds(file.Probe),
+			ProbeVersion:    int64(file.Probe.Version),
 		})
 		if err != nil {
 			return fmt.Errorf("record new file %s: %w", file.RelPath, err)
@@ -256,6 +284,9 @@ func (s *Store) ApplyScan(ctx context.Context, rootID int64, changes ScanChanges
 			ParsedChapter: parsed.ParsedChapter,
 			ParsedVolume:  parsed.ParsedVolume,
 			ParserVersion: parsed.ParserVersion,
+
+			DurationSeconds: probeSeconds(file.Probe),
+			ProbeVersion:    int64(file.Probe.Version),
 		})
 		if err != nil {
 			return fmt.Errorf("update changed file %d: %w", file.ID, err)
@@ -268,6 +299,17 @@ func (s *Store) ApplyScan(ctx context.Context, rootID int64, changes ScanChanges
 
 		if err = queries.UpdateLibraryFileParse(ctx, parsed); err != nil {
 			return fmt.Errorf("re-parse file %d: %w", file.ID, err)
+		}
+	}
+
+	for _, file := range changes.Probed {
+		err = queries.UpdateLibraryFileProbe(ctx, sqlc.UpdateLibraryFileProbeParams{
+			ID:              file.ID,
+			DurationSeconds: probeSeconds(file.Probe),
+			ProbeVersion:    int64(file.Probe.Version),
+		})
+		if err != nil {
+			return fmt.Errorf("re-probe file %d: %w", file.ID, err)
 		}
 	}
 
@@ -361,7 +403,8 @@ func (s *Store) Files(ctx context.Context, filter FileFilter) ([]File, int, erro
 			MissingSince: optionalTime(row.MissingSince),
 			Parsed: parsedFrom(row.MediaForm, row.ParsedTitle, row.ParsedYear,
 				row.ParsedSeason, row.ParsedEpisode, row.ParsedChapter, row.ParsedVolume),
-			Match: matchFrom(row.MediaRef, row.Season, row.Episode, row.Confidence, row.MatchSource),
+			Match:    matchFrom(row.MediaRef, row.Season, row.Episode, row.Confidence, row.MatchSource),
+			Duration: durationFrom(row.DurationSeconds),
 		})
 	}
 
@@ -389,7 +432,8 @@ func (s *Store) File(ctx context.Context, id int64) (*File, error) {
 		MissingSince: optionalTime(row.MissingSince),
 		Parsed: parsedFrom(row.MediaForm, row.ParsedTitle, row.ParsedYear,
 			row.ParsedSeason, row.ParsedEpisode, row.ParsedChapter, row.ParsedVolume),
-		Match: matchFrom(row.MediaRef, row.Season, row.Episode, row.Confidence, row.MatchSource),
+		Match:    matchFrom(row.MediaRef, row.Season, row.Episode, row.Confidence, row.MatchSource),
+		Duration: durationFrom(row.DurationSeconds),
 	}, nil
 }
 
@@ -526,6 +570,51 @@ func matchFrom(
 	}
 
 	return match
+}
+
+// Counts is what the filter tabs over the list show, read in one statement so
+// the three numbers cannot disagree with each other.
+type Counts struct {
+	Total     int
+	Unmatched int
+	Missing   int
+}
+
+func (s *Store) Counts(ctx context.Context, filter FileFilter) (Counts, error) {
+	row, err := sqlc.New(s.db).CountLibraryFileStates(ctx, sqlc.CountLibraryFileStatesParams{
+		RootID:    filter.RootID,
+		Kind:      filter.Kind,
+		MediaForm: filter.MediaForm,
+	})
+	if err != nil {
+		return Counts{}, fmt.Errorf("count library files: %w", err)
+	}
+
+	return Counts{
+		Total:     int(row.Total),
+		Unmatched: int(row.Unmatched),
+		Missing:   int(row.Missing),
+	}, nil
+}
+
+// Seconds, not milliseconds: a column the user reads as "23:57" does not need
+// more, and whole seconds survive a round trip through JSON unchanged.
+func probeSeconds(probe Probe) sql.NullInt64 {
+	if probe.Duration == nil {
+		return sql.NullInt64{}
+	}
+
+	return sql.NullInt64{Int64: int64(probe.Duration.Round(time.Second).Seconds()), Valid: true}
+}
+
+func durationFrom(value sql.NullInt64) *time.Duration {
+	if !value.Valid {
+		return nil
+	}
+
+	duration := time.Duration(value.Int64) * time.Second
+
+	return &duration
 }
 
 func optionalTime(value sql.NullInt64) *time.Time {

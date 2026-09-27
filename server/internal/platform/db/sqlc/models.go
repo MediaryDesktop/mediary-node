@@ -52,22 +52,24 @@ type FileMatch struct {
 }
 
 type LibraryFile struct {
-	ID            int64          `json:"id"`
-	RootID        int64          `json:"root_id"`
-	RelPath       string         `json:"rel_path"`
-	Kind          string         `json:"kind"`
-	SizeBytes     int64          `json:"size_bytes"`
-	Mtime         int64          `json:"mtime"`
-	ScannedAt     int64          `json:"scanned_at"`
-	MissingSince  sql.NullInt64  `json:"missing_since"`
-	MediaForm     sql.NullString `json:"media_form"`
-	ParsedTitle   sql.NullString `json:"parsed_title"`
-	ParsedYear    sql.NullInt64  `json:"parsed_year"`
-	ParsedSeason  sql.NullInt64  `json:"parsed_season"`
-	ParsedEpisode sql.NullInt64  `json:"parsed_episode"`
-	ParsedChapter sql.NullInt64  `json:"parsed_chapter"`
-	ParsedVolume  sql.NullInt64  `json:"parsed_volume"`
-	ParserVersion int64          `json:"parser_version"`
+	ID              int64          `json:"id"`
+	RootID          int64          `json:"root_id"`
+	RelPath         string         `json:"rel_path"`
+	Kind            string         `json:"kind"`
+	SizeBytes       int64          `json:"size_bytes"`
+	Mtime           int64          `json:"mtime"`
+	ScannedAt       int64          `json:"scanned_at"`
+	MissingSince    sql.NullInt64  `json:"missing_since"`
+	MediaForm       sql.NullString `json:"media_form"`
+	ParsedTitle     sql.NullString `json:"parsed_title"`
+	ParsedYear      sql.NullInt64  `json:"parsed_year"`
+	ParsedSeason    sql.NullInt64  `json:"parsed_season"`
+	ParsedEpisode   sql.NullInt64  `json:"parsed_episode"`
+	ParsedChapter   sql.NullInt64  `json:"parsed_chapter"`
+	ParsedVolume    sql.NullInt64  `json:"parsed_volume"`
+	ParserVersion   int64          `json:"parser_version"`
+	DurationSeconds sql.NullInt64  `json:"duration_seconds"`
+	ProbeVersion    int64          `json:"probe_version"`
 }
 
 type LibraryRoot struct {

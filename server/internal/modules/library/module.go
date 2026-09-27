@@ -18,8 +18,9 @@ import (
 // reaching into another module's data from here is exactly what the module
 // boundaries exist to prevent.
 type (
-	TitleCandidate = service.TitleCandidate
-	TitleSource    = service.TitleSource
+	TitleCandidate   = service.TitleCandidate
+	TitleDescription = service.TitleDescription
+	TitleSource      = service.TitleSource
 )
 
 // PlayableFile is the module's read-only port onto one scanned file, for the parts

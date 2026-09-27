@@ -3,8 +3,10 @@ package app
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/mediaryorg/mediary-node/server/internal/modules/library"
+	"github.com/mediaryorg/mediary-node/server/internal/modules/media"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/tracker"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
 )
@@ -17,6 +19,7 @@ import (
 // composition root is the one place allowed to know both.
 type titleSource struct {
 	tracker *tracker.Module
+	media   *media.Module
 	aniList *anilist.Client
 }
 
@@ -64,23 +67,117 @@ func (s titleSource) Search(ctx context.Context, query, mediaType string) ([]lib
 	candidates := make([]library.TitleCandidate, 0, len(result.Media))
 
 	for i := range result.Media {
-		media := &result.Media[i]
+		found := &result.Media[i]
 
-		count := media.Episodes
+		count := found.Episodes
 		if sourceType == anilist.MediaTypeManga {
-			count = media.Chapters
+			count = found.Chapters
 		}
 
 		candidates = append(candidates, library.TitleCandidate{
-			MediaRef: fmt.Sprintf("anilist:%d", media.ID),
-			Titles:   append(spellings(media.Title), media.Synonyms...),
-			Format:   value(media.Format),
-			Year:     media.SeasonYear,
+			MediaRef: fmt.Sprintf("anilist:%d", found.ID),
+			Titles:   append(spellings(found.Title), found.Synonyms...),
+			Format:   value(found.Format),
+			Year:     found.SeasonYear,
 			Episodes: count,
 		})
 	}
 
 	return candidates, nil
+}
+
+// Describe names the titles a page of matched files belongs to. It reads the
+// user's mirrored collection first — most of a library is on it, and the mirror
+// answers offline — and falls back to the details the node cached when a title
+// page was opened. Neither path goes to the network: a list of a hundred files
+// must not become a hundred requests.
+func (s titleSource) Describe(ctx context.Context, mediaRefs []string) ([]library.TitleDescription, error) {
+	wanted := make(map[string]struct{}, len(mediaRefs))
+	for _, ref := range mediaRefs {
+		wanted[ref] = struct{}{}
+	}
+
+	described := make([]library.TitleDescription, 0, len(mediaRefs))
+
+	for _, mediaType := range []string{"anime", "manga"} {
+		if len(wanted) == 0 {
+			break
+		}
+
+		tracked, err := s.tracker.TrackedTitles(ctx, mediaType)
+		if err != nil {
+			return nil, fmt.Errorf("read tracked %s titles: %w", mediaType, err)
+		}
+
+		for i := range tracked {
+			entry := &tracked[i]
+
+			if _, want := wanted[entry.MediaRef]; !want {
+				continue
+			}
+
+			delete(wanted, entry.MediaRef)
+
+			described = append(described, library.TitleDescription{
+				MediaRef:   entry.MediaRef,
+				MediaType:  mediaType,
+				Title:      firstNonEmpty(entry.Display, entry.Titles...),
+				CoverImage: entry.CoverImage,
+				CoverColor: entry.CoverColor,
+				Format:     optional(entry.Format),
+				Episodes:   entry.Episodes,
+			})
+		}
+	}
+
+	for ref := range wanted {
+		details, err := s.media.Cached(ctx, ref)
+
+		// A ref the media module cannot even parse belongs to a provider it does
+		// not own. That is not a reason to fail the page it appears on.
+		if err != nil || details == nil {
+			continue
+		}
+
+		count := details.Episodes
+		if details.MediaType == "manga" {
+			count = details.Chapters
+		}
+
+		described = append(described, library.TitleDescription{
+			MediaRef:   details.MediaRef,
+			MediaType:  details.MediaType,
+			Title:      firstNonEmpty("", spellings(anilist.Titles(details.Title))...),
+			CoverImage: details.CoverImage,
+			CoverColor: details.CoverColor,
+			Format:     details.Format,
+			Episodes:   count,
+		})
+	}
+
+	return described, nil
+}
+
+func firstNonEmpty(preferred string, fallbacks ...string) string {
+	if strings.TrimSpace(preferred) != "" {
+		return preferred
+	}
+
+	for _, spelling := range fallbacks {
+		if strings.TrimSpace(spelling) != "" {
+			return spelling
+		}
+	}
+
+	return ""
+}
+
+func optional(text string) *string {
+	if text == "" {
+		return nil
+	}
+
+	return &text
 }
 
 // spellings orders the titles the way a release group is likely to write them.

@@ -10,6 +10,10 @@ import (
 
 type Querier interface {
 	ClearLibraryFileMissing(ctx context.Context, arg ClearLibraryFileMissingParams) error
+	// What the filter tabs above the list show. One query rather than three: the
+	// three numbers have to agree with each other, and they only do if they are read
+	// from the same snapshot.
+	CountLibraryFileStates(ctx context.Context, arg CountLibraryFileStatesParams) (CountLibraryFileStatesRow, error)
 	CountLibraryFiles(ctx context.Context, arg CountLibraryFilesParams) (int64, error)
 	DeleteAniListMirror(ctx context.Context) error
 	DeleteAniListOutbox(ctx context.Context) error
@@ -53,6 +57,8 @@ type Querier interface {
 	// Only the parsed columns: the file itself did not change, a newer parser reads
 	// its name differently.
 	UpdateLibraryFileParse(ctx context.Context, arg UpdateLibraryFileParseParams) error
+	// The file itself did not change; a newer prober reads its container again.
+	UpdateLibraryFileProbe(ctx context.Context, arg UpdateLibraryFileProbeParams) error
 	UpsertAniListMirror(ctx context.Context, arg UpsertAniListMirrorParams) error
 	UpsertAniListOutboxEntry(ctx context.Context, arg UpsertAniListOutboxEntryParams) error
 	// A manual match is the user's decision, so an automatic one never replaces it.

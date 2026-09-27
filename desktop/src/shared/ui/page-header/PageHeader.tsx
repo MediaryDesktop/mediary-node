@@ -9,6 +9,7 @@ import styles from './PageHeader.module.scss'
 
 export interface PageHeaderProps {
 	title: ReactNode
+	icon?: ReactNode
 	subtitle?: ReactNode
 	onBack?: () => void
 	backLabel?: string
@@ -19,6 +20,7 @@ export interface PageHeaderProps {
 
 export function PageHeader({
 	title,
+	icon,
 	subtitle,
 	onBack,
 	backLabel,
@@ -47,13 +49,15 @@ export function PageHeader({
 					</nav>
 				)}
 
+				{icon && <span className={styles.icon}>{icon}</span>}
+
 				<h1 className={styles.title}>{title}</h1>
 
 				{rightContent && <div className={styles.rightContent}>{rightContent}</div>}
 			</div>
 
 			{(subtitle || children) && (
-				<div className={clsx(styles.content, onBack && styles.withBack)}>
+				<div className={clsx(styles.content, onBack && styles.withBack, icon && styles.withIcon)}>
 					{subtitle && <p className={styles.subtitle}>{subtitle}</p>}
 					{children}
 				</div>

@@ -102,6 +102,43 @@ func (s *Service) Details(ctx context.Context, mediaRef string) (*MediaDetails, 
 	return &details, nil
 }
 
+// CachedDetails returns what the node already holds about a title and never goes
+// to the source. It is for the parts of the app that decorate a list — a library
+// page naming the titles its files were matched to — where one request per title
+// would be a burst the source would rightly throttle, and where a missing poster
+// is no reason to fail.
+//
+// A stale payload is still returned: the age limit exists to keep the details
+// page current, and a poster does not go out of date.
+func (s *Service) CachedDetails(ctx context.Context, mediaRef string) (*MediaDetails, error) {
+	mediaID, err := parseMediaRef(mediaRef)
+	if err != nil {
+		return nil, err
+	}
+
+	cached, err := s.store.Get(ctx, ProviderAniList, strconv.Itoa(mediaID))
+	if err != nil {
+		return nil, apperr.Wrap(err, apperr.KindInternal, "read media cache")
+	}
+	if cached == nil {
+		return nil, nil
+	}
+
+	return decodeCachedDetails(cached.Payload), nil
+}
+
+// decodeCachedDetails reads a stored payload back. A payload an older build
+// wrote, or one that will not decode at all, is a cache miss rather than a
+// failure: the caller asked for whatever is on hand.
+func decodeCachedDetails(payload []byte) *MediaDetails {
+	var entry cachedDetails
+	if err := json.Unmarshal(payload, &entry); err != nil || entry.Version != detailsCacheVersion {
+		return nil
+	}
+
+	return &entry.Details
+}
+
 const (
 	defaultPerPage = 30
 	maxPerPage     = 50

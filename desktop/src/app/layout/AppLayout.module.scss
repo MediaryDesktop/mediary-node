@@ -6,6 +6,8 @@
 		--page-inset-x: 2rem;
 		--page-inset-left: calc(var(--sidebar-width) + var(--page-inset-x));
 
+		display: flex;
+		flex-direction: column;
 		min-height: 100vh;
 		padding: var(--page-inset-top) var(--page-inset-x) 2rem var(--page-inset-left);
 	}

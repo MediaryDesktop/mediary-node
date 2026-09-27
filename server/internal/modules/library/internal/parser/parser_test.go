@@ -78,6 +78,18 @@ func TestParseVideoNames(t *testing.T) {
 			form:    FormSeries, title: "Kimetsu no Yaiba", season: number(4), episode: number(5),
 		},
 		{
+			// The bare numbering a downloader leaves behind: nothing but the season
+			// and the episode, with the title standing on the folder above.
+			relPath: "Kimetsu no Yaiba/s01e01.mp4",
+			kind:    scanner.KindVideo,
+			form:    FormSeries, title: "Kimetsu no Yaiba", season: number(1), episode: number(1),
+		},
+		{
+			relPath: "Kimetsu no Yaiba/s02e01_720.mp4",
+			kind:    scanner.KindVideo,
+			form:    FormSeries, title: "Kimetsu no Yaiba", season: number(2), episode: number(1),
+		},
+		{
 			// The marker must leave the title, or it is searched for as part of it.
 			relPath: "[Group] Show Movie [1080p].mkv",
 			kind:    scanner.KindVideo,

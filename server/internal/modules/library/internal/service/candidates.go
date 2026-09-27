@@ -21,11 +21,32 @@ type TitleCandidate struct {
 	Episodes *int
 }
 
-// TitleSource answers "what could this file be". Tracked comes from the node's own
-// mirror and works offline; Search goes to the source over the network.
+// TitleDescription is a matched title as the library shows it: a name, a poster
+// and how many episodes there are. Unlike a candidate it answers "what is this",
+// not "what could this be", and it is read from what the node already holds.
+type TitleDescription struct {
+	MediaRef  string
+	MediaType string
+	Title     string
+
+	CoverImage *string
+	CoverColor *string
+
+	Format   *string
+	Episodes *int
+}
+
+// TitleSource answers "what could this file be", and — once a file is matched —
+// "what is this title". Tracked and Describe come from the node's own mirror and
+// its details cache, so they work offline; Search goes to the source over the
+// network.
 type TitleSource interface {
 	Tracked(ctx context.Context, mediaType string) ([]TitleCandidate, error)
 	Search(ctx context.Context, query, mediaType string) ([]TitleCandidate, error)
+
+	// Describe answers for the refs it knows and leaves out the rest: a title the
+	// node has never fetched is not an error, it is a title with no poster yet.
+	Describe(ctx context.Context, mediaRefs []string) ([]TitleDescription, error)
 }
 
 // mediaTypeForForm maps what the file's name said onto the source that owns that

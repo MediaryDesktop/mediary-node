@@ -60,12 +60,13 @@ func (s *Service) Roots(ctx context.Context) ([]Root, error) {
 	roots := make([]Root, 0, len(rows))
 	for _, row := range rows {
 		roots = append(roots, Root{
-			ID:           row.ID,
-			Path:         row.Path,
-			AddedAt:      row.AddedAt,
-			LastScanAt:   row.LastScanAt,
-			FileCount:    row.FileCount,
-			MissingCount: row.MissingCount,
+			ID:             row.ID,
+			Path:           row.Path,
+			AddedAt:        row.AddedAt,
+			LastScanAt:     row.LastScanAt,
+			FileCount:      row.FileCount,
+			MissingCount:   row.MissingCount,
+			UnmatchedCount: row.UnmatchedCount,
 		})
 	}
 
@@ -189,7 +190,68 @@ func (s *Service) Files(ctx context.Context, query FileQuery) (*FilePage, error)
 		items = append(items, fileFrom(rows[i]))
 	}
 
-	return &FilePage{Items: items, Total: total, Limit: limit, Offset: offset}, nil
+	counts, err := s.store.Counts(ctx, store.FileFilter{
+		RootID:    query.RootID,
+		Kind:      query.Kind,
+		MediaForm: query.MediaForm,
+	})
+	if err != nil {
+		return nil, apperr.Wrap(err, apperr.KindInternal, "count library files")
+	}
+
+	return &FilePage{
+		Items:  items,
+		Total:  total,
+		Limit:  limit,
+		Offset: offset,
+		Counts: Counts{Total: counts.Total, Unmatched: counts.Unmatched, Missing: counts.Missing},
+		Titles: s.describeTitles(ctx, items),
+	}, nil
+}
+
+// describeTitles names the titles this page's files were matched to. It asks
+// only what the node already holds, so a page of a matched library still shows
+// its posters with the network down — and a source that cannot answer costs the
+// list its covers, never its files.
+func (s *Service) describeTitles(ctx context.Context, files []File) []MatchedTitle {
+	if s.opts.Titles == nil {
+		return []MatchedTitle{}
+	}
+
+	refs := make([]string, 0, len(files))
+	seen := make(map[string]struct{}, len(files))
+
+	for i := range files {
+		if files[i].Match == nil {
+			continue
+		}
+
+		ref := files[i].Match.MediaRef
+		if _, known := seen[ref]; known {
+			continue
+		}
+
+		seen[ref] = struct{}{}
+		refs = append(refs, ref)
+	}
+
+	if len(refs) == 0 {
+		return []MatchedTitle{}
+	}
+
+	described, err := s.opts.Titles.Describe(ctx, refs)
+	if err != nil {
+		s.logger.Warn().Err(err).Msg("describe matched titles")
+
+		return []MatchedTitle{}
+	}
+
+	titles := make([]MatchedTitle, 0, len(described))
+	for i := range described {
+		titles = append(titles, MatchedTitle(described[i]))
+	}
+
+	return titles
 }
 
 func (s *Service) SetMatch(ctx context.Context, fileID int64, mediaRef string, season, episode *int) (*File, error) {
@@ -290,6 +352,11 @@ func fileFrom(row store.File) File {
 			Chapter: row.Parsed.Chapter,
 			Volume:  row.Parsed.Volume,
 		},
+	}
+
+	if row.Duration != nil {
+		seconds := int(row.Duration.Seconds())
+		file.DurationSeconds = &seconds
 	}
 
 	if row.Match != nil {

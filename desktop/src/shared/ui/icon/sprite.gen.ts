@@ -281,6 +281,7 @@ export const sprites = defineSpriteMap([
 				defineSpriteSymbol(['home'], [24]),
 				defineSpriteSymbol(['info'], [24]),
 				defineSpriteSymbol(['library'], [24]),
+				defineSpriteSymbol(['link'], [24]),
 				defineSpriteSymbol(['list-checks'], [24]),
 				defineSpriteSymbol(['lock'], [24]),
 				defineSpriteSymbol(['mail'], [24]),
@@ -349,6 +350,7 @@ export type SpritesMeta = {
 		| 'home'
 		| 'info'
 		| 'library'
+		| 'link'
 		| 'list-checks'
 		| 'lock'
 		| 'mail'

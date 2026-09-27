@@ -17,12 +17,14 @@ import (
 type fakeTitles struct {
 	mu sync.Mutex
 
-	tracked  []TitleCandidate
-	found    []TitleCandidate
-	searches []string
+	tracked   []TitleCandidate
+	found     []TitleCandidate
+	described []TitleDescription
+	searches  []string
 
-	trackedErr error
-	searchErr  error
+	trackedErr  error
+	searchErr   error
+	describeErr error
 }
 
 func (f *fakeTitles) Tracked(_ context.Context, _ string) ([]TitleCandidate, error) {
@@ -47,6 +49,29 @@ func (f *fakeTitles) Search(_ context.Context, query, _ string) ([]TitleCandidat
 	}
 
 	return f.found, nil
+}
+
+func (f *fakeTitles) Describe(_ context.Context, mediaRefs []string) ([]TitleDescription, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+
+	if f.describeErr != nil {
+		return nil, f.describeErr
+	}
+
+	wanted := make(map[string]struct{}, len(mediaRefs))
+	for _, ref := range mediaRefs {
+		wanted[ref] = struct{}{}
+	}
+
+	described := make([]TitleDescription, 0, len(f.described))
+	for _, title := range f.described {
+		if _, want := wanted[title.MediaRef]; want {
+			described = append(described, title)
+		}
+	}
+
+	return described, nil
 }
 
 func (f *fakeTitles) searchCount() int {

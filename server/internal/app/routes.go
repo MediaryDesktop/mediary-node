@@ -57,9 +57,16 @@ func Register(api huma.API, deps Deps) {
 	// The library matches files against titles; the tracker knows which titles the
 	// user follows. Joining them is this file's job, so that neither module has to
 	// know the other exists.
+	mediaModule := media.New(media.Deps{
+		DB:      deps.DB,
+		Logger:  moduleLogger(deps.Logger, "media"),
+		AniList: deps.AniList,
+	})
+	mediaModule.Register(api)
+
 	var titles library.TitleSource
 	if deps.AniList != nil {
-		titles = titleSource{tracker: trackerModule, aniList: deps.AniList}
+		titles = titleSource{tracker: trackerModule, media: mediaModule, aniList: deps.AniList}
 	}
 
 	libraryModule := library.New(library.Deps{
@@ -91,12 +98,6 @@ func Register(api huma.API, deps Deps) {
 	reader.New(reader.Deps{
 		DB:     deps.DB,
 		Logger: moduleLogger(deps.Logger, "reader"),
-	}).Register(api)
-
-	media.New(media.Deps{
-		DB:      deps.DB,
-		Logger:  moduleLogger(deps.Logger, "media"),
-		AniList: deps.AniList,
 	}).Register(api)
 
 	sync.New(sync.Deps{

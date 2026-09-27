@@ -19,7 +19,8 @@ const ROOT: LibraryRoot = {
 	path: 'D:\\Anime',
 	added_at: '2026-01-01T00:00:00Z',
 	file_count: 0,
-	missing_count: 0
+	missing_count: 0,
+	unmatched_count: 0
 }
 
 const EMPTY_SCAN = {
@@ -124,26 +125,55 @@ describe('scan activity', () => {
 	it('follows the scan through the node events instead of polling', async () => {
 		const scope = fork()
 
-		await allSettled(nodeEventReceived, { scope, params: scanEvent('started', { roots: 1 }) })
+		await allSettled(nodeEventReceived, {
+			scope,
+			params: scanEvent('started', { roots_total: 2, roots_done: 0 })
+		})
 		expect(scope.getState(libraryModel.$activity)).toEqual({
 			phase: 'scanning',
 			found: 0,
-			matched: 0,
-			total: 0
+			done: 0,
+			total: 0,
+			rootsDone: 0,
+			rootsTotal: 2
 		})
 
-		await allSettled(nodeEventReceived, { scope, params: scanEvent('progress', { found: 128 }) })
+		await allSettled(nodeEventReceived, {
+			scope,
+			params: scanEvent('progress', { found: 128, roots_total: 2, roots_done: 0 })
+		})
 		expect(scope.getState(libraryModel.$activity)?.found).toBe(128)
+
+		await allSettled(nodeEventReceived, {
+			scope,
+			params: scanEvent('probing', { probed: 40, total: 128, roots_total: 2, roots_done: 0 })
+		})
+		expect(scope.getState(libraryModel.$activity)).toMatchObject({
+			phase: 'probing',
+			done: 40,
+			total: 128
+		})
+
+		await allSettled(nodeEventReceived, {
+			scope,
+			params: scanEvent('root', { roots_total: 2, roots_done: 1 })
+		})
+		expect(scope.getState(libraryModel.$activity)?.rootsDone).toBe(1)
 
 		await allSettled(nodeEventReceived, {
 			scope,
 			params: scanEvent('matching', { matched: 3, total: 10 })
 		})
+
+		// Matching starts once every folder is walked, so the folder count is
+		// complete even though the event does not repeat it.
 		expect(scope.getState(libraryModel.$activity)).toEqual({
 			phase: 'matching',
 			found: 128,
-			matched: 3,
-			total: 10
+			done: 3,
+			total: 10,
+			rootsDone: 2,
+			rootsTotal: 2
 		})
 
 		await allSettled(nodeEventReceived, { scope, params: scanEvent('finished', { found: 128 }) })

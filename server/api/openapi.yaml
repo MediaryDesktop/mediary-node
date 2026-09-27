@@ -107,6 +107,26 @@ components:
       required:
         - action
       type: object
+    Counts:
+      additionalProperties: false
+      properties:
+        missing:
+          description: Of those, files the last scan did not find.
+          format: int64
+          type: integer
+        total:
+          description: Files the filter matches.
+          format: int64
+          type: integer
+        unmatched:
+          description: Of those, files that belong to no title yet.
+          format: int64
+          type: integer
+      required:
+        - total
+        - unmatched
+        - missing
+      type: object
     CreateListInputBody:
       additionalProperties: false
       properties:
@@ -419,6 +439,10 @@ components:
     File:
       additionalProperties: false
       properties:
+        duration_seconds:
+          description: How long the file runs, read out of its container during the scan. Absent for a container the node cannot read and for everything that is not video.
+          format: int64
+          type: integer
         id:
           description: Identifier of the file, stable while its path does not change.
           format: int64
@@ -487,6 +511,9 @@ components:
     FilePage:
       additionalProperties: false
       properties:
+        counts:
+          $ref: "#/components/schemas/Counts"
+          description: Totals for the whole library behind the filters over the list.
         items:
           description: One page of files.
           items:
@@ -502,6 +529,13 @@ components:
           description: Offset that was applied.
           format: int64
           type: integer
+        titles:
+          description: Every title the files on this page are matched to, once each.
+          items:
+            $ref: "#/components/schemas/MatchedTitle"
+          type:
+            - array
+            - "null"
         total:
           description: How many files match the filter in total.
           format: int64
@@ -511,6 +545,8 @@ components:
         - total
         - limit
         - offset
+        - counts
+        - titles
       type: object
     FilesOutputBody:
       additionalProperties: false
@@ -728,6 +764,38 @@ components:
         - media_ref
         - confidence
         - source
+      type: object
+    MatchedTitle:
+      additionalProperties: false
+      properties:
+        cover_color:
+          description: Dominant colour of the poster, for a placeholder while it loads.
+          type: string
+        cover_image:
+          description: Poster for the title.
+          type: string
+        episodes:
+          description: Episodes the title has in total, or chapters for a comic.
+          format: int64
+          type: integer
+        format:
+          description: TV, MOVIE, OVA and so on, as the source names it.
+          type: string
+        media_ref:
+          description: The title, as provider:id.
+          type: string
+        media_type:
+          description: Which catalog the title comes from.
+          enum:
+            - anime
+            - manga
+          type: string
+        title:
+          description: The title as the user's source spells it.
+          type: string
+      required:
+        - media_ref
+        - title
       type: object
     Media:
       additionalProperties: false
@@ -1271,12 +1339,17 @@ components:
         path:
           description: Absolute path on this machine.
           type: string
+        unmatched_count:
+          description: "Files under this root that belong to no title yet. Openings and other extras are left out: they belong to none by design."
+          format: int64
+          type: integer
       required:
         - id
         - path
         - added_at
         - file_count
         - missing_count
+        - unmatched_count
       type: object
     RootOutputBody:
       additionalProperties: false
@@ -1370,6 +1443,10 @@ components:
         path:
           description: Absolute path of the root.
           type: string
+        probed:
+          description: Files whose container was opened to read how long they run.
+          format: int64
+          type: integer
         reparsed:
           description: Untouched files whose names a newer parser read again.
           format: int64
@@ -1386,6 +1463,7 @@ components:
         - changed
         - reparsed
         - missing
+        - probed
       type: object
     ScanStatus:
       additionalProperties: false
@@ -1418,6 +1496,10 @@ components:
           description: Files that were recorded before and are gone now.
           format: int64
           type: integer
+        probed:
+          description: Files whose container was opened to read how long they run.
+          format: int64
+          type: integer
         reparsed:
           description: Untouched files whose names a newer parser read again.
           format: int64
@@ -1429,6 +1511,14 @@ components:
           type:
             - array
             - "null"
+        roots_done:
+          description: Folders it has finished with.
+          format: int64
+          type: integer
+        roots_total:
+          description: Folders this scan covers.
+          format: int64
+          type: integer
         running:
           description: True while a scan is walking the filesystem.
           type: boolean
@@ -1439,11 +1529,14 @@ components:
       required:
         - running
         - roots
+        - roots_total
+        - roots_done
         - found
         - added
         - changed
         - reparsed
         - missing
+        - probed
         - considered
         - matched
       type: object

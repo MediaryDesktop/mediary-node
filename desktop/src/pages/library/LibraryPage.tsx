@@ -12,6 +12,7 @@ import {
 	SegmentedControl,
 	toast
 } from '@shared/ui'
+import type { IconName } from '@shared/ui'
 
 import {
 	LIBRARY_PAGE_SIZE,
@@ -24,12 +25,17 @@ import { playbackModel } from '@entities/playback'
 
 import { MatchFileDrawer, matchFileModel } from '@features/match-library-file'
 
-import { LIBRARY_VIEWS, unmatchedCount, visibleFiles } from './lib/library-view'
-import type { LibraryView } from './lib/library-view'
+import { LIBRARY_LAYOUTS, LIBRARY_VIEWS, visibleFiles } from './lib/library-view'
+import type { LibraryLayout, LibraryView } from './lib/library-view'
 import { LibraryFiles } from './library-files/LibraryFiles'
 import { LibraryRoots } from './library-roots/LibraryRoots'
 import styles from './LibraryPage.module.scss'
-import { ScanActivityBar } from './scan-activity/ScanActivityBar'
+import { ScanPanel } from './scan-panel/ScanPanel'
+
+const LAYOUT_ICONS: Record<LibraryLayout, IconName> = {
+	grid: 'common/library',
+	rows: 'common/list-checks'
+}
 
 export function LibraryPage() {
 	const { t } = useTranslation()
@@ -61,6 +67,7 @@ export function LibraryPage() {
 	const [playing, playRequested] = useUnit([playbackModel.$session, playbackModel.playRequested])
 
 	const [view, setView] = useState<LibraryView>('all')
+	const [layout, setLayout] = useState<LibraryLayout>('grid')
 	const [search, setSearch] = useState('')
 
 	useEffect(() => {
@@ -96,22 +103,23 @@ export function LibraryPage() {
 	const allRoots = useMemo(() => roots?.roots ?? [], [roots])
 	const files = useMemo(() => page?.files.items ?? [], [page])
 
-	const unmatched = useMemo(() => unmatchedCount(files), [files])
-
 	const visible = useMemo(() => visibleFiles(files, view, search), [files, view, search])
 
+	// The counts come from the node rather than from the page: the tabs say how
+	// much there is to page through, and a page holds at most LIBRARY_PAGE_SIZE.
+	const counts = page?.files.counts
 	const total = page?.files.total ?? 0
 	const scanning = activity !== null || (scan?.scan.running ?? false)
 
 	const summary = [
-		t('library.summary.files', { count: total }),
-		t('library.summary.unmatched', { count: unmatched })
+		t('library.summary.files', { count: counts?.total ?? total }),
+		t('library.summary.unmatched', { count: counts?.unmatched ?? 0 })
 	]
 
 	if (!rootsPending && allRoots.length === 0) {
 		return (
 			<PageTransition className={styles.root}>
-				<PageHeader title={t('nav.library')} />
+				<PageHeader title={t('nav.library')} icon={<Icon name='common/database' size={24} />} />
 
 				<EmptyState
 					size='page'
@@ -136,10 +144,12 @@ export function LibraryPage() {
 		<PageTransition className={styles.root}>
 			<PageHeader
 				title={t('nav.library')}
+				icon={<Icon name='common/database' size={24} />}
 				subtitle={summary.join(' · ')}
 				rightContent={
 					<div className={styles.actions}>
 						<Button
+							variant='primary'
 							startIcon={<Icon name='common/folder-open' size={16} />}
 							disabled={pickingFolder}
 							onClick={() => folderRequested()}
@@ -148,7 +158,6 @@ export function LibraryPage() {
 						</Button>
 
 						<Button
-							variant='primary'
 							startIcon={<Icon name='common/reset' size={16} />}
 							disabled={scanning}
 							onClick={() => scanRequested(0)}
@@ -159,9 +168,9 @@ export function LibraryPage() {
 				}
 			/>
 
-			<ScanActivityBar activity={activity} scan={scan?.scan ?? null} />
+			<ScanPanel activity={activity} scan={scan?.scan ?? null} />
 
-			<LibraryRoots roots={allRoots} />
+			<LibraryRoots roots={allRoots} scanning={scanning} />
 
 			<section className={styles.files}>
 				<div className={styles.toolbar}>
@@ -175,9 +184,28 @@ export function LibraryPage() {
 
 					<SegmentedControl
 						size='large'
-						items={LIBRARY_VIEWS.map(mode => ({ value: mode, label: t(`library.view.${mode}`) }))}
+						items={LIBRARY_VIEWS.map(mode => ({
+							value: mode,
+							label: (
+								<span className={styles.filter}>
+									{t(`library.view.${mode}`)}
+									<span className={styles.count}>{filterCount(mode, counts, total)}</span>
+								</span>
+							)
+						}))}
 						value={view}
 						onValueChange={setView}
+					/>
+
+					<SegmentedControl
+						size='large'
+						items={LIBRARY_LAYOUTS.map(mode => ({
+							value: mode,
+							label: <Icon name={LAYOUT_ICONS[mode]} size={16} />,
+							ariaLabel: t(`library.layout.${mode}`)
+						}))}
+						value={layout}
+						onValueChange={setLayout}
 					/>
 				</div>
 
@@ -197,6 +225,8 @@ export function LibraryPage() {
 				{visible.length > 0 && (
 					<LibraryFiles
 						files={visible}
+						titles={page?.files.titles ?? undefined}
+						layout={layout}
 						playingFileID={playing?.file_id}
 						onPlay={file => playRequested(file.id)}
 						onMatch={file => matchRequested(file)}
@@ -220,4 +250,16 @@ export function LibraryPage() {
 			<MatchFileDrawer />
 		</PageTransition>
 	)
+}
+
+function filterCount(
+	view: LibraryView,
+	counts: { total: number; unmatched: number; missing: number } | undefined,
+	total: number
+): number {
+	if (!counts) {
+		return view === 'all' ? total : 0
+	}
+
+	return counts[view === 'all' ? 'total' : view]
 }

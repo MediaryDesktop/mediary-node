@@ -27,6 +27,41 @@ func (q *Queries) ClearLibraryFileMissing(ctx context.Context, arg ClearLibraryF
 	return err
 }
 
+const countLibraryFileStates = `-- name: CountLibraryFileStates :one
+SELECT COUNT(*) AS total,
+       CAST(COALESCE(SUM(CASE WHEN m.file_id IS NULL
+                               AND f.media_form IS NOT NULL
+                               AND f.media_form <> 'extra' THEN 1 ELSE 0 END), 0) AS INTEGER) AS unmatched,
+       CAST(COALESCE(SUM(CASE WHEN f.missing_since IS NOT NULL THEN 1 ELSE 0 END), 0) AS INTEGER) AS missing
+FROM library_file f
+         LEFT JOIN file_match m ON m.file_id = f.id
+WHERE (CAST(?1 AS INTEGER) = 0 OR f.root_id = CAST(?1 AS INTEGER))
+  AND (CAST(?2 AS TEXT) = '' OR f.kind = CAST(?2 AS TEXT))
+  AND (CAST(?3 AS TEXT) = '' OR f.media_form = CAST(?3 AS TEXT))
+`
+
+type CountLibraryFileStatesParams struct {
+	RootID    int64  `json:"root_id"`
+	Kind      string `json:"kind"`
+	MediaForm string `json:"media_form"`
+}
+
+type CountLibraryFileStatesRow struct {
+	Total     int64 `json:"total"`
+	Unmatched int64 `json:"unmatched"`
+	Missing   int64 `json:"missing"`
+}
+
+// What the filter tabs above the list show. One query rather than three: the
+// three numbers have to agree with each other, and they only do if they are read
+// from the same snapshot.
+func (q *Queries) CountLibraryFileStates(ctx context.Context, arg CountLibraryFileStatesParams) (CountLibraryFileStatesRow, error) {
+	row := q.db.QueryRowContext(ctx, countLibraryFileStates, arg.RootID, arg.Kind, arg.MediaForm)
+	var i CountLibraryFileStatesRow
+	err := row.Scan(&i.Total, &i.Unmatched, &i.Missing)
+	return i, err
+}
+
 const countLibraryFiles = `-- name: CountLibraryFiles :one
 SELECT COUNT(*) AS total
 FROM library_file f
@@ -86,7 +121,7 @@ const getLibraryFile = `-- name: GetLibraryFile :one
 SELECT f.id, f.root_id, r.path AS root_path, f.rel_path, f.kind, f.size_bytes,
        f.mtime, f.scanned_at, f.missing_since,
        f.media_form, f.parsed_title, f.parsed_year, f.parsed_season,
-       f.parsed_episode, f.parsed_chapter, f.parsed_volume,
+       f.parsed_episode, f.parsed_chapter, f.parsed_volume, f.duration_seconds,
        m.media_ref, m.season, m.episode, m.confidence, m.source AS match_source
 FROM library_file f
          JOIN library_root r ON r.id = f.root_id
@@ -95,27 +130,28 @@ WHERE f.id = ?
 `
 
 type GetLibraryFileRow struct {
-	ID            int64           `json:"id"`
-	RootID        int64           `json:"root_id"`
-	RootPath      string          `json:"root_path"`
-	RelPath       string          `json:"rel_path"`
-	Kind          string          `json:"kind"`
-	SizeBytes     int64           `json:"size_bytes"`
-	Mtime         int64           `json:"mtime"`
-	ScannedAt     int64           `json:"scanned_at"`
-	MissingSince  sql.NullInt64   `json:"missing_since"`
-	MediaForm     sql.NullString  `json:"media_form"`
-	ParsedTitle   sql.NullString  `json:"parsed_title"`
-	ParsedYear    sql.NullInt64   `json:"parsed_year"`
-	ParsedSeason  sql.NullInt64   `json:"parsed_season"`
-	ParsedEpisode sql.NullInt64   `json:"parsed_episode"`
-	ParsedChapter sql.NullInt64   `json:"parsed_chapter"`
-	ParsedVolume  sql.NullInt64   `json:"parsed_volume"`
-	MediaRef      sql.NullString  `json:"media_ref"`
-	Season        sql.NullInt64   `json:"season"`
-	Episode       sql.NullInt64   `json:"episode"`
-	Confidence    sql.NullFloat64 `json:"confidence"`
-	MatchSource   sql.NullString  `json:"match_source"`
+	ID              int64           `json:"id"`
+	RootID          int64           `json:"root_id"`
+	RootPath        string          `json:"root_path"`
+	RelPath         string          `json:"rel_path"`
+	Kind            string          `json:"kind"`
+	SizeBytes       int64           `json:"size_bytes"`
+	Mtime           int64           `json:"mtime"`
+	ScannedAt       int64           `json:"scanned_at"`
+	MissingSince    sql.NullInt64   `json:"missing_since"`
+	MediaForm       sql.NullString  `json:"media_form"`
+	ParsedTitle     sql.NullString  `json:"parsed_title"`
+	ParsedYear      sql.NullInt64   `json:"parsed_year"`
+	ParsedSeason    sql.NullInt64   `json:"parsed_season"`
+	ParsedEpisode   sql.NullInt64   `json:"parsed_episode"`
+	ParsedChapter   sql.NullInt64   `json:"parsed_chapter"`
+	ParsedVolume    sql.NullInt64   `json:"parsed_volume"`
+	DurationSeconds sql.NullInt64   `json:"duration_seconds"`
+	MediaRef        sql.NullString  `json:"media_ref"`
+	Season          sql.NullInt64   `json:"season"`
+	Episode         sql.NullInt64   `json:"episode"`
+	Confidence      sql.NullFloat64 `json:"confidence"`
+	MatchSource     sql.NullString  `json:"match_source"`
 }
 
 func (q *Queries) GetLibraryFile(ctx context.Context, id int64) (GetLibraryFileRow, error) {
@@ -138,6 +174,7 @@ func (q *Queries) GetLibraryFile(ctx context.Context, id int64) (GetLibraryFileR
 		&i.ParsedEpisode,
 		&i.ParsedChapter,
 		&i.ParsedVolume,
+		&i.DurationSeconds,
 		&i.MediaRef,
 		&i.Season,
 		&i.Episode,
@@ -168,26 +205,29 @@ func (q *Queries) GetLibraryRoot(ctx context.Context, id int64) (LibraryRoot, er
 const insertLibraryFile = `-- name: InsertLibraryFile :one
 INSERT INTO library_file (root_id, rel_path, kind, size_bytes, mtime, scanned_at,
                           media_form, parsed_title, parsed_year, parsed_season,
-                          parsed_episode, parsed_chapter, parsed_volume, parser_version)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                          parsed_episode, parsed_chapter, parsed_volume, parser_version,
+                          duration_seconds, probe_version)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 RETURNING id
 `
 
 type InsertLibraryFileParams struct {
-	RootID        int64          `json:"root_id"`
-	RelPath       string         `json:"rel_path"`
-	Kind          string         `json:"kind"`
-	SizeBytes     int64          `json:"size_bytes"`
-	Mtime         int64          `json:"mtime"`
-	ScannedAt     int64          `json:"scanned_at"`
-	MediaForm     sql.NullString `json:"media_form"`
-	ParsedTitle   sql.NullString `json:"parsed_title"`
-	ParsedYear    sql.NullInt64  `json:"parsed_year"`
-	ParsedSeason  sql.NullInt64  `json:"parsed_season"`
-	ParsedEpisode sql.NullInt64  `json:"parsed_episode"`
-	ParsedChapter sql.NullInt64  `json:"parsed_chapter"`
-	ParsedVolume  sql.NullInt64  `json:"parsed_volume"`
-	ParserVersion int64          `json:"parser_version"`
+	RootID          int64          `json:"root_id"`
+	RelPath         string         `json:"rel_path"`
+	Kind            string         `json:"kind"`
+	SizeBytes       int64          `json:"size_bytes"`
+	Mtime           int64          `json:"mtime"`
+	ScannedAt       int64          `json:"scanned_at"`
+	MediaForm       sql.NullString `json:"media_form"`
+	ParsedTitle     sql.NullString `json:"parsed_title"`
+	ParsedYear      sql.NullInt64  `json:"parsed_year"`
+	ParsedSeason    sql.NullInt64  `json:"parsed_season"`
+	ParsedEpisode   sql.NullInt64  `json:"parsed_episode"`
+	ParsedChapter   sql.NullInt64  `json:"parsed_chapter"`
+	ParsedVolume    sql.NullInt64  `json:"parsed_volume"`
+	ParserVersion   int64          `json:"parser_version"`
+	DurationSeconds sql.NullInt64  `json:"duration_seconds"`
+	ProbeVersion    int64          `json:"probe_version"`
 }
 
 func (q *Queries) InsertLibraryFile(ctx context.Context, arg InsertLibraryFileParams) (int64, error) {
@@ -206,6 +246,8 @@ func (q *Queries) InsertLibraryFile(ctx context.Context, arg InsertLibraryFilePa
 		arg.ParsedChapter,
 		arg.ParsedVolume,
 		arg.ParserVersion,
+		arg.DurationSeconds,
+		arg.ProbeVersion,
 	)
 	var id int64
 	err := row.Scan(&id)
@@ -236,7 +278,7 @@ func (q *Queries) InsertLibraryRoot(ctx context.Context, arg InsertLibraryRootPa
 }
 
 const listLibraryFileStates = `-- name: ListLibraryFileStates :many
-SELECT id, rel_path, kind, size_bytes, mtime, missing_since, parser_version
+SELECT id, rel_path, kind, size_bytes, mtime, missing_since, parser_version, probe_version
 FROM library_file
 WHERE root_id = ?
 `
@@ -249,6 +291,7 @@ type ListLibraryFileStatesRow struct {
 	Mtime         int64         `json:"mtime"`
 	MissingSince  sql.NullInt64 `json:"missing_since"`
 	ParserVersion int64         `json:"parser_version"`
+	ProbeVersion  int64         `json:"probe_version"`
 }
 
 // The scan reads every known file of a root once, then walks the filesystem and
@@ -270,6 +313,7 @@ func (q *Queries) ListLibraryFileStates(ctx context.Context, rootID int64) ([]Li
 			&i.Mtime,
 			&i.MissingSince,
 			&i.ParserVersion,
+			&i.ProbeVersion,
 		); err != nil {
 			return nil, err
 		}
@@ -288,7 +332,7 @@ const listLibraryFiles = `-- name: ListLibraryFiles :many
 SELECT f.id, f.root_id, r.path AS root_path, f.rel_path, f.kind, f.size_bytes,
        f.mtime, f.scanned_at, f.missing_since,
        f.media_form, f.parsed_title, f.parsed_year, f.parsed_season,
-       f.parsed_episode, f.parsed_chapter, f.parsed_volume,
+       f.parsed_episode, f.parsed_chapter, f.parsed_volume, f.duration_seconds,
        m.media_ref, m.season, m.episode, m.confidence, m.source AS match_source
 FROM library_file f
          JOIN library_root r ON r.id = f.root_id
@@ -311,27 +355,28 @@ type ListLibraryFilesParams struct {
 }
 
 type ListLibraryFilesRow struct {
-	ID            int64           `json:"id"`
-	RootID        int64           `json:"root_id"`
-	RootPath      string          `json:"root_path"`
-	RelPath       string          `json:"rel_path"`
-	Kind          string          `json:"kind"`
-	SizeBytes     int64           `json:"size_bytes"`
-	Mtime         int64           `json:"mtime"`
-	ScannedAt     int64           `json:"scanned_at"`
-	MissingSince  sql.NullInt64   `json:"missing_since"`
-	MediaForm     sql.NullString  `json:"media_form"`
-	ParsedTitle   sql.NullString  `json:"parsed_title"`
-	ParsedYear    sql.NullInt64   `json:"parsed_year"`
-	ParsedSeason  sql.NullInt64   `json:"parsed_season"`
-	ParsedEpisode sql.NullInt64   `json:"parsed_episode"`
-	ParsedChapter sql.NullInt64   `json:"parsed_chapter"`
-	ParsedVolume  sql.NullInt64   `json:"parsed_volume"`
-	MediaRef      sql.NullString  `json:"media_ref"`
-	Season        sql.NullInt64   `json:"season"`
-	Episode       sql.NullInt64   `json:"episode"`
-	Confidence    sql.NullFloat64 `json:"confidence"`
-	MatchSource   sql.NullString  `json:"match_source"`
+	ID              int64           `json:"id"`
+	RootID          int64           `json:"root_id"`
+	RootPath        string          `json:"root_path"`
+	RelPath         string          `json:"rel_path"`
+	Kind            string          `json:"kind"`
+	SizeBytes       int64           `json:"size_bytes"`
+	Mtime           int64           `json:"mtime"`
+	ScannedAt       int64           `json:"scanned_at"`
+	MissingSince    sql.NullInt64   `json:"missing_since"`
+	MediaForm       sql.NullString  `json:"media_form"`
+	ParsedTitle     sql.NullString  `json:"parsed_title"`
+	ParsedYear      sql.NullInt64   `json:"parsed_year"`
+	ParsedSeason    sql.NullInt64   `json:"parsed_season"`
+	ParsedEpisode   sql.NullInt64   `json:"parsed_episode"`
+	ParsedChapter   sql.NullInt64   `json:"parsed_chapter"`
+	ParsedVolume    sql.NullInt64   `json:"parsed_volume"`
+	DurationSeconds sql.NullInt64   `json:"duration_seconds"`
+	MediaRef        sql.NullString  `json:"media_ref"`
+	Season          sql.NullInt64   `json:"season"`
+	Episode         sql.NullInt64   `json:"episode"`
+	Confidence      sql.NullFloat64 `json:"confidence"`
+	MatchSource     sql.NullString  `json:"match_source"`
 }
 
 func (q *Queries) ListLibraryFiles(ctx context.Context, arg ListLibraryFilesParams) ([]ListLibraryFilesRow, error) {
@@ -367,6 +412,7 @@ func (q *Queries) ListLibraryFiles(ctx context.Context, arg ListLibraryFilesPara
 			&i.ParsedEpisode,
 			&i.ParsedChapter,
 			&i.ParsedVolume,
+			&i.DurationSeconds,
 			&i.MediaRef,
 			&i.Season,
 			&i.Episode,
@@ -391,18 +437,25 @@ SELECT r.id, r.path, r.added_at, r.last_scan_at,
        (SELECT COUNT(*) FROM library_file f
          WHERE f.root_id = r.id AND f.missing_since IS NULL) AS file_count,
        (SELECT COUNT(*) FROM library_file f
-         WHERE f.root_id = r.id AND f.missing_since IS NOT NULL) AS missing_count
+         WHERE f.root_id = r.id AND f.missing_since IS NOT NULL) AS missing_count,
+       -- An opening or a trailer belongs to no title, so counting it as waiting
+       -- for one would leave a number the user can never bring down to zero.
+       (SELECT COUNT(*) FROM library_file f
+              LEFT JOIN file_match m ON m.file_id = f.id
+         WHERE f.root_id = r.id AND m.file_id IS NULL
+           AND f.media_form IS NOT NULL AND f.media_form <> 'extra') AS unmatched_count
 FROM library_root r
 ORDER BY r.path
 `
 
 type ListLibraryRootsRow struct {
-	ID           int64         `json:"id"`
-	Path         string        `json:"path"`
-	AddedAt      int64         `json:"added_at"`
-	LastScanAt   sql.NullInt64 `json:"last_scan_at"`
-	FileCount    int64         `json:"file_count"`
-	MissingCount int64         `json:"missing_count"`
+	ID             int64         `json:"id"`
+	Path           string        `json:"path"`
+	AddedAt        int64         `json:"added_at"`
+	LastScanAt     sql.NullInt64 `json:"last_scan_at"`
+	FileCount      int64         `json:"file_count"`
+	MissingCount   int64         `json:"missing_count"`
+	UnmatchedCount int64         `json:"unmatched_count"`
 }
 
 func (q *Queries) ListLibraryRoots(ctx context.Context) ([]ListLibraryRootsRow, error) {
@@ -421,6 +474,7 @@ func (q *Queries) ListLibraryRoots(ctx context.Context) ([]ListLibraryRootsRow, 
 			&i.LastScanAt,
 			&i.FileCount,
 			&i.MissingCount,
+			&i.UnmatchedCount,
 		); err != nil {
 			return nil, err
 		}
@@ -545,24 +599,28 @@ SET kind           = ?,
     parsed_episode = ?,
     parsed_chapter = ?,
     parsed_volume  = ?,
-    parser_version = ?
+    parser_version = ?,
+    duration_seconds = ?,
+    probe_version    = ?
 WHERE id = ?
 `
 
 type UpdateLibraryFileParams struct {
-	Kind          string         `json:"kind"`
-	SizeBytes     int64          `json:"size_bytes"`
-	Mtime         int64          `json:"mtime"`
-	ScannedAt     int64          `json:"scanned_at"`
-	MediaForm     sql.NullString `json:"media_form"`
-	ParsedTitle   sql.NullString `json:"parsed_title"`
-	ParsedYear    sql.NullInt64  `json:"parsed_year"`
-	ParsedSeason  sql.NullInt64  `json:"parsed_season"`
-	ParsedEpisode sql.NullInt64  `json:"parsed_episode"`
-	ParsedChapter sql.NullInt64  `json:"parsed_chapter"`
-	ParsedVolume  sql.NullInt64  `json:"parsed_volume"`
-	ParserVersion int64          `json:"parser_version"`
-	ID            int64          `json:"id"`
+	Kind            string         `json:"kind"`
+	SizeBytes       int64          `json:"size_bytes"`
+	Mtime           int64          `json:"mtime"`
+	ScannedAt       int64          `json:"scanned_at"`
+	MediaForm       sql.NullString `json:"media_form"`
+	ParsedTitle     sql.NullString `json:"parsed_title"`
+	ParsedYear      sql.NullInt64  `json:"parsed_year"`
+	ParsedSeason    sql.NullInt64  `json:"parsed_season"`
+	ParsedEpisode   sql.NullInt64  `json:"parsed_episode"`
+	ParsedChapter   sql.NullInt64  `json:"parsed_chapter"`
+	ParsedVolume    sql.NullInt64  `json:"parsed_volume"`
+	ParserVersion   int64          `json:"parser_version"`
+	DurationSeconds sql.NullInt64  `json:"duration_seconds"`
+	ProbeVersion    int64          `json:"probe_version"`
+	ID              int64          `json:"id"`
 }
 
 func (q *Queries) UpdateLibraryFile(ctx context.Context, arg UpdateLibraryFileParams) error {
@@ -579,6 +637,8 @@ func (q *Queries) UpdateLibraryFile(ctx context.Context, arg UpdateLibraryFilePa
 		arg.ParsedChapter,
 		arg.ParsedVolume,
 		arg.ParserVersion,
+		arg.DurationSeconds,
+		arg.ProbeVersion,
 		arg.ID,
 	)
 	return err
@@ -623,6 +683,25 @@ func (q *Queries) UpdateLibraryFileParse(ctx context.Context, arg UpdateLibraryF
 		arg.ParserVersion,
 		arg.ID,
 	)
+	return err
+}
+
+const updateLibraryFileProbe = `-- name: UpdateLibraryFileProbe :exec
+UPDATE library_file
+SET duration_seconds = ?,
+    probe_version    = ?
+WHERE id = ?
+`
+
+type UpdateLibraryFileProbeParams struct {
+	DurationSeconds sql.NullInt64 `json:"duration_seconds"`
+	ProbeVersion    int64         `json:"probe_version"`
+	ID              int64         `json:"id"`
+}
+
+// The file itself did not change; a newer prober reads its container again.
+func (q *Queries) UpdateLibraryFileProbe(ctx context.Context, arg UpdateLibraryFileProbeParams) error {
+	_, err := q.db.ExecContext(ctx, updateLibraryFileProbe, arg.DurationSeconds, arg.ProbeVersion, arg.ID)
 	return err
 }
 

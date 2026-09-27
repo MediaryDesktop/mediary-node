@@ -2,10 +2,12 @@ package service
 
 import (
 	"context"
+	"path/filepath"
 	"slices"
 	"time"
 
 	"github.com/mediaryorg/mediary-node/server/internal/modules/library/internal/parser"
+	"github.com/mediaryorg/mediary-node/server/internal/modules/library/internal/prober"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/library/internal/scanner"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/library/internal/store"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
@@ -47,7 +49,12 @@ func (s *Service) StartScan(ctx context.Context, rootID int64) (*ScanStatus, err
 	}
 
 	startedAt := s.opts.Now()
-	s.scan = ScanStatus{Running: true, StartedAt: &startedAt, Roots: make([]ScanRootResult, 0, len(roots))}
+	s.scan = ScanStatus{
+		Running:    true,
+		StartedAt:  &startedAt,
+		RootsTotal: len(roots),
+		Roots:      make([]ScanRootResult, 0, len(roots)),
+	}
 	for _, root := range roots {
 		s.scan.Roots = append(s.scan.Roots, ScanRootResult{RootID: root.ID, Path: root.Path})
 	}
@@ -89,21 +96,31 @@ func (s *Service) scanTargets(ctx context.Context, rootID int64) ([]store.Root, 
 }
 
 func (s *Service) runScan(ctx context.Context, roots []store.Root) {
-	s.publishScan("started", map[string]any{"roots": len(roots)})
+	s.publishScan("started", map[string]any{"roots_total": len(roots), "roots_done": 0})
 
 	changed := false
 
 	for i, root := range roots {
-		result := s.scanRoot(ctx, root)
+		result := s.scanRoot(ctx, root, i, len(roots))
 
 		s.mu.Lock()
 		s.scan.Roots[i] = result
+		s.scan.RootsDone = i + 1
 		s.scan.Found += result.Found
 		s.scan.Added += result.Added
 		s.scan.Changed += result.Changed
 		s.scan.Reparsed += result.Reparsed
 		s.scan.Missing += result.Missing
+		s.scan.Probed += result.Probed
 		s.mu.Unlock()
+
+		s.publishScan("root", map[string]any{
+			"root_id":     result.RootID,
+			"path":        result.Path,
+			"error":       result.Error,
+			"roots_total": len(roots),
+			"roots_done":  i + 1,
+		})
 
 		if result.Added+result.Changed+result.Reparsed+result.Missing > 0 {
 			changed = true
@@ -130,12 +147,14 @@ func (s *Service) runScan(ctx context.Context, roots []store.Root) {
 	s.mu.Unlock()
 
 	s.publishScan("finished", map[string]any{
-		"found":    status.Found,
-		"added":    status.Added,
-		"changed":  status.Changed,
-		"reparsed": status.Reparsed,
-		"missing":  status.Missing,
-		"matched":  status.Matched,
+		"roots_total": status.RootsTotal,
+		"roots_done":  status.RootsDone,
+		"found":       status.Found,
+		"added":       status.Added,
+		"changed":     status.Changed,
+		"reparsed":    status.Reparsed,
+		"missing":     status.Missing,
+		"matched":     status.Matched,
 	})
 
 	s.publishMatched(outcome)
@@ -148,7 +167,7 @@ func (s *Service) runScan(ctx context.Context, roots []store.Root) {
 	}
 }
 
-func (s *Service) scanRoot(ctx context.Context, root store.Root) ScanRootResult {
+func (s *Service) scanRoot(ctx context.Context, root store.Root, index, total int) ScanRootResult {
 	result := ScanRootResult{RootID: root.ID, Path: root.Path}
 
 	known, err := s.store.FileStates(ctx, root.ID)
@@ -171,9 +190,11 @@ func (s *Service) scanRoot(ctx context.Context, root store.Root) ScanRootResult 
 			lastProgress = now
 
 			s.publishScan("progress", map[string]any{
-				"root_id": root.ID,
-				"path":    root.Path,
-				"found":   count,
+				"root_id":     root.ID,
+				"path":        root.Path,
+				"found":       count,
+				"roots_total": total,
+				"roots_done":  index,
 			})
 		},
 	})
@@ -189,6 +210,8 @@ func (s *Service) scanRoot(ctx context.Context, root store.Root) ScanRootResult 
 
 	changes := diffFiles(known, found)
 
+	result.Probed = s.probeDurations(ctx, root.Path, known, found, &changes, index, total)
+
 	if err := s.store.ApplyScan(ctx, root.ID, changes, s.opts.Now()); err != nil {
 		s.logger.Error().Err(err).Int64("root_id", root.ID).Msg("apply library scan")
 		result.Error = err.Error()
@@ -203,6 +226,121 @@ func (s *Service) scanRoot(ctx context.Context, root store.Root) ScanRootResult 
 	result.Missing = len(changes.Missing)
 
 	return result
+}
+
+// probeDurations reads how long every new, changed or never-probed video file
+// runs. It happens here rather than in diffFiles because it touches the disk, and
+// because a scan that reports nothing while it opens thousands of files looks
+// wedged.
+func (s *Service) probeDurations(
+	ctx context.Context,
+	rootPath string,
+	known []store.FileState,
+	found []scanner.File,
+	changes *store.ScanChanges,
+	index, total int,
+) int {
+	stale := staleProbes(known, found, changes)
+
+	work := len(changes.Added) + len(changes.Changed) + len(stale)
+	if work == 0 {
+		return 0
+	}
+
+	done := 0
+	lastProgress := time.Time{}
+
+	report := func() {
+		done++
+
+		now := s.opts.Now()
+		if now.Sub(lastProgress) < progressInterval && done < work {
+			return
+		}
+		lastProgress = now
+
+		s.publishScan("probing", map[string]any{
+			"root_id":     rootPath,
+			"path":        rootPath,
+			"probed":      done,
+			"total":       work,
+			"roots_total": total,
+			"roots_done":  index,
+		})
+	}
+
+	for i := range changes.Added {
+		if ctx.Err() != nil {
+			return done
+		}
+
+		changes.Added[i].Probe = s.probe(rootPath, changes.Added[i].RelPath, changes.Added[i].Kind)
+		report()
+	}
+
+	for i := range changes.Changed {
+		if ctx.Err() != nil {
+			return done
+		}
+
+		changes.Changed[i].Probe = s.probe(rootPath, changes.Changed[i].RelPath, changes.Changed[i].Kind)
+		report()
+	}
+
+	for _, file := range stale {
+		if ctx.Err() != nil {
+			return done
+		}
+
+		changes.Probed = append(changes.Probed, store.Probed{
+			ID:    file.ID,
+			Probe: s.probe(rootPath, file.RelPath, file.Kind),
+		})
+		report()
+	}
+
+	return done
+}
+
+func (s *Service) probe(rootPath, relPath, kind string) store.Probe {
+	probe := store.Probe{Version: prober.Version}
+
+	if kind != string(scanner.KindVideo) {
+		return probe
+	}
+
+	if duration, ok := prober.Duration(filepath.Join(rootPath, filepath.FromSlash(relPath))); ok {
+		probe.Duration = &duration
+	}
+
+	return probe
+}
+
+// staleProbes are the files on disk that this scan is not rewriting anyway and
+// that a newer prober has not looked at yet.
+func staleProbes(known []store.FileState, found []scanner.File, changes *store.ScanChanges) []store.FileState {
+	rewritten := make(map[int64]struct{}, len(changes.Changed))
+	for i := range changes.Changed {
+		rewritten[changes.Changed[i].ID] = struct{}{}
+	}
+
+	onDisk := make(map[string]struct{}, len(found))
+	for _, file := range found {
+		onDisk[file.RelPath] = struct{}{}
+	}
+
+	stale := make([]store.FileState, 0)
+
+	for _, state := range known {
+		_, present := onDisk[state.RelPath]
+		_, rewriting := rewritten[state.ID]
+
+		if present && !rewriting && state.ProbeVersion < prober.Version {
+			stale = append(stale, state)
+		}
+	}
+
+	return stale
 }
 
 // diffFiles compares what the previous scan recorded against what is on disk
@@ -239,11 +377,12 @@ func diffFiles(known []store.FileState, found []scanner.File) store.ScanChanges 
 			state.Mtime.UnixMilli() != file.ModTime.UnixMilli() ||
 			state.Kind != string(file.Kind):
 			changes.Changed = append(changes.Changed, store.Changed{
-				ID:     state.ID,
-				Kind:   string(file.Kind),
-				Size:   file.Size,
-				Mtime:  file.ModTime,
-				Parsed: parseFile(file),
+				ID:      state.ID,
+				RelPath: file.RelPath,
+				Kind:    string(file.Kind),
+				Size:    file.Size,
+				Mtime:   file.ModTime,
+				Parsed:  parseFile(file),
 			})
 
 		case state.Missing:

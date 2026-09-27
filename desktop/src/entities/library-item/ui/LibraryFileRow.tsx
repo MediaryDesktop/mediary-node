@@ -1,11 +1,11 @@
 import clsx from 'clsx'
 
 import { useTranslation } from '@shared/i18n'
-import { Badge, Icon, Tooltip } from '@shared/ui'
-import type { IconName } from '@shared/ui'
+import { Badge, DropdownMenu, Icon } from '@shared/ui'
+import type { DropdownMenuItem, IconName } from '@shared/ui'
 
 import type { LibraryFile, LibraryMediaForm } from '../api/api'
-import { fileNumber, fileTitle } from '../model/model'
+import { fileDuration, fileName, fileNumber, fileSeason } from '../model/model'
 
 import styles from './LibraryFileRow.module.scss'
 
@@ -21,6 +21,7 @@ const FORM_ICONS: Record<LibraryMediaForm, IconName> = {
 export interface LibraryFileRowProps {
 	file: LibraryFile
 	playing?: boolean
+
 	onPlay?: (file: LibraryFile) => void
 	onMatch?: (file: LibraryFile) => void
 	onClearMatch?: (file: LibraryFile) => void
@@ -31,66 +32,104 @@ export function LibraryFileRow({ file, playing, onPlay, onMatch, onClearMatch }:
 
 	const form = file.parsed.form
 	const number = fileNumber(file)
+	const season = fileSeason(file)
+	const duration = fileDuration(file)
 	const match = file.match
+
+	const playable = Boolean(onPlay) && file.kind === 'video' && !file.missing
+	const matchable = Boolean(onMatch) && form !== 'extra'
+
+	const menu: DropdownMenuItem[] = []
+
+	if (matchable) {
+		menu.push({
+			id: 'match',
+			label: match ? t('library.file.change') : t('library.file.match'),
+			icon: 'common/link',
+			onSelect: () => onMatch?.(file)
+		})
+	}
+
+	if (onClearMatch && match) {
+		menu.push({
+			id: 'clear',
+			label: t('library.file.clear'),
+			icon: 'common/close',
+			danger: true,
+			onSelect: () => onClearMatch(file)
+		})
+	}
+
+	// What the match is worth belongs on the control that changes it: the row
+	// shows a file, and a badge per line would drown the list in colour.
+	const matchHint = match
+		? match.source === 'manual'
+			? t('library.file.matchedByHand')
+			: t('library.file.matched', { percent: Math.round(match.confidence * 100) })
+		: t('library.file.unmatched')
+
+	// The season comes off the name the same way the episode does — "s02e01" says
+	// both — so a row that shows one and hides the other is hiding what the scan
+	// already worked out.
+	const numbering = [
+		season !== null ? t('library.file.season', { number: season }) : null,
+		number !== null
+			? file.kind === 'video'
+				? t('library.file.episode', { number })
+				: t('library.file.chapter', { number })
+			: null
+	].filter(Boolean)
 
 	return (
 		<article className={clsx(styles.row, playing && styles.playing)}>
-			{onPlay && file.kind === 'video' && !file.missing ? (
-				<Tooltip content={t('library.file.play')}>
-					<button
-						type='button'
-						className={styles.play}
-						aria-label={t('library.file.play')}
-						onClick={() => onPlay(file)}
-					>
-						<Icon name='common/play' size={16} />
-					</button>
-				</Tooltip>
-			) : (
-				<Icon name={form ? FORM_ICONS[form] : 'common/database'} size={20} className={styles.icon} />
-			)}
+			<span className={styles.marker} aria-hidden>
+				<Icon
+					name={playing ? 'common/play' : form ? FORM_ICONS[form] : 'common/database'}
+					size={playing ? 12 : 14}
+				/>
+			</span>
 
 			<div className={styles.body}>
-				<p className={styles.title}>
-					{fileTitle(file)}
-					{number !== null && <span className={styles.number}>#{number}</span>}
+				<p className={styles.name} title={file.path}>
+					{fileName(file)}
 				</p>
 
-				<Tooltip content={file.path}>
-					<p className={styles.path}>{file.rel_path}</p>
-				</Tooltip>
+				{file.missing && <Badge tone='danger'>{t('library.file.missing')}</Badge>}
 			</div>
 
-			<div className={styles.meta}>
-				{file.missing && <Badge tone='danger'>{t('library.file.missing')}</Badge>}
+			<span className={styles.number}>{numbering.join(' · ')}</span>
 
-				{form && <Badge tone='neutral'>{t(`library.form.${form}`)}</Badge>}
+			<span className={styles.duration}>{duration}</span>
 
-				{match ? (
-					<Badge tone={match.source === 'manual' ? 'info' : 'success'}>
-						{match.source === 'manual'
-							? t('library.file.matchedByHand')
-							: t('library.file.matched', { percent: Math.round(match.confidence * 100) })}
-					</Badge>
-				) : (
-					form !== 'extra' && <Badge tone='warning'>{t('library.file.unmatched')}</Badge>
+			<div className={styles.actions}>
+				{playable && (
+					<button type='button' className={styles.action} onClick={() => onPlay?.(file)}>
+						<Icon name='common/play' size={12} />
+						{t('library.file.play')}
+					</button>
 				)}
 
-				{onMatch && form !== 'extra' && (
-					<button type='button' className={styles.action} onClick={() => onMatch(file)}>
+				{matchable && (
+					<button
+						type='button'
+						title={matchHint}
+						className={styles.action}
+						onClick={() => onMatch?.(file)}
+					>
+						<Icon name='common/link' size={12} />
 						{match ? t('library.file.change') : t('library.file.match')}
 					</button>
 				)}
 
-				{onClearMatch && match && (
-					<button
-						type='button'
-						className={styles.action}
-						aria-label={t('library.file.clear')}
-						onClick={() => onClearMatch(file)}
-					>
-						<Icon name='common/close' size={14} />
-					</button>
+				{menu.length > 0 && (
+					<DropdownMenu
+						items={menu}
+						trigger={
+							<button type='button' className={styles.more} aria-label={t('library.file.menu')}>
+								<Icon name='common/more-vertical' size={16} />
+							</button>
+						}
+					/>
 				)}
 			</div>
 		</article>

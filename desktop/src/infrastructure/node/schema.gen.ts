@@ -540,6 +540,23 @@ export interface components {
 			 */
 			position?: number
 		}
+		Counts: {
+			/**
+			 * Format: int64
+			 * @description Of those, files the last scan did not find.
+			 */
+			missing: number
+			/**
+			 * Format: int64
+			 * @description Files the filter matches.
+			 */
+			total: number
+			/**
+			 * Format: int64
+			 * @description Of those, files that belong to no title yet.
+			 */
+			unmatched: number
+		}
 		CreateListInputBody: {
 			/**
 			 * Format: uri
@@ -710,6 +727,11 @@ export interface components {
 		File: {
 			/**
 			 * Format: int64
+			 * @description How long the file runs, read out of its container during the scan. Absent for a container the node cannot read and for everything that is not video.
+			 */
+			duration_seconds?: number
+			/**
+			 * Format: int64
 			 * @description Identifier of the file, stable while its path does not change.
 			 */
 			id: number
@@ -755,6 +777,8 @@ export interface components {
 			file: components['schemas']['File']
 		}
 		FilePage: {
+			/** @description Totals for the whole library behind the filters over the list. */
+			counts: components['schemas']['Counts']
 			/** @description One page of files. */
 			items: components['schemas']['File'][] | null
 			/**
@@ -767,6 +791,8 @@ export interface components {
 			 * @description Offset that was applied.
 			 */
 			offset: number
+			/** @description Every title the files on this page are matched to, once each. */
+			titles: components['schemas']['MatchedTitle'][] | null
 			/**
 			 * Format: int64
 			 * @description How many files match the filter in total.
@@ -887,6 +913,28 @@ export interface components {
 			 */
 			source: 'auto' | 'manual'
 		}
+		MatchedTitle: {
+			/** @description Dominant colour of the poster, for a placeholder while it loads. */
+			cover_color?: string
+			/** @description Poster for the title. */
+			cover_image?: string
+			/**
+			 * Format: int64
+			 * @description Episodes the title has in total, or chapters for a comic.
+			 */
+			episodes?: number
+			/** @description TV, MOVIE, OVA and so on, as the source names it. */
+			format?: string
+			/** @description The title, as provider:id. */
+			media_ref: string
+			/**
+			 * @description Which catalog the title comes from.
+			 * @enum {string}
+			 */
+			media_type?: 'anime' | 'manga'
+			/** @description The title as the user's source spells it. */
+			title: string
+		}
 		Media: {
 			/** Format: int64 */
 			average_score: number | null
@@ -904,6 +952,7 @@ export interface components {
 			season_year: number | null
 			site_url: string
 			status: string | null
+			synonyms?: string[] | null
 			title: components['schemas']['Title']
 			/** Format: int64 */
 			volumes: number | null
@@ -1117,6 +1166,11 @@ export interface components {
 			missing_count: number
 			/** @description Absolute path on this machine. */
 			path: string
+			/**
+			 * Format: int64
+			 * @description Files under this root that belong to no title yet. Openings and other extras are left out: they belong to none by design.
+			 */
+			unmatched_count: number
 		}
 		RootOutputBody: {
 			/**
@@ -1188,6 +1242,11 @@ export interface components {
 			path: string
 			/**
 			 * Format: int64
+			 * @description Files whose container was opened to read how long they run.
+			 */
+			probed: number
+			/**
+			 * Format: int64
 			 * @description Untouched files whose names a newer parser read again.
 			 */
 			reparsed: number
@@ -1235,11 +1294,26 @@ export interface components {
 			missing: number
 			/**
 			 * Format: int64
+			 * @description Files whose container was opened to read how long they run.
+			 */
+			probed: number
+			/**
+			 * Format: int64
 			 * @description Untouched files whose names a newer parser read again.
 			 */
 			reparsed: number
 			/** @description Per-root outcome of the current or last scan. */
 			roots: components['schemas']['ScanRootResult'][] | null
+			/**
+			 * Format: int64
+			 * @description Folders it has finished with.
+			 */
+			roots_done: number
+			/**
+			 * Format: int64
+			 * @description Folders this scan covers.
+			 */
+			roots_total: number
 			/** @description True while a scan is walking the filesystem. */
 			running: boolean
 			/**
@@ -1512,6 +1586,7 @@ export type SchemaAccount = components['schemas']['Account']
 export type SchemaAddRootInputBody = components['schemas']['AddRootInputBody']
 export type SchemaAiringEpisode = components['schemas']['AiringEpisode']
 export type SchemaControlInputBody = components['schemas']['ControlInputBody']
+export type SchemaCounts = components['schemas']['Counts']
 export type SchemaCreateListInputBody = components['schemas']['CreateListInputBody']
 export type SchemaCustomList = components['schemas']['CustomList']
 export type SchemaDate = components['schemas']['Date']
@@ -1532,6 +1607,7 @@ export type SchemaHealthOutputBody = components['schemas']['HealthOutputBody']
 export type SchemaList = components['schemas']['List']
 export type SchemaListsOutputBody = components['schemas']['ListsOutputBody']
 export type SchemaMatch = components['schemas']['Match']
+export type SchemaMatchedTitle = components['schemas']['MatchedTitle']
 export type SchemaMedia = components['schemas']['Media']
 export type SchemaMediaDetails = components['schemas']['MediaDetails']
 export type SchemaMediaSummary = components['schemas']['MediaSummary']
