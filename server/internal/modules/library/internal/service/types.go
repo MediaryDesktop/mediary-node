@@ -87,6 +87,25 @@ type FilePage struct {
 	Titles []MatchedTitle `json:"titles" doc:"Every title the files on this page are matched to, once each."`
 }
 
+// LibraryCollectionEntry is one title the library holds files of. It is what a
+// shelf of posters is built from, so it carries the title itself rather than
+// making the caller look every media_ref up again.
+type LibraryCollectionEntry struct {
+	MediaRef     string        `json:"media_ref" doc:"The title, as provider:id."`
+	FileCount    int           `json:"file_count" doc:"Files matched to this title."`
+	MissingCount int           `json:"missing_count" doc:"Of those, files the last scan did not find."`
+	Title        *MatchedTitle `json:"title,omitempty" doc:"Name and poster, when the node can describe the title. Absent for a title no source has answered for yet."`
+}
+
+// LibraryCollection is the library seen as titles rather than as files.
+type LibraryCollection struct {
+	Entries []LibraryCollectionEntry `json:"entries" doc:"Titles the library holds files of, by name."`
+
+	Files     int `json:"files" doc:"Files in the library in total."`
+	Unmatched int `json:"unmatched" doc:"Files that belong to no title yet. Openings and other extras are left out: they belong to none by design."`
+	Missing   int `json:"missing" doc:"Files the last scan did not find where they used to be."`
+}
+
 type ScanRootResult struct {
 	RootID int64  `json:"root_id" doc:"Root this result belongs to."`
 	Path   string `json:"path" doc:"Absolute path of the root."`

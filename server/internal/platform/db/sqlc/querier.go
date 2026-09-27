@@ -44,6 +44,9 @@ type Querier interface {
 	ListAniListOutbox(ctx context.Context, accountID int64) ([]AnilistOutbox, error)
 	ListCustomListItems(ctx context.Context, listID int64) ([]CustomListItem, error)
 	ListCustomLists(ctx context.Context) ([]ListCustomListsRow, error)
+	// The library as a list of titles rather than of files: one row per title the
+	// user has something of, which is what a shelf of posters is made from.
+	ListLibraryCollection(ctx context.Context) ([]ListLibraryCollectionRow, error)
 	// The scan reads every known file of a root once, then walks the filesystem and
 	// compares in memory: one query instead of a lookup per file.
 	ListLibraryFileStates(ctx context.Context, rootID int64) ([]ListLibraryFileStatesRow, error)

@@ -11,6 +11,8 @@ export type LibraryScanRoot = NodeSchemas['ScanRootResult']
 export type LibrarySuggestion = NodeSchemas['Suggestion']
 export type LibraryTitle = NodeSchemas['MatchedTitle']
 export type LibraryCounts = NodeSchemas['Counts']
+export type LibraryCollection = NodeSchemas['LibraryCollection']
+export type LibraryCollectionEntry = NodeSchemas['LibraryCollectionEntry']
 export type LibraryScanRunSummary = NodeSchemas['ScanRunSummary']
 export type LibraryScanRunDetail = NodeSchemas['ScanRunDetail']
 export type LibraryScanHistoryPage = NodeSchemas['ScanHistoryPage']
@@ -61,6 +63,12 @@ export const fetchLibraryFilesFx = createNodeRequestFx<LibraryFileQuery, NodeSch
 export const fetchLibraryScanFx = createNodeRequestFx<void, NodeSchemas['ScanOutputBody']>(() => ({
 	url: '/v1/library/scan'
 }))
+
+export const fetchLibraryCollectionFx = createNodeRequestFx<void, NodeSchemas['CollectionOutputBody']>(
+	() => ({
+		url: '/v1/library/collection'
+	})
+)
 
 // 0 scans every root, which is what the page's button means.
 export const startLibraryScanFx = createNodeRequestFx<number | void, NodeSchemas['ScanOutputBody']>(

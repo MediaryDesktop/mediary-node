@@ -244,12 +244,17 @@ export const uk: Translation = {
 			unmatched_one: '{{count}} без тайтла',
 			unmatched_few: '{{count}} без тайтла',
 			unmatched_many: '{{count}} без тайтла',
-			unmatched_other: '{{count}} без тайтла'
+			unmatched_other: '{{count}} без тайтла',
+			titles_one: '{{count}} тайтл',
+			titles_few: '{{count}} тайтли',
+			titles_many: '{{count}} тайтлів',
+			titles_other: '{{count}} тайтла'
 		},
 		empty: {
 			title: 'Тек бібліотеки ще немає',
 			description:
-				'Вкажіть ноді теку з вашими файлами. Вона обійде й підтеки, а знайдене автоматично доповнить деталями'
+				'Вкажіть ноді теку з вашими файлами. Вона обійде й підтеки, а знайдене автоматично доповнить деталями',
+			action: 'Додати теку в налаштуваннях'
 		},
 		root: {
 			add: 'Додати теку',

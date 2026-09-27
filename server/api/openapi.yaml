@@ -82,6 +82,30 @@ components:
         - episode
         - airing_at
       type: object
+    CollectionOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/CollectionOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        collection:
+          $ref: "#/components/schemas/LibraryCollection"
+          description: The library seen as titles rather than as files.
+        sources:
+          description: Attribution for every field that came from an external source.
+          items:
+            $ref: "#/components/schemas/Source"
+          type:
+            - array
+            - "null"
+      required:
+        - collection
+        - sources
+      type: object
     ControlInputBody:
       additionalProperties: false
       properties:
@@ -687,6 +711,56 @@ components:
         - commit
         - built
         - linked
+      type: object
+    LibraryCollection:
+      additionalProperties: false
+      properties:
+        entries:
+          description: Titles the library holds files of, by name.
+          items:
+            $ref: "#/components/schemas/LibraryCollectionEntry"
+          type:
+            - array
+            - "null"
+        files:
+          description: Files in the library in total.
+          format: int64
+          type: integer
+        missing:
+          description: Files the last scan did not find where they used to be.
+          format: int64
+          type: integer
+        unmatched:
+          description: "Files that belong to no title yet. Openings and other extras are left out: they belong to none by design."
+          format: int64
+          type: integer
+      required:
+        - entries
+        - files
+        - unmatched
+        - missing
+      type: object
+    LibraryCollectionEntry:
+      additionalProperties: false
+      properties:
+        file_count:
+          description: Files matched to this title.
+          format: int64
+          type: integer
+        media_ref:
+          description: The title, as provider:id.
+          type: string
+        missing_count:
+          description: Of those, files the last scan did not find.
+          format: int64
+          type: integer
+        title:
+          $ref: "#/components/schemas/MatchedTitle"
+          description: Name and poster, when the node can describe the title. Absent for a title no source has answered for yet.
+      required:
+        - media_ref
+        - file_count
+        - missing_count
       type: object
     List:
       additionalProperties: false
@@ -2384,6 +2458,26 @@ paths:
       summary: Node health
       tags:
         - health
+  /v1/library/collection:
+    get:
+      description: "Every title the library holds files of, by name, with how many files each has. This is what the library shelf is drawn from: grouping a page of files into titles on the client would both cost a page of files and miss everything past it."
+      operationId: getLibraryCollection
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CollectionOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: The library as titles
+      tags:
+        - library
   /v1/library/files:
     get:
       description: Files the last scan recorded, with the title each was matched to. A file the scan no longer finds is kept and reported as missing, so an unplugged drive does not take the user's manual matches with it.

@@ -98,6 +98,13 @@ type SuggestionsOutput struct {
 	}
 }
 
+type CollectionOutput struct {
+	Body struct {
+		Collection *service.LibraryCollection `json:"collection" doc:"The library seen as titles rather than as files."`
+		Sources    []httpapi.Source           `json:"sources" doc:"Attribution for every field that came from an external source."`
+	}
+}
+
 type ScanHistoryInput struct {
 	From   time.Time `query:"from" doc:"Only scans started at or after this time. Left out for no lower bound."`
 	To     time.Time `query:"to" doc:"Only scans started at or before this time. Left out for no upper bound."`
@@ -291,6 +298,26 @@ func (h *Handler) Register(api huma.API) {
 		}
 
 		return nil, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "getLibraryCollection",
+		Method:      http.MethodGet,
+		Path:        "/v1/library/collection",
+		Summary:     "The library as titles",
+		Description: "Every title the library holds files of, by name, with how many files each has. This is what the library shelf is drawn from: grouping a page of files into titles on the client would both cost a page of files and miss everything past it.",
+		Tags:        []string{"library"},
+	}, func(ctx context.Context, _ *struct{}) (*CollectionOutput, error) {
+		collection, err := h.svc.Collection(ctx)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		out := &CollectionOutput{}
+		out.Body.Collection = collection
+		out.Body.Sources = []httpapi.Source{httpapi.AniListSource}
+
+		return out, nil
 	})
 
 	huma.Register(api, huma.Operation{

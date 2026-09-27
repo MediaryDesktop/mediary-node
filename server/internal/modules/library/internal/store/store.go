@@ -469,6 +469,32 @@ func (s *Store) UnmatchedFiles(ctx context.Context, limit int) ([]Unmatched, err
 	return files, nil
 }
 
+// CollectionEntry is one title the library holds something of, with how much of
+// it is on disk.
+type CollectionEntry struct {
+	MediaRef     string
+	FileCount    int
+	MissingCount int
+}
+
+func (s *Store) CollectionEntries(ctx context.Context) ([]CollectionEntry, error) {
+	rows, err := sqlc.New(s.db).ListLibraryCollection(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("list library collection: %w", err)
+	}
+
+	entries := make([]CollectionEntry, 0, len(rows))
+	for _, row := range rows {
+		entries = append(entries, CollectionEntry{
+			MediaRef:     row.MediaRef,
+			FileCount:    int(row.FileCount),
+			MissingCount: int(row.MissingCount),
+		})
+	}
+
+	return entries, nil
+}
+
 // SetAutoMatch never touches a match the user made by hand; the statement itself
 // enforces that, so a scan cannot undo a correction even by mistake.
 func (s *Store) SetAutoMatch(ctx context.Context, fileID int64, match Match, now time.Time) error {

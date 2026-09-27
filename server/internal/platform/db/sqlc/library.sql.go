@@ -277,6 +277,46 @@ func (q *Queries) InsertLibraryRoot(ctx context.Context, arg InsertLibraryRootPa
 	return i, err
 }
 
+const listLibraryCollection = `-- name: ListLibraryCollection :many
+SELECT m.media_ref,
+       COUNT(*) AS file_count,
+       CAST(COALESCE(SUM(CASE WHEN f.missing_since IS NOT NULL THEN 1 ELSE 0 END), 0) AS INTEGER) AS missing_count
+FROM file_match m
+         JOIN library_file f ON f.id = m.file_id
+GROUP BY m.media_ref
+`
+
+type ListLibraryCollectionRow struct {
+	MediaRef     string `json:"media_ref"`
+	FileCount    int64  `json:"file_count"`
+	MissingCount int64  `json:"missing_count"`
+}
+
+// The library as a list of titles rather than of files: one row per title the
+// user has something of, which is what a shelf of posters is made from.
+func (q *Queries) ListLibraryCollection(ctx context.Context) ([]ListLibraryCollectionRow, error) {
+	rows, err := q.db.QueryContext(ctx, listLibraryCollection)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListLibraryCollectionRow{}
+	for rows.Next() {
+		var i ListLibraryCollectionRow
+		if err := rows.Scan(&i.MediaRef, &i.FileCount, &i.MissingCount); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listLibraryFileStates = `-- name: ListLibraryFileStates :many
 SELECT id, rel_path, kind, size_bytes, mtime, missing_since, parser_version, probe_version
 FROM library_file

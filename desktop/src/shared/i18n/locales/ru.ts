@@ -245,12 +245,17 @@ export const ru: Translation = {
 			unmatched_one: '{{count}} без тайтла',
 			unmatched_few: '{{count}} без тайтла',
 			unmatched_many: '{{count}} без тайтла',
-			unmatched_other: '{{count}} без тайтла'
+			unmatched_other: '{{count}} без тайтла',
+			titles_one: '{{count}} тайтл',
+			titles_few: '{{count}} тайтла',
+			titles_many: '{{count}} тайтлов',
+			titles_other: '{{count}} тайтла'
 		},
 		empty: {
 			title: 'Папок библиотеки пока нет',
 			description:
-				'Укажите ноде папку с вашими файлами. Она обойдёт и подпапки, а найденное автоматически дополнит деталями'
+				'Укажите ноде папку с вашими файлами. Она обойдёт и подпапки, а найденное автоматически дополнит деталями',
+			action: 'Добавить папку в настройках'
 		},
 		root: {
 			add: 'Добавить папку',

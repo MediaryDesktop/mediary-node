@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -252,6 +253,83 @@ func (s *Service) describeTitles(ctx context.Context, files []File) []MatchedTit
 	}
 
 	return titles
+}
+
+// describeRefs names titles by reference, for the callers that hold media_refs
+// rather than files. It asks only what the node already holds, so an unreachable
+// source costs a poster, never the entry it belongs to.
+func (s *Service) describeRefs(ctx context.Context, refs []string) map[string]*MatchedTitle {
+	result := make(map[string]*MatchedTitle, len(refs))
+	if s.opts.Titles == nil || len(refs) == 0 {
+		return result
+	}
+
+	described, err := s.opts.Titles.Describe(ctx, refs)
+	if err != nil {
+		s.logger.Warn().Err(err).Msg("describe titles")
+
+		return result
+	}
+
+	for i := range described {
+		title := MatchedTitle(described[i])
+		result[title.MediaRef] = &title
+	}
+
+	return result
+}
+
+// Collection reads the library as titles rather than as files. The grid of
+// posters would otherwise have to pull every file in the library and group them
+// itself, which is a page of work for a number the database already knows.
+func (s *Service) Collection(ctx context.Context) (*LibraryCollection, error) {
+	rows, err := s.store.CollectionEntries(ctx)
+	if err != nil {
+		return nil, apperr.Wrap(err, apperr.KindInternal, "read library collection")
+	}
+
+	counts, err := s.store.Counts(ctx, store.FileFilter{})
+	if err != nil {
+		return nil, apperr.Wrap(err, apperr.KindInternal, "count library files")
+	}
+
+	refs := make([]string, 0, len(rows))
+	for _, row := range rows {
+		refs = append(refs, row.MediaRef)
+	}
+
+	titles := s.describeRefs(ctx, refs)
+
+	entries := make([]LibraryCollectionEntry, 0, len(rows))
+	for _, row := range rows {
+		entries = append(entries, LibraryCollectionEntry{
+			MediaRef:     row.MediaRef,
+			FileCount:    row.FileCount,
+			MissingCount: row.MissingCount,
+			Title:        titles[row.MediaRef],
+		})
+	}
+
+	// By name, so the shelf reads like a shelf. A title the source could not name
+	// sorts under its reference rather than disappearing to the end.
+	slices.SortFunc(entries, func(left, right LibraryCollectionEntry) int {
+		return strings.Compare(collectionSortKey(left), collectionSortKey(right))
+	})
+
+	return &LibraryCollection{
+		Entries:   entries,
+		Files:     counts.Total,
+		Unmatched: counts.Unmatched,
+		Missing:   counts.Missing,
+	}, nil
+}
+
+func collectionSortKey(entry LibraryCollectionEntry) string {
+	if entry.Title != nil && entry.Title.Title != "" {
+		return strings.ToLower(entry.Title.Title)
+	}
+
+	return strings.ToLower(entry.MediaRef)
 }
 
 func (s *Service) SetMatch(ctx context.Context, fileID int64, mediaRef string, season, episode *int) (*File, error) {

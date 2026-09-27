@@ -10,6 +10,7 @@ export {
 	isMatched,
 	isTrackable,
 	libraryCandidatesQuery,
+	libraryCollectionQuery,
 	libraryFilesQuery,
 	libraryModel,
 	libraryRootsQuery,
@@ -27,6 +28,8 @@ export { LibraryFileRow } from './ui/LibraryFileRow'
 export type { LibraryFileRowProps } from './ui/LibraryFileRow'
 
 export type {
+	LibraryCollection,
+	LibraryCollectionEntry,
 	LibraryCounts,
 	LibraryFile,
 	LibraryFileKind,

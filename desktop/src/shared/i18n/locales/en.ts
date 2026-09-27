@@ -246,12 +246,17 @@ export const en = {
 			unmatched_one: '{{count}} unmatched',
 			unmatched_few: '{{count}} unmatched',
 			unmatched_many: '{{count}} unmatched',
-			unmatched_other: '{{count}} unmatched'
+			unmatched_other: '{{count}} unmatched',
+			titles_one: '{{count}} title',
+			titles_few: '{{count}} titles',
+			titles_many: '{{count}} titles',
+			titles_other: '{{count}} titles'
 		},
 		empty: {
 			title: 'No library folders yet',
 			description:
-				'Point the node at a folder with your files. It walks subfolders too and matches what it finds to fill in the details automatically'
+				'Point the node at a folder with your files. It walks subfolders too and matches what it finds to fill in the details automatically',
+			action: 'Add a folder in settings'
 		},
 		root: {
 			add: 'Add folder',

@@ -69,6 +69,26 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/v1/library/collection': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * The library as titles
+		 * @description Every title the library holds files of, by name, with how many files each has. This is what the library shelf is drawn from: grouping a page of files into titles on the client would both cost a page of files and miss everything past it.
+		 */
+		get: operations['getLibraryCollection']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/v1/library/files': {
 		parameters: {
 			query?: never
@@ -562,6 +582,18 @@ export interface components {
 			/** Format: int64 */
 			episode: number
 		}
+		CollectionOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/CollectionOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The library seen as titles rather than as files. */
+			collection: components['schemas']['LibraryCollection']
+			/** @description Attribution for every field that came from an external source. */
+			sources: components['schemas']['Source'][] | null
+		}
 		ControlInputBody: {
 			/**
 			 * Format: uri
@@ -909,6 +941,41 @@ export interface components {
 			 * @example 0.1.0
 			 */
 			version: string
+		}
+		LibraryCollection: {
+			/** @description Titles the library holds files of, by name. */
+			entries: components['schemas']['LibraryCollectionEntry'][] | null
+			/**
+			 * Format: int64
+			 * @description Files in the library in total.
+			 */
+			files: number
+			/**
+			 * Format: int64
+			 * @description Files the last scan did not find where they used to be.
+			 */
+			missing: number
+			/**
+			 * Format: int64
+			 * @description Files that belong to no title yet. Openings and other extras are left out: they belong to none by design.
+			 */
+			unmatched: number
+		}
+		LibraryCollectionEntry: {
+			/**
+			 * Format: int64
+			 * @description Files matched to this title.
+			 */
+			file_count: number
+			/** @description The title, as provider:id. */
+			media_ref: string
+			/**
+			 * Format: int64
+			 * @description Of those, files the last scan did not find.
+			 */
+			missing_count: number
+			/** @description Name and poster, when the node can describe the title. Absent for a title no source has answered for yet. */
+			title?: components['schemas']['MatchedTitle']
 		}
 		List: {
 			/** Format: int64 */
@@ -1856,6 +1923,7 @@ export type SchemaAcceptedOutputBody = components['schemas']['AcceptedOutputBody
 export type SchemaAccount = components['schemas']['Account']
 export type SchemaAddRootInputBody = components['schemas']['AddRootInputBody']
 export type SchemaAiringEpisode = components['schemas']['AiringEpisode']
+export type SchemaCollectionOutputBody = components['schemas']['CollectionOutputBody']
 export type SchemaControlInputBody = components['schemas']['ControlInputBody']
 export type SchemaCounts = components['schemas']['Counts']
 export type SchemaCreateListInputBody = components['schemas']['CreateListInputBody']
@@ -1875,6 +1943,8 @@ export type SchemaFilterOptionsOutputBody = components['schemas']['FilterOptions
 export type SchemaFilterTag = components['schemas']['FilterTag']
 export type SchemaFuzzyDate = components['schemas']['FuzzyDate']
 export type SchemaHealthOutputBody = components['schemas']['HealthOutputBody']
+export type SchemaLibraryCollection = components['schemas']['LibraryCollection']
+export type SchemaLibraryCollectionEntry = components['schemas']['LibraryCollectionEntry']
 export type SchemaList = components['schemas']['List']
 export type SchemaListsOutputBody = components['schemas']['ListsOutputBody']
 export type SchemaMatch = components['schemas']['Match']
@@ -2056,6 +2126,35 @@ export interface operations {
 				}
 				content: {
 					'application/json': components['schemas']['HealthOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getLibraryCollection: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['CollectionOutputBody']
 				}
 			}
 			/** @description Error */

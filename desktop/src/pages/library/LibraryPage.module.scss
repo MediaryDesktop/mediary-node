@@ -12,4 +12,14 @@
 		align-items: center;
 		gap: 0.625rem;
 	}
+
+	.link {
+		color: var(--accent-text);
+		font-size: 0.9375rem;
+		text-decoration: none;
+
+		&:hover {
+			text-decoration: underline;
+		}
+	}
 }

@@ -144,7 +144,12 @@ func (s *Service) ScanRun(ctx context.Context, id int64) (*ScanRunDetail, error)
 		return nil, apperr.Wrap(err, apperr.KindInternal, "read scan run file logs")
 	}
 
-	titles := s.describeGroupTitles(ctx, groups)
+	refs := make([]string, 0, len(groups))
+	for _, group := range groups {
+		refs = append(refs, group.MediaRef)
+	}
+
+	titles := s.describeRefs(ctx, refs)
 
 	detail := &ScanRunDetail{
 		ScanRunSummary: scanRunSummaryFrom(*run),
@@ -190,35 +195,6 @@ func (s *Service) ScanRun(ctx context.Context, id int64) (*ScanRunDetail, error)
 	}
 
 	return detail, nil
-}
-
-// describeGroupTitles names the titles a scan settled on, the same way
-// describeTitles does for a page of files: only what the node already has, so a
-// history entry still shows names with the source unreachable.
-func (s *Service) describeGroupTitles(ctx context.Context, groups []store.ScanRunGroup) map[string]*MatchedTitle {
-	result := make(map[string]*MatchedTitle, len(groups))
-	if s.opts.Titles == nil || len(groups) == 0 {
-		return result
-	}
-
-	refs := make([]string, 0, len(groups))
-	for _, group := range groups {
-		refs = append(refs, group.MediaRef)
-	}
-
-	described, err := s.opts.Titles.Describe(ctx, refs)
-	if err != nil {
-		s.logger.Warn().Err(err).Msg("describe scan run titles")
-
-		return result
-	}
-
-	for i := range described {
-		title := MatchedTitle(described[i])
-		result[title.MediaRef] = &title
-	}
-
-	return result
 }
 
 func scanRunSummaryFrom(run store.ScanRun) ScanRunSummary {

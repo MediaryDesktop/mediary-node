@@ -193,3 +193,13 @@ WHERE file_match.source <> 'manual';
 -- name: DeleteFileMatch :execrows
 DELETE FROM file_match
 WHERE file_id = ?;
+
+-- The library as a list of titles rather than of files: one row per title the
+-- user has something of, which is what a shelf of posters is made from.
+-- name: ListLibraryCollection :many
+SELECT m.media_ref,
+       COUNT(*) AS file_count,
+       CAST(COALESCE(SUM(CASE WHEN f.missing_since IS NOT NULL THEN 1 ELSE 0 END), 0) AS INTEGER) AS missing_count
+FROM file_match m
+         JOIN library_file f ON f.id = m.file_id
+GROUP BY m.media_ref;

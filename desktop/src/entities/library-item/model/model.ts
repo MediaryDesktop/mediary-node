@@ -11,6 +11,7 @@ import {
 	deleteLibraryMatchFx,
 	deleteLibraryRootFx,
 	fetchLibraryCandidatesFx,
+	fetchLibraryCollectionFx,
 	fetchLibraryFilesFx,
 	fetchLibraryRootsFx,
 	fetchLibraryScanFx,
@@ -45,6 +46,11 @@ export const libraryRootsQuery = createQuery({ effect: fetchLibraryRootsFx, name
 export const libraryFilesQuery = createQuery({
 	effect: attach({ effect: fetchLibraryFilesFx, mapParams: () => ({ limit: LIBRARY_PAGE_SIZE }) }),
 	name: 'libraryFiles'
+})
+
+export const libraryCollectionQuery = createQuery({
+	effect: fetchLibraryCollectionFx,
+	name: 'libraryCollection'
 })
 
 export const libraryScanQuery = createQuery({ effect: fetchLibraryScanFx, name: 'libraryScan' })
@@ -86,6 +92,14 @@ export const deleteLibraryMatchMutation = createMutation({
 keepFresh(libraryRootsQuery, { triggers: [libraryUpdated] })
 
 keepFresh(libraryFilesQuery, {
+	triggers: [
+		libraryUpdated,
+		setLibraryMatchMutation.finished.success,
+		deleteLibraryMatchMutation.finished.success
+	]
+})
+
+keepFresh(libraryCollectionQuery, {
 	triggers: [
 		libraryUpdated,
 		setLibraryMatchMutation.finished.success,
