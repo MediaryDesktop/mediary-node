@@ -269,10 +269,13 @@ export const en = {
 			missing_other: '{{count}} missing',
 			section: 'Library roots',
 			menu: 'Folder actions',
-			rescan: 'Rescan this folder'
+			rescan: 'Rescan this folder',
+			none: 'No folders yet'
 		},
 		scan: {
 			start: 'Scan',
+			failed: 'The scan could not be started',
+			noRoots: 'Add a library folder in Settings before scanning',
 			running: 'Scanning…',
 			title: 'Scanning the library',
 			walking: 'Walking folders',
@@ -560,6 +563,10 @@ export const en = {
 		language: {
 			name: 'Language',
 			hint: 'Interface language. Catalog titles keep their own languages'
+		},
+		library: {
+			name: 'Library folders',
+			hint: 'Folders the node walks when it scans. Subfolders are included'
 		},
 		wizard: {
 			name: 'Setup wizard',

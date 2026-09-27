@@ -7,8 +7,8 @@ import { Drawer, Icon } from '@shared/ui'
 
 import { libraryScanRunQuery } from '@entities/library-item'
 
-import { ScanRunGroupRow } from './ScanRunGroupRow'
 import styles from './ScanRunDetail.module.scss'
+import { ScanRunGroupRow } from './ScanRunGroupRow'
 
 export interface ScanRunDetailProps {
 	runId: number | null

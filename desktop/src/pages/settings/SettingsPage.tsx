@@ -1,7 +1,9 @@
 import { Link } from '@tanstack/react-router'
+import clsx from 'clsx'
 
 import { useTranslation } from '@shared/i18n'
 
+import { LibraryRootsSettings } from '@features/manage-library-roots'
 import { LanguageSwitcher } from '@features/switch-language'
 import { ThemeSwitcher } from '@features/switch-theme'
 
@@ -30,6 +32,15 @@ export function SettingsPage() {
 				</span>
 
 				<LanguageSwitcher />
+			</section>
+
+			<section className={clsx(styles.section, styles.block)}>
+				<span className={styles.label}>
+					<span className={styles.name}>{t('settings.library.name')}</span>
+					<span className={styles.hint}>{t('settings.library.hint')}</span>
+				</span>
+
+				<LibraryRootsSettings />
 			</section>
 
 			<section className={styles.section}>

@@ -5,7 +5,9 @@ export function formatWeekday(value: string | Date | number, locale: string): st
 // A history list tells scans apart by when they ran, not by how long ago that
 // was — two scans from the same afternoon both read as "today" otherwise.
 export function formatDateTime(value: string | Date | number, locale: string): string {
-	return new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))
+	return new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }).format(
+		new Date(value)
+	)
 }
 
 export function formatCompact(value: number, locale: string): string {

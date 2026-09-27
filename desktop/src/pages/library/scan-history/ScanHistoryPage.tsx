@@ -8,8 +8,8 @@ import { Badge, EmptyState, Icon, PageHeader, PageTransition } from '@shared/ui'
 
 import { libraryScanHistoryQuery } from '@entities/library-item'
 
-import { ScanRunDetail } from './ScanRunDetail'
 import styles from './ScanHistoryPage.module.scss'
+import { ScanRunDetail } from './ScanRunDetail'
 
 const HISTORY_LIMIT = 50
 
@@ -46,13 +46,19 @@ export function ScanHistoryPage() {
 				<ul className={styles.runs}>
 					{runs.map(run => (
 						<li key={run.id}>
-							<button type='button' className={styles.run} onClick={() => setSelectedId(run.id)}>
+							<button
+								type='button'
+								className={styles.run}
+								onClick={() => setSelectedId(run.id)}
+							>
 								<span className={styles.icon}>
 									<Icon name='common/clock' size={18} />
 								</span>
 
 								<div className={styles.body}>
-									<p className={styles.date}>{formatDateTime(run.started_at, i18n.language)}</p>
+									<p className={styles.date}>
+										{formatDateTime(run.started_at, i18n.language)}
+									</p>
 
 									<p className={styles.summary}>
 										{[

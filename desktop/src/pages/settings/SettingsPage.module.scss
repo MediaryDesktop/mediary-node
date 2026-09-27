@@ -22,6 +22,14 @@
 			margin-top: 0.75rem;
 		}
 
+		// A folder list is not a control that fits beside its label, so the block
+		// variant stacks them instead of squeezing the list into the right column.
+		&.block {
+			flex-direction: column;
+			align-items: stretch;
+			gap: 1rem;
+		}
+
 		.label {
 			display: flex;
 			flex-direction: column;

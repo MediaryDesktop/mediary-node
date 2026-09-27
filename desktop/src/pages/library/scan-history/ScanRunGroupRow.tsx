@@ -26,7 +26,11 @@ export function ScanRunGroupRow({ group }: ScanRunGroupRowProps) {
 	return (
 		<li className={styles.row}>
 			<span className={styles.poster} style={{ background: color ?? undefined }}>
-				{cover ? <img src={cover} alt='' loading='lazy' /> : <Icon name='common/database' size={16} />}
+				{cover ? (
+					<img src={cover} alt='' loading='lazy' />
+				) : (
+					<Icon name='common/database' size={16} />
+				)}
 			</span>
 
 			<div className={styles.body}>
