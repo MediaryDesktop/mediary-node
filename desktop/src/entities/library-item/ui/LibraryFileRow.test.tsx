@@ -15,6 +15,7 @@ function file(overrides: Partial<LibraryFile> = {}): LibraryFile {
 		size_bytes: 1024,
 		modified_at: '2026-01-01T00:00:00Z',
 		missing: false,
+		ignored: false,
 		parsed: { form: 'series', title: 'Frieren', episode: 1 },
 		...overrides
 	}

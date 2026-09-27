@@ -134,6 +134,10 @@ components:
     Counts:
       additionalProperties: false
       properties:
+        ignored:
+          description: Of those, files the user told the node to leave alone.
+          format: int64
+          type: integer
         missing:
           description: Of those, files the last scan did not find.
           format: int64
@@ -150,6 +154,7 @@ components:
         - total
         - unmatched
         - missing
+        - ignored
       type: object
     CreateListInputBody:
       additionalProperties: false
@@ -471,6 +476,9 @@ components:
           description: Identifier of the file, stable while its path does not change.
           format: int64
           type: integer
+        ignored:
+          description: True when the user told the node to leave this file alone. An ignored file is never offered to the matcher again.
+          type: boolean
         kind:
           description: Form of media the extension points at.
           enum:
@@ -514,6 +522,7 @@ components:
         - size_bytes
         - modified_at
         - missing
+        - ignored
         - parsed
       type: object
     FileOutputBody:
@@ -1990,6 +1999,22 @@ components:
       required:
         - connected
       type: object
+    SetIgnoredInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/SetIgnoredInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        ignored:
+          description: True to leave the file alone from now on, false to take that mark off.
+          type: boolean
+      required:
+        - ignored
+      type: object
     SetMatchInputBody:
       additionalProperties: false
       properties:
@@ -2516,12 +2541,19 @@ paths:
               - manga
               - book
             type: string
-        - description: Only files that are not matched to a title yet.
+        - description: Only files that still need a title. Files the user set aside are left out — they are asking for nothing.
           explode: false
           in: query
           name: unmatched
           schema:
-            description: Only files that are not matched to a title yet.
+            description: Only files that still need a title. Files the user set aside are left out — they are asking for nothing.
+            type: boolean
+        - description: Only files the user told the node to leave alone.
+          explode: false
+          in: query
+          name: ignored
+          schema:
+            description: Only files the user told the node to leave alone.
             type: boolean
         - description: Page size.
           explode: false
@@ -2559,6 +2591,31 @@ paths:
       summary: Scanned files
       tags:
         - library
+  /v1/library/files/{id}:
+    delete:
+      description: Removes the file from disk and then from the library. A file the node could not delete keeps its row, so nothing is quietly forgotten while it is still there.
+      operationId: deleteLibraryFile
+      parameters:
+        - description: Identifier of the file to delete.
+          in: path
+          name: id
+          required: true
+          schema:
+            description: Identifier of the file to delete.
+            format: int64
+            type: integer
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Delete a file
+      tags:
+        - library
   /v1/library/files/{id}/candidates:
     get:
       description: "Titles the file's name could refer to, best first, each with how well it fits. This is the other half of the automatic match: what the node would not decide on its own it offers here, for the user to confirm with setLibraryFileMatch. Entries already on the user's own list are marked and come from the node's mirror, so they are offered even while the source is unreachable."
@@ -2586,6 +2643,41 @@ paths:
                 $ref: "#/components/schemas/ErrorModel"
           description: Error
       summary: What this file could be
+      tags:
+        - library
+  /v1/library/files/{id}/ignore:
+    put:
+      description: Sets a file aside so no scan offers it for matching again. A sample, a trailer the parser could not place, a file that belongs to nothing — without this it comes back as unmatched after every scan and the count never reaches zero. Nothing on disk is touched.
+      operationId: setLibraryFileIgnored
+      parameters:
+        - description: Identifier of the file to set aside.
+          in: path
+          name: id
+          required: true
+          schema:
+            description: Identifier of the file to set aside.
+            format: int64
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetIgnoredInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FileOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Leave a file alone
       tags:
         - library
   /v1/library/files/{id}/match:

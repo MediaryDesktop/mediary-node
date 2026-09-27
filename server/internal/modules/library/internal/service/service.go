@@ -156,6 +156,7 @@ type FileQuery struct {
 	Kind          string
 	MediaForm     string
 	UnmatchedOnly bool
+	IgnoredOnly   bool
 	Limit         int
 	Offset        int
 }
@@ -179,6 +180,7 @@ func (s *Service) Files(ctx context.Context, query FileQuery) (*FilePage, error)
 		Kind:          query.Kind,
 		MediaForm:     query.MediaForm,
 		UnmatchedOnly: query.UnmatchedOnly,
+		IgnoredOnly:   query.IgnoredOnly,
 		Limit:         limit,
 		Offset:        offset,
 	})
@@ -205,7 +207,12 @@ func (s *Service) Files(ctx context.Context, query FileQuery) (*FilePage, error)
 		Total:  total,
 		Limit:  limit,
 		Offset: offset,
-		Counts: Counts{Total: counts.Total, Unmatched: counts.Unmatched, Missing: counts.Missing},
+		Counts: Counts{
+			Total:     counts.Total,
+			Unmatched: counts.Unmatched,
+			Missing:   counts.Missing,
+			Ignored:   counts.Ignored,
+		},
 		Titles: s.describeTitles(ctx, items),
 	}, nil
 }
@@ -421,6 +428,7 @@ func fileFrom(row store.File) File {
 		SizeBytes:  row.Size,
 		ModifiedAt: row.Mtime,
 		Missing:    row.MissingSince != nil,
+		Ignored:    row.IgnoredSince != nil,
 		Parsed: Parsed{
 			Form:    row.Parsed.Form,
 			Title:   row.Parsed.Title,

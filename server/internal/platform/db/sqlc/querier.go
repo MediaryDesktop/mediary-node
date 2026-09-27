@@ -9,6 +9,7 @@ import (
 )
 
 type Querier interface {
+	ClearLibraryFileIgnored(ctx context.Context, id int64) (int64, error)
 	ClearLibraryFileMissing(ctx context.Context, arg ClearLibraryFileMissingParams) error
 	// What the filter tabs above the list show. One query rather than three: the
 	// three numbers have to agree with each other, and they only do if they are read
@@ -22,6 +23,9 @@ type Querier interface {
 	DeleteAniListOutboxForOtherAccounts(ctx context.Context, accountID int64) error
 	DeleteCustomList(ctx context.Context, id int64) (int64, error)
 	DeleteFileMatch(ctx context.Context, fileID int64) (int64, error)
+	// The match hangs off the file row and goes with it: the user deleted the file
+	// itself, not only what it was tied to.
+	DeleteLibraryFile(ctx context.Context, id int64) (int64, error)
 	DeleteLibraryRoot(ctx context.Context, id int64) (int64, error)
 	DeleteSourceCacheOlderThan(ctx context.Context, arg DeleteSourceCacheOlderThanParams) error
 	GetAniListMirror(ctx context.Context, kind string) (AnilistMirror, error)
@@ -68,6 +72,7 @@ type Querier interface {
 	PruneScanRuns(ctx context.Context, limit int64) error
 	RecordAniListOutboxFailure(ctx context.Context, arg RecordAniListOutboxFailureParams) error
 	RenameCustomList(ctx context.Context, arg RenameCustomListParams) (int64, error)
+	SetLibraryFileIgnored(ctx context.Context, arg SetLibraryFileIgnoredParams) (int64, error)
 	TouchLibraryRoot(ctx context.Context, arg TouchLibraryRootParams) error
 	UpdateLibraryFile(ctx context.Context, arg UpdateLibraryFileParams) error
 	// Only the parsed columns: the file itself did not change, a newer parser reads

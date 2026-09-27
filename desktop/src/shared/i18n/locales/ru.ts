@@ -315,6 +315,21 @@ export const ru: Translation = {
 			failures: 'Папки, которые не удалось прочитать',
 			rootFailed: 'Папку не удалось прочитать: {{reason}}'
 		},
+		unmatched: {
+			action_one: '{{count}} без тайтла',
+			action_few: '{{count}} без тайтла',
+			action_many: '{{count}} без тайтла',
+			action_other: '{{count}} без тайтла',
+			title: 'Файлы без тайтла',
+			description:
+				'Сопоставьте то, что нода не смогла распознать, или отложите, чтобы больше не спрашивала',
+			empty: 'У всех файлов есть тайтл',
+			noneIgnored: 'Ничего не отложено',
+			view: {
+				unmatched: 'Без тайтла',
+				ignored: 'Отложенные'
+			}
+		},
 		history: {
 			action: 'История',
 			title: 'История сканирований',
@@ -366,6 +381,14 @@ export const ru: Translation = {
 			match: 'Сопоставить',
 			change: 'Изменить',
 			clear: 'Забыть сопоставление',
+			ignore: 'Не трогать этот файл',
+			unignore: 'Снова учитывать',
+			ignored: 'Отложен',
+			ignoreFailed: 'Не удалось отложить файл',
+			deleteFile: 'Удалить с диска',
+			deleteFileTitle: 'Удалить этот файл?',
+			deleteFileWarning: 'Файл будет удалён с этого компьютера. Это нельзя отменить.',
+			deleteFailed: 'Не удалось удалить файл',
 			unknownTitle: 'Не распознано',
 			season: 'Сезон {{number}}',
 			episode: 'Серия {{number}}',

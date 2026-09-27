@@ -57,7 +57,8 @@ type FilesInput struct {
 	RootID        int64  `query:"root_id" doc:"Only files under this root."`
 	Kind          string `query:"kind" enum:"video,manga,book" doc:"Only files whose extension points at this form of media."`
 	Form          string `query:"form" enum:"series,movie,special,extra,manga,book" doc:"Only files whose name reads as this. Use it to leave out openings and extras, which are never episodes."`
-	UnmatchedOnly bool   `query:"unmatched" doc:"Only files that are not matched to a title yet."`
+	UnmatchedOnly bool   `query:"unmatched" doc:"Only files that still need a title. Files the user set aside are left out — they are asking for nothing."`
+	IgnoredOnly   bool   `query:"ignored" doc:"Only files the user told the node to leave alone."`
 	Limit         int    `query:"limit" minimum:"1" maximum:"500" default:"100" doc:"Page size."`
 	Offset        int    `query:"offset" minimum:"0" doc:"How many files to skip."`
 }
@@ -85,6 +86,17 @@ type FileOutput struct {
 
 type DeleteMatchInput struct {
 	ID int64 `path:"id" doc:"Identifier of the file whose match to forget."`
+}
+
+type SetIgnoredInput struct {
+	ID   int64 `path:"id" doc:"Identifier of the file to set aside."`
+	Body struct {
+		Ignored bool `json:"ignored" doc:"True to leave the file alone from now on, false to take that mark off."`
+	}
+}
+
+type DeleteFileInput struct {
+	ID int64 `path:"id" doc:"Identifier of the file to delete."`
 }
 
 type SuggestionsInput struct {
@@ -232,6 +244,7 @@ func (h *Handler) Register(api huma.API) {
 			Kind:          in.Kind,
 			MediaForm:     in.Form,
 			UnmatchedOnly: in.UnmatchedOnly,
+			IgnoredOnly:   in.IgnoredOnly,
 			Limit:         in.Limit,
 			Offset:        in.Offset,
 		})
@@ -294,6 +307,41 @@ func (h *Handler) Register(api huma.API) {
 		DefaultStatus: http.StatusNoContent,
 	}, func(ctx context.Context, in *DeleteMatchInput) (*struct{}, error) {
 		if err := h.svc.DeleteMatch(ctx, in.ID); err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return nil, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "setLibraryFileIgnored",
+		Method:      http.MethodPut,
+		Path:        "/v1/library/files/{id}/ignore",
+		Summary:     "Leave a file alone",
+		Description: "Sets a file aside so no scan offers it for matching again. A sample, a trailer the parser could not place, a file that belongs to nothing — without this it comes back as unmatched after every scan and the count never reaches zero. Nothing on disk is touched.",
+		Tags:        []string{"library"},
+	}, func(ctx context.Context, in *SetIgnoredInput) (*FileOutput, error) {
+		file, err := h.svc.SetIgnored(ctx, in.ID, in.Body.Ignored)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		out := &FileOutput{}
+		out.Body.File = file
+
+		return out, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID:   "deleteLibraryFile",
+		Method:        http.MethodDelete,
+		Path:          "/v1/library/files/{id}",
+		Summary:       "Delete a file",
+		Description:   "Removes the file from disk and then from the library. A file the node could not delete keeps its row, so nothing is quietly forgotten while it is still there.",
+		Tags:          []string{"library"},
+		DefaultStatus: http.StatusNoContent,
+	}, func(ctx context.Context, in *DeleteFileInput) (*struct{}, error) {
+		if err := h.svc.DeleteFile(ctx, in.ID); err != nil {
 			return nil, httpapi.ToHTTP(err)
 		}
 

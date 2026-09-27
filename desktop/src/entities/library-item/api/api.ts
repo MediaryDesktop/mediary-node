@@ -42,6 +42,7 @@ export interface LibraryFileQuery {
 	kind?: LibraryFileKind
 	form?: LibraryMediaForm
 	unmatched?: boolean
+	ignored?: boolean
 	limit?: number
 	offset?: number
 }
@@ -54,6 +55,7 @@ export const fetchLibraryFilesFx = createNodeRequestFx<LibraryFileQuery, NodeSch
 			kind: query.kind,
 			form: query.form,
 			unmatched: query.unmatched,
+			ignored: query.ignored,
 			limit: query.limit,
 			offset: query.offset
 		}
@@ -93,6 +95,25 @@ export const setLibraryMatchFx = createNodeRequestFx<SetLibraryMatchParams, Node
 		body: { media_ref: mediaRef, season, episode }
 	})
 )
+
+export interface SetLibraryFileIgnoredParams {
+	fileId: number
+	ignored: boolean
+}
+
+export const setLibraryFileIgnoredFx = createNodeRequestFx<
+	SetLibraryFileIgnoredParams,
+	NodeSchemas['FileOutputBody']
+>(({ fileId, ignored }) => ({
+	url: `/v1/library/files/${fileId}/ignore`,
+	method: 'PUT',
+	body: { ignored }
+}))
+
+export const deleteLibraryFileFx = createNodeRequestFx<number, void>(fileId => ({
+	url: `/v1/library/files/${fileId}`,
+	method: 'DELETE'
+}))
 
 export const deleteLibraryMatchFx = createNodeRequestFx<number, void>(fileId => ({
 	url: `/v1/library/files/${fileId}/match`,

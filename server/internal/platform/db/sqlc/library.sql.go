@@ -10,6 +10,20 @@ import (
 	"database/sql"
 )
 
+const clearLibraryFileIgnored = `-- name: ClearLibraryFileIgnored :execrows
+UPDATE library_file
+SET ignored_at = NULL
+WHERE id = ?
+`
+
+func (q *Queries) ClearLibraryFileIgnored(ctx context.Context, id int64) (int64, error) {
+	result, err := q.db.ExecContext(ctx, clearLibraryFileIgnored, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
 const clearLibraryFileMissing = `-- name: ClearLibraryFileMissing :exec
 UPDATE library_file
 SET missing_since = NULL,
@@ -30,8 +44,10 @@ func (q *Queries) ClearLibraryFileMissing(ctx context.Context, arg ClearLibraryF
 const countLibraryFileStates = `-- name: CountLibraryFileStates :one
 SELECT COUNT(*) AS total,
        CAST(COALESCE(SUM(CASE WHEN m.file_id IS NULL
+                               AND f.ignored_at IS NULL
                                AND f.media_form IS NOT NULL
                                AND f.media_form <> 'extra' THEN 1 ELSE 0 END), 0) AS INTEGER) AS unmatched,
+       CAST(COALESCE(SUM(CASE WHEN f.ignored_at IS NOT NULL THEN 1 ELSE 0 END), 0) AS INTEGER) AS ignored,
        CAST(COALESCE(SUM(CASE WHEN f.missing_since IS NOT NULL THEN 1 ELSE 0 END), 0) AS INTEGER) AS missing
 FROM library_file f
          LEFT JOIN file_match m ON m.file_id = f.id
@@ -49,6 +65,7 @@ type CountLibraryFileStatesParams struct {
 type CountLibraryFileStatesRow struct {
 	Total     int64 `json:"total"`
 	Unmatched int64 `json:"unmatched"`
+	Ignored   int64 `json:"ignored"`
 	Missing   int64 `json:"missing"`
 }
 
@@ -58,7 +75,12 @@ type CountLibraryFileStatesRow struct {
 func (q *Queries) CountLibraryFileStates(ctx context.Context, arg CountLibraryFileStatesParams) (CountLibraryFileStatesRow, error) {
 	row := q.db.QueryRowContext(ctx, countLibraryFileStates, arg.RootID, arg.Kind, arg.MediaForm)
 	var i CountLibraryFileStatesRow
-	err := row.Scan(&i.Total, &i.Unmatched, &i.Missing)
+	err := row.Scan(
+		&i.Total,
+		&i.Unmatched,
+		&i.Ignored,
+		&i.Missing,
+	)
 	return i, err
 }
 
@@ -69,7 +91,8 @@ FROM library_file f
 WHERE (CAST(?1 AS INTEGER) = 0 OR f.root_id = CAST(?1 AS INTEGER))
   AND (CAST(?2 AS TEXT) = '' OR f.kind = CAST(?2 AS TEXT))
   AND (CAST(?3 AS TEXT) = '' OR f.media_form = CAST(?3 AS TEXT))
-  AND (CAST(?4 AS INTEGER) = 0 OR m.file_id IS NULL)
+  AND (CAST(?4 AS INTEGER) = 0 OR (m.file_id IS NULL AND f.ignored_at IS NULL))
+  AND (CAST(?5 AS INTEGER) = 0 OR f.ignored_at IS NOT NULL)
 `
 
 type CountLibraryFilesParams struct {
@@ -77,6 +100,7 @@ type CountLibraryFilesParams struct {
 	Kind          string `json:"kind"`
 	MediaForm     string `json:"media_form"`
 	UnmatchedOnly int64  `json:"unmatched_only"`
+	IgnoredOnly   int64  `json:"ignored_only"`
 }
 
 func (q *Queries) CountLibraryFiles(ctx context.Context, arg CountLibraryFilesParams) (int64, error) {
@@ -85,6 +109,7 @@ func (q *Queries) CountLibraryFiles(ctx context.Context, arg CountLibraryFilesPa
 		arg.Kind,
 		arg.MediaForm,
 		arg.UnmatchedOnly,
+		arg.IgnoredOnly,
 	)
 	var total int64
 	err := row.Scan(&total)
@@ -98,6 +123,21 @@ WHERE file_id = ?
 
 func (q *Queries) DeleteFileMatch(ctx context.Context, fileID int64) (int64, error) {
 	result, err := q.db.ExecContext(ctx, deleteFileMatch, fileID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+const deleteLibraryFile = `-- name: DeleteLibraryFile :execrows
+DELETE FROM library_file
+WHERE id = ?
+`
+
+// The match hangs off the file row and goes with it: the user deleted the file
+// itself, not only what it was tied to.
+func (q *Queries) DeleteLibraryFile(ctx context.Context, id int64) (int64, error) {
+	result, err := q.db.ExecContext(ctx, deleteLibraryFile, id)
 	if err != nil {
 		return 0, err
 	}
@@ -119,7 +159,7 @@ func (q *Queries) DeleteLibraryRoot(ctx context.Context, id int64) (int64, error
 
 const getLibraryFile = `-- name: GetLibraryFile :one
 SELECT f.id, f.root_id, r.path AS root_path, f.rel_path, f.kind, f.size_bytes,
-       f.mtime, f.scanned_at, f.missing_since,
+       f.mtime, f.scanned_at, f.missing_since, f.ignored_at,
        f.media_form, f.parsed_title, f.parsed_year, f.parsed_season,
        f.parsed_episode, f.parsed_chapter, f.parsed_volume, f.duration_seconds,
        m.media_ref, m.season, m.episode, m.confidence, m.source AS match_source
@@ -139,6 +179,7 @@ type GetLibraryFileRow struct {
 	Mtime           int64           `json:"mtime"`
 	ScannedAt       int64           `json:"scanned_at"`
 	MissingSince    sql.NullInt64   `json:"missing_since"`
+	IgnoredAt       sql.NullInt64   `json:"ignored_at"`
 	MediaForm       sql.NullString  `json:"media_form"`
 	ParsedTitle     sql.NullString  `json:"parsed_title"`
 	ParsedYear      sql.NullInt64   `json:"parsed_year"`
@@ -167,6 +208,7 @@ func (q *Queries) GetLibraryFile(ctx context.Context, id int64) (GetLibraryFileR
 		&i.Mtime,
 		&i.ScannedAt,
 		&i.MissingSince,
+		&i.IgnoredAt,
 		&i.MediaForm,
 		&i.ParsedTitle,
 		&i.ParsedYear,
@@ -370,7 +412,7 @@ func (q *Queries) ListLibraryFileStates(ctx context.Context, rootID int64) ([]Li
 
 const listLibraryFiles = `-- name: ListLibraryFiles :many
 SELECT f.id, f.root_id, r.path AS root_path, f.rel_path, f.kind, f.size_bytes,
-       f.mtime, f.scanned_at, f.missing_since,
+       f.mtime, f.scanned_at, f.missing_since, f.ignored_at,
        f.media_form, f.parsed_title, f.parsed_year, f.parsed_season,
        f.parsed_episode, f.parsed_chapter, f.parsed_volume, f.duration_seconds,
        m.media_ref, m.season, m.episode, m.confidence, m.source AS match_source
@@ -380,9 +422,10 @@ FROM library_file f
 WHERE (CAST(?1 AS INTEGER) = 0 OR f.root_id = CAST(?1 AS INTEGER))
   AND (CAST(?2 AS TEXT) = '' OR f.kind = CAST(?2 AS TEXT))
   AND (CAST(?3 AS TEXT) = '' OR f.media_form = CAST(?3 AS TEXT))
-  AND (CAST(?4 AS INTEGER) = 0 OR m.file_id IS NULL)
+  AND (CAST(?4 AS INTEGER) = 0 OR (m.file_id IS NULL AND f.ignored_at IS NULL))
+  AND (CAST(?5 AS INTEGER) = 0 OR f.ignored_at IS NOT NULL)
 ORDER BY r.path, f.rel_path
-LIMIT CAST(?6 AS INTEGER) OFFSET CAST(?5 AS INTEGER)
+LIMIT CAST(?7 AS INTEGER) OFFSET CAST(?6 AS INTEGER)
 `
 
 type ListLibraryFilesParams struct {
@@ -390,6 +433,7 @@ type ListLibraryFilesParams struct {
 	Kind          string `json:"kind"`
 	MediaForm     string `json:"media_form"`
 	UnmatchedOnly int64  `json:"unmatched_only"`
+	IgnoredOnly   int64  `json:"ignored_only"`
 	PageOffset    int64  `json:"page_offset"`
 	PageLimit     int64  `json:"page_limit"`
 }
@@ -404,6 +448,7 @@ type ListLibraryFilesRow struct {
 	Mtime           int64           `json:"mtime"`
 	ScannedAt       int64           `json:"scanned_at"`
 	MissingSince    sql.NullInt64   `json:"missing_since"`
+	IgnoredAt       sql.NullInt64   `json:"ignored_at"`
 	MediaForm       sql.NullString  `json:"media_form"`
 	ParsedTitle     sql.NullString  `json:"parsed_title"`
 	ParsedYear      sql.NullInt64   `json:"parsed_year"`
@@ -425,6 +470,7 @@ func (q *Queries) ListLibraryFiles(ctx context.Context, arg ListLibraryFilesPara
 		arg.Kind,
 		arg.MediaForm,
 		arg.UnmatchedOnly,
+		arg.IgnoredOnly,
 		arg.PageOffset,
 		arg.PageLimit,
 	)
@@ -445,6 +491,7 @@ func (q *Queries) ListLibraryFiles(ctx context.Context, arg ListLibraryFilesPara
 			&i.Mtime,
 			&i.ScannedAt,
 			&i.MissingSince,
+			&i.IgnoredAt,
 			&i.MediaForm,
 			&i.ParsedTitle,
 			&i.ParsedYear,
@@ -536,6 +583,7 @@ FROM library_file f
          LEFT JOIN file_match m ON m.file_id = f.id
 WHERE m.file_id IS NULL
   AND f.missing_since IS NULL
+  AND f.ignored_at IS NULL
   AND f.parsed_title IS NOT NULL
   AND f.parsed_title <> ''
   -- An opening or a trailer belongs to no episode, so there is nothing to match.
@@ -609,6 +657,25 @@ type MarkLibraryFileMissingParams struct {
 func (q *Queries) MarkLibraryFileMissing(ctx context.Context, arg MarkLibraryFileMissingParams) error {
 	_, err := q.db.ExecContext(ctx, markLibraryFileMissing, arg.MissingSince, arg.ID)
 	return err
+}
+
+const setLibraryFileIgnored = `-- name: SetLibraryFileIgnored :execrows
+UPDATE library_file
+SET ignored_at = ?
+WHERE id = ?
+`
+
+type SetLibraryFileIgnoredParams struct {
+	IgnoredAt sql.NullInt64 `json:"ignored_at"`
+	ID        int64         `json:"id"`
+}
+
+func (q *Queries) SetLibraryFileIgnored(ctx context.Context, arg SetLibraryFileIgnoredParams) (int64, error) {
+	result, err := q.db.ExecContext(ctx, setLibraryFileIgnored, arg.IgnoredAt, arg.ID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
 }
 
 const touchLibraryRoot = `-- name: TouchLibraryRoot :exec

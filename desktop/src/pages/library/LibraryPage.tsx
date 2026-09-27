@@ -7,6 +7,8 @@ import { Button, EmptyState, Icon, PageHeader, PageTransition } from '@shared/ui
 
 import { libraryCollectionQuery, libraryRootsQuery, libraryScanQuery } from '@entities/library-item'
 
+import { UnmatchedFilesDrawer, unmatchedFilesModel } from '@features/manage-unmatched-files'
+import { MatchFileDrawer, matchFileModel } from '@features/match-library-file'
 import { scanLibraryModel, ScanModal } from '@features/scan-library'
 
 import { LibraryCollection } from './library-collection/LibraryCollection'
@@ -29,6 +31,8 @@ export function LibraryPage() {
 	])
 
 	const scanRequested = useUnit(scanLibraryModel.requested)
+	const unmatchedRequested = useUnit(unmatchedFilesModel.requested)
+	const matchRequested = useUnit(matchFileModel.requested)
 
 	useEffect(() => {
 		startCollection()
@@ -60,6 +64,15 @@ export function LibraryPage() {
 				subtitle={summary}
 				rightContent={
 					<div className={styles.actions}>
+						{collection !== null && collection.unmatched > 0 && (
+							<Button
+								startIcon={<Icon name='common/info' size={16} />}
+								onClick={() => unmatchedRequested()}
+							>
+								{t('library.unmatched.action', { count: collection.unmatched })}
+							</Button>
+						)}
+
 						<Button
 							variant='primary'
 							startIcon={<Icon name='common/reset' size={16} />}
@@ -107,6 +120,8 @@ export function LibraryPage() {
 				))}
 
 			<ScanModal />
+			<UnmatchedFilesDrawer onMatch={file => matchRequested(file)} />
+			<MatchFileDrawer />
 		</PageTransition>
 	)
 }

@@ -65,6 +65,7 @@ type File struct {
 	ScannedAt time.Time
 
 	MissingSince *time.Time
+	IgnoredSince *time.Time
 	Parsed       Parsed
 	Match        *Match
 
@@ -353,6 +354,7 @@ type FileFilter struct {
 	Kind          string
 	MediaForm     string
 	UnmatchedOnly bool
+	IgnoredOnly   bool
 	Limit         int
 	Offset        int
 }
@@ -365,11 +367,17 @@ func (s *Store) Files(ctx context.Context, filter FileFilter) ([]File, int, erro
 		unmatchedOnly = 1
 	}
 
+	ignoredOnly := int64(0)
+	if filter.IgnoredOnly {
+		ignoredOnly = 1
+	}
+
 	total, err := queries.CountLibraryFiles(ctx, sqlc.CountLibraryFilesParams{
 		RootID:        filter.RootID,
 		Kind:          filter.Kind,
 		MediaForm:     filter.MediaForm,
 		UnmatchedOnly: unmatchedOnly,
+		IgnoredOnly:   ignoredOnly,
 	})
 	if err != nil {
 		return nil, 0, fmt.Errorf("count library files: %w", err)
@@ -380,6 +388,7 @@ func (s *Store) Files(ctx context.Context, filter FileFilter) ([]File, int, erro
 		Kind:          filter.Kind,
 		MediaForm:     filter.MediaForm,
 		UnmatchedOnly: unmatchedOnly,
+		IgnoredOnly:   ignoredOnly,
 		PageLimit:     int64(filter.Limit),
 		PageOffset:    int64(filter.Offset),
 	})
@@ -401,6 +410,7 @@ func (s *Store) Files(ctx context.Context, filter FileFilter) ([]File, int, erro
 			Mtime:        time.UnixMilli(row.Mtime).UTC(),
 			ScannedAt:    time.Unix(row.ScannedAt, 0).UTC(),
 			MissingSince: optionalTime(row.MissingSince),
+			IgnoredSince: optionalTime(row.IgnoredAt),
 			Parsed: parsedFrom(row.MediaForm, row.ParsedTitle, row.ParsedYear,
 				row.ParsedSeason, row.ParsedEpisode, row.ParsedChapter, row.ParsedVolume),
 			Match:    matchFrom(row.MediaRef, row.Season, row.Episode, row.Confidence, row.MatchSource),
@@ -430,6 +440,7 @@ func (s *Store) File(ctx context.Context, id int64) (*File, error) {
 		Mtime:        time.UnixMilli(row.Mtime).UTC(),
 		ScannedAt:    time.Unix(row.ScannedAt, 0).UTC(),
 		MissingSince: optionalTime(row.MissingSince),
+		IgnoredSince: optionalTime(row.IgnoredAt),
 		Parsed: parsedFrom(row.MediaForm, row.ParsedTitle, row.ParsedYear,
 			row.ParsedSeason, row.ParsedEpisode, row.ParsedChapter, row.ParsedVolume),
 		Match:    matchFrom(row.MediaRef, row.Season, row.Episode, row.Confidence, row.MatchSource),
@@ -467,6 +478,40 @@ func (s *Store) UnmatchedFiles(ctx context.Context, limit int) ([]Unmatched, err
 	}
 
 	return files, nil
+}
+
+// SetIgnored marks a file as one the node should leave alone, or clears that
+// mark when at is nil.
+func (s *Store) SetIgnored(ctx context.Context, fileID int64, at *time.Time) (bool, error) {
+	queries := sqlc.New(s.db)
+
+	if at == nil {
+		cleared, err := queries.ClearLibraryFileIgnored(ctx, fileID)
+		if err != nil {
+			return false, fmt.Errorf("stop ignoring file %d: %w", fileID, err)
+		}
+
+		return cleared > 0, nil
+	}
+
+	updated, err := queries.SetLibraryFileIgnored(ctx, sqlc.SetLibraryFileIgnoredParams{
+		ID:        fileID,
+		IgnoredAt: sql.NullInt64{Int64: at.Unix(), Valid: true},
+	})
+	if err != nil {
+		return false, fmt.Errorf("ignore file %d: %w", fileID, err)
+	}
+
+	return updated > 0, nil
+}
+
+func (s *Store) DeleteFile(ctx context.Context, fileID int64) (bool, error) {
+	deleted, err := sqlc.New(s.db).DeleteLibraryFile(ctx, fileID)
+	if err != nil {
+		return false, fmt.Errorf("delete library file %d: %w", fileID, err)
+	}
+
+	return deleted > 0, nil
 }
 
 // CollectionEntry is one title the library holds something of, with how much of
@@ -607,6 +652,7 @@ type Counts struct {
 	Total     int
 	Unmatched int
 	Missing   int
+	Ignored   int
 }
 
 func (s *Store) Counts(ctx context.Context, filter FileFilter) (Counts, error) {
@@ -623,6 +669,7 @@ func (s *Store) Counts(ctx context.Context, filter FileFilter) (Counts, error) {
 		Total:     int(row.Total),
 		Unmatched: int(row.Unmatched),
 		Missing:   int(row.Missing),
+		Ignored:   int(row.Ignored),
 	}, nil
 }
 

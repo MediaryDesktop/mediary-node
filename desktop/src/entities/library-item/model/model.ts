@@ -1,5 +1,5 @@
 import { createMutation, createQuery, keepFresh } from '@farfetched/core'
-import { attach, createEffect, createEvent, createStore, sample } from 'effector'
+import { createEffect, createEvent, createStore, sample } from 'effector'
 
 import { atom } from '@shared/factory'
 import { formatDuration } from '@shared/lib'
@@ -8,6 +8,7 @@ import { nodeTopic } from '@infra/node'
 
 import {
 	addLibraryRootFx,
+	deleteLibraryFileFx,
 	deleteLibraryMatchFx,
 	deleteLibraryRootFx,
 	fetchLibraryCandidatesFx,
@@ -17,6 +18,7 @@ import {
 	fetchLibraryScanFx,
 	fetchLibraryScanHistoryFx,
 	fetchLibraryScanRunFx,
+	setLibraryFileIgnoredFx,
 	setLibraryMatchFx,
 	startLibraryScanFx
 } from '../api/api'
@@ -43,10 +45,7 @@ const scanFinished = scanPhase('finished')
 
 export const libraryRootsQuery = createQuery({ effect: fetchLibraryRootsFx, name: 'libraryRoots' })
 
-export const libraryFilesQuery = createQuery({
-	effect: attach({ effect: fetchLibraryFilesFx, mapParams: () => ({ limit: LIBRARY_PAGE_SIZE }) }),
-	name: 'libraryFiles'
-})
+export const libraryFilesQuery = createQuery({ effect: fetchLibraryFilesFx, name: 'libraryFiles' })
 
 export const libraryCollectionQuery = createQuery({
 	effect: fetchLibraryCollectionFx,
@@ -81,6 +80,16 @@ export const startLibraryScanMutation = createMutation({
 
 export const setLibraryMatchMutation = createMutation({ effect: setLibraryMatchFx, name: 'setLibraryMatch' })
 
+export const setLibraryFileIgnoredMutation = createMutation({
+	effect: setLibraryFileIgnoredFx,
+	name: 'setLibraryFileIgnored'
+})
+
+export const deleteLibraryFileMutation = createMutation({
+	effect: deleteLibraryFileFx,
+	name: 'deleteLibraryFile'
+})
+
 export const deleteLibraryMatchMutation = createMutation({
 	effect: deleteLibraryMatchFx,
 	name: 'deleteLibraryMatch'
@@ -95,7 +104,9 @@ keepFresh(libraryFilesQuery, {
 	triggers: [
 		libraryUpdated,
 		setLibraryMatchMutation.finished.success,
-		deleteLibraryMatchMutation.finished.success
+		deleteLibraryMatchMutation.finished.success,
+		setLibraryFileIgnoredMutation.finished.success,
+		deleteLibraryFileMutation.finished.success
 	]
 })
 
@@ -103,7 +114,9 @@ keepFresh(libraryCollectionQuery, {
 	triggers: [
 		libraryUpdated,
 		setLibraryMatchMutation.finished.success,
-		deleteLibraryMatchMutation.finished.success
+		deleteLibraryMatchMutation.finished.success,
+		setLibraryFileIgnoredMutation.finished.success,
+		deleteLibraryFileMutation.finished.success
 	]
 })
 
@@ -158,7 +171,7 @@ export const libraryModel = atom(() => {
 
 	sample({
 		clock: [addLibraryRootMutation.finished.success, deleteLibraryRootMutation.finished.success],
-		target: [libraryRootsQuery.start, libraryFilesQuery.start]
+		target: libraryRootsQuery.start
 	})
 
 	// Progress is read off the events rather than refetched: during a scan they
@@ -224,6 +237,10 @@ export function isMatched(file: LibraryFile): boolean {
 
 // An opening or a trailer belongs to no episode, so the node never matches it and
 // the library does not offer to.
+export function isIgnored(file: LibraryFile): boolean {
+	return file.ignored
+}
+
 export function isTrackable(file: LibraryFile): boolean {
 	return file.parsed.form !== 'extra'
 }

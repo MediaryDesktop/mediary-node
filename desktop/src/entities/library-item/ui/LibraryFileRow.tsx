@@ -25,9 +25,19 @@ export interface LibraryFileRowProps {
 	onPlay?: (file: LibraryFile) => void
 	onMatch?: (file: LibraryFile) => void
 	onClearMatch?: (file: LibraryFile) => void
+	onIgnore?: (file: LibraryFile, ignored: boolean) => void
+	onDelete?: (file: LibraryFile) => void
 }
 
-export function LibraryFileRow({ file, playing, onPlay, onMatch, onClearMatch }: LibraryFileRowProps) {
+export function LibraryFileRow({
+	file,
+	playing,
+	onPlay,
+	onMatch,
+	onClearMatch,
+	onIgnore,
+	onDelete
+}: LibraryFileRowProps) {
 	const { t } = useTranslation()
 
 	const form = file.parsed.form
@@ -57,6 +67,25 @@ export function LibraryFileRow({ file, playing, onPlay, onMatch, onClearMatch }:
 			icon: 'common/close',
 			danger: true,
 			onSelect: () => onClearMatch(file)
+		})
+	}
+
+	if (onIgnore) {
+		menu.push({
+			id: 'ignore',
+			label: file.ignored ? t('library.file.unignore') : t('library.file.ignore'),
+			icon: file.ignored ? 'common/eye' : 'common/eye-off',
+			onSelect: () => onIgnore(file, !file.ignored)
+		})
+	}
+
+	if (onDelete) {
+		menu.push({
+			id: 'delete',
+			label: t('library.file.deleteFile'),
+			icon: 'common/trash',
+			danger: true,
+			onSelect: () => onDelete(file)
 		})
 	}
 
@@ -95,6 +124,7 @@ export function LibraryFileRow({ file, playing, onPlay, onMatch, onClearMatch }:
 				</p>
 
 				{file.missing && <Badge tone='danger'>{t('library.file.missing')}</Badge>}
+				{file.ignored && <Badge>{t('library.file.ignored')}</Badge>}
 			</div>
 
 			<span className={styles.number}>{numbering.join(' · ')}</span>

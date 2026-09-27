@@ -316,6 +316,20 @@ export const en = {
 			failures: 'Folders that could not be read',
 			rootFailed: 'A folder could not be read: {{reason}}'
 		},
+		unmatched: {
+			action_one: '{{count}} unmatched',
+			action_few: '{{count}} unmatched',
+			action_many: '{{count}} unmatched',
+			action_other: '{{count}} unmatched',
+			title: 'Files without a title',
+			description: 'Match what the node could not work out, or set it aside so it stops asking',
+			empty: 'Every file has a title',
+			noneIgnored: 'Nothing has been set aside',
+			view: {
+				unmatched: 'Unmatched',
+				ignored: 'Set aside'
+			}
+		},
 		history: {
 			action: 'History',
 			title: 'Scan history',
@@ -367,6 +381,14 @@ export const en = {
 			match: 'Match',
 			change: 'Change',
 			clear: 'Forget this match',
+			ignore: 'Leave this file alone',
+			unignore: 'Stop leaving it alone',
+			ignored: 'Set aside',
+			ignoreFailed: 'Could not set that file aside',
+			deleteFile: 'Delete from disk',
+			deleteFileTitle: 'Delete this file?',
+			deleteFileWarning: 'The file is removed from this computer. This cannot be undone.',
+			deleteFailed: 'Could not delete that file',
 			unknownTitle: 'Unrecognized',
 			season: 'Season {{number}}',
 			episode: 'Episode {{number}}',

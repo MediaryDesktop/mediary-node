@@ -1,5 +1,6 @@
 export {
 	addLibraryRootMutation,
+	deleteLibraryFileMutation,
 	deleteLibraryMatchMutation,
 	deleteLibraryRootMutation,
 	fileDuration,
@@ -7,6 +8,7 @@ export {
 	fileNumber,
 	fileSeason,
 	fileTitle,
+	isIgnored,
 	isMatched,
 	isTrackable,
 	libraryCandidatesQuery,
@@ -18,6 +20,7 @@ export {
 	libraryScanQuery,
 	libraryScanRunQuery,
 	LIBRARY_PAGE_SIZE,
+	setLibraryFileIgnoredMutation,
 	setLibraryMatchMutation,
 	startLibraryScanMutation
 } from './model/model'
@@ -46,5 +49,6 @@ export type {
 	LibraryScanRunSummary,
 	LibrarySuggestion,
 	LibraryTitle,
+	SetLibraryFileIgnoredParams,
 	SetLibraryMatchParams
 } from './api/api'

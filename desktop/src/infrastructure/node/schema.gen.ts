@@ -109,6 +109,26 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/v1/library/files/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		post?: never
+		/**
+		 * Delete a file
+		 * @description Removes the file from disk and then from the library. A file the node could not delete keeps its row, so nothing is quietly forgotten while it is still there.
+		 */
+		delete: operations['deleteLibraryFile']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/v1/library/files/{id}/candidates': {
 		parameters: {
 			query?: never
@@ -122,6 +142,26 @@ export interface paths {
 		 */
 		get: operations['listLibraryFileCandidates']
 		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/library/files/{id}/ignore': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		/**
+		 * Leave a file alone
+		 * @description Sets a file aside so no scan offers it for matching again. A sample, a trailer the parser could not place, a file that belongs to nothing — without this it comes back as unmatched after every scan and the count never reaches zero. Nothing on disk is touched.
+		 */
+		put: operations['setLibraryFileIgnored']
 		post?: never
 		delete?: never
 		options?: never
@@ -615,6 +655,11 @@ export interface components {
 		Counts: {
 			/**
 			 * Format: int64
+			 * @description Of those, files the user told the node to leave alone.
+			 */
+			ignored: number
+			/**
+			 * Format: int64
 			 * @description Of those, files the last scan did not find.
 			 */
 			missing: number
@@ -807,6 +852,8 @@ export interface components {
 			 * @description Identifier of the file, stable while its path does not change.
 			 */
 			id: number
+			/** @description True when the user told the node to leave this file alone. An ignored file is never offered to the matcher again. */
+			ignored: boolean
 			/**
 			 * @description Form of media the extension points at.
 			 * @enum {string}
@@ -1696,6 +1743,16 @@ export interface components {
 			/** @description Whether an AniList access token is stored in this node. */
 			connected: boolean
 		}
+		SetIgnoredInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/SetIgnoredInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description True to leave the file alone from now on, false to take that mark off. */
+			ignored: boolean
+		}
 		SetMatchInputBody: {
 			/**
 			 * Format: uri
@@ -1976,6 +2033,7 @@ export type SchemaScanStatus = components['schemas']['ScanStatus']
 export type SchemaSearchOutputBody = components['schemas']['SearchOutputBody']
 export type SchemaSearchPage = components['schemas']['SearchPage']
 export type SchemaSessionOutputBody = components['schemas']['SessionOutputBody']
+export type SchemaSetIgnoredInputBody = components['schemas']['SetIgnoredInputBody']
 export type SchemaSetMatchInputBody = components['schemas']['SetMatchInputBody']
 export type SchemaSignInInputBody = components['schemas']['SignInInputBody']
 export type SchemaSource = components['schemas']['Source']
@@ -2177,8 +2235,10 @@ export interface operations {
 				kind?: 'video' | 'manga' | 'book'
 				/** @description Only files whose name reads as this. Use it to leave out openings and extras, which are never episodes. */
 				form?: 'series' | 'movie' | 'special' | 'extra' | 'manga' | 'book'
-				/** @description Only files that are not matched to a title yet. */
+				/** @description Only files that still need a title. Files the user set aside are left out — they are asking for nothing. */
 				unmatched?: boolean
+				/** @description Only files the user told the node to leave alone. */
+				ignored?: boolean
 				/** @description Page size. */
 				limit?: number
 				/** @description How many files to skip. */
@@ -2210,6 +2270,36 @@ export interface operations {
 			}
 		}
 	}
+	deleteLibraryFile: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Identifier of the file to delete. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
 	listLibraryFileCandidates: {
 		parameters: {
 			query?: never
@@ -2229,6 +2319,42 @@ export interface operations {
 				}
 				content: {
 					'application/json': components['schemas']['SuggestionsOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	setLibraryFileIgnored: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Identifier of the file to set aside. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['SetIgnoredInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['FileOutputBody']
 				}
 			}
 			/** @description Error */

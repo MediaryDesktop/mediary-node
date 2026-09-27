@@ -100,7 +100,7 @@ WHERE id = ? AND missing_since IS NULL;
 
 -- name: ListLibraryFiles :many
 SELECT f.id, f.root_id, r.path AS root_path, f.rel_path, f.kind, f.size_bytes,
-       f.mtime, f.scanned_at, f.missing_since,
+       f.mtime, f.scanned_at, f.missing_since, f.ignored_at,
        f.media_form, f.parsed_title, f.parsed_year, f.parsed_season,
        f.parsed_episode, f.parsed_chapter, f.parsed_volume, f.duration_seconds,
        m.media_ref, m.season, m.episode, m.confidence, m.source AS match_source
@@ -110,7 +110,8 @@ FROM library_file f
 WHERE (CAST(sqlc.arg(root_id) AS INTEGER) = 0 OR f.root_id = CAST(sqlc.arg(root_id) AS INTEGER))
   AND (CAST(sqlc.arg(kind) AS TEXT) = '' OR f.kind = CAST(sqlc.arg(kind) AS TEXT))
   AND (CAST(sqlc.arg(media_form) AS TEXT) = '' OR f.media_form = CAST(sqlc.arg(media_form) AS TEXT))
-  AND (CAST(sqlc.arg(unmatched_only) AS INTEGER) = 0 OR m.file_id IS NULL)
+  AND (CAST(sqlc.arg(unmatched_only) AS INTEGER) = 0 OR (m.file_id IS NULL AND f.ignored_at IS NULL))
+  AND (CAST(sqlc.arg(ignored_only) AS INTEGER) = 0 OR f.ignored_at IS NOT NULL)
 ORDER BY r.path, f.rel_path
 LIMIT CAST(sqlc.arg(page_limit) AS INTEGER) OFFSET CAST(sqlc.arg(page_offset) AS INTEGER);
 
@@ -121,7 +122,8 @@ FROM library_file f
 WHERE (CAST(sqlc.arg(root_id) AS INTEGER) = 0 OR f.root_id = CAST(sqlc.arg(root_id) AS INTEGER))
   AND (CAST(sqlc.arg(kind) AS TEXT) = '' OR f.kind = CAST(sqlc.arg(kind) AS TEXT))
   AND (CAST(sqlc.arg(media_form) AS TEXT) = '' OR f.media_form = CAST(sqlc.arg(media_form) AS TEXT))
-  AND (CAST(sqlc.arg(unmatched_only) AS INTEGER) = 0 OR m.file_id IS NULL);
+  AND (CAST(sqlc.arg(unmatched_only) AS INTEGER) = 0 OR (m.file_id IS NULL AND f.ignored_at IS NULL))
+  AND (CAST(sqlc.arg(ignored_only) AS INTEGER) = 0 OR f.ignored_at IS NOT NULL);
 
 -- What the filter tabs above the list show. One query rather than three: the
 -- three numbers have to agree with each other, and they only do if they are read
@@ -129,8 +131,10 @@ WHERE (CAST(sqlc.arg(root_id) AS INTEGER) = 0 OR f.root_id = CAST(sqlc.arg(root_
 -- name: CountLibraryFileStates :one
 SELECT COUNT(*) AS total,
        CAST(COALESCE(SUM(CASE WHEN m.file_id IS NULL
+                               AND f.ignored_at IS NULL
                                AND f.media_form IS NOT NULL
                                AND f.media_form <> 'extra' THEN 1 ELSE 0 END), 0) AS INTEGER) AS unmatched,
+       CAST(COALESCE(SUM(CASE WHEN f.ignored_at IS NOT NULL THEN 1 ELSE 0 END), 0) AS INTEGER) AS ignored,
        CAST(COALESCE(SUM(CASE WHEN f.missing_since IS NOT NULL THEN 1 ELSE 0 END), 0) AS INTEGER) AS missing
 FROM library_file f
          LEFT JOIN file_match m ON m.file_id = f.id
@@ -140,7 +144,7 @@ WHERE (CAST(sqlc.arg(root_id) AS INTEGER) = 0 OR f.root_id = CAST(sqlc.arg(root_
 
 -- name: GetLibraryFile :one
 SELECT f.id, f.root_id, r.path AS root_path, f.rel_path, f.kind, f.size_bytes,
-       f.mtime, f.scanned_at, f.missing_since,
+       f.mtime, f.scanned_at, f.missing_since, f.ignored_at,
        f.media_form, f.parsed_title, f.parsed_year, f.parsed_season,
        f.parsed_episode, f.parsed_chapter, f.parsed_volume, f.duration_seconds,
        m.media_ref, m.season, m.episode, m.confidence, m.source AS match_source
@@ -159,6 +163,7 @@ FROM library_file f
          LEFT JOIN file_match m ON m.file_id = f.id
 WHERE m.file_id IS NULL
   AND f.missing_since IS NULL
+  AND f.ignored_at IS NULL
   AND f.parsed_title IS NOT NULL
   AND f.parsed_title <> ''
   -- An opening or a trailer belongs to no episode, so there is nothing to match.
@@ -203,3 +208,19 @@ SELECT m.media_ref,
 FROM file_match m
          JOIN library_file f ON f.id = m.file_id
 GROUP BY m.media_ref;
+
+-- name: SetLibraryFileIgnored :execrows
+UPDATE library_file
+SET ignored_at = ?
+WHERE id = ?;
+
+-- name: ClearLibraryFileIgnored :execrows
+UPDATE library_file
+SET ignored_at = NULL
+WHERE id = ?;
+
+-- The match hangs off the file row and goes with it: the user deleted the file
+-- itself, not only what it was tied to.
+-- name: DeleteLibraryFile :execrows
+DELETE FROM library_file
+WHERE id = ?;

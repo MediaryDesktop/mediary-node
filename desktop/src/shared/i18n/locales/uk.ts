@@ -314,6 +314,20 @@ export const uk: Translation = {
 			failures: 'Теки, які не вдалося прочитати',
 			rootFailed: 'Теку не вдалося прочитати: {{reason}}'
 		},
+		unmatched: {
+			action_one: '{{count}} без тайтла',
+			action_few: '{{count}} без тайтла',
+			action_many: '{{count}} без тайтла',
+			action_other: '{{count}} без тайтла',
+			title: 'Файли без тайтла',
+			description: 'Зіставте те, що нода не змогла розпізнати, або відкладіть, щоб більше не питала',
+			empty: 'Усі файли мають тайтл',
+			noneIgnored: 'Нічого не відкладено',
+			view: {
+				unmatched: 'Без тайтла',
+				ignored: 'Відкладені'
+			}
+		},
 		history: {
 			action: 'Історія',
 			title: 'Історія сканувань',
@@ -365,6 +379,14 @@ export const uk: Translation = {
 			match: 'Зіставити',
 			change: 'Змінити',
 			clear: 'Забути зіставлення',
+			ignore: 'Не чіпати цей файл',
+			unignore: 'Знову враховувати',
+			ignored: 'Відкладено',
+			ignoreFailed: 'Не вдалося відкласти файл',
+			deleteFile: 'Видалити з диска',
+			deleteFileTitle: 'Видалити цей файл?',
+			deleteFileWarning: 'Файл буде видалено з цього компʼютера. Це не можна скасувати.',
+			deleteFailed: 'Не вдалося видалити файл',
 			unknownTitle: 'Не розпізнано',
 			season: 'Сезон {{number}}',
 			episode: 'Серія {{number}}',

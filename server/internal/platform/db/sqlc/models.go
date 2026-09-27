@@ -70,6 +70,7 @@ type LibraryFile struct {
 	ParserVersion   int64          `json:"parser_version"`
 	DurationSeconds sql.NullInt64  `json:"duration_seconds"`
 	ProbeVersion    int64          `json:"probe_version"`
+	IgnoredAt       sql.NullInt64  `json:"ignored_at"`
 }
 
 type LibraryRoot struct {

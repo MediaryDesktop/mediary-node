@@ -47,6 +47,7 @@ type File struct {
 	ModifiedAt time.Time `json:"modified_at" doc:"Modification time the last scan saw."`
 
 	Missing bool   `json:"missing" doc:"True when the last scan did not find the file where it used to be."`
+	Ignored bool   `json:"ignored" doc:"True when the user told the node to leave this file alone. An ignored file is never offered to the matcher again."`
 	Parsed  Parsed `json:"parsed" doc:"What the file's name says. Present whether or not the file is matched."`
 	Match   *Match `json:"match,omitempty" doc:"What the file was matched to. Absent while unmatched."`
 
@@ -75,6 +76,7 @@ type Counts struct {
 	Total     int `json:"total" doc:"Files the filter matches."`
 	Unmatched int `json:"unmatched" doc:"Of those, files that belong to no title yet."`
 	Missing   int `json:"missing" doc:"Of those, files the last scan did not find."`
+	Ignored   int `json:"ignored" doc:"Of those, files the user told the node to leave alone."`
 }
 
 type FilePage struct {
