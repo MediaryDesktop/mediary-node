@@ -319,6 +319,94 @@ func (q *Queries) InsertLibraryRoot(ctx context.Context, arg InsertLibraryRootPa
 	return i, err
 }
 
+const listAllLibraryFiles = `-- name: ListAllLibraryFiles :many
+SELECT f.id, f.root_id, r.path AS root_path, f.rel_path, f.kind, f.size_bytes,
+       f.mtime, f.scanned_at, f.missing_since, f.ignored_at,
+       f.media_form, f.parsed_title, f.parsed_year, f.parsed_season,
+       f.parsed_episode, f.parsed_chapter, f.parsed_volume, f.duration_seconds,
+       m.media_ref, m.season, m.episode, m.confidence, m.source AS match_source
+FROM library_file f
+         JOIN library_root r ON r.id = f.root_id
+         LEFT JOIN file_match m ON m.file_id = f.id
+ORDER BY r.path, f.rel_path
+`
+
+type ListAllLibraryFilesRow struct {
+	ID              int64           `json:"id"`
+	RootID          int64           `json:"root_id"`
+	RootPath        string          `json:"root_path"`
+	RelPath         string          `json:"rel_path"`
+	Kind            string          `json:"kind"`
+	SizeBytes       int64           `json:"size_bytes"`
+	Mtime           int64           `json:"mtime"`
+	ScannedAt       int64           `json:"scanned_at"`
+	MissingSince    sql.NullInt64   `json:"missing_since"`
+	IgnoredAt       sql.NullInt64   `json:"ignored_at"`
+	MediaForm       sql.NullString  `json:"media_form"`
+	ParsedTitle     sql.NullString  `json:"parsed_title"`
+	ParsedYear      sql.NullInt64   `json:"parsed_year"`
+	ParsedSeason    sql.NullInt64   `json:"parsed_season"`
+	ParsedEpisode   sql.NullInt64   `json:"parsed_episode"`
+	ParsedChapter   sql.NullInt64   `json:"parsed_chapter"`
+	ParsedVolume    sql.NullInt64   `json:"parsed_volume"`
+	DurationSeconds sql.NullInt64   `json:"duration_seconds"`
+	MediaRef        sql.NullString  `json:"media_ref"`
+	Season          sql.NullInt64   `json:"season"`
+	Episode         sql.NullInt64   `json:"episode"`
+	Confidence      sql.NullFloat64 `json:"confidence"`
+	MatchSource     sql.NullString  `json:"match_source"`
+}
+
+// Every file at once, for the explorer's tree. The tree is the whole library by
+// definition, so paging it would only mean the client asking for page after page
+// before it can draw anything.
+func (q *Queries) ListAllLibraryFiles(ctx context.Context) ([]ListAllLibraryFilesRow, error) {
+	rows, err := q.db.QueryContext(ctx, listAllLibraryFiles)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListAllLibraryFilesRow{}
+	for rows.Next() {
+		var i ListAllLibraryFilesRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.RootID,
+			&i.RootPath,
+			&i.RelPath,
+			&i.Kind,
+			&i.SizeBytes,
+			&i.Mtime,
+			&i.ScannedAt,
+			&i.MissingSince,
+			&i.IgnoredAt,
+			&i.MediaForm,
+			&i.ParsedTitle,
+			&i.ParsedYear,
+			&i.ParsedSeason,
+			&i.ParsedEpisode,
+			&i.ParsedChapter,
+			&i.ParsedVolume,
+			&i.DurationSeconds,
+			&i.MediaRef,
+			&i.Season,
+			&i.Episode,
+			&i.Confidence,
+			&i.MatchSource,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listLibraryCollection = `-- name: ListLibraryCollection :many
 SELECT m.media_ref,
        COUNT(*) AS file_count,

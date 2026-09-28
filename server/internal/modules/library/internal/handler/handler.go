@@ -314,6 +314,25 @@ func (h *Handler) Register(api huma.API) {
 	})
 
 	huma.Register(api, huma.Operation{
+		OperationID: "listAllLibraryFiles",
+		Method:      http.MethodGet,
+		Path:        "/v1/library/files/tree",
+		Summary:     "Every scanned file",
+		Description: "The whole library in one read, for a view that draws all of it at once. A tree is every file by definition, so paging it would only mean asking page after page before anything can be drawn.",
+		Tags:        []string{"library"},
+	}, func(ctx context.Context, _ *struct{}) (*FilesOutput, error) {
+		files, err := h.svc.AllFiles(ctx)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		out := &FilesOutput{}
+		out.Body.Files = files
+
+		return out, nil
+	})
+
+	huma.Register(api, huma.Operation{
 		OperationID: "setLibraryFileIgnored",
 		Method:      http.MethodPut,
 		Path:        "/v1/library/files/{id}/ignore",

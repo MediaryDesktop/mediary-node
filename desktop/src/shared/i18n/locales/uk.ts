@@ -314,6 +314,28 @@ export const uk: Translation = {
 			failures: 'Теки, які не вдалося прочитати',
 			rootFailed: 'Теку не вдалося прочитати: {{reason}}'
 		},
+		explorer: {
+			action: 'Провідник',
+			title: 'Провідник бібліотеки',
+			description: 'Усі просканованi файли в теках, де вони лежать',
+			search: 'Пошук файлів і тек…',
+			nothing: 'За цим фільтром нічого немає',
+			pickSomething: 'Виберіть файл або теку, щоб побачити, що про них знає нода',
+			folderMeta: '{{matched}} з {{count}} зіставлено',
+			files: 'Файлів',
+			matchedTitle: 'Тайтл',
+			season: 'Сезон',
+			episode: 'Епізод',
+			duration: 'Тривалість',
+			size: 'Розмір',
+			kind: 'Тип',
+			filter: {
+				all: 'Усі',
+				unmatched: 'Без тайтла',
+				ignored: 'Відкладені',
+				missing: 'Відсутні'
+			}
+		},
 		unmatched: {
 			action_one: '{{count}} без тайтла',
 			action_few: '{{count}} без тайтла',

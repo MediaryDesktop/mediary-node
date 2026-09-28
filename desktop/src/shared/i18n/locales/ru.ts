@@ -315,6 +315,28 @@ export const ru: Translation = {
 			failures: 'Папки, которые не удалось прочитать',
 			rootFailed: 'Папку не удалось прочитать: {{reason}}'
 		},
+		explorer: {
+			action: 'Проводник',
+			title: 'Проводник библиотеки',
+			description: 'Все просканированные файлы в папках, где они лежат',
+			search: 'Поиск файлов и папок…',
+			nothing: 'По этому фильтру ничего нет',
+			pickSomething: 'Выберите файл или папку, чтобы увидеть, что о них знает нода',
+			folderMeta: '{{matched}} из {{count}} сопоставлено',
+			files: 'Файлов',
+			matchedTitle: 'Тайтл',
+			season: 'Сезон',
+			episode: 'Эпизод',
+			duration: 'Длительность',
+			size: 'Размер',
+			kind: 'Тип',
+			filter: {
+				all: 'Все',
+				unmatched: 'Без тайтла',
+				ignored: 'Отложенные',
+				missing: 'Отсутствуют'
+			}
+		},
 		unmatched: {
 			action_one: '{{count}} без тайтла',
 			action_few: '{{count}} без тайтла',

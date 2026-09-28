@@ -82,6 +82,13 @@ export function LibraryPage() {
 						</Button>
 
 						<Button
+							startIcon={<Icon name='common/folder-open' size={16} />}
+							onClick={() => navigate({ to: '/library/explorer' })}
+						>
+							{t('library.explorer.action')}
+						</Button>
+
+						<Button
 							startIcon={<Icon name='common/clock' size={16} />}
 							onClick={() => navigate({ to: '/library/history' })}
 						>

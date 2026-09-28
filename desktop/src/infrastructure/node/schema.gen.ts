@@ -109,6 +109,26 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/v1/library/files/tree': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Every scanned file
+		 * @description The whole library in one read, for a view that draws all of it at once. A tree is every file by definition, so paging it would only mean asking page after page before anything can be drawn.
+		 */
+		get: operations['listAllLibraryFiles']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/v1/library/files/{id}': {
 		parameters: {
 			query?: never
@@ -2244,6 +2264,35 @@ export interface operations {
 				/** @description How many files to skip. */
 				offset?: number
 			}
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['FilesOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listAllLibraryFiles: {
+		parameters: {
+			query?: never
 			header?: never
 			path?: never
 			cookie?: never

@@ -45,6 +45,10 @@ type Querier interface {
 	InsertScanRunFileLog(ctx context.Context, arg InsertScanRunFileLogParams) error
 	InsertScanRunGroup(ctx context.Context, arg InsertScanRunGroupParams) error
 	InsertScanRunRoot(ctx context.Context, arg InsertScanRunRootParams) error
+	// Every file at once, for the explorer's tree. The tree is the whole library by
+	// definition, so paging it would only mean the client asking for page after page
+	// before it can draw anything.
+	ListAllLibraryFiles(ctx context.Context) ([]ListAllLibraryFilesRow, error)
 	ListAniListOutbox(ctx context.Context, accountID int64) ([]AnilistOutbox, error)
 	ListCustomListItems(ctx context.Context, listID int64) ([]CustomListItem, error)
 	ListCustomLists(ctx context.Context) ([]ListCustomListsRow, error)

@@ -224,3 +224,17 @@ WHERE id = ?;
 -- name: DeleteLibraryFile :execrows
 DELETE FROM library_file
 WHERE id = ?;
+
+-- Every file at once, for the explorer's tree. The tree is the whole library by
+-- definition, so paging it would only mean the client asking for page after page
+-- before it can draw anything.
+-- name: ListAllLibraryFiles :many
+SELECT f.id, f.root_id, r.path AS root_path, f.rel_path, f.kind, f.size_bytes,
+       f.mtime, f.scanned_at, f.missing_since, f.ignored_at,
+       f.media_form, f.parsed_title, f.parsed_year, f.parsed_season,
+       f.parsed_episode, f.parsed_chapter, f.parsed_volume, f.duration_seconds,
+       m.media_ref, m.season, m.episode, m.confidence, m.source AS match_source
+FROM library_file f
+         JOIN library_root r ON r.id = f.root_id
+         LEFT JOIN file_match m ON m.file_id = f.id
+ORDER BY r.path, f.rel_path;

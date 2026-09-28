@@ -480,6 +480,39 @@ func (s *Store) UnmatchedFiles(ctx context.Context, limit int) ([]Unmatched, err
 	return files, nil
 }
 
+// AllFiles is the whole library in one read, for the explorer's tree. The tree
+// is every file by definition, so paging it would only mean asking again.
+func (s *Store) AllFiles(ctx context.Context) ([]File, error) {
+	rows, err := sqlc.New(s.db).ListAllLibraryFiles(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("list all library files: %w", err)
+	}
+
+	files := make([]File, 0, len(rows))
+	for i := range rows {
+		row := &rows[i]
+
+		files = append(files, File{
+			ID:           row.ID,
+			RootID:       row.RootID,
+			RootPath:     row.RootPath,
+			RelPath:      row.RelPath,
+			Kind:         row.Kind,
+			Size:         row.SizeBytes,
+			Mtime:        time.UnixMilli(row.Mtime).UTC(),
+			ScannedAt:    time.Unix(row.ScannedAt, 0).UTC(),
+			MissingSince: optionalTime(row.MissingSince),
+			IgnoredSince: optionalTime(row.IgnoredAt),
+			Parsed: parsedFrom(row.MediaForm, row.ParsedTitle, row.ParsedYear,
+				row.ParsedSeason, row.ParsedEpisode, row.ParsedChapter, row.ParsedVolume),
+			Match:    matchFrom(row.MediaRef, row.Season, row.Episode, row.Confidence, row.MatchSource),
+			Duration: durationFrom(row.DurationSeconds),
+		})
+	}
+
+	return files, nil
+}
+
 // SetIgnored marks a file as one the node should leave alone, or clears that
 // mark when at is nil.
 func (s *Store) SetIgnored(ctx context.Context, fileID int64, at *time.Time) (bool, error) {

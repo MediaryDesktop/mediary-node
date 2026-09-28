@@ -2591,6 +2591,26 @@ paths:
       summary: Scanned files
       tags:
         - library
+  /v1/library/files/tree:
+    get:
+      description: The whole library in one read, for a view that draws all of it at once. A tree is every file by definition, so paging it would only mean asking page after page before anything can be drawn.
+      operationId: listAllLibraryFiles
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FilesOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Every scanned file
+      tags:
+        - library
   /v1/library/files/{id}:
     delete:
       description: Removes the file from disk and then from the library. A file the node could not delete keeps its row, so nothing is quietly forgotten while it is still there.

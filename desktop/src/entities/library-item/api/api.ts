@@ -62,6 +62,13 @@ export const fetchLibraryFilesFx = createNodeRequestFx<LibraryFileQuery, NodeSch
 	})
 )
 
+export const fetchLibraryTreeFx = createNodeRequestFx<void, NodeSchemas['FilesOutputBody']>(() => ({
+	url: '/v1/library/files/tree',
+
+	// The whole library at once, which on a big one is a lot of rows to build.
+	timeout: 20_000
+}))
+
 export const fetchLibraryScanFx = createNodeRequestFx<void, NodeSchemas['ScanOutputBody']>(() => ({
 	url: '/v1/library/scan'
 }))

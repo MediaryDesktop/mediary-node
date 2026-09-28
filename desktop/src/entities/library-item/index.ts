@@ -19,6 +19,7 @@ export {
 	libraryScanHistoryQuery,
 	libraryScanQuery,
 	libraryScanRunQuery,
+	libraryTreeQuery,
 	LIBRARY_PAGE_SIZE,
 	setLibraryFileIgnoredMutation,
 	setLibraryMatchMutation,

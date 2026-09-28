@@ -286,6 +286,40 @@ func (s *Service) describeRefs(ctx context.Context, refs []string) map[string]*M
 	return result
 }
 
+// AllFiles is every file the library holds, with the titles they are matched to.
+// The explorer draws a tree of the whole library, which is one read of
+// everything rather than a page at a time.
+func (s *Service) AllFiles(ctx context.Context) (*FilePage, error) {
+	rows, err := s.store.AllFiles(ctx)
+	if err != nil {
+		return nil, apperr.Wrap(err, apperr.KindInternal, "read library files")
+	}
+
+	items := make([]File, 0, len(rows))
+	for i := range rows {
+		items = append(items, fileFrom(rows[i]))
+	}
+
+	counts, err := s.store.Counts(ctx, store.FileFilter{})
+	if err != nil {
+		return nil, apperr.Wrap(err, apperr.KindInternal, "count library files")
+	}
+
+	return &FilePage{
+		Items:  items,
+		Total:  len(items),
+		Limit:  len(items),
+		Offset: 0,
+		Counts: Counts{
+			Total:     counts.Total,
+			Unmatched: counts.Unmatched,
+			Missing:   counts.Missing,
+			Ignored:   counts.Ignored,
+		},
+		Titles: s.describeTitles(ctx, items),
+	}, nil
+}
+
 // Collection reads the library as titles rather than as files. The grid of
 // posters would otherwise have to pull every file in the library and group them
 // itself, which is a page of work for a number the database already knows.

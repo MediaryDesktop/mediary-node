@@ -18,6 +18,7 @@ import {
 	fetchLibraryScanFx,
 	fetchLibraryScanHistoryFx,
 	fetchLibraryScanRunFx,
+	fetchLibraryTreeFx,
 	setLibraryFileIgnoredFx,
 	setLibraryMatchFx,
 	startLibraryScanFx
@@ -51,6 +52,8 @@ export const libraryCollectionQuery = createQuery({
 	effect: fetchLibraryCollectionFx,
 	name: 'libraryCollection'
 })
+
+export const libraryTreeQuery = createQuery({ effect: fetchLibraryTreeFx, name: 'libraryTree' })
 
 export const libraryScanQuery = createQuery({ effect: fetchLibraryScanFx, name: 'libraryScan' })
 
@@ -111,6 +114,16 @@ keepFresh(libraryFilesQuery, {
 })
 
 keepFresh(libraryCollectionQuery, {
+	triggers: [
+		libraryUpdated,
+		setLibraryMatchMutation.finished.success,
+		deleteLibraryMatchMutation.finished.success,
+		setLibraryFileIgnoredMutation.finished.success,
+		deleteLibraryFileMutation.finished.success
+	]
+})
+
+keepFresh(libraryTreeQuery, {
 	triggers: [
 		libraryUpdated,
 		setLibraryMatchMutation.finished.success,

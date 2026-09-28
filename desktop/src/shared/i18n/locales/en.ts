@@ -316,6 +316,28 @@ export const en = {
 			failures: 'Folders that could not be read',
 			rootFailed: 'A folder could not be read: {{reason}}'
 		},
+		explorer: {
+			action: 'Explorer',
+			title: 'Library explorer',
+			description: 'Every scanned file, as the folders they sit in',
+			search: 'Search files and folders…',
+			nothing: 'Nothing matches this filter',
+			pickSomething: 'Pick a file or a folder to see what the node knows about it',
+			folderMeta: '{{matched}} of {{count}} matched',
+			files: 'Files',
+			matchedTitle: 'Title',
+			season: 'Season',
+			episode: 'Episode',
+			duration: 'Duration',
+			size: 'Size',
+			kind: 'Kind',
+			filter: {
+				all: 'All',
+				unmatched: 'Unmatched',
+				ignored: 'Set aside',
+				missing: 'Missing'
+			}
+		},
 		unmatched: {
 			action_one: '{{count}} unmatched',
 			action_few: '{{count}} unmatched',
