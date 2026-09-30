@@ -400,14 +400,25 @@ export const en = {
 			more: 'More library actions'
 		},
 		unmatched: {
-			title: 'Files without a title',
-			description: 'Match what the node could not work out, or set it aside so it stops asking',
+			title: 'Unmatched files',
 			empty: 'Every file has a title',
-			noneIgnored: 'Nothing has been set aside',
-			view: {
-				unmatched: 'Unmatched',
-				ignored: 'Set aside'
-			}
+			previous: 'Previous',
+			next: 'Next',
+			sourceId: 'AniList ID',
+			matchSelection: 'Match selection',
+			selectAll: 'Select all files',
+			fetchSuggestions: 'Fetch suggestions',
+			ignoreSelection: 'Ignore selection',
+			pickTitle: 'Select a title',
+			confidence: '{{percent}}% match',
+			onYourList: 'On your list',
+			ignoredTitle: 'Ignored files',
+			noneIgnored: 'No ignored files',
+			unignoreSelection: 'Un-ignore selection',
+			ignoreFailed_one: '{{count}} file could not be set aside',
+			ignoreFailed_few: '{{count}} files could not be set aside',
+			ignoreFailed_many: '{{count}} files could not be set aside',
+			ignoreFailed_other: '{{count}} files could not be set aside'
 		},
 		history: {
 			title: 'Scan history',

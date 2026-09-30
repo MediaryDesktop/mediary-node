@@ -13,7 +13,6 @@ import {
 	deleteLibraryRootFx,
 	fetchLibraryCandidatesFx,
 	fetchLibraryCollectionFx,
-	fetchLibraryFilesFx,
 	fetchLibraryRootsFx,
 	fetchLibraryScanFx,
 	fetchLibraryScanHistoryFx,
@@ -24,11 +23,6 @@ import {
 	startLibraryScanFx
 } from '../api/api'
 import type { LibraryFile, SetLibraryFileIgnoredParams, SetLibraryMatchParams } from '../api/api'
-
-// How many files one page request brings in. The node pages at 500, and a list
-// this long is already past what anyone scrolls — the count in the header says
-// how many more there are.
-export const LIBRARY_PAGE_SIZE = 500
 
 const libraryUpdated = nodeTopic('library.update')
 const libraryScanEvent = nodeTopic('library.scan')
@@ -45,8 +39,6 @@ const scanMatching = scanPhase('matching')
 const scanFinished = scanPhase('finished')
 
 export const libraryRootsQuery = createQuery({ effect: fetchLibraryRootsFx, name: 'libraryRoots' })
-
-export const libraryFilesQuery = createQuery({ effect: fetchLibraryFilesFx, name: 'libraryFiles' })
 
 export const libraryCollectionQuery = createQuery({
 	effect: fetchLibraryCollectionFx,
@@ -142,20 +134,6 @@ export const deleteLibraryMatchMutation = createMutation({
 // finds a file, a match the matcher worked out, a folder that was removed — each
 // arrives as an event, and the query refetches once.
 keepFresh(libraryRootsQuery, { triggers: [libraryUpdated] })
-
-keepFresh(libraryFilesQuery, {
-	triggers: [
-		libraryUpdated,
-		setLibraryMatchMutation.finished.success,
-		deleteLibraryMatchMutation.finished.success,
-		setLibraryFileIgnoredMutation.finished.success,
-		deleteLibraryFileMutation.finished.success,
-		setLibraryMatchesMutation.finished.success,
-		setLibraryFilesIgnoredMutation.finished.success,
-		deleteLibraryFilesMutation.finished.success,
-		deleteLibraryMatchesMutation.finished.success
-	]
-})
 
 keepFresh(libraryCollectionQuery, {
 	triggers: [

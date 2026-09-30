@@ -399,15 +399,25 @@ export const ru: Translation = {
 			more: 'Другие действия с библиотекой'
 		},
 		unmatched: {
-			title: 'Файлы без тайтла',
-			description:
-				'Сопоставьте то, что нода не смогла распознать, или отложите, чтобы больше не спрашивала',
+			title: 'Несопоставленные файлы',
 			empty: 'У всех файлов есть тайтл',
-			noneIgnored: 'Ничего не отложено',
-			view: {
-				unmatched: 'Без тайтла',
-				ignored: 'Отложенные'
-			}
+			previous: 'Предыдущая',
+			next: 'Следующая',
+			sourceId: 'AniList ID',
+			matchSelection: 'Сопоставить выбранные',
+			selectAll: 'Выбрать все файлы',
+			fetchSuggestions: 'Подобрать варианты',
+			ignoreSelection: 'Отложить выбранные',
+			pickTitle: 'Выберите тайтл',
+			confidence: 'Совпадение {{percent}}%',
+			onYourList: 'В вашем списке',
+			ignoredTitle: 'Отложенные файлы',
+			noneIgnored: 'Отложенных файлов нет',
+			unignoreSelection: 'Вернуть выбранные',
+			ignoreFailed_one: 'Не удалось отложить {{count}} файл',
+			ignoreFailed_few: 'Не удалось отложить {{count}} файла',
+			ignoreFailed_many: 'Не удалось отложить {{count}} файлов',
+			ignoreFailed_other: 'Не удалось отложить {{count}} файла'
 		},
 		history: {
 			title: 'История сканирований',

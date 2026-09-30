@@ -1,0 +1,23 @@
+.row {
+	display: flex;
+	align-items: center;
+	gap: 0.625rem;
+	padding: 0.5rem;
+	cursor: pointer;
+
+	&:hover {
+		background: var(--surface-hover);
+	}
+
+	.label {
+		min-width: 0;
+		color: var(--text);
+		font-size: 0.875rem;
+		letter-spacing: 0.01em;
+		word-break: break-all;
+	}
+
+	&.off .label {
+		opacity: 0.5;
+	}
+}

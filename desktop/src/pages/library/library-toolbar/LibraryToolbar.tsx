@@ -23,11 +23,11 @@ export function LibraryToolbar({ hasEntries, hasRoots, unmatched }: LibraryToolb
 	const { t } = useTranslation()
 	const navigate = useNavigate()
 
-	const [explorerRequested, scanRequested, unmatchedRequested, viewChanged] = useUnit([
+	const [explorerRequested, scanRequested, unmatchedRequested, ignoredRequested] = useUnit([
 		libraryExplorerModel.requested,
 		scanLibraryModel.requested,
-		unmatchedFilesModel.requested,
-		unmatchedFilesModel.viewChanged
+		unmatchedFilesModel.unmatchedRequested,
+		unmatchedFilesModel.ignoredRequested
 	])
 
 	return (
@@ -65,10 +65,7 @@ export function LibraryToolbar({ hasEntries, hasRoots, unmatched }: LibraryToolb
 					variant='primary'
 					startIcon={<Icon name='common/library' size={16} />}
 					className={styles.alert}
-					onClick={() => {
-						viewChanged('unmatched')
-						unmatchedRequested()
-					}}
+					onClick={() => unmatchedRequested()}
 				>
 					{t('library.toolbar.resolveUnmatched', { count: unmatched })}
 				</Button>
@@ -82,10 +79,7 @@ export function LibraryToolbar({ hasEntries, hasRoots, unmatched }: LibraryToolb
 							id: 'ignored',
 							label: t('library.toolbar.ignoredFiles'),
 							icon: 'common/eye-off',
-							onSelect: () => {
-								viewChanged('ignored')
-								unmatchedRequested()
-							}
+							onSelect: () => ignoredRequested()
 						},
 						{
 							id: 'summaries',

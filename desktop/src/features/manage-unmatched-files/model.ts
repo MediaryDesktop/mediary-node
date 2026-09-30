@@ -1,80 +1,59 @@
-import { createEvent, createStore, sample } from 'effector'
+import { createEvent, createStore } from 'effector'
 
 import { atom } from '@shared/factory'
 import { translate } from '@shared/i18n'
 import { toast } from '@shared/ui'
 
-import {
-	deleteLibraryFileMutation,
-	LIBRARY_PAGE_SIZE,
-	libraryFilesQuery,
-	setLibraryFileIgnoredMutation
-} from '@entities/library-item'
-import type { LibraryFile } from '@entities/library-item'
+import { setLibraryFilesIgnoredMutation, setLibraryMatchesMutation } from '@entities/library-item'
+import type { BulkOutcome } from '@entities/library-item'
 
-export type UnmatchedView = 'unmatched' | 'ignored'
+// The id matches the one the match drawer uses for the same failure, so a group
+// matched from either place raises one toast, not two.
+function reportFailures(outcome: BulkOutcome, message: (count: number) => string, id: string) {
+	if (outcome.failed > 0) {
+		toast.error(message(outcome.failed), { id })
+	}
+}
 
+// Two drawers, the way the design has them: one to work through what the node
+// could not name, one to look back at what the user set aside.
 export const unmatchedFilesModel = atom(() => {
-	const requested = createEvent()
-	const closed = createEvent()
-	const viewChanged = createEvent<UnmatchedView>()
+	const unmatchedRequested = createEvent()
+	const unmatchedClosed = createEvent()
 
-	const deleteRequested = createEvent<LibraryFile>()
-	const deleteCancelled = createEvent()
-	const deleteConfirmed = createEvent()
+	const ignoredRequested = createEvent()
+	const ignoredClosed = createEvent()
 
-	const $open = createStore(false)
-		.on(requested, () => true)
-		.reset(closed)
+	const $unmatchedOpen = createStore(false)
+		.on(unmatchedRequested, () => true)
+		.reset(unmatchedClosed)
 
-	const $view = createStore<UnmatchedView>('unmatched').on(viewChanged, (_, view) => view)
+	const $ignoredOpen = createStore(false)
+		.on(ignoredRequested, () => true)
+		.reset(ignoredClosed)
 
-	const $pendingDelete = createStore<LibraryFile | null>(null)
-		.on(deleteRequested, (_, file) => file)
-		.reset(deleteCancelled, deleteConfirmed, closed)
+	setLibraryMatchesMutation.finished.success.watch(({ result }) =>
+		reportFailures(
+			result,
+			count => translate('library.match.someFailed', { count }),
+			'library-match-failed'
+		)
+	)
 
-	// Each view is its own slice of the library, so opening the drawer or moving
-	// between the two asks the node for that slice rather than filtering a page it
-	// already has — the page would only hold the first few hundred files anyway.
-	sample({
-		clock: [requested, viewChanged],
-		source: $view,
-		fn: (view: UnmatchedView) => ({
-			unmatched: view === 'unmatched',
-			ignored: view === 'ignored',
-			limit: LIBRARY_PAGE_SIZE
-		}),
-		target: libraryFilesQuery.start
-	})
-
-	sample({
-		clock: deleteConfirmed,
-		source: $pendingDelete,
-		filter: (file): file is LibraryFile => file !== null,
-		fn: (file: LibraryFile) => file.id,
-		target: deleteLibraryFileMutation.start
-	})
-
-	deleteLibraryFileMutation.finished.failure.watch(({ error }) => {
-		toast.error(error.body?.detail ?? translate('library.file.deleteFailed'), {
-			id: 'library-file-delete-failed'
-		})
-	})
-
-	setLibraryFileIgnoredMutation.finished.failure.watch(() => {
-		toast.error(translate('library.file.ignoreFailed'), { id: 'library-file-ignore-failed' })
-	})
+	setLibraryFilesIgnoredMutation.finished.success.watch(({ result }) =>
+		reportFailures(
+			result,
+			count => translate('library.unmatched.ignoreFailed', { count }),
+			'library-ignore-failed'
+		)
+	)
 
 	return {
-		$open,
-		$view,
-		$pendingDelete,
-		requested,
-		closed,
-		viewChanged,
-		deleteRequested,
-		deleteCancelled,
-		deleteConfirmed,
-		ignoreRequested: setLibraryFileIgnoredMutation.start
+		$unmatchedOpen,
+		$ignoredOpen,
+		unmatchedRequested,
+		unmatchedClosed,
+		ignoredRequested,
+		ignoredClosed
 	}
 })

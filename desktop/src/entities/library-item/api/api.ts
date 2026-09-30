@@ -37,31 +37,6 @@ export const deleteLibraryRootFx = createNodeRequestFx<number, void>(id => ({
 	method: 'DELETE'
 }))
 
-export interface LibraryFileQuery {
-	rootId?: number
-	kind?: LibraryFileKind
-	form?: LibraryMediaForm
-	unmatched?: boolean
-	ignored?: boolean
-	limit?: number
-	offset?: number
-}
-
-export const fetchLibraryFilesFx = createNodeRequestFx<LibraryFileQuery, NodeSchemas['FilesOutputBody']>(
-	query => ({
-		url: '/v1/library/files',
-		query: {
-			root_id: query.rootId,
-			kind: query.kind,
-			form: query.form,
-			unmatched: query.unmatched,
-			ignored: query.ignored,
-			limit: query.limit,
-			offset: query.offset
-		}
-	})
-)
-
 export const fetchLibraryTreeFx = createNodeRequestFx<void, NodeSchemas['FilesOutputBody']>(() => ({
 	url: '/v1/library/files/tree',
 

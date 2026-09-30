@@ -3,13 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { nodeEventReceived } from '@infra/node'
 
-import {
-	addLibraryRootFx,
-	deleteLibraryRootFx,
-	fetchLibraryFilesFx,
-	fetchLibraryRootsFx,
-	startLibraryScanFx
-} from '../api/api'
+import { addLibraryRootFx, deleteLibraryRootFx, fetchLibraryRootsFx, startLibraryScanFx } from '../api/api'
 import type { LibraryRoot } from '../api/api'
 
 import { deleteLibraryRootMutation, libraryModel } from './model'
@@ -59,11 +53,7 @@ describe('library roots', () => {
 			handlers: [
 				[addLibraryRootFx, addRoot],
 				[startLibraryScanFx, startScan],
-				[fetchLibraryRootsFx, () => Promise.resolve({ roots: [ROOT] })],
-				[
-					fetchLibraryFilesFx,
-					() => Promise.resolve({ files: { items: [], total: 0, limit: 500, offset: 0 } })
-				]
+				[fetchLibraryRootsFx, () => Promise.resolve({ roots: [ROOT] })]
 			]
 		})
 
@@ -107,11 +97,7 @@ describe('library roots', () => {
 		const scope = fork({
 			handlers: [
 				[deleteLibraryRootFx, () => Promise.resolve(undefined)],
-				[fetchLibraryRootsFx, roots],
-				[
-					fetchLibraryFilesFx,
-					() => Promise.resolve({ files: { items: [], total: 0, limit: 500, offset: 0 } })
-				]
+				[fetchLibraryRootsFx, roots]
 			]
 		})
 

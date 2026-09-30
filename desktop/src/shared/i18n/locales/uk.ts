@@ -398,14 +398,25 @@ export const uk: Translation = {
 			more: 'Інші дії з бібліотекою'
 		},
 		unmatched: {
-			title: 'Файли без тайтла',
-			description: 'Зіставте те, що нода не змогла розпізнати, або відкладіть, щоб більше не питала',
+			title: 'Незіставлені файли',
 			empty: 'Усі файли мають тайтл',
-			noneIgnored: 'Нічого не відкладено',
-			view: {
-				unmatched: 'Без тайтла',
-				ignored: 'Відкладені'
-			}
+			previous: 'Попередня',
+			next: 'Наступна',
+			sourceId: 'AniList ID',
+			matchSelection: 'Зіставити вибрані',
+			selectAll: 'Вибрати всі файли',
+			fetchSuggestions: 'Підібрати варіанти',
+			ignoreSelection: 'Відкласти вибрані',
+			pickTitle: 'Виберіть тайтл',
+			confidence: 'Збіг {{percent}}%',
+			onYourList: 'У вашому списку',
+			ignoredTitle: 'Відкладені файли',
+			noneIgnored: 'Відкладених файлів немає',
+			unignoreSelection: 'Повернути вибрані',
+			ignoreFailed_one: 'Не вдалося відкласти {{count}} файл',
+			ignoreFailed_few: 'Не вдалося відкласти {{count}} файли',
+			ignoreFailed_many: 'Не вдалося відкласти {{count}} файлів',
+			ignoreFailed_other: 'Не вдалося відкласти {{count}} файлу'
 		},
 		history: {
 			title: 'Історія сканувань',
