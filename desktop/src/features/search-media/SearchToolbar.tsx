@@ -1,4 +1,5 @@
 import { useUnit } from 'effector-react'
+import { FaFilter } from 'react-icons/fa6'
 
 import { useTranslation } from '@shared/i18n'
 import { Button, Icon, Input } from '@shared/ui'
@@ -31,7 +32,7 @@ export function SearchToolbar() {
 				variant='secondary'
 				onClick={() => filtersToggled()}
 				aria-expanded={filtersOpen}
-				startIcon={<Icon name='common/filter' size={18} />}
+				startIcon={<FaFilter size={16} />}
 				className={styles.toggle}
 			>
 				{t('search.filters')}

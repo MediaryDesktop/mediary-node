@@ -85,21 +85,25 @@
 		display: inline-flex;
 		flex: none;
 		align-items: center;
-		justify-content: center;
-		width: 1.5rem;
-		height: 1.5rem;
-		border: 1.5px solid currentColor;
-		border-radius: 50%;
+		gap: 0.3125rem;
+		padding: 0.25rem 0.625rem;
+		border-radius: 999px;
+		font-size: 0.75rem;
+		font-weight: 600;
+		white-space: nowrap;
 
 		&.matched {
+			background: var(--success-muted);
 			color: var(--success-text);
 		}
 
 		&.unmatched {
+			background: var(--warning-muted);
 			color: var(--warning-text);
 		}
 
 		&.missing {
+			background: var(--danger-muted);
 			color: var(--danger-text);
 		}
 	}

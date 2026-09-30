@@ -1,8 +1,9 @@
 import { useUnit } from 'effector-react'
 import { useState } from 'react'
+import { LuFolderSync } from 'react-icons/lu'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, Icon, Modal, SelectDropdown } from '@shared/ui'
+import { Button, Modal, SelectDropdown } from '@shared/ui'
 
 import { libraryModel, libraryRootsQuery } from '@entities/library-item'
 
@@ -55,7 +56,7 @@ export function ScanModal() {
 					variant='primary'
 					fullWidth
 					loading={scanning}
-					startIcon={<Icon name='common/search' size={16} />}
+					startIcon={<LuFolderSync size={16} />}
 					disabled={roots.length === 0 || scanning}
 					onClick={() => started(target === ALL_FOLDERS ? 0 : Number(target))}
 				>

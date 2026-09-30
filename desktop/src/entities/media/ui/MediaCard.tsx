@@ -39,6 +39,7 @@ export interface MediaCardProps {
 	children?: ReactNode
 	previewRef?: string
 	tracking?: MediaTracking | null
+	previewExtra?: ReactNode
 	onOpen?: () => void
 	className?: string
 }
@@ -52,6 +53,7 @@ export function MediaCard({
 	children,
 	previewRef,
 	tracking,
+	previewExtra,
 	onOpen,
 	className
 }: MediaCardProps) {
@@ -159,6 +161,7 @@ export function MediaCard({
 						title={title}
 						active={previewing}
 						tracking={tracking}
+						extra={previewExtra}
 					/>
 				</div>
 			)}

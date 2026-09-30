@@ -1,3 +1,4 @@
+import clsx from 'clsx'
 import type { ReactNode } from 'react'
 
 import { useTranslation } from '@shared/i18n'
@@ -85,7 +86,7 @@ export function DetailPanel({ node, titles }: DetailPanelProps) {
 				) : (
 					file && (
 						<>
-							<Field label={t('library.explorer.libraryFile')}>
+							<Field label={t('library.explorer.libraryFile')} inline>
 								<span className={styles.badges}>
 									{isMatched(file) ? (
 										<Badge tone='success' icon='common/check'>
@@ -141,9 +142,17 @@ export function DetailPanel({ node, titles }: DetailPanelProps) {
 	)
 }
 
-function Field({ label, children }: { label: string; children: ReactNode }) {
+function Field({
+	label,
+	inline,
+	children
+}: {
+	label: string
+	inline?: boolean
+	children: ReactNode
+}) {
 	return (
-		<div className={styles.field}>
+		<div className={clsx(styles.field, inline && styles.inline)}>
 			<dt>{label}</dt>
 			<dd>{children}</dd>
 		</div>

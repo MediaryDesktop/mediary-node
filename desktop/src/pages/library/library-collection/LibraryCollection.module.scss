@@ -6,3 +6,11 @@
 	padding: 0;
 	list-style: none;
 }
+
+// Dropped into the hover preview's meta row, next to the score and the year
+// a regular card shows there — same row, same icon+text language.
+.episodesMeta {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3125rem;
+}

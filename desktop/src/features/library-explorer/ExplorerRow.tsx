@@ -109,15 +109,6 @@ export function ExplorerRow({
 								? styles.matched
 								: styles.unmatched
 					)}
-					title={
-						file?.missing
-							? t('library.file.missing')
-							: file?.ignored
-								? t('library.file.ignored')
-								: file && isMatched(file)
-									? t('library.group.matched')
-									: t('library.group.unmatched')
-					}
 				>
 					<Icon
 						name={
@@ -129,6 +120,14 @@ export function ExplorerRow({
 						}
 						size={13}
 					/>
+
+					{file?.missing
+						? t('library.file.missing')
+						: file?.ignored
+							? t('library.file.ignored')
+							: file && isMatched(file)
+								? t('library.group.matched')
+								: t('library.group.unmatched')}
 				</span>
 			)}
 		</div>

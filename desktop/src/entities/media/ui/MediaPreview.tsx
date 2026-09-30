@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import { useUnit } from 'effector-react'
+import type { ReactNode } from 'react'
 import { useEffect, useRef, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
@@ -98,9 +99,12 @@ export interface MediaPreviewProps {
 	title: string
 	active: boolean
 	tracking?: MediaTracking | null
+	// Whatever the caller knows that the catalog doesn't — file counts, scan
+	// state — rendered in the same meta row as the score and the year.
+	extra?: ReactNode
 }
 
-export function MediaPreview({ mediaRef, title, active, tracking }: MediaPreviewProps) {
+export function MediaPreview({ mediaRef, title, active, tracking, extra }: MediaPreviewProps) {
 	const [previews, trailerHost, requestPreview] = useUnit([
 		mediaPreviewModel.$previews,
 		mediaPreviewModel.$trailerHost,
@@ -128,7 +132,7 @@ export function MediaPreview({ mediaRef, title, active, tracking }: MediaPreview
 
 					{genres.length > 0 && <p className={styles.genres}>{genres.join(', ')}</p>}
 
-					{(tracking.score > 0 || tracking.year != null) && (
+					{(tracking.score > 0 || tracking.year != null || extra) && (
 						<div className={styles.meta}>
 							{tracking.score > 0 && (
 								<span className={styles.personalScore}>
@@ -143,6 +147,8 @@ export function MediaPreview({ mediaRef, title, active, tracking }: MediaPreview
 									{tracking.year}
 								</span>
 							)}
+
+							{extra}
 						</div>
 					)}
 				</div>
@@ -174,7 +180,7 @@ export function MediaPreview({ mediaRef, title, active, tracking }: MediaPreview
 			<div className={styles.info}>
 				<p className={styles.title}>{title}</p>
 
-				{(score != null || year != null) && (
+				{(score != null || year != null || extra) && (
 					<div className={styles.meta}>
 						{score != null && (
 							<span className={clsx(styles.score, styles[scoreTone(score)])}>
@@ -189,6 +195,8 @@ export function MediaPreview({ mediaRef, title, active, tracking }: MediaPreview
 								{year}
 							</span>
 						)}
+
+						{extra}
 					</div>
 				)}
 			</div>

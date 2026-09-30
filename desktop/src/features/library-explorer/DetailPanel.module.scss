@@ -3,9 +3,13 @@
 	flex-direction: column;
 	gap: 0.75rem;
 	min-height: 0;
-	padding: 0.75rem;
+	padding: 0 0 0 1rem;
 	overflow-y: auto;
-	background: var(--bg-subtle);
+	scrollbar-width: none;
+
+	&::-webkit-scrollbar {
+		display: none;
+	}
 }
 
 .hint {
@@ -81,6 +85,19 @@
 		color: var(--text);
 		font-size: 0.875rem;
 		font-weight: 500;
+	}
+
+	// The label and its value share a row instead of stacking, for a field
+	// whose value is already a badge and reads fine beside its name.
+	&.inline {
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
+
+		dt {
+			flex: none;
+		}
 	}
 }
 

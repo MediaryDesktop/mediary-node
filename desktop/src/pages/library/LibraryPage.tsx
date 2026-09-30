@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
 import { useEffect } from 'react'
+import { LuFolderSync } from 'react-icons/lu'
 
 import { useTranslation } from '@shared/i18n'
 import { Button, EmptyState, Icon, PageHeader, PageTransition } from '@shared/ui'
@@ -92,7 +93,11 @@ export function LibraryPage() {
 						title={t('library.noFiles')}
 						description={t('library.noFilesHint')}
 						action={
-							<Button variant='primary' onClick={() => scanRequested()}>
+							<Button
+								variant='primary'
+								startIcon={<LuFolderSync size={16} />}
+								onClick={() => scanRequested()}
+							>
 								{t('library.scan.start')}
 							</Button>
 						}

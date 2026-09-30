@@ -1,5 +1,7 @@
 import { useUnit } from 'effector-react'
 import { useEffect, useMemo, useState } from 'react'
+import { FaFilter } from 'react-icons/fa6'
+import { LuFolderSync } from 'react-icons/lu'
 
 import { useTranslation } from '@shared/i18n'
 import { Button, Drawer, DropdownMenu, EmptyState, Icon, Input, Modal } from '@shared/ui'
@@ -149,6 +151,7 @@ export function LibraryExplorer({ onMatchMany }: LibraryExplorerProps) {
 				title={t('library.explorer.title')}
 				side='bottom'
 				size='sheet'
+				closable={false}
 				headerAction={
 					<div className={styles.toolbar}>
 						{unmatchedCount > 0 && (
@@ -228,7 +231,7 @@ export function LibraryExplorer({ onMatchMany }: LibraryExplorerProps) {
 									<Button
 										variant='secondary'
 										size='small'
-										startIcon={<Icon name='common/filter' size={16} />}
+										startIcon={<FaFilter size={16} />}
 									>
 										{t('library.explorer.filterAction')}
 									</Button>
@@ -269,7 +272,7 @@ export function LibraryExplorer({ onMatchMany }: LibraryExplorerProps) {
 							aria-label={t('library.explorer.refresh')}
 							onClick={() => startTree()}
 						>
-							<Icon name='common/reset' size={16} />
+							<LuFolderSync size={16} />
 						</Button>
 					</div>
 				}

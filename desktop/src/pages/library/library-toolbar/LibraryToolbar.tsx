@@ -2,7 +2,8 @@ import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, DropdownMenu, Icon, Tooltip } from '@shared/ui'
+import { Button, DropdownMenu, Icon } from '@shared/ui'
+import type { DropdownMenuItem } from '@shared/ui'
 
 import { libraryExplorerModel } from '@features/library-explorer'
 import { unmatchedFilesModel } from '@features/manage-unmatched-files'
@@ -16,9 +17,8 @@ export interface LibraryToolbarProps {
 	unmatched: number
 }
 
-// The same row, in the same order, as the library toolbar the design follows:
-// the explorer, the scan, the unmatched files when there are any, and a menu for
-// everything used less often.
+// The explorer is the one thing worth a full button; the rest — scanning,
+// unresolved matches, ignored files, scan history — lives behind the menu.
 export function LibraryToolbar({ hasEntries, hasRoots, unmatched }: LibraryToolbarProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
@@ -30,66 +30,61 @@ export function LibraryToolbar({ hasEntries, hasRoots, unmatched }: LibraryToolb
 		unmatchedFilesModel.ignoredRequested
 	])
 
+	const menuItems: DropdownMenuItem[] = []
+
+	if (hasRoots) {
+		menuItems.push({
+			id: 'scan',
+			label: hasEntries ? t('library.toolbar.refresh') : t('library.scan.start'),
+			icon: 'common/reset',
+			onSelect: () => scanRequested()
+		})
+	}
+
+	if (unmatched > 0) {
+		menuItems.push({
+			id: 'unmatched',
+			label: t('library.toolbar.resolveUnmatched', { count: unmatched }),
+			icon: 'common/library',
+			onSelect: () => unmatchedRequested()
+		})
+	}
+
+	if (hasRoots) {
+		menuItems.push(
+			{
+				id: 'ignored',
+				label: t('library.toolbar.ignoredFiles'),
+				icon: 'common/eye-off',
+				onSelect: () => ignoredRequested()
+			},
+			{
+				id: 'summaries',
+				label: t('library.toolbar.scanSummaries'),
+				icon: 'common/clock',
+				onSelect: () => navigate({ to: '/library/history' })
+			}
+		)
+	}
+
 	return (
 		<div className={styles.toolbar}>
 			{hasRoots && (
-				<Tooltip content={t('library.toolbar.explorer')}>
-					<Button
-						variant='ghost'
-						iconOnly
-						aria-label={t('library.toolbar.explorer')}
-						className={unmatched > 0 ? styles.pulse : undefined}
-						onClick={() => explorerRequested()}
-					>
-						<Icon name='common/folder-tree' size={20} />
-					</Button>
-				</Tooltip>
-			)}
-
-			{hasRoots && (
-				<Tooltip
-					content={hasEntries ? t('library.toolbar.refreshHint') : t('library.toolbar.scanHint')}
-				>
-					<Button
-						variant={hasEntries ? 'secondary' : 'primary'}
-						startIcon={<Icon name={hasEntries ? 'common/reset' : 'common/search'} size={16} />}
-						onClick={() => scanRequested()}
-					>
-						{hasEntries ? t('library.toolbar.refresh') : t('library.scan.start')}
-					</Button>
-				</Tooltip>
-			)}
-
-			{unmatched > 0 && (
 				<Button
 					variant='primary'
-					startIcon={<Icon name='common/library' size={16} />}
-					className={styles.alert}
-					onClick={() => unmatchedRequested()}
+					startIcon={<Icon name='common/folder-tree' size={16} />}
+					onClick={() => explorerRequested()}
 				>
-					{t('library.toolbar.resolveUnmatched', { count: unmatched })}
+					{t('library.toolbar.explorer')}
 				</Button>
 			)}
 
-			{hasRoots && (
+			{menuItems.length > 0 && (
 				<DropdownMenu
 					align='end'
-					items={[
-						{
-							id: 'ignored',
-							label: t('library.toolbar.ignoredFiles'),
-							icon: 'common/eye-off',
-							onSelect: () => ignoredRequested()
-						},
-						{
-							id: 'summaries',
-							label: t('library.toolbar.scanSummaries'),
-							icon: 'common/clock',
-							onSelect: () => navigate({ to: '/library/history' })
-						}
-					]}
+					items={menuItems}
 					trigger={
-						<Button variant='ghost' iconOnly aria-label={t('library.toolbar.more')}>
+						<Button variant='secondary' iconOnly aria-label={t('library.toolbar.more')}>
 							<Icon name='common/more-vertical' size={20} />
 						</Button>
 					}
