@@ -203,6 +203,8 @@ type ScanRunGroupDetail struct {
 	FileCount int           `json:"file_count" doc:"Files this scan matched to the title."`
 	Tracked   bool          `json:"tracked" doc:"False when the match came from a search rather than the user's own list."`
 	Title     *MatchedTitle `json:"title,omitempty" doc:"The title's name and poster, when the node can still describe it."`
+
+	Files []ScanRunFileLogDetail `json:"files" doc:"What the scan made of every file it matched to this title, for the scanner log under the title."`
 }
 
 // ScanRunFileLogDetail is what a scan made of one file it could not match.

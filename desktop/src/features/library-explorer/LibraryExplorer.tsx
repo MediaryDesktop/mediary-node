@@ -31,7 +31,12 @@ export interface LibraryExplorerProps {
 export function LibraryExplorer({ onMatchMany }: LibraryExplorerProps) {
 	const { t } = useTranslation()
 
-	const [open, closed] = useUnit([libraryExplorerModel.$open, libraryExplorerModel.closed])
+	const [open, closed, search, setSearch] = useUnit([
+		libraryExplorerModel.$open,
+		libraryExplorerModel.closed,
+		libraryExplorerModel.$search,
+		libraryExplorerModel.searchChanged
+	])
 
 	const [treeData, treePending, startTree] = useUnit([
 		libraryTreeQuery.$data,
@@ -49,7 +54,6 @@ export function LibraryExplorer({ onMatchMany }: LibraryExplorerProps) {
 	])
 
 	const [filter, setFilter] = useState<ExplorerFilter | null>(null)
-	const [search, setSearch] = useState('')
 	const [expanded, setExpanded] = useState<Set<string>>(new Set())
 	const [focused, setFocused] = useState<TreeNode | null>(null)
 	const [selecting, setSelecting] = useState(false)

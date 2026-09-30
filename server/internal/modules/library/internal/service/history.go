@@ -172,25 +172,39 @@ func (s *Service) ScanRun(ctx context.Context, id int64) (*ScanRunDetail, error)
 		})
 	}
 
+	// A matched file belongs under the title it went to, so the log of a title
+	// reads as what happened to that title's files; the rest are the unmatched.
+	matchedByRef := make(map[string][]ScanRunFileLogDetail, len(groups))
+
+	for _, entry := range logs {
+		logged := ScanRunFileLogDetail{
+			FileID:      entry.FileID,
+			RelPath:     entry.RelPath,
+			ParsedTitle: entry.ParsedTitle,
+			Confidence:  entry.Confidence,
+		}
+
+		if entry.Matched {
+			matchedByRef[entry.MediaRef] = append(matchedByRef[entry.MediaRef], logged)
+
+			continue
+		}
+
+		detail.UnmatchedFiles = append(detail.UnmatchedFiles, logged)
+	}
+
 	for _, group := range groups {
+		files := matchedByRef[group.MediaRef]
+		if files == nil {
+			files = []ScanRunFileLogDetail{}
+		}
+
 		detail.Groups = append(detail.Groups, ScanRunGroupDetail{
 			MediaRef:  group.MediaRef,
 			FileCount: group.FileCount,
 			Tracked:   group.Tracked,
 			Title:     titles[group.MediaRef],
-		})
-	}
-
-	for _, entry := range logs {
-		if entry.Matched {
-			continue
-		}
-
-		detail.UnmatchedFiles = append(detail.UnmatchedFiles, ScanRunFileLogDetail{
-			FileID:      entry.FileID,
-			RelPath:     entry.RelPath,
-			ParsedTitle: entry.ParsedTitle,
-			Confidence:  entry.Confidence,
+			Files:     files,
 		})
 	}
 

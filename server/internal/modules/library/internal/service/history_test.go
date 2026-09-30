@@ -62,6 +62,11 @@ func TestScanRecordsHistory(t *testing.T) {
 		t.Error("group.Tracked = false, want true: the match came off the user's own list")
 	}
 
+	// The log under a title is what happened to that title's own files.
+	if len(group.Files) != 2 {
+		t.Errorf("group files = %+v, want both episodes logged under the title", group.Files)
+	}
+
 	if len(detail.UnmatchedFiles) != 0 {
 		t.Errorf("unmatched files = %+v, want none: every file matched", detail.UnmatchedFiles)
 	}

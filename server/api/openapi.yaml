@@ -1705,6 +1705,13 @@ components:
           description: Files this scan matched to the title.
           format: int64
           type: integer
+        files:
+          description: What the scan made of every file it matched to this title, for the scanner log under the title.
+          items:
+            $ref: "#/components/schemas/ScanRunFileLogDetail"
+          type:
+            - array
+            - "null"
         media_ref:
           description: The title, as provider:id.
           type: string
@@ -1718,6 +1725,7 @@ components:
         - media_ref
         - file_count
         - tracked
+        - files
       type: object
     ScanRunOutputBody:
       additionalProperties: false

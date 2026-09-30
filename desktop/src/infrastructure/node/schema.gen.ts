@@ -1544,6 +1544,8 @@ export interface components {
 			 * @description Files this scan matched to the title.
 			 */
 			file_count: number
+			/** @description What the scan made of every file it matched to this title, for the scanner log under the title. */
+			files: components['schemas']['ScanRunFileLogDetail'][] | null
 			/** @description The title, as provider:id. */
 			media_ref: string
 			/** @description The title's name and poster, when the node can still describe it. */
