@@ -276,6 +276,7 @@ export const sprites = defineSpriteMap([
 				defineSpriteSymbol(['eye'], [24]),
 				defineSpriteSymbol(['filter'], [24]),
 				defineSpriteSymbol(['folder-open'], [24]),
+				defineSpriteSymbol(['folder-tree'], [24]),
 				defineSpriteSymbol(['folder'], [24]),
 				defineSpriteSymbol(['heart'], [24]),
 				defineSpriteSymbol(['home'], [24]),
@@ -345,6 +346,7 @@ export type SpritesMeta = {
 		| 'eye'
 		| 'filter'
 		| 'folder-open'
+		| 'folder-tree'
 		| 'folder'
 		| 'heart'
 		| 'home'

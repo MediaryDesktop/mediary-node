@@ -279,6 +279,8 @@ export const en = {
 		},
 		scan: {
 			start: 'Scan',
+			folders: 'Folders',
+			allFolders: 'Every library folder',
 			failed: 'The scan could not be started',
 			noRoots: 'Add a library folder in Settings before scanning',
 			running: 'Scanning…',
@@ -317,7 +319,6 @@ export const en = {
 			rootFailed: 'A folder could not be read: {{reason}}'
 		},
 		explorer: {
-			action: 'Explorer',
 			title: 'Library explorer',
 			description: 'Every scanned file, as the folders they sit in',
 			search: 'Search files and folders…',
@@ -338,11 +339,20 @@ export const en = {
 				missing: 'Missing'
 			}
 		},
+		toolbar: {
+			explorer: 'Library explorer',
+			refresh: 'Refresh',
+			refreshHint: 'Rescan the library',
+			scanHint: 'Scan the library',
+			resolveUnmatched_one: 'Resolve unmatched ({{count}})',
+			resolveUnmatched_few: 'Resolve unmatched ({{count}})',
+			resolveUnmatched_many: 'Resolve unmatched ({{count}})',
+			resolveUnmatched_other: 'Resolve unmatched ({{count}})',
+			ignoredFiles: 'Ignored files',
+			scanSummaries: 'Scan summaries',
+			more: 'More library actions'
+		},
 		unmatched: {
-			action_one: '{{count}} unmatched',
-			action_few: '{{count}} unmatched',
-			action_many: '{{count}} unmatched',
-			action_other: '{{count}} unmatched',
 			title: 'Files without a title',
 			description: 'Match what the node could not work out, or set it aside so it stops asking',
 			empty: 'Every file has a title',
@@ -353,7 +363,6 @@ export const en = {
 			}
 		},
 		history: {
-			action: 'History',
 			title: 'Scan history',
 			description: 'Every scan the node has run',
 			empty: 'No scans yet',

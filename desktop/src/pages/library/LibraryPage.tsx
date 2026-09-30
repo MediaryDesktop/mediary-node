@@ -1,4 +1,4 @@
-import { Link, useNavigate } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
 import { useEffect } from 'react'
 
@@ -7,16 +7,16 @@ import { Button, EmptyState, Icon, PageHeader, PageTransition } from '@shared/ui
 
 import { libraryCollectionQuery, libraryRootsQuery, libraryScanQuery } from '@entities/library-item'
 
-import { UnmatchedFilesDrawer, unmatchedFilesModel } from '@features/manage-unmatched-files'
+import { UnmatchedFilesDrawer } from '@features/manage-unmatched-files'
 import { MatchFileDrawer, matchFileModel } from '@features/match-library-file'
 import { scanLibraryModel, ScanModal } from '@features/scan-library'
 
 import { LibraryCollection } from './library-collection/LibraryCollection'
+import { LibraryToolbar } from './library-toolbar/LibraryToolbar'
 import styles from './LibraryPage.module.scss'
 
 export function LibraryPage() {
 	const { t } = useTranslation()
-	const navigate = useNavigate()
 
 	const [collectionData, collectionPending, startCollection] = useUnit([
 		libraryCollectionQuery.$data,
@@ -31,7 +31,6 @@ export function LibraryPage() {
 	])
 
 	const scanRequested = useUnit(scanLibraryModel.requested)
-	const unmatchedRequested = useUnit(unmatchedFilesModel.requested)
 	const matchRequested = useUnit(matchFileModel.requested)
 
 	useEffect(() => {
@@ -63,38 +62,11 @@ export function LibraryPage() {
 				icon={<Icon name='common/database' size={24} />}
 				subtitle={summary}
 				rightContent={
-					<div className={styles.actions}>
-						{collection !== null && collection.unmatched > 0 && (
-							<Button
-								startIcon={<Icon name='common/info' size={16} />}
-								onClick={() => unmatchedRequested()}
-							>
-								{t('library.unmatched.action', { count: collection.unmatched })}
-							</Button>
-						)}
-
-						<Button
-							variant='primary'
-							startIcon={<Icon name='common/reset' size={16} />}
-							onClick={() => scanRequested()}
-						>
-							{t('library.scan.start')}
-						</Button>
-
-						<Button
-							startIcon={<Icon name='common/folder-open' size={16} />}
-							onClick={() => navigate({ to: '/library/explorer' })}
-						>
-							{t('library.explorer.action')}
-						</Button>
-
-						<Button
-							startIcon={<Icon name='common/clock' size={16} />}
-							onClick={() => navigate({ to: '/library/history' })}
-						>
-							{t('library.history.action')}
-						</Button>
-					</div>
+					<LibraryToolbar
+						hasEntries={entries.length > 0}
+						hasRoots={roots.length > 0}
+						unmatched={collection?.unmatched ?? 0}
+					/>
 				}
 			/>
 

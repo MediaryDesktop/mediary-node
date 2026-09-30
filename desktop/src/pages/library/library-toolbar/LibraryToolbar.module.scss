@@ -1,0 +1,33 @@
+.toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 0.25rem;
+}
+
+// Unmatched files are the one thing on this row that asks for the user, so the
+// explorer that resolves them breathes until they are gone.
+.pulse {
+	animation: pulse 2s ease-in-out infinite;
+}
+
+.alert {
+	background: var(--danger);
+
+	&:hover:not(:disabled) {
+		background: var(--danger-hover);
+	}
+}
+
+@keyframes pulse {
+	50% {
+		opacity: 0.5;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.pulse {
+		animation: none;
+	}
+}

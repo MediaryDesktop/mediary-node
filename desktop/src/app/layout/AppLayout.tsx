@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 
 import { NowPlayingBar, playbackQuery } from '@entities/playback'
 
+import { ScanProgress } from '@features/scan-library'
 import { ManageEntryDrawer, RateEntryDrawer } from '@features/track-media'
 
 import styles from './AppLayout.module.scss'
@@ -26,6 +27,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
 			<ManageEntryDrawer />
 			<RateEntryDrawer />
+
+			<ScanProgress />
 		</div>
 	)
 }

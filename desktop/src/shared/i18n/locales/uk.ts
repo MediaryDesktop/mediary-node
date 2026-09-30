@@ -277,6 +277,8 @@ export const uk: Translation = {
 		},
 		scan: {
 			start: 'Сканувати',
+			folders: 'Теки',
+			allFolders: 'Усі теки бібліотеки',
 			failed: 'Не вдалося запустити сканування',
 			noRoots: 'Додайте теку бібліотеки в налаштуваннях, щоб сканувати',
 			running: 'Сканування…',
@@ -315,7 +317,6 @@ export const uk: Translation = {
 			rootFailed: 'Теку не вдалося прочитати: {{reason}}'
 		},
 		explorer: {
-			action: 'Провідник',
 			title: 'Провідник бібліотеки',
 			description: 'Усі просканованi файли в теках, де вони лежать',
 			search: 'Пошук файлів і тек…',
@@ -336,11 +337,20 @@ export const uk: Translation = {
 				missing: 'Відсутні'
 			}
 		},
+		toolbar: {
+			explorer: 'Провідник бібліотеки',
+			refresh: 'Оновити',
+			refreshHint: 'Пересканувати бібліотеку',
+			scanHint: 'Сканувати бібліотеку',
+			resolveUnmatched_one: 'Розібрати незіставлені ({{count}})',
+			resolveUnmatched_few: 'Розібрати незіставлені ({{count}})',
+			resolveUnmatched_many: 'Розібрати незіставлені ({{count}})',
+			resolveUnmatched_other: 'Розібрати незіставлені ({{count}})',
+			ignoredFiles: 'Відкладені файли',
+			scanSummaries: 'Підсумки сканувань',
+			more: 'Інші дії з бібліотекою'
+		},
 		unmatched: {
-			action_one: '{{count}} без тайтла',
-			action_few: '{{count}} без тайтла',
-			action_many: '{{count}} без тайтла',
-			action_other: '{{count}} без тайтла',
 			title: 'Файли без тайтла',
 			description: 'Зіставте те, що нода не змогла розпізнати, або відкладіть, щоб більше не питала',
 			empty: 'Усі файли мають тайтл',
@@ -351,7 +361,6 @@ export const uk: Translation = {
 			}
 		},
 		history: {
-			action: 'Історія',
 			title: 'Історія сканувань',
 			description: 'Усі скани, які виконала нода',
 			empty: 'Сканувань ще не було',

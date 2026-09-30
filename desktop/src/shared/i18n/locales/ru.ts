@@ -278,6 +278,8 @@ export const ru: Translation = {
 		},
 		scan: {
 			start: 'Сканировать',
+			folders: 'Папки',
+			allFolders: 'Все папки библиотеки',
 			failed: 'Не удалось запустить сканирование',
 			noRoots: 'Добавьте папку библиотеки в настройках, чтобы сканировать',
 			running: 'Сканирование…',
@@ -316,7 +318,6 @@ export const ru: Translation = {
 			rootFailed: 'Папку не удалось прочитать: {{reason}}'
 		},
 		explorer: {
-			action: 'Проводник',
 			title: 'Проводник библиотеки',
 			description: 'Все просканированные файлы в папках, где они лежат',
 			search: 'Поиск файлов и папок…',
@@ -337,11 +338,20 @@ export const ru: Translation = {
 				missing: 'Отсутствуют'
 			}
 		},
+		toolbar: {
+			explorer: 'Проводник библиотеки',
+			refresh: 'Обновить',
+			refreshHint: 'Пересканировать библиотеку',
+			scanHint: 'Сканировать библиотеку',
+			resolveUnmatched_one: 'Разобрать несопоставленные ({{count}})',
+			resolveUnmatched_few: 'Разобрать несопоставленные ({{count}})',
+			resolveUnmatched_many: 'Разобрать несопоставленные ({{count}})',
+			resolveUnmatched_other: 'Разобрать несопоставленные ({{count}})',
+			ignoredFiles: 'Отложенные файлы',
+			scanSummaries: 'Итоги сканирований',
+			more: 'Другие действия с библиотекой'
+		},
 		unmatched: {
-			action_one: '{{count}} без тайтла',
-			action_few: '{{count}} без тайтла',
-			action_many: '{{count}} без тайтла',
-			action_other: '{{count}} без тайтла',
 			title: 'Файлы без тайтла',
 			description:
 				'Сопоставьте то, что нода не смогла распознать, или отложите, чтобы больше не спрашивала',
@@ -353,7 +363,6 @@ export const ru: Translation = {
 			}
 		},
 		history: {
-			action: 'История',
 			title: 'История сканирований',
 			description: 'Все сканирования, которые выполнила нода',
 			empty: 'Сканирований ещё не было',
