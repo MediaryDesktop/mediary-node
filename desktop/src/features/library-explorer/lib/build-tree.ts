@@ -1,9 +1,9 @@
 import { isIgnored, isMatched } from '@entities/library-item'
 import type { LibraryFile, LibraryRoot } from '@entities/library-item'
 
-export type ExplorerFilter = 'all' | 'unmatched' | 'ignored' | 'missing'
+export type ExplorerFilter = 'unmatched' | 'auto' | 'ignored' | 'missing'
 
-export const EXPLORER_FILTERS: readonly ExplorerFilter[] = ['all', 'unmatched', 'ignored', 'missing']
+export const EXPLORER_FILTERS: readonly ExplorerFilter[] = ['unmatched', 'auto', 'ignored', 'missing']
 
 export interface TreeFile {
 	kind: 'file'
@@ -29,10 +29,14 @@ export interface FlatNode {
 	depth: number
 }
 
-export function matchesFilter(file: LibraryFile, filter: ExplorerFilter): boolean {
+export function matchesFilter(file: LibraryFile, filter: ExplorerFilter | null): boolean {
 	switch (filter) {
 		case 'unmatched':
 			return !isMatched(file) && !isIgnored(file)
+		// A match the node made on its own and nobody confirmed — the one a rescan
+		// is still allowed to change.
+		case 'auto':
+			return file.match?.source === 'auto'
 		case 'ignored':
 			return isIgnored(file)
 		case 'missing':

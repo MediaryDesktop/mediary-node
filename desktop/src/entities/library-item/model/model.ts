@@ -23,7 +23,7 @@ import {
 	setLibraryMatchFx,
 	startLibraryScanFx
 } from '../api/api'
-import type { LibraryFile } from '../api/api'
+import type { LibraryFile, SetLibraryFileIgnoredParams, SetLibraryMatchParams } from '../api/api'
 
 // How many files one page request brings in. The node pages at 500, and a list
 // this long is already past what anyone scrolls — the count in the header says
@@ -93,6 +93,46 @@ export const deleteLibraryFileMutation = createMutation({
 	name: 'deleteLibraryFile'
 })
 
+// What a group action did: how many of the files it went through and how many
+// it could not. A file that is open in a player cannot be deleted, and one
+// failure should not throw away what happened to the other ninety-nine.
+export interface BulkOutcome {
+	done: number
+	failed: number
+}
+
+async function settle<Params>(
+	items: Params[],
+	run: (item: Params) => Promise<unknown>
+): Promise<BulkOutcome> {
+	const results = await Promise.allSettled(items.map(run))
+	const failed = results.filter(result => result.status === 'rejected').length
+
+	return { done: results.length - failed, failed }
+}
+
+export const setLibraryMatchesMutation = createMutation({
+	effect: createEffect((items: SetLibraryMatchParams[]) => settle(items, item => setLibraryMatchFx(item))),
+	name: 'setLibraryMatches'
+})
+
+export const setLibraryFilesIgnoredMutation = createMutation({
+	effect: createEffect((items: SetLibraryFileIgnoredParams[]) =>
+		settle(items, item => setLibraryFileIgnoredFx(item))
+	),
+	name: 'setLibraryFilesIgnored'
+})
+
+export const deleteLibraryFilesMutation = createMutation({
+	effect: createEffect((fileIds: number[]) => settle(fileIds, fileId => deleteLibraryFileFx(fileId))),
+	name: 'deleteLibraryFiles'
+})
+
+export const deleteLibraryMatchesMutation = createMutation({
+	effect: createEffect((fileIds: number[]) => settle(fileIds, fileId => deleteLibraryMatchFx(fileId))),
+	name: 'deleteLibraryMatches'
+})
+
 export const deleteLibraryMatchMutation = createMutation({
 	effect: deleteLibraryMatchFx,
 	name: 'deleteLibraryMatch'
@@ -109,7 +149,11 @@ keepFresh(libraryFilesQuery, {
 		setLibraryMatchMutation.finished.success,
 		deleteLibraryMatchMutation.finished.success,
 		setLibraryFileIgnoredMutation.finished.success,
-		deleteLibraryFileMutation.finished.success
+		deleteLibraryFileMutation.finished.success,
+		setLibraryMatchesMutation.finished.success,
+		setLibraryFilesIgnoredMutation.finished.success,
+		deleteLibraryFilesMutation.finished.success,
+		deleteLibraryMatchesMutation.finished.success
 	]
 })
 
@@ -119,7 +163,11 @@ keepFresh(libraryCollectionQuery, {
 		setLibraryMatchMutation.finished.success,
 		deleteLibraryMatchMutation.finished.success,
 		setLibraryFileIgnoredMutation.finished.success,
-		deleteLibraryFileMutation.finished.success
+		deleteLibraryFileMutation.finished.success,
+		setLibraryMatchesMutation.finished.success,
+		setLibraryFilesIgnoredMutation.finished.success,
+		deleteLibraryFilesMutation.finished.success,
+		deleteLibraryMatchesMutation.finished.success
 	]
 })
 
@@ -129,7 +177,11 @@ keepFresh(libraryTreeQuery, {
 		setLibraryMatchMutation.finished.success,
 		deleteLibraryMatchMutation.finished.success,
 		setLibraryFileIgnoredMutation.finished.success,
-		deleteLibraryFileMutation.finished.success
+		deleteLibraryFileMutation.finished.success,
+		setLibraryMatchesMutation.finished.success,
+		setLibraryFilesIgnoredMutation.finished.success,
+		deleteLibraryFilesMutation.finished.success,
+		deleteLibraryMatchesMutation.finished.success
 	]
 })
 

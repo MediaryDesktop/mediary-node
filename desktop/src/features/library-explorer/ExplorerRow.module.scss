@@ -1,0 +1,110 @@
+.row {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	min-height: 2.25rem;
+	padding: 0.25rem 0.625rem;
+	border-radius: var(--radius-sm);
+	cursor: pointer;
+
+	&:hover {
+		background: var(--surface-hover);
+	}
+
+	&.focused {
+		background: var(--surface-active);
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: -2px;
+	}
+
+	.marker {
+		display: inline-flex;
+		flex: none;
+		align-items: center;
+		justify-content: center;
+		width: 0.875rem;
+		color: var(--text-muted);
+	}
+
+	.chevron {
+		transition: transform 160ms ease;
+
+		&.collapsed {
+			transform: rotate(-90deg);
+		}
+	}
+
+	.icon {
+		flex: none;
+		color: var(--text-muted);
+	}
+
+	.name {
+		min-width: 0;
+		color: var(--text);
+		font-size: 0.875rem;
+		font-weight: 500;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	// The title a file was matched to, next to its name: the one thing the tree
+	// is for is seeing which file went where.
+	.chip {
+		flex: none;
+		max-width: 16rem;
+		padding: 0.125rem 0.5rem;
+		border-radius: var(--radius-sm);
+		background: var(--bg-subtle);
+		color: var(--text-secondary);
+		font-size: 0.6875rem;
+		font-weight: 600;
+		letter-spacing: 0.02em;
+		text-transform: uppercase;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.spacer {
+		flex: 1;
+	}
+
+	.meta {
+		flex: none;
+		color: var(--text-muted);
+		font-size: 0.6875rem;
+		white-space: nowrap;
+	}
+
+	.state {
+		display: inline-flex;
+		flex: none;
+		align-items: center;
+		justify-content: center;
+		width: 1.5rem;
+		height: 1.5rem;
+		border: 1.5px solid currentColor;
+		border-radius: 50%;
+
+		&.matched {
+			color: var(--success-text);
+		}
+
+		&.unmatched {
+			color: var(--warning-text);
+		}
+
+		&.missing {
+			color: var(--danger-text);
+		}
+	}
+
+	.dim {
+		opacity: 0.55;
+	}
+}

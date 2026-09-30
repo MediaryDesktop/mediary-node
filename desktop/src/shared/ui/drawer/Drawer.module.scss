@@ -97,10 +97,33 @@ $ease-in: cubic-bezier(0.32, 0.72, 0, 1);
 		max-width: 32.5rem;
 	}
 
+	// A workspace rather than a form: a list of files beside what the user is
+	// doing with them needs the width of a page, not of a panel.
+	&.xl {
+		max-width: 64rem;
+	}
+
 	&.bottom.sm,
 	&.bottom.md,
-	&.bottom.lg {
+	&.bottom.lg,
+	&.bottom.xl {
 		max-width: none;
+	}
+
+	// Most of the window, over the page it was opened from, so the user can see
+	// where they are and close back to it.
+	&.bottom.sheet {
+		right: 2rem;
+		left: 2rem;
+		height: 85vh;
+		max-height: none;
+		border-right-width: 1px;
+		border-left-width: 1px;
+
+		@media (max-width: 900px) {
+			right: 0;
+			left: 0;
+		}
 	}
 
 	.header {

@@ -7,6 +7,7 @@ import { Button, EmptyState, Icon, PageHeader, PageTransition } from '@shared/ui
 
 import { libraryCollectionQuery, libraryRootsQuery, libraryScanQuery } from '@entities/library-item'
 
+import { LibraryExplorer } from '@features/library-explorer'
 import { UnmatchedFilesDrawer } from '@features/manage-unmatched-files'
 import { MatchFileDrawer, matchFileModel } from '@features/match-library-file'
 import { scanLibraryModel, ScanModal } from '@features/scan-library'
@@ -31,7 +32,10 @@ export function LibraryPage() {
 	])
 
 	const scanRequested = useUnit(scanLibraryModel.requested)
-	const matchRequested = useUnit(matchFileModel.requested)
+	const [matchRequested, matchRequestedMany] = useUnit([
+		matchFileModel.requested,
+		matchFileModel.requestedMany
+	])
 
 	useEffect(() => {
 		startCollection()
@@ -100,6 +104,7 @@ export function LibraryPage() {
 
 			<ScanModal />
 			<UnmatchedFilesDrawer onMatch={file => matchRequested(file)} />
+			<LibraryExplorer onMatchMany={files => matchRequestedMany(files)} />
 			<MatchFileDrawer />
 		</PageTransition>
 	)

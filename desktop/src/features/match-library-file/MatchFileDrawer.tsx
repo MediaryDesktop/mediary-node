@@ -20,9 +20,10 @@ function confidenceTone(confidence: number): 'success' | 'warning' | 'neutral' {
 export function MatchFileDrawer() {
 	const { t } = useTranslation()
 
-	const [open, file, applying, closed, confirmed] = useUnit([
+	const [open, file, files, applying, closed, confirmed] = useUnit([
 		matchFileModel.$open,
 		matchFileModel.$file,
+		matchFileModel.$files,
 		matchFileModel.$applying,
 		matchFileModel.closed,
 		matchFileModel.confirmed
@@ -44,7 +45,11 @@ export function MatchFileDrawer() {
 			description={file ? fileTitle(file) : undefined}
 		>
 			<div className={styles.content}>
-				{file && <p className={styles.path}>{file.rel_path}</p>}
+				{files.length > 1 ? (
+					<p className={styles.path}>{t('library.match.group', { count: files.length })}</p>
+				) : (
+					file && <p className={styles.path}>{file.rel_path}</p>
+				)}
 
 				{pending && <p className={styles.muted}>{t('library.match.loading')}</p>}
 

@@ -125,6 +125,6 @@ describe('matchesFilter', () => {
 
 		expect(matchesFilter(ignored, 'unmatched')).toBe(false)
 		expect(matchesFilter(ignored, 'ignored')).toBe(true)
-		expect(matchesFilter(ignored, 'all')).toBe(true)
+		expect(matchesFilter(ignored, null)).toBe(true)
 	})
 })

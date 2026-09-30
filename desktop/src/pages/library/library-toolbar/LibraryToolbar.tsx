@@ -4,6 +4,7 @@ import { useUnit } from 'effector-react'
 import { useTranslation } from '@shared/i18n'
 import { Button, DropdownMenu, Icon, Tooltip } from '@shared/ui'
 
+import { libraryExplorerModel } from '@features/library-explorer'
 import { unmatchedFilesModel } from '@features/manage-unmatched-files'
 import { scanLibraryModel } from '@features/scan-library'
 
@@ -22,7 +23,8 @@ export function LibraryToolbar({ hasEntries, hasRoots, unmatched }: LibraryToolb
 	const { t } = useTranslation()
 	const navigate = useNavigate()
 
-	const [scanRequested, unmatchedRequested, viewChanged] = useUnit([
+	const [explorerRequested, scanRequested, unmatchedRequested, viewChanged] = useUnit([
+		libraryExplorerModel.requested,
 		scanLibraryModel.requested,
 		unmatchedFilesModel.requested,
 		unmatchedFilesModel.viewChanged
@@ -37,7 +39,7 @@ export function LibraryToolbar({ hasEntries, hasRoots, unmatched }: LibraryToolb
 						iconOnly
 						aria-label={t('library.toolbar.explorer')}
 						className={unmatched > 0 ? styles.pulse : undefined}
-						onClick={() => navigate({ to: '/library/explorer' })}
+						onClick={() => explorerRequested()}
 					>
 						<Icon name='common/folder-tree' size={20} />
 					</Button>

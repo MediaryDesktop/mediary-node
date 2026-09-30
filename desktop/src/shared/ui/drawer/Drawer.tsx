@@ -15,7 +15,7 @@ export interface DrawerProps {
 	headerAction?: ReactNode
 	closable?: boolean
 	side?: 'right' | 'left' | 'bottom'
-	size?: 'sm' | 'md' | 'lg'
+	size?: 'sm' | 'md' | 'lg' | 'xl' | 'sheet'
 	children?: ReactNode
 }
 

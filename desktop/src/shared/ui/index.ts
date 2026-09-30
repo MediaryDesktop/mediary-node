@@ -37,6 +37,9 @@ export { Toaster, toast } from './toast'
 export { Badge } from './badge/Badge'
 export type { BadgeProps, BadgeTone } from './badge/Badge'
 
+export { Checkbox } from './checkbox/Checkbox'
+export type { CheckboxProps, CheckboxState } from './checkbox/Checkbox'
+
 export { Drawer } from './drawer/Drawer'
 export type { DrawerProps } from './drawer/Drawer'
 

@@ -1,6 +1,8 @@
 export {
 	addLibraryRootMutation,
 	deleteLibraryFileMutation,
+	deleteLibraryFilesMutation,
+	deleteLibraryMatchesMutation,
 	deleteLibraryMatchMutation,
 	deleteLibraryRootMutation,
 	fileDuration,
@@ -22,11 +24,13 @@ export {
 	libraryTreeQuery,
 	LIBRARY_PAGE_SIZE,
 	setLibraryFileIgnoredMutation,
+	setLibraryFilesIgnoredMutation,
+	setLibraryMatchesMutation,
 	setLibraryMatchMutation,
 	startLibraryScanMutation
 } from './model/model'
 
-export type { ScanActivity, ScanPhase } from './model/model'
+export type { BulkOutcome, ScanActivity, ScanPhase } from './model/model'
 
 export { LibraryFileRow } from './ui/LibraryFileRow'
 export type { LibraryFileRowProps } from './ui/LibraryFileRow'
