@@ -25,7 +25,7 @@ export function SearchToolbar() {
 				onChange={event => titleChanged(event.target.value)}
 				placeholder={t('search.searchPlaceholder')}
 				aria-label={t('search.searchLabel')}
-				startIcon={<Icon name='common/search' size={18} />}
+				startIcon={<Icon name='common/search' size={20} />}
 			/>
 
 			<Button

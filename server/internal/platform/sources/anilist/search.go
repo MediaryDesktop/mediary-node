@@ -11,6 +11,9 @@ var (
 
 	//go:embed queries/filter_options.graphql
 	filterOptionsQuery string
+
+	//go:embed queries/match_candidates.graphql
+	matchCandidatesQuery string
 )
 
 // SearchParams mirrors AniList's own filter arguments. A zero value means the
@@ -147,6 +150,77 @@ func (c *Client) Search(ctx context.Context, params SearchParams) (*SearchResult
 
 	if data.Page == nil {
 		return &SearchResult{}, nil
+	}
+
+	return data.Page, nil
+}
+
+// MatchRelatedMedia is enough of a related entry for the library's matcher to
+// score a file against it, without a second request: its own identity and the
+// facts the matcher checks structurally. Title and synonyms are left out on
+// purpose — a candidate built from this borrows the originating entry's text
+// instead, since that is what matched the file in the first place.
+type MatchRelatedMedia struct {
+	ID         int     `json:"id"`
+	Format     *string `json:"format"`
+	Episodes   *int    `json:"episodes"`
+	Chapters   *int    `json:"chapters"`
+	SeasonYear *int    `json:"seasonYear"`
+}
+
+type MatchRelation struct {
+	RelationType string            `json:"relationType"`
+	Node         MatchRelatedMedia `json:"node"`
+}
+
+// MatchCandidate is one entry as the library's matcher needs it: lighter than
+// MediaSummary, and carrying one hop of relations that MediaSummary does not,
+// so a synonym that only landed on an earlier season can still resolve to the
+// sequel a file actually names — see matcher.Candidate.Sequels.
+type MatchCandidate struct {
+	ID         int      `json:"id"`
+	Format     *string  `json:"format"`
+	Synonyms   []string `json:"synonyms"`
+	Episodes   *int     `json:"episodes"`
+	Chapters   *int     `json:"chapters"`
+	SeasonYear *int     `json:"seasonYear"`
+	Title      Titles   `json:"title"`
+	Relations  struct {
+		Edges []MatchRelation `json:"edges"`
+	} `json:"relations"`
+}
+
+type MatchCandidateResult struct {
+	Media []MatchCandidate `json:"media"`
+}
+
+// SearchMatchCandidates is Search's narrower sibling for the one caller that
+// needs relations: the library matching a scanned file against the source. A
+// catalog browse asks nothing about relations, so it keeps using Search rather
+// than paying for this on every page of results.
+func (c *Client) SearchMatchCandidates(ctx context.Context, params SearchParams) (*MatchCandidateResult, error) {
+	variables := map[string]any{"page": params.Page, "perPage": params.PerPage}
+
+	if params.Search != "" {
+		variables["search"] = params.Search
+	}
+	if params.Type != "" {
+		variables["type"] = params.Type
+	}
+	if len(params.Sort) > 0 {
+		variables["sort"] = params.Sort
+	}
+
+	var data struct {
+		Page *MatchCandidateResult `json:"Page"`
+	}
+
+	if err := c.queryOptionalAuth(ctx, matchCandidatesQuery, variables, &data); err != nil {
+		return nil, err
+	}
+
+	if data.Page == nil {
+		return &MatchCandidateResult{}, nil
 	}
 
 	return data.Page, nil

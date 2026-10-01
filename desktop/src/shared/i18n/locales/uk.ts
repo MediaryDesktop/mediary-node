@@ -70,7 +70,8 @@ export const uk: Translation = {
 	},
 
 	common: {
-		cancel: 'Скасувати'
+		cancel: 'Скасувати',
+		breadcrumbs: 'Шлях навігації'
 	},
 
 	lists: {

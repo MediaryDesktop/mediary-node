@@ -274,6 +274,7 @@ export const sprites = defineSpriteMap([
 				defineSpriteSymbol(['external-link'], [24]),
 				defineSpriteSymbol(['eye-off'], [24]),
 				defineSpriteSymbol(['eye'], [24]),
+				defineSpriteSymbol(['file-tree'], [64, '0 0 24 24']),
 				defineSpriteSymbol(['filter'], [24]),
 				defineSpriteSymbol(['folder-open'], [24]),
 				defineSpriteSymbol(['folder-tree'], [24]),
@@ -284,6 +285,7 @@ export const sprites = defineSpriteMap([
 				defineSpriteSymbol(['library'], [24]),
 				defineSpriteSymbol(['link'], [24]),
 				defineSpriteSymbol(['list-checks'], [24]),
+				defineSpriteSymbol(['list'], [64, '0 0 24 24']),
 				defineSpriteSymbol(['lock'], [24]),
 				defineSpriteSymbol(['mail'], [24]),
 				defineSpriteSymbol(['maximize'], [24]),
@@ -297,11 +299,11 @@ export const sprites = defineSpriteMap([
 				defineSpriteSymbol(['plus'], [24]),
 				defineSpriteSymbol(['reset'], [64, '0 0 1920 1920']),
 				defineSpriteSymbol(['restore'], [24]),
-				defineSpriteSymbol(['search'], [24]),
+				defineSpriteSymbol(['search'], [100, '1.4 7.6 128 128']),
 				defineSpriteSymbol(['settings'], [24]),
 				defineSpriteSymbol(['signal'], [24]),
 				defineSpriteSymbol(['sort'], [24]),
-				defineSpriteSymbol(['sparkles'], [24]),
+				defineSpriteSymbol(['sparkles'], [64, '0 0 512 512']),
 				defineSpriteSymbol(['star'], [12]),
 				defineSpriteSymbol(['sun'], [24]),
 				defineSpriteSymbol(['tag'], [24]),
@@ -344,6 +346,7 @@ export type SpritesMeta = {
 		| 'external-link'
 		| 'eye-off'
 		| 'eye'
+		| 'file-tree'
 		| 'filter'
 		| 'folder-open'
 		| 'folder-tree'
@@ -354,6 +357,7 @@ export type SpritesMeta = {
 		| 'library'
 		| 'link'
 		| 'list-checks'
+		| 'list'
 		| 'lock'
 		| 'mail'
 		| 'maximize'

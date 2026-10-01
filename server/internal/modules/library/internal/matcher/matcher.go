@@ -45,6 +45,29 @@ type Candidate struct {
 	// Tracked marks a candidate taken from the user's own list. A file most often
 	// belongs to something they are already watching.
 	Tracked bool
+
+	// Season overrides the number Rank would otherwise read out of this
+	// candidate's own title text. Left nil for an ordinary candidate — AniList
+	// has no season field, so the text is all there is. Set only on a synthetic
+	// candidate produced by withSequelCandidates, where the season is known by
+	// construction rather than guessed from a string.
+	Season *int
+
+	// Sequels this candidate's source knows about, one relation hop forward.
+	// Only a title that came from a source search carries these — see
+	// withSequelCandidates for what they are used for.
+	Sequels []RelatedCandidate
+}
+
+// RelatedCandidate is enough of a sequel entry to score a file against it: its
+// own identity and the facts Rank checks structurally. Its titles are not
+// included — withSequelCandidates borrows the originating candidate's instead,
+// since that is the text that matched the file in the first place.
+type RelatedCandidate struct {
+	MediaRef string
+	Format   string
+	Year     *int
+	Episodes *int
 }
 
 type Scored struct {
@@ -64,6 +87,8 @@ func Rank(file File, candidates []Candidate) []Scored {
 	if fileTitle.Normalized == "" {
 		return nil
 	}
+
+	candidates = withSequelCandidates(file, candidates)
 
 	scored := make([]Scored, 0, len(candidates))
 	for i := range candidates {
@@ -136,7 +161,7 @@ func score(file File, fileTitle Title, candidate *Candidate) float64 {
 			similarity *= synonymWeight
 		}
 
-		similarity += numberingAdjustment(file, candidateTitle)
+		similarity += numberingAdjustment(file, candidateTitle, candidate)
 
 		if similarity > best {
 			best = similarity
@@ -212,15 +237,80 @@ func precisionWeighted(precision, recall float64) float64 {
 	return (1 + beta2) * precision * recall / (beta2*precision + recall)
 }
 
-// numberingAdjustment compares the season the file claims with the season the
-// candidate's own title claims — AniList has no season field, the number is part
-// of the name. A first season is usually left unwritten on both sides.
-func numberingAdjustment(file File, candidate Title) float64 {
-	if orOne(file.Season) == orOne(candidate.Season) {
+// numberingAdjustment compares the season the file claims with the season this
+// title stands for. Ordinarily that is read out of the title text itself —
+// AniList has no season field, the number is part of the name, and a first
+// season is usually left unwritten on both sides. A synthetic sequel candidate
+// knows its season by construction instead, and overrides the text.
+func numberingAdjustment(file File, candidateTitle Title, owner *Candidate) float64 {
+	candidateSeason := orOne(candidateTitle.Season)
+	if owner.Season != nil {
+		candidateSeason = *owner.Season
+	}
+
+	if orOne(file.Season) == candidateSeason {
 		return seasonAgrees
 	}
 
 	return seasonDisagrees
+}
+
+// withSequelCandidates follows a sequel relation when the file names a season
+// one past what a candidate's own titles claim. A localized synonym tends to
+// land on AniList's earliest season first — the one most people search for and
+// add synonyms to — so a season 2 file can score well on text against the
+// season 1 entry and still lose on numberingAdjustment alone. The synthetic
+// candidate keeps that text, since it is still the best evidence of which show
+// this is, but is judged everywhere else — its ref, its format, its episode
+// count, its season — as the sequel it actually points at.
+func withSequelCandidates(file File, candidates []Candidate) []Candidate {
+	if file.Season == nil || *file.Season < 2 {
+		return candidates
+	}
+
+	expanded := candidates
+
+	for i := range candidates {
+		origin := &candidates[i]
+		if len(origin.Sequels) == 0 {
+			continue
+		}
+
+		if bestOwnSeason(origin)+1 != *file.Season {
+			continue
+		}
+
+		for _, sequel := range origin.Sequels {
+			season := *file.Season
+
+			expanded = append(expanded, Candidate{
+				MediaRef: sequel.MediaRef,
+				Titles:   origin.Titles,
+				Format:   sequel.Format,
+				Year:     sequel.Year,
+				Episodes: sequel.Episodes,
+				Tracked:  origin.Tracked,
+				Season:   &season,
+			})
+		}
+	}
+
+	return expanded
+}
+
+// bestOwnSeason is the season a candidate's own titles claim, read the same way
+// numberingAdjustment reads it for an ordinary candidate — the highest one any
+// of its titles name, or 1 when none of them say otherwise.
+func bestOwnSeason(candidate *Candidate) int {
+	season := 1
+
+	for _, raw := range candidate.Titles {
+		if found := NormalizeTitle(raw).Season; found != nil && *found > season {
+			season = *found
+		}
+	}
+
+	return season
 }
 
 func yearAdjustment(file, candidate *int) float64 {

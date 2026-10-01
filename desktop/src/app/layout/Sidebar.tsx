@@ -1,12 +1,17 @@
 import { Link } from '@tanstack/react-router'
 import clsx from 'clsx'
 import { useUnit } from 'effector-react'
-import type { ReactNode } from 'react'
+import { cloneElement } from 'react'
+import type { ReactElement, ReactNode } from 'react'
 
 import type { NodeState } from '@shared/bridge'
 import { useTranslation } from '@shared/i18n'
 import { Icon, Logo, useRipple } from '@shared/ui'
 import type { IconName } from '@shared/ui'
+
+// A sidebar icon is either one of our own sprite names, or a ready-made
+// element (e.g. from react-icons) dropped in as-is.
+type SectionIcon = IconName | ReactElement
 
 import { $nodeState } from '@infra/node'
 
@@ -15,13 +20,13 @@ import { sessionModel } from '@entities/session'
 import styles from './Sidebar.module.scss'
 
 const SECTIONS = [
-	{ to: '/', icon: 'common/home', labelKey: 'nav.home' },
-	{ to: '/discover', icon: 'common/compass', labelKey: 'nav.discover' },
-	{ to: '/search', icon: 'common/search', labelKey: 'nav.search' },
-	{ to: '/lists', icon: 'common/list-checks', labelKey: 'nav.lists' },
-	{ to: '/library', icon: 'common/book-open', labelKey: 'nav.library' },
-	{ to: '/downloads', icon: 'common/download', labelKey: 'nav.downloads' }
-] as const satisfies readonly { to: string; icon: IconName; labelKey: string }[]
+	{ to: '/', icon: 'common/home', labelKey: 'nav.home', size: 22 },
+	{ to: '/discover', icon: 'common/compass', labelKey: 'nav.discover', size: 24},
+	{ to: '/search', icon: 'common/search', labelKey: 'nav.search', size: 26 },
+	{ to: '/lists', icon: 'common/list', labelKey: 'nav.lists', size: 22 },
+	{ to: '/library', icon: 'common/file-tree', labelKey: 'nav.library', size: 22 },
+	{ to: '/downloads', icon: 'common/download', labelKey: 'nav.downloads', size: 22 }
+] as const satisfies readonly { to: string; icon: SectionIcon; labelKey: string; size?: number }[]
 
 const VISIBLE_NODE_STATES = new Set<NodeState>(['starting', 'restarting', 'failed'])
 
@@ -51,6 +56,7 @@ export function Sidebar() {
 							icon={section.icon}
 							label={t(section.labelKey)}
 							exact={section.to === '/'}
+							size={section.size}
 						/>
 					</li>
 				))}
@@ -81,13 +87,14 @@ export function Sidebar() {
 
 interface RailLinkProps {
 	to: RailTo
-	icon: IconName
+	icon: SectionIcon
 	label: string
 	exact?: boolean
 	markActive?: boolean
+	size?: number
 }
 
-function RailLink({ to, icon, label, exact = false, markActive = true }: RailLinkProps) {
+function RailLink({ to, icon, label, exact = false, markActive = true, size = 22 }: RailLinkProps) {
 	const ripple = useRipple<HTMLAnchorElement>()
 
 	return (
@@ -99,7 +106,11 @@ function RailLink({ to, icon, label, exact = false, markActive = true }: RailLin
 			className={styles.item}
 			aria-label={label}
 		>
-			<Icon name={icon} size={22} />
+			{typeof icon === 'string' ? (
+				<Icon name={icon} size={size} />
+			) : (
+				cloneElement(icon, { size } as { size: number })
+			)}
 			<Tooltip>{label}</Tooltip>
 		</Link>
 	)

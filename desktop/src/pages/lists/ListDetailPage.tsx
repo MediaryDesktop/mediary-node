@@ -112,7 +112,10 @@ export function ListDetailPage({ listId }: ListDetailPageProps) {
 				<PageHeader
 					title={title}
 					subtitle={subtitle}
-					onBack={() => navigate({ to: '/lists' })}
+					breadcrumbs={[
+						{ label: t('nav.lists'), onSelect: () => navigate({ to: '/lists' }) },
+						{ label: title }
+					]}
 					rightContent={list && <ListOptionsMenu list={list} />}
 				/>
 

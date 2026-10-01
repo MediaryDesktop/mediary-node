@@ -3,7 +3,7 @@ import { useUnit } from 'effector-react'
 import { useEffect } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { PageHeader, PageTransition } from '@shared/ui'
+import { Icon, PageHeader, PageTransition } from '@shared/ui'
 
 import { SearchFilters, searchMediaModel, SearchResults, SearchToolbar } from '@features/search-media'
 
@@ -20,7 +20,11 @@ export function SearchPage() {
 
 	return (
 		<PageTransition className={styles.root}>
-			<PageHeader title={t('nav.search')} subtitle={t('search.subtitle')} />
+			<PageHeader
+				title={t('nav.search')}
+				icon={<Icon name='common/search' size={28} />}
+				subtitle={t('search.subtitle')}
+			/>
 
 			<SearchToolbar />
 

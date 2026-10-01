@@ -111,7 +111,10 @@ export function ScanHistoryPage() {
 				title={t('library.history.title')}
 				icon={<Icon name='common/clock' size={24} />}
 				subtitle={t('library.history.description')}
-				onBack={() => navigate({ to: '/library' })}
+				breadcrumbs={[
+					{ label: t('nav.library'), onSelect: () => navigate({ to: '/library' }) },
+					{ label: t('library.history.title') }
+				]}
 			/>
 
 			{!historyPending && runs.length === 0 ? (
@@ -131,7 +134,7 @@ export function ScanHistoryPage() {
 							value={search}
 							onChange={event => setSearch(event.target.value)}
 							placeholder={t('library.history.search')}
-							startIcon={<Icon name='common/search' size={16} />}
+							startIcon={<Icon name='common/search' size={18} />}
 						/>
 					</div>
 

@@ -72,7 +72,8 @@ export const en = {
 	},
 
 	common: {
-		cancel: 'Cancel'
+		cancel: 'Cancel',
+		breadcrumbs: 'Breadcrumb'
 	},
 
 	lists: {

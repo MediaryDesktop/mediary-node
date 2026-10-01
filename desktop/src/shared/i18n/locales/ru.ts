@@ -70,7 +70,8 @@ export const ru: Translation = {
 	},
 
 	common: {
-		cancel: 'Отменить'
+		cancel: 'Отменить',
+		breadcrumbs: 'Путь навигации'
 	},
 
 	lists: {

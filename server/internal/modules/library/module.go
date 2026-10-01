@@ -19,6 +19,7 @@ import (
 // boundaries exist to prevent.
 type (
 	TitleCandidate   = service.TitleCandidate
+	RelatedCandidate = service.RelatedCandidate
 	TitleDescription = service.TitleDescription
 	TitleSource      = service.TitleSource
 )

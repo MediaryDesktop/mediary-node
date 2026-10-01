@@ -29,7 +29,7 @@ export function ListFilters({ filters, formats, genres, mediaType, onChange }: L
 				value={filters.title}
 				onChange={event => patch({ title: event.target.value })}
 				placeholder={t('lists.filters.search')}
-				startIcon={<Icon name='common/search' size={16} />}
+				startIcon={<Icon name='common/search' size={18} />}
 				className={styles.search}
 			/>
 

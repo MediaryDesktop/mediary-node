@@ -1,0 +1,35 @@
+query SearchMatchCandidates(
+  $page: Int
+  $perPage: Int
+  $search: String
+  $type: MediaType
+  $sort: [MediaSort]
+) {
+  Page(page: $page, perPage: $perPage) {
+    media(search: $search, type: $type, sort: $sort) {
+      id
+      format
+      synonyms
+      episodes
+      chapters
+      seasonYear
+      title {
+        romaji
+        english
+        native
+      }
+      relations {
+        edges {
+          relationType(version: 2)
+          node {
+            id
+            format
+            episodes
+            chapters
+            seasonYear
+          }
+        }
+      }
+    }
+  }
+}

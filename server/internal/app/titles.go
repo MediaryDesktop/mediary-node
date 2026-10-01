@@ -53,7 +53,7 @@ func (s titleSource) Search(ctx context.Context, query, mediaType string) ([]lib
 
 	// Relevance, not popularity: the node is not browsing, it is identifying one
 	// file whose name it already has.
-	result, err := s.aniList.Search(ctx, anilist.SearchParams{
+	result, err := s.aniList.SearchMatchCandidates(ctx, anilist.SearchParams{
 		Page:    1,
 		PerPage: searchCandidates,
 		Search:  query,
@@ -69,21 +69,48 @@ func (s titleSource) Search(ctx context.Context, query, mediaType string) ([]lib
 	for i := range result.Media {
 		found := &result.Media[i]
 
-		count := found.Episodes
-		if sourceType == anilist.MediaTypeManga {
-			count = found.Chapters
-		}
-
 		candidates = append(candidates, library.TitleCandidate{
 			MediaRef: fmt.Sprintf("anilist:%d", found.ID),
 			Titles:   append(spellings(found.Title), found.Synonyms...),
 			Format:   value(found.Format),
 			Year:     found.SeasonYear,
-			Episodes: count,
+			Episodes: episodeCount(sourceType, found.Episodes, found.Chapters),
+			Sequels:  sequelsOf(sourceType, found.Relations.Edges),
 		})
 	}
 
 	return candidates, nil
+}
+
+// sequelsOf keeps the edges AniList calls a direct sequel — the one hop a
+// season's own text falling short can be resolved across, see
+// matcher.Candidate.Sequels. Everything else (prequels, side stories, the
+// source material) answers a different question than "what season is this".
+func sequelsOf(sourceType anilist.MediaType, edges []anilist.MatchRelation) []library.RelatedCandidate {
+	var sequels []library.RelatedCandidate
+
+	for _, edge := range edges {
+		if edge.RelationType != "SEQUEL" {
+			continue
+		}
+
+		sequels = append(sequels, library.RelatedCandidate{
+			MediaRef: fmt.Sprintf("anilist:%d", edge.Node.ID),
+			Format:   value(edge.Node.Format),
+			Year:     edge.Node.SeasonYear,
+			Episodes: episodeCount(sourceType, edge.Node.Episodes, edge.Node.Chapters),
+		})
+	}
+
+	return sequels
+}
+
+func episodeCount(sourceType anilist.MediaType, episodes, chapters *int) *int {
+	if sourceType == anilist.MediaTypeManga {
+		return chapters
+	}
+
+	return episodes
 }
 
 // Describe names the titles a page of matched files belongs to. It reads the

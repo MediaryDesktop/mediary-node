@@ -19,6 +19,21 @@ type TitleCandidate struct {
 
 	Year     *int
 	Episodes *int
+
+	// Sequels this candidate's source knows about, one relation hop forward —
+	// see matcher.Candidate.Sequels for what the matcher does with them. Only a
+	// title that came from Search carries these; the user's own collection does
+	// not know its own relations.
+	Sequels []RelatedCandidate
+}
+
+// RelatedCandidate is enough of a sequel entry for the matcher to score a file
+// against it once a season's own text falls short. See matcher.RelatedCandidate.
+type RelatedCandidate struct {
+	MediaRef string
+	Format   string
+	Year     *int
+	Episodes *int
 }
 
 // TitleDescription is a matched title as the library shows it: a name, a poster
@@ -74,6 +89,26 @@ func candidates(source []TitleCandidate, tracked bool) []matcher.Candidate {
 			Year:     source[i].Year,
 			Episodes: source[i].Episodes,
 			Tracked:  tracked,
+			Sequels:  sequels(source[i].Sequels),
+		})
+	}
+
+	return converted
+}
+
+func sequels(source []RelatedCandidate) []matcher.RelatedCandidate {
+	if len(source) == 0 {
+		return nil
+	}
+
+	converted := make([]matcher.RelatedCandidate, 0, len(source))
+
+	for _, related := range source {
+		converted = append(converted, matcher.RelatedCandidate{
+			MediaRef: related.MediaRef,
+			Format:   related.Format,
+			Year:     related.Year,
+			Episodes: related.Episodes,
 		})
 	}
 

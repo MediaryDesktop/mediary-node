@@ -10,10 +10,12 @@
 
 		.startIcon {
 			position: absolute;
+			top: 50%;
 			left: 16px;
 			display: inline-flex;
 			color: var(--text-secondary);
 			pointer-events: none;
+			transform: translateY(-50%);
 		}
 
 		.input {
@@ -27,6 +29,7 @@
 			font-family: inherit;
 			font-size: 14px;
 			font-weight: 500;
+			line-height: var(--control-height);
 			transition:
 				border-color 160ms,
 				background-color 160ms,

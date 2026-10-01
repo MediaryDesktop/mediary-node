@@ -125,6 +125,7 @@ export function ListsPage() {
 		<PageTransition className={styles.root}>
 			<PageHeader
 				title={t('nav.lists')}
+				icon={<Icon name='common/list' size={24} />}
 				subtitle={summary.join(' · ')}
 				rightContent={
 					<Button
@@ -161,7 +162,7 @@ export function ListsPage() {
 							value={search}
 							onChange={event => setSearch(event.target.value)}
 							placeholder={t('lists.search')}
-							startIcon={<Icon name='common/search' size={16} />}
+							startIcon={<Icon name='common/search' size={22} />}
 							className={styles.search}
 						/>
 

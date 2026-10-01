@@ -55,6 +55,21 @@ var (
 		Titles:   []string{"Bocchi the Rock!", "BOCCHI THE ROCK!", "ぼっち・ざ・ろっく！"},
 		Format:   "TV", Year: number(2022), Episodes: number(12),
 	}
+
+	// The Russian synonym below is AniList's own — added to the first season's
+	// entry only, same as it would be the day the second season airs and no one
+	// has gotten around to the sequel's entry yet.
+	kimetsuS1 = Candidate{
+		MediaRef: "anilist:101922",
+		Titles: []string{
+			"Kimetsu no Yaiba", "Demon Slayer: Kimetsu no Yaiba", "鬼滅の刃",
+			"Клинок, рассекающий демонов",
+		},
+		Format: "TV", Year: number(2019), Episodes: number(26),
+		Sequels: []RelatedCandidate{
+			{MediaRef: "anilist:112151", Format: "TV", Year: number(2021), Episodes: number(11)},
+		},
+	}
 )
 
 func bestOf(t *testing.T, file File, candidates ...Candidate) Scored {
@@ -232,6 +247,41 @@ func TestRankChecksTheEpisodeAgainstTheEntry(t *testing.T) {
 	if short.Confidence >= full.Confidence {
 		t.Errorf("episode 40 of a 12 episode entry scored %.2f, not below the %.2f of episode 4",
 			short.Confidence, full.Confidence)
+	}
+}
+
+// A localized synonym the community has only added to the first season's entry
+// must still resolve a second season's file to the sequel it is actually named
+// after, not fail it over a season number that the matched text never claimed.
+func TestRankFollowsASequelForASynonymOnTheEarlierSeason(t *testing.T) {
+	file := File{Title: "Клинок, рассекающий демонов", Form: "series", Season: number(2), Episode: number(1), Year: number(2021)}
+
+	second := bestOf(t, file, kimetsuS1)
+
+	if second.Candidate.MediaRef != "anilist:112151" {
+		t.Fatalf("picked %s, want the sequel the relation points at", second.Candidate.MediaRef)
+	}
+	if second.Confidence < AutoThreshold {
+		t.Errorf("confidence = %.2f, want at least %.2f", second.Confidence, AutoThreshold)
+	}
+
+	// Without the relation the file has nothing but the season 1 entry to score
+	// against, and the season mismatch must still hold it below the threshold —
+	// proof the win above comes from the sequel, not from relaxed scoring.
+	noRelation := kimetsuS1
+	noRelation.Sequels = nil
+
+	if plain := bestOf(t, file, noRelation); plain.Confidence >= AutoThreshold {
+		t.Errorf("confidence = %.2f without a sequel relation, want it below %.2f", plain.Confidence, AutoThreshold)
+	}
+
+	// The relation reaches one season forward, not two: a third season file must
+	// not silently land on the second season's entry just because it is the
+	// nearest thing with a relation.
+	third := bestOf(t, File{Title: "Клинок, рассекающий демонов", Form: "series", Season: number(3), Episode: number(1)}, kimetsuS1)
+	if third.Confidence >= AutoThreshold {
+		t.Errorf("confidence = %.2f for a season the relation does not reach, want it below %.2f",
+			third.Confidence, AutoThreshold)
 	}
 }
 

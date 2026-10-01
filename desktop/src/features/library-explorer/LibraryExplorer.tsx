@@ -283,7 +283,7 @@ export function LibraryExplorer({ onMatchMany }: LibraryExplorerProps) {
 							value={search}
 							onChange={event => setSearch(event.target.value)}
 							placeholder={t('library.explorer.search')}
-							startIcon={<Icon name='common/search' size={16} />}
+							startIcon={<Icon name='common/search' size={18} />}
 						/>
 
 						<div className={styles.tree} role='tree'>

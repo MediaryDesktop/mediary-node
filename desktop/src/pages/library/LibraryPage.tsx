@@ -61,7 +61,7 @@ export function LibraryPage() {
 		<PageTransition className={styles.root}>
 			<PageHeader
 				title={t('nav.library')}
-				icon={<Icon name='common/database' size={24} />}
+				icon={<Icon name='common/file-tree' size={24} />}
 				subtitle={summary}
 				rightContent={
 					<LibraryToolbar

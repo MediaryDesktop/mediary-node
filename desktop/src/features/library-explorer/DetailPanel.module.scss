@@ -42,10 +42,9 @@
 	justify-content: center;
 	width: 3.25rem;
 	height: 3.25rem;
-	border: 1px solid var(--border);
 	border-radius: var(--radius);
-	background: var(--bg-subtle);
-	color: var(--accent-text);
+	background: var(--accent-muted);
+	color: var(--accent);
 }
 
 .name {
