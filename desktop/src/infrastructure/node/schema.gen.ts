@@ -1904,6 +1904,10 @@ export interface components {
 			 * @description How well this entry fits the file's name, from 0 to 1.
 			 */
 			confidence: number
+			/** @description Dominant colour of the poster, for a placeholder while it loads. */
+			cover_color?: string
+			/** @description Poster for the entry. */
+			cover_image?: string
 			/** @description The source's format: TV, MOVIE, OVA, MANGA and so on. */
 			format?: string
 			/** @description Reference to pass to setLibraryFileMatch. */

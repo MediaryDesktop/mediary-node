@@ -2205,6 +2205,12 @@ components:
           description: How well this entry fits the file's name, from 0 to 1.
           format: double
           type: number
+        cover_color:
+          description: Dominant colour of the poster, for a placeholder while it loads.
+          type: string
+        cover_image:
+          description: Poster for the entry.
+          type: string
         format:
           description: "The source's format: TV, MOVIE, OVA, MANGA and so on."
           type: string

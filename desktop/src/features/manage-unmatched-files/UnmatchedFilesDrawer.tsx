@@ -3,7 +3,7 @@ import { useUnit } from 'effector-react'
 import { useEffect, useMemo, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, Drawer, EmptyState, Icon, Input } from '@shared/ui'
+import { Button, Drawer, EmptyState, Icon, Input, useRipple } from '@shared/ui'
 
 import {
 	libraryCandidatesQuery,
@@ -55,6 +55,7 @@ export function UnmatchedFilesDrawer() {
 			onOpenChange={next => !next && closed()}
 			title={t('library.unmatched.title')}
 			size='xl'
+			closable={false}
 		>
 			{current === null ? (
 				<EmptyState title={t('library.unmatched.empty')} />
@@ -66,7 +67,6 @@ export function UnmatchedFilesDrawer() {
 								variant='secondary'
 								startIcon={<Icon name='common/arrow-left' size={16} />}
 								disabled={shown === 0}
-								className={clsx(shown === 0 && styles.hidden)}
 								onClick={() => setPage(shown - 1)}
 							>
 								{t('library.unmatched.previous')}
@@ -80,7 +80,6 @@ export function UnmatchedFilesDrawer() {
 								variant='secondary'
 								endIcon={<Icon name='common/arrow-right' size={16} />}
 								disabled={shown >= lastPage}
-								className={clsx(shown >= lastPage && styles.hidden)}
 								onClick={() => setPage(shown + 1)}
 							>
 								{t('library.unmatched.next')}
@@ -241,39 +240,66 @@ function GroupPage({ group }: { group: UnmatchedGroup }) {
 							const chosen = mediaId !== '' && id === mediaId
 
 							return (
-								<button
+								<SuggestionCard
 									key={suggestion.media_ref}
-									type='button'
-									role='radio'
-									aria-checked={chosen}
-									className={clsx(styles.card, chosen && styles.chosen)}
+									suggestion={suggestion}
+									chosen={chosen}
 									onClick={() => setMediaId(id)}
-								>
-									<span className={styles.cardTitle}>{suggestion.title}</span>
-
-									<span className={styles.cardMeta}>
-										{[
-											suggestion.format,
-											suggestion.year ? String(suggestion.year) : null,
-											t('library.unmatched.confidence', {
-												percent: Math.round(suggestion.confidence * 100)
-											})
-										]
-											.filter(Boolean)
-											.join(' · ')}
-									</span>
-
-									{suggestion.tracked && (
-										<span className={styles.tracked}>
-											{t('library.unmatched.onYourList')}
-										</span>
-									)}
-								</button>
+								/>
 							)
 						})}
 					</div>
 				</section>
 			)}
 		</>
+	)
+}
+
+interface SuggestionCardProps {
+	suggestion: LibrarySuggestion
+	chosen: boolean
+	onClick: () => void
+}
+
+function SuggestionCard({ suggestion, chosen, onClick }: SuggestionCardProps) {
+	const { t } = useTranslation()
+	const ripple = useRipple<HTMLButtonElement>()
+
+	return (
+		<button
+			ref={ripple}
+			type='button'
+			role='radio'
+			aria-checked={chosen}
+			className={clsx(styles.card, chosen && styles.chosen)}
+			onClick={onClick}
+		>
+			<span className={styles.poster} style={{ backgroundColor: suggestion.cover_color ?? undefined }}>
+				{suggestion.cover_image && <img src={suggestion.cover_image} alt='' loading='lazy' />}
+			</span>
+
+			<span className={styles.cardText}>
+				<span className={styles.cardTitle}>{suggestion.title}</span>
+
+				<span className={styles.cardMeta}>
+					{[
+						suggestion.format,
+						suggestion.year ? String(suggestion.year) : null,
+						t('library.unmatched.confidence', {
+							percent: Math.round(suggestion.confidence * 100)
+						})
+					]
+						.filter(Boolean)
+						.join(' · ')}
+				</span>
+			</span>
+
+			{suggestion.tracked && (
+				<span className={styles.tracked}>
+					<Icon name='common/list' size={12} />
+					{t('library.unmatched.onYourList')}
+				</span>
+			)}
+		</button>
 	)
 }

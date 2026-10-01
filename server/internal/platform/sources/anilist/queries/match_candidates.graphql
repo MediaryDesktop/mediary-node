@@ -18,6 +18,10 @@ query SearchMatchCandidates(
         english
         native
       }
+      coverImage {
+        large
+        color
+      }
       relations {
         edges {
           relationType(version: 2)
@@ -27,6 +31,10 @@ query SearchMatchCandidates(
             episodes
             chapters
             seasonYear
+            coverImage {
+              large
+              color
+            }
           }
         }
       }

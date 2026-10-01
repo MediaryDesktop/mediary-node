@@ -161,11 +161,18 @@ func (c *Client) Search(ctx context.Context, params SearchParams) (*SearchResult
 // purpose — a candidate built from this borrows the originating entry's text
 // instead, since that is what matched the file in the first place.
 type MatchRelatedMedia struct {
-	ID         int     `json:"id"`
-	Format     *string `json:"format"`
-	Episodes   *int    `json:"episodes"`
-	Chapters   *int    `json:"chapters"`
-	SeasonYear *int    `json:"seasonYear"`
+	ID         int        `json:"id"`
+	Format     *string    `json:"format"`
+	Episodes   *int       `json:"episodes"`
+	Chapters   *int       `json:"chapters"`
+	SeasonYear *int       `json:"seasonYear"`
+	CoverImage MatchCover `json:"coverImage"`
+}
+
+// MatchCover is the one poster size a suggestion card shows.
+type MatchCover struct {
+	Large *string `json:"large"`
+	Color *string `json:"color"`
 }
 
 type MatchRelation struct {
@@ -183,8 +190,9 @@ type MatchCandidate struct {
 	Synonyms   []string `json:"synonyms"`
 	Episodes   *int     `json:"episodes"`
 	Chapters   *int     `json:"chapters"`
-	SeasonYear *int     `json:"seasonYear"`
-	Title      Titles   `json:"title"`
+	SeasonYear *int       `json:"seasonYear"`
+	Title      Titles     `json:"title"`
+	CoverImage MatchCover `json:"coverImage"`
 	Relations  struct {
 		Edges []MatchRelation `json:"edges"`
 	} `json:"relations"`

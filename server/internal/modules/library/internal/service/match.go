@@ -30,6 +30,8 @@ type Suggestion struct {
 	Year       *int    `json:"year,omitempty" doc:"Year the entry is listed under."`
 	Confidence float64 `json:"confidence" doc:"How well this entry fits the file's name, from 0 to 1."`
 	Tracked    bool    `json:"tracked" doc:"True when the entry is already on the user's own list."`
+	CoverImage *string `json:"cover_image,omitempty" doc:"Poster for the entry."`
+	CoverColor *string `json:"cover_color,omitempty" doc:"Dominant colour of the poster, for a placeholder while it loads."`
 }
 
 // Suggestions ranks what a file could be, for the user to confirm. It is the other
@@ -65,9 +67,9 @@ func (s *Service) Suggestions(ctx context.Context, fileID int64) ([]Suggestion, 
 		Episode: episodeOrChapter(file.Parsed),
 	}
 
-	pool, err := s.trackedCandidates(ctx, mediaType, map[string][]matcher.Candidate{})
+	tracked, err := s.opts.Titles.Tracked(ctx, mediaType)
 	if err != nil {
-		return nil, err
+		return nil, apperr.Wrap(err, apperr.KindUnavailable, "read tracked titles")
 	}
 
 	found, err := s.opts.Titles.Search(ctx, file.Parsed.Title, mediaType)
@@ -77,10 +79,13 @@ func (s *Service) Suggestions(ctx context.Context, fileID int64) ([]Suggestion, 
 		s.logger.Debug().Err(err).Msg("search for suggestions failed")
 	}
 
-	ranked := matcher.Rank(target, append(pool, candidates(found, false)...))
+	ranked := matcher.Rank(target, append(candidates(tracked, true), candidates(found, false)...))
+	posters := postersByRef(tracked, found)
 
 	suggestions := make([]Suggestion, 0, min(len(ranked), maxSuggestions))
 	for _, scored := range ranked[:min(len(ranked), maxSuggestions)] {
+		art := posters[scored.Candidate.MediaRef]
+
 		suggestions = append(suggestions, Suggestion{
 			MediaRef:   scored.Candidate.MediaRef,
 			Title:      firstTitle(scored.Candidate.Titles),
@@ -88,6 +93,8 @@ func (s *Service) Suggestions(ctx context.Context, fileID int64) ([]Suggestion, 
 			Year:       scored.Candidate.Year,
 			Confidence: scored.Confidence,
 			Tracked:    scored.Candidate.Tracked,
+			CoverImage: art.image,
+			CoverColor: art.color,
 		})
 	}
 

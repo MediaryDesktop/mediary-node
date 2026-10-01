@@ -178,11 +178,14 @@ func TestScanLeavesAWeakGuessToTheUser(t *testing.T) {
 	h := newHarness(t)
 	root := t.TempDir()
 
+	cover := "https://img/one-piece.jpg"
+
 	h.titles.found = []TitleCandidate{{
-		MediaRef: "anilist:21",
-		Titles:   []string{"One Piece"},
-		Format:   "TV",
-		Year:     count(1999),
+		MediaRef:   "anilist:21",
+		Titles:     []string{"One Piece"},
+		Format:     "TV",
+		Year:       count(1999),
+		CoverImage: &cover,
 	}}
 
 	writeEpisodes(t, root, "One - 01.mkv")
@@ -212,6 +215,9 @@ func TestScanLeavesAWeakGuessToTheUser(t *testing.T) {
 	if suggestions[0].Confidence >= matcher.AutoThreshold {
 		t.Errorf("suggestion confidence %.2f is above the threshold, so it should have been matched already",
 			suggestions[0].Confidence)
+	}
+	if suggestions[0].CoverImage == nil || *suggestions[0].CoverImage != cover {
+		t.Errorf("suggestion cover = %v, want the poster the source gave", suggestions[0].CoverImage)
 	}
 }
 

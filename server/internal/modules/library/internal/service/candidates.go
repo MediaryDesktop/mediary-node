@@ -20,6 +20,9 @@ type TitleCandidate struct {
 	Year     *int
 	Episodes *int
 
+	CoverImage *string
+	CoverColor *string
+
 	// Sequels this candidate's source knows about, one relation hop forward —
 	// see matcher.Candidate.Sequels for what the matcher does with them. Only a
 	// title that came from Search carries these; the user's own collection does
@@ -34,6 +37,9 @@ type RelatedCandidate struct {
 	Format   string
 	Year     *int
 	Episodes *int
+
+	CoverImage *string
+	CoverColor *string
 }
 
 // TitleDescription is a matched title as the library shows it: a name, a poster
@@ -94,6 +100,37 @@ func candidates(source []TitleCandidate, tracked bool) []matcher.Candidate {
 	}
 
 	return converted
+}
+
+type poster struct {
+	image *string
+	color *string
+}
+
+// postersByRef keeps the posters out of the matcher, which has no use for them:
+// a suggestion looks its own up by ref once ranking is done. Sequels are
+// included because a ranked candidate can be a sequel the search only reached
+// through a relation.
+func postersByRef(sources ...[]TitleCandidate) map[string]poster {
+	posters := make(map[string]poster)
+
+	keep := func(ref string, image, color *string) {
+		if posters[ref].image == nil {
+			posters[ref] = poster{image: image, color: color}
+		}
+	}
+
+	for _, source := range sources {
+		for i := range source {
+			keep(source[i].MediaRef, source[i].CoverImage, source[i].CoverColor)
+
+			for _, related := range source[i].Sequels {
+				keep(related.MediaRef, related.CoverImage, related.CoverColor)
+			}
+		}
+	}
+
+	return posters
 }
 
 func sequels(source []RelatedCandidate) []matcher.RelatedCandidate {

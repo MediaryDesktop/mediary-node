@@ -13,8 +13,6 @@ export interface CheckRowProps {
 	children?: ReactNode
 }
 
-// A whole row toggles, not only the circle: in a list of forty files the name is
-// what the eye lands on and what the hand goes for.
 export function CheckRow({ checked, onCheckedChange, label, children }: CheckRowProps) {
 	return (
 		<div

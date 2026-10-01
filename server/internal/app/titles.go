@@ -34,11 +34,13 @@ func (s titleSource) Tracked(ctx context.Context, mediaType string) ([]library.T
 	candidates := make([]library.TitleCandidate, 0, len(tracked))
 	for i := range tracked {
 		candidates = append(candidates, library.TitleCandidate{
-			MediaRef: tracked[i].MediaRef,
-			Titles:   tracked[i].Titles,
-			Format:   tracked[i].Format,
-			Year:     tracked[i].Year,
-			Episodes: tracked[i].Episodes,
+			MediaRef:   tracked[i].MediaRef,
+			Titles:     tracked[i].Titles,
+			Format:     tracked[i].Format,
+			Year:       tracked[i].Year,
+			Episodes:   tracked[i].Episodes,
+			CoverImage: tracked[i].CoverImage,
+			CoverColor: tracked[i].CoverColor,
 		})
 	}
 
@@ -70,12 +72,14 @@ func (s titleSource) Search(ctx context.Context, query, mediaType string) ([]lib
 		found := &result.Media[i]
 
 		candidates = append(candidates, library.TitleCandidate{
-			MediaRef: fmt.Sprintf("anilist:%d", found.ID),
-			Titles:   append(spellings(found.Title), found.Synonyms...),
-			Format:   value(found.Format),
-			Year:     found.SeasonYear,
-			Episodes: episodeCount(sourceType, found.Episodes, found.Chapters),
-			Sequels:  sequelsOf(sourceType, found.Relations.Edges),
+			MediaRef:   fmt.Sprintf("anilist:%d", found.ID),
+			Titles:     append(spellings(found.Title), found.Synonyms...),
+			Format:     value(found.Format),
+			Year:       found.SeasonYear,
+			Episodes:   episodeCount(sourceType, found.Episodes, found.Chapters),
+			CoverImage: found.CoverImage.Large,
+			CoverColor: found.CoverImage.Color,
+			Sequels:    sequelsOf(sourceType, found.Relations.Edges),
 		})
 	}
 
@@ -95,10 +99,12 @@ func sequelsOf(sourceType anilist.MediaType, edges []anilist.MatchRelation) []li
 		}
 
 		sequels = append(sequels, library.RelatedCandidate{
-			MediaRef: fmt.Sprintf("anilist:%d", edge.Node.ID),
-			Format:   value(edge.Node.Format),
-			Year:     edge.Node.SeasonYear,
-			Episodes: episodeCount(sourceType, edge.Node.Episodes, edge.Node.Chapters),
+			MediaRef:   fmt.Sprintf("anilist:%d", edge.Node.ID),
+			Format:     value(edge.Node.Format),
+			Year:       edge.Node.SeasonYear,
+			Episodes:   episodeCount(sourceType, edge.Node.Episodes, edge.Node.Chapters),
+			CoverImage: edge.Node.CoverImage.Large,
+			CoverColor: edge.Node.CoverImage.Color,
 		})
 	}
 
