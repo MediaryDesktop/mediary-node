@@ -2265,6 +2265,8 @@ export interface operations {
 				unmatched?: boolean
 				/** @description Only files the user told the node to leave alone. */
 				ignored?: boolean
+				/** @description Only files matched to this title — the episodes a title page lists. */
+				media_ref?: string
 				/** @description Page size. */
 				limit?: number
 				/** @description How many files to skip. */

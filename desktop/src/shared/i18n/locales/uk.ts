@@ -559,7 +559,14 @@ export const uk: Translation = {
 			episodesNotInLibrary: 'Цих епізодів немає у вашій бібліотеці:',
 			episode: 'Епізод {{number}}',
 			metadataUnavailable: 'Дані про епізоди ще недоступні — бібліотека в розробці',
-			andMore: 'Та інші…'
+			andMore: 'Та інші…',
+			toWatch: 'Далі до перегляду',
+			specials: 'Спешели',
+			others: 'Інше',
+			play: 'Дивитися: {{name}}',
+			playing: 'Грає',
+			watched: 'Переглянуто',
+			missing: 'Останній скан не знайшов файл'
 		},
 		menu: {
 			label: 'Більше дій',

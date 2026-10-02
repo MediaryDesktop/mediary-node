@@ -44,6 +44,13 @@ export const fetchLibraryTreeFx = createNodeRequestFx<void, NodeSchemas['FilesOu
 	timeout: 20_000
 }))
 
+// One title's files. 500 is the node's page ceiling and far above any real
+// season count, so a title page never has to page.
+export const fetchTitleFilesFx = createNodeRequestFx<string, NodeSchemas['FilesOutputBody']>(mediaRef => ({
+	url: '/v1/library/files',
+	query: { media_ref: mediaRef, kind: 'video', limit: 500 }
+}))
+
 export const fetchLibraryScanFx = createNodeRequestFx<void, NodeSchemas['ScanOutputBody']>(() => ({
 	url: '/v1/library/scan'
 }))

@@ -18,12 +18,13 @@ import { RelationsSection } from '../relations-section/RelationsSection'
 import styles from './MediaView.module.scss'
 
 export interface MediaViewProps {
+	mediaRef: string
 	media: MediaDetails | null
 	sources: MediaSource[]
 	entry: TrackerEntry | null
 }
 
-export function MediaView({ media, sources, entry }: MediaViewProps) {
+export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 	const { t, i18n } = useTranslation()
 	const [descriptionOpen, setDescriptionOpen] = useState(false)
 	const [detailsOpen, setDetailsOpen] = useState(false)
@@ -77,10 +78,13 @@ export function MediaView({ media, sources, entry }: MediaViewProps) {
 
 			<div className={styles.sections}>
 				<LibrarySection
+					mediaRef={mediaRef}
 					cover={base.cover_image}
 					coverColor={base.cover_color}
+					banner={base.banner_image}
 					total={total}
 					mediaType={mediaType}
+					progress={entry?.progress ?? 0}
 				/>
 
 				<RelationsSection relations={media?.relations ?? []} />

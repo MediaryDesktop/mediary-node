@@ -560,7 +560,14 @@ export const ru: Translation = {
 			episodesNotInLibrary: 'Этих эпизодов нет в вашей библиотеке:',
 			episode: 'Эпизод {{number}}',
 			metadataUnavailable: 'Данные об эпизодах пока недоступны — библиотека в разработке',
-			andMore: 'И другие…'
+			andMore: 'И другие…',
+			toWatch: 'Дальше к просмотру',
+			specials: 'Спешлы',
+			others: 'Другое',
+			play: 'Смотреть: {{name}}',
+			playing: 'Играет',
+			watched: 'Просмотрено',
+			missing: 'Последний скан не нашёл файл'
 		},
 		menu: {
 			label: 'Больше действий',

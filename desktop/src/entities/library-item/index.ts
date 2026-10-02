@@ -25,7 +25,8 @@ export {
 	setLibraryFilesIgnoredMutation,
 	setLibraryMatchesMutation,
 	setLibraryMatchMutation,
-	startLibraryScanMutation
+	startLibraryScanMutation,
+	titleFilesQuery
 } from './model/model'
 
 export type { BulkOutcome, ScanActivity, ScanPhase } from './model/model'

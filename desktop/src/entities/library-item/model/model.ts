@@ -18,6 +18,7 @@ import {
 	fetchLibraryScanHistoryFx,
 	fetchLibraryScanRunFx,
 	fetchLibraryTreeFx,
+	fetchTitleFilesFx,
 	setLibraryFileIgnoredFx,
 	setLibraryMatchFx,
 	startLibraryScanFx
@@ -46,6 +47,8 @@ export const libraryCollectionQuery = createQuery({
 })
 
 export const libraryTreeQuery = createQuery({ effect: fetchLibraryTreeFx, name: 'libraryTree' })
+
+export const titleFilesQuery = createQuery({ effect: fetchTitleFilesFx, name: 'titleFiles' })
 
 export const libraryScanQuery = createQuery({ effect: fetchLibraryScanFx, name: 'libraryScan' })
 
@@ -149,19 +152,21 @@ keepFresh(libraryCollectionQuery, {
 	]
 })
 
-keepFresh(libraryTreeQuery, {
-	triggers: [
-		libraryUpdated,
-		setLibraryMatchMutation.finished.success,
-		deleteLibraryMatchMutation.finished.success,
-		setLibraryFileIgnoredMutation.finished.success,
-		deleteLibraryFileMutation.finished.success,
-		setLibraryMatchesMutation.finished.success,
-		setLibraryFilesIgnoredMutation.finished.success,
-		deleteLibraryFilesMutation.finished.success,
-		deleteLibraryMatchesMutation.finished.success
-	]
-})
+const filesChanged = [
+	libraryUpdated,
+	setLibraryMatchMutation.finished.success,
+	deleteLibraryMatchMutation.finished.success,
+	setLibraryFileIgnoredMutation.finished.success,
+	deleteLibraryFileMutation.finished.success,
+	setLibraryMatchesMutation.finished.success,
+	setLibraryFilesIgnoredMutation.finished.success,
+	deleteLibraryFilesMutation.finished.success,
+	deleteLibraryMatchesMutation.finished.success
+]
+
+keepFresh(libraryTreeQuery, { triggers: filesChanged })
+
+keepFresh(titleFilesQuery, { triggers: filesChanged })
 
 keepFresh(libraryScanQuery, { triggers: [scanStarted, scanFinished] })
 

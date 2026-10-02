@@ -48,14 +48,21 @@ export function MediaPage({ mediaRef }: MediaPageProps) {
 				onClick={() => router.history.back()}
 			/>
 
-			{details && <MediaView media={details.media} sources={details.sources ?? []} entry={entry} />}
+			{details && (
+				<MediaView
+					mediaRef={mediaRef}
+					media={details.media}
+					sources={details.sources ?? []}
+					entry={entry}
+				/>
+			)}
 
 			{!details && !failed && <MediaHeroSkeleton />}
 
 			{failed && entry && (
 				<>
 					<p className={styles.offline}>{t('media.offline')}</p>
-					<MediaView media={null} sources={[]} entry={entry} />
+					<MediaView mediaRef={mediaRef} media={null} sources={[]} entry={entry} />
 				</>
 			)}
 
