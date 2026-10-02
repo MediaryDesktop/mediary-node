@@ -7,6 +7,9 @@ export {
 	stopPlaybackMutation
 } from './model/model'
 
+export { browserCanPlayType, canDirectPlay } from './lib/codecs'
+
 export { NowPlayingBar } from './ui/NowPlayingBar'
 
-export type { PlaybackAction, PlaybackSession, PlaybackStatus } from './api/api'
+export { fetchPlaybackStreamFx } from './api/api'
+export type { MediaInfo, PlaybackAction, PlaybackSession, PlaybackStatus, PlaybackStream } from './api/api'

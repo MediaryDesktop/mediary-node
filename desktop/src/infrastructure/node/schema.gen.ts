@@ -429,6 +429,46 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/v1/playback/files/{id}/direct': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Serve a file as it is
+		 * @description The file's bytes with range support, for a video element to play directly. Accepts the node token as ?token=, because a video element cannot send headers.
+		 */
+		get: operations['getPlaybackDirect']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/playback/files/{id}/stream': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Describe a file for the built-in player
+		 * @description Runs ffprobe on the file, once per version of it, and reports its streams together with an RFC 6381 type. The renderer asks its own video element whether it can play that type, which decides between direct play and transcoding.
+		 */
+		get: operations['getPlaybackStream']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/v1/reader/status': {
 		parameters: {
 			query?: never
@@ -641,6 +681,25 @@ export interface components {
 			airing_at: string
 			/** Format: int64 */
 			episode: number
+		}
+		Audio: {
+			/** Format: int32 */
+			channels: number
+			codec: string
+			/** Format: int32 */
+			index: number
+			is_default: boolean
+			is_forced: boolean
+			language?: string
+			mime_codec?: string
+			title?: string
+		}
+		Chapter: {
+			/** Format: float */
+			end_time: number
+			name: string
+			/** Format: float */
+			start_time: number
 		}
 		CollectionOutputBody: {
 			/**
@@ -1174,6 +1233,34 @@ export interface components {
 			trailer: components['schemas']['Trailer']
 			/** Format: int64 */
 			volumes: number | null
+		}
+		MediaInfo: {
+			audios: components['schemas']['Audio'][] | null
+			chapters: components['schemas']['Chapter'][] | null
+			/** @description Container format as ffprobe names it. */
+			container?: string
+			/**
+			 * Format: float
+			 * @description Length in seconds.
+			 */
+			duration: number
+			/** @description File extension without the dot. */
+			extension: string
+			/** @description Attached font file names, needed to render ASS subtitles. */
+			fonts: string[] | null
+			/** @description RFC 6381 type with codecs, for canPlayType. Absent when a stream has a codec the node cannot describe — such a file is not a direct-play candidate. */
+			mime_codec?: string
+			/** @description Absolute path of the file. */
+			path: string
+			/**
+			 * Format: int64
+			 * @description Size in bytes.
+			 */
+			size: number
+			subtitles: components['schemas']['Subtitle'][] | null
+			/** @description The first video stream. */
+			video?: components['schemas']['Video']
+			videos: components['schemas']['Video'][] | null
 		}
 		MediaSummary: {
 			/** Format: int64 */
@@ -1898,6 +1985,46 @@ export interface components {
 			/** @description True when the module's dependencies are wired. */
 			ready: boolean
 		}
+		Stream: {
+			/** @description Path that serves the file as it is, with range requests. The renderer appends the node token as ?token= because a video element cannot send headers. */
+			direct_url: string
+			/**
+			 * Format: int64
+			 * @description Episode number within that title.
+			 */
+			episode?: number
+			/**
+			 * Format: int64
+			 * @description Library file this describes.
+			 */
+			file_id: number
+			/** @description Streams, codecs and chapters as ffprobe reports them. */
+			info: components['schemas']['MediaInfo']
+			/** @description Title this file is matched to. Absent while unmatched. */
+			media_ref?: string
+			/** @description Title as the library reads it, for the UI. */
+			title: string
+		}
+		StreamOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/StreamOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description What the file holds and where to fetch it. */
+			stream: components['schemas']['Stream']
+		}
+		Subtitle: {
+			codec: string
+			extension: string
+			/** Format: int32 */
+			index: number
+			is_default: boolean
+			is_forced: boolean
+			language?: string
+			title?: string
+		}
 		Suggestion: {
 			/**
 			 * Format: double
@@ -1995,6 +2122,22 @@ export interface components {
 			 */
 			status?: 'CURRENT' | 'PLANNING' | 'COMPLETED' | 'DROPPED' | 'PAUSED' | 'REPEATING'
 		}
+		Video: {
+			/** Format: int32 */
+			bitrate: number
+			codec: string
+			color_primaries: string
+			color_space: string
+			color_transfer: string
+			/** Format: int32 */
+			height: number
+			language?: string
+			mime_codec?: string
+			pix_fmt: string
+			quality: string
+			/** Format: int32 */
+			width: number
+		}
 	}
 	responses: never
 	parameters: never
@@ -2006,6 +2149,8 @@ export type SchemaAcceptedOutputBody = components['schemas']['AcceptedOutputBody
 export type SchemaAccount = components['schemas']['Account']
 export type SchemaAddRootInputBody = components['schemas']['AddRootInputBody']
 export type SchemaAiringEpisode = components['schemas']['AiringEpisode']
+export type SchemaAudio = components['schemas']['Audio']
+export type SchemaChapter = components['schemas']['Chapter']
 export type SchemaCollectionOutputBody = components['schemas']['CollectionOutputBody']
 export type SchemaControlInputBody = components['schemas']['ControlInputBody']
 export type SchemaCounts = components['schemas']['Counts']
@@ -2034,6 +2179,7 @@ export type SchemaMatch = components['schemas']['Match']
 export type SchemaMatchedTitle = components['schemas']['MatchedTitle']
 export type SchemaMedia = components['schemas']['Media']
 export type SchemaMediaDetails = components['schemas']['MediaDetails']
+export type SchemaMediaInfo = components['schemas']['MediaInfo']
 export type SchemaMediaSummary = components['schemas']['MediaSummary']
 export type SchemaParsed = components['schemas']['Parsed']
 export type SchemaPlaybackOutputBody = components['schemas']['PlaybackOutputBody']
@@ -2068,12 +2214,16 @@ export type SchemaStatusOutputBody = components['schemas']['StatusOutputBody']
 export type SchemaStatusOutputBody1 = components['schemas']['StatusOutputBody1']
 export type SchemaStatusOutputBody2 = components['schemas']['StatusOutputBody2']
 export type SchemaStatusOutputBody3 = components['schemas']['StatusOutputBody3']
+export type SchemaStream = components['schemas']['Stream']
+export type SchemaStreamOutputBody = components['schemas']['StreamOutputBody']
+export type SchemaSubtitle = components['schemas']['Subtitle']
 export type SchemaSuggestion = components['schemas']['Suggestion']
 export type SchemaSuggestionsOutputBody = components['schemas']['SuggestionsOutputBody']
 export type SchemaTitle = components['schemas']['Title']
 export type SchemaTitleNames = components['schemas']['TitleNames']
 export type SchemaTrailer = components['schemas']['Trailer']
 export type SchemaUpdateEntryInputBody = components['schemas']['UpdateEntryInputBody']
+export type SchemaVideo = components['schemas']['Video']
 export type $defs = Record<string, never>
 export interface operations {
 	getAniListSession: {
@@ -2963,6 +3113,68 @@ export interface operations {
 				}
 				content: {
 					'application/json': components['schemas']['PlaybackOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getPlaybackDirect: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Library file, as listed by listLibraryFiles. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getPlaybackStream: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Library file, as listed by listLibraryFiles. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['StreamOutputBody']
 				}
 			}
 			/** @description Error */

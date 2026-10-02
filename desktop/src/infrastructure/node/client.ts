@@ -22,3 +22,15 @@ export function openNodeEventStream(topics: string[] = []): WebSocket {
 
 	return new WebSocket(url)
 }
+
+// A video element cannot send headers, so media URLs carry the token the way the
+// event stream does. The node accepts it only on its read-only media routes.
+export function nodeMediaUrl(path: string): string {
+	const connection = requireNodeConnection()
+
+	const url = new URL(path, connection.baseUrl)
+
+	url.searchParams.set('token', connection.token)
+
+	return url.toString()
+}

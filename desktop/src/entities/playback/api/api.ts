@@ -4,6 +4,8 @@ import type { NodeSchemas } from '@infra/node'
 export type PlaybackStatus = NodeSchemas['PlaybackStatus']
 export type PlaybackSession = NodeSchemas['PlaybackSession']
 export type PlaybackAction = NodeSchemas['ControlInputBody']['action']
+export type PlaybackStream = NodeSchemas['Stream']
+export type MediaInfo = NodeSchemas['MediaInfo']
 
 export const fetchPlaybackFx = createNodeRequestFx<void, NodeSchemas['PlaybackOutputBody']>(() => ({
 	url: '/v1/playback'
@@ -35,4 +37,11 @@ export const controlPlaybackFx = createNodeRequestFx<
 export const stopPlaybackFx = createNodeRequestFx<void, NodeSchemas['PlaybackOutputBody']>(() => ({
 	url: '/v1/playback',
 	method: 'DELETE'
+}))
+
+export const fetchPlaybackStreamFx = createNodeRequestFx<number, NodeSchemas['StreamOutputBody']>(fileId => ({
+	url: `/v1/playback/files/${fileId}/stream`,
+
+	// The first look at a large file runs ffprobe over it.
+	timeout: 45_000
 }))
