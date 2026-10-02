@@ -1,0 +1,36 @@
+package middleware
+
+import (
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
+
+func TestQueryTokenIsAcceptedOnlyWhereHeadersCannotBeSent(t *testing.T) {
+	handler := LocalToken("secret")(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusNoContent)
+	}))
+
+	tests := []struct {
+		method string
+		target string
+		want   int
+	}{
+		{http.MethodGet, "/ws?token=secret", http.StatusNoContent},
+		{http.MethodGet, "/v1/playback/files/7/direct?token=secret", http.StatusNoContent},
+		{http.MethodGet, "/v1/playback/files/7/direct?token=wrong", http.StatusUnauthorized},
+		{http.MethodPost, "/v1/playback/files/7/direct?token=secret", http.StatusUnauthorized},
+		{http.MethodGet, "/v1/library/files?token=secret", http.StatusUnauthorized},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.method+" "+tt.target, func(t *testing.T) {
+			recorder := httptest.NewRecorder()
+			handler.ServeHTTP(recorder, httptest.NewRequest(tt.method, tt.target, nil))
+
+			if recorder.Code != tt.want {
+				t.Errorf("status = %d, want %d", recorder.Code, tt.want)
+			}
+		})
+	}
+}

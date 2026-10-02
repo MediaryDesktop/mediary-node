@@ -3,11 +3,15 @@ package handler
 import (
 	"context"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"github.com/danielgtaylor/huma/v2"
+	"github.com/danielgtaylor/huma/v2/adapters/humachi"
 
 	"github.com/mediaryorg/mediary-node/server/internal/httpapi"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/service"
+	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/videofile"
 )
 
 type Handler struct {
@@ -37,7 +41,54 @@ type ControlInput struct {
 	}
 }
 
+type FileInput struct {
+	ID int64 `path:"id" doc:"Library file, as listed by listLibraryFiles."`
+}
+
+type StreamOutput struct {
+	Body struct {
+		Stream *service.Stream `json:"stream" doc:"What the file holds and where to fetch it."`
+	}
+}
+
 func (h *Handler) Register(api huma.API) {
+	huma.Register(api, huma.Operation{
+		OperationID: "getPlaybackStream",
+		Method:      http.MethodGet,
+		Path:        "/v1/playback/files/{id}/stream",
+		Summary:     "Describe a file for the built-in player",
+		Description: "Runs ffprobe on the file, once per version of it, and reports its streams together with an RFC 6381 type. The renderer asks its own video element whether it can play that type, which decides between direct play and transcoding.",
+		Tags:        []string{"playback"},
+	}, func(ctx context.Context, in *FileInput) (*StreamOutput, error) {
+		stream, err := h.svc.Stream(ctx, in.ID)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		out := &StreamOutput{}
+		out.Body.Stream = stream
+
+		return out, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "getPlaybackDirect",
+		Method:      http.MethodGet,
+		Path:        "/v1/playback/files/{id}/direct",
+		Summary:     "Serve a file as it is",
+		Description: "The file's bytes with range support, for a video element to play directly. Accepts the node token as ?token=, because a video element cannot send headers.",
+		Tags:        []string{"playback"},
+	}, func(ctx context.Context, in *FileInput) (*huma.StreamResponse, error) {
+		path, err := h.svc.DirectPath(ctx, in.ID)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return &huma.StreamResponse{Body: func(hctx huma.Context) {
+			serveFile(hctx, path)
+		}}, nil
+	})
+
 	huma.Register(api, huma.Operation{
 		OperationID: "getPlayback",
 		Method:      http.MethodGet,
@@ -103,4 +154,27 @@ func (h *Handler) Register(api huma.API) {
 
 		return out, nil
 	})
+}
+
+func serveFile(hctx huma.Context, path string) {
+	r, w := humachi.Unwrap(hctx)
+
+	file, err := os.Open(path)
+	if err != nil {
+		http.Error(w, "the file cannot be opened", http.StatusNotFound)
+		return
+	}
+	defer file.Close()
+
+	stat, err := file.Stat()
+	if err != nil {
+		http.Error(w, "the file cannot be read", http.StatusInternalServerError)
+		return
+	}
+
+	if contentType := videofile.ContainerMimeType(filepath.Ext(path)); contentType != "" {
+		w.Header().Set("Content-Type", contentType)
+	}
+
+	http.ServeContent(w, r, filepath.Base(path), stat.ModTime(), file)
 }

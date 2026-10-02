@@ -82,6 +82,52 @@ components:
         - episode
         - airing_at
       type: object
+    Audio:
+      additionalProperties: false
+      properties:
+        channels:
+          format: int32
+          minimum: 0
+          type: integer
+        codec:
+          type: string
+        index:
+          format: int32
+          minimum: 0
+          type: integer
+        is_default:
+          type: boolean
+        is_forced:
+          type: boolean
+        language:
+          type: string
+        mime_codec:
+          type: string
+        title:
+          type: string
+      required:
+        - index
+        - codec
+        - is_default
+        - is_forced
+        - channels
+      type: object
+    Chapter:
+      additionalProperties: false
+      properties:
+        end_time:
+          format: float
+          type: number
+        name:
+          type: string
+        start_time:
+          format: float
+          type: number
+      required:
+        - start_time
+        - end_time
+        - name
+      type: object
     CollectionOutputBody:
       additionalProperties: false
       properties:
@@ -1122,6 +1168,75 @@ components:
         - next_airing_episode
         - relations
         - fetched_at
+      type: object
+    MediaInfo:
+      additionalProperties: false
+      properties:
+        audios:
+          items:
+            $ref: "#/components/schemas/Audio"
+          type:
+            - array
+            - "null"
+        chapters:
+          items:
+            $ref: "#/components/schemas/Chapter"
+          type:
+            - array
+            - "null"
+        container:
+          description: Container format as ffprobe names it.
+          type: string
+        duration:
+          description: Length in seconds.
+          format: float
+          type: number
+        extension:
+          description: File extension without the dot.
+          type: string
+        fonts:
+          description: Attached font file names, needed to render ASS subtitles.
+          items:
+            type: string
+          type:
+            - array
+            - "null"
+        mime_codec:
+          description: RFC 6381 type with codecs, for canPlayType. Absent when a stream has a codec the node cannot describe — such a file is not a direct-play candidate.
+          type: string
+        path:
+          description: Absolute path of the file.
+          type: string
+        size:
+          description: Size in bytes.
+          format: int64
+          minimum: 0
+          type: integer
+        subtitles:
+          items:
+            $ref: "#/components/schemas/Subtitle"
+          type:
+            - array
+            - "null"
+        video:
+          $ref: "#/components/schemas/Video"
+          description: The first video stream.
+        videos:
+          items:
+            $ref: "#/components/schemas/Video"
+          type:
+            - array
+            - "null"
+      required:
+        - path
+        - extension
+        - size
+        - duration
+        - videos
+        - audios
+        - subtitles
+        - fonts
+        - chapters
       type: object
     MediaSummary:
       additionalProperties: false
@@ -2198,6 +2313,77 @@ components:
         - module
         - ready
       type: object
+    Stream:
+      additionalProperties: false
+      properties:
+        direct_url:
+          description: Path that serves the file as it is, with range requests. The renderer appends the node token as ?token= because a video element cannot send headers.
+          type: string
+        episode:
+          description: Episode number within that title.
+          format: int64
+          type: integer
+        file_id:
+          description: Library file this describes.
+          format: int64
+          type: integer
+        info:
+          $ref: "#/components/schemas/MediaInfo"
+          description: Streams, codecs and chapters as ffprobe reports them.
+        media_ref:
+          description: Title this file is matched to. Absent while unmatched.
+          type: string
+        title:
+          description: Title as the library reads it, for the UI.
+          type: string
+      required:
+        - file_id
+        - title
+        - info
+        - direct_url
+      type: object
+    StreamOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/StreamOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        stream:
+          $ref: "#/components/schemas/Stream"
+          description: What the file holds and where to fetch it.
+      required:
+        - stream
+      type: object
+    Subtitle:
+      additionalProperties: false
+      properties:
+        codec:
+          type: string
+        extension:
+          type: string
+        index:
+          format: int32
+          minimum: 0
+          type: integer
+        is_default:
+          type: boolean
+        is_forced:
+          type: boolean
+        language:
+          type: string
+        title:
+          type: string
+      required:
+        - index
+        - codec
+        - extension
+        - is_default
+        - is_forced
+      type: object
     Suggestion:
       additionalProperties: false
       properties:
@@ -2385,6 +2571,48 @@ components:
             - PAUSED
             - REPEATING
           type: string
+      type: object
+    Video:
+      additionalProperties: false
+      properties:
+        bitrate:
+          format: int32
+          minimum: 0
+          type: integer
+        codec:
+          type: string
+        color_primaries:
+          type: string
+        color_space:
+          type: string
+        color_transfer:
+          type: string
+        height:
+          format: int32
+          minimum: 0
+          type: integer
+        language:
+          type: string
+        mime_codec:
+          type: string
+        pix_fmt:
+          type: string
+        quality:
+          type: string
+        width:
+          format: int32
+          minimum: 0
+          type: integer
+      required:
+        - codec
+        - quality
+        - width
+        - height
+        - bitrate
+        - pix_fmt
+        - color_space
+        - color_transfer
+        - color_primaries
       type: object
   securitySchemes:
     nodeToken:
@@ -3297,6 +3525,60 @@ paths:
                 $ref: "#/components/schemas/ErrorModel"
           description: Error
       summary: Steer the open player
+      tags:
+        - playback
+  /v1/playback/files/{id}/direct:
+    get:
+      description: The file's bytes with range support, for a video element to play directly. Accepts the node token as ?token=, because a video element cannot send headers.
+      operationId: getPlaybackDirect
+      parameters:
+        - description: Library file, as listed by listLibraryFiles.
+          in: path
+          name: id
+          required: true
+          schema:
+            description: Library file, as listed by listLibraryFiles.
+            format: int64
+            type: integer
+      responses:
+        "200":
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Serve a file as it is
+      tags:
+        - playback
+  /v1/playback/files/{id}/stream:
+    get:
+      description: Runs ffprobe on the file, once per version of it, and reports its streams together with an RFC 6381 type. The renderer asks its own video element whether it can play that type, which decides between direct play and transcoding.
+      operationId: getPlaybackStream
+      parameters:
+        - description: Library file, as listed by listLibraryFiles.
+          in: path
+          name: id
+          required: true
+          schema:
+            description: Library file, as listed by listLibraryFiles.
+            format: int64
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StreamOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Describe a file for the built-in player
       tags:
         - playback
   /v1/reader/status:

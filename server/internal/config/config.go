@@ -79,8 +79,9 @@ type Torrent struct {
 }
 
 type Playback struct {
-	MPVPath    string `env:"NODE_MPV_PATH"`
-	FFmpegPath string `env:"NODE_FFMPEG_PATH"`
+	MPVPath     string `env:"NODE_MPV_PATH"`
+	FFmpegPath  string `env:"NODE_FFMPEG_PATH"`
+	FFprobePath string `env:"NODE_FFPROBE_PATH"`
 
 	TranscodeDir string `env:"NODE_TRANSCODE_DIR"`
 

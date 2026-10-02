@@ -36,8 +36,9 @@ type Deps struct {
 
 	LibraryFollowSymlinks bool
 
-	MPVPath string
-	DataDir string
+	MPVPath     string
+	FFprobePath string
+	DataDir     string
 }
 
 func Register(api huma.API, deps Deps) {
@@ -87,12 +88,13 @@ func Register(api huma.API, deps Deps) {
 	// The player opens files the library scanned and reports what was watched to the
 	// tracker. Both edges are ports, joined here: playback knows neither module.
 	playback.New(playback.Deps{
-		Logger:   moduleLogger(deps.Logger, "playback"),
-		Events:   deps.Events,
-		MPVPath:  deps.MPVPath,
-		DataDir:  deps.DataDir,
-		Library:  playableFiles{library: libraryModule},
-		Progress: watchedEpisodes{tracker: trackerModule},
+		Logger:      moduleLogger(deps.Logger, "playback"),
+		Events:      deps.Events,
+		MPVPath:     deps.MPVPath,
+		FFprobePath: deps.FFprobePath,
+		DataDir:     deps.DataDir,
+		Library:     playableFiles{library: libraryModule},
+		Progress:    watchedEpisodes{tracker: trackerModule},
 	}).Register(api)
 
 	reader.New(reader.Deps{

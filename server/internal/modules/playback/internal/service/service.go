@@ -33,6 +33,7 @@ type Options struct {
 	Launcher Launcher
 	Library  Library
 	Progress Progress
+	Prober   Prober
 
 	Now func() time.Time
 }
@@ -66,20 +67,13 @@ func (s *Service) Status() PlaybackStatus {
 // file replaces the first, because two players fighting over the same speakers is
 // never what the user meant.
 func (s *Service) Start(ctx context.Context, fileID int64) (*PlaybackStatus, error) {
-	if s.opts.Launcher == nil || s.opts.Library == nil {
+	if s.opts.Launcher == nil {
 		return nil, apperr.New(apperr.KindPrecondition, "playback is not configured on this node")
 	}
 
-	file, err := s.opts.Library.Playable(ctx, fileID)
+	file, err := s.playable(ctx, fileID)
 	if err != nil {
 		return nil, err
-	}
-	if file == nil {
-		return nil, apperr.New(apperr.KindNotFound, "library file %d does not exist", fileID)
-	}
-	if file.Missing {
-		return nil, apperr.New(apperr.KindPrecondition,
-			"the last scan did not find %s where it used to be", file.Path)
 	}
 
 	s.stop()

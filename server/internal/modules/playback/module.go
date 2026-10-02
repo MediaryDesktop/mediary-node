@@ -1,12 +1,15 @@
 package playback
 
 import (
+	"path/filepath"
+
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/rs/zerolog"
 
 	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/handler"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/mpv"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/service"
+	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/videofile"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
 )
 
@@ -25,8 +28,11 @@ type Deps struct {
 	// MPVPath is the configured player. Empty means the node looks for mpv on PATH.
 	MPVPath string
 
+	// FFprobePath is the configured ffprobe. Empty means the node looks on PATH.
+	FFprobePath string
+
 	// DataDir is where the player's control socket goes on platforms where it is a
-	// file rather than a named pipe.
+	// file rather than a named pipe, and where probed media info is cached.
 	DataDir string
 
 	Library  Library
@@ -42,6 +48,10 @@ func New(deps Deps) *Module {
 		},
 		Library:  deps.Library,
 		Progress: deps.Progress,
+		Prober: videofile.Prober{
+			FFprobePath: deps.FFprobePath,
+			CacheDir:    filepath.Join(deps.DataDir, "cache", "mediainfo"),
+		},
 	})
 
 	return &Module{handler: handler.New(svc)}

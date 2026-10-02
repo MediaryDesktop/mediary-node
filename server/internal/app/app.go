@@ -104,8 +104,9 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 
 		LibraryFollowSymlinks: cfg.Library.FollowSymlinks,
 
-		MPVPath: cfg.Playback.MPVPath,
-		DataDir: cfg.DataDir,
+		MPVPath:     cfg.Playback.MPVPath,
+		FFprobePath: cfg.Playback.FFprobePath,
+		DataDir:     cfg.DataDir,
 	})
 
 	if mux, ok := router.(*chi.Mux); ok {

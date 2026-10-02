@@ -52,9 +52,19 @@ func presentedToken(r *http.Request) string {
 		}
 	}
 
-	if strings.HasPrefix(r.URL.Path, "/ws") {
+	if acceptsQueryToken(r) {
 		return r.URL.Query().Get("token")
 	}
 
 	return ""
+}
+
+// The WebSocket API and a video element's src cannot set headers, so these two
+// take the token from the URL. Media is read-only, so only GET qualifies there.
+func acceptsQueryToken(r *http.Request) bool {
+	if strings.HasPrefix(r.URL.Path, "/ws") {
+		return true
+	}
+
+	return r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/v1/playback/files/")
 }
