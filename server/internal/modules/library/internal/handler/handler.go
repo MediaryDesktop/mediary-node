@@ -59,6 +59,7 @@ type FilesInput struct {
 	Form          string `query:"form" enum:"series,movie,special,extra,manga,book" doc:"Only files whose name reads as this. Use it to leave out openings and extras, which are never episodes."`
 	UnmatchedOnly bool   `query:"unmatched" doc:"Only files that still need a title. Files the user set aside are left out — they are asking for nothing."`
 	IgnoredOnly   bool   `query:"ignored" doc:"Only files the user told the node to leave alone."`
+	MediaRef      string `query:"media_ref" example:"anilist:154587" doc:"Only files matched to this title — the episodes a title page lists."`
 	Limit         int    `query:"limit" minimum:"1" maximum:"500" default:"100" doc:"Page size."`
 	Offset        int    `query:"offset" minimum:"0" doc:"How many files to skip."`
 }
@@ -245,6 +246,7 @@ func (h *Handler) Register(api huma.API) {
 			MediaForm:     in.Form,
 			UnmatchedOnly: in.UnmatchedOnly,
 			IgnoredOnly:   in.IgnoredOnly,
+			MediaRef:      in.MediaRef,
 			Limit:         in.Limit,
 			Offset:        in.Offset,
 		})

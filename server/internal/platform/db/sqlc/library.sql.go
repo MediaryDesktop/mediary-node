@@ -93,6 +93,7 @@ WHERE (CAST(?1 AS INTEGER) = 0 OR f.root_id = CAST(?1 AS INTEGER))
   AND (CAST(?3 AS TEXT) = '' OR f.media_form = CAST(?3 AS TEXT))
   AND (CAST(?4 AS INTEGER) = 0 OR (m.file_id IS NULL AND f.ignored_at IS NULL))
   AND (CAST(?5 AS INTEGER) = 0 OR f.ignored_at IS NOT NULL)
+  AND (CAST(?6 AS TEXT) = '' OR m.media_ref = CAST(?6 AS TEXT))
 `
 
 type CountLibraryFilesParams struct {
@@ -101,6 +102,7 @@ type CountLibraryFilesParams struct {
 	MediaForm     string `json:"media_form"`
 	UnmatchedOnly int64  `json:"unmatched_only"`
 	IgnoredOnly   int64  `json:"ignored_only"`
+	MediaRef      string `json:"media_ref"`
 }
 
 func (q *Queries) CountLibraryFiles(ctx context.Context, arg CountLibraryFilesParams) (int64, error) {
@@ -110,6 +112,7 @@ func (q *Queries) CountLibraryFiles(ctx context.Context, arg CountLibraryFilesPa
 		arg.MediaForm,
 		arg.UnmatchedOnly,
 		arg.IgnoredOnly,
+		arg.MediaRef,
 	)
 	var total int64
 	err := row.Scan(&total)
@@ -512,8 +515,9 @@ WHERE (CAST(?1 AS INTEGER) = 0 OR f.root_id = CAST(?1 AS INTEGER))
   AND (CAST(?3 AS TEXT) = '' OR f.media_form = CAST(?3 AS TEXT))
   AND (CAST(?4 AS INTEGER) = 0 OR (m.file_id IS NULL AND f.ignored_at IS NULL))
   AND (CAST(?5 AS INTEGER) = 0 OR f.ignored_at IS NOT NULL)
+  AND (CAST(?6 AS TEXT) = '' OR m.media_ref = CAST(?6 AS TEXT))
 ORDER BY r.path, f.rel_path
-LIMIT CAST(?7 AS INTEGER) OFFSET CAST(?6 AS INTEGER)
+LIMIT CAST(?8 AS INTEGER) OFFSET CAST(?7 AS INTEGER)
 `
 
 type ListLibraryFilesParams struct {
@@ -522,6 +526,7 @@ type ListLibraryFilesParams struct {
 	MediaForm     string `json:"media_form"`
 	UnmatchedOnly int64  `json:"unmatched_only"`
 	IgnoredOnly   int64  `json:"ignored_only"`
+	MediaRef      string `json:"media_ref"`
 	PageOffset    int64  `json:"page_offset"`
 	PageLimit     int64  `json:"page_limit"`
 }
@@ -559,6 +564,7 @@ func (q *Queries) ListLibraryFiles(ctx context.Context, arg ListLibraryFilesPara
 		arg.MediaForm,
 		arg.UnmatchedOnly,
 		arg.IgnoredOnly,
+		arg.MediaRef,
 		arg.PageOffset,
 		arg.PageLimit,
 	)

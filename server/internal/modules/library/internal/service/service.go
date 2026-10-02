@@ -157,6 +157,7 @@ type FileQuery struct {
 	MediaForm     string
 	UnmatchedOnly bool
 	IgnoredOnly   bool
+	MediaRef      string
 	Limit         int
 	Offset        int
 }
@@ -181,6 +182,7 @@ func (s *Service) Files(ctx context.Context, query FileQuery) (*FilePage, error)
 		MediaForm:     query.MediaForm,
 		UnmatchedOnly: query.UnmatchedOnly,
 		IgnoredOnly:   query.IgnoredOnly,
+		MediaRef:      query.MediaRef,
 		Limit:         limit,
 		Offset:        offset,
 	})

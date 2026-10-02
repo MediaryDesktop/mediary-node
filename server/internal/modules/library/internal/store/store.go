@@ -355,6 +355,7 @@ type FileFilter struct {
 	MediaForm     string
 	UnmatchedOnly bool
 	IgnoredOnly   bool
+	MediaRef      string
 	Limit         int
 	Offset        int
 }
@@ -378,6 +379,7 @@ func (s *Store) Files(ctx context.Context, filter FileFilter) ([]File, int, erro
 		MediaForm:     filter.MediaForm,
 		UnmatchedOnly: unmatchedOnly,
 		IgnoredOnly:   ignoredOnly,
+		MediaRef:      filter.MediaRef,
 	})
 	if err != nil {
 		return nil, 0, fmt.Errorf("count library files: %w", err)
@@ -389,6 +391,7 @@ func (s *Store) Files(ctx context.Context, filter FileFilter) ([]File, int, erro
 		MediaForm:     filter.MediaForm,
 		UnmatchedOnly: unmatchedOnly,
 		IgnoredOnly:   ignoredOnly,
+		MediaRef:      filter.MediaRef,
 		PageLimit:     int64(filter.Limit),
 		PageOffset:    int64(filter.Offset),
 	})

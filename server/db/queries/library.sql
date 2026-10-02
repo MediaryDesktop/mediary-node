@@ -112,6 +112,7 @@ WHERE (CAST(sqlc.arg(root_id) AS INTEGER) = 0 OR f.root_id = CAST(sqlc.arg(root_
   AND (CAST(sqlc.arg(media_form) AS TEXT) = '' OR f.media_form = CAST(sqlc.arg(media_form) AS TEXT))
   AND (CAST(sqlc.arg(unmatched_only) AS INTEGER) = 0 OR (m.file_id IS NULL AND f.ignored_at IS NULL))
   AND (CAST(sqlc.arg(ignored_only) AS INTEGER) = 0 OR f.ignored_at IS NOT NULL)
+  AND (CAST(sqlc.arg(media_ref) AS TEXT) = '' OR m.media_ref = CAST(sqlc.arg(media_ref) AS TEXT))
 ORDER BY r.path, f.rel_path
 LIMIT CAST(sqlc.arg(page_limit) AS INTEGER) OFFSET CAST(sqlc.arg(page_offset) AS INTEGER);
 
@@ -123,7 +124,8 @@ WHERE (CAST(sqlc.arg(root_id) AS INTEGER) = 0 OR f.root_id = CAST(sqlc.arg(root_
   AND (CAST(sqlc.arg(kind) AS TEXT) = '' OR f.kind = CAST(sqlc.arg(kind) AS TEXT))
   AND (CAST(sqlc.arg(media_form) AS TEXT) = '' OR f.media_form = CAST(sqlc.arg(media_form) AS TEXT))
   AND (CAST(sqlc.arg(unmatched_only) AS INTEGER) = 0 OR (m.file_id IS NULL AND f.ignored_at IS NULL))
-  AND (CAST(sqlc.arg(ignored_only) AS INTEGER) = 0 OR f.ignored_at IS NOT NULL);
+  AND (CAST(sqlc.arg(ignored_only) AS INTEGER) = 0 OR f.ignored_at IS NOT NULL)
+  AND (CAST(sqlc.arg(media_ref) AS TEXT) = '' OR m.media_ref = CAST(sqlc.arg(media_ref) AS TEXT));
 
 -- What the filter tabs above the list show. One query rather than three: the
 -- three numbers have to agree with each other, and they only do if they are read

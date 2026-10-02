@@ -2569,6 +2569,15 @@ paths:
           schema:
             description: Only files the user told the node to leave alone.
             type: boolean
+        - description: Only files matched to this title — the episodes a title page lists.
+          explode: false
+          in: query
+          name: media_ref
+          schema:
+            description: Only files matched to this title — the episodes a title page lists.
+            examples:
+              - anilist:154587
+            type: string
         - description: Page size.
           explode: false
           in: query
