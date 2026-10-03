@@ -61,3 +61,8 @@ export const reportPlaybackProgressFx = createNodeRequestFx<
 	method: 'POST',
 	body: { position, duration, ended }
 }))
+
+export const stopTranscodeFx = createNodeRequestFx<number, void>(fileId => ({
+	url: `/v1/playback/files/${fileId}/hls`,
+	method: 'DELETE'
+}))

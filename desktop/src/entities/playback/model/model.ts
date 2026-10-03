@@ -11,7 +11,8 @@ import {
 	fetchPlaybackStreamFx,
 	reportPlaybackProgressFx,
 	startPlaybackFx,
-	stopPlaybackFx
+	stopPlaybackFx,
+	stopTranscodeFx
 } from '../api/api'
 import type { PlaybackSession, ReportProgressParams } from '../api/api'
 
@@ -76,6 +77,11 @@ export const playbackModel = atom(() => {
 
 	sample({ clock: progressReported, target: reportPlaybackProgressFx })
 
+	// Encoders would otherwise run until the node's idle reaper notices.
+	const transcodeClosed = createEvent<number>()
+
+	sample({ clock: transcodeClosed, target: stopTranscodeFx })
+
 	return {
 		$session,
 		$starting: startPlaybackMutation.$pending,
@@ -84,7 +90,8 @@ export const playbackModel = atom(() => {
 		commandRequested: controlPlaybackMutation.start,
 		playFailed: startPlaybackMutation.finished.failure,
 		watched: playbackEvent.filter({ fn: event => event.payload?.state === 'watched' }),
-		progressReported
+		progressReported,
+		transcodeClosed
 	}
 })
 

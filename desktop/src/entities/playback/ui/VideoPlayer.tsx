@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import { useUnit } from 'effector-react'
+import Hls from 'hls.js'
 import JASSUB from 'jassub'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
@@ -10,7 +11,7 @@ import type { DropdownMenuItem, IconName } from '@shared/ui'
 
 import type { PlaybackStream } from '../api/api'
 import { initialAudio, initialSubtitle, trackLabel } from '../lib/tracks'
-import { directUrl, fontUrl, subtitleUrl } from '../lib/urls'
+import { directUrl, fontUrl, mediaUrl, subtitleUrl } from '../lib/urls'
 import { formatTimecode, playbackModel } from '../model/model'
 
 import styles from './VideoPlayer.module.scss'
@@ -31,19 +32,41 @@ function audioTracksOf(video: HTMLVideoElement): AudioTrackList | undefined {
 	return (video as HTMLVideoElement & { audioTracks?: AudioTrackList }).audioTracks
 }
 
+// Direct play hands the file to the video element as it is; HLS goes through
+// hls.js, because Chromium has no HLS of its own.
+export type VideoSource = { kind: 'direct' } | { kind: 'hls'; path: string }
+
 export interface VideoPlayerProps {
 	stream: PlaybackStream
+	source: VideoSource
 	heading: string
 	subheading?: string
 	onClose: () => void
 	onOpenExternally: () => void
+
+	// Called instead of showing a failure when there is somewhere else to go:
+	// a file Chromium said it could play directly and then could not.
+	onFallback?: () => void
 }
 
-export function VideoPlayer({ stream, heading, subheading, onClose, onOpenExternally }: VideoPlayerProps) {
+export function VideoPlayer({
+	stream,
+	source,
+	heading,
+	subheading,
+	onClose,
+	onOpenExternally,
+	onFallback
+}: VideoPlayerProps) {
 	const { t, i18n } = useTranslation()
-	const reportProgress = useUnit(playbackModel.progressReported)
+	const [reportProgress, transcodeClosed] = useUnit([
+		playbackModel.progressReported,
+		playbackModel.transcodeClosed
+	])
 
 	const videoRef = useRef<HTMLVideoElement>(null)
+	const hlsRef = useRef<Hls | null>(null)
+	const hlsPath = source.kind === 'hls' ? source.path : null
 
 	const fileId = stream.file_id
 	const info = stream.info
@@ -68,14 +91,43 @@ export function VideoPlayer({ stream, heading, subheading, onClose, onOpenExtern
 	const report = useCallback(
 		(ended = false) => {
 			const video = videoRef.current
-			if (!video || !Number.isFinite(video.duration)) {
+			// A transcode's playlist grows while it is read, so the element's own
+			// duration is only right once it ends; the probe knew it from the start.
+			const total = info.duration > 0 ? info.duration : video?.duration
+			if (!video || !total || !Number.isFinite(total)) {
 				return
 			}
 
-			reportProgress({ fileId, position: video.currentTime, duration: video.duration, ended })
+			reportProgress({ fileId, position: video.currentTime, duration: total, ended })
 		},
-		[fileId, reportProgress]
+		[fileId, info.duration, reportProgress]
 	)
+
+	useEffect(() => {
+		const video = videoRef.current
+		if (!video || hlsPath === null) {
+			return
+		}
+
+		const hls = new Hls()
+		hlsRef.current = hls
+
+		hls.on(Hls.Events.ERROR, (_, data) => {
+			if (data.fatal) {
+				console.warn('transcoded stream failed', data)
+				setFailed(true)
+			}
+		})
+
+		hls.loadSource(mediaUrl(hlsPath))
+		hls.attachMedia(video)
+
+		return () => {
+			hls.destroy()
+			hlsRef.current = null
+			transcodeClosed(fileId)
+		}
+	}, [hlsPath, fileId, transcodeClosed])
 
 	// Subtitles are drawn by libass in a worker; the instance is rebuilt per track
 	// because a track switch also changes which fonts are worth loading.
@@ -104,13 +156,23 @@ export function VideoPlayer({ stream, heading, subheading, onClose, onOpenExtern
 	}, [fileId, subtitle, fonts])
 
 	useEffect(() => {
+		const selected = audios.findIndex(track => track.index === audio)
+
+		// The master playlist lists the tracks in the file's order.
+		const hls = hlsRef.current
+		if (hls) {
+			if (selected >= 0 && hls.audioTrack !== selected) {
+				hls.audioTrack = selected
+			}
+			return
+		}
+
 		const video = videoRef.current
 		const tracks = video ? audioTracksOf(video) : undefined
 		if (!video || !tracks || tracks.length < 2) {
 			return
 		}
 
-		const selected = audios.findIndex(track => track.index === audio)
 		for (let i = 0; i < tracks.length; i += 1) {
 			const track = tracks[i]
 			if (track) track.enabled = i === selected
@@ -273,7 +335,7 @@ export function VideoPlayer({ stream, heading, subheading, onClose, onOpenExtern
 				<video
 					ref={videoRef}
 					className={styles.video}
-					src={directUrl(fileId)}
+					src={source.kind === 'direct' ? directUrl(fileId) : undefined}
 					// The node is another origin; without CORS the frames are tainted
 					// and the subtitle renderer cannot read them.
 					crossOrigin='anonymous'
@@ -289,13 +351,19 @@ export function VideoPlayer({ stream, heading, subheading, onClose, onOpenExtern
 					onTimeUpdate={event => setPosition(event.currentTarget.currentTime)}
 					onDurationChange={event => {
 						const value = event.currentTarget.duration
-						if (Number.isFinite(value)) setDuration(value)
+						if (info.duration <= 0 && Number.isFinite(value)) setDuration(value)
 					}}
 					onVolumeChange={event => {
 						setVolume(event.currentTarget.volume)
 						setMuted(event.currentTarget.muted)
 					}}
-					onError={() => setFailed(true)}
+					onError={() => {
+						if (onFallback) {
+							onFallback()
+						} else {
+							setFailed(true)
+						}
+					}}
 				/>
 			</div>
 

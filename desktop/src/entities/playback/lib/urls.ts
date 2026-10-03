@@ -1,5 +1,9 @@
 import { nodeMediaUrl } from '@infra/node'
 
+export function mediaUrl(path: string): string {
+	return nodeMediaUrl(path)
+}
+
 export function directUrl(fileId: number): string {
 	return nodeMediaUrl(`/v1/playback/files/${fileId}/direct`)
 }

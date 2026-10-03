@@ -15,7 +15,7 @@ export { browserCanPlayType, canDirectPlay } from './lib/codecs'
 
 export { NowPlayingBar } from './ui/NowPlayingBar'
 export { VideoPlayer } from './ui/VideoPlayer'
-export type { VideoPlayerProps } from './ui/VideoPlayer'
+export type { VideoPlayerProps, VideoSource } from './ui/VideoPlayer'
 
 export { fetchPlaybackStreamFx } from './api/api'
 export type { MediaInfo, PlaybackAction, PlaybackSession, PlaybackStatus, PlaybackStream } from './api/api'

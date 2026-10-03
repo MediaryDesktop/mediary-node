@@ -469,6 +469,86 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/v1/playback/files/{id}/hls': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		post?: never
+		/**
+		 * Stop transcoding a file
+		 * @description Called when the player closes, so encoders stop at once instead of when the idle reaper notices.
+		 */
+		delete: operations['stopPlaybackHLS']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/playback/files/{id}/hls/audio/{index}/{name}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Playlist or segment of one audio track
+		 * @description AAC is copied, anything else is encoded to AAC. Accepts ?token=.
+		 */
+		get: operations['getPlaybackHLSAudio']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/playback/files/{id}/hls/master.m3u8': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * HLS master playlist of a transcoded file
+		 * @description For a file the renderer cannot play directly. Video the renderer can decode is copied; only what it cannot is re-encoded, segment by segment as the player asks. Accepts ?token=.
+		 */
+		get: operations['getPlaybackHLSMaster']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/playback/files/{id}/hls/{quality}/{name}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Playlist or segment of one video rendition
+		 * @description A segment request waits until the encoder has written it. Accepts ?token=.
+		 */
+		get: operations['getPlaybackHLSVideo']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/v1/playback/files/{id}/progress': {
 		parameters: {
 			query?: never
@@ -2093,6 +2173,8 @@ export interface components {
 			 * @description Library file this describes.
 			 */
 			file_id: number
+			/** @description Master playlist of the file transcoded to HLS, for when the renderer cannot play it directly. Absent while transcoding is turned off. */
+			hls_url?: string
 			/** @description Streams, codecs and chapters as ffprobe reports them. */
 			info: components['schemas']['MediaInfo']
 			/** @description Title this file is matched to. Absent while unmatched. */
@@ -3263,6 +3345,143 @@ export interface operations {
 				id: number
 				/** @description Track index as the stream description lists it. */
 				index: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	stopPlaybackHLS: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Library file, as listed by listLibraryFiles. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getPlaybackHLSAudio: {
+		parameters: {
+			query?: {
+				/** @description The node token. Repeated into every URL the playlist lists, so the player can follow them. */
+				token?: string
+			}
+			header?: never
+			path: {
+				/** @description Library file, as listed by listLibraryFiles. */
+				id: number
+				/** @description Audio track, as the master playlist names it. */
+				index: number
+				/** @description index.m3u8, or segment-N.ts. */
+				name: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getPlaybackHLSMaster: {
+		parameters: {
+			query?: {
+				/** @description The node token. Repeated into every URL the playlist lists, so the player can follow them. */
+				token?: string
+			}
+			header?: never
+			path: {
+				/** @description Library file, as listed by listLibraryFiles. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getPlaybackHLSVideo: {
+		parameters: {
+			query?: {
+				/** @description The node token. Repeated into every URL the playlist lists, so the player can follow them. */
+				token?: string
+			}
+			header?: never
+			path: {
+				/** @description Library file, as listed by listLibraryFiles. */
+				id: number
+				/** @description Rendition, as the master playlist names it. */
+				quality: string
+				/** @description index.m3u8, or segment-N.ts. */
+				name: string
 			}
 			cookie?: never
 		}

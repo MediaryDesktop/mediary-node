@@ -1,6 +1,6 @@
 import { useRouter } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 
 import { useTranslation } from '@shared/i18n'
@@ -13,6 +13,7 @@ import {
 	playbackStreamQuery,
 	VideoPlayer
 } from '@entities/playback'
+import type { VideoSource } from '@entities/playback'
 
 import styles from './WatchPage.module.scss'
 
@@ -31,6 +32,9 @@ export function WatchPage({ fileId }: WatchPageProps) {
 		playbackStreamQuery.start,
 		playbackModel.playRequested
 	])
+
+	// Set when direct play was attempted and failed; the transcode takes over.
+	const [directFailed, setDirectFailed] = useState(false)
 
 	useEffect(() => {
 		load(fileId)
@@ -65,7 +69,15 @@ export function WatchPage({ fileId }: WatchPageProps) {
 	const subheading =
 		stream.episode !== undefined ? t('playback.episode', { number: stream.episode }) : undefined
 
-	if (!canDirectPlay(stream.info.mime_codec, browserCanPlayType)) {
+	const direct = !directFailed && canDirectPlay(stream.info.mime_codec, browserCanPlayType)
+
+	const source: VideoSource | null = direct
+		? { kind: 'direct' }
+		: stream.hls_url
+			? { kind: 'hls', path: stream.hls_url }
+			: null
+
+	if (!source) {
 		return (
 			<Panel onClose={close}>
 				<p className={styles.heading}>{stream.title}</p>
@@ -77,11 +89,14 @@ export function WatchPage({ fileId }: WatchPageProps) {
 
 	return (
 		<VideoPlayer
+			key={source.kind}
 			stream={stream}
+			source={source}
 			heading={stream.title}
 			subheading={subheading}
 			onClose={close}
 			onOpenExternally={openExternally}
+			onFallback={source.kind === 'direct' && stream.hls_url ? () => setDirectFailed(true) : undefined}
 		/>
 	)
 }
