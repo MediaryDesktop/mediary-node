@@ -40,6 +40,7 @@
 		"effector": "^23.4.4",
 		"effector-react": "^23.3.0",
 		"i18next": "^26.4.1",
+		"jassub": "^2.5.16",
 		"motion": "^13.3.0",
 		"ofetch": "^1.4.1",
 		"patronum": "^2.3.0",

@@ -279,6 +279,9 @@ export const sprites = defineSpriteMap([
 				defineSpriteSymbol(['folder-open'], [24]),
 				defineSpriteSymbol(['folder-tree'], [24]),
 				defineSpriteSymbol(['folder'], [24]),
+				defineSpriteSymbol(['fullscreen-exit'], [24]),
+				defineSpriteSymbol(['fullscreen'], [24]),
+				defineSpriteSymbol(['headphones'], [24]),
 				defineSpriteSymbol(['heart'], [24]),
 				defineSpriteSymbol(['home'], [24]),
 				defineSpriteSymbol(['info'], [24]),
@@ -293,6 +296,7 @@ export const sprites = defineSpriteMap([
 				defineSpriteSymbol(['moon'], [24]),
 				defineSpriteSymbol(['more-vertical'], [24]),
 				defineSpriteSymbol(['node'], [64, '-16 0 288 288']),
+				defineSpriteSymbol(['pause'], [24]),
 				defineSpriteSymbol(['pencil'], [24]),
 				defineSpriteSymbol(['play'], [24]),
 				defineSpriteSymbol(['player'], [24]),
@@ -305,11 +309,14 @@ export const sprites = defineSpriteMap([
 				defineSpriteSymbol(['sort'], [24]),
 				defineSpriteSymbol(['sparkles'], [64, '0 0 512 512']),
 				defineSpriteSymbol(['star'], [12]),
+				defineSpriteSymbol(['subtitles'], [24]),
 				defineSpriteSymbol(['sun'], [24]),
 				defineSpriteSymbol(['tag'], [24]),
 				defineSpriteSymbol(['trash'], [24]),
 				defineSpriteSymbol(['user'], [24]),
-				defineSpriteSymbol(['users'], [24])
+				defineSpriteSymbol(['users'], [24]),
+				defineSpriteSymbol(['volume-off'], [24]),
+				defineSpriteSymbol(['volume'], [24])
 			],
 			defineExternalAssetMeta('common.svg')
 		)
@@ -351,6 +358,9 @@ export type SpritesMeta = {
 		| 'folder-open'
 		| 'folder-tree'
 		| 'folder'
+		| 'fullscreen-exit'
+		| 'fullscreen'
+		| 'headphones'
 		| 'heart'
 		| 'home'
 		| 'info'
@@ -365,6 +375,7 @@ export type SpritesMeta = {
 		| 'moon'
 		| 'more-vertical'
 		| 'node'
+		| 'pause'
 		| 'pencil'
 		| 'play'
 		| 'player'
@@ -377,11 +388,14 @@ export type SpritesMeta = {
 		| 'sort'
 		| 'sparkles'
 		| 'star'
+		| 'subtitles'
 		| 'sun'
 		| 'tag'
 		| 'trash'
 		| 'user'
 		| 'users'
+		| 'volume-off'
+		| 'volume'
 	social: 'anilist' | 'apple' | 'facebook' | 'github' | 'google'
 }
 

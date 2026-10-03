@@ -6,9 +6,10 @@ import { authTree } from './routes/auth'
 import { framedTree } from './routes/framed'
 import { rootRoute } from './routes/root'
 import { setupRoute } from './routes/setup'
+import { watchRoute } from './routes/watch'
 import { authViewTransition } from './transitions/auth.transition'
 
-const routeTree = rootRoute.addChildren([framedTree, setupRoute, authTree])
+const routeTree = rootRoute.addChildren([framedTree, setupRoute, watchRoute, authTree])
 
 export const router = createRouter({
 	routeTree,

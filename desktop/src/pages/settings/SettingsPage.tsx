@@ -3,6 +3,7 @@ import clsx from 'clsx'
 
 import { useTranslation } from '@shared/i18n'
 
+import { PlayerModeSwitcher } from '@features/choose-player'
 import { LibraryRootsSettings } from '@features/manage-library-roots'
 import { LanguageSwitcher } from '@features/switch-language'
 import { ThemeSwitcher } from '@features/switch-theme'
@@ -32,6 +33,15 @@ export function SettingsPage() {
 				</span>
 
 				<LanguageSwitcher />
+			</section>
+
+			<section className={styles.section}>
+				<span className={styles.label}>
+					<span className={styles.name}>{t('settings.player.name')}</span>
+					<span className={styles.hint}>{t('settings.player.hint')}</span>
+				</span>
+
+				<PlayerModeSwitcher />
 			</section>
 
 			<section className={clsx(styles.section, styles.block)}>

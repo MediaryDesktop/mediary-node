@@ -45,3 +45,19 @@ export const fetchPlaybackStreamFx = createNodeRequestFx<number, NodeSchemas['St
 	// The first look at a large file runs ffprobe over it.
 	timeout: 45_000
 }))
+
+export interface ReportProgressParams {
+	fileId: number
+	position: number
+	duration: number
+	ended?: boolean
+}
+
+export const reportPlaybackProgressFx = createNodeRequestFx<
+	ReportProgressParams,
+	NodeSchemas['ProgressOutputBody']
+>(({ fileId, position, duration, ended }) => ({
+	url: `/v1/playback/files/${fileId}/progress`,
+	method: 'POST',
+	body: { position, duration, ended }
+}))

@@ -697,6 +697,24 @@ export const en = {
 		}
 	},
 
+	player: {
+		play: 'Play',
+		pause: 'Pause',
+		mute: 'Mute',
+		unmute: 'Unmute',
+		volume: 'Volume',
+		seek: 'Position',
+		audio: 'Audio track',
+		subtitles: 'Subtitles',
+		subtitlesOff: 'Off',
+		fullscreen: 'Full screen',
+		exitFullscreen: 'Exit full screen',
+		close: 'Back',
+		failed: 'The built-in player could not play this file.',
+		loadFailed: 'Could not read this file.',
+		needsTranscode: 'This file uses codecs the built-in player cannot decode yet. It plays in mpv.',
+		openExternally: 'Open in mpv'
+	},
 	playback: {
 		episode: 'Episode {{number}}',
 		watched: 'Counted as watched',
@@ -723,6 +741,14 @@ export const en = {
 		library: {
 			name: 'Library folders',
 			hint: 'Folders the node walks when it scans. Subfolders are included'
+		},
+		player: {
+			name: 'Player',
+			hint: 'Where episodes open: in the app or in mpv',
+			modes: {
+				builtin: 'Built-in',
+				external: 'mpv'
+			}
 		},
 		wizard: {
 			name: 'Setup wizard',

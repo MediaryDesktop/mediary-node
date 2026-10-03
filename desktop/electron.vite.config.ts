@@ -35,6 +35,17 @@ export default defineConfig({
 				resetColors: true
 			})
 		],
+
+		// The subtitle renderer's worker splits into chunks, which only ES workers allow.
+		worker: { format: 'es' },
+
+		// Pre-bundling moves the worker away from the .wasm files it finds next to
+		// itself, and subtitles silently stop rendering in development.
+		// Its CommonJS dependencies still need converting.
+		optimizeDeps: {
+			exclude: ['jassub'],
+			include: ['jassub > throughput', 'jassub > rvfc-polyfill', 'jassub > lfa-ponyfill']
+		},
 		resolve: {
 			alias: {
 				'@app': dir('./src/app'),

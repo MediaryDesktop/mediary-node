@@ -1,12 +1,19 @@
 import { createMutation, createQuery } from '@farfetched/core'
-import { createStore, sample } from 'effector'
+import { createEvent, createStore, sample } from 'effector'
 
 import { atom } from '@shared/factory'
 
 import { nodeTopic } from '@infra/node'
 
-import { controlPlaybackFx, fetchPlaybackFx, startPlaybackFx, stopPlaybackFx } from '../api/api'
-import type { PlaybackSession } from '../api/api'
+import {
+	controlPlaybackFx,
+	fetchPlaybackFx,
+	fetchPlaybackStreamFx,
+	reportPlaybackProgressFx,
+	startPlaybackFx,
+	stopPlaybackFx
+} from '../api/api'
+import type { PlaybackSession, ReportProgressParams } from '../api/api'
 
 const playbackEvent = nodeTopic('playback')
 
@@ -20,6 +27,8 @@ export const controlPlaybackMutation = createMutation({
 })
 
 export const stopPlaybackMutation = createMutation({ effect: stopPlaybackFx, name: 'stopPlayback' })
+
+export const playbackStreamQuery = createQuery({ effect: fetchPlaybackStreamFx, name: 'playbackStream' })
 
 function numberIn(payload: Record<string, unknown> | undefined, key: string): number {
 	const value = payload?.[key]
@@ -61,6 +70,12 @@ export const playbackModel = atom(() => {
 
 	sample({ clock: stopPlaybackMutation.finished.success, target: playbackQuery.start })
 
+	// The built-in player reports and forgets: a report that fails is followed by
+	// another a few seconds later, and the node keeps the rule about when to count.
+	const progressReported = createEvent<ReportProgressParams>()
+
+	sample({ clock: progressReported, target: reportPlaybackProgressFx })
+
 	return {
 		$session,
 		$starting: startPlaybackMutation.$pending,
@@ -68,7 +83,8 @@ export const playbackModel = atom(() => {
 		stopRequested: stopPlaybackMutation.start,
 		commandRequested: controlPlaybackMutation.start,
 		playFailed: startPlaybackMutation.finished.failure,
-		watched: playbackEvent.filter({ fn: event => event.payload?.state === 'watched' })
+		watched: playbackEvent.filter({ fn: event => event.payload?.state === 'watched' }),
+		progressReported
 	}
 })
 

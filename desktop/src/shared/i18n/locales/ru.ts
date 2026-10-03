@@ -696,6 +696,25 @@ export const ru: Translation = {
 		}
 	},
 
+	player: {
+		play: 'Воспроизвести',
+		pause: 'Пауза',
+		mute: 'Выключить звук',
+		unmute: 'Включить звук',
+		volume: 'Громкость',
+		seek: 'Позиция',
+		audio: 'Аудиодорожка',
+		subtitles: 'Субтитры',
+		subtitlesOff: 'Выключены',
+		fullscreen: 'На весь экран',
+		exitFullscreen: 'Выйти из полноэкранного режима',
+		close: 'Назад',
+		failed: 'Встроенный плеер не смог воспроизвести этот файл.',
+		loadFailed: 'Не удалось прочитать этот файл.',
+		needsTranscode:
+			'Этот файл использует кодеки, которые встроенный плеер пока не декодирует. Его можно открыть в mpv.',
+		openExternally: 'Открыть в mpv'
+	},
 	playback: {
 		episode: 'Серия {{number}}',
 		watched: 'Зачтено как просмотренное',
@@ -722,6 +741,14 @@ export const ru: Translation = {
 		library: {
 			name: 'Папки библиотеки',
 			hint: 'Папки, которые нода обходит при сканировании. Подпапки тоже'
+		},
+		player: {
+			name: 'Плеер',
+			hint: 'Где открываются серии: в приложении или в mpv',
+			modes: {
+				builtin: 'Встроенный',
+				external: 'mpv'
+			}
 		},
 		wizard: {
 			name: 'Мастер настройки',

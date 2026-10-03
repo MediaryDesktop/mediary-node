@@ -695,6 +695,25 @@ export const uk: Translation = {
 		}
 	},
 
+	player: {
+		play: 'Відтворити',
+		pause: 'Пауза',
+		mute: 'Вимкнути звук',
+		unmute: 'Увімкнути звук',
+		volume: 'Гучність',
+		seek: 'Позиція',
+		audio: 'Аудіодоріжка',
+		subtitles: 'Субтитри',
+		subtitlesOff: 'Вимкнено',
+		fullscreen: 'На весь екран',
+		exitFullscreen: 'Вийти з повноекранного режиму',
+		close: 'Назад',
+		failed: 'Вбудований плеєр не зміг відтворити цей файл.',
+		loadFailed: 'Не вдалося прочитати цей файл.',
+		needsTranscode:
+			'Цей файл використовує кодеки, які вбудований плеєр поки не декодує. Його можна відкрити в mpv.',
+		openExternally: 'Відкрити в mpv'
+	},
 	playback: {
 		episode: 'Серія {{number}}',
 		watched: 'Зараховано як переглянуте',
@@ -721,6 +740,14 @@ export const uk: Translation = {
 		library: {
 			name: 'Теки бібліотеки',
 			hint: 'Теки, які нода обходить під час сканування. Підтеки теж'
+		},
+		player: {
+			name: 'Плеєр',
+			hint: 'Де відкриваються серії: у застосунку чи в mpv',
+			modes: {
+				builtin: 'Вбудований',
+				external: 'mpv'
+			}
 		},
 		wizard: {
 			name: 'Майстер налаштування',

@@ -449,6 +449,46 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/v1/playback/files/{id}/fonts/{index}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * One font attached to the file
+		 * @description Fonts the subtitles were typeset with, as the file carries them. Accepts ?token=.
+		 */
+		get: operations['getPlaybackFont']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/playback/files/{id}/progress': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Report where the built-in player is
+		 * @description The built-in player's counterpart of mpv's position events. The node applies the same rule — 85 % or played to the end — and tells the tracker once.
+		 */
+		post: operations['reportPlaybackProgress']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/v1/playback/files/{id}/stream': {
 		parameters: {
 			query?: never
@@ -461,6 +501,26 @@ export interface paths {
 		 * @description Runs ffprobe on the file, once per version of it, and reports its streams together with an RFC 6381 type. The renderer asks its own video element whether it can play that type, which decides between direct play and transcoding.
 		 */
 		get: operations['getPlaybackStream']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/playback/files/{id}/subtitles/{index}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * One subtitle track as ASS
+		 * @description Text tracks are pulled out of the file with ffmpeg on first request, all at once, and converted to ASS so one renderer draws every format. Accepts ?token=.
+		 */
+		get: operations['getPlaybackSubtitle']
 		put?: never
 		post?: never
 		delete?: never
@@ -1030,6 +1090,11 @@ export interface components {
 			is_adult: boolean
 			name: string
 		}
+		Font: {
+			/** Format: int32 */
+			index: number
+			name: string
+		}
 		FuzzyDate: {
 			/** Format: int64 */
 			day: number | null
@@ -1246,8 +1311,8 @@ export interface components {
 			duration: number
 			/** @description File extension without the dot. */
 			extension: string
-			/** @description Attached font file names, needed to render ASS subtitles. */
-			fonts: string[] | null
+			/** @description Fonts attached to the file, needed to render its ASS subtitles as authored. */
+			fonts: components['schemas']['Font'][] | null
 			/** @description RFC 6381 type with codecs, for canPlayType. Absent when a stream has a codec the node cannot describe — such a file is not a direct-play candidate. */
 			mime_codec?: string
 			/** @description Absolute path of the file. */
@@ -1376,6 +1441,36 @@ export interface components {
 			playing: boolean
 			/** @description The open session. Absent when nothing is playing. */
 			session?: components['schemas']['PlaybackSession']
+		}
+		ProgressInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ProgressInputBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * Format: double
+			 * @description Length of the file, in seconds.
+			 */
+			duration: number
+			/** @description True when the file played to its end. */
+			ended?: boolean
+			/**
+			 * Format: double
+			 * @description Where the player is, in seconds.
+			 */
+			position: number
+		}
+		ProgressOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ProgressOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description True once this file counts as watched and the tracker was told. */
+			watched: boolean
 		}
 		RelatedMedia: {
 			cover_color: string | null
@@ -2169,6 +2264,7 @@ export type SchemaFilesOutputBody = components['schemas']['FilesOutputBody']
 export type SchemaFilterOptions = components['schemas']['FilterOptions']
 export type SchemaFilterOptionsOutputBody = components['schemas']['FilterOptionsOutputBody']
 export type SchemaFilterTag = components['schemas']['FilterTag']
+export type SchemaFont = components['schemas']['Font']
 export type SchemaFuzzyDate = components['schemas']['FuzzyDate']
 export type SchemaHealthOutputBody = components['schemas']['HealthOutputBody']
 export type SchemaLibraryCollection = components['schemas']['LibraryCollection']
@@ -2185,6 +2281,8 @@ export type SchemaParsed = components['schemas']['Parsed']
 export type SchemaPlaybackOutputBody = components['schemas']['PlaybackOutputBody']
 export type SchemaPlaybackSession = components['schemas']['PlaybackSession']
 export type SchemaPlaybackStatus = components['schemas']['PlaybackStatus']
+export type SchemaProgressInputBody = components['schemas']['ProgressInputBody']
+export type SchemaProgressOutputBody = components['schemas']['ProgressOutputBody']
 export type SchemaRelatedMedia = components['schemas']['RelatedMedia']
 export type SchemaRenameListInputBody = components['schemas']['RenameListInputBody']
 export type SchemaRoot = components['schemas']['Root']
@@ -3156,6 +3254,74 @@ export interface operations {
 			}
 		}
 	}
+	getPlaybackFont: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Library file, as listed by listLibraryFiles. */
+				id: number
+				/** @description Track index as the stream description lists it. */
+				index: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	reportPlaybackProgress: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Library file being played. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['ProgressInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ProgressOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
 	getPlaybackStream: {
 		parameters: {
 			query?: never
@@ -3176,6 +3342,38 @@ export interface operations {
 				content: {
 					'application/json': components['schemas']['StreamOutputBody']
 				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getPlaybackSubtitle: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Library file, as listed by listLibraryFiles. */
+				id: number
+				/** @description Track index as the stream description lists it. */
+				index: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
 			}
 			/** @description Error */
 			default: {

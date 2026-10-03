@@ -45,7 +45,11 @@ function createWindow(): BrowserWindow {
 			contextIsolation: true,
 			nodeIntegration: false,
 			sandbox: true,
-			webSecurity: true
+			webSecurity: true,
+
+			// The built-in player switches between a file's audio tracks through
+			// HTMLMediaElement.audioTracks, which Chromium still keeps behind a flag.
+			enableBlinkFeatures: 'AudioVideoTracks'
 		}
 	})
 

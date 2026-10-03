@@ -1,3 +1,4 @@
+import { useNavigate } from '@tanstack/react-router'
 import clsx from 'clsx'
 import { useUnit } from 'effector-react'
 import { useEffect } from 'react'
@@ -7,7 +8,7 @@ import { Badge, Icon, Skeleton, toast } from '@shared/ui'
 
 import { fileDuration, fileName, fileTitle, titleFilesQuery } from '@entities/library-item'
 import type { LibraryFile } from '@entities/library-item'
-import { playbackModel } from '@entities/playback'
+import { $playerMode, playbackModel } from '@entities/playback'
 
 import { episodeNumber, groupTitleFiles, isWatched } from '../lib/episodes'
 
@@ -38,13 +39,24 @@ export function LibrarySection({
 
 	const episodeLabel = useEpisodeLabel()
 
-	const [data, load, play, session, starting] = useUnit([
+	const navigate = useNavigate()
+
+	const [data, load, playExternally, session, starting, playerMode] = useUnit([
 		titleFilesQuery.$data,
 		titleFilesQuery.start,
 		playbackModel.playRequested,
 		playbackModel.$session,
-		playbackModel.$starting
+		playbackModel.$starting,
+		$playerMode
 	])
+
+	const play = (fileId: number) => {
+		if (playerMode === 'external') {
+			playExternally(fileId)
+		} else {
+			void navigate({ to: '/watch/$fileId', params: { fileId: String(fileId) } })
+		}
+	}
 
 	useEffect(() => {
 		load(mediaRef)
