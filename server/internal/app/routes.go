@@ -40,9 +40,14 @@ type Deps struct {
 	FFmpegPath  string
 	FFprobePath string
 	DataDir     string
+
+	Transcode        bool
+	TranscodeDir     string
+	TranscodeHWAccel string
 }
 
-func Register(api huma.API, deps Deps) {
+// Register mounts every module and returns what has to run on shutdown.
+func Register(api huma.API, deps Deps) (shutdown func()) {
 	httpapi.RegisterHealth(api, deps.Build, deps.Linked)
 
 	trackerModule := tracker.New(tracker.Deps{
@@ -88,7 +93,7 @@ func Register(api huma.API, deps Deps) {
 
 	// The player opens files the library scanned and reports what was watched to the
 	// tracker. Both edges are ports, joined here: playback knows neither module.
-	playback.New(playback.Deps{
+	playbackModule := playback.New(playback.Deps{
 		Logger:      moduleLogger(deps.Logger, "playback"),
 		Events:      deps.Events,
 		MPVPath:     deps.MPVPath,
@@ -97,7 +102,12 @@ func Register(api huma.API, deps Deps) {
 		DataDir:     deps.DataDir,
 		Library:     playableFiles{library: libraryModule},
 		Progress:    watchedEpisodes{tracker: trackerModule},
-	}).Register(api)
+
+		Transcode:        deps.Transcode,
+		TranscodeDir:     deps.TranscodeDir,
+		TranscodeHWAccel: deps.TranscodeHWAccel,
+	})
+	playbackModule.Register(api)
 
 	reader.New(reader.Deps{
 		DB:     deps.DB,
@@ -115,6 +125,8 @@ func Register(api huma.API, deps Deps) {
 		DB:     deps.DB,
 		Logger: moduleLogger(deps.Logger, "extension"),
 	}).Register(api)
+
+	return playbackModule.Close
 }
 
 func moduleLogger(logger zerolog.Logger, module string) zerolog.Logger {

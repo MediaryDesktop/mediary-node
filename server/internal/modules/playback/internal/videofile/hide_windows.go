@@ -5,8 +5,8 @@ import (
 	"syscall"
 )
 
-// The node runs without a console, so a child it starts would get a window of
-// its own flashing over the player.
-func hideWindow(cmd *exec.Cmd) {
+// HideWindow keeps ffmpeg and ffprobe from opening a console: the node runs
+// without one, so each child would otherwise get a window over the player.
+func HideWindow(cmd *exec.Cmd) {
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 }

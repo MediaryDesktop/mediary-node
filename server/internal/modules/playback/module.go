@@ -6,6 +6,7 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/rs/zerolog"
 
+	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/cassette"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/handler"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/mpv"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/service"
@@ -37,12 +38,44 @@ type Deps struct {
 	// file rather than a named pipe, and where probed media info is cached.
 	DataDir string
 
+	// Transcode turns on HLS for files the renderer cannot play as they are.
+	// Segments go to TranscodeDir, which is emptied on every start.
+	Transcode        bool
+	TranscodeDir     string
+	TranscodeHWAccel string
+
 	Library  Library
 	Progress Progress
 }
 
 func New(deps Deps) *Module {
-	svc := service.New(deps.Logger, deps.Events, service.Options{
+	var transcoder *cassette.Cassette
+
+	if deps.Transcode {
+		logger := deps.Logger
+
+		ffmpeg := deps.FFmpegPath
+		if ffmpeg == "" {
+			ffmpeg = "ffmpeg"
+		}
+
+		var err error
+		transcoder, err = cassette.New(&cassette.NewCassetteOptions{
+			Logger:      &logger,
+			HwAccelKind: deps.TranscodeHWAccel,
+			TempOutDir:  deps.TranscodeDir,
+			FfmpegPath:  ffmpeg,
+			FfprobePath: deps.FFprobePath,
+		})
+		if err != nil {
+			// Direct play and mpv do not need it; a broken transcode dir should
+			// not take them down.
+			deps.Logger.Error().Err(err).Msg("transcoding is unavailable")
+			transcoder = nil
+		}
+	}
+
+	opts := service.Options{
 		Launcher: service.MPVLauncher{
 			Binary: deps.MPVPath,
 			Socket: mpv.SocketPath(deps.DataDir),
@@ -58,13 +91,28 @@ func New(deps Deps) *Module {
 			FFmpegPath: deps.FFmpegPath,
 			CacheDir:   filepath.Join(deps.DataDir, "cache", "extracted"),
 		},
-	})
+	}
 
-	return &Module{handler: handler.New(svc)}
+	// A typed nil in the interface would read as "transcoding on".
+	if transcoder != nil {
+		opts.Transcoder = transcoder
+	}
+
+	svc := service.New(deps.Logger, deps.Events, opts)
+
+	return &Module{handler: handler.New(svc), transcoder: transcoder}
 }
 
 type Module struct {
-	handler *handler.Handler
+	handler    *handler.Handler
+	transcoder *cassette.Cassette
+}
+
+// Close stops every encoder, so no ffmpeg outlives the node.
+func (m *Module) Close() {
+	if m.transcoder != nil {
+		m.transcoder.Destroy()
+	}
 }
 
 func (m *Module) Register(api huma.API) {

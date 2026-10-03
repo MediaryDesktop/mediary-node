@@ -1,7 +1,6 @@
 package videofile
 
 import (
-	"bytes"
 	"context"
 	"os"
 	"os/exec"
@@ -20,23 +19,23 @@ func makeSubtitledSample(t *testing.T, dir string) string {
 	if err != nil {
 		t.Skip("ffmpeg is not on PATH")
 	}
-	if _, err := exec.LookPath("ffprobe"); err != nil {
+	if _, lookErr := exec.LookPath("ffprobe"); lookErr != nil {
 		t.Skip("ffprobe is not on PATH")
 	}
 
 	srt := filepath.Join(dir, "sub.srt")
-	if err := os.WriteFile(srt, []byte("1\n00:00:00,000 --> 00:00:01,000\nHello there\n"), 0o600); err != nil {
+	if err = os.WriteFile(srt, []byte("1\n00:00:00,000 --> 00:00:01,000\nHello there\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 
 	font := filepath.Join(dir, "font.ttf")
-	if err := os.WriteFile(font, bytes.Repeat([]byte{0}, 64), 0o600); err != nil {
+	if err = os.WriteFile(font, make([]byte, 64), 0o600); err != nil {
 		t.Fatal(err)
 	}
 
 	path := filepath.Join(dir, "sample.mkv")
 
-	out, err := exec.Command(ffmpeg, "-v", "error",
+	out, err := exec.CommandContext(t.Context(), ffmpeg, "-v", "error",
 		"-f", "lavfi", "-i", "testsrc=size=160x120:rate=12:duration=1",
 		"-i", srt,
 		"-attach", font,

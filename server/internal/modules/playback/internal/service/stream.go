@@ -32,6 +32,8 @@ type Stream struct {
 	Info *videofile.MediaInfo `json:"info" doc:"Streams, codecs and chapters as ffprobe reports them."`
 
 	DirectURL string `json:"direct_url" doc:"Path that serves the file as it is, with range requests. The renderer appends the node token as ?token= because a video element cannot send headers."`
+
+	HLSURL string `json:"hls_url,omitempty" doc:"Master playlist of the file transcoded to HLS, for when the renderer cannot play it directly. Absent while transcoding is turned off."`
 }
 
 func (s *Service) Stream(ctx context.Context, fileID int64) (*Stream, error) {
@@ -52,7 +54,16 @@ func (s *Service) Stream(ctx context.Context, fileID int64) (*Stream, error) {
 		Episode:   file.Episode,
 		Info:      info,
 		DirectURL: fmt.Sprintf("/v1/playback/files/%d/direct", file.ID),
+		HLSURL:    s.hlsURL(file.ID),
 	}, nil
+}
+
+func (s *Service) hlsURL(fileID int64) string {
+	if s.opts.Transcoder == nil {
+		return ""
+	}
+
+	return fmt.Sprintf("/v1/playback/files/%d/hls/master.m3u8", fileID)
 }
 
 // DirectPath is the file to hand to a direct-play request. Only library files

@@ -89,7 +89,7 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 		Logger:         logger,
 	})
 
-	Register(api, Deps{
+	shutdownModules := Register(api, Deps{
 		Logger: logger,
 		DB:     database,
 		Events: hub,
@@ -108,7 +108,12 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 		FFmpegPath:  cfg.Playback.FFmpegPath,
 		FFprobePath: cfg.Playback.FFprobePath,
 		DataDir:     cfg.DataDir,
+
+		Transcode:        cfg.Playback.EnableTranscoding,
+		TranscodeDir:     cfg.Playback.TranscodeDir,
+		TranscodeHWAccel: cfg.Playback.TranscodeHWAccel,
 	})
+	defer shutdownModules()
 
 	if mux, ok := router.(*chi.Mux); ok {
 		mux.Handle("/ws", wsapi.New(hub, logger, cfg.HTTP.AllowedOrigins))

@@ -185,11 +185,11 @@ type MatchRelation struct {
 // so a synonym that only landed on an earlier season can still resolve to the
 // sequel a file actually names — see matcher.Candidate.Sequels.
 type MatchCandidate struct {
-	ID         int      `json:"id"`
-	Format     *string  `json:"format"`
-	Synonyms   []string `json:"synonyms"`
-	Episodes   *int     `json:"episodes"`
-	Chapters   *int     `json:"chapters"`
+	ID         int        `json:"id"`
+	Format     *string    `json:"format"`
+	Synonyms   []string   `json:"synonyms"`
+	Episodes   *int       `json:"episodes"`
+	Chapters   *int       `json:"chapters"`
 	SeasonYear *int       `json:"seasonYear"`
 	Title      Titles     `json:"title"`
 	CoverImage MatchCover `json:"coverImage"`

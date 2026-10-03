@@ -26,7 +26,7 @@ func TestQueryTokenIsAcceptedOnlyWhereHeadersCannotBeSent(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.method+" "+tt.target, func(t *testing.T) {
 			recorder := httptest.NewRecorder()
-			handler.ServeHTTP(recorder, httptest.NewRequest(tt.method, tt.target, nil))
+			handler.ServeHTTP(recorder, httptest.NewRequestWithContext(t.Context(), tt.method, tt.target, http.NoBody))
 
 			if recorder.Code != tt.want {
 				t.Errorf("status = %d, want %d", recorder.Code, tt.want)

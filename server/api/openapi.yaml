@@ -2383,6 +2383,9 @@ components:
           description: Library file this describes.
           format: int64
           type: integer
+        hls_url:
+          description: Master playlist of the file transcoded to HLS, for when the renderer cannot play it directly. Absent while transcoding is turned off.
+          type: string
         info:
           $ref: "#/components/schemas/MediaInfo"
           description: Streams, codecs and chapters as ffprobe reports them.
@@ -3640,6 +3643,157 @@ paths:
                 $ref: "#/components/schemas/ErrorModel"
           description: Error
       summary: One font attached to the file
+      tags:
+        - playback
+  /v1/playback/files/{id}/hls:
+    delete:
+      description: Called when the player closes, so encoders stop at once instead of when the idle reaper notices.
+      operationId: stopPlaybackHLS
+      parameters:
+        - description: Library file, as listed by listLibraryFiles.
+          in: path
+          name: id
+          required: true
+          schema:
+            description: Library file, as listed by listLibraryFiles.
+            format: int64
+            type: integer
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Stop transcoding a file
+      tags:
+        - playback
+  /v1/playback/files/{id}/hls/audio/{index}/{name}:
+    get:
+      description: AAC is copied, anything else is encoded to AAC. Accepts ?token=.
+      operationId: getPlaybackHLSAudio
+      parameters:
+        - description: Library file, as listed by listLibraryFiles.
+          in: path
+          name: id
+          required: true
+          schema:
+            description: Library file, as listed by listLibraryFiles.
+            format: int64
+            type: integer
+        - description: The node token. Repeated into every URL the playlist lists, so the player can follow them.
+          explode: false
+          in: query
+          name: token
+          schema:
+            description: The node token. Repeated into every URL the playlist lists, so the player can follow them.
+            type: string
+        - description: Audio track, as the master playlist names it.
+          in: path
+          name: index
+          required: true
+          schema:
+            description: Audio track, as the master playlist names it.
+            format: int32
+            minimum: 0
+            type: integer
+        - description: index.m3u8, or segment-N.ts.
+          in: path
+          name: name
+          required: true
+          schema:
+            description: index.m3u8, or segment-N.ts.
+            type: string
+      responses:
+        "200":
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Playlist or segment of one audio track
+      tags:
+        - playback
+  /v1/playback/files/{id}/hls/master.m3u8:
+    get:
+      description: For a file the renderer cannot play directly. Video the renderer can decode is copied; only what it cannot is re-encoded, segment by segment as the player asks. Accepts ?token=.
+      operationId: getPlaybackHLSMaster
+      parameters:
+        - description: Library file, as listed by listLibraryFiles.
+          in: path
+          name: id
+          required: true
+          schema:
+            description: Library file, as listed by listLibraryFiles.
+            format: int64
+            type: integer
+        - description: The node token. Repeated into every URL the playlist lists, so the player can follow them.
+          explode: false
+          in: query
+          name: token
+          schema:
+            description: The node token. Repeated into every URL the playlist lists, so the player can follow them.
+            type: string
+      responses:
+        "200":
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: HLS master playlist of a transcoded file
+      tags:
+        - playback
+  /v1/playback/files/{id}/hls/{quality}/{name}:
+    get:
+      description: A segment request waits until the encoder has written it. Accepts ?token=.
+      operationId: getPlaybackHLSVideo
+      parameters:
+        - description: Library file, as listed by listLibraryFiles.
+          in: path
+          name: id
+          required: true
+          schema:
+            description: Library file, as listed by listLibraryFiles.
+            format: int64
+            type: integer
+        - description: The node token. Repeated into every URL the playlist lists, so the player can follow them.
+          explode: false
+          in: query
+          name: token
+          schema:
+            description: The node token. Repeated into every URL the playlist lists, so the player can follow them.
+            type: string
+        - description: Rendition, as the master playlist names it.
+          in: path
+          name: quality
+          required: true
+          schema:
+            description: Rendition, as the master playlist names it.
+            type: string
+        - description: index.m3u8, or segment-N.ts.
+          in: path
+          name: name
+          required: true
+          schema:
+            description: index.m3u8, or segment-N.ts.
+            type: string
+      responses:
+        "200":
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Playlist or segment of one video rendition
       tags:
         - playback
   /v1/playback/files/{id}/progress:

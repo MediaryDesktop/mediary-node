@@ -106,14 +106,14 @@ func TestProberReadsARealFileAndCachesIt(t *testing.T) {
 	if err != nil {
 		t.Skip("ffmpeg is not on PATH")
 	}
-	if _, err := exec.LookPath("ffprobe"); err != nil {
+	if _, lookErr := exec.LookPath("ffprobe"); lookErr != nil {
 		t.Skip("ffprobe is not on PATH")
 	}
 
 	dir := t.TempDir()
 	path := filepath.Join(dir, "sample.mkv")
 
-	out, err := exec.Command(ffmpeg, "-v", "error",
+	out, err := exec.CommandContext(t.Context(), ffmpeg, "-v", "error",
 		"-f", "lavfi", "-i", "testsrc=size=320x240:rate=24:duration=1",
 		"-f", "lavfi", "-i", "sine=frequency=440:duration=1",
 		"-c:v", "libx264", "-profile:v", "high", "-pix_fmt", "yuv420p",

@@ -6,6 +6,7 @@ import (
 	"cmp"
 	"context"
 	"fmt"
+	"math"
 	"mime"
 	"path/filepath"
 	"strconv"
@@ -113,9 +114,9 @@ func probe(ctx context.Context, ffprobePath, path string) (*MediaInfo, error) {
 			Codec:          stream.CodecName,
 			MimeCodec:      streamToMimeCodec(stream),
 			Language:       nullIfZero(lang.String()),
-			Quality:        heightToQuality(uint32(stream.Height)),
-			Width:          uint32(stream.Width),
-			Height:         uint32(stream.Height),
+			Quality:        heightToQuality(dimension(stream.Height)),
+			Width:          dimension(stream.Width),
+			Height:         dimension(stream.Height),
 			Bitrate:        uint32(bitrate),
 			PixFmt:         stream.PixFmt,
 			ColorSpace:     stream.ColorSpace,
@@ -213,7 +214,7 @@ func isFont(name, mimetype string) bool {
 
 func channelCount(stream *ffprobe.Stream) uint32 {
 	if stream.Channels > 0 {
-		return uint32(stream.Channels)
+		return dimension(stream.Channels)
 	}
 
 	switch {
@@ -226,6 +227,17 @@ func channelCount(stream *ffprobe.Stream) uint32 {
 	default:
 		return 2
 	}
+}
+
+// dimension converts a width or height as ffprobe reports it.
+func dimension(n int) uint32 {
+	if n <= 0 {
+		return 0
+	}
+	if n > math.MaxUint32 {
+		return math.MaxUint32
+	}
+	return uint32(n)
 }
 
 func nullIfZero[T comparable](v T) *T {
@@ -418,7 +430,7 @@ func mediaMimeCodec(extension string, videos []Video, audios []Audio) *string {
 		return nil
 	}
 
-	return ptr(fmt.Sprintf("%s; codecs=\"%s\"", container, strings.Join(codecs, ", ")))
+	return ptr(fmt.Sprintf("%s; codecs=%q", container, strings.Join(codecs, ", ")))
 }
 
 func ContainerMimeType(extension string) string {

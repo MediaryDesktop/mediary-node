@@ -30,11 +30,12 @@ const (
 )
 
 type Options struct {
-	Launcher  Launcher
-	Library   Library
-	Progress  Progress
-	Prober    Prober
-	Extractor Extractor
+	Launcher   Launcher
+	Library    Library
+	Progress   Progress
+	Prober     Prober
+	Extractor  Extractor
+	Transcoder Transcoder
 
 	Now func() time.Time
 }

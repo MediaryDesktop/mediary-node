@@ -110,8 +110,8 @@ func (x *Extractor) run(ctx context.Context, path string, info *MediaInfo, out E
 		binary = "ffmpeg"
 	}
 
-	cmd := exec.CommandContext(ctx, binary, args...)
-	hideWindow(cmd)
+	cmd := exec.CommandContext(ctx, binary, args...) //nolint:gosec // the configured ffmpeg, arguments built here
+	HideWindow(cmd)
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {

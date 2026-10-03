@@ -85,7 +85,13 @@ type Playback struct {
 
 	TranscodeDir string `env:"NODE_TRANSCODE_DIR"`
 
-	EnableTranscoding bool `env:"NODE_ENABLE_TRANSCODING" envDefault:"false"`
+	// On by default: it costs nothing until a file the renderer cannot play
+	// directly is opened, and without it such a file only plays in mpv.
+	EnableTranscoding bool `env:"NODE_ENABLE_TRANSCODING" envDefault:"true"`
+
+	// cpu, auto, nvidia, qsv, vaapi or videotoolbox. CPU until hardware
+	// encoding has proven itself on real libraries.
+	TranscodeHWAccel string `env:"NODE_TRANSCODE_HWACCEL" envDefault:"cpu"`
 }
 
 type Cloud struct {

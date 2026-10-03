@@ -59,6 +59,17 @@ func (p Prober) Info(ctx context.Context, path string) (*MediaInfo, error) {
 	return info, nil
 }
 
+// FileKey names one version of a file: it changes when the file is rewritten,
+// so anything derived from it can be cached under it.
+func FileKey(path string) (string, error) {
+	stat, err := os.Stat(path)
+	if err != nil {
+		return "", err
+	}
+
+	return cacheKey(path, stat), nil
+}
+
 func cacheKey(path string, stat os.FileInfo) string {
 	sum := sha256.Sum256(fmt.Appendf(nil, "%d:%s:%d:%d", cacheVersion, path, stat.ModTime().UnixNano(), stat.Size()))
 
@@ -66,7 +77,7 @@ func cacheKey(path string, stat os.FileInfo) string {
 }
 
 func readCached(path string) (*MediaInfo, bool) {
-	raw, err := os.ReadFile(path)
+	raw, err := os.ReadFile(path) //nolint:gosec // a file in the node's own cache
 	if err != nil {
 		return nil, false
 	}
