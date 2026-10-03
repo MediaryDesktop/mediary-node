@@ -28,7 +28,9 @@ type Deps struct {
 	// MPVPath is the configured player. Empty means the node looks for mpv on PATH.
 	MPVPath string
 
-	// FFprobePath is the configured ffprobe. Empty means the node looks on PATH.
+	// FFmpegPath and FFprobePath are the configured tools. Empty means the node
+	// looks for them on PATH.
+	FFmpegPath  string
 	FFprobePath string
 
 	// DataDir is where the player's control socket goes on platforms where it is a
@@ -51,6 +53,10 @@ func New(deps Deps) *Module {
 		Prober: videofile.Prober{
 			FFprobePath: deps.FFprobePath,
 			CacheDir:    filepath.Join(deps.DataDir, "cache", "mediainfo"),
+		},
+		Extractor: &videofile.Extractor{
+			FFmpegPath: deps.FFmpegPath,
+			CacheDir:   filepath.Join(deps.DataDir, "cache", "extracted"),
 		},
 	})
 

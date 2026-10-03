@@ -704,6 +704,19 @@ components:
         - category
         - is_adult
       type: object
+    Font:
+      additionalProperties: false
+      properties:
+        index:
+          format: int32
+          minimum: 0
+          type: integer
+        name:
+          type: string
+      required:
+        - index
+        - name
+      type: object
     FuzzyDate:
       additionalProperties: false
       properties:
@@ -1195,9 +1208,9 @@ components:
           description: File extension without the dot.
           type: string
         fonts:
-          description: Attached font file names, needed to render ASS subtitles.
+          description: Fonts attached to the file, needed to render its ASS subtitles as authored.
           items:
-            type: string
+            $ref: "#/components/schemas/Font"
           type:
             - array
             - "null"
@@ -1449,6 +1462,49 @@ components:
           description: The open session. Absent when nothing is playing.
       required:
         - playing
+      type: object
+    ProgressInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/ProgressInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        duration:
+          description: Length of the file, in seconds.
+          format: double
+          minimum: 0
+          type: number
+        ended:
+          description: True when the file played to its end.
+          type: boolean
+        position:
+          description: Where the player is, in seconds.
+          format: double
+          minimum: 0
+          type: number
+      required:
+        - position
+        - duration
+      type: object
+    ProgressOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/ProgressOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        watched:
+          description: True once this file counts as watched and the tracker was told.
+          type: boolean
+      required:
+        - watched
       type: object
     RelatedMedia:
       additionalProperties: false
@@ -3552,6 +3608,75 @@ paths:
       summary: Serve a file as it is
       tags:
         - playback
+  /v1/playback/files/{id}/fonts/{index}:
+    get:
+      description: Fonts the subtitles were typeset with, as the file carries them. Accepts ?token=.
+      operationId: getPlaybackFont
+      parameters:
+        - description: Library file, as listed by listLibraryFiles.
+          in: path
+          name: id
+          required: true
+          schema:
+            description: Library file, as listed by listLibraryFiles.
+            format: int64
+            type: integer
+        - description: Track index as the stream description lists it.
+          in: path
+          name: index
+          required: true
+          schema:
+            description: Track index as the stream description lists it.
+            format: int32
+            minimum: 0
+            type: integer
+      responses:
+        "200":
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: One font attached to the file
+      tags:
+        - playback
+  /v1/playback/files/{id}/progress:
+    post:
+      description: The built-in player's counterpart of mpv's position events. The node applies the same rule — 85 % or played to the end — and tells the tracker once.
+      operationId: reportPlaybackProgress
+      parameters:
+        - description: Library file being played.
+          in: path
+          name: id
+          required: true
+          schema:
+            description: Library file being played.
+            format: int64
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProgressInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProgressOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Report where the built-in player is
+      tags:
+        - playback
   /v1/playback/files/{id}/stream:
     get:
       description: Runs ffprobe on the file, once per version of it, and reports its streams together with an RFC 6381 type. The renderer asks its own video element whether it can play that type, which decides between direct play and transcoding.
@@ -3579,6 +3704,40 @@ paths:
                 $ref: "#/components/schemas/ErrorModel"
           description: Error
       summary: Describe a file for the built-in player
+      tags:
+        - playback
+  /v1/playback/files/{id}/subtitles/{index}:
+    get:
+      description: Text tracks are pulled out of the file with ffmpeg on first request, all at once, and converted to ASS so one renderer draws every format. Accepts ?token=.
+      operationId: getPlaybackSubtitle
+      parameters:
+        - description: Library file, as listed by listLibraryFiles.
+          in: path
+          name: id
+          required: true
+          schema:
+            description: Library file, as listed by listLibraryFiles.
+            format: int64
+            type: integer
+        - description: Track index as the stream description lists it.
+          in: path
+          name: index
+          required: true
+          schema:
+            description: Track index as the stream description lists it.
+            format: int32
+            minimum: 0
+            type: integer
+      responses:
+        "200":
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: One subtitle track as ASS
       tags:
         - playback
   /v1/reader/status:

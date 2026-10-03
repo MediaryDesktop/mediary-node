@@ -16,6 +16,11 @@ type Prober interface {
 	Info(ctx context.Context, path string) (*videofile.MediaInfo, error)
 }
 
+// Extractor pulls subtitle tracks and fonts out of a file for the renderer.
+type Extractor interface {
+	Extract(ctx context.Context, path string, info *videofile.MediaInfo) (videofile.Extracted, error)
+}
+
 // Stream is what the built-in player needs before it can choose how to play a
 // file: what is inside it, and where to fetch it from.
 type Stream struct {
@@ -35,18 +40,9 @@ func (s *Service) Stream(ctx context.Context, fileID int64) (*Stream, error) {
 		return nil, err
 	}
 
-	if s.opts.Prober == nil {
-		return nil, apperr.New(apperr.KindPrecondition, "media probing is not configured on this node")
-	}
-
-	info, err := s.opts.Prober.Info(ctx, file.Path)
+	info, err := s.info(ctx, file)
 	if err != nil {
-		if errors.Is(err, exec.ErrNotFound) {
-			return nil, apperr.Wrap(err, apperr.KindPrecondition,
-				"ffprobe was not found on PATH: install FFmpeg or set NODE_FFPROBE_PATH")
-		}
-
-		return nil, apperr.Wrap(err, apperr.KindInternal, "could not read the streams of %s", file.Path)
+		return nil, err
 	}
 
 	return &Stream{
@@ -88,4 +84,82 @@ func (s *Service) playable(ctx context.Context, fileID int64) (*PlayableFile, er
 	}
 
 	return file, nil
+}
+
+func (s *Service) info(ctx context.Context, file *PlayableFile) (*videofile.MediaInfo, error) {
+	if s.opts.Prober == nil {
+		return nil, apperr.New(apperr.KindPrecondition, "media probing is not configured on this node")
+	}
+
+	info, err := s.opts.Prober.Info(ctx, file.Path)
+	if err != nil {
+		if errors.Is(err, exec.ErrNotFound) {
+			return nil, apperr.Wrap(err, apperr.KindPrecondition,
+				"ffprobe was not found on PATH: install FFmpeg or set NODE_FFPROBE_PATH")
+		}
+
+		return nil, apperr.Wrap(err, apperr.KindInternal, "could not read the streams of %s", file.Path)
+	}
+
+	return info, nil
+}
+
+func (s *Service) extracted(ctx context.Context, fileID int64) (*videofile.MediaInfo, videofile.Extracted, error) {
+	file, err := s.playable(ctx, fileID)
+	if err != nil {
+		return nil, videofile.Extracted{}, err
+	}
+
+	info, err := s.info(ctx, file)
+	if err != nil {
+		return nil, videofile.Extracted{}, err
+	}
+
+	if s.opts.Extractor == nil {
+		return nil, videofile.Extracted{}, apperr.New(apperr.KindPrecondition, "subtitle extraction is not configured on this node")
+	}
+
+	out, err := s.opts.Extractor.Extract(ctx, file.Path, info)
+	if err != nil {
+		if errors.Is(err, exec.ErrNotFound) {
+			return nil, videofile.Extracted{}, apperr.Wrap(err, apperr.KindPrecondition,
+				"ffmpeg was not found on PATH: install FFmpeg or set NODE_FFMPEG_PATH")
+		}
+
+		return nil, videofile.Extracted{}, apperr.Wrap(err, apperr.KindInternal, "could not extract the subtitles of %s", file.Path)
+	}
+
+	return info, out, nil
+}
+
+// SubtitlePath is one subtitle track of a library file, as ASS.
+func (s *Service) SubtitlePath(ctx context.Context, fileID int64, index uint32) (string, error) {
+	info, out, err := s.extracted(ctx, fileID)
+	if err != nil {
+		return "", err
+	}
+
+	for _, sub := range info.Subtitles {
+		if sub.Index == index {
+			return out.Subtitle(index), nil
+		}
+	}
+
+	return "", apperr.New(apperr.KindNotFound, "file %d has no text subtitle track %d", fileID, index)
+}
+
+// FontPath is one font attached to a library file.
+func (s *Service) FontPath(ctx context.Context, fileID int64, index uint32) (string, error) {
+	info, out, err := s.extracted(ctx, fileID)
+	if err != nil {
+		return "", err
+	}
+
+	for _, font := range info.Fonts {
+		if font.Index == index {
+			return out.Font(font), nil
+		}
+	}
+
+	return "", apperr.New(apperr.KindNotFound, "file %d has no attached font %d", fileID, index)
 }

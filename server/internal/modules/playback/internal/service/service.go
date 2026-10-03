@@ -30,10 +30,11 @@ const (
 )
 
 type Options struct {
-	Launcher Launcher
-	Library  Library
-	Progress Progress
-	Prober   Prober
+	Launcher  Launcher
+	Library   Library
+	Progress  Progress
+	Prober    Prober
+	Extractor Extractor
 
 	Now func() time.Time
 }
@@ -46,6 +47,11 @@ type Service struct {
 	mu      sync.Mutex
 	session *PlaybackSession
 	player  Player
+
+	// Files the built-in player already counted. Its reports arrive every few
+	// seconds past the threshold, and each would otherwise be another write to
+	// the user's list.
+	counted map[int64]bool
 }
 
 func New(logger zerolog.Logger, hub *events.Hub, opts Options) *Service {
@@ -326,6 +332,51 @@ func (s *Service) markWatched(ctx context.Context) {
 	}
 
 	s.publish("watched", &snapshot)
+}
+
+// ReportProgress is the built-in player's side of what the mpv pump does: the
+// renderer says where it is, and the same rule decides when the episode counts.
+func (s *Service) ReportProgress(ctx context.Context, fileID int64, position, duration float64, ended bool) (bool, error) {
+	if !shouldMarkWatched(position, duration, ended) {
+		return false, nil
+	}
+
+	s.mu.Lock()
+	counted := s.counted[fileID]
+	s.mu.Unlock()
+
+	if counted {
+		return true, nil
+	}
+
+	file, err := s.playable(ctx, fileID)
+	if err != nil {
+		return false, err
+	}
+
+	if file.MediaRef == "" || file.Episode == nil || s.opts.Progress == nil {
+		return false, nil
+	}
+
+	if err := s.opts.Progress.MarkWatched(ctx, file.MediaRef, *file.Episode); err != nil {
+		return false, apperr.Wrap(err, apperr.KindUnavailable, "could not record the episode as watched")
+	}
+
+	s.mu.Lock()
+	if s.counted == nil {
+		s.counted = map[int64]bool{}
+	}
+	s.counted[fileID] = true
+	s.mu.Unlock()
+
+	s.hub.Publish(events.TopicPlayback, map[string]any{
+		"state":     "watched",
+		"file_id":   file.ID,
+		"media_ref": file.MediaRef,
+		"watched":   true,
+	})
+
+	return true, nil
 }
 
 // shouldMarkWatched is the whole rule, kept apart from the plumbing because it is

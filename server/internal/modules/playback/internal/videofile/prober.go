@@ -13,7 +13,7 @@ import (
 
 // cacheVersion is part of every cache key, so a change to what probe extracts
 // retires every entry written before it instead of serving stale info.
-const cacheVersion = 1
+const cacheVersion = 2
 
 const probeTimeout = 40 * time.Second
 

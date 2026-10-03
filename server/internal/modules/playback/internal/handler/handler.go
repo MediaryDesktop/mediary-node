@@ -45,6 +45,26 @@ type FileInput struct {
 	ID int64 `path:"id" doc:"Library file, as listed by listLibraryFiles."`
 }
 
+type TrackInput struct {
+	ID    int64  `path:"id" doc:"Library file, as listed by listLibraryFiles."`
+	Index uint32 `path:"index" doc:"Track index as the stream description lists it."`
+}
+
+type ProgressInput struct {
+	ID   int64 `path:"id" doc:"Library file being played."`
+	Body struct {
+		Position float64 `json:"position" minimum:"0" doc:"Where the player is, in seconds."`
+		Duration float64 `json:"duration" minimum:"0" doc:"Length of the file, in seconds."`
+		Ended    bool    `json:"ended,omitempty" doc:"True when the file played to its end."`
+	}
+}
+
+type ProgressOutput struct {
+	Body struct {
+		Watched bool `json:"watched" doc:"True once this file counts as watched and the tracker was told."`
+	}
+}
+
 type StreamOutput struct {
 	Body struct {
 		Stream *service.Stream `json:"stream" doc:"What the file holds and where to fetch it."`
@@ -72,6 +92,61 @@ func (h *Handler) Register(api huma.API) {
 	})
 
 	huma.Register(api, huma.Operation{
+		OperationID: "getPlaybackSubtitle",
+		Method:      http.MethodGet,
+		Path:        "/v1/playback/files/{id}/subtitles/{index}",
+		Summary:     "One subtitle track as ASS",
+		Description: "Text tracks are pulled out of the file with ffmpeg on first request, all at once, and converted to ASS so one renderer draws every format. Accepts ?token=.",
+		Tags:        []string{"playback"},
+	}, func(ctx context.Context, in *TrackInput) (*huma.StreamResponse, error) {
+		path, err := h.svc.SubtitlePath(ctx, in.ID, in.Index)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return &huma.StreamResponse{Body: func(hctx huma.Context) {
+			serveFile(hctx, path, "text/x-ssa; charset=utf-8")
+		}}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "getPlaybackFont",
+		Method:      http.MethodGet,
+		Path:        "/v1/playback/files/{id}/fonts/{index}",
+		Summary:     "One font attached to the file",
+		Description: "Fonts the subtitles were typeset with, as the file carries them. Accepts ?token=.",
+		Tags:        []string{"playback"},
+	}, func(ctx context.Context, in *TrackInput) (*huma.StreamResponse, error) {
+		path, err := h.svc.FontPath(ctx, in.ID, in.Index)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return &huma.StreamResponse{Body: func(hctx huma.Context) {
+			serveFile(hctx, path, "application/octet-stream")
+		}}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "reportPlaybackProgress",
+		Method:      http.MethodPost,
+		Path:        "/v1/playback/files/{id}/progress",
+		Summary:     "Report where the built-in player is",
+		Description: "The built-in player's counterpart of mpv's position events. The node applies the same rule — 85 % or played to the end — and tells the tracker once.",
+		Tags:        []string{"playback"},
+	}, func(ctx context.Context, in *ProgressInput) (*ProgressOutput, error) {
+		watched, err := h.svc.ReportProgress(ctx, in.ID, in.Body.Position, in.Body.Duration, in.Body.Ended)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		out := &ProgressOutput{}
+		out.Body.Watched = watched
+
+		return out, nil
+	})
+
+	huma.Register(api, huma.Operation{
 		OperationID: "getPlaybackDirect",
 		Method:      http.MethodGet,
 		Path:        "/v1/playback/files/{id}/direct",
@@ -85,7 +160,7 @@ func (h *Handler) Register(api huma.API) {
 		}
 
 		return &huma.StreamResponse{Body: func(hctx huma.Context) {
-			serveFile(hctx, path)
+			serveFile(hctx, path, videofile.ContainerMimeType(filepath.Ext(path)))
 		}}, nil
 	})
 
@@ -156,7 +231,7 @@ func (h *Handler) Register(api huma.API) {
 	})
 }
 
-func serveFile(hctx huma.Context, path string) {
+func serveFile(hctx huma.Context, path, contentType string) {
 	r, w := humachi.Unwrap(hctx)
 
 	file, err := os.Open(path)
@@ -172,7 +247,7 @@ func serveFile(hctx huma.Context, path string) {
 		return
 	}
 
-	if contentType := videofile.ContainerMimeType(filepath.Ext(path)); contentType != "" {
+	if contentType != "" {
 		w.Header().Set("Content-Type", contentType)
 	}
 

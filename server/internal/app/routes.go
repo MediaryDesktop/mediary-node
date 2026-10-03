@@ -37,6 +37,7 @@ type Deps struct {
 	LibraryFollowSymlinks bool
 
 	MPVPath     string
+	FFmpegPath  string
 	FFprobePath string
 	DataDir     string
 }
@@ -91,6 +92,7 @@ func Register(api huma.API, deps Deps) {
 		Logger:      moduleLogger(deps.Logger, "playback"),
 		Events:      deps.Events,
 		MPVPath:     deps.MPVPath,
+		FFmpegPath:  deps.FFmpegPath,
 		FFprobePath: deps.FFprobePath,
 		DataDir:     deps.DataDir,
 		Library:     playableFiles{library: libraryModule},

@@ -105,6 +105,7 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 		LibraryFollowSymlinks: cfg.Library.FollowSymlinks,
 
 		MPVPath:     cfg.Playback.MPVPath,
+		FFmpegPath:  cfg.Playback.FFmpegPath,
 		FFprobePath: cfg.Playback.FFprobePath,
 		DataDir:     cfg.DataDir,
 	})

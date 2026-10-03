@@ -28,7 +28,7 @@ type MediaInfo struct {
 	Videos    []Video    `json:"videos"`
 	Audios    []Audio    `json:"audios"`
 	Subtitles []Subtitle `json:"subtitles"`
-	Fonts     []string   `json:"fonts" doc:"Attached font file names, needed to render ASS subtitles."`
+	Fonts     []Font     `json:"fonts" doc:"Fonts attached to the file, needed to render its ASS subtitles as authored."`
 	Chapters  []Chapter  `json:"chapters"`
 }
 
@@ -65,6 +65,13 @@ type Subtitle struct {
 	Extension string  `json:"extension"`
 	IsDefault bool    `json:"is_default"`
 	IsForced  bool    `json:"is_forced"`
+}
+
+type Font struct {
+	// Index counts attachment streams, fonts or not, because that is what
+	// ffmpeg's t:N specifier addresses.
+	Index uint32 `json:"index"`
+	Name  string `json:"name"`
 }
 
 type Chapter struct {
@@ -162,10 +169,17 @@ func probe(ctx context.Context, ffprobePath, path string) (*MediaInfo, error) {
 		})
 	}
 
-	mi.Fonts = streamsOf(data.Streams, ffprobe.StreamAttachment, func(stream *ffprobe.Stream, _ uint32) string {
-		name, _ := stream.TagList.GetString("filename")
-		return name
-	})
+	mi.Fonts = []Font{}
+	for i, attachment := range streamsOf(data.Streams, ffprobe.StreamAttachment, func(stream *ffprobe.Stream, _ uint32) *ffprobe.Stream {
+		return stream
+	}) {
+		name, _ := attachment.TagList.GetString("filename")
+		mimetype, _ := attachment.TagList.GetString("mimetype")
+
+		if isFont(name, mimetype) {
+			mi.Fonts = append(mi.Fonts, Font{Index: uint32(i), Name: name})
+		}
+	}
 
 	mi.MimeCodec = mediaMimeCodec(mi.Extension, mi.Videos, mi.Audios)
 
@@ -181,6 +195,20 @@ func probe(ctx context.Context, ffprobePath, path string) (*MediaInfo, error) {
 	}
 
 	return mi, nil
+}
+
+func isFont(name, mimetype string) bool {
+	mimetype = strings.ToLower(mimetype)
+	if strings.Contains(mimetype, "font") || strings.Contains(mimetype, "opentype") {
+		return true
+	}
+
+	switch strings.ToLower(filepath.Ext(name)) {
+	case ".ttf", ".otf", ".ttc", ".woff", ".woff2":
+		return true
+	default:
+		return false
+	}
 }
 
 func channelCount(stream *ffprobe.Stream) uint32 {
