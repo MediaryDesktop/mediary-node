@@ -554,6 +554,9 @@ export const uk: Translation = {
 			library: 'Локальна бібліотека',
 			torrent: 'Торент-стрімінг'
 		},
+		chapters: {
+			title: 'Глави · {{count}}'
+		},
 		library: {
 			notInLibrary: 'Немає у вашій бібліотеці',
 			episodesNotInLibrary: 'Цих епізодів немає у вашій бібліотеці:',
@@ -713,6 +716,20 @@ export const uk: Translation = {
 		needsTranscode:
 			'Цей файл використовує кодеки, які вбудований плеєр поки не декодує. Його можна відкрити в mpv.',
 		openExternally: 'Відкрити в mpv'
+	},
+	reader: {
+		close: 'Назад',
+		pageAlt: 'Сторінка {{number}}',
+		empty: 'У цьому розділі немає сторінок, які можна показати.',
+		counted: 'Зараховано як прочитане',
+		read: 'Прочитано',
+		loadFailed: 'Не вдалося відкрити цей розділ.',
+		seek: 'Сторінка',
+		previousChapter: 'Попередній розділ',
+		nextChapter: 'Наступний розділ',
+		pageOf: '{{current}} / {{total}}',
+		end: 'Кінець розділу',
+		chapterNumber: 'Розділ {{number}}'
 	},
 	playback: {
 		episode: 'Серія {{number}}',

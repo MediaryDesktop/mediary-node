@@ -609,6 +609,66 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/v1/reader/files/{id}/chapter': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Pages of a comic chapter
+		 * @description The chapter's pages in reading order. Each page is fetched separately, so the reader can start before the whole archive is read.
+		 */
+		get: operations['getReaderChapter']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/reader/files/{id}/pages/{index}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * One page of a comic chapter
+		 * @description The page's image as it is stored in the archive. Accepts ?token=, because an image element cannot send headers.
+		 */
+		get: operations['getReaderPage']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/reader/files/{id}/progress': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Report the page the reader is on
+		 * @description Reaching the last page counts the chapter as read on the user's list. The tracker decides what that means for the list and never lowers progress.
+		 */
+		post: operations['reportReaderPage']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/v1/reader/status': {
 		parameters: {
 			query?: never
@@ -618,7 +678,7 @@ export interface paths {
 		}
 		/**
 		 * Reader module status
-		 * @description Reports whether the reader module is wired. Placeholder for phase 0.
+		 * @description Reports whether the reader module is wired.
 		 */
 		get: operations['getReaderStatus']
 		put?: never
@@ -840,6 +900,33 @@ export interface components {
 			name: string
 			/** Format: float */
 			start_time: number
+		}
+		ChapterBody: {
+			/**
+			 * Format: int64
+			 * @description Chapter number within that title.
+			 */
+			chapter?: number
+			/**
+			 * Format: int64
+			 * @description Library file this chapter is.
+			 */
+			file_id: number
+			/** @description Title this chapter is matched to. Absent while unmatched. */
+			media_ref?: string
+			/** @description Every page, in reading order. */
+			pages: components['schemas']['Page'][] | null
+			/** @description Title as the library reads it, for the UI. */
+			title: string
+		}
+		ChapterOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ChapterOutputBody.json
+			 */
+			readonly $schema?: string
+			chapter: components['schemas']['ChapterBody']
 		}
 		CollectionOutputBody: {
 			/**
@@ -1435,6 +1522,15 @@ export interface components {
 			/** Format: int64 */
 			volumes: number | null
 		}
+		Page: {
+			/**
+			 * Format: int64
+			 * @description Position in reading order, starting at 0.
+			 */
+			index: number
+			/** @description File name inside the archive. */
+			name: string
+		}
 		Parsed: {
 			/**
 			 * Format: int64
@@ -1551,6 +1647,29 @@ export interface components {
 			readonly $schema?: string
 			/** @description True once this file counts as watched and the tracker was told. */
 			watched: boolean
+		}
+		ReadInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ReadInputBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * Format: int64
+			 * @description Page the reader is on, starting at 0.
+			 */
+			page: number
+		}
+		ReadOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ReadOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description True once the chapter counts as read, on this call or an earlier one. */
+			counted: boolean
 		}
 		RelatedMedia: {
 			cover_color: string | null
@@ -2328,6 +2447,8 @@ export type SchemaAddRootInputBody = components['schemas']['AddRootInputBody']
 export type SchemaAiringEpisode = components['schemas']['AiringEpisode']
 export type SchemaAudio = components['schemas']['Audio']
 export type SchemaChapter = components['schemas']['Chapter']
+export type SchemaChapterBody = components['schemas']['ChapterBody']
+export type SchemaChapterOutputBody = components['schemas']['ChapterOutputBody']
 export type SchemaCollectionOutputBody = components['schemas']['CollectionOutputBody']
 export type SchemaControlInputBody = components['schemas']['ControlInputBody']
 export type SchemaCounts = components['schemas']['Counts']
@@ -2359,12 +2480,15 @@ export type SchemaMedia = components['schemas']['Media']
 export type SchemaMediaDetails = components['schemas']['MediaDetails']
 export type SchemaMediaInfo = components['schemas']['MediaInfo']
 export type SchemaMediaSummary = components['schemas']['MediaSummary']
+export type SchemaPage = components['schemas']['Page']
 export type SchemaParsed = components['schemas']['Parsed']
 export type SchemaPlaybackOutputBody = components['schemas']['PlaybackOutputBody']
 export type SchemaPlaybackSession = components['schemas']['PlaybackSession']
 export type SchemaPlaybackStatus = components['schemas']['PlaybackStatus']
 export type SchemaProgressInputBody = components['schemas']['ProgressInputBody']
 export type SchemaProgressOutputBody = components['schemas']['ProgressOutputBody']
+export type SchemaReadInputBody = components['schemas']['ReadInputBody']
+export type SchemaReadOutputBody = components['schemas']['ReadOutputBody']
 export type SchemaRelatedMedia = components['schemas']['RelatedMedia']
 export type SchemaRenameListInputBody = components['schemas']['RenameListInputBody']
 export type SchemaRoot = components['schemas']['Root']
@@ -3593,6 +3717,106 @@ export interface operations {
 					[name: string]: unknown
 				}
 				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getReaderChapter: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Library file, as listed by listLibraryFiles. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ChapterOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getReaderPage: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Library file, as listed by listLibraryFiles. */
+				id: number
+				/** @description Position in reading order, from the chapter listing. */
+				index: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	reportReaderPage: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Library file being read. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['ReadInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ReadOutputBody']
+				}
 			}
 			/** @description Error */
 			default: {

@@ -1,0 +1,130 @@
+.root {
+	position: fixed;
+	inset: 0;
+	display: flex;
+	flex-direction: column;
+	background: #000;
+	color: #fff;
+	overflow: hidden;
+
+	.stage {
+		position: absolute;
+		inset: 0;
+		display: grid;
+		place-items: center;
+		cursor: pointer;
+
+		&.empty {
+			cursor: default;
+		}
+
+		.page {
+			max-width: 100%;
+			max-height: 100%;
+			object-fit: contain;
+			user-select: none;
+		}
+
+		.message {
+			color: rgb(255 255 255 / 70%);
+		}
+	}
+
+	.top,
+	.bottom {
+		position: absolute;
+		right: 0;
+		left: 0;
+		z-index: 2;
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 0.25s ease;
+
+		&.visible {
+			opacity: 1;
+			pointer-events: auto;
+		}
+	}
+
+	.top {
+		top: 0;
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		height: calc(var(--titlebar-height) + 2.5rem);
+		padding: 0 0 0 1rem;
+		background: linear-gradient(to bottom, rgb(0 0 0 / 75%), transparent);
+		-webkit-app-region: drag;
+
+		button,
+		.window {
+			-webkit-app-region: no-drag;
+		}
+
+		.heading {
+			display: flex;
+			flex-direction: column;
+			min-width: 0;
+
+			.title {
+				overflow: hidden;
+				font-size: 1.0625rem;
+				font-weight: 650;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+
+			.subtitle {
+				color: rgb(255 255 255 / 70%);
+				font-size: 0.8125rem;
+			}
+		}
+
+		.counted {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.25rem;
+			color: var(--success-text);
+			font-size: 0.8125rem;
+		}
+
+		.window {
+			margin-left: auto;
+			align-self: flex-start;
+		}
+	}
+
+	.bottom {
+		bottom: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		padding: 2.5rem 1.25rem 1rem;
+		background: linear-gradient(to top, rgb(0 0 0 / 80%), transparent);
+
+		.seek {
+			width: 100%;
+			margin: 0;
+			cursor: pointer;
+		}
+
+		.bar {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+		}
+
+		.count {
+			font-size: 0.875rem;
+			font-variant-numeric: tabular-nums;
+		}
+
+		.end {
+			color: var(--success-text);
+		}
+
+		.spacer {
+			flex: 1;
+		}
+	}
+}

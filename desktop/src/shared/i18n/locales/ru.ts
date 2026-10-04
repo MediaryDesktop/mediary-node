@@ -555,6 +555,9 @@ export const ru: Translation = {
 			library: 'Локальная библиотека',
 			torrent: 'Торрент-стриминг'
 		},
+		chapters: {
+			title: 'Главы · {{count}}'
+		},
 		library: {
 			notInLibrary: 'Нет в вашей библиотеке',
 			episodesNotInLibrary: 'Этих эпизодов нет в вашей библиотеке:',
@@ -714,6 +717,20 @@ export const ru: Translation = {
 		needsTranscode:
 			'Этот файл использует кодеки, которые встроенный плеер пока не декодирует. Его можно открыть в mpv.',
 		openExternally: 'Открыть в mpv'
+	},
+	reader: {
+		close: 'Назад',
+		pageAlt: 'Страница {{number}}',
+		empty: 'В этой главе нет страниц, которые можно показать.',
+		counted: 'Зачтено как прочитанное',
+		read: 'Прочитано',
+		loadFailed: 'Не удалось открыть эту главу.',
+		seek: 'Страница',
+		previousChapter: 'Предыдущая глава',
+		nextChapter: 'Следующая глава',
+		pageOf: '{{current}} / {{total}}',
+		end: 'Конец главы',
+		chapterNumber: 'Глава {{number}}'
 	},
 	playback: {
 		episode: 'Серия {{number}}',

@@ -6,6 +6,8 @@ import type { ReactNode } from 'react'
 import { useTranslation } from '@shared/i18n'
 import { Button, Icon, ReelLoader, WindowControls } from '@shared/ui'
 
+import { $nodeReady } from '@infra/node'
+
 import {
 	browserCanPlayType,
 	canDirectPlay,
@@ -25,20 +27,23 @@ export function WatchPage({ fileId }: WatchPageProps) {
 	const { t } = useTranslation()
 	const router = useRouter()
 
-	const [data, error, pending, load, playExternally] = useUnit([
+	const [data, error, pending, load, playExternally, nodeReady] = useUnit([
 		playbackStreamQuery.$data,
 		playbackStreamQuery.$error,
 		playbackStreamQuery.$pending,
 		playbackStreamQuery.start,
-		playbackModel.playRequested
+		playbackModel.playRequested,
+		$nodeReady
 	])
 
 	// Set when direct play was attempted and failed; the transcode takes over.
 	const [directFailed, setDirectFailed] = useState(false)
 
 	useEffect(() => {
-		load(fileId)
-	}, [fileId, load])
+		if (nodeReady) {
+			load(fileId)
+		}
+	}, [fileId, load, nodeReady])
 
 	const close = () => router.history.back()
 

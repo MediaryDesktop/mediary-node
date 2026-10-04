@@ -6,12 +6,15 @@ import { useEffect } from 'react'
 import { useTranslation } from '@shared/i18n'
 import { Badge, Icon, Skeleton, toast } from '@shared/ui'
 
+import { $nodeReady } from '@infra/node'
+
 import { fileDuration, fileName, fileTitle, titleFilesQuery } from '@entities/library-item'
 import type { LibraryFile } from '@entities/library-item'
 import { $playerMode, playbackModel } from '@entities/playback'
 
 import { episodeNumber, groupTitleFiles, isWatched } from '../lib/episodes'
 
+import { ChapterList } from './ChapterList'
 import styles from './LibrarySection.module.scss'
 
 const MAX_EPISODE_PLACEHOLDERS = 28
@@ -26,28 +29,35 @@ export interface LibrarySectionProps {
 	progress: number
 }
 
-export function LibrarySection({
-	mediaRef,
-	cover,
-	coverColor,
-	banner,
-	total,
-	mediaType,
-	progress
-}: LibrarySectionProps) {
+export function LibrarySection(props: LibrarySectionProps) {
+	if (props.mediaType === 'manga') {
+		return (
+			<ChapterList mediaRef={props.mediaRef} progress={props.progress} coverColor={props.coverColor} />
+		)
+	}
+
+	if (props.mediaType !== 'anime') {
+		return null
+	}
+
+	return <EpisodeLibrary {...props} />
+}
+
+function EpisodeLibrary({ mediaRef, cover, coverColor, banner, total, progress }: LibrarySectionProps) {
 	const { t } = useTranslation()
 
 	const episodeLabel = useEpisodeLabel()
 
 	const navigate = useNavigate()
 
-	const [data, load, playExternally, session, starting, playerMode] = useUnit([
+	const [data, load, playExternally, session, starting, playerMode, nodeReady] = useUnit([
 		titleFilesQuery.$data,
 		titleFilesQuery.start,
 		playbackModel.playRequested,
 		playbackModel.$session,
 		playbackModel.$starting,
-		$playerMode
+		$playerMode,
+		$nodeReady
 	])
 
 	const play = (fileId: number) => {
@@ -59,8 +69,10 @@ export function LibrarySection({
 	}
 
 	useEffect(() => {
-		load(mediaRef)
-	}, [mediaRef, load])
+		if (nodeReady) {
+			load({ mediaRef, kind: 'video' })
+		}
+	}, [mediaRef, load, nodeReady])
 
 	useEffect(
 		() =>
@@ -69,10 +81,6 @@ export function LibrarySection({
 			),
 		[t]
 	)
-
-	if (mediaType !== 'anime') {
-		return null
-	}
 
 	// The query is shared across title pages, so what it holds may still be the
 	// previous title's files for a moment after navigating.

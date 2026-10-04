@@ -556,6 +556,9 @@ export const en = {
 			library: 'Local library',
 			torrent: 'Torrent streaming'
 		},
+		chapters: {
+			title: 'Chapters · {{count}}'
+		},
 		library: {
 			notInLibrary: 'Not in your library',
 			episodesNotInLibrary: 'The following episodes are not in your library:',
@@ -714,6 +717,20 @@ export const en = {
 		loadFailed: 'Could not read this file.',
 		needsTranscode: 'This file uses codecs the built-in player cannot decode yet. It plays in mpv.',
 		openExternally: 'Open in mpv'
+	},
+	reader: {
+		close: 'Back',
+		pageAlt: 'Page {{number}}',
+		empty: 'This chapter has no pages the reader can show.',
+		counted: 'Counted as read',
+		read: 'Read',
+		loadFailed: 'Could not open this chapter.',
+		seek: 'Page',
+		previousChapter: 'Previous chapter',
+		nextChapter: 'Next chapter',
+		pageOf: '{{current}} / {{total}}',
+		end: 'End of the chapter',
+		chapterNumber: 'Chapter {{number}}'
 	},
 	playback: {
 		episode: 'Episode {{number}}',
