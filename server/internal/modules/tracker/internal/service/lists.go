@@ -14,6 +14,7 @@ import (
 
 const (
 	maxListNameLength = 100
+	maxListIconLength = 40
 	listCoverCount    = 4
 )
 
@@ -42,6 +43,7 @@ type CustomList struct {
 	Provider  ListProvider  `json:"provider" enum:"anilist,local" doc:"Where the list lives: anilist or local."`
 	MediaType ListMediaType `json:"media_type" enum:"anime,manga,movie,series,dorama,book" doc:"The one media type this list holds."`
 	Name      string        `json:"name"`
+	Icon      string        `json:"icon,omitempty" doc:"Icon the user chose, by name. Absent means the default; a name the client does not know means the default too."`
 	Count     int           `json:"count" doc:"How many titles are in the list."`
 	Covers    []string      `json:"covers" doc:"Up to four cover images, for the list's thumbnail."`
 	UpdatedAt *time.Time    `json:"updated_at,omitempty" doc:"When a title in the list last changed. Absent for an empty list."`
@@ -109,6 +111,24 @@ func parseListID(id string) (listRef, error) {
 	}
 }
 
+// An icon is a name from the client's icon set, which the node does not keep a
+// copy of; it only makes sure the value is a plain name and not something else.
+func normalizeListIcon(icon string) (string, error) {
+	icon = strings.TrimSpace(icon)
+
+	if len(icon) > maxListIconLength {
+		return "", apperr.Invalid("icon", "an icon name is at most %d characters", maxListIconLength)
+	}
+
+	for _, r := range icon {
+		if (r < 'a' || r > 'z') && (r < '0' || r > '9') && r != '-' {
+			return "", apperr.Invalid("icon", "an icon name is lowercase letters, digits and dashes")
+		}
+	}
+
+	return icon, nil
+}
+
 func normalizeListName(name string) (string, error) {
 	trimmed := strings.TrimSpace(name)
 
@@ -163,11 +183,25 @@ func (s *Service) Lists(ctx context.Context) ([]CustomList, error) {
 		})
 	}
 
+	icons, err := s.store.ListIcons(ctx)
+	if err != nil {
+		return nil, apperr.Wrap(err, apperr.KindInternal, "read list icons")
+	}
+
+	for i := range lists {
+		lists[i].Icon = icons[lists[i].ID]
+	}
+
 	return lists, nil
 }
 
-func (s *Service) CreateList(ctx context.Context, mediaType ListMediaType, name string) (*CustomList, error) {
+func (s *Service) CreateList(ctx context.Context, mediaType ListMediaType, name, icon string) (*CustomList, error) {
 	clean, err := normalizeListName(name)
+	if err != nil {
+		return nil, err
+	}
+
+	cleanIcon, err := normalizeListIcon(icon)
 	if err != nil {
 		return nil, err
 	}
@@ -182,15 +216,21 @@ func (s *Service) CreateList(ctx context.Context, mediaType ListMediaType, name 
 			return nil, apperr.Wrap(createErr, apperr.KindInternal, "create custom list")
 		}
 
-		s.publishLists("created")
-
-		return &CustomList{
+		list := &CustomList{
 			ID:        localListID(row.ID),
 			Provider:  ListProviderLocal,
 			MediaType: mediaType,
 			Name:      row.Name,
 			Covers:    []string{},
-		}, nil
+		}
+
+		if iconErr := s.setListIcon(ctx, list, cleanIcon); iconErr != nil {
+			return nil, iconErr
+		}
+
+		s.publishLists("created")
+
+		return list, nil
 	}
 
 	err = s.rewriteAniListCustomLists(ctx, mediaType, listChange{to: clean}, func(names []string) ([]string, error) {
@@ -204,16 +244,37 @@ func (s *Service) CreateList(ctx context.Context, mediaType ListMediaType, name 
 		return nil, err
 	}
 
-	return &CustomList{
+	list := &CustomList{
 		ID:        aniListListID(mediaType.trackerType(), clean),
 		Provider:  ListProviderAniList,
 		MediaType: mediaType,
 		Name:      clean,
 		Covers:    []string{},
-	}, nil
+	}
+
+	// A list of this name may have been deleted earlier with its icon left behind
+	// under the same identifier; a new list starts from what was asked for.
+	if iconErr := s.setListIcon(ctx, list, cleanIcon); iconErr != nil {
+		return nil, iconErr
+	}
+
+	return list, nil
 }
 
-func (s *Service) RenameList(ctx context.Context, id, name string) (*CustomList, error) {
+// setListIcon records the icon on the node and on the list being returned.
+func (s *Service) setListIcon(ctx context.Context, list *CustomList, icon string) error {
+	if err := s.store.SetListIcon(ctx, list.ID, icon); err != nil {
+		return apperr.Wrap(err, apperr.KindInternal, "save list icon")
+	}
+
+	list.Icon = icon
+
+	return nil
+}
+
+// UpdateList renames a list and, when icon is given, changes its icon. An empty
+// icon puts the list back on the default.
+func (s *Service) UpdateList(ctx context.Context, id, name string, icon *string) (*CustomList, error) {
 	ref, err := parseListID(id)
 	if err != nil {
 		return nil, err
@@ -224,6 +285,59 @@ func (s *Service) RenameList(ctx context.Context, id, name string) (*CustomList,
 		return nil, err
 	}
 
+	var cleanIcon *string
+	if icon != nil {
+		normalized, iconErr := normalizeListIcon(*icon)
+		if iconErr != nil {
+			return nil, iconErr
+		}
+		cleanIcon = &normalized
+	}
+
+	// Changing only the icon of an AniList list must not rewrite the account's
+	// lists: that is a round trip to AniList for something AniList never sees.
+	var list *CustomList
+	if ref.provider == ListProviderAniList && clean == ref.name {
+		list = &CustomList{
+			ID:        id,
+			Provider:  ListProviderAniList,
+			MediaType: ref.mediaType,
+			Name:      clean,
+			Covers:    []string{},
+		}
+	} else {
+		list, err = s.renameList(ctx, ref, clean)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if list.ID != id {
+		if moveErr := s.store.MoveListIcon(ctx, id, list.ID); moveErr != nil {
+			return nil, apperr.Wrap(moveErr, apperr.KindInternal, "move list icon")
+		}
+	}
+
+	if cleanIcon != nil {
+		if iconErr := s.setListIcon(ctx, list, *cleanIcon); iconErr != nil {
+			return nil, iconErr
+		}
+
+		s.publishLists("renamed")
+
+		return list, nil
+	}
+
+	icons, err := s.store.ListIcons(ctx)
+	if err != nil {
+		return nil, apperr.Wrap(err, apperr.KindInternal, "read list icons")
+	}
+	list.Icon = icons[list.ID]
+
+	return list, nil
+}
+
+func (s *Service) renameList(ctx context.Context, ref listRef, clean string) (*CustomList, error) {
 	if ref.provider == ListProviderLocal {
 		list, readErr := s.store.CustomList(ctx, ref.localID)
 		if readErr != nil {
@@ -258,7 +372,7 @@ func (s *Service) RenameList(ctx context.Context, id, name string) (*CustomList,
 		}, nil
 	}
 
-	err = s.rewriteAniListCustomLists(ctx, ref.mediaType, listChange{from: ref.name, to: clean}, func(names []string) ([]string, error) {
+	err := s.rewriteAniListCustomLists(ctx, ref.mediaType, listChange{from: ref.name, to: clean}, func(names []string) ([]string, error) {
 		at := slices.Index(names, ref.name)
 		if at < 0 {
 			return nil, apperr.New(apperr.KindNotFound, "no such list")
@@ -302,12 +416,16 @@ func (s *Service) DeleteList(ctx context.Context, id string) error {
 			return apperr.New(apperr.KindNotFound, "no such list")
 		}
 
+		if iconErr := s.store.SetListIcon(ctx, id, ""); iconErr != nil {
+			return apperr.Wrap(iconErr, apperr.KindInternal, "clear list icon")
+		}
+
 		s.publishLists("deleted")
 
 		return nil
 	}
 
-	return s.rewriteAniListCustomLists(ctx, ref.mediaType, listChange{from: ref.name}, func(names []string) ([]string, error) {
+	err = s.rewriteAniListCustomLists(ctx, ref.mediaType, listChange{from: ref.name}, func(names []string) ([]string, error) {
 		at := slices.Index(names, ref.name)
 		if at < 0 {
 			return nil, apperr.New(apperr.KindNotFound, "no such list")
@@ -315,6 +433,15 @@ func (s *Service) DeleteList(ctx context.Context, id string) error {
 
 		return slices.Delete(slices.Clone(names), at, at+1), nil
 	})
+	if err != nil {
+		return err
+	}
+
+	if iconErr := s.store.SetListIcon(ctx, id, ""); iconErr != nil {
+		return apperr.Wrap(iconErr, apperr.KindInternal, "clear list icon")
+	}
+
+	return nil
 }
 
 // listChange names the one list a rewrite touches: from alone deletes it, to

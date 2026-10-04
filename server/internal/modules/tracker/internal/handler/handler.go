@@ -88,6 +88,7 @@ type CreateListInput struct {
 	Body struct {
 		MediaType service.ListMediaType `json:"media_type" enum:"anime,manga,movie,series,dorama,book" required:"true" doc:"The one media type this list holds. A list never mixes types: anime and manga lists are created in the user's AniList account, the rest in this node."`
 		Name      string                `json:"name" minLength:"1" maxLength:"100" doc:"What to call the list."`
+		Icon      string                `json:"icon,omitempty" maxLength:"40" doc:"Icon for the list, by name from the client's icon set. Leave it out for the default."`
 	}
 }
 
@@ -98,7 +99,8 @@ type ListIDInput struct {
 type RenameListInput struct {
 	ID   string `path:"id" doc:"The list's identifier, as returned by listTrackerLists."`
 	Body struct {
-		Name string `json:"name" minLength:"1" maxLength:"100" doc:"The new name."`
+		Name string  `json:"name" minLength:"1" maxLength:"100" doc:"The new name."`
+		Icon *string `json:"icon,omitempty" maxLength:"40" doc:"New icon, by name. Leave it out to keep the current one; an empty string goes back to the default."`
 	}
 }
 
@@ -238,7 +240,7 @@ func (h *Handler) Register(api huma.API) {
 		Tags:          []string{"tracker"},
 		DefaultStatus: http.StatusCreated,
 	}, func(ctx context.Context, in *CreateListInput) (*ListOutput, error) {
-		list, err := h.svc.CreateList(ctx, in.Body.MediaType, in.Body.Name)
+		list, err := h.svc.CreateList(ctx, in.Body.MediaType, in.Body.Name, in.Body.Icon)
 		if err != nil {
 			return nil, httpapi.ToHTTP(err)
 		}
@@ -250,10 +252,11 @@ func (h *Handler) Register(api huma.API) {
 		OperationID: "renameTrackerList",
 		Method:      http.MethodPatch,
 		Path:        "/v1/tracker/lists/{id}",
-		Summary:     "Rename a custom list",
+		Summary:     "Rename a custom list or change its icon",
+		Description: "The icon is the node's own: an AniList list keeps its name in AniList and its icon here, and the icon follows the list when it is renamed.",
 		Tags:        []string{"tracker"},
 	}, func(ctx context.Context, in *RenameListInput) (*ListOutput, error) {
-		list, err := h.svc.RenameList(ctx, in.ID, in.Body.Name)
+		list, err := h.svc.UpdateList(ctx, in.ID, in.Body.Name, in.Body.Icon)
 		if err != nil {
 			return nil, httpapi.ToHTTP(err)
 		}

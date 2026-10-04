@@ -39,26 +39,30 @@ export const fetchTrackerListsFx = createNodeRequestFx<void, TrackerListCollecti
 export interface CreateTrackerListParams {
 	mediaType: ListMediaType
 	name: string
+	// Empty means the default icon.
+	icon?: string
 }
 
 export const createTrackerListFx = createNodeRequestFx<CreateTrackerListParams, TrackerCustomList>(
-	({ mediaType, name }) => ({
+	({ mediaType, name, icon }) => ({
 		url: '/v1/tracker/lists',
 		method: 'POST',
-		body: { media_type: mediaType, name }
+		body: { media_type: mediaType, name, icon: icon || undefined }
 	})
 )
 
 export interface RenameTrackerListParams {
 	id: string
 	name: string
+	// Left out keeps the current icon; empty goes back to the default.
+	icon?: string
 }
 
 export const renameTrackerListFx = createNodeRequestFx<RenameTrackerListParams, TrackerCustomList>(
-	({ id, name }) => ({
+	({ id, name, icon }) => ({
 		url: `/v1/tracker/lists/${encodeURIComponent(id)}`,
 		method: 'PATCH',
-		body: { name }
+		body: { name, icon }
 	})
 )
 

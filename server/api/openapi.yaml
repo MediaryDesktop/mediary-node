@@ -256,6 +256,10 @@ components:
           format: uri
           readOnly: true
           type: string
+        icon:
+          description: Icon for the list, by name from the client's icon set. Leave it out for the default.
+          maxLength: 40
+          type: string
         media_type:
           description: "The one media type this list holds. A list never mixes types: anime and manga lists are created in the user's AniList account, the rest in this node."
           enum:
@@ -296,6 +300,9 @@ components:
           type:
             - array
             - "null"
+        icon:
+          description: Icon the user chose, by name. Absent means the default; a name the client does not know means the default too.
+          type: string
         id:
           description: Opaque identifier; pass it back URL-encoded to rename or delete the list.
           type: string
@@ -1650,6 +1657,10 @@ components:
             - https://example.com/schemas/RenameListInputBody.json
           format: uri
           readOnly: true
+          type: string
+        icon:
+          description: New icon, by name. Leave it out to keep the current one; an empty string goes back to the default.
+          maxLength: 40
           type: string
         name:
           description: The new name.
@@ -4284,6 +4295,7 @@ paths:
       tags:
         - tracker
     patch:
+      description: "The icon is the node's own: an AniList list keeps its name in AniList and its icon here, and the icon follows the list when it is renamed."
       operationId: renameTrackerList
       parameters:
         - description: The list's identifier, as returned by listTrackerLists.
@@ -4312,7 +4324,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorModel"
           description: Error
-      summary: Rename a custom list
+      summary: Rename a custom list or change its icon
       tags:
         - tracker
   /v1/tracker/refresh:

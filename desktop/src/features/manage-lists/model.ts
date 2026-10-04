@@ -36,6 +36,7 @@ export const manageListsModel = atom(() => {
 	const drawerClosed = createEvent()
 	const nameChanged = createEvent<string>()
 	const mediaTypeChanged = createEvent<ListMediaType>()
+	const iconChanged = createEvent<string>()
 	const submitted = createEvent()
 	const deleteRequested = createEvent<TrackerCustomList>()
 	const deleteCancelled = createEvent()
@@ -54,6 +55,12 @@ export const manageListsModel = atom(() => {
 		.on(nameChanged, (_, name) => name)
 		.on(createRequested, () => '')
 		.on(renameRequested, (_, list) => list.name)
+
+	// Empty is the default icon, which is also what a list without a choice gets.
+	const $icon = createStore('')
+		.on(iconChanged, (_, icon) => icon)
+		.on(createRequested, () => '')
+		.on(renameRequested, (_, list) => list.icon ?? '')
 
 	const $mediaType = createStore<ListMediaType>(DEFAULT_MEDIA_TYPE)
 		.on(mediaTypeChanged, (_, mediaType) => mediaType)
@@ -76,17 +83,17 @@ export const manageListsModel = atom(() => {
 
 	sample({
 		clock: submitAccepted,
-		source: { name: $name, mediaType: $mediaType, editingID: $editingID },
+		source: { name: $name, mediaType: $mediaType, icon: $icon, editingID: $editingID },
 		filter: ({ editingID }) => editingID === null,
-		fn: ({ name, mediaType }) => ({ name: name.trim(), mediaType }),
+		fn: ({ name, mediaType, icon }) => ({ name: name.trim(), mediaType, icon }),
 		target: createTrackerListMutation.start
 	})
 
 	sample({
 		clock: submitAccepted,
-		source: { name: $name, editingID: $editingID },
+		source: { name: $name, icon: $icon, editingID: $editingID },
 		filter: ({ editingID }) => editingID !== null,
-		fn: ({ name, editingID }) => ({ id: editingID as string, name: name.trim() }),
+		fn: ({ name, icon, editingID }) => ({ id: editingID as string, name: name.trim(), icon }),
 		target: renameTrackerListMutation.start
 	})
 
@@ -127,6 +134,7 @@ export const manageListsModel = atom(() => {
 		$open,
 		$name,
 		$mediaType,
+		$icon,
 		$editingID,
 		$canSubmit,
 		$submitting,
@@ -139,6 +147,7 @@ export const manageListsModel = atom(() => {
 		drawerClosed,
 		nameChanged,
 		mediaTypeChanged,
+		iconChanged,
 		submitted,
 		deleteRequested,
 		deleteCancelled,

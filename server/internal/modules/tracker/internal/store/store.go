@@ -295,3 +295,48 @@ func (s *Store) DeleteCustomList(ctx context.Context, id int64) (bool, error) {
 
 	return deleted > 0, nil
 }
+
+// ListIcons maps a list's identifier to the icon the user chose for it.
+func (s *Store) ListIcons(ctx context.Context) (map[string]string, error) {
+	rows, err := sqlc.New(s.db).ListListIcons(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("list list icons: %w", err)
+	}
+
+	icons := make(map[string]string, len(rows))
+	for _, row := range rows {
+		icons[row.ListID] = row.Icon
+	}
+
+	return icons, nil
+}
+
+// SetListIcon stores the icon for a list; an empty icon clears it, which puts
+// the list back on the default.
+func (s *Store) SetListIcon(ctx context.Context, listID, icon string) error {
+	queries := sqlc.New(s.db)
+
+	if icon == "" {
+		if err := queries.DeleteListIcon(ctx, listID); err != nil {
+			return fmt.Errorf("clear icon of list %s: %w", listID, err)
+		}
+
+		return nil
+	}
+
+	if err := queries.SetListIcon(ctx, sqlc.SetListIconParams{ListID: listID, Icon: icon}); err != nil {
+		return fmt.Errorf("set icon of list %s: %w", listID, err)
+	}
+
+	return nil
+}
+
+// MoveListIcon follows a list whose identifier changed. An AniList list is named
+// by its name, so renaming it gives it a new identifier.
+func (s *Store) MoveListIcon(ctx context.Context, fromID, toID string) error {
+	if err := sqlc.New(s.db).MoveListIcon(ctx, sqlc.MoveListIconParams{FromID: fromID, ToID: toID}); err != nil {
+		return fmt.Errorf("move icon of list %s: %w", fromID, err)
+	}
+
+	return nil
+}

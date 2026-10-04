@@ -10,6 +10,9 @@ export {
 	updateTrackerEntryMutation
 } from './model/model'
 
+export { isListIcon, LIST_ICONS, ListIcon } from './ui/ListIcon'
+export type { ListIconProps } from './ui/ListIcon'
+
 export { MediaTypeIcon } from './ui/MediaTypeIcon'
 export type { MediaTypeIconProps } from './ui/MediaTypeIcon'
 

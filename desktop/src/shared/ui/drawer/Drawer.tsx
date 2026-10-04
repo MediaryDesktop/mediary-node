@@ -40,6 +40,16 @@ export function Drawer({
 				<Dialog.Content
 					className={clsx(styles.panel, styles[side], styles[size])}
 					aria-describedby={undefined}
+					onEscapeKeyDown={event => {
+						// An open popup inside the drawer closes itself on Escape; the drawer
+						// stays. Radix listens on the document, so it hears the key first.
+						if (
+							event.target instanceof Element &&
+							event.target.closest('[data-handles-escape]')
+						) {
+							event.preventDefault()
+						}
+					}}
 				>
 					<header className={styles.header}>
 						<div className={styles.titleRow}>

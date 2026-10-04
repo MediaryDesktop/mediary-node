@@ -22,6 +22,16 @@ func (q *Queries) DeleteCustomList(ctx context.Context, id int64) (int64, error)
 	return result.RowsAffected()
 }
 
+const deleteListIcon = `-- name: DeleteListIcon :exec
+DELETE FROM list_icon
+WHERE list_id = ?
+`
+
+func (q *Queries) DeleteListIcon(ctx context.Context, listID string) error {
+	_, err := q.db.ExecContext(ctx, deleteListIcon, listID)
+	return err
+}
+
 const getCustomList = `-- name: GetCustomList :one
 SELECT id, media_type, name, position, created_at
 FROM custom_list
@@ -153,6 +163,50 @@ func (q *Queries) ListCustomLists(ctx context.Context) ([]ListCustomListsRow, er
 	return items, nil
 }
 
+const listListIcons = `-- name: ListListIcons :many
+SELECT list_id, icon
+FROM list_icon
+`
+
+func (q *Queries) ListListIcons(ctx context.Context) ([]ListIcon, error) {
+	rows, err := q.db.QueryContext(ctx, listListIcons)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListIcon{}
+	for rows.Next() {
+		var i ListIcon
+		if err := rows.Scan(&i.ListID, &i.Icon); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const moveListIcon = `-- name: MoveListIcon :exec
+UPDATE list_icon
+SET list_id = ?1
+WHERE list_id = ?2
+`
+
+type MoveListIconParams struct {
+	ToID   string `json:"to_id"`
+	FromID string `json:"from_id"`
+}
+
+func (q *Queries) MoveListIcon(ctx context.Context, arg MoveListIconParams) error {
+	_, err := q.db.ExecContext(ctx, moveListIcon, arg.ToID, arg.FromID)
+	return err
+}
+
 const nextCustomListPosition = `-- name: NextCustomListPosition :one
 SELECT CAST(COALESCE(MAX(position) + 1, 0) AS INTEGER) AS next_position
 FROM custom_list
@@ -183,4 +237,20 @@ func (q *Queries) RenameCustomList(ctx context.Context, arg RenameCustomListPara
 		return 0, err
 	}
 	return result.RowsAffected()
+}
+
+const setListIcon = `-- name: SetListIcon :exec
+INSERT INTO list_icon (list_id, icon)
+VALUES (?, ?)
+ON CONFLICT (list_id) DO UPDATE SET icon = excluded.icon
+`
+
+type SetListIconParams struct {
+	ListID string `json:"list_id"`
+	Icon   string `json:"icon"`
+}
+
+func (q *Queries) SetListIcon(ctx context.Context, arg SetListIconParams) error {
+	_, err := q.db.ExecContext(ctx, setListIcon, arg.ListID, arg.Icon)
+	return err
 }

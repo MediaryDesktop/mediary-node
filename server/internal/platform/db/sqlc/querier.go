@@ -27,6 +27,7 @@ type Querier interface {
 	// itself, not only what it was tied to.
 	DeleteLibraryFile(ctx context.Context, id int64) (int64, error)
 	DeleteLibraryRoot(ctx context.Context, id int64) (int64, error)
+	DeleteListIcon(ctx context.Context, listID string) error
 	DeleteSourceCacheOlderThan(ctx context.Context, arg DeleteSourceCacheOlderThanParams) error
 	GetAniListMirror(ctx context.Context, kind string) (AnilistMirror, error)
 	GetAniListOutboxEntry(ctx context.Context, arg GetAniListOutboxEntryParams) (AnilistOutbox, error)
@@ -60,6 +61,7 @@ type Querier interface {
 	ListLibraryFileStates(ctx context.Context, rootID int64) ([]ListLibraryFileStatesRow, error)
 	ListLibraryFiles(ctx context.Context, arg ListLibraryFilesParams) ([]ListLibraryFilesRow, error)
 	ListLibraryRoots(ctx context.Context) ([]ListLibraryRootsRow, error)
+	ListListIcons(ctx context.Context) ([]ListIcon, error)
 	ListNodeMeta(ctx context.Context) ([]NodeMetum, error)
 	ListScanRunFileLogs(ctx context.Context, scanRunID int64) ([]ScanRunFileLog, error)
 	ListScanRunGroups(ctx context.Context, scanRunID int64) ([]ScanRunGroup, error)
@@ -70,6 +72,7 @@ type Querier interface {
 	// instead of once per file.
 	ListUnmatchedFiles(ctx context.Context, limit int64) ([]ListUnmatchedFilesRow, error)
 	MarkLibraryFileMissing(ctx context.Context, arg MarkLibraryFileMissingParams) error
+	MoveListIcon(ctx context.Context, arg MoveListIconParams) error
 	NextCustomListPosition(ctx context.Context, mediaType string) (int64, error)
 	// A local database has no reason to grow scan history forever; the newest runs
 	// are the only ones anyone comes back to read.
@@ -77,6 +80,7 @@ type Querier interface {
 	RecordAniListOutboxFailure(ctx context.Context, arg RecordAniListOutboxFailureParams) error
 	RenameCustomList(ctx context.Context, arg RenameCustomListParams) (int64, error)
 	SetLibraryFileIgnored(ctx context.Context, arg SetLibraryFileIgnoredParams) (int64, error)
+	SetListIcon(ctx context.Context, arg SetListIconParams) error
 	TouchLibraryRoot(ctx context.Context, arg TouchLibraryRootParams) error
 	UpdateLibraryFile(ctx context.Context, arg UpdateLibraryFileParams) error
 	// Only the parsed columns: the file itself did not change, a newer parser reads

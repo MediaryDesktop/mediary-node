@@ -20,7 +20,7 @@
 			color 120ms ease;
 
 		&:hover {
-			background: var(--field-hover);
+			background: #23232392;
 			color: var(--text);
 		}
 
@@ -30,8 +30,8 @@
 		}
 
 		&.close:hover {
-			background: #ff3939;
-			color: #fff;
+			background: var(--accent-muted);
+			color: var(--accent);
 		}
 	}
 }

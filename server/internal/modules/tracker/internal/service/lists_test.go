@@ -78,7 +78,7 @@ func TestLocalListsLiveWithoutAniList(t *testing.T) {
 	h := newHarness(t, fake.server.URL)
 	ctx := context.Background()
 
-	created, err := h.svc.CreateList(ctx, ListMediaTypeMovie, "  Rainy Sunday  ")
+	created, err := h.svc.CreateList(ctx, ListMediaTypeMovie, "  Rainy Sunday  ", "")
 	if err != nil {
 		t.Fatalf("create: %v", err)
 	}
@@ -87,12 +87,12 @@ func TestLocalListsLiveWithoutAniList(t *testing.T) {
 		t.Fatalf("unexpected list: %+v", created)
 	}
 
-	_, duplicateErr := h.svc.CreateList(ctx, ListMediaTypeMovie, "Rainy Sunday")
+	_, duplicateErr := h.svc.CreateList(ctx, ListMediaTypeMovie, "Rainy Sunday", "")
 	if apperr.KindOf(duplicateErr) != apperr.KindConflict {
 		t.Fatalf("a duplicate name must conflict, got %v", duplicateErr)
 	}
 
-	dorama, err := h.svc.CreateList(ctx, ListMediaTypeDorama, "K-drama picks")
+	dorama, err := h.svc.CreateList(ctx, ListMediaTypeDorama, "K-drama picks", "")
 	if err != nil {
 		t.Fatalf("create dorama list: %v", err)
 	}
@@ -114,7 +114,7 @@ func TestLocalListsLiveWithoutAniList(t *testing.T) {
 		t.Fatalf("delete dorama list: %v", err)
 	}
 
-	renamed, err := h.svc.RenameList(ctx, created.ID, "Cosy evening")
+	renamed, err := h.svc.UpdateList(ctx, created.ID, "Cosy evening", nil)
 	if err != nil {
 		t.Fatalf("rename: %v", err)
 	}
@@ -148,7 +148,7 @@ func TestCreateAniListListKeepsTheOtherMediaTypesLists(t *testing.T) {
 		t.Fatalf("sign in: %v", err)
 	}
 
-	created, err := h.svc.CreateList(ctx, ListMediaTypeAnime, "Comfort shows")
+	created, err := h.svc.CreateList(ctx, ListMediaTypeAnime, "Comfort shows", "")
 	if err != nil {
 		t.Fatalf("create: %v", err)
 	}
@@ -297,7 +297,7 @@ func TestCreatedAniListListStartsEmptyEvenWhenAniListRemembersTheName(t *testing
 		t.Fatalf("entries: %v", err)
 	}
 
-	if _, err := h.svc.CreateList(ctx, ListMediaTypeAnime, "Favourites 2025"); err != nil {
+	if _, err := h.svc.CreateList(ctx, ListMediaTypeAnime, "Favourites 2025", ""); err != nil {
 		t.Fatalf("create: %v", err)
 	}
 

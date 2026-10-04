@@ -810,7 +810,10 @@ export interface paths {
 		delete: operations['deleteTrackerList']
 		options?: never
 		head?: never
-		/** Rename a custom list */
+		/**
+		 * Rename a custom list or change its icon
+		 * @description The icon is the node's own: an AniList list keeps its name in AniList and its icon here, and the icon follows the list when it is renamed.
+		 */
 		patch: operations['renameTrackerList']
 		trace?: never
 	}
@@ -987,6 +990,8 @@ export interface components {
 			 * @example https://example.com/schemas/CreateListInputBody.json
 			 */
 			readonly $schema?: string
+			/** @description Icon for the list, by name from the client's icon set. Leave it out for the default. */
+			icon?: string
 			/**
 			 * @description The one media type this list holds. A list never mixes types: anime and manga lists are created in the user's AniList account, the rest in this node.
 			 * @enum {string}
@@ -1009,6 +1014,8 @@ export interface components {
 			count: number
 			/** @description Up to four cover images, for the list's thumbnail. */
 			covers: string[] | null
+			/** @description Icon the user chose, by name. Absent means the default; a name the client does not know means the default too. */
+			icon?: string
 			/** @description Opaque identifier; pass it back URL-encoded to rename or delete the list. */
 			id: string
 			/**
@@ -1690,6 +1697,8 @@ export interface components {
 			 * @example https://example.com/schemas/RenameListInputBody.json
 			 */
 			readonly $schema?: string
+			/** @description New icon, by name. Leave it out to keep the current one; an empty string goes back to the default. */
+			icon?: string
 			/** @description The new name. */
 			name: string
 		}

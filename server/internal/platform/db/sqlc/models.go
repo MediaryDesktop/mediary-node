@@ -80,6 +80,11 @@ type LibraryRoot struct {
 	LastScanAt sql.NullInt64 `json:"last_scan_at"`
 }
 
+type ListIcon struct {
+	ListID string `json:"list_id"`
+	Icon   string `json:"icon"`
+}
+
 type NodeMetum struct {
 	Key       string `json:"key"`
 	Value     string `json:"value"`

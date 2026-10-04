@@ -33,3 +33,21 @@ SELECT list_id, media_ref, position, added_at
 FROM custom_list_item
 WHERE list_id = ?
 ORDER BY position;
+
+-- name: ListListIcons :many
+SELECT list_id, icon
+FROM list_icon;
+
+-- name: SetListIcon :exec
+INSERT INTO list_icon (list_id, icon)
+VALUES (?, ?)
+ON CONFLICT (list_id) DO UPDATE SET icon = excluded.icon;
+
+-- name: DeleteListIcon :exec
+DELETE FROM list_icon
+WHERE list_id = ?;
+
+-- name: MoveListIcon :exec
+UPDATE list_icon
+SET list_id = sqlc.arg(to_id)
+WHERE list_id = sqlc.arg(from_id);

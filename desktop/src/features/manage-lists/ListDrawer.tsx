@@ -6,6 +6,7 @@ import { Drawer, DrawerForm, DrawerSection, Input, SelectionGroup } from '@share
 
 import { LIST_MEDIA_TYPES, MediaTypeIcon } from '@entities/tracker'
 
+import { IconPicker } from './IconPicker'
 import { manageListsModel } from './model'
 
 export function ListDrawer() {
@@ -16,23 +17,27 @@ export function ListDrawer() {
 		open,
 		name,
 		mediaType,
+		icon,
 		editingID,
 		canSubmit,
 		submitting,
 		close,
 		nameChanged,
 		mediaTypeChanged,
+		iconChanged,
 		submitted
 	] = useUnit([
 		manageListsModel.$open,
 		manageListsModel.$name,
 		manageListsModel.$mediaType,
+		manageListsModel.$icon,
 		manageListsModel.$editingID,
 		manageListsModel.$canSubmit,
 		manageListsModel.$submitting,
 		manageListsModel.drawerClosed,
 		manageListsModel.nameChanged,
 		manageListsModel.mediaTypeChanged,
+		manageListsModel.iconChanged,
 		manageListsModel.submitted
 	])
 
@@ -76,6 +81,15 @@ export function ListDrawer() {
 						autoComplete='off'
 						maxLength={100}
 						placeholder={t('lists.manage.namePlaceholder')}
+					/>
+				</DrawerSection>
+
+				<DrawerSection title={t('lists.manage.iconLabel')} description={t('lists.manage.iconHint')}>
+					<IconPicker
+						value={icon}
+						mediaType={mediaType}
+						onChange={iconChanged}
+						disabled={submitting}
 					/>
 				</DrawerSection>
 

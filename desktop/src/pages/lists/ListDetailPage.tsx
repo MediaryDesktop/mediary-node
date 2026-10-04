@@ -7,7 +7,7 @@ import { EmptyState, PageHeader, PageTransition } from '@shared/ui'
 
 import { aniListAccountModel } from '@entities/anilist-account'
 import { MediaCard } from '@entities/media'
-import { entryTracking, trackerListsQuery, useTrackedEntries } from '@entities/tracker'
+import { entryTracking, ListIcon, trackerListsQuery, useTrackedEntries } from '@entities/tracker'
 import type { TrackerCustomList, TrackerEntry, TrackerMediaType } from '@entities/tracker'
 
 import { DeleteListDialog, ListDrawer, ListOptionsMenu, manageListsModel } from '@features/manage-lists'
@@ -111,6 +111,7 @@ export function ListDetailPage({ listId }: ListDetailPageProps) {
 			>
 				<PageHeader
 					title={title}
+					icon={<ListIcon icon={list?.icon} mediaType={list?.media_type} size={24} />}
 					subtitle={subtitle}
 					breadcrumbs={[
 						{ label: t('nav.lists'), onSelect: () => navigate({ to: '/lists' }) },
