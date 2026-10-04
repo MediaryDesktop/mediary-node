@@ -128,6 +128,50 @@ components:
         - end_time
         - name
       type: object
+    ChapterBody:
+      additionalProperties: false
+      properties:
+        chapter:
+          description: Chapter number within that title.
+          format: int64
+          type: integer
+        file_id:
+          description: Library file this chapter is.
+          format: int64
+          type: integer
+        media_ref:
+          description: Title this chapter is matched to. Absent while unmatched.
+          type: string
+        pages:
+          description: Every page, in reading order.
+          items:
+            $ref: "#/components/schemas/Page"
+          type:
+            - array
+            - "null"
+        title:
+          description: Title as the library reads it, for the UI.
+          type: string
+      required:
+        - file_id
+        - title
+        - pages
+      type: object
+    ChapterOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/ChapterOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        chapter:
+          $ref: "#/components/schemas/ChapterBody"
+      required:
+        - chapter
+      type: object
     CollectionOutputBody:
       additionalProperties: false
       properties:
@@ -1350,6 +1394,20 @@ components:
         - site_url
         - next_airing_episode
       type: object
+    Page:
+      additionalProperties: false
+      properties:
+        index:
+          description: Position in reading order, starting at 0.
+          format: int64
+          type: integer
+        name:
+          description: File name inside the archive.
+          type: string
+      required:
+        - index
+        - name
+      type: object
     Parsed:
       additionalProperties: false
       properties:
@@ -1505,6 +1563,40 @@ components:
           type: boolean
       required:
         - watched
+      type: object
+    ReadInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/ReadInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        page:
+          description: Page the reader is on, starting at 0.
+          format: int64
+          minimum: 0
+          type: integer
+      required:
+        - page
+      type: object
+    ReadOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/ReadOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        counted:
+          description: True once the chapter counts as read, on this call or an earlier one.
+          type: boolean
+      required:
+        - counted
       type: object
     RelatedMedia:
       additionalProperties: false
@@ -3894,9 +3986,107 @@ paths:
       summary: One subtitle track as ASS
       tags:
         - playback
+  /v1/reader/files/{id}/chapter:
+    get:
+      description: The chapter's pages in reading order. Each page is fetched separately, so the reader can start before the whole archive is read.
+      operationId: getReaderChapter
+      parameters:
+        - description: Library file, as listed by listLibraryFiles.
+          in: path
+          name: id
+          required: true
+          schema:
+            description: Library file, as listed by listLibraryFiles.
+            format: int64
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChapterOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Pages of a comic chapter
+      tags:
+        - reader
+  /v1/reader/files/{id}/pages/{index}:
+    get:
+      description: The page's image as it is stored in the archive. Accepts ?token=, because an image element cannot send headers.
+      operationId: getReaderPage
+      parameters:
+        - description: Library file, as listed by listLibraryFiles.
+          in: path
+          name: id
+          required: true
+          schema:
+            description: Library file, as listed by listLibraryFiles.
+            format: int64
+            type: integer
+        - description: Position in reading order, from the chapter listing.
+          in: path
+          name: index
+          required: true
+          schema:
+            description: Position in reading order, from the chapter listing.
+            format: int64
+            minimum: 0
+            type: integer
+      responses:
+        "200":
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: One page of a comic chapter
+      tags:
+        - reader
+  /v1/reader/files/{id}/progress:
+    post:
+      description: Reaching the last page counts the chapter as read on the user's list. The tracker decides what that means for the list and never lowers progress.
+      operationId: reportReaderPage
+      parameters:
+        - description: Library file being read.
+          in: path
+          name: id
+          required: true
+          schema:
+            description: Library file being read.
+            format: int64
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReadInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReadOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Report the page the reader is on
+      tags:
+        - reader
   /v1/reader/status:
     get:
-      description: Reports whether the reader module is wired. Placeholder for phase 0.
+      description: Reports whether the reader module is wired.
       operationId: getReaderStatus
       responses:
         "200":

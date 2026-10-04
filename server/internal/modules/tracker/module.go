@@ -57,6 +57,11 @@ func (m *Module) TrackedTitles(ctx context.Context, mediaType string) ([]Tracked
 	return m.svc.TrackedTitles(ctx, service.MediaType(mediaType))
 }
 
+// MarkRead records a chapter as read, for the reader. Same path as MarkWatched.
+func (m *Module) MarkRead(ctx context.Context, mediaRef string, chapter int) error {
+	return m.svc.MarkRead(ctx, mediaRef, chapter)
+}
+
 // MarkWatched records an episode as watched, for the player. It takes the same path
 // as a user's own edit, including the offline queue and the rule against lowering
 // progress the user already has elsewhere.

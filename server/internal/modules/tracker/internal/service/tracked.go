@@ -63,6 +63,18 @@ func (s *Service) TrackedTitles(ctx context.Context, mediaType MediaType) ([]Tra
 	return titles, nil
 }
 
+// MarkRead records that a chapter was read. Progress on a manga entry counts
+// chapters, so it is the same write as MarkWatched, under the name the reader uses.
+func (s *Service) MarkRead(ctx context.Context, mediaRef string, chapter int) error {
+	if chapter <= 0 {
+		return apperr.Invalid("chapter", "a chapter number starts at 1")
+	}
+
+	_, err := s.UpdateEntry(ctx, mediaRef, EntryPatch{Progress: &chapter})
+
+	return err
+}
+
 // MarkWatched records that an episode was watched. It is the same path a user's own
 // edit takes, deliberately: the rule that progress is never silently lowered — and
 // the queue that carries the change while AniList is unreachable — already live

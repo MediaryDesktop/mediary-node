@@ -110,8 +110,9 @@ func Register(api huma.API, deps Deps) (shutdown func()) {
 	playbackModule.Register(api)
 
 	reader.New(reader.Deps{
-		DB:     deps.DB,
-		Logger: moduleLogger(deps.Logger, "reader"),
+		Logger:   moduleLogger(deps.Logger, "reader"),
+		Library:  readableFiles{library: libraryModule},
+		Progress: readChapters{tracker: trackerModule},
 	}).Register(api)
 
 	sync.New(sync.Deps{

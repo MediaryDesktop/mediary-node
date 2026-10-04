@@ -66,5 +66,9 @@ func acceptsQueryToken(r *http.Request) bool {
 		return true
 	}
 
-	return r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/v1/playback/files/")
+	if r.Method != http.MethodGet {
+		return false
+	}
+
+	return strings.HasPrefix(r.URL.Path, "/v1/playback/files/") || strings.HasPrefix(r.URL.Path, "/v1/reader/files/")
 }
