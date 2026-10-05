@@ -62,3 +62,31 @@ func (m *Module) Register(api huma.API) {
 func (m *Module) Playable(ctx context.Context, fileID int64) (*PlayableFile, error) {
 	return m.svc.Playable(ctx, fileID)
 }
+
+// RootPath is where a library folder is on disk, for a module that writes files
+// into it. It returns false when there is no folder with the id.
+func (m *Module) RootPath(ctx context.Context, rootID int64) (path string, found bool, err error) {
+	roots, err := m.svc.Roots(ctx)
+	if err != nil {
+		return "", false, err
+	}
+
+	for _, root := range roots {
+		if root.ID == rootID {
+			return root.Path, true, nil
+		}
+	}
+
+	return "", false, nil
+}
+
+// ImportFile adds a file the node wrote into a library folder and matches it to
+// the title it belongs to, without a scan of the whole folder.
+func (m *Module) ImportFile(ctx context.Context, rootID int64, relPath, mediaRef string, episode *int) (int64, error) {
+	file, err := m.svc.ImportFile(ctx, rootID, relPath, mediaRef, episode)
+	if err != nil {
+		return 0, err
+	}
+
+	return file.ID, nil
+}

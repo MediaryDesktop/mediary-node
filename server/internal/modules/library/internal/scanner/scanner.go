@@ -236,3 +236,32 @@ func isSkippedDir(name string) bool {
 
 	return skipped
 }
+
+// Describe is Walk for one file the node has just written itself, so that it can
+// join the library without a walk of the whole root. It reports false for a file
+// Walk would not list either.
+func Describe(root, relPath string) (File, bool, error) {
+	absRoot, err := filepath.Abs(root)
+	if err != nil {
+		return File{}, false, fmt.Errorf("resolve library root %s: %w", root, err)
+	}
+
+	path := filepath.Join(absRoot, filepath.FromSlash(relPath))
+
+	info, err := os.Stat(path)
+	if err != nil {
+		return File{}, false, fmt.Errorf("read %s: %w", path, err)
+	}
+
+	kind, ok := classify(filepath.Base(path))
+	if !ok || !info.Mode().IsRegular() || info.Size() == 0 {
+		return File{}, false, nil
+	}
+
+	return File{
+		RelPath: filepath.ToSlash(relPath),
+		Kind:    kind,
+		Size:    info.Size(),
+		ModTime: info.ModTime(),
+	}, true, nil
+}
