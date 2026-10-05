@@ -174,6 +174,54 @@ components:
       required:
         - chapter
       type: object
+    CheckOPDSServerInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/CheckOPDSServerInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        password:
+          type: string
+        server_id:
+          description: A saved server, whose stored password is used when none is given.
+          format: int64
+          type: integer
+        url:
+          type: string
+        username:
+          type: string
+      required:
+        - url
+      type: object
+    CheckOPDSServerOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/CheckOPDSServerOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        detail:
+          type: string
+        ok:
+          type: boolean
+        problem:
+          description: What is wrong, when something is.
+          enum:
+            - unauthorized
+            - not_opds
+            - unreachable
+            - other_host
+          type: string
+      required:
+        - ok
+      type: object
     CollectionOutputBody:
       additionalProperties: false
       properties:
@@ -1025,6 +1073,180 @@ components:
         - lists
         - sources
       type: object
+    MangaChapterBody:
+      additionalProperties: false
+      properties:
+        number:
+          description: Chapter number as the source writes it. Absent for an unnumbered chapter.
+          type: string
+        pages:
+          format: int64
+          type: integer
+        ref:
+          description: Chapter reference for the reader's endpoints.
+          type: string
+        source:
+          type: string
+        source_name:
+          type: string
+        title:
+          type: string
+      required:
+        - ref
+        - source
+        - source_name
+        - title
+        - pages
+      type: object
+    MangaChaptersOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/MangaChaptersOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        chapters:
+          items:
+            $ref: "#/components/schemas/MangaChapterBody"
+          type:
+            - array
+            - "null"
+        problems:
+          description: Linked sources that could not be read this time; the others are listed.
+          items:
+            $ref: "#/components/schemas/MangaSourceProblemBody"
+          type:
+            - array
+            - "null"
+      required:
+        - chapters
+        - problems
+      type: object
+    MangaLinkBody:
+      additionalProperties: false
+      properties:
+        chosen_by:
+          enum:
+            - auto
+            - user
+          type: string
+        series_id:
+          type: string
+        series_title:
+          type: string
+        source:
+          type: string
+        source_name:
+          type: string
+      required:
+        - source
+        - source_name
+        - series_id
+        - chosen_by
+      type: object
+    MangaLinksOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/MangaLinksOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        links:
+          items:
+            $ref: "#/components/schemas/MangaLinkBody"
+          type:
+            - array
+            - "null"
+      required:
+        - links
+      type: object
+    MangaSearchOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/MangaSearchOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        series:
+          items:
+            $ref: "#/components/schemas/MangaSeriesBody"
+          type:
+            - array
+            - "null"
+      required:
+        - series
+      type: object
+    MangaSeriesBody:
+      additionalProperties: false
+      properties:
+        id:
+          description: The series' path on the server, for linking a title to it.
+          type: string
+        title:
+          type: string
+      required:
+        - id
+        - title
+      type: object
+    MangaSourceBody:
+      additionalProperties: false
+      properties:
+        id:
+          examples:
+            - opds:3
+          type: string
+        kind:
+          enum:
+            - opds
+          type: string
+        name:
+          type: string
+      required:
+        - id
+        - name
+        - kind
+      type: object
+    MangaSourceProblemBody:
+      additionalProperties: false
+      properties:
+        detail:
+          type: string
+        source:
+          type: string
+        source_name:
+          type: string
+      required:
+        - source
+        - detail
+      type: object
+    MangaSourcesOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/MangaSourcesOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        sources:
+          items:
+            $ref: "#/components/schemas/MangaSourceBody"
+          type:
+            - array
+            - "null"
+      required:
+        - sources
+      type: object
     Match:
       additionalProperties: false
       properties:
@@ -1497,6 +1719,87 @@ components:
         - site_url
         - next_airing_episode
       type: object
+    OPDSServerBody:
+      additionalProperties: false
+      properties:
+        has_password:
+          description: Whether a password is stored. The password itself is never sent back.
+          type: boolean
+        id:
+          format: int64
+          type: integer
+        name:
+          type: string
+        url:
+          description: Address of the catalogue's root feed.
+          type: string
+        username:
+          type: string
+      required:
+        - id
+        - name
+        - url
+        - has_password
+      type: object
+    OPDSServerInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/OPDSServerInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        name:
+          maxLength: 100
+          type: string
+        password:
+          description: Absent keeps the stored password; an empty string removes it.
+          type: string
+        url:
+          description: Address of the catalogue's root feed, such as http://nas:25600/opds/v1.2/catalog.
+          type: string
+        username:
+          type: string
+      required:
+        - name
+        - url
+      type: object
+    OPDSServerOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/OPDSServerOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        server:
+          $ref: "#/components/schemas/OPDSServerBody"
+      required:
+        - server
+      type: object
+    OPDSServersOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/OPDSServersOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        servers:
+          items:
+            $ref: "#/components/schemas/OPDSServerBody"
+          type:
+            - array
+            - "null"
+      required:
+        - servers
+      type: object
     Page:
       additionalProperties: false
       properties:
@@ -1666,6 +1969,24 @@ components:
           type: boolean
       required:
         - watched
+      type: object
+    PutMangaLinkInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/PutMangaLinkInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        series_id:
+          description: As the search returned it.
+          type: string
+        series_title:
+          type: string
+      required:
+        - series_id
       type: object
     ReadBody:
       additionalProperties: false
@@ -3469,6 +3790,298 @@ paths:
       summary: One past scan
       tags:
         - library
+  /v1/manga/opds/check:
+    post:
+      description: "Reads the catalogue's root with the given credentials and says what is wrong, if anything. Answers 200 either way: a failed check is a result, not an error."
+      operationId: checkOPDSServer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CheckOPDSServerInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckOPDSServerOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Try an OPDS server
+      tags:
+        - manga
+  /v1/manga/opds/servers:
+    get:
+      description: "The user's own catalogues: Komga, Kavita, Calibre-Web."
+      operationId: listOPDSServers
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OPDSServersOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: OPDS servers
+      tags:
+        - manga
+    post:
+      description: Saves the server. The password is kept outside the database and never returned.
+      operationId: createOPDSServer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OPDSServerInputBody"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OPDSServerOutputBody"
+          description: Created
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Add an OPDS server
+      tags:
+        - manga
+  /v1/manga/opds/servers/{id}:
+    delete:
+      description: Removes the server, its password and every title's link to it.
+      operationId: deleteOPDSServer
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            format: int64
+            type: integer
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Remove an OPDS server
+      tags:
+        - manga
+    put:
+      operationId: updateOPDSServer
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            format: int64
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OPDSServerInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OPDSServerOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Change an OPDS server
+      tags:
+        - manga
+  /v1/manga/sources:
+    get:
+      operationId: listMangaSources
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MangaSourcesOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Sources of chapters
+      tags:
+        - manga
+  /v1/manga/sources/{source}/search:
+    get:
+      description: For linking a title to the series that holds its chapters.
+      operationId: searchMangaSource
+      parameters:
+        - in: path
+          name: source
+          required: true
+          schema:
+            examples:
+              - opds:3
+            type: string
+        - explode: false
+          in: query
+          name: q
+          schema:
+            maxLength: 200
+            minLength: 1
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MangaSearchOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Find a series in a source
+      tags:
+        - manga
+  /v1/manga/titles/{mediaRef}/chapters:
+    get:
+      description: Every chapter the linked series hold, in chapter order. Chapters in the library are listed by the library, not here.
+      operationId: listMangaChapters
+      parameters:
+        - in: path
+          name: mediaRef
+          required: true
+          schema:
+            examples:
+              - anilist:30002
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MangaChaptersOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Chapters of a title from its linked sources
+      tags:
+        - manga
+  /v1/manga/titles/{mediaRef}/links:
+    get:
+      operationId: listMangaLinks
+      parameters:
+        - in: path
+          name: mediaRef
+          required: true
+          schema:
+            examples:
+              - anilist:30002
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MangaLinksOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Series a title is read from
+      tags:
+        - manga
+  /v1/manga/titles/{mediaRef}/links/{source}:
+    delete:
+      operationId: deleteMangaLink
+      parameters:
+        - in: path
+          name: mediaRef
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: source
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Stop reading a title from a source
+      tags:
+        - manga
+    put:
+      description: Links the title to a series in the source, replacing any earlier link to the same source.
+      operationId: putMangaLink
+      parameters:
+        - in: path
+          name: mediaRef
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: source
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PutMangaLinkInputBody"
+        required: true
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Read a title from a series
+      tags:
+        - manga
   /v1/media/filter-options:
     get:
       description: The source's own vocabulary, kept for at most a day. Formats, statuses and seasons are fixed enums of searchMedia and are not repeated here.

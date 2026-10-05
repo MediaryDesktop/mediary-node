@@ -37,6 +37,9 @@ type Progress interface {
 type Options struct {
 	Library  Library
 	Progress Progress
+	// Sources are the other places chapters come from, by the prefix of their
+	// references. Local files are always read by the reader itself.
+	Sources map[string]Source
 }
 
 type Service struct {
@@ -52,6 +55,9 @@ type Service struct {
 
 func New(opts Options) *Service {
 	sources := map[string]Source{}
+	for prefix, source := range opts.Sources {
+		sources[prefix] = source
+	}
 	if opts.Library != nil {
 		sources[ref.SourceLocal] = localSource{library: opts.Library}
 	}

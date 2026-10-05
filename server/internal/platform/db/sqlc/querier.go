@@ -17,6 +17,7 @@ type Querier interface {
 	CountLibraryFileStates(ctx context.Context, arg CountLibraryFileStatesParams) (CountLibraryFileStatesRow, error)
 	CountLibraryFiles(ctx context.Context, arg CountLibraryFilesParams) (int64, error)
 	CountScanRuns(ctx context.Context, arg CountScanRunsParams) (int64, error)
+	CreateOPDSServer(ctx context.Context, arg CreateOPDSServerParams) (OpdsServer, error)
 	DeleteAniListMirror(ctx context.Context) error
 	DeleteAniListOutbox(ctx context.Context) error
 	DeleteAniListOutboxEntryIfUnchanged(ctx context.Context, arg DeleteAniListOutboxEntryIfUnchangedParams) (int64, error)
@@ -28,15 +29,20 @@ type Querier interface {
 	DeleteLibraryFile(ctx context.Context, id int64) (int64, error)
 	DeleteLibraryRoot(ctx context.Context, id int64) (int64, error)
 	DeleteListIcon(ctx context.Context, listID string) error
+	DeleteMangaSourceLink(ctx context.Context, arg DeleteMangaSourceLinkParams) (int64, error)
+	DeleteMangaSourceLinksBySource(ctx context.Context, source string) error
+	DeleteOPDSServer(ctx context.Context, id int64) (int64, error)
 	DeleteSourceCacheOlderThan(ctx context.Context, arg DeleteSourceCacheOlderThanParams) error
 	GetAniListMirror(ctx context.Context, kind string) (AnilistMirror, error)
 	GetAniListOutboxEntry(ctx context.Context, arg GetAniListOutboxEntryParams) (AnilistOutbox, error)
 	GetCustomList(ctx context.Context, id int64) (CustomList, error)
 	GetLibraryFile(ctx context.Context, id int64) (GetLibraryFileRow, error)
 	GetLibraryRoot(ctx context.Context, id int64) (LibraryRoot, error)
+	GetMangaSourceLinkBySeries(ctx context.Context, arg GetMangaSourceLinkBySeriesParams) (MangaSourceLink, error)
 	// Phase 0 queries, proving `task sqlc` produces compiling Go. Module queries
 	// go in db/queries/<module>.sql.
 	GetNodeMeta(ctx context.Context, key string) (NodeMetum, error)
+	GetOPDSServer(ctx context.Context, id int64) (OpdsServer, error)
 	GetScanRun(ctx context.Context, id int64) (ScanRun, error)
 	GetSourceCache(ctx context.Context, arg GetSourceCacheParams) (SourceCache, error)
 	InsertCustomList(ctx context.Context, arg InsertCustomListParams) (CustomList, error)
@@ -62,7 +68,9 @@ type Querier interface {
 	ListLibraryFiles(ctx context.Context, arg ListLibraryFilesParams) ([]ListLibraryFilesRow, error)
 	ListLibraryRoots(ctx context.Context) ([]ListLibraryRootsRow, error)
 	ListListIcons(ctx context.Context) ([]ListIcon, error)
+	ListMangaSourceLinks(ctx context.Context, mediaRef string) ([]MangaSourceLink, error)
 	ListNodeMeta(ctx context.Context) ([]NodeMetum, error)
+	ListOPDSServers(ctx context.Context) ([]OpdsServer, error)
 	ListScanRunFileLogs(ctx context.Context, scanRunID int64) ([]ScanRunFileLog, error)
 	ListScanRunGroups(ctx context.Context, scanRunID int64) ([]ScanRunGroup, error)
 	ListScanRunRoots(ctx context.Context, scanRunID int64) ([]ScanRunRoot, error)
@@ -88,10 +96,12 @@ type Querier interface {
 	UpdateLibraryFileParse(ctx context.Context, arg UpdateLibraryFileParseParams) error
 	// The file itself did not change; a newer prober reads its container again.
 	UpdateLibraryFileProbe(ctx context.Context, arg UpdateLibraryFileProbeParams) error
+	UpdateOPDSServer(ctx context.Context, arg UpdateOPDSServerParams) (OpdsServer, error)
 	UpsertAniListMirror(ctx context.Context, arg UpsertAniListMirrorParams) error
 	UpsertAniListOutboxEntry(ctx context.Context, arg UpsertAniListOutboxEntryParams) error
 	// A manual match is the user's decision, so an automatic one never replaces it.
 	UpsertAutoFileMatch(ctx context.Context, arg UpsertAutoFileMatchParams) error
+	UpsertMangaSourceLink(ctx context.Context, arg UpsertMangaSourceLinkParams) error
 	UpsertManualFileMatch(ctx context.Context, arg UpsertManualFileMatchParams) error
 	UpsertNodeMeta(ctx context.Context, arg UpsertNodeMetaParams) (NodeMetum, error)
 	UpsertSourceCache(ctx context.Context, arg UpsertSourceCacheParams) error

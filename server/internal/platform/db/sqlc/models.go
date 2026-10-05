@@ -85,10 +85,28 @@ type ListIcon struct {
 	Icon   string `json:"icon"`
 }
 
+type MangaSourceLink struct {
+	MediaRef    string `json:"media_ref"`
+	Source      string `json:"source"`
+	SeriesID    string `json:"series_id"`
+	SeriesTitle string `json:"series_title"`
+	ChosenBy    string `json:"chosen_by"`
+	CreatedAt   string `json:"created_at"`
+}
+
 type NodeMetum struct {
 	Key       string `json:"key"`
 	Value     string `json:"value"`
 	UpdatedAt int64  `json:"updated_at"`
+}
+
+type OpdsServer struct {
+	ID        int64  `json:"id"`
+	Name      string `json:"name"`
+	Url       string `json:"url"`
+	Username  string `json:"username"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
 }
 
 type ScanRun struct {

@@ -2,6 +2,7 @@ package app
 
 import (
 	"database/sql"
+	"path/filepath"
 	"time"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -10,6 +11,7 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/httpapi"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/extension"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/library"
+	"github.com/mediaryorg/mediary-node/server/internal/modules/manga"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/media"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/playback"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/reader"
@@ -112,10 +114,21 @@ func Register(api huma.API, deps Deps) (shutdown func()) {
 	})
 	playbackModule.Register(api)
 
+	mangaModule := manga.New(manga.Deps{
+		DB:          deps.DB,
+		Logger:      moduleLogger(deps.Logger, "manga"),
+		SecretsPath: filepath.Join(deps.DataDir, "opds-secrets.json"),
+		UserAgent:   "mediary-node/" + deps.Build.Version,
+	})
+	mangaModule.Register(api)
+
+	// The reader reads the library's files and, through the manga module, chapters
+	// on the user's OPDS servers. Every edge is a port joined here.
 	reader.New(reader.Deps{
 		Logger:   moduleLogger(deps.Logger, "reader"),
 		Library:  readableFiles{library: libraryModule},
 		Progress: readChapters{tracker: trackerModule},
+		Sources:  map[string]reader.ChapterSource{reader.SourceOPDS: opdsChapters{manga: mangaModule}},
 	}).Register(api)
 
 	sync.New(sync.Deps{
