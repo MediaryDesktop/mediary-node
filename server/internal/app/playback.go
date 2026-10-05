@@ -27,6 +27,7 @@ func (p playableFiles) Playable(ctx context.Context, fileID int64) (*playback.Pl
 		Title:    file.Title,
 		MediaRef: file.MediaRef,
 		Episode:  file.Episode,
+		Duration: file.Duration,
 		Missing:  file.Missing,
 	}, nil
 }

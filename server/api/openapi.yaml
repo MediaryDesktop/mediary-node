@@ -503,6 +503,100 @@ components:
         - sync_pending
         - media
       type: object
+    Episode:
+      additionalProperties: false
+      properties:
+        air_date:
+          description: First broadcast, as YYYY-MM-DD.
+          type:
+            - string
+            - "null"
+        image:
+          description: Still for the episode. Absent when no source has one; a client with the file can cut its own from it.
+          type:
+            - string
+            - "null"
+        number:
+          description: Episode number within the title, from 1.
+          format: int64
+          type: integer
+        overview:
+          description: Synopsis, in English.
+          type:
+            - string
+            - "null"
+        runtime_minutes:
+          description: Length in minutes, from the episode or, failing that, the title's typical length.
+          format: int64
+          type:
+            - integer
+            - "null"
+        title:
+          description: Episode title in the first language a source had it in, English first.
+          type:
+            - string
+            - "null"
+        titles:
+          additionalProperties:
+            type: string
+          description: The title per language, keyed by BCP 47 tag (x-jat is romanised Japanese), for the client to pick the user's own.
+          type: object
+      required:
+        - number
+        - title
+        - overview
+        - image
+        - runtime_minutes
+        - air_date
+      type: object
+    EpisodeList:
+      additionalProperties: false
+      properties:
+        episodes:
+          description: One entry per episode, in order, whether or not anything is known about it beyond its number.
+          items:
+            $ref: "#/components/schemas/Episode"
+          type:
+            - array
+            - "null"
+        media_ref:
+          description: The title, as provider:id.
+          type: string
+        total:
+          description: Episodes the title has, or that have aired while the final count is unknown. Absent when no source can say.
+          format: int64
+          type:
+            - integer
+            - "null"
+      required:
+        - media_ref
+        - total
+        - episodes
+      type: object
+    EpisodesOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/EpisodesOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        episodes:
+          $ref: "#/components/schemas/EpisodeList"
+          description: The title's episodes with whatever the sources know of each.
+        sources:
+          description: Attribution for every field that came from an external source.
+          items:
+            $ref: "#/components/schemas/Source"
+          type:
+            - array
+            - "null"
+      required:
+        - episodes
+        - sources
+      type: object
     ErrorDetail:
       additionalProperties: false
       properties:
@@ -3599,6 +3693,36 @@ paths:
       summary: Title details
       tags:
         - media
+  /v1/media/{media_ref}/episodes:
+    get:
+      description: "Titles, synopses and stills per episode, gathered on demand from ani.zip and from the streaming listings AniList carries, each kept for at most a day. A source that fails or knows nothing only leaves its fields empty: the list always has one entry per episode the title is known to have."
+      operationId: getMediaEpisodes
+      parameters:
+        - description: The title's media reference.
+          in: path
+          name: media_ref
+          required: true
+          schema:
+            description: The title's media reference.
+            examples:
+              - anilist:154587
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EpisodesOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Episodes of a title
+      tags:
+        - media
   /v1/playback:
     delete:
       description: Ends the session. Whatever was already recorded as watched stays recorded.
@@ -3995,6 +4119,31 @@ paths:
                 $ref: "#/components/schemas/ErrorModel"
           description: Error
       summary: One subtitle track as ASS
+      tags:
+        - playback
+  /v1/playback/files/{id}/thumbnail:
+    get:
+      description: One frame from the middle of the file, cut with ffmpeg on first request and kept until the file changes. The frame is picked per file, so a season does not show the same moment twice, and stays the same between requests. Stands in for an episode image no source has. Accepts ?token=.
+      operationId: getPlaybackThumbnail
+      parameters:
+        - description: Library file, as listed by listLibraryFiles.
+          in: path
+          name: id
+          required: true
+          schema:
+            description: Library file, as listed by listLibraryFiles.
+            format: int64
+            type: integer
+      responses:
+        "200":
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: A still from the file
       tags:
         - playback
   /v1/reader/files/{id}/chapter:

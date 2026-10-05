@@ -381,6 +381,26 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/v1/media/{media_ref}/episodes': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Episodes of a title
+		 * @description Titles, synopses and stills per episode, gathered on demand from ani.zip and from the streaming listings AniList carries, each kept for at most a day. A source that fails or knows nothing only leaves its fields empty: the list always has one entry per episode the title is known to have.
+		 */
+		get: operations['getMediaEpisodes']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/v1/playback': {
 		parameters: {
 			query?: never
@@ -601,6 +621,26 @@ export interface paths {
 		 * @description Text tracks are pulled out of the file with ffmpeg on first request, all at once, and converted to ASS so one renderer draws every format. Accepts ?token=.
 		 */
 		get: operations['getPlaybackSubtitle']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/playback/files/{id}/thumbnail': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * A still from the file
+		 * @description One frame from the middle of the file, cut with ffmpeg on first request and kept until the file changes. The frame is picked per file, so a season does not show the same moment twice, and stays the same between requests. Stands in for an episode image no source has. Accepts ?token=.
+		 */
+		get: operations['getPlaybackThumbnail']
 		put?: never
 		post?: never
 		delete?: never
@@ -1106,6 +1146,53 @@ export interface components {
 			sync_pending: boolean
 			/** Format: date-time */
 			updated_at: string
+		}
+		Episode: {
+			/** @description First broadcast, as YYYY-MM-DD. */
+			air_date: string | null
+			/** @description Still for the episode. Absent when no source has one; a client with the file can cut its own from it. */
+			image: string | null
+			/**
+			 * Format: int64
+			 * @description Episode number within the title, from 1.
+			 */
+			number: number
+			/** @description Synopsis, in English. */
+			overview: string | null
+			/**
+			 * Format: int64
+			 * @description Length in minutes, from the episode or, failing that, the title's typical length.
+			 */
+			runtime_minutes: number | null
+			/** @description Episode title in the first language a source had it in, English first. */
+			title: string | null
+			/** @description The title per language, keyed by BCP 47 tag (x-jat is romanised Japanese), for the client to pick the user's own. */
+			titles?: {
+				[key: string]: string
+			}
+		}
+		EpisodeList: {
+			/** @description One entry per episode, in order, whether or not anything is known about it beyond its number. */
+			episodes: components['schemas']['Episode'][] | null
+			/** @description The title, as provider:id. */
+			media_ref: string
+			/**
+			 * Format: int64
+			 * @description Episodes the title has, or that have aired while the final count is unknown. Absent when no source can say.
+			 */
+			total: number | null
+		}
+		EpisodesOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/EpisodesOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The title's episodes with whatever the sources know of each. */
+			episodes: components['schemas']['EpisodeList']
+			/** @description Attribution for every field that came from an external source. */
+			sources: components['schemas']['Source'][] | null
 		}
 		ErrorDetail: {
 			/** @description Where the error occurred, e.g. 'body.items[3].tags' or 'path.thing-id' */
@@ -2467,6 +2554,9 @@ export type SchemaDate = components['schemas']['Date']
 export type SchemaDetailsOutputBody = components['schemas']['DetailsOutputBody']
 export type SchemaEntriesOutputBody = components['schemas']['EntriesOutputBody']
 export type SchemaEntry = components['schemas']['Entry']
+export type SchemaEpisode = components['schemas']['Episode']
+export type SchemaEpisodeList = components['schemas']['EpisodeList']
+export type SchemaEpisodesOutputBody = components['schemas']['EpisodesOutputBody']
 export type SchemaErrorDetail = components['schemas']['ErrorDetail']
 export type SchemaErrorModel = components['schemas']['ErrorModel']
 export type SchemaFile = components['schemas']['File']
@@ -3315,6 +3405,38 @@ export interface operations {
 			}
 		}
 	}
+	getMediaEpisodes: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description The title's media reference. */
+				media_ref: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['EpisodesOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
 	getPlayback: {
 		parameters: {
 			query?: never
@@ -3715,6 +3837,36 @@ export interface operations {
 				id: number
 				/** @description Track index as the stream description lists it. */
 				index: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getPlaybackThumbnail: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Library file, as listed by listLibraryFiles. */
+				id: number
 			}
 			cookie?: never
 		}

@@ -19,6 +19,17 @@ export type MediaSummary = Omit<NodeSchemas['MediaSummary'], 'next_airing_episod
 	next_airing_episode: MediaAiringEpisode | null
 }
 
+export type MediaEpisode = NodeSchemas['Episode']
+
+export type MediaEpisodeList = Omit<NodeSchemas['EpisodeList'], 'episodes'> & {
+	episodes: MediaEpisode[] | null
+}
+
+export interface MediaEpisodesResponse {
+	episodes: MediaEpisodeList
+	sources: MediaSource[] | null
+}
+
 export type MediaSearchQuery = NonNullable<NodeOperation<'searchMedia'>['parameters']['query']>
 
 export type MediaSearchSort = NonNullable<MediaSearchQuery['sort']>
@@ -68,6 +79,11 @@ function searchParams(query: MediaSearchQuery): Record<string, string> {
 
 export const fetchMediaDetailsFx = createNodeRequestFx<string, MediaDetailsResponse>(mediaRef => ({
 	url: `/v1/media/${encodeURIComponent(mediaRef)}`
+}))
+
+export const fetchMediaEpisodesFx = createNodeRequestFx<string, MediaEpisodesResponse>(mediaRef => ({
+	url: `/v1/media/${encodeURIComponent(mediaRef)}/episodes`,
+	timeout: 20_000
 }))
 
 export const searchMediaFx = createNodeRequestFx<MediaSearchQuery, MediaSearchResponse>(query => ({

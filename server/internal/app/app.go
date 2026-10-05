@@ -18,6 +18,7 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/logging"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anizip"
 	"github.com/mediaryorg/mediary-node/server/internal/wsapi"
 )
 
@@ -82,6 +83,15 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 		Tokens:    anilist.NewTokenStore(cfg.AniListTokenPath()),
 	})
 
+	var aniZip *anizip.Client
+	if cfg.AniZip.Endpoint != "" {
+		aniZip = anizip.New(anizip.Options{
+			Endpoint:  cfg.AniZip.Endpoint,
+			Timeout:   cfg.AniZip.Timeout,
+			UserAgent: "mediary-node/" + build.Version,
+		})
+	}
+
 	router, api := httpapi.New(httpapi.Options{
 		Version:        build.Version,
 		Token:          token,
@@ -98,6 +108,7 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 		Linked: cfg.Cloud.Linked(),
 
 		AniList:             aniList,
+		AniZip:              aniZip,
 		AniListClientID:     cfg.AniList.ClientID,
 		AniListAuthorizeURL: cfg.AniList.AuthorizeURL,
 		AniListRefresh:      cfg.AniList.RefreshInterval,

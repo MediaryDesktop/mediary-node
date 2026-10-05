@@ -146,6 +146,27 @@ func (h *Handler) Register(api huma.API) {
 	})
 
 	huma.Register(api, huma.Operation{
+		OperationID: "getPlaybackThumbnail",
+		Method:      http.MethodGet,
+		Path:        "/v1/playback/files/{id}/thumbnail",
+		Summary:     "A still from the file",
+		Description: "One frame from the middle of the file, cut with ffmpeg on first request and kept until the file changes. The frame is picked per file, so a season does not show the same moment twice, and stays the same between requests. Stands in for an episode image no source has. Accepts ?token=.",
+		Tags:        []string{"playback"},
+	}, func(ctx context.Context, in *FileInput) (*huma.StreamResponse, error) {
+		path, err := h.svc.ThumbnailPath(ctx, in.ID)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return &huma.StreamResponse{Body: func(hctx huma.Context) {
+			// The URL names the file, not its version, so the cache has to ask
+			// again now and then to see a re-encoded file's new still.
+			hctx.SetHeader("Cache-Control", "private, max-age=86400")
+			serveFile(hctx, path, "image/jpeg")
+		}}, nil
+	})
+
+	huma.Register(api, huma.Operation{
 		OperationID: "reportPlaybackProgress",
 		Method:      http.MethodPost,
 		Path:        "/v1/playback/files/{id}/progress",

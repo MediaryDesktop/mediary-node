@@ -21,6 +21,10 @@ type PlayableFile struct {
 	MediaRef string
 	Episode  *int
 
+	// Duration is how long the library's scan found the file to run. Nil when
+	// the scan could not read it.
+	Duration *time.Duration
+
 	Missing bool
 }
 

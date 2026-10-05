@@ -12,6 +12,7 @@ export { $playerMode, PLAYER_MODES, playerModeChanged } from './model/player-mod
 export type { PlayerMode } from './model/player-mode'
 
 export { browserCanPlayType, canDirectPlay } from './lib/codecs'
+export { thumbnailUrl } from './lib/urls'
 
 export { NowPlayingBar } from './ui/NowPlayingBar'
 export { VideoPlayer } from './ui/VideoPlayer'

@@ -5,12 +5,22 @@ import type { TFunction } from 'i18next'
 import { atom } from '@shared/factory'
 import { firstPresent } from '@shared/lib'
 
-import { fetchMediaDetailsFx, fetchMediaFilterOptionsFx, searchMediaFx } from '../api/api'
-import type { MediaDate, MediaDetails, MediaTitle } from '../api/api'
+import {
+	fetchMediaDetailsFx,
+	fetchMediaEpisodesFx,
+	fetchMediaFilterOptionsFx,
+	searchMediaFx
+} from '../api/api'
+import type { MediaDate, MediaDetails, MediaEpisode, MediaTitle } from '../api/api'
 
 export const mediaDetailsQuery = createQuery({
 	effect: fetchMediaDetailsFx,
 	name: 'mediaDetails'
+})
+
+export const mediaEpisodesQuery = createQuery({
+	effect: fetchMediaEpisodesFx,
+	name: 'mediaEpisodes'
 })
 
 export const mediaSearchQuery = createQuery({
@@ -74,6 +84,15 @@ export const mediaPreviewModel = atom(() => {
 
 export function mediaTitle(title: MediaTitle): string {
 	return firstPresent(title.user_preferred, title.english, title.romaji, title.native)
+}
+
+// The user's own language first, then English, then the romanisation a fan of the
+// original would recognise. The node only sends the languages the app speaks.
+export function episodeTitle(episode: MediaEpisode, language: string): string | null {
+	const titles = episode.titles ?? {}
+	const base = language.split('-')[0] ?? language
+
+	return titles[language] ?? titles[base] ?? titles.en ?? titles['x-jat'] ?? episode.title ?? null
 }
 
 export function alternativeTitles(title: MediaTitle): string[] {

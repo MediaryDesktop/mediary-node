@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"path/filepath"
+	"time"
 
 	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
 )
@@ -16,6 +17,9 @@ type PlayableFile struct {
 
 	MediaRef string
 	Episode  *int
+
+	// Duration is what the scan read out of the container. Nil when it could not.
+	Duration *time.Duration
 
 	Missing bool
 }
@@ -37,6 +41,8 @@ func (s *Service) Playable(ctx context.Context, fileID int64) (*PlayableFile, er
 		Path:    filepath.Join(row.RootPath, filepath.FromSlash(row.RelPath)),
 		Title:   row.Parsed.Title,
 		Missing: row.MissingSince != nil,
+
+		Duration: row.Duration,
 	}
 
 	if playable.Title == "" {

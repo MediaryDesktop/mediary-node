@@ -424,6 +424,15 @@ type MediaDetails struct {
 	Relations struct {
 		Edges []Relation `json:"edges"`
 	} `json:"relations"`
+	StreamingEpisodes []StreamingEpisode `json:"streamingEpisodes"`
+}
+
+// StreamingEpisode is an episode as a licensed streaming site lists it. Only
+// titles some site streams have them, and the title is the site's own string,
+// usually "Episode 3 - Name".
+type StreamingEpisode struct {
+	Title     *string `json:"title"`
+	Thumbnail *string `json:"thumbnail"`
 }
 
 func (c *Client) optionalToken() string {

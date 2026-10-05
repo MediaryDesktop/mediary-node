@@ -19,6 +19,7 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/platform/cloud"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anizip"
 )
 
 type Deps struct {
@@ -30,6 +31,7 @@ type Deps struct {
 	Linked bool
 
 	AniList             *anilist.Client
+	AniZip              *anizip.Client
 	AniListClientID     string
 	AniListAuthorizeURL string
 	AniListRefresh      time.Duration
@@ -68,6 +70,7 @@ func Register(api huma.API, deps Deps) (shutdown func()) {
 		DB:      deps.DB,
 		Logger:  moduleLogger(deps.Logger, "media"),
 		AniList: deps.AniList,
+		AniZip:  deps.AniZip,
 	})
 	mediaModule.Register(api)
 

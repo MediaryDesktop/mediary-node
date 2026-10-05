@@ -567,7 +567,7 @@ export const uk: Translation = {
 			notInLibrary: 'Немає у вашій бібліотеці',
 			episodesNotInLibrary: 'Цих епізодів немає у вашій бібліотеці:',
 			episode: 'Епізод {{number}}',
-			metadataUnavailable: 'Дані про епізоди ще недоступні — бібліотека в розробці',
+			metadataUnavailable: 'Жодне джерело поки не має даних про епізоди цього тайтлу',
 			andMore: 'Та інші…',
 			toWatch: 'Далі до перегляду',
 			specials: 'Спешели',
@@ -575,7 +575,12 @@ export const uk: Translation = {
 			play: 'Дивитися: {{name}}',
 			playing: 'Грає',
 			watched: 'Переглянуто',
-			missing: 'Останній скан не знайшов файл'
+			missing: 'Останній скан не знайшов файл',
+			minutes: '{{count}} хв',
+			aired: 'Вийшов {{date}}',
+			about: 'Про епізод',
+			previous: 'Попередні епізоди',
+			next: 'Наступні епізоди'
 		},
 		menu: {
 			label: 'Більше дій',

@@ -569,7 +569,7 @@ export const ru: Translation = {
 			notInLibrary: 'Нет в вашей библиотеке',
 			episodesNotInLibrary: 'Этих эпизодов нет в вашей библиотеке:',
 			episode: 'Эпизод {{number}}',
-			metadataUnavailable: 'Данные об эпизодах пока недоступны — библиотека в разработке',
+			metadataUnavailable: 'Ни один источник пока не знает эпизодов этого тайтла',
 			andMore: 'И другие…',
 			toWatch: 'Дальше к просмотру',
 			specials: 'Спешлы',
@@ -577,7 +577,12 @@ export const ru: Translation = {
 			play: 'Смотреть: {{name}}',
 			playing: 'Играет',
 			watched: 'Просмотрено',
-			missing: 'Последний скан не нашёл файл'
+			missing: 'Последний скан не нашёл файл',
+			minutes: '{{count}} мин',
+			aired: 'Вышел {{date}}',
+			about: 'Об эпизоде',
+			previous: 'Предыдущие эпизоды',
+			next: 'Следующие эпизоды'
 		},
 		menu: {
 			label: 'Больше действий',

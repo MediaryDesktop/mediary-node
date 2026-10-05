@@ -29,6 +29,13 @@ type DetailsOutput struct {
 	}
 }
 
+type EpisodesOutput struct {
+	Body struct {
+		Episodes *service.EpisodeList `json:"episodes" doc:"The title's episodes with whatever the sources know of each."`
+		Sources  []httpapi.Source     `json:"sources" doc:"Attribution for every field that came from an external source."`
+	}
+}
+
 type SearchInput struct {
 	Query    string   `query:"q" maxLength:"100" doc:"Free text to match against every title the source knows. Empty browses by the filters alone."`
 	Type     string   `query:"type" enum:"anime,manga" default:"anime" doc:"Which catalog to search. Every source owns one kind of media, so this also picks the source."`
@@ -133,4 +140,39 @@ func (h *Handler) Register(api huma.API) {
 
 		return out, nil
 	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "getMediaEpisodes",
+		Method:      http.MethodGet,
+		Path:        "/v1/media/{media_ref}/episodes",
+		Summary:     "Episodes of a title",
+		Description: "Titles, synopses and stills per episode, gathered on demand from ani.zip and from the streaming listings AniList carries, each kept for at most a day. A source that fails or knows nothing only leaves its fields empty: the list always has one entry per episode the title is known to have.",
+		Tags:        []string{"media"},
+	}, func(ctx context.Context, in *DetailsInput) (*EpisodesOutput, error) {
+		episodes, err := h.svc.Episodes(ctx, in.MediaRef)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		out := &EpisodesOutput{}
+		out.Body.Episodes = episodes
+		out.Body.Sources = sourcesOf(episodes.Sources)
+
+		return out, nil
+	})
+}
+
+func sourcesOf(ids []string) []httpapi.Source {
+	sources := make([]httpapi.Source, 0, len(ids))
+
+	for _, id := range ids {
+		switch id {
+		case service.ProviderAniList:
+			sources = append(sources, httpapi.AniListSource)
+		case service.ProviderAniZip:
+			sources = append(sources, httpapi.AniZipSource)
+		}
+	}
+
+	return sources
 }

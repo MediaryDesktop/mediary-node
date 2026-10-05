@@ -12,21 +12,27 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/modules/media/internal/store"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anizip"
 )
 
 const aniListMaxAge = 24 * time.Hour
 
 // Bump when MediaDetails gains a field, so payloads cached by an older build
 // are fetched again instead of being served without it for up to a day.
-const detailsCacheVersion = 2
+const detailsCacheVersion = 3
 
 type cachedDetails struct {
 	Version int          `json:"version"`
 	Details MediaDetails `json:"details"`
+
+	// Streaming is kept beside the details rather than in them: the title page
+	// never shows it, only the episode list falls back on it.
+	Streaming []anilist.StreamingEpisode `json:"streaming,omitempty"`
 }
 
 type Options struct {
 	AniList *anilist.Client
+	AniZip  *anizip.Client
 	Now     func() time.Time
 }
 
@@ -59,6 +65,15 @@ func parseMediaRef(mediaRef string) (int, error) {
 }
 
 func (s *Service) Details(ctx context.Context, mediaRef string) (*MediaDetails, error) {
+	entry, err := s.details(ctx, mediaRef)
+	if err != nil {
+		return nil, err
+	}
+
+	return &entry.Details, nil
+}
+
+func (s *Service) details(ctx context.Context, mediaRef string) (*cachedDetails, error) {
 	mediaID, err := parseMediaRef(mediaRef)
 	if err != nil {
 		return nil, err
@@ -75,7 +90,7 @@ func (s *Service) Details(ctx context.Context, mediaRef string) (*MediaDetails, 
 	if cached != nil && now.Sub(cached.FetchedAt) < aniListMaxAge {
 		var entry cachedDetails
 		if decodeErr := json.Unmarshal(cached.Payload, &entry); decodeErr == nil && entry.Version == detailsCacheVersion {
-			return &entry.Details, nil
+			return &entry, nil
 		}
 	}
 
@@ -84,9 +99,13 @@ func (s *Service) Details(ctx context.Context, mediaRef string) (*MediaDetails, 
 		return nil, err
 	}
 
-	details := detailsFromAniList(source, now)
+	entry := cachedDetails{
+		Version:   detailsCacheVersion,
+		Details:   detailsFromAniList(source, now),
+		Streaming: source.StreamingEpisodes,
+	}
 
-	payload, err := json.Marshal(cachedDetails{Version: detailsCacheVersion, Details: details})
+	payload, err := json.Marshal(entry)
 	if err != nil {
 		return nil, apperr.Wrap(err, apperr.KindInternal, "encode media details")
 	}
@@ -99,7 +118,7 @@ func (s *Service) Details(ctx context.Context, mediaRef string) (*MediaDetails, 
 		s.logger.Warn().Err(purgeErr).Msg("purge expired anilist cache")
 	}
 
-	return &details, nil
+	return &entry, nil
 }
 
 // CachedDetails returns what the node already holds about a title and never goes

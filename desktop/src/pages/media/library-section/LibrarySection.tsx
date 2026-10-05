@@ -1,20 +1,24 @@
 import { useNavigate } from '@tanstack/react-router'
 import clsx from 'clsx'
 import { useUnit } from 'effector-react'
-import { useEffect } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
+import type { ReactNode } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Badge, Icon, Skeleton, toast } from '@shared/ui'
+import { Badge, Icon, Skeleton, toast, Tooltip } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
 
-import { fileDuration, fileName, fileTitle, titleFilesQuery } from '@entities/library-item'
+import { fileName, fileTitle, titleFilesQuery } from '@entities/library-item'
 import type { LibraryFile } from '@entities/library-item'
-import { $playerMode, playbackModel } from '@entities/playback'
+import { episodeTitle, mediaEpisodesQuery } from '@entities/media'
+import type { MediaEpisode } from '@entities/media'
+import { $playerMode, playbackModel, thumbnailUrl } from '@entities/playback'
 
 import { episodeNumber, groupTitleFiles, isWatched } from '../lib/episodes'
 
 import { ChapterList } from './ChapterList'
+import { EpisodeImage } from './EpisodeImage'
 import styles from './LibrarySection.module.scss'
 
 const MAX_EPISODE_PLACEHOLDERS = 28
@@ -43,10 +47,84 @@ export function LibrarySection(props: LibrarySectionProps) {
 	return <EpisodeLibrary {...props} />
 }
 
+type EpisodeMeta = Map<number, MediaEpisode>
+
+// What the sources know about each episode, by number. Empty until they answer,
+// and for good when they know nothing: every part of the page has to read well
+// from the files alone.
+function useEpisodeMeta(mediaRef: string): { meta: EpisodeMeta; count: number | null } {
+	const [data, load, nodeReady] = useUnit([mediaEpisodesQuery.$data, mediaEpisodesQuery.start, $nodeReady])
+
+	useEffect(() => {
+		if (nodeReady) {
+			load(mediaRef)
+		}
+	}, [mediaRef, load, nodeReady])
+
+	return useMemo(() => {
+		// Shared across title pages like the files query, so it may still hold the
+		// previous title's list for a moment.
+		const list = data?.episodes.media_ref === mediaRef ? data.episodes : null
+		const episodes = list?.episodes ?? []
+
+		return {
+			meta: new Map(episodes.map(episode => [episode.number, episode])),
+			count: list?.total ?? (episodes.length > 0 ? episodes.length : null)
+		}
+	}, [data, mediaRef])
+}
+
+function useEpisodeText() {
+	const { t, i18n } = useTranslation()
+
+	const label = (file: LibraryFile): string => {
+		const number = episodeNumber(file)
+
+		// A movie or an unnumbered file has no "Episode N" to show, so it goes by its name.
+		return number === null ? fileTitle(file) : String(t('media.library.episode', { number }))
+	}
+
+	const name = (episode: MediaEpisode | undefined): string | null =>
+		episode ? episodeTitle(episode, i18n.language) : null
+
+	// The file's own length when the scan read it, the source's otherwise.
+	const minutes = (file: LibraryFile | null, episode: MediaEpisode | undefined): string | null => {
+		const value = file?.duration_seconds ? file.duration_seconds / 60 : episode?.runtime_minutes
+
+		return value ? String(t('media.library.minutes', { count: Math.max(1, Math.round(value)) })) : null
+	}
+
+	const aired = (episode: MediaEpisode | undefined): string | null => {
+		if (!episode?.air_date) {
+			return null
+		}
+
+		const date = new Date(`${episode.air_date}T00:00:00Z`)
+		if (Number.isNaN(date.getTime())) {
+			return null
+		}
+
+		const formatted = new Intl.DateTimeFormat(i18n.language, {
+			dateStyle: 'medium',
+			timeZone: 'UTC'
+		}).format(date)
+
+		return String(t('media.library.aired', { date: formatted }))
+	}
+
+	return { label, name, minutes, aired }
+}
+
+function metaFor(meta: EpisodeMeta, file: LibraryFile): MediaEpisode | undefined {
+	const number = episodeNumber(file)
+
+	return number === null ? undefined : meta.get(number)
+}
+
 function EpisodeLibrary({ mediaRef, cover, coverColor, banner, total, progress }: LibrarySectionProps) {
 	const { t } = useTranslation()
-
-	const episodeLabel = useEpisodeLabel()
+	const text = useEpisodeText()
+	const { meta, count } = useEpisodeMeta(mediaRef)
 
 	const navigate = useNavigate()
 
@@ -87,52 +165,93 @@ function EpisodeLibrary({ mediaRef, cover, coverColor, banner, total, progress }
 	const files = (data?.files.items ?? []).filter(file => file.match?.media_ref === mediaRef)
 
 	if (files.length === 0) {
-		return <NotInLibrary cover={cover} coverColor={coverColor} total={total} />
+		return (
+			<NotInLibrary
+				cover={cover}
+				coverColor={coverColor}
+				banner={banner}
+				total={total ?? count}
+				meta={meta}
+			/>
+		)
 	}
 
 	const groups = groupTitleFiles(files, progress)
-	const image = banner ?? cover
+	const fallback = banner ?? cover
+	const of = total ?? count
 
-	const item = (file: LibraryFile) => (
-		<EpisodeItem
-			key={file.id}
-			file={file}
-			image={image}
-			coverColor={coverColor}
-			watched={isWatched(file, progress)}
-			playing={session?.file_id === file.id}
-			disabled={starting}
-			onPlay={play}
-		/>
-	)
+	// The source's still first: it is chosen to show the episode without spoiling
+	// it. A frame from the file stands in when the source has none.
+	const imagesFor = (file: LibraryFile, episode: MediaEpisode | undefined) => [
+		episode?.image,
+		file.missing ? null : thumbnailUrl(file.id),
+		fallback
+	]
+
+	const item = (file: LibraryFile) => {
+		const episode = metaFor(meta, file)
+
+		return (
+			<EpisodeItem
+				key={file.id}
+				file={file}
+				episode={episode}
+				images={imagesFor(file, episode)}
+				coverColor={coverColor}
+				watched={isWatched(file, progress)}
+				playing={session?.file_id === file.id}
+				disabled={starting}
+				onPlay={play}
+			/>
+		)
+	}
 
 	return (
 		<section className={styles.section}>
 			{groups.toWatch.length > 0 && (
-				<ul className={styles.toWatch} aria-label={t('media.library.toWatch')}>
-					{groups.toWatch.map(file => (
-						<li key={file.id}>
-							<button
-								type='button'
-								className={styles.card}
-								style={{ backgroundColor: coverColor ?? undefined }}
-								disabled={starting}
-								onClick={() => play(file.id)}
-							>
-								{image && <img src={image} alt='' loading='lazy' />}
-								<span className={styles.cardPlay}>
-									<Icon name='common/play' size={32} />
-								</span>
-								<span className={styles.cardText}>
-									<span className={styles.cardTitle}>{episodeLabel(file)}</span>
-									{fileDuration(file) && (
-										<span className={styles.cardMeta}>{fileDuration(file)}</span>
-									)}
-								</span>
-							</button>
-						</li>
-					))}
-				</ul>
+				<ToWatchRail>
+					{groups.toWatch.map(file => {
+						const episode = metaFor(meta, file)
+						const name = text.name(episode)
+						const duration = text.minutes(file, episode)
+						const number = episodeNumber(file)
+
+						return (
+							<li key={file.id}>
+								<button
+									type='button'
+									className={styles.card}
+									disabled={starting}
+									aria-label={t('media.library.play', { name: text.label(file) })}
+									onClick={() => play(file.id)}
+								>
+									<span
+										className={styles.cardImage}
+										style={{ backgroundColor: coverColor ?? undefined }}
+									>
+										<EpisodeImage sources={imagesFor(file, episode)} />
+										<span className={styles.cardPlay}>
+											<Icon name='common/play' size={32} />
+										</span>
+									</span>
+
+									<span className={styles.cardText}>
+										{name && <span className={styles.cardName}>{name}</span>}
+										<span className={styles.cardRow}>
+											<span className={styles.cardTitle}>
+												{text.label(file)}
+												{number !== null && of ? (
+													<span className={styles.cardOf}> / {of}</span>
+												) : null}
+											</span>
+											{duration && <span className={styles.cardMeta}>{duration}</span>}
+										</span>
+									</span>
+								</button>
+							</li>
+						)
+					})}
+				</ToWatchRail>
 			)}
 
 			<ul className={styles.episodes}>{groups.main.map(item)}</ul>
@@ -154,20 +273,49 @@ function EpisodeLibrary({ mediaRef, cover, coverColor, banner, total, progress }
 	)
 }
 
-// A movie or an unnumbered file has no "Episode N" to show, so it goes by its name.
-function useEpisodeLabel() {
+function ToWatchRail({ children }: { children: ReactNode }) {
 	const { t } = useTranslation()
+	const rail = useRef<HTMLUListElement>(null)
 
-	return (file: LibraryFile): string => {
-		const number = episodeNumber(file)
-
-		return number === null ? fileTitle(file) : String(t('media.library.episode', { number }))
+	const scroll = (direction: -1 | 1) => {
+		const element = rail.current
+		if (element) {
+			element.scrollBy({ left: direction * element.clientWidth * 0.9, behavior: 'smooth' })
+		}
 	}
+
+	return (
+		<div className={styles.rail}>
+			<div className={styles.railControls}>
+				<button
+					type='button'
+					className={styles.railButton}
+					aria-label={t('media.library.previous')}
+					onClick={() => scroll(-1)}
+				>
+					<Icon name='common/arrow-left' size={18} />
+				</button>
+				<button
+					type='button'
+					className={styles.railButton}
+					aria-label={t('media.library.next')}
+					onClick={() => scroll(1)}
+				>
+					<Icon name='common/arrow-right' size={18} />
+				</button>
+			</div>
+
+			<ul ref={rail} className={styles.toWatch} aria-label={t('media.library.toWatch')}>
+				{children}
+			</ul>
+		</div>
+	)
 }
 
 interface EpisodeItemProps {
 	file: LibraryFile
-	image: string | null
+	episode: MediaEpisode | undefined
+	images: (string | null | undefined)[]
 	coverColor: string | null
 	watched: boolean
 	playing: boolean
@@ -175,10 +323,21 @@ interface EpisodeItemProps {
 	onPlay: (fileId: number) => void
 }
 
-function EpisodeItem({ file, image, coverColor, watched, playing, disabled, onPlay }: EpisodeItemProps) {
+function EpisodeItem({
+	file,
+	episode,
+	images,
+	coverColor,
+	watched,
+	playing,
+	disabled,
+	onPlay
+}: EpisodeItemProps) {
 	const { t } = useTranslation()
-	const label = useEpisodeLabel()(file)
-	const duration = fileDuration(file)
+	const text = useEpisodeText()
+	const label = text.label(file)
+	const name = text.name(episode)
+	const duration = text.minutes(file, episode)
 
 	return (
 		<li className={clsx(styles.episode, watched && styles.watched)}>
@@ -190,43 +349,102 @@ function EpisodeItem({ file, image, coverColor, watched, playing, disabled, onPl
 				aria-label={t('media.library.play', { name: label })}
 				onClick={() => onPlay(file.id)}
 			>
-				{image && <img src={image} alt='' loading='lazy' />}
+				<EpisodeImage sources={images} />
 				<span className={styles.episodePlay}>
 					<Icon name='common/play' size={24} />
 				</span>
 			</button>
 
-			<span className={styles.episodeContent}>
-				<span className={styles.episodeTitle}>
-					{label}
-					{playing && <Badge tone='accent'>{t('media.library.playing')}</Badge>}
-				</span>
+			<EpisodeText
+				label={label}
+				name={name}
+				duration={duration}
+				overview={episode?.overview ?? null}
+				badge={playing && <Badge tone='accent'>{t('media.library.playing')}</Badge>}
+			>
 				<span className={styles.episodeFile} title={file.rel_path}>
 					{fileName(file)}
 				</span>
-				<span className={styles.episodeMeta}>
-					{duration && <span>{duration}</span>}
-					{watched && (
-						<span className={styles.watchedMark}>
-							<Icon name='common/check' size={14} />
-							{t('media.library.watched')}
-						</span>
-					)}
-					{file.missing && <span className={styles.missing}>{t('media.library.missing')}</span>}
-				</span>
-			</span>
+				{file.missing && <span className={styles.missing}>{t('media.library.missing')}</span>}
+			</EpisodeText>
+
+			<EpisodeAside episode={episode} watched={watched} />
 		</li>
+	)
+}
+
+interface EpisodeTextProps {
+	label: string
+	name: string | null
+	duration: string | null
+	overview: string | null
+	badge?: ReactNode
+	children?: ReactNode
+}
+
+function EpisodeText({ label, name, duration, overview, badge, children }: EpisodeTextProps) {
+	return (
+		<span className={styles.episodeContent}>
+			<span className={styles.episodeHeader}>
+				<span className={styles.episodeLabel}>{label}</span>
+				{duration && <span className={styles.episodeDuration}>{duration}</span>}
+				{badge}
+			</span>
+			{name && <span className={styles.episodeName}>{name}</span>}
+			{overview && <span className={styles.episodeOverview}>{overview}</span>}
+			{children}
+		</span>
+	)
+}
+
+function EpisodeAside({ episode, watched }: { episode: MediaEpisode | undefined; watched: boolean }) {
+	const { t } = useTranslation()
+	const text = useEpisodeText()
+	const aired = text.aired(episode)
+	const overview = episode?.overview
+
+	if (!watched && !overview && !aired) {
+		return null
+	}
+
+	return (
+		<span className={styles.episodeAside}>
+			{watched && (
+				<span className={styles.watchedMark} title={t('media.library.watched')}>
+					<Icon name='common/check' size={16} />
+				</span>
+			)}
+
+			{(overview || aired) && (
+				<Tooltip
+					side='left'
+					content={
+						<span className={styles.episodeInfo}>
+							{aired && <span className={styles.episodeAired}>{aired}</span>}
+							{overview && <span>{overview}</span>}
+						</span>
+					}
+				>
+					<button type='button' className={styles.infoButton} aria-label={t('media.library.about')}>
+						<Icon name='common/info' size={16} />
+					</button>
+				</Tooltip>
+			)}
+		</span>
 	)
 }
 
 interface NotInLibraryProps {
 	cover: string | null
 	coverColor: string | null
+	banner: string | null
 	total: number | null | undefined
+	meta: EpisodeMeta
 }
 
-function NotInLibrary({ cover, coverColor, total }: NotInLibraryProps) {
+function NotInLibrary({ cover, coverColor, banner, total, meta }: NotInLibraryProps) {
 	const { t } = useTranslation()
+	const text = useEpisodeText()
 
 	if (!total) {
 		return null
@@ -234,6 +452,8 @@ function NotInLibrary({ cover, coverColor, total }: NotInLibraryProps) {
 
 	const shown = Math.min(total, MAX_EPISODE_PLACEHOLDERS)
 	const episodes = Array.from({ length: shown }, (_, index) => index + 1)
+
+	const known = [...meta.values()].some(episode => episode.title || episode.overview || episode.image)
 
 	return (
 		<section className={styles.section}>
@@ -243,29 +463,49 @@ function NotInLibrary({ cover, coverColor, total }: NotInLibraryProps) {
 			</h2>
 
 			<p className={styles.libraryText}>{t('media.library.episodesNotInLibrary')}</p>
-			<p className={styles.libraryNotice}>{t('media.library.metadataUnavailable')}</p>
+			{!known && <p className={styles.libraryNotice}>{t('media.library.metadataUnavailable')}</p>}
 
 			<ul className={styles.episodes}>
-				{episodes.map(number => (
-					<li key={number} className={styles.episode}>
-						<span
-							className={clsx(styles.episodeImage, styles.placeholderImage)}
-							style={{ backgroundColor: coverColor ?? undefined }}
-						>
-							{cover && <img src={cover} alt='' loading='lazy' />}
-						</span>
+				{episodes.map(number => {
+					const episode = meta.get(number)
 
-						<span className={styles.episodeContent}>
-							<span className={styles.episodeTitle}>
-								{t('media.library.episode', { number })}
+					return (
+						<li key={number} className={styles.episode}>
+							<span
+								className={clsx(
+									styles.episodeImage,
+									!episode?.image && styles.placeholderImage
+								)}
+								style={{ backgroundColor: coverColor ?? undefined }}
+							>
+								<EpisodeImage sources={[episode?.image, banner ?? cover]} />
 							</span>
-							<span className={styles.episodePlaceholder}>
-								<Skeleton width='70%' height='0.75rem' />
-								<Skeleton width='45%' height='0.75rem' />
-							</span>
-						</span>
-					</li>
-				))}
+
+							{known ? (
+								<EpisodeText
+									label={String(t('media.library.episode', { number }))}
+									name={text.name(episode)}
+									duration={text.minutes(null, episode)}
+									overview={episode?.overview ?? null}
+								/>
+							) : (
+								<span className={styles.episodeContent}>
+									<span className={styles.episodeHeader}>
+										<span className={styles.episodeLabel}>
+											{t('media.library.episode', { number })}
+										</span>
+									</span>
+									<span className={styles.episodePlaceholder}>
+										<Skeleton width='70%' height='0.75rem' />
+										<Skeleton width='45%' height='0.75rem' />
+									</span>
+								</span>
+							)}
+
+							<EpisodeAside episode={episode} watched={false} />
+						</li>
+					)
+				})}
 			</ul>
 
 			{total > shown && <p className={styles.libraryText}>{t('media.library.andMore')}</p>}

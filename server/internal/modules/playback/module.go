@@ -91,6 +91,10 @@ func New(deps Deps) *Module {
 			FFmpegPath: deps.FFmpegPath,
 			CacheDir:   filepath.Join(deps.DataDir, "cache", "extracted"),
 		},
+		Thumbnailer: &videofile.Thumbnailer{
+			FFmpegPath: deps.FFmpegPath,
+			CacheDir:   filepath.Join(deps.DataDir, "cache", "thumbnails"),
+		},
 	}
 
 	// A typed nil in the interface would read as "transcoding on".

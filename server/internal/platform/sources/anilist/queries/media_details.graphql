@@ -54,6 +54,10 @@ query MediaDetails($id: Int) {
       episode
       airingAt
     }
+    streamingEpisodes {
+      title
+      thumbnail
+    }
     studios(isMain: true) {
       nodes {
         id

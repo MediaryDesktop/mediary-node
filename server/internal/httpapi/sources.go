@@ -6,4 +6,7 @@ type Source struct {
 	URL  string `json:"url" example:"https://anilist.co" doc:"Where the attribution links to."`
 }
 
-var AniListSource = Source{ID: "anilist", Name: "AniList", URL: "https://anilist.co"}
+var (
+	AniListSource = Source{ID: "anilist", Name: "AniList", URL: "https://anilist.co"}
+	AniZipSource  = Source{ID: "anizip", Name: "ani.zip", URL: "https://ani.zip"}
+)

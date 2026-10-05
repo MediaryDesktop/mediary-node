@@ -1,9 +1,11 @@
 export {
 	alternativeTitles,
 	enumLabel,
+	episodeTitle,
 	formatMediaDate,
 	mediaDetailsModel,
 	mediaDetailsQuery,
+	mediaEpisodesQuery,
 	mediaFilterOptionsQuery,
 	mediaSearchQuery,
 	mediaTitle,
@@ -15,12 +17,19 @@ export { MediaCard } from './ui/MediaCard'
 export type { MediaCardMedia, MediaCardProps } from './ui/MediaCard'
 export type { MediaTracking } from './ui/MediaPreview'
 
-export { fetchMediaDetailsFx, fetchMediaFilterOptionsFx, searchMediaFx } from './api/api'
+export {
+	fetchMediaDetailsFx,
+	fetchMediaEpisodesFx,
+	fetchMediaFilterOptionsFx,
+	searchMediaFx
+} from './api/api'
 export type {
 	MediaAiringEpisode,
 	MediaDate,
 	MediaDetails,
 	MediaDetailsResponse,
+	MediaEpisode,
+	MediaEpisodeList,
 	MediaFilterOptions,
 	MediaFilterTag,
 	MediaSearchFormat,

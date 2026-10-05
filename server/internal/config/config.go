@@ -28,6 +28,7 @@ type Config struct {
 	Playback Playback
 	Cloud    Cloud
 	AniList  AniList
+	AniZip   AniZip
 	Log      Log
 }
 
@@ -55,6 +56,13 @@ type HTTP struct {
 
 func (h HTTP) Addr() string {
 	return fmt.Sprintf("%s:%d", h.Host, h.Port)
+}
+
+// AniZip is the episode-listing source. An empty endpoint turns it off, and the
+// episode list falls back on what AniList itself carries.
+type AniZip struct {
+	Endpoint string        `env:"NODE_ANIZIP_ENDPOINT" envDefault:"https://api.ani.zip"`
+	Timeout  time.Duration `env:"NODE_ANIZIP_TIMEOUT"  envDefault:"15s"`
 }
 
 type Library struct {

@@ -3,11 +3,12 @@ import type { TFunction } from 'i18next'
 import { describe, expect, it, vi } from 'vitest'
 
 import { fetchMediaDetailsFx } from '../api/api'
-import type { MediaDetailsResponse } from '../api/api'
+import type { MediaDetailsResponse, MediaEpisode } from '../api/api'
 
 import {
 	alternativeTitles,
 	enumLabel,
+	episodeTitle,
 	formatMediaDate,
 	mediaDetailsModel,
 	mediaTitle,
@@ -88,5 +89,22 @@ describe('scoreTone', () => {
 		expect(scoreTone(65)).toBe('good')
 		expect(scoreTone(80)).toBe('great')
 		expect(scoreTone(95)).toBe('best')
+	})
+})
+
+describe('episodeTitle', () => {
+	const episode = (titles: Record<string, string>, title: string | null = null) =>
+		({ number: 1, title, titles }) as MediaEpisode
+
+	it('prefers the language the app is shown in', () => {
+		expect(episodeTitle(episode({ en: 'Rebirth', uk: 'Переродження' }), 'uk')).toBe('Переродження')
+		expect(episodeTitle(episode({ en: 'Rebirth', uk: 'Переродження' }), 'uk-UA')).toBe('Переродження')
+	})
+
+	it('falls back to English, then the romanisation, then whatever the node chose', () => {
+		expect(episodeTitle(episode({ en: 'Rebirth', 'x-jat': 'Shinsei' }), 'ru')).toBe('Rebirth')
+		expect(episodeTitle(episode({ 'x-jat': 'Shinsei' }), 'ru')).toBe('Shinsei')
+		expect(episodeTitle(episode({}, 'Dealings'), 'ru')).toBe('Dealings')
+		expect(episodeTitle(episode({}), 'ru')).toBeNull()
 	})
 })

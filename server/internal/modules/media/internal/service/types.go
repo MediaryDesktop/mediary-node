@@ -131,3 +131,28 @@ type FilterOptions struct {
 	Tags      []FilterTag `json:"tags"`
 	FetchedAt time.Time   `json:"fetched_at"`
 }
+
+// Episode is one episode as the title page lists it. Only the number is certain:
+// every other field is whatever some source knew, and absent when none did.
+type Episode struct {
+	Number int `json:"number" doc:"Episode number within the title, from 1."`
+
+	Title  *string           `json:"title" doc:"Episode title in the first language a source had it in, English first."`
+	Titles map[string]string `json:"titles,omitempty" doc:"The title per language, keyed by BCP 47 tag (x-jat is romanised Japanese), for the client to pick the user's own."`
+
+	Overview *string `json:"overview" doc:"Synopsis, in English."`
+	Image    *string `json:"image" doc:"Still for the episode. Absent when no source has one; a client with the file can cut its own from it."`
+
+	RuntimeMinutes *int    `json:"runtime_minutes" doc:"Length in minutes, from the episode or, failing that, the title's typical length."`
+	AirDate        *string `json:"air_date" doc:"First broadcast, as YYYY-MM-DD."`
+}
+
+type EpisodeList struct {
+	MediaRef string `json:"media_ref" doc:"The title, as provider:id."`
+
+	Total *int `json:"total" doc:"Episodes the title has, or that have aired while the final count is unknown. Absent when no source can say."`
+
+	Episodes []Episode `json:"episodes" doc:"One entry per episode, in order, whether or not anything is known about it beyond its number."`
+
+	Sources []string `json:"-"`
+}

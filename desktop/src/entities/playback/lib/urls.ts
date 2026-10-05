@@ -15,3 +15,7 @@ export function subtitleUrl(fileId: number, index: number): string {
 export function fontUrl(fileId: number, index: number): string {
 	return nodeMediaUrl(`/v1/playback/files/${fileId}/fonts/${index}`)
 }
+
+export function thumbnailUrl(fileId: number): string {
+	return nodeMediaUrl(`/v1/playback/files/${fileId}/thumbnail`)
+}

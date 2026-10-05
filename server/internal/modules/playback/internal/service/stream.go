@@ -21,6 +21,12 @@ type Extractor interface {
 	Extract(ctx context.Context, path string, info *videofile.MediaInfo) (videofile.Extracted, error)
 }
 
+// Thumbnailer cuts a still out of a video file, for an episode no source has an
+// image for.
+type Thumbnailer interface {
+	Thumbnail(ctx context.Context, path string, duration float64) (string, error)
+}
+
 // Stream is what the built-in player needs before it can choose how to play a
 // file: what is inside it, and where to fetch it from.
 type Stream struct {
@@ -173,4 +179,34 @@ func (s *Service) FontPath(ctx context.Context, fileID int64, index uint32) (str
 	}
 
 	return "", apperr.New(apperr.KindNotFound, "file %d has no attached font %d", fileID, index)
+}
+
+// ThumbnailPath is a still from a library file, cut on first request and kept
+// while the file stays the same.
+func (s *Service) ThumbnailPath(ctx context.Context, fileID int64) (string, error) {
+	if s.opts.Thumbnailer == nil {
+		return "", apperr.New(apperr.KindPrecondition, "thumbnails are not configured on this node")
+	}
+
+	file, err := s.playable(ctx, fileID)
+	if err != nil {
+		return "", err
+	}
+
+	var duration float64
+	if file.Duration != nil {
+		duration = file.Duration.Seconds()
+	}
+
+	path, err := s.opts.Thumbnailer.Thumbnail(ctx, file.Path, duration)
+	if err != nil {
+		if errors.Is(err, exec.ErrNotFound) {
+			return "", apperr.Wrap(err, apperr.KindPrecondition,
+				"ffmpeg was not found on PATH: install FFmpeg or set NODE_FFMPEG_PATH")
+		}
+
+		return "", apperr.Wrap(err, apperr.KindInternal, "could not cut a still from %s", file.Path)
+	}
+
+	return path, nil
 }

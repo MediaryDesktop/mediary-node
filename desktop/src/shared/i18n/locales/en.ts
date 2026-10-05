@@ -569,7 +569,7 @@ export const en = {
 			notInLibrary: 'Not in your library',
 			episodesNotInLibrary: 'The following episodes are not in your library:',
 			episode: 'Episode {{number}}',
-			metadataUnavailable: 'Episode details are not available yet — the library is still being built',
+			metadataUnavailable: 'No source has episode details for this title yet',
 			andMore: 'And more…',
 			toWatch: 'Next to watch',
 			specials: 'Specials',
@@ -577,7 +577,12 @@ export const en = {
 			play: 'Play {{name}}',
 			playing: 'Playing',
 			watched: 'Watched',
-			missing: 'File not found on the last scan'
+			missing: 'File not found on the last scan',
+			minutes: '{{count}}m',
+			aired: 'Aired {{date}}',
+			about: 'About this episode',
+			previous: 'Previous episodes',
+			next: 'Next episodes'
 		},
 		menu: {
 			label: 'More actions',
