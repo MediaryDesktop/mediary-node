@@ -6,10 +6,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { DropdownMenu, Icon, WindowControls } from '@shared/ui'
+import { Button, DropdownMenu, Icon, WindowControls } from '@shared/ui'
 import type { DropdownMenuItem, IconName } from '@shared/ui'
 
 import type { PlaybackStream } from '../api/api'
+import { videoFit } from '../lib/fit'
 import { initialAudio, initialSubtitle, trackLabel } from '../lib/tracks'
 import { directUrl, fontUrl, mediaUrl, subtitleUrl } from '../lib/urls'
 import { formatTimecode, playbackModel } from '../model/model'
@@ -18,8 +19,13 @@ import styles from './VideoPlayer.module.scss'
 
 const SEEK_STEP = 5
 const VOLUME_STEP = 0.05
-const CONTROLS_HIDE_DELAY = 2500
+// Ten seconds without the pointer or a key, and the controls leave; they come back on
+// the next movement. Playback itself does not count as activity.
+const CONTROLS_HIDE_DELAY = 10_000
 const PROGRESS_INTERVAL = 10_000
+// Matches the keyframes in the stylesheet; the host waits this long before unmounting.
+const ENTER_MS = 340
+const LEAVE_MS = 240
 
 // Chromium exposes audioTracks only behind a Blink feature, which the shell
 // turns on; the DOM typings do not know about it.
@@ -41,12 +47,21 @@ export interface VideoPlayerProps {
 	source: VideoSource
 	heading: string
 	subheading?: string
+	// Full covers the window; mini is the corner picture that stays while the user
+	// browses. The same element plays in both, so switching does not interrupt it.
+	mode: 'full' | 'mini'
+	onMinimize: () => void
+	onExpand: () => void
 	onClose: () => void
 	onOpenExternally: () => void
 
 	// Called instead of showing a failure when there is somewhere else to go:
 	// a file Chromium said it could play directly and then could not.
 	onFallback?: () => void
+
+	// Set while the player slides away; onLeft runs once that has finished.
+	leaving?: boolean
+	onLeft?: () => void
 }
 
 export function VideoPlayer({
@@ -54,17 +69,25 @@ export function VideoPlayer({
 	source,
 	heading,
 	subheading,
+	mode,
+	onMinimize,
+	onExpand,
 	onClose,
 	onOpenExternally,
-	onFallback
+	onFallback,
+	leaving = false,
+	onLeft
 }: VideoPlayerProps) {
+	const mini = mode === 'mini'
 	const { t, i18n } = useTranslation()
 	const [reportProgress, transcodeClosed] = useUnit([
 		playbackModel.progressReported,
 		playbackModel.transcodeClosed
 	])
 
+	const rootRef = useRef<HTMLDivElement>(null)
 	const videoRef = useRef<HTMLVideoElement>(null)
+	const [stageAspect, setStageAspect] = useState(0)
 	const hlsRef = useRef<Hls | null>(null)
 	const hlsPath = source.kind === 'hls' ? source.path : null
 
@@ -83,7 +106,63 @@ export function VideoPlayer({
 	const [muted, setMuted] = useState(false)
 	const [fullscreen, setFullscreen] = useState(false)
 	const [controlsVisible, setControlsVisible] = useState(true)
+	const [activity, setActivity] = useState(0)
 	const [failed, setFailed] = useState(false)
+
+	// A full player that opens slides up from the bottom, like a drawer; the class is
+	// only there for the first moments, so later changes of mode do not replay it.
+	const [entering, setEntering] = useState(mode === 'full')
+
+	useEffect(() => {
+		if (!entering) {
+			return
+		}
+
+		const timer = window.setTimeout(() => setEntering(false), ENTER_MS)
+
+		return () => window.clearTimeout(timer)
+	}, [entering])
+
+	const onLeftRef = useRef(onLeft)
+	useEffect(() => {
+		onLeftRef.current = onLeft
+	})
+
+	useEffect(() => {
+		if (!leaving) {
+			return
+		}
+
+		const timer = window.setTimeout(() => onLeftRef.current?.(), LEAVE_MS)
+
+		return () => window.clearTimeout(timer)
+	}, [leaving])
+
+	const wake = useCallback(() => {
+		setControlsVisible(true)
+		setActivity(count => count + 1)
+	}, [])
+
+	useEffect(() => {
+		const root = rootRef.current
+		if (!root) {
+			return
+		}
+
+		const measure = () => {
+			const { width, height } = root.getBoundingClientRect()
+			setStageAspect(height > 0 ? width / height : 0)
+		}
+
+		measure()
+		const observer = new ResizeObserver(measure)
+		observer.observe(root)
+
+		return () => observer.disconnect()
+	}, [])
+
+	const video = info.video ?? info.videos?.[0]
+	const fit = video?.width && video.height ? videoFit(stageAspect, video.width / video.height) : 'contain'
 
 	const [subtitle, setSubtitle] = useState<number | null>(() => initialSubtitle(subtitles))
 	const [audio, setAudio] = useState(() => initialAudio(audios))
@@ -248,10 +327,18 @@ export function VideoPlayer({
 
 	useEffect(() => {
 		const onKey = (event: KeyboardEvent) => {
-			if (event.target instanceof HTMLInputElement || event.ctrlKey || event.metaKey || event.altKey) {
+			// The corner picture takes no keys: they belong to whatever page is open.
+			if (
+				mini ||
+				event.target instanceof HTMLInputElement ||
+				event.ctrlKey ||
+				event.metaKey ||
+				event.altKey
+			) {
 				return
 			}
 
+			wake()
 			const video = videoRef.current
 
 			switch (event.key) {
@@ -278,7 +365,7 @@ export function VideoPlayer({
 					toggleFullscreen()
 					break
 				case 'Escape':
-					if (!document.fullscreenElement) onClose()
+					if (!document.fullscreenElement) onMinimize()
 					break
 				default:
 					return
@@ -290,8 +377,11 @@ export function VideoPlayer({
 		window.addEventListener('keydown', onKey)
 
 		return () => window.removeEventListener('keydown', onKey)
-	}, [togglePlay, seekBy, changeVolume, toggleFullscreen, onClose])
+	}, [mini, wake, togglePlay, seekBy, changeVolume, toggleFullscreen, onMinimize])
 
+	// Keyed on activity, not on playback: the position changes several times a second
+	// while the film plays, and restarting the timer on each of them would never let
+	// the controls go.
 	useEffect(() => {
 		if (!controlsVisible || !playing) {
 			return
@@ -300,7 +390,7 @@ export function VideoPlayer({
 		const timer = window.setTimeout(() => setControlsVisible(false), CONTROLS_HIDE_DELAY)
 
 		return () => window.clearTimeout(timer)
-	}, [controlsVisible, playing, position])
+	}, [controlsVisible, playing, activity])
 
 	const subtitleItems: DropdownMenuItem[] = [
 		{
@@ -326,22 +416,32 @@ export function VideoPlayer({
 
 	const shown = controlsVisible || !playing || failed
 
+	const progress = duration ? `${Math.min((position / duration) * 100, 100)}%` : '0%'
+
 	return (
 		<div
-			className={clsx(styles.root, !shown && styles.idle)}
-			onMouseMove={() => setControlsVisible(true)}
+			ref={rootRef}
+			className={clsx(
+				styles.root,
+				mini ? styles.mini : styles.full,
+				entering && styles.enter,
+				leaving && styles.leave,
+				!shown && styles.idle
+			)}
+			onMouseMove={wake}
 		>
 			<div className={styles.stage}>
 				<video
 					ref={videoRef}
 					className={styles.video}
+					style={{ objectFit: fit }}
 					src={source.kind === 'direct' ? directUrl(fileId) : undefined}
 					// The node is another origin; without CORS the frames are tainted
 					// and the subtitle renderer cannot read them.
 					crossOrigin='anonymous'
 					autoPlay
 					onClick={togglePlay}
-					onDoubleClick={toggleFullscreen}
+					onDoubleClick={() => (mini ? onExpand() : toggleFullscreen())}
 					onPlay={() => setPlaying(true)}
 					onPause={() => {
 						setPlaying(false)
@@ -367,22 +467,44 @@ export function VideoPlayer({
 				/>
 			</div>
 
-			<header className={clsx(styles.top, shown && styles.visible)}>
-				<button
-					type='button'
-					className={styles.control}
-					aria-label={t('player.close')}
-					onClick={onClose}
-				>
-					<Icon name='common/arrow-left' size={22} />
-				</button>
+			<header className={clsx(styles.top, mini && styles.topMini, shown && styles.visible)}>
+				{mini ? (
+					<Button
+						variant='chrome'
+						iconOnly
+						aria-label={t('player.expand')}
+						startIcon={<Icon name='common/maximize' size={18} />}
+						onClick={onExpand}
+					/>
+				) : (
+					<Button
+						variant='chrome'
+						iconOnly
+						aria-label={t('player.minimize')}
+						startIcon={<Icon name='common/arrow-left' size={22} />}
+						onClick={onMinimize}
+					/>
+				)}
 
-				<div className={styles.heading}>
-					<span className={styles.title}>{heading}</span>
-					{subheading && <span className={styles.subtitle}>{subheading}</span>}
-				</div>
+				{!mini && (
+					<div className={styles.heading}>
+						<span className={styles.title}>{heading}</span>
+						{subheading && <span className={styles.subtitle}>{subheading}</span>}
+					</div>
+				)}
 
-				{!fullscreen && <WindowControls className={styles.window} />}
+				{mini && (
+					<Button
+						variant='chrome-close'
+						iconOnly
+						className={styles.controlEnd}
+						aria-label={t('playback.stop')}
+						startIcon={<Icon name='common/close' size={16} />}
+						onClick={onClose}
+					/>
+				)}
+
+				{!mini && !fullscreen && <WindowControls className={styles.window} />}
 			</header>
 
 			{failed && (
@@ -394,97 +516,108 @@ export function VideoPlayer({
 				</div>
 			)}
 
-			<footer className={clsx(styles.bottom, shown && styles.visible)}>
-				<input
-					type='range'
-					className={styles.seek}
-					min={0}
-					max={duration || 0}
-					step={0.1}
-					value={position}
-					aria-label={t('player.seek')}
-					style={
-						{ '--progress': duration ? `${(position / duration) * 100}%` : '0%' } as CSSProperties
-					}
-					onChange={event => {
-						const video = videoRef.current
-						if (video) video.currentTime = Number(event.target.value)
-					}}
-				/>
-
-				<div className={styles.bar}>
-					<ControlButton
-						icon={playing ? 'common/pause' : 'common/play'}
-						label={playing ? t('player.pause') : t('player.play')}
-						onClick={togglePlay}
-					/>
-
-					<ControlButton
-						icon={muted || volume === 0 ? 'common/volume-off' : 'common/volume'}
-						label={muted ? t('player.unmute') : t('player.mute')}
-						onClick={() => {
+			{mini ? (
+				<div className={styles.miniProgress} style={{ width: progress }} />
+			) : (
+				<footer className={clsx(styles.bottom, shown && styles.visible)}>
+					<input
+						type='range'
+						className={styles.seek}
+						min={0}
+						max={duration || 0}
+						step={0.1}
+						value={position}
+						aria-label={t('player.seek')}
+						style={
+							{
+								'--progress': duration ? `${(position / duration) * 100}%` : '0%'
+							} as CSSProperties
+						}
+						onChange={event => {
 							const video = videoRef.current
-							if (video) video.muted = !video.muted
+							if (video) video.currentTime = Number(event.target.value)
 						}}
 					/>
 
-					<input
-						type='range'
-						className={styles.volume}
-						min={0}
-						max={1}
-						step={0.01}
-						value={muted ? 0 : volume}
-						aria-label={t('player.volume')}
-						style={{ '--progress': `${(muted ? 0 : volume) * 100}%` } as CSSProperties}
-						onChange={event => changeVolume(Number(event.target.value))}
-					/>
-
-					<span className={styles.time}>
-						{formatTimecode(position)} / {formatTimecode(duration)}
-					</span>
-
-					<span className={styles.spacer} />
-
-					{audios.length > 1 && (
-						<DropdownMenu
-							align='end'
-							items={audioItems}
-							trigger={
-								<button
-									type='button'
-									className={styles.control}
-									aria-label={t('player.audio')}
-								>
-									<Icon name='common/headphones' size={22} />
-								</button>
-							}
+					<div className={styles.bar}>
+						<ControlButton
+							icon={playing ? 'common/pause' : 'common/play'}
+							label={playing ? t('player.pause') : t('player.play')}
+							onClick={togglePlay}
 						/>
-					)}
 
-					{subtitles.length > 0 && (
-						<DropdownMenu
-							align='end'
-							items={subtitleItems}
-							trigger={
-								<button
-									type='button'
-									className={styles.control}
-									aria-label={t('player.subtitles')}
-								>
-									<Icon name='common/subtitles' size={22} />
-								</button>
-							}
+						<ControlButton
+							icon={muted || volume === 0 ? 'common/volume-off' : 'common/volume'}
+							label={muted ? t('player.unmute') : t('player.mute')}
+							onClick={() => {
+								const video = videoRef.current
+								if (video) video.muted = !video.muted
+							}}
 						/>
-					)}
 
-					<ControlButton
-						icon={fullscreen ? 'common/fullscreen-exit' : 'common/fullscreen'}
-						label={fullscreen ? t('player.exitFullscreen') : t('player.fullscreen')}
-						onClick={toggleFullscreen}
-					/>
-				</div>
-			</footer>
+						<input
+							type='range'
+							className={styles.volume}
+							min={0}
+							max={1}
+							step={0.01}
+							value={muted ? 0 : volume}
+							aria-label={t('player.volume')}
+							style={{ '--progress': `${(muted ? 0 : volume) * 100}%` } as CSSProperties}
+							onChange={event => changeVolume(Number(event.target.value))}
+						/>
+
+						<span className={styles.time}>
+							{formatTimecode(position)} / {formatTimecode(duration)}
+						</span>
+
+						<span className={styles.spacer} />
+
+						{audios.length > 1 && (
+							<DropdownMenu
+								align='end'
+								items={audioItems}
+								trigger={
+									<Button
+										variant='chrome'
+										iconOnly
+										aria-label={t('player.audio')}
+										startIcon={<Icon name='common/headphones' size={22} />}
+									/>
+								}
+							/>
+						)}
+
+						{subtitles.length > 0 && (
+							<DropdownMenu
+								align='end'
+								items={subtitleItems}
+								trigger={
+									<Button
+										variant='chrome'
+										iconOnly
+										aria-label={t('player.subtitles')}
+										startIcon={<Icon name='common/subtitles' size={22} />}
+									/>
+								}
+							/>
+						)}
+
+						<ControlButton
+							icon={fullscreen ? 'common/fullscreen-exit' : 'common/fullscreen'}
+							label={fullscreen ? t('player.exitFullscreen') : t('player.fullscreen')}
+							onClick={toggleFullscreen}
+						/>
+
+						<ControlButton
+							icon='common/close'
+							label={t('playback.stop')}
+							onClick={onClose}
+							closing
+						/>
+					</div>
+				</footer>
+			)}
 		</div>
 	)
 }
@@ -493,12 +626,18 @@ interface ControlButtonProps {
 	icon: IconName
 	label: string
 	onClick: () => void
+	closing?: boolean
 }
 
-function ControlButton({ icon, label, onClick }: ControlButtonProps) {
+function ControlButton({ icon, label, onClick, closing }: ControlButtonProps) {
 	return (
-		<button type='button' className={styles.control} aria-label={label} title={label} onClick={onClick}>
-			<Icon name={icon} size={22} />
-		</button>
+		<Button
+			variant={closing ? 'chrome-close' : 'chrome'}
+			iconOnly
+			aria-label={label}
+			title={label}
+			startIcon={<Icon name={icon} size={22} />}
+			onClick={onClick}
+		/>
 	)
 }

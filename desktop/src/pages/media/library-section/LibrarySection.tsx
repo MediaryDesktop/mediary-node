@@ -1,11 +1,10 @@
-import { useNavigate } from '@tanstack/react-router'
 import clsx from 'clsx'
 import { useUnit } from 'effector-react'
 import { useEffect, useMemo, useRef } from 'react'
 import type { ReactNode } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Badge, Icon, Skeleton, toast, Tooltip } from '@shared/ui'
+import { Badge, Button, Icon, Skeleton, toast, Tooltip } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
 
@@ -13,7 +12,7 @@ import { fileName, fileTitle, titleFilesQuery } from '@entities/library-item'
 import type { LibraryFile } from '@entities/library-item'
 import { episodeTitle, mediaEpisodesQuery } from '@entities/media'
 import type { MediaEpisode } from '@entities/media'
-import { $playerMode, playbackModel, thumbnailUrl } from '@entities/playback'
+import { $playerMode, playbackModel, playerOpened, thumbnailUrl } from '@entities/playback'
 
 import { episodeNumber, groupTitleFiles, isWatched } from '../lib/episodes'
 
@@ -126,23 +125,22 @@ function EpisodeLibrary({ mediaRef, cover, coverColor, banner, total, progress }
 	const text = useEpisodeText()
 	const { meta, count } = useEpisodeMeta(mediaRef)
 
-	const navigate = useNavigate()
-
-	const [data, load, playExternally, session, starting, playerMode, nodeReady] = useUnit([
+	const [data, load, playExternally, session, starting, playerMode, nodeReady, openPlayer] = useUnit([
 		titleFilesQuery.$data,
 		titleFilesQuery.start,
 		playbackModel.playRequested,
 		playbackModel.$session,
 		playbackModel.$starting,
 		$playerMode,
-		$nodeReady
+		$nodeReady,
+		playerOpened
 	])
 
 	const play = (fileId: number) => {
 		if (playerMode === 'external') {
 			playExternally(fileId)
 		} else {
-			void navigate({ to: '/watch/$fileId', params: { fileId: String(fileId) } })
+			openPlayer(fileId)
 		}
 	}
 
@@ -287,22 +285,22 @@ function ToWatchRail({ children }: { children: ReactNode }) {
 	return (
 		<div className={styles.rail}>
 			<div className={styles.railControls}>
-				<button
-					type='button'
-					className={styles.railButton}
+				<Button
+					variant='ghost'
+					size='small'
+					iconOnly
 					aria-label={t('media.library.previous')}
+					startIcon={<Icon name='common/arrow-left' size={18} />}
 					onClick={() => scroll(-1)}
-				>
-					<Icon name='common/arrow-left' size={18} />
-				</button>
-				<button
-					type='button'
-					className={styles.railButton}
+				/>
+				<Button
+					variant='ghost'
+					size='small'
+					iconOnly
 					aria-label={t('media.library.next')}
+					startIcon={<Icon name='common/arrow-right' size={18} />}
 					onClick={() => scroll(1)}
-				>
-					<Icon name='common/arrow-right' size={18} />
-				</button>
+				/>
 			</div>
 
 			<ul ref={rail} className={styles.toWatch} aria-label={t('media.library.toWatch')}>

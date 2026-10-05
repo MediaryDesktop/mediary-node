@@ -1,9 +1,48 @@
 .root {
+	--mini-width: min(380px, 40vw);
+	--mini-height: calc(var(--mini-width) * 9 / 16);
+	--ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+
 	position: fixed;
-	inset: 0;
 	overflow: hidden;
 	background: #000;
 	color: #fff;
+	// Both modes move between these values, so the picture glides instead of jumping.
+	transition:
+		left 0.4s var(--ease),
+		top 0.4s var(--ease),
+		width 0.4s var(--ease),
+		height 0.4s var(--ease),
+		border-radius 0.4s var(--ease),
+		box-shadow 0.4s var(--ease);
+
+	// Above the window controls of the app chrome, which sit on top of every page.
+	&.full {
+		z-index: 1100;
+		top: 0;
+		left: 0;
+		width: 100vw;
+		height: 100vh;
+	}
+
+	&.mini {
+		z-index: 880;
+		top: calc(100vh - var(--mini-height) - 20px);
+		left: calc(100vw - var(--mini-width) - 20px);
+		width: var(--mini-width);
+		height: var(--mini-height);
+		border-radius: var(--radius-lg);
+		box-shadow: var(--shadow-lg);
+		cursor: pointer;
+	}
+
+	&.enter {
+		animation: player-in 340ms cubic-bezier(0.32, 0.72, 0, 1) both;
+	}
+
+	&.leave {
+		animation: player-out 240ms ease-in forwards;
+	}
 
 	&.idle {
 		cursor: none;
@@ -30,12 +69,50 @@
 		z-index: 2;
 		opacity: 0;
 		pointer-events: none;
-		transition: opacity 0.25s ease;
+		// The bars slide in from their own edge while they fade, and out again.
+		transition:
+			opacity 0.35s var(--ease),
+			transform 0.35s var(--ease);
 
 		&.visible {
 			opacity: 1;
 			pointer-events: auto;
+			transform: none;
 		}
+	}
+
+	.top:not(.visible) {
+		transform: translateY(-10px);
+	}
+
+	.bottom:not(.visible) {
+		transform: translateY(10px);
+	}
+
+	// Written as .top.topMini: the full-mode .top rule comes later with the same weight
+	// and would reset the padding on the right.
+	.top.topMini {
+		justify-content: space-between;
+		height: auto;
+		padding: 6px;
+		background: linear-gradient(to bottom, rgb(0 0 0 / 70%), transparent);
+		// Over the page, a drag region here would move the whole app window.
+		-webkit-app-region: no-drag;
+	}
+
+	.controlEnd {
+		margin-left: auto;
+	}
+
+	.miniProgress {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		z-index: 2;
+		height: 3px;
+		background: var(--accent);
+		transition: width 0.25s linear;
+		pointer-events: none;
 	}
 
 	.top {
@@ -138,28 +215,6 @@
 		width: 6rem;
 	}
 
-	.control {
-		display: grid;
-		place-items: center;
-		width: 2.5rem;
-		height: 2.5rem;
-		padding: 0;
-		border: none;
-		border-radius: var(--radius);
-		background: transparent;
-		color: inherit;
-		cursor: pointer;
-
-		&:hover {
-			background: rgb(255 255 255 / 12%);
-		}
-
-		&:focus-visible {
-			outline: none;
-			box-shadow: var(--focus-shadow);
-		}
-	}
-
 	.failure {
 		position: absolute;
 		inset: 0;
@@ -191,5 +246,24 @@
 		&:hover {
 			background: var(--accent-hover);
 		}
+	}
+}
+
+@keyframes player-in {
+	from {
+		transform: translateY(100%);
+	}
+}
+
+@keyframes player-out {
+	to {
+		transform: translateY(100%);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.root.enter,
+	.root.leave {
+		animation-duration: 1ms;
 	}
 }

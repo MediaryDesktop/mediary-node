@@ -9,6 +9,14 @@ export {
 } from './model/model'
 
 export { $playerMode, PLAYER_MODES, playerModeChanged } from './model/player-mode'
+export {
+	$playerExpanded,
+	$playerFileId,
+	playerClosed,
+	playerExpanded,
+	playerMinimized,
+	playerOpened
+} from './model/player-session'
 export type { PlayerMode } from './model/player-mode'
 
 export { browserCanPlayType, canDirectPlay } from './lib/codecs'

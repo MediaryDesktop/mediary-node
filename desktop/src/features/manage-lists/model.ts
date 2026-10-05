@@ -112,11 +112,12 @@ export const manageListsModel = atom(() => {
 		.on(deleteTrackerListMutation.finished.success, (_, { params }) => params)
 		.reset(deleteRequested, deletionHandled)
 
+	const $deletingId = $deleting.map(list => list?.id ?? null)
+
 	sample({
 		clock: deleteConfirmed,
-		source: $deleting,
-		filter: (list): list is TrackerCustomList => list !== null,
-		fn: list => list.id,
+		source: $deletingId,
+		filter: (id): id is string => id !== null,
 		target: deleteTrackerListMutation.start
 	})
 

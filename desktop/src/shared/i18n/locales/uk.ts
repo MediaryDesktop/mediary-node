@@ -721,7 +721,8 @@ export const uk: Translation = {
 		subtitlesOff: 'Вимкнено',
 		fullscreen: 'На весь екран',
 		exitFullscreen: 'Вийти з повноекранного режиму',
-		close: 'Назад',
+		minimize: 'Назад до сторінки',
+		expand: 'Відкрити плеєр',
 		failed: 'Вбудований плеєр не зміг відтворити цей файл.',
 		loadFailed: 'Не вдалося прочитати цей файл.',
 		needsTranscode:

@@ -83,6 +83,32 @@
 		}
 	}
 
+	// The window-chrome look: a transparent square that lights up on hover. The close
+	// variant lights up in the accent colour, the same as the window's own close.
+	&.chrome,
+	&.chrome-close {
+		height: var(--titlebar-height);
+		min-height: var(--titlebar-height);
+		border-radius: var(--radius-md);
+		background: transparent;
+		color: var(--text-secondary);
+
+		&:not(:disabled):hover {
+			background: #23232374;
+			color: var(--text);
+		}
+	}
+
+	&.chrome-close:not(:disabled):hover {
+		background: var(--accent-muted);
+		color: var(--accent);
+	}
+
+	&.chrome.iconOnly,
+	&.chrome-close.iconOnly {
+		width: var(--titlebar-height);
+	}
+
 	&.small {
 		height: var(--control-height-sm);
 		min-height: var(--control-height-sm);

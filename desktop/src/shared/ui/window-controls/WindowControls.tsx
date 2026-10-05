@@ -2,6 +2,7 @@ import clsx from 'clsx'
 import { useEffect, useState } from 'react'
 
 import { useTranslation } from '../../i18n'
+import { Button } from '../button/Button'
 import { Icon } from '../icon/Icon'
 
 import styles from './WindowControls.module.scss'
@@ -31,32 +32,29 @@ export function WindowControls({ className }: WindowControlsProps) {
 
 	return (
 		<div className={clsx(styles.root, className)}>
-			<button
-				type='button'
-				className={styles.button}
+			<Button
+				variant='chrome'
+				iconOnly
 				aria-label={t('window.minimize')}
+				startIcon={<Icon name='common/minimize' size={18} />}
 				onClick={() => window.mediary.window.minimize()}
-			>
-				<Icon name='common/minimize' size={18} />
-			</button>
+			/>
 
-			<button
-				type='button'
-				className={styles.button}
+			<Button
+				variant='chrome'
+				iconOnly
 				aria-label={t(maximized ? 'window.restore' : 'window.maximize')}
+				startIcon={<Icon name={maximized ? 'common/restore' : 'common/maximize'} size={18} />}
 				onClick={() => window.mediary.window.toggleMaximize()}
-			>
-				<Icon name={maximized ? 'common/restore' : 'common/maximize'} size={18} />
-			</button>
+			/>
 
-			<button
-				type='button'
-				className={clsx(styles.button, styles.close)}
+			<Button
+				variant='chrome-close'
+				iconOnly
 				aria-label={t('window.close')}
+				startIcon={<Icon name='common/close' size={18} />}
 				onClick={() => window.mediary.window.close()}
-			>
-				<Icon name='common/close' size={18} />
-			</button>
+			/>
 		</div>
 	)
 }

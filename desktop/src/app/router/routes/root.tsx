@@ -1,3 +1,14 @@
 import { createRootRoute, Outlet } from '@tanstack/react-router'
 
-export const rootRoute = createRootRoute({ component: Outlet })
+import { PlayerHost } from '../../layout/PlayerHost'
+
+function RootLayout() {
+	return (
+		<>
+			<Outlet />
+			<PlayerHost />
+		</>
+	)
+}
+
+export const rootRoute = createRootRoute({ component: RootLayout })

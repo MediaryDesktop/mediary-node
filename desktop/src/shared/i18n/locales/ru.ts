@@ -723,7 +723,8 @@ export const ru: Translation = {
 		subtitlesOff: 'Выключены',
 		fullscreen: 'На весь экран',
 		exitFullscreen: 'Выйти из полноэкранного режима',
-		close: 'Назад',
+		minimize: 'Назад к странице',
+		expand: 'Открыть плеер',
 		failed: 'Встроенный плеер не смог воспроизвести этот файл.',
 		loadFailed: 'Не удалось прочитать этот файл.',
 		needsTranscode:

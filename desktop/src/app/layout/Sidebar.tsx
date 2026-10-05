@@ -9,19 +9,19 @@ import { useTranslation } from '@shared/i18n'
 import { Icon, Logo, useRipple } from '@shared/ui'
 import type { IconName } from '@shared/ui'
 
-// A sidebar icon is either one of our own sprite names, or a ready-made
-// element (e.g. from react-icons) dropped in as-is.
-type SectionIcon = IconName | ReactElement
-
 import { $nodeState } from '@infra/node'
 
 import { sessionModel } from '@entities/session'
 
 import styles from './Sidebar.module.scss'
 
+// A sidebar icon is either one of our own sprite names, or a ready-made
+// element (e.g. from react-icons) dropped in as-is.
+type SectionIcon = IconName | ReactElement
+
 const SECTIONS = [
 	{ to: '/', icon: 'common/home', labelKey: 'nav.home', size: 22 },
-	{ to: '/discover', icon: 'common/compass', labelKey: 'nav.discover', size: 24},
+	{ to: '/discover', icon: 'common/compass', labelKey: 'nav.discover', size: 24 },
 	{ to: '/search', icon: 'common/search', labelKey: 'nav.search', size: 26 },
 	{ to: '/lists', icon: 'common/list', labelKey: 'nav.lists', size: 22 },
 	{ to: '/library', icon: 'common/file-tree', labelKey: 'nav.library', size: 22 },
