@@ -758,7 +758,66 @@ export const en = {
 		downloads: 'Torrent providers and the download queue handled by the node'
 	},
 
+	mangaSources: {
+		none: 'No servers yet',
+		add: 'Add OPDS server',
+		menu: 'Server actions',
+		edit: 'Edit',
+		remove: 'Remove',
+		removeFailed: 'Could not remove the server',
+		saveFailed: 'Could not save the server',
+		drawer: {
+			createTitle: 'Add OPDS server',
+			editTitle: 'Edit OPDS server',
+			description:
+				'Address of the catalogue’s root feed, such as http://nas:25600/opds/v1.2/catalog for Komga',
+			nameLabel: 'Name',
+			namePlaceholder: 'Komga at home',
+			urlLabel: 'Address',
+			usernameLabel: 'User name',
+			passwordLabel: 'Password',
+			passwordHint: 'The node keeps it in a file of its own and never shows it again',
+			passwordKept: 'Leave empty to keep the stored password',
+			create: 'Add',
+			save: 'Save',
+			check: 'Check connection',
+			ok: 'Connected',
+			problems: {
+				unauthorized: 'The server refused the user name or password',
+				not_opds: 'This address does not serve an OPDS catalogue',
+				unreachable: 'The server could not be reached',
+				other_host: 'The catalogue points to another server'
+			}
+		},
+		chapters: {
+			title: 'Online chapters',
+			link: 'Find on a server',
+			relink: 'Change series',
+			unlink: 'Unlink',
+			from: 'from {{name}}',
+			empty: 'The linked series has no chapters that can be read page by page',
+			loadFailed: 'Could not load online chapters',
+			pages_one: '{{count}} page',
+			pages_few: '{{count}} pages',
+			pages_many: '{{count}} pages',
+			pages_other: '{{count}} pages'
+		},
+		link: {
+			title: 'Find the series',
+			description: 'Pick the series on your server that holds this title’s chapters',
+			sourceLabel: 'Server',
+			searchLabel: 'Series name',
+			search: 'Search',
+			noResults: 'Nothing found on this server',
+			choose: 'Use',
+			failed: 'Could not link the series'
+		}
+	},
 	settings: {
+		mangaSources: {
+			name: 'Manga sources',
+			hint: 'Your own OPDS catalogues — Komga, Kavita, Calibre-Web — to read chapters from'
+		},
 		appearance: {
 			name: 'Appearance',
 			hint: 'Light or dark surface for the whole app'

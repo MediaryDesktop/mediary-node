@@ -759,7 +759,66 @@ export const ru: Translation = {
 		downloads: 'Источники торрентов и очередь загрузок, которой управляет нода'
 	},
 
+	mangaSources: {
+		none: 'Серверов пока нет',
+		add: 'Добавить OPDS-сервер',
+		menu: 'Действия с сервером',
+		edit: 'Изменить',
+		remove: 'Удалить',
+		removeFailed: 'Не удалось удалить сервер',
+		saveFailed: 'Не удалось сохранить сервер',
+		drawer: {
+			createTitle: 'Добавить OPDS-сервер',
+			editTitle: 'Изменить OPDS-сервер',
+			description:
+				'Адрес корневого фида каталога, например http://nas:25600/opds/v1.2/catalog для Komga',
+			nameLabel: 'Название',
+			namePlaceholder: 'Komga дома',
+			urlLabel: 'Адрес',
+			usernameLabel: 'Имя пользователя',
+			passwordLabel: 'Пароль',
+			passwordHint: 'Нода хранит его в отдельном файле и больше никогда не показывает',
+			passwordKept: 'Оставьте пустым, чтобы сохранить текущий пароль',
+			create: 'Добавить',
+			save: 'Сохранить',
+			check: 'Проверить соединение',
+			ok: 'Соединение есть',
+			problems: {
+				unauthorized: 'Сервер не принял имя пользователя или пароль',
+				not_opds: 'По этому адресу нет OPDS-каталога',
+				unreachable: 'Не удалось соединиться с сервером',
+				other_host: 'Каталог ссылается на другой сервер'
+			}
+		},
+		chapters: {
+			title: 'Главы онлайн',
+			link: 'Найти на сервере',
+			relink: 'Сменить серию',
+			unlink: 'Отвязать',
+			from: 'с {{name}}',
+			empty: 'В привязанной серии нет глав, которые можно читать постранично',
+			loadFailed: 'Не удалось загрузить главы онлайн',
+			pages_one: '{{count}} страница',
+			pages_few: '{{count}} страницы',
+			pages_many: '{{count}} страниц',
+			pages_other: '{{count}} страницы'
+		},
+		link: {
+			title: 'Найти серию',
+			description: 'Выберите серию на вашем сервере, в которой лежат главы этого тайтла',
+			sourceLabel: 'Сервер',
+			searchLabel: 'Название серии',
+			search: 'Искать',
+			noResults: 'На этом сервере ничего не найдено',
+			choose: 'Выбрать',
+			failed: 'Не удалось привязать серию'
+		}
+	},
 	settings: {
+		mangaSources: {
+			name: 'Источники манги',
+			hint: 'Ваши собственные OPDS-каталоги — Komga, Kavita, Calibre-Web — откуда читать главы'
+		},
 		appearance: {
 			name: 'Внешний вид',
 			hint: 'Светлая или тёмная тема для всего приложения'

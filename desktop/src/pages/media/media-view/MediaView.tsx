@@ -79,6 +79,7 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 			<div className={styles.sections}>
 				<LibrarySection
 					mediaRef={mediaRef}
+					title={title}
 					cover={base.cover_image}
 					coverColor={base.cover_color}
 					banner={base.banner_image}

@@ -9,6 +9,7 @@ import { Button, Icon, ReelLoader, WindowControls } from '@shared/ui'
 import { $nodeReady } from '@infra/node'
 
 import { titleFilesQuery } from '@entities/library-item'
+import { mangaChaptersQuery } from '@entities/manga-source'
 import { chapterQuery, localRef, neighbourChapters, ReaderView } from '@entities/reader'
 
 import styles from './ReadPage.module.scss'
@@ -22,16 +23,31 @@ export function ReadPage({ chapterRef, onOpenChapter }: ReadPageProps) {
 	const { t } = useTranslation()
 	const router = useRouter()
 
-	const [chapterData, chapterError, chapterPending, loadChapter, titleFiles, loadTitleFiles, nodeReady] =
-		useUnit([
-			chapterQuery.$data,
-			chapterQuery.$error,
-			chapterQuery.$pending,
-			chapterQuery.start,
-			titleFilesQuery.$data,
-			titleFilesQuery.start,
-			$nodeReady
-		])
+	const [
+		chapterData,
+		chapterError,
+		chapterPending,
+		loadChapter,
+		titleFiles,
+		loadTitleFiles,
+		onlineChapters,
+		loadOnlineChapters,
+		nodeReady
+	] = useUnit([
+		chapterQuery.$data,
+		chapterQuery.$error,
+		chapterQuery.$pending,
+		chapterQuery.start,
+		titleFilesQuery.$data,
+		titleFilesQuery.start,
+		mangaChaptersQuery.$data,
+		mangaChaptersQuery.start,
+		$nodeReady
+	])
+
+	// A chapter's neighbours come from where it came from: the library's files for a
+	// local chapter, the linked series for an online one.
+	const local = chapterRef.startsWith('local:')
 
 	const [page, setPage] = useState(0)
 
@@ -46,19 +62,36 @@ export function ReadPage({ chapterRef, onOpenChapter }: ReadPageProps) {
 	const mediaRef = chapter?.media_ref
 
 	useEffect(() => {
-		if (mediaRef && nodeReady) {
-			loadTitleFiles({ mediaRef, kind: 'manga' })
+		if (!mediaRef || !nodeReady) {
+			return
 		}
-	}, [mediaRef, loadTitleFiles, nodeReady])
+
+		if (local) {
+			loadTitleFiles({ mediaRef, kind: 'manga' })
+		} else {
+			loadOnlineChapters(mediaRef)
+		}
+	}, [mediaRef, local, loadTitleFiles, loadOnlineChapters, nodeReady])
 
 	const neighbours = useMemo(() => {
+		if (!local) {
+			const online =
+				(onlineChapters && onlineChapters.mediaRef === mediaRef ? onlineChapters.chapters : null) ??
+				[]
+
+			return neighbourChapters(
+				online.map(item => ({ ref: item.ref, chapter: item.number ? Number(item.number) : null })),
+				chapterRef
+			)
+		}
+
 		const files = titleFiles?.files.items ?? []
 
 		return neighbourChapters(
 			files.map(file => ({ ref: localRef(file.id), chapter: file.match?.episode })),
 			chapterRef
 		)
-	}, [titleFiles, chapterRef])
+	}, [local, onlineChapters, mediaRef, titleFiles, chapterRef])
 
 	const close = () => router.history.back()
 

@@ -757,7 +757,66 @@ export const uk: Translation = {
 		downloads: 'Джерела торентів і черга завантажень, якою керує нода'
 	},
 
+	mangaSources: {
+		none: 'Серверів поки немає',
+		add: 'Додати OPDS-сервер',
+		menu: 'Дії з сервером',
+		edit: 'Змінити',
+		remove: 'Видалити',
+		removeFailed: 'Не вдалося видалити сервер',
+		saveFailed: 'Не вдалося зберегти сервер',
+		drawer: {
+			createTitle: 'Додати OPDS-сервер',
+			editTitle: 'Змінити OPDS-сервер',
+			description:
+				'Адреса кореневого фіду каталогу, наприклад http://nas:25600/opds/v1.2/catalog для Komga',
+			nameLabel: 'Назва',
+			namePlaceholder: 'Komga вдома',
+			urlLabel: 'Адреса',
+			usernameLabel: 'Ім’я користувача',
+			passwordLabel: 'Пароль',
+			passwordHint: 'Нода зберігає його в окремому файлі й більше ніколи не показує',
+			passwordKept: 'Залиште порожнім, щоб лишити збережений пароль',
+			create: 'Додати',
+			save: 'Зберегти',
+			check: 'Перевірити з’єднання',
+			ok: 'З’єднання є',
+			problems: {
+				unauthorized: 'Сервер не прийняв ім’я користувача або пароль',
+				not_opds: 'За цією адресою немає OPDS-каталогу',
+				unreachable: 'Не вдалося з’єднатися із сервером',
+				other_host: 'Каталог посилається на інший сервер'
+			}
+		},
+		chapters: {
+			title: 'Розділи онлайн',
+			link: 'Знайти на сервері',
+			relink: 'Змінити серію',
+			unlink: 'Відв’язати',
+			from: 'з {{name}}',
+			empty: 'У прив’язаній серії немає розділів, які можна читати посторінково',
+			loadFailed: 'Не вдалося завантажити розділи онлайн',
+			pages_one: '{{count}} сторінка',
+			pages_few: '{{count}} сторінки',
+			pages_many: '{{count}} сторінок',
+			pages_other: '{{count}} сторінки'
+		},
+		link: {
+			title: 'Знайти серію',
+			description: 'Виберіть серію на вашому сервері, в якій лежать розділи цього тайтлу',
+			sourceLabel: 'Сервер',
+			searchLabel: 'Назва серії',
+			search: 'Шукати',
+			noResults: 'На цьому сервері нічого не знайдено',
+			choose: 'Вибрати',
+			failed: 'Не вдалося прив’язати серію'
+		}
+	},
 	settings: {
+		mangaSources: {
+			name: 'Джерела манги',
+			hint: 'Ваші власні OPDS-каталоги — Komga, Kavita, Calibre-Web — звідки читати розділи'
+		},
 		appearance: {
 			name: 'Вигляд',
 			hint: 'Світла або темна тема для всього застосунку'

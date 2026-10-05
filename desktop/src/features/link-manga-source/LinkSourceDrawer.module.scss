@@ -1,0 +1,51 @@
+.root {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+
+	.search {
+		display: flex;
+		gap: 0.5rem;
+
+		> :first-child {
+			flex: 1;
+		}
+	}
+
+	.status {
+		display: grid;
+		place-items: center;
+		min-height: 4rem;
+		margin: 0;
+		color: var(--text-muted);
+		font-size: 0.875rem;
+	}
+
+	.results {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.result {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		padding: 0.625rem 0.75rem;
+		border: 1px solid var(--border);
+		border-radius: var(--radius-sm);
+		background: var(--bg-subtle);
+
+		.name {
+			min-width: 0;
+			overflow: hidden;
+			font-size: 0.9375rem;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+	}
+}

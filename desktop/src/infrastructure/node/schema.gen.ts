@@ -321,6 +321,166 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/v1/manga/opds/check': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Try an OPDS server
+		 * @description Reads the catalogue's root with the given credentials and says what is wrong, if anything. Answers 200 either way: a failed check is a result, not an error.
+		 */
+		post: operations['checkOPDSServer']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/manga/opds/servers': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * OPDS servers
+		 * @description The user's own catalogues: Komga, Kavita, Calibre-Web.
+		 */
+		get: operations['listOPDSServers']
+		put?: never
+		/**
+		 * Add an OPDS server
+		 * @description Saves the server. The password is kept outside the database and never returned.
+		 */
+		post: operations['createOPDSServer']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/manga/opds/servers/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		/** Change an OPDS server */
+		put: operations['updateOPDSServer']
+		post?: never
+		/**
+		 * Remove an OPDS server
+		 * @description Removes the server, its password and every title's link to it.
+		 */
+		delete: operations['deleteOPDSServer']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/manga/sources': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/** Sources of chapters */
+		get: operations['listMangaSources']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/manga/sources/{source}/search': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Find a series in a source
+		 * @description For linking a title to the series that holds its chapters.
+		 */
+		get: operations['searchMangaSource']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/manga/titles/{mediaRef}/chapters': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Chapters of a title from its linked sources
+		 * @description Every chapter the linked series hold, in chapter order. Chapters in the library are listed by the library, not here.
+		 */
+		get: operations['listMangaChapters']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/manga/titles/{mediaRef}/links': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/** Series a title is read from */
+		get: operations['listMangaLinks']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/manga/titles/{mediaRef}/links/{source}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		/**
+		 * Read a title from a series
+		 * @description Links the title to a series in the source, replacing any earlier link to the same source.
+		 */
+		put: operations['putMangaLink']
+		post?: never
+		/** Stop reading a title from a source */
+		delete: operations['deleteMangaLink']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/v1/media/filter-options': {
 		parameters: {
 			query?: never
@@ -1030,6 +1190,37 @@ export interface components {
 			readonly $schema?: string
 			chapter: components['schemas']['ChapterBody']
 		}
+		CheckOPDSServerInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/CheckOPDSServerInputBody.json
+			 */
+			readonly $schema?: string
+			password?: string
+			/**
+			 * Format: int64
+			 * @description A saved server, whose stored password is used when none is given.
+			 */
+			server_id?: number
+			url: string
+			username?: string
+		}
+		CheckOPDSServerOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/CheckOPDSServerOutputBody.json
+			 */
+			readonly $schema?: string
+			detail?: string
+			ok: boolean
+			/**
+			 * @description What is wrong, when something is.
+			 * @enum {string}
+			 */
+			problem?: 'unauthorized' | 'not_opds' | 'unreachable' | 'other_host'
+		}
 		CollectionOutputBody: {
 			/**
 			 * Format: uri
@@ -1507,6 +1698,80 @@ export interface components {
 			/** @description Attribution for every field that came from an external source. */
 			sources: components['schemas']['Source'][] | null
 		}
+		MangaChapterBody: {
+			/** @description Chapter number as the source writes it. Absent for an unnumbered chapter. */
+			number?: string
+			/** Format: int64 */
+			pages: number
+			/** @description Chapter reference for the reader's endpoints. */
+			ref: string
+			source: string
+			source_name: string
+			title: string
+		}
+		MangaChaptersOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/MangaChaptersOutputBody.json
+			 */
+			readonly $schema?: string
+			chapters: components['schemas']['MangaChapterBody'][] | null
+			/** @description Linked sources that could not be read this time; the others are listed. */
+			problems: components['schemas']['MangaSourceProblemBody'][] | null
+		}
+		MangaLinkBody: {
+			/** @enum {string} */
+			chosen_by: 'auto' | 'user'
+			series_id: string
+			series_title?: string
+			source: string
+			source_name: string
+		}
+		MangaLinksOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/MangaLinksOutputBody.json
+			 */
+			readonly $schema?: string
+			links: components['schemas']['MangaLinkBody'][] | null
+		}
+		MangaSearchOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/MangaSearchOutputBody.json
+			 */
+			readonly $schema?: string
+			series: components['schemas']['MangaSeriesBody'][] | null
+		}
+		MangaSeriesBody: {
+			/** @description The series' path on the server, for linking a title to it. */
+			id: string
+			title: string
+		}
+		MangaSourceBody: {
+			/** @example opds:3 */
+			id: string
+			/** @enum {string} */
+			kind: 'opds'
+			name: string
+		}
+		MangaSourceProblemBody: {
+			detail: string
+			source: string
+			source_name?: string
+		}
+		MangaSourcesOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/MangaSourcesOutputBody.json
+			 */
+			readonly $schema?: string
+			sources: components['schemas']['MangaSourceBody'][] | null
+		}
 		Match: {
 			/**
 			 * Format: double
@@ -1675,6 +1940,48 @@ export interface components {
 			/** Format: int64 */
 			volumes: number | null
 		}
+		OPDSServerBody: {
+			/** @description Whether a password is stored. The password itself is never sent back. */
+			has_password: boolean
+			/** Format: int64 */
+			id: number
+			name: string
+			/** @description Address of the catalogue's root feed. */
+			url: string
+			username?: string
+		}
+		OPDSServerInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/OPDSServerInputBody.json
+			 */
+			readonly $schema?: string
+			name: string
+			/** @description Absent keeps the stored password; an empty string removes it. */
+			password?: string
+			/** @description Address of the catalogue's root feed, such as http://nas:25600/opds/v1.2/catalog. */
+			url: string
+			username?: string
+		}
+		OPDSServerOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/OPDSServerOutputBody.json
+			 */
+			readonly $schema?: string
+			server: components['schemas']['OPDSServerBody']
+		}
+		OPDSServersOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/OPDSServersOutputBody.json
+			 */
+			readonly $schema?: string
+			servers: components['schemas']['OPDSServerBody'][] | null
+		}
 		Page: {
 			/**
 			 * Format: int64
@@ -1800,6 +2107,17 @@ export interface components {
 			readonly $schema?: string
 			/** @description True once this file counts as watched and the tracker was told. */
 			watched: boolean
+		}
+		PutMangaLinkInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/PutMangaLinkInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description As the search returned it. */
+			series_id: string
+			series_title?: string
 		}
 		ReadBody: {
 			/**
@@ -2604,6 +2922,8 @@ export type SchemaAudio = components['schemas']['Audio']
 export type SchemaChapter = components['schemas']['Chapter']
 export type SchemaChapterBody = components['schemas']['ChapterBody']
 export type SchemaChapterOutputBody = components['schemas']['ChapterOutputBody']
+export type SchemaCheckOpdsServerInputBody = components['schemas']['CheckOPDSServerInputBody']
+export type SchemaCheckOpdsServerOutputBody = components['schemas']['CheckOPDSServerOutputBody']
 export type SchemaCollectionOutputBody = components['schemas']['CollectionOutputBody']
 export type SchemaControlInputBody = components['schemas']['ControlInputBody']
 export type SchemaCounts = components['schemas']['Counts']
@@ -2632,12 +2952,25 @@ export type SchemaLibraryCollection = components['schemas']['LibraryCollection']
 export type SchemaLibraryCollectionEntry = components['schemas']['LibraryCollectionEntry']
 export type SchemaList = components['schemas']['List']
 export type SchemaListsOutputBody = components['schemas']['ListsOutputBody']
+export type SchemaMangaChapterBody = components['schemas']['MangaChapterBody']
+export type SchemaMangaChaptersOutputBody = components['schemas']['MangaChaptersOutputBody']
+export type SchemaMangaLinkBody = components['schemas']['MangaLinkBody']
+export type SchemaMangaLinksOutputBody = components['schemas']['MangaLinksOutputBody']
+export type SchemaMangaSearchOutputBody = components['schemas']['MangaSearchOutputBody']
+export type SchemaMangaSeriesBody = components['schemas']['MangaSeriesBody']
+export type SchemaMangaSourceBody = components['schemas']['MangaSourceBody']
+export type SchemaMangaSourceProblemBody = components['schemas']['MangaSourceProblemBody']
+export type SchemaMangaSourcesOutputBody = components['schemas']['MangaSourcesOutputBody']
 export type SchemaMatch = components['schemas']['Match']
 export type SchemaMatchedTitle = components['schemas']['MatchedTitle']
 export type SchemaMedia = components['schemas']['Media']
 export type SchemaMediaDetails = components['schemas']['MediaDetails']
 export type SchemaMediaInfo = components['schemas']['MediaInfo']
 export type SchemaMediaSummary = components['schemas']['MediaSummary']
+export type SchemaOpdsServerBody = components['schemas']['OPDSServerBody']
+export type SchemaOpdsServerInputBody = components['schemas']['OPDSServerInputBody']
+export type SchemaOpdsServerOutputBody = components['schemas']['OPDSServerOutputBody']
+export type SchemaOpdsServersOutputBody = components['schemas']['OPDSServersOutputBody']
 export type SchemaPage = components['schemas']['Page']
 export type SchemaParsed = components['schemas']['Parsed']
 export type SchemaPlaybackOutputBody = components['schemas']['PlaybackOutputBody']
@@ -2645,6 +2978,7 @@ export type SchemaPlaybackSession = components['schemas']['PlaybackSession']
 export type SchemaPlaybackStatus = components['schemas']['PlaybackStatus']
 export type SchemaProgressInputBody = components['schemas']['ProgressInputBody']
 export type SchemaProgressOutputBody = components['schemas']['ProgressOutputBody']
+export type SchemaPutMangaLinkInputBody = components['schemas']['PutMangaLinkInputBody']
 export type SchemaReadBody = components['schemas']['ReadBody']
 export type SchemaReadOutputBody = components['schemas']['ReadOutputBody']
 export type SchemaRelatedMedia = components['schemas']['RelatedMedia']
@@ -3315,6 +3649,353 @@ export interface operations {
 				content: {
 					'application/json': components['schemas']['ScanRunOutputBody']
 				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	checkOPDSServer: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['CheckOPDSServerInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['CheckOPDSServerOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listOPDSServers: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['OPDSServersOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	createOPDSServer: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['OPDSServerInputBody']
+			}
+		}
+		responses: {
+			/** @description Created */
+			201: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['OPDSServerOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	updateOPDSServer: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['OPDSServerInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['OPDSServerOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	deleteOPDSServer: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listMangaSources: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['MangaSourcesOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	searchMangaSource: {
+		parameters: {
+			query?: {
+				q?: string
+			}
+			header?: never
+			path: {
+				source: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['MangaSearchOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listMangaChapters: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				mediaRef: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['MangaChaptersOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listMangaLinks: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				mediaRef: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['MangaLinksOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	putMangaLink: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				mediaRef: string
+				source: string
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['PutMangaLinkInputBody']
+			}
+		}
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	deleteMangaLink: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				mediaRef: string
+				source: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
 			}
 			/** @description Error */
 			default: {
