@@ -1,5 +1,5 @@
 import { nodeMediaUrl } from '@infra/node'
 
-export function pageUrl(fileId: number, index: number): string {
-	return nodeMediaUrl(`/v1/reader/files/${fileId}/pages/${index}`)
+export function pageUrl(ref: string, index: number): string {
+	return nodeMediaUrl(`/v1/reader/chapters/${encodeURIComponent(ref)}/pages/${index}`)
 }

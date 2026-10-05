@@ -9,16 +9,16 @@ import { Button, Icon, ReelLoader, WindowControls } from '@shared/ui'
 import { $nodeReady } from '@infra/node'
 
 import { titleFilesQuery } from '@entities/library-item'
-import { chapterQuery, neighbourChapters, ReaderView } from '@entities/reader'
+import { chapterQuery, localRef, neighbourChapters, ReaderView } from '@entities/reader'
 
 import styles from './ReadPage.module.scss'
 
 export interface ReadPageProps {
-	fileId: number
-	onOpenChapter: (fileId: number) => void
+	chapterRef: string
+	onOpenChapter: (ref: string) => void
 }
 
-export function ReadPage({ fileId, onOpenChapter }: ReadPageProps) {
+export function ReadPage({ chapterRef, onOpenChapter }: ReadPageProps) {
 	const { t } = useTranslation()
 	const router = useRouter()
 
@@ -38,11 +38,11 @@ export function ReadPage({ fileId, onOpenChapter }: ReadPageProps) {
 	// A query sent before the node is up fails, and a reload of this page gets there first.
 	useEffect(() => {
 		if (nodeReady) {
-			loadChapter(fileId)
+			loadChapter(chapterRef)
 		}
-	}, [fileId, loadChapter, nodeReady])
+	}, [chapterRef, loadChapter, nodeReady])
 
-	const chapter = chapterData?.chapter.file_id === fileId ? chapterData.chapter : null
+	const chapter = chapterData?.chapter.ref === chapterRef ? chapterData.chapter : null
 	const mediaRef = chapter?.media_ref
 
 	useEffect(() => {
@@ -55,10 +55,10 @@ export function ReadPage({ fileId, onOpenChapter }: ReadPageProps) {
 		const files = titleFiles?.files.items ?? []
 
 		return neighbourChapters(
-			files.map(file => ({ fileId: file.id, chapter: file.match?.episode })),
-			fileId
+			files.map(file => ({ ref: localRef(file.id), chapter: file.match?.episode })),
+			chapterRef
 		)
-	}, [titleFiles, fileId])
+	}, [titleFiles, chapterRef])
 
 	const close = () => router.history.back()
 
@@ -67,7 +67,7 @@ export function ReadPage({ fileId, onOpenChapter }: ReadPageProps) {
 			return (
 				<Panel onClose={close}>
 					<p>{chapterError.body?.detail ?? t('reader.loadFailed')}</p>
-					<Button onClick={() => loadChapter(fileId)}>{t('media.retry')}</Button>
+					<Button onClick={() => loadChapter(chapterRef)}>{t('media.retry')}</Button>
 				</Panel>
 			)
 		}
@@ -81,7 +81,7 @@ export function ReadPage({ fileId, onOpenChapter }: ReadPageProps) {
 
 	return (
 		<ReaderView
-			key={fileId}
+			key={chapterRef}
 			chapter={chapter}
 			page={page}
 			onPageChange={setPage}

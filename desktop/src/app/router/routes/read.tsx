@@ -1,5 +1,7 @@
 import { createRoute, useRouter } from '@tanstack/react-router'
 
+import { routeRef } from '@entities/reader'
+
 import { ReadPage } from '@pages/read'
 
 import { rootRoute } from './root'
@@ -7,18 +9,17 @@ import { rootRoute } from './root'
 // Outside the framed layout, like the player: a chapter owns the whole window.
 export const readRoute = createRoute({
 	getParentRoute: () => rootRoute,
-	path: '/read/$fileId',
+	path: '/read/$ref',
 	component: function ReadRoute() {
-		const { fileId } = readRoute.useParams()
+		const { ref } = readRoute.useParams()
 		const router = useRouter()
+		const chapterRef = routeRef(ref)
 
 		return (
 			<ReadPage
-				key={fileId}
-				fileId={Number(fileId)}
-				onOpenChapter={next =>
-					void router.navigate({ to: '/read/$fileId', params: { fileId: String(next) } })
-				}
+				key={chapterRef}
+				chapterRef={chapterRef}
+				onOpenChapter={next => void router.navigate({ to: '/read/$ref', params: { ref: next } })}
 			/>
 		)
 	}

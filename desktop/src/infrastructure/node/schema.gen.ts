@@ -649,6 +649,66 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/v1/reader/chapters/{ref}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Pages of a chapter
+		 * @description The chapter's pages in reading order, from whichever source the reference names. Chapter reference: local:<file id>, opds:<server id>:<entry id> or mangadex:<chapter id>.
+		 */
+		get: operations['getReaderChapterByRef']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/reader/chapters/{ref}/pages/{index}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * One page of a chapter
+		 * @description The page's image, served by the node whichever source it comes from. Accepts ?token=, because an image element cannot send headers.
+		 */
+		get: operations['getReaderPageByRef']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/reader/chapters/{ref}/progress': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Report the page the reader is on
+		 * @description Reaching the last page counts the chapter as read. Only a whole chapter number moves the user's list; an extra such as 12.5 is read without moving it. The tracker never lowers progress.
+		 */
+		post: operations['reportReaderPageByRef']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/v1/reader/files/{id}/chapter': {
 		parameters: {
 			query?: never
@@ -658,7 +718,7 @@ export interface paths {
 		}
 		/**
 		 * Pages of a comic chapter
-		 * @description The chapter's pages in reading order. Each page is fetched separately, so the reader can start before the whole archive is read.
+		 * @description The same as getReaderChapterByRef with local:<id>.
 		 */
 		get: operations['getReaderChapter']
 		put?: never
@@ -678,7 +738,7 @@ export interface paths {
 		}
 		/**
 		 * One page of a comic chapter
-		 * @description The page's image as it is stored in the archive. Accepts ?token=, because an image element cannot send headers.
+		 * @description The same as getReaderPageByRef with local:<id>. Accepts ?token=, because an image element cannot send headers.
 		 */
 		get: operations['getReaderPage']
 		put?: never
@@ -700,7 +760,7 @@ export interface paths {
 		put?: never
 		/**
 		 * Report the page the reader is on
-		 * @description Reaching the last page counts the chapter as read on the user's list. The tracker decides what that means for the list and never lowers progress.
+		 * @description The same as reportReaderPageByRef with local:<id>.
 		 */
 		post: operations['reportReaderPage']
 		delete?: never
@@ -947,19 +1007,18 @@ export interface components {
 		ChapterBody: {
 			/**
 			 * Format: int64
-			 * @description Chapter number within that title.
+			 * @description Library file this chapter is. Absent for a chapter from any other source.
 			 */
-			chapter?: number
-			/**
-			 * Format: int64
-			 * @description Library file this chapter is.
-			 */
-			file_id: number
+			file_id?: number
 			/** @description Title this chapter is matched to. Absent while unmatched. */
 			media_ref?: string
+			/** @description Chapter number as the source writes it, such as 12 or 12.5. Absent for an unnumbered chapter. */
+			number?: string
 			/** @description Every page, in reading order. */
 			pages: components['schemas']['Page'][] | null
-			/** @description Title as the library reads it, for the UI. */
+			/** @description Chapter reference, for the page and progress endpoints. */
+			ref: string
+			/** @description Title as the source names it, for the UI. */
 			title: string
 		}
 		ChapterOutputBody: {
@@ -1742,11 +1801,11 @@ export interface components {
 			/** @description True once this file counts as watched and the tracker was told. */
 			watched: boolean
 		}
-		ReadInputBody: {
+		ReadBody: {
 			/**
 			 * Format: uri
 			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/ReadInputBody.json
+			 * @example https://example.com/schemas/ReadBody.json
 			 */
 			readonly $schema?: string
 			/**
@@ -2586,7 +2645,7 @@ export type SchemaPlaybackSession = components['schemas']['PlaybackSession']
 export type SchemaPlaybackStatus = components['schemas']['PlaybackStatus']
 export type SchemaProgressInputBody = components['schemas']['ProgressInputBody']
 export type SchemaProgressOutputBody = components['schemas']['ProgressOutputBody']
-export type SchemaReadInputBody = components['schemas']['ReadInputBody']
+export type SchemaReadBody = components['schemas']['ReadBody']
 export type SchemaReadOutputBody = components['schemas']['ReadOutputBody']
 export type SchemaRelatedMedia = components['schemas']['RelatedMedia']
 export type SchemaRenameListInputBody = components['schemas']['RenameListInputBody']
@@ -3890,6 +3949,106 @@ export interface operations {
 			}
 		}
 	}
+	getReaderChapterByRef: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Chapter reference: local:<file id>, opds:<server id>:<entry id> or mangadex:<chapter id>. */
+				ref: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ChapterOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getReaderPageByRef: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Chapter reference, as in getReaderChapterByRef. */
+				ref: string
+				/** @description Position in reading order, from the chapter listing. */
+				index: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	reportReaderPageByRef: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Chapter being read, as in getReaderChapterByRef. */
+				ref: string
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['ReadBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ReadOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
 	getReaderChapter: {
 		parameters: {
 			query?: never
@@ -3966,7 +4125,7 @@ export interface operations {
 		}
 		requestBody: {
 			content: {
-				'application/json': components['schemas']['ReadInputBody']
+				'application/json': components['schemas']['ReadBody']
 			}
 		}
 		responses: {

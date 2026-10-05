@@ -11,6 +11,7 @@ import { $nodeReady } from '@infra/node'
 
 import { fileName, fileTitle, titleFilesQuery } from '@entities/library-item'
 import type { LibraryFile } from '@entities/library-item'
+import { localRef } from '@entities/reader'
 
 import { episodeNumber, groupTitleFiles, isWatched } from '../lib/episodes'
 
@@ -43,7 +44,7 @@ export function ChapterList({ mediaRef, progress, coverColor }: ChapterListProps
 	const chapters = groupTitleFiles(files, progress).main
 
 	const open = (file: LibraryFile) => {
-		void navigate({ to: '/read/$fileId', params: { fileId: String(file.id) } })
+		void navigate({ to: '/read/$ref', params: { ref: localRef(file.id) } })
 	}
 
 	return (

@@ -18,9 +18,9 @@ export interface ReaderViewProps {
 	page: number
 	onPageChange: (page: number) => void
 	onClose: () => void
-	previous: { fileId: number } | null
-	next: { fileId: number } | null
-	onOpenChapter: (fileId: number) => void
+	previous: { ref: string } | null
+	next: { ref: string } | null
+	onOpenChapter: (ref: string) => void
 }
 
 export function ReaderView({
@@ -39,7 +39,7 @@ export function ReaderView({
 	const current = clampPage(page, total)
 	const [controlsVisible, setControlsVisible] = useState(true)
 
-	const fileId = chapter.file_id
+	const ref = chapter.ref
 
 	const goTo = useCallback(
 		(index: number) => {
@@ -55,16 +55,16 @@ export function ReaderView({
 	// reported, and the node ignores the ones that do not matter.
 	useEffect(() => {
 		if (total > 0) {
-			pageTurned({ fileId, page: current })
+			pageTurned({ ref, page: current })
 		}
-	}, [current, fileId, total, pageTurned])
+	}, [current, ref, total, pageTurned])
 
 	// Fetch the pages ahead while the current one is on screen, so turning a page
 	// does not wait on the archive.
 	useEffect(() => {
 		const preloaded = prefetchIndexes(current, total).map(index => {
 			const image = new Image()
-			image.src = pageUrl(fileId, index)
+			image.src = pageUrl(ref, index)
 
 			return image
 		})
@@ -74,7 +74,7 @@ export function ReaderView({
 				image.src = ''
 			}
 		}
-	}, [current, total, fileId])
+	}, [current, total, ref])
 
 	useEffect(() => {
 		const onKey = (event: KeyboardEvent) => {
@@ -126,10 +126,7 @@ export function ReaderView({
 		}
 	}
 
-	const label =
-		chapter.chapter !== undefined && chapter.chapter !== null
-			? t('reader.chapterNumber', { number: chapter.chapter })
-			: null
+	const label = chapter.number ? t('reader.chapterNumber', { number: chapter.number }) : null
 
 	return (
 		<div className={styles.root}>
@@ -140,9 +137,9 @@ export function ReaderView({
 			>
 				{total > 0 ? (
 					<img
-						key={`${fileId}-${current}`}
+						key={`${ref}-${current}`}
 						className={styles.page}
-						src={pageUrl(fileId, current)}
+						src={pageUrl(ref, current)}
 						alt={t('reader.pageAlt', { number: current + 1 })}
 						draggable={false}
 					/>
@@ -191,7 +188,7 @@ export function ReaderView({
 						variant='ghost'
 						size='small'
 						disabled={!previous}
-						onClick={() => previous && onOpenChapter(previous.fileId)}
+						onClick={() => previous && onOpenChapter(previous.ref)}
 					>
 						{t('reader.previousChapter')}
 					</Button>
@@ -209,7 +206,7 @@ export function ReaderView({
 						variant='ghost'
 						size='small'
 						disabled={!next}
-						onClick={() => next && onOpenChapter(next.fileId)}
+						onClick={() => next && onOpenChapter(next.ref)}
 					>
 						{t('reader.nextChapter')}
 					</Button>

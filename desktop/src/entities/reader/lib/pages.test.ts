@@ -35,25 +35,25 @@ describe('prefetchIndexes', () => {
 
 describe('neighbourChapters', () => {
 	const chapters = [
-		{ fileId: 3, chapter: 3 },
-		{ fileId: 1, chapter: 1 },
-		{ fileId: 9, chapter: null },
-		{ fileId: 2, chapter: 2 }
+		{ ref: 'local:3', chapter: 3 },
+		{ ref: 'local:1', chapter: 1 },
+		{ ref: 'local:9', chapter: null },
+		{ ref: 'local:2', chapter: 2 }
 	]
 
 	it('finds the chapters either side in number order', () => {
-		expect(neighbourChapters(chapters, 2)).toEqual({
-			previous: { fileId: 1, chapter: 1 },
-			next: { fileId: 3, chapter: 3 }
+		expect(neighbourChapters(chapters, 'local:2')).toEqual({
+			previous: { ref: 'local:1', chapter: 1 },
+			next: { ref: 'local:3', chapter: 3 }
 		})
 	})
 
 	it('has no neighbour past either end', () => {
-		expect(neighbourChapters(chapters, 1).previous).toBeNull()
-		expect(neighbourChapters(chapters, 3).next).toBeNull()
+		expect(neighbourChapters(chapters, 'local:1').previous).toBeNull()
+		expect(neighbourChapters(chapters, 'local:3').next).toBeNull()
 	})
 
 	it('offers nothing for an unnumbered chapter', () => {
-		expect(neighbourChapters(chapters, 9)).toEqual({ previous: null, next: null })
+		expect(neighbourChapters(chapters, 'local:9')).toEqual({ previous: null, next: null })
 	})
 })
