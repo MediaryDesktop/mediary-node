@@ -59,7 +59,7 @@ func presentedToken(r *http.Request) string {
 	return ""
 }
 
-// The WebSocket API and a video element's src cannot set headers, so these two
+// The WebSocket API and the src of a video or image element cannot set headers, so these
 // take the token from the URL. Media is read-only, so only GET qualifies there.
 func acceptsQueryToken(r *http.Request) bool {
 	if strings.HasPrefix(r.URL.Path, "/ws") {
@@ -70,5 +70,11 @@ func acceptsQueryToken(r *http.Request) bool {
 		return false
 	}
 
-	return strings.HasPrefix(r.URL.Path, "/v1/playback/files/") || strings.HasPrefix(r.URL.Path, "/v1/reader/files/")
+	for _, prefix := range []string{"/v1/playback/files/", "/v1/reader/files/", "/v1/reader/chapters/"} {
+		if strings.HasPrefix(r.URL.Path, prefix) {
+			return true
+		}
+	}
+
+	return false
 }

@@ -2,11 +2,13 @@ package service
 
 import (
 	"context"
-	"path/filepath"
+	"math"
+	"strconv"
 	"strings"
 	"sync"
 
 	"github.com/mediaryorg/mediary-node/server/internal/modules/reader/internal/archive"
+	"github.com/mediaryorg/mediary-node/server/internal/modules/reader/internal/ref"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
 )
 
@@ -38,100 +40,95 @@ type Options struct {
 }
 
 type Service struct {
-	opts Options
+	opts    Options
+	sources map[string]Source
 
 	mu sync.Mutex
-	// Chapters the reader already counted. The reader reports every page turn past
-	// the end, and each would otherwise be another write to the user's list.
-	counted map[int64]bool
+	// Chapters the reader already counted, by reference. The reader reports every
+	// page turn past the end, and each would otherwise be another write to the
+	// user's list.
+	counted map[string]bool
 }
 
 func New(opts Options) *Service {
-	return &Service{opts: opts, counted: map[int64]bool{}}
+	sources := map[string]Source{}
+	if opts.Library != nil {
+		sources[ref.SourceLocal] = localSource{library: opts.Library}
+	}
+
+	return &Service{opts: opts, sources: sources, counted: map[string]bool{}}
 }
 
 func (s *Service) Status(context.Context) (bool, error) {
 	return s.opts.Library != nil, nil
 }
 
+// Chapter is one chapter as the reader shows it, whichever source it came from.
 type Chapter struct {
+	Ref ref.ChapterRef
+	// FileID is the library file of a local chapter, and zero for any other.
 	FileID   int64
 	Title    string
 	MediaRef string
-	Chapter  *int
-	Pages    []archive.Page
+	// Number is the chapter number as the source writes it: "12", "12.5", or empty
+	// for an extra. Only a whole number moves progress; see ProgressChapter.
+	Number string
+	Pages  []archive.Page
 }
 
-// Chapter lists the pages of a comic file in reading order.
-func (s *Service) Chapter(ctx context.Context, fileID int64) (*Chapter, error) {
-	file, err := s.comic(ctx, fileID)
+// Chapter lists the pages of a chapter in reading order.
+func (s *Service) Chapter(ctx context.Context, chapter ref.ChapterRef) (*Chapter, error) {
+	source, err := s.source(chapter)
 	if err != nil {
 		return nil, err
 	}
 
-	pages, err := archive.Pages(file.Path)
-	if err != nil {
-		return nil, apperr.Wrap(err, apperr.KindPrecondition, "could not read %s", filepath.Base(file.Path))
-	}
-
-	return &Chapter{
-		FileID:   file.ID,
-		Title:    file.Title,
-		MediaRef: file.MediaRef,
-		Chapter:  file.Chapter,
-		Pages:    pages,
-	}, nil
+	return source.Chapter(ctx, chapter)
 }
 
-// PageImage returns one page of a comic chapter.
-func (s *Service) PageImage(ctx context.Context, fileID int64, index int) (archive.Image, error) {
-	file, err := s.comic(ctx, fileID)
+// PageImage returns one page of a chapter.
+func (s *Service) PageImage(ctx context.Context, chapter ref.ChapterRef, index int) (archive.Image, error) {
+	source, err := s.source(chapter)
 	if err != nil {
 		return archive.Image{}, err
 	}
 
-	image, err := archive.ReadPage(file.Path, index)
-	if err != nil {
-		return archive.Image{}, apperr.Wrap(err, apperr.KindNotFound, "no page %d in %s", index, filepath.Base(file.Path))
-	}
-
-	return image, nil
+	return source.Page(ctx, chapter, index)
 }
 
 // ReportPage is the reader's side of the progress rule: reaching the last page
-// counts the chapter as read. It reports whether this call counted it.
-func (s *Service) ReportPage(ctx context.Context, fileID int64, page int) (bool, error) {
-	file, err := s.comic(ctx, fileID)
+// counts the chapter as read. It reports whether the chapter counts, on this call
+// or an earlier one.
+func (s *Service) ReportPage(ctx context.Context, chapterRef ref.ChapterRef, page int) (bool, error) {
+	chapter, err := s.Chapter(ctx, chapterRef)
 	if err != nil {
 		return false, err
 	}
 
-	pages, err := archive.Pages(file.Path)
-	if err != nil {
-		return false, apperr.Wrap(err, apperr.KindPrecondition, "could not read %s", filepath.Base(file.Path))
-	}
-
-	if !CountsAsRead(page, len(pages)) {
+	if !CountsAsRead(page, len(chapter.Pages)) {
 		return false, nil
 	}
 
+	key := chapterRef.String()
+
 	s.mu.Lock()
-	already := s.counted[fileID]
+	already := s.counted[key]
 	s.mu.Unlock()
 	if already {
 		return true, nil
 	}
 
-	if file.MediaRef == "" || file.Chapter == nil || s.opts.Progress == nil {
+	number, whole := ProgressChapter(chapter.Number)
+	if chapter.MediaRef == "" || !whole || s.opts.Progress == nil {
 		return false, nil
 	}
 
-	if err := s.opts.Progress.MarkRead(ctx, file.MediaRef, *file.Chapter); err != nil {
+	if err := s.opts.Progress.MarkRead(ctx, chapter.MediaRef, number); err != nil {
 		return false, apperr.Wrap(err, apperr.KindUnavailable, "could not record the chapter as read")
 	}
 
 	s.mu.Lock()
-	s.counted[fileID] = true
+	s.counted[key] = true
 	s.mu.Unlock()
 
 	return true, nil
@@ -143,27 +140,27 @@ func CountsAsRead(page, total int) bool {
 	return total > 0 && page >= total-1
 }
 
-func (s *Service) comic(ctx context.Context, fileID int64) (*PlayableFile, error) {
-	if s.opts.Library == nil {
+// ProgressChapter is the chapter a read chapter moves the user's list to. Lists
+// count whole chapters, so "12" moves it to 12, while "12.5" (an extra between two
+// chapters) and an unnumbered chapter do not move it at all.
+func ProgressChapter(number string) (int, bool) {
+	value, err := strconv.ParseFloat(strings.TrimSpace(number), 64)
+	if err != nil || value <= 0 || value != math.Trunc(value) || value > math.MaxInt32 {
+		return 0, false
+	}
+
+	return int(value), true
+}
+
+func (s *Service) source(chapter ref.ChapterRef) (Source, error) {
+	if chapter.Source == ref.SourceLocal && s.opts.Library == nil {
 		return nil, apperr.New(apperr.KindPrecondition, "the reader is not configured on this node")
 	}
 
-	file, err := s.opts.Library.Playable(ctx, fileID)
-	if err != nil {
-		return nil, err
-	}
-	if file == nil {
-		return nil, apperr.New(apperr.KindNotFound, "library file %d does not exist", fileID)
-	}
-	if file.Missing {
-		return nil, apperr.New(apperr.KindPrecondition,
-			"the last scan did not find %s where it used to be", file.Path)
+	source, ok := s.sources[chapter.Source]
+	if !ok {
+		return nil, apperr.New(apperr.KindPrecondition, "chapters from %s cannot be read on this node yet", chapter.Source)
 	}
 
-	if strings.ToLower(filepath.Ext(file.Path)) != ".cbz" {
-		return nil, apperr.New(apperr.KindPrecondition,
-			"only CBZ comics can be read for now; %s is another format", filepath.Base(file.Path))
-	}
-
-	return file, nil
+	return source, nil
 }

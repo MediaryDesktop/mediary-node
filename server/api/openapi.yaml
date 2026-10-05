@@ -131,16 +131,15 @@ components:
     ChapterBody:
       additionalProperties: false
       properties:
-        chapter:
-          description: Chapter number within that title.
-          format: int64
-          type: integer
         file_id:
-          description: Library file this chapter is.
+          description: Library file this chapter is. Absent for a chapter from any other source.
           format: int64
           type: integer
         media_ref:
           description: Title this chapter is matched to. Absent while unmatched.
+          type: string
+        number:
+          description: Chapter number as the source writes it, such as 12 or 12.5. Absent for an unnumbered chapter.
           type: string
         pages:
           description: Every page, in reading order.
@@ -149,11 +148,14 @@ components:
           type:
             - array
             - "null"
+        ref:
+          description: Chapter reference, for the page and progress endpoints.
+          type: string
         title:
-          description: Title as the library reads it, for the UI.
+          description: Title as the source names it, for the UI.
           type: string
       required:
-        - file_id
+        - ref
         - title
         - pages
       type: object
@@ -1665,13 +1667,13 @@ components:
       required:
         - watched
       type: object
-    ReadInputBody:
+    ReadBody:
       additionalProperties: false
       properties:
         $schema:
           description: A URL to the JSON Schema for this object.
           examples:
-            - https://example.com/schemas/ReadInputBody.json
+            - https://example.com/schemas/ReadBody.json
           format: uri
           readOnly: true
           type: string
@@ -4146,9 +4148,104 @@ paths:
       summary: A still from the file
       tags:
         - playback
+  /v1/reader/chapters/{ref}:
+    get:
+      description: "The chapter's pages in reading order, from whichever source the reference names. Chapter reference: local:<file id>, opds:<server id>:<entry id> or mangadex:<chapter id>."
+      operationId: getReaderChapterByRef
+      parameters:
+        - description: "Chapter reference: local:<file id>, opds:<server id>:<entry id> or mangadex:<chapter id>."
+          in: path
+          name: ref
+          required: true
+          schema:
+            description: "Chapter reference: local:<file id>, opds:<server id>:<entry id> or mangadex:<chapter id>."
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChapterOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Pages of a chapter
+      tags:
+        - reader
+  /v1/reader/chapters/{ref}/pages/{index}:
+    get:
+      description: The page's image, served by the node whichever source it comes from. Accepts ?token=, because an image element cannot send headers.
+      operationId: getReaderPageByRef
+      parameters:
+        - description: Chapter reference, as in getReaderChapterByRef.
+          in: path
+          name: ref
+          required: true
+          schema:
+            description: Chapter reference, as in getReaderChapterByRef.
+            type: string
+        - description: Position in reading order, from the chapter listing.
+          in: path
+          name: index
+          required: true
+          schema:
+            description: Position in reading order, from the chapter listing.
+            format: int64
+            minimum: 0
+            type: integer
+      responses:
+        "200":
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: One page of a chapter
+      tags:
+        - reader
+  /v1/reader/chapters/{ref}/progress:
+    post:
+      description: Reaching the last page counts the chapter as read. Only a whole chapter number moves the user's list; an extra such as 12.5 is read without moving it. The tracker never lowers progress.
+      operationId: reportReaderPageByRef
+      parameters:
+        - description: Chapter being read, as in getReaderChapterByRef.
+          in: path
+          name: ref
+          required: true
+          schema:
+            description: Chapter being read, as in getReaderChapterByRef.
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReadBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReadOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Report the page the reader is on
+      tags:
+        - reader
   /v1/reader/files/{id}/chapter:
     get:
-      description: The chapter's pages in reading order. Each page is fetched separately, so the reader can start before the whole archive is read.
+      description: The same as getReaderChapterByRef with local:<id>.
       operationId: getReaderChapter
       parameters:
         - description: Library file, as listed by listLibraryFiles.
@@ -4177,7 +4274,7 @@ paths:
         - reader
   /v1/reader/files/{id}/pages/{index}:
     get:
-      description: The page's image as it is stored in the archive. Accepts ?token=, because an image element cannot send headers.
+      description: The same as getReaderPageByRef with local:<id>. Accepts ?token=, because an image element cannot send headers.
       operationId: getReaderPage
       parameters:
         - description: Library file, as listed by listLibraryFiles.
@@ -4211,7 +4308,7 @@ paths:
         - reader
   /v1/reader/files/{id}/progress:
     post:
-      description: Reaching the last page counts the chapter as read on the user's list. The tracker decides what that means for the list and never lowers progress.
+      description: The same as reportReaderPageByRef with local:<id>.
       operationId: reportReaderPage
       parameters:
         - description: Library file being read.
@@ -4226,7 +4323,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ReadInputBody"
+              $ref: "#/components/schemas/ReadBody"
         required: true
       responses:
         "200":
