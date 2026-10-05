@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import { filterChapters, isChapterRead, mergeChapters, neighbourChapters } from './chapters'
+import {
+	chapterNumberFromName,
+	filterChapters,
+	isChapterRead,
+	mergeChapters,
+	neighbourChapters
+} from './chapters'
 import type { ChapterOption } from './chapters'
 
 const option = (ref: string, number: string | null, source: string): ChapterOption => ({
@@ -67,5 +73,18 @@ describe('isChapterRead', () => {
 		expect(isChapterRead('12.5', 12)).toBe(false)
 		expect(isChapterRead('12.5', 13)).toBe(true)
 		expect(isChapterRead(null, 40)).toBe(false)
+	})
+})
+
+describe('chapterNumberFromName', () => {
+	it('reads the number the node wrote into a saved chapter', () => {
+		expect(chapterNumberFromName('Berserk/Berserk - Ch. 013.5.cbz')).toBe('13.5')
+		expect(chapterNumberFromName('Berserk/Berserk - Ch. 013.cbz')).toBe('13')
+		expect(chapterNumberFromName('Vol. 2 Ch. 7.cbz')).toBe('7')
+		expect(chapterNumberFromName('Berserk 014.cbz')).toBe('14')
+	})
+
+	it('finds nothing in a name without a number', () => {
+		expect(chapterNumberFromName('Berserk/Berserk - Prototype.cbz')).toBeNull()
 	})
 })

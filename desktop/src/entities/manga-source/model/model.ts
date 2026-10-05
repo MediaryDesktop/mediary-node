@@ -1,15 +1,25 @@
-import { createMutation, createQuery, keepFresh } from '@farfetched/core'
+import { concurrency, createMutation, createQuery, keepFresh } from '@farfetched/core'
+import { sample } from 'effector'
+
+import { nodeTopic } from '@infra/node'
 
 import {
+	cancelMangaDownloadFx,
 	checkOPDSServerFx,
 	createOPDSServerFx,
 	deleteMangaLinkFx,
 	deleteOPDSServerFx,
+	enqueueMangaDownloadsFx,
 	fetchMangaChaptersFx,
+	fetchMangaDownloadSettingsFx,
+	fetchMangaDownloadsFx,
 	fetchMangaLinksFx,
 	fetchMangaSourcesFx,
 	fetchOPDSServersFx,
+	forgetMangaDownloadFx,
+	putMangaDownloadSettingsFx,
 	putMangaLinkFx,
+	retryMangaDownloadFx,
 	searchMangaSourceFx,
 	updateOPDSServerFx
 } from '../api/api'
@@ -61,3 +71,51 @@ keepFresh(mangaSourcesQuery, { triggers: serversChanged })
 keepFresh(mangaLinksQuery, { triggers: [...serversChanged, ...linksChanged] })
 
 keepFresh(mangaChaptersQuery, { triggers: [...serversChanged, ...linksChanged] })
+
+export const mangaDownloadsQuery = createQuery({ effect: fetchMangaDownloadsFx, name: 'mangaDownloads' })
+
+export const mangaDownloadSettingsQuery = createQuery({
+	effect: fetchMangaDownloadSettingsFx,
+	name: 'mangaDownloadSettings'
+})
+
+export const enqueueMangaDownloadsMutation = createMutation({
+	effect: enqueueMangaDownloadsFx,
+	name: 'enqueueMangaDownloads'
+})
+
+export const cancelMangaDownloadMutation = createMutation({
+	effect: cancelMangaDownloadFx,
+	name: 'cancelMangaDownload'
+})
+
+export const retryMangaDownloadMutation = createMutation({
+	effect: retryMangaDownloadFx,
+	name: 'retryMangaDownload'
+})
+
+export const forgetMangaDownloadMutation = createMutation({
+	effect: forgetMangaDownloadFx,
+	name: 'forgetMangaDownload'
+})
+
+export const putMangaDownloadSettingsMutation = createMutation({
+	effect: putMangaDownloadSettingsFx,
+	name: 'putMangaDownloadSettings'
+})
+
+// The node reports every change in the queue, and the list asks again on each one
+// rather than polling. Several arrive while a chapter downloads; only the answer to
+// the last of them may stand, or the list stops on a page count that is long gone.
+concurrency(mangaDownloadsQuery, { strategy: 'TAKE_LATEST' })
+
+sample({
+	clock: [
+		nodeTopic('manga.download'),
+		enqueueMangaDownloadsMutation.finished.success,
+		forgetMangaDownloadMutation.finished.success
+	],
+	target: mangaDownloadsQuery.start
+})
+
+keepFresh(mangaDownloadSettingsQuery, { triggers: [putMangaDownloadSettingsMutation.finished.success] })

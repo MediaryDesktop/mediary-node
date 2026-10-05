@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 
 import { NowPlayingBar, playbackQuery } from '@entities/playback'
 
+import { DownloadFolderPrompt } from '@features/download-chapters'
 import { ScanProgress } from '@features/scan-library'
 import { ManageEntryDrawer, RateEntryDrawer } from '@features/track-media'
 
@@ -27,6 +28,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
 			<ManageEntryDrawer />
 			<RateEntryDrawer />
+			<DownloadFolderPrompt />
 
 			<ScanProgress />
 		</div>

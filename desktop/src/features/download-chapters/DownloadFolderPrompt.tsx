@@ -1,0 +1,81 @@
+import { useUnit } from 'effector-react'
+import { useEffect } from 'react'
+
+import { useTranslation } from '@shared/i18n'
+import { Button, Icon, Modal, toast } from '@shared/ui'
+
+import { libraryRootsQuery } from '@entities/library-item'
+import { enqueueMangaDownloadsMutation, putMangaDownloadSettingsMutation } from '@entities/manga-source'
+
+import styles from './DownloadFolderPrompt.module.scss'
+import { $promptOpen, folderChosen, promptClosed } from './model'
+
+// Asks once where chapters go, the first time the user saves one. It also reports
+// a download the node would not queue, wherever it was started from.
+export function DownloadFolderPrompt() {
+	const { t } = useTranslation()
+
+	const [open, choose, close, roots, loadRoots, saving] = useUnit([
+		$promptOpen,
+		folderChosen,
+		promptClosed,
+		libraryRootsQuery.$data,
+		libraryRootsQuery.start,
+		putMangaDownloadSettingsMutation.$pending
+	])
+
+	useEffect(() => {
+		if (open) {
+			loadRoots()
+		}
+	}, [open, loadRoots])
+
+	useEffect(() => {
+		const stop = [
+			enqueueMangaDownloadsMutation.finished.success.watch(({ result }) =>
+				toast.success(t('mangaSources.downloads.queued', { count: result.downloads?.length ?? 0 }), {
+					id: 'manga-download-queued'
+				})
+			),
+			enqueueMangaDownloadsMutation.finished.failure.watch(({ error }) =>
+				toast.error(error.body?.detail ?? t('mangaSources.downloads.failedToQueue'), {
+					id: 'manga-download-failed'
+				})
+			)
+		]
+
+		return () => stop.forEach(unwatch => unwatch())
+	}, [t])
+
+	const folders = roots?.roots ?? []
+
+	return (
+		<Modal
+			open={open}
+			onOpenChange={next => !next && close()}
+			title={t('mangaSources.downloads.folderTitle')}
+			description={t('mangaSources.downloads.folderDescription')}
+			size='sm'
+		>
+			{folders.length === 0 ? (
+				<p className={styles.empty}>{t('mangaSources.downloads.noFolders')}</p>
+			) : (
+				<ul className={styles.folders}>
+					{folders.map(root => (
+						<li key={root.id}>
+							<Button
+								fullWidth
+								disabled={saving}
+								startIcon={<Icon name='common/folder' size={16} />}
+								className={styles.folder}
+								onClick={() => choose(root.id)}
+							>
+								<span className={styles.path}>{root.path}</span>
+							</Button>
+						</li>
+					))}
+				</ul>
+			)}
+		</Modal>
+	)
+}

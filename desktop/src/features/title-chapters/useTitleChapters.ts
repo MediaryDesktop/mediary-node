@@ -8,7 +8,7 @@ import { $nodeReady } from '@infra/node'
 import { fileName, fileTitle, titleFilesQuery } from '@entities/library-item'
 import { mangaChaptersQuery, mangaLinksQuery, mangaSourcesQuery } from '@entities/manga-source'
 import type { MangaLink, MangaSource, MangaSourceProblem } from '@entities/manga-source'
-import { LOCAL_SOURCE, localRef, mergeChapters } from '@entities/reader'
+import { chapterNumberFromName, LOCAL_SOURCE, localRef, mergeChapters } from '@entities/reader'
 import type { ChapterOption, ChapterRow } from '@entities/reader'
 
 export interface TitleChapters {
@@ -78,11 +78,15 @@ export function useTitleChapters(mediaRef: string | undefined): TitleChapters {
 				continue
 			}
 
-			const number = file.match?.episode ?? file.parsed.episode
+			const counted = file.match?.episode ?? file.parsed.episode
+			const number =
+				counted === undefined || counted === null
+					? chapterNumberFromName(file.rel_path)
+					: String(counted)
 
 			options.push({
 				ref: localRef(file.id),
-				number: number === undefined || number === null ? null : String(number),
+				number,
 				title: fileTitle(file),
 				source: LOCAL_SOURCE,
 				sourceName: t('mangaSources.chapters.library'),

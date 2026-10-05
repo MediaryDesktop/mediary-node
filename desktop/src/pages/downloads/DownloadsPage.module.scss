@@ -1,0 +1,11 @@
+.root {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+
+	.title {
+		margin: 0;
+		font-size: 1.75rem;
+		font-weight: 700;
+	}
+}

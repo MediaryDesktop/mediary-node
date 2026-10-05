@@ -805,6 +805,33 @@ export const en = {
 			pages_many: '{{count}} pages',
 			pages_other: '{{count}} pages'
 		},
+		downloads: {
+			save: 'Save to disk',
+			saveAll: 'Save all to disk',
+			queued_one: '{{count}} chapter queued',
+			queued_few: '{{count}} chapters queued',
+			queued_many: '{{count}} chapters queued',
+			queued_other: '{{count}} chapters queued',
+			failedToQueue: 'Could not queue the download',
+			folderTitle: 'Where to save chapters',
+			folderDescription:
+				'Chapters are saved as CBZ files in a library folder, so they are in the library at once',
+			noFolders: 'Add a library folder in the settings first',
+			folderPlaceholder: 'Choose a folder',
+			title: 'Manga chapters',
+			empty: 'Nothing saved yet',
+			cancel: 'Stop',
+			retry: 'Try again',
+			forget: 'Remove from the list',
+			progress: '{{done}} / {{total}} pages',
+			states: {
+				queued: 'Waiting',
+				running: 'Saving',
+				done: 'Saved',
+				failed: 'Failed',
+				cancelled: 'Stopped'
+			}
+		},
 		link: {
 			title: 'Find the series',
 			description: 'Pick the series on your server that holds this title’s chapters',
@@ -817,6 +844,10 @@ export const en = {
 		}
 	},
 	settings: {
+		mangaDownloads: {
+			name: 'Manga downloads',
+			hint: 'Library folder chapters are saved to, as CBZ files'
+		},
 		mangaSources: {
 			name: 'Manga sources',
 			hint: 'Your own OPDS catalogues — Komga, Kavita, Calibre-Web — to read chapters from'

@@ -806,6 +806,33 @@ export const ru: Translation = {
 			pages_many: '{{count}} страниц',
 			pages_other: '{{count}} страницы'
 		},
+		downloads: {
+			save: 'Сохранить на диск',
+			saveAll: 'Сохранить всё на диск',
+			queued_one: '{{count}} глава в очереди',
+			queued_few: '{{count}} главы в очереди',
+			queued_many: '{{count}} глав в очереди',
+			queued_other: '{{count}} главы в очереди',
+			failedToQueue: 'Не удалось поставить в очередь',
+			folderTitle: 'Куда сохранять главы',
+			folderDescription:
+				'Главы сохраняются как CBZ в папке библиотеки, поэтому сразу появляются в библиотеке',
+			noFolders: 'Сначала добавьте папку библиотеки в настройках',
+			folderPlaceholder: 'Выберите папку',
+			title: 'Главы манги',
+			empty: 'Пока ничего не сохранено',
+			cancel: 'Остановить',
+			retry: 'Попробовать снова',
+			forget: 'Убрать из списка',
+			progress: '{{done}} / {{total}} страниц',
+			states: {
+				queued: 'Ожидает',
+				running: 'Сохраняется',
+				done: 'Сохранено',
+				failed: 'Ошибка',
+				cancelled: 'Остановлено'
+			}
+		},
 		link: {
 			title: 'Найти серию',
 			description: 'Выберите серию на вашем сервере, в которой лежат главы этого тайтла',
@@ -818,6 +845,10 @@ export const ru: Translation = {
 		}
 	},
 	settings: {
+		mangaDownloads: {
+			name: 'Загрузки манги',
+			hint: 'Папка библиотеки, куда сохраняются главы в формате CBZ'
+		},
 		mangaSources: {
 			name: 'Источники манги',
 			hint: 'Ваши собственные OPDS-каталоги — Komga, Kavita, Calibre-Web — откуда читать главы'

@@ -1,16 +1,24 @@
 import { useNavigate } from '@tanstack/react-router'
 import clsx from 'clsx'
 import { useUnit } from 'effector-react'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import type { CSSProperties } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { Badge, Button, DropdownMenu, Icon, SegmentedControl } from '@shared/ui'
 
-import { deleteMangaLinkMutation } from '@entities/manga-source'
+import { $nodeReady } from '@infra/node'
+
+import {
+	deleteMangaLinkMutation,
+	mangaDownloadSettingsQuery,
+	mangaDownloadsQuery
+} from '@entities/manga-source'
+import type { MangaDownload } from '@entities/manga-source'
 import { filterChapters, isChapterRead, LOCAL_SOURCE } from '@entities/reader'
 import type { ChapterOption, ChapterRow as Row } from '@entities/reader'
 
+import { downloadRequested } from '@features/download-chapters'
 import { LinkSourceDrawer } from '@features/link-manga-source'
 import { useTitleChapters } from '@features/title-chapters'
 
@@ -47,7 +55,21 @@ function writeFilter(value: string) {
 export function ChapterList({ mediaRef, title, progress, coverColor }: ChapterListProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
-	const unlink = useUnit(deleteMangaLinkMutation.start)
+	const [unlink, downloadsData, loadDownloads, loadDownloadSettings, save, nodeReady] = useUnit([
+		deleteMangaLinkMutation.start,
+		mangaDownloadsQuery.$data,
+		mangaDownloadsQuery.start,
+		mangaDownloadSettingsQuery.start,
+		downloadRequested,
+		$nodeReady
+	])
+
+	useEffect(() => {
+		if (nodeReady) {
+			loadDownloads()
+			loadDownloadSettings()
+		}
+	}, [loadDownloads, loadDownloadSettings, nodeReady])
 
 	const { rows, sources, links, problems, loadingOnline } = useTitleChapters(mediaRef)
 
@@ -78,6 +100,29 @@ export function ChapterList({ mediaRef, title, progress, coverColor }: ChapterLi
 		writeFilter(value)
 	}
 
+	// The newest download of each chapter, by the copy it was saved from.
+	const downloads = new Map<string, MangaDownload>()
+	for (const item of downloadsData?.downloads ?? []) {
+		if (!downloads.has(item.chapter_ref)) {
+			downloads.set(item.chapter_ref, item)
+		}
+	}
+
+	// A chapter the library does not hold can be saved from its first online copy,
+	// unless that is already under way.
+	const savable = (row: Row): ChapterOption | null => {
+		if (row.options.some(option => option.source === LOCAL_SOURCE)) {
+			return null
+		}
+
+		const online = row.options.find(option => option.source.startsWith('opds:'))
+		const pending = row.options.some(option => isActive(downloads.get(option.ref)))
+
+		return online && !pending ? online : null
+	}
+
+	const unsaved = shown.map(savable).filter((option): option is ChapterOption => option !== null)
+
 	const open = (option: ChapterOption) => {
 		void navigate({ to: '/read/$ref', params: { ref: option.ref } })
 	}
@@ -87,15 +132,27 @@ export function ChapterList({ mediaRef, title, progress, coverColor }: ChapterLi
 			<div className={styles.header}>
 				<h2 className={styles.title}>{t('media.chapters.title', { count: shown.length })}</h2>
 
-				{unlinked.length > 0 && (
-					<Button
-						size='small'
-						startIcon={<Icon name='common/link' size={16} />}
-						onClick={() => setLinking(unlinked[0]?.id ?? null)}
-					>
-						{t('mangaSources.chapters.link')}
-					</Button>
-				)}
+				<div className={styles.actions}>
+					{unsaved.length > 1 && (
+						<Button
+							size='small'
+							startIcon={<Icon name='common/download' size={16} />}
+							onClick={() => save(unsaved.map(option => option.ref))}
+						>
+							{t('mangaSources.downloads.saveAll')}
+						</Button>
+					)}
+
+					{unlinked.length > 0 && (
+						<Button
+							size='small'
+							startIcon={<Icon name='common/link' size={16} />}
+							onClick={() => setLinking(unlinked[0]?.id ?? null)}
+						>
+							{t('mangaSources.chapters.link')}
+						</Button>
+					)}
+				</div>
 			</div>
 
 			{(links.length > 0 || present.size > 1) && (
@@ -168,15 +225,21 @@ export function ChapterList({ mediaRef, title, progress, coverColor }: ChapterLi
 
 			{shown.length > 0 && (
 				<ul className={styles.list}>
-					{shown.map(row => (
-						<ChapterRow
-							key={row.key}
-							row={row}
-							read={isChapterRead(row.number, progress)}
-							accent={coverColor}
-							onOpen={open}
-						/>
-					))}
+					{shown.map(row => {
+						const from = savable(row)
+
+						return (
+							<ChapterRow
+								key={row.key}
+								row={row}
+								read={isChapterRead(row.number, progress)}
+								accent={coverColor}
+								onOpen={open}
+								download={activeDownload(row, downloads)}
+								onSave={from ? () => save([from.ref]) : undefined}
+							/>
+						)
+					})}
 				</ul>
 			)}
 
@@ -192,14 +255,32 @@ export function ChapterList({ mediaRef, title, progress, coverColor }: ChapterLi
 	)
 }
 
+function isActive(item: MangaDownload | undefined): boolean {
+	return item?.state === 'queued' || item?.state === 'running'
+}
+
+function activeDownload(row: Row, downloads: Map<string, MangaDownload>): MangaDownload | undefined {
+	for (const option of row.options) {
+		const item = downloads.get(option.ref)
+		if (isActive(item)) {
+			return item
+		}
+	}
+
+	return undefined
+}
+
 interface ChapterRowProps {
 	row: Row
 	read: boolean
 	accent: string | null
 	onOpen: (option: ChapterOption) => void
+	// A download of this chapter under way.
+	download?: MangaDownload
+	onSave?: () => void
 }
 
-function ChapterRow({ row, read, accent, onOpen }: ChapterRowProps) {
+function ChapterRow({ row, read, accent, onOpen, download, onSave }: ChapterRowProps) {
 	const { t } = useTranslation()
 	const [first, ...others] = row.options
 
@@ -253,6 +334,29 @@ function ChapterRow({ row, read, accent, onOpen }: ChapterRowProps) {
 						</button>
 					}
 				/>
+			)}
+
+			{download ? (
+				<span className={styles.saving} role='status'>
+					{download.state === 'running' && download.pages_total > 0
+						? t('mangaSources.downloads.progress', {
+								done: download.pages_done,
+								total: download.pages_total
+							})
+						: t(`mangaSources.downloads.states.${download.state}`)}
+				</span>
+			) : (
+				onSave && (
+					<button
+						type='button'
+						className={styles.copies}
+						aria-label={t('mangaSources.downloads.save')}
+						title={t('mangaSources.downloads.save')}
+						onClick={onSave}
+					>
+						<Icon name='common/download' size={16} />
+					</button>
+				)
 			)}
 		</li>
 	)

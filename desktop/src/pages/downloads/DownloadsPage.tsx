@@ -1,14 +1,17 @@
 import { useTranslation } from '@shared/i18n'
-import { EmptyState } from '@shared/ui'
+
+import { MangaDownloadList } from '@features/download-chapters'
+
+import styles from './DownloadsPage.module.scss'
 
 export function DownloadsPage() {
 	const { t } = useTranslation()
 
 	return (
-		<EmptyState
-			size='page'
-			title={t('nav.downloads')}
-			description={t('placeholder.downloads')}
-		/>
+		<div className={styles.root}>
+			<h1 className={styles.title}>{t('nav.downloads')}</h1>
+
+			<MangaDownloadList />
+		</div>
 	)
 }

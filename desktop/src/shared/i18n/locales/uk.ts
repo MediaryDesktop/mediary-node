@@ -804,6 +804,33 @@ export const uk: Translation = {
 			pages_many: '{{count}} сторінок',
 			pages_other: '{{count}} сторінки'
 		},
+		downloads: {
+			save: 'Зберегти на диск',
+			saveAll: 'Зберегти все на диск',
+			queued_one: '{{count}} розділ у черзі',
+			queued_few: '{{count}} розділи в черзі',
+			queued_many: '{{count}} розділів у черзі',
+			queued_other: '{{count}} розділу в черзі',
+			failedToQueue: 'Не вдалося поставити в чергу',
+			folderTitle: 'Куди зберігати розділи',
+			folderDescription:
+				'Розділи зберігаються як CBZ у теці бібліотеки, тож одразу з’являються в бібліотеці',
+			noFolders: 'Спершу додайте теку бібліотеки в налаштуваннях',
+			folderPlaceholder: 'Виберіть теку',
+			title: 'Розділи манги',
+			empty: 'Ще нічого не збережено',
+			cancel: 'Зупинити',
+			retry: 'Спробувати ще раз',
+			forget: 'Прибрати зі списку',
+			progress: '{{done}} / {{total}} сторінок',
+			states: {
+				queued: 'Очікує',
+				running: 'Зберігається',
+				done: 'Збережено',
+				failed: 'Помилка',
+				cancelled: 'Зупинено'
+			}
+		},
 		link: {
 			title: 'Знайти серію',
 			description: 'Виберіть серію на вашому сервері, в якій лежать розділи цього тайтлу',
@@ -816,6 +843,10 @@ export const uk: Translation = {
 		}
 	},
 	settings: {
+		mangaDownloads: {
+			name: 'Завантаження манги',
+			hint: 'Тека бібліотеки, куди зберігаються розділи у форматі CBZ'
+		},
 		mangaSources: {
 			name: 'Джерела манги',
 			hint: 'Ваші власні OPDS-каталоги — Komga, Kavita, Calibre-Web — звідки читати розділи'

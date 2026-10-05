@@ -321,6 +321,105 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/v1/manga/downloads': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Chapter downloads
+		 * @description The queue and recent downloads, newest first. Changes arrive on the manga.download topic.
+		 */
+		get: operations['listMangaDownloads']
+		put?: never
+		/**
+		 * Save chapters to disk
+		 * @description Queues the chapters as CBZ files in the download folder. A chapter already queued or saved is left as it is; a failed one is queued again.
+		 */
+		post: operations['enqueueMangaDownloads']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/manga/downloads/settings': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/** Where chapters are saved */
+		get: operations['getMangaDownloadSettings']
+		/**
+		 * Choose where chapters are saved
+		 * @description One of the library folders, so a saved chapter is part of the library at once.
+		 */
+		put: operations['putMangaDownloadSettings']
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/manga/downloads/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		post?: never
+		/**
+		 * Remove a finished download from the list
+		 * @description The saved file stays where it is.
+		 */
+		delete: operations['forgetMangaDownload']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/manga/downloads/{id}/cancel': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/** Stop a download */
+		post: operations['cancelMangaDownload']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/manga/downloads/{id}/retry': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/** Try a failed download again */
+		post: operations['retryMangaDownload']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/v1/manga/opds/check': {
 		parameters: {
 			query?: never
@@ -1345,6 +1444,16 @@ export interface components {
 			/** @description Attribution for every field that came from an external source. */
 			sources: components['schemas']['Source'][] | null
 		}
+		EnqueueMangaDownloadsInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/EnqueueMangaDownloadsInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description Chapter references, as the chapter listing gives them. */
+			refs: string[] | null
+		}
 		EntriesOutputBody: {
 			/**
 			 * Format: uri
@@ -1719,6 +1828,47 @@ export interface components {
 			chapters: components['schemas']['MangaChapterBody'][] | null
 			/** @description Linked sources that could not be read this time; the others are listed. */
 			problems: components['schemas']['MangaSourceProblemBody'][] | null
+		}
+		MangaDownloadBody: {
+			chapter_ref: string
+			error?: string
+			/** Format: int64 */
+			id: number
+			media_ref: string
+			number?: string
+			/** Format: int64 */
+			pages_done: number
+			/** Format: int64 */
+			pages_total: number
+			/** @description Where the chapter is saved, inside the download folder. */
+			rel_path?: string
+			series: string
+			source_name: string
+			/** @enum {string} */
+			state: 'queued' | 'running' | 'done' | 'failed' | 'cancelled'
+			title: string
+		}
+		MangaDownloadSettingsBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/MangaDownloadSettingsBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * Format: int64
+			 * @description Library folder chapters are saved to; 0 while none is chosen.
+			 */
+			root_id: number
+		}
+		MangaDownloadsOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/MangaDownloadsOutputBody.json
+			 */
+			readonly $schema?: string
+			downloads: components['schemas']['MangaDownloadBody'][] | null
 		}
 		MangaLinkBody: {
 			/** @enum {string} */
@@ -2107,6 +2257,16 @@ export interface components {
 			readonly $schema?: string
 			/** @description True once this file counts as watched and the tracker was told. */
 			watched: boolean
+		}
+		PutMangaDownloadSettingsInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/PutMangaDownloadSettingsInputBody.json
+			 */
+			readonly $schema?: string
+			/** Format: int64 */
+			root_id: number
 		}
 		PutMangaLinkInputBody: {
 			/**
@@ -2931,6 +3091,7 @@ export type SchemaCreateListInputBody = components['schemas']['CreateListInputBo
 export type SchemaCustomList = components['schemas']['CustomList']
 export type SchemaDate = components['schemas']['Date']
 export type SchemaDetailsOutputBody = components['schemas']['DetailsOutputBody']
+export type SchemaEnqueueMangaDownloadsInputBody = components['schemas']['EnqueueMangaDownloadsInputBody']
 export type SchemaEntriesOutputBody = components['schemas']['EntriesOutputBody']
 export type SchemaEntry = components['schemas']['Entry']
 export type SchemaEpisode = components['schemas']['Episode']
@@ -2954,6 +3115,9 @@ export type SchemaList = components['schemas']['List']
 export type SchemaListsOutputBody = components['schemas']['ListsOutputBody']
 export type SchemaMangaChapterBody = components['schemas']['MangaChapterBody']
 export type SchemaMangaChaptersOutputBody = components['schemas']['MangaChaptersOutputBody']
+export type SchemaMangaDownloadBody = components['schemas']['MangaDownloadBody']
+export type SchemaMangaDownloadSettingsBody = components['schemas']['MangaDownloadSettingsBody']
+export type SchemaMangaDownloadsOutputBody = components['schemas']['MangaDownloadsOutputBody']
 export type SchemaMangaLinkBody = components['schemas']['MangaLinkBody']
 export type SchemaMangaLinksOutputBody = components['schemas']['MangaLinksOutputBody']
 export type SchemaMangaSearchOutputBody = components['schemas']['MangaSearchOutputBody']
@@ -2978,6 +3142,8 @@ export type SchemaPlaybackSession = components['schemas']['PlaybackSession']
 export type SchemaPlaybackStatus = components['schemas']['PlaybackStatus']
 export type SchemaProgressInputBody = components['schemas']['ProgressInputBody']
 export type SchemaProgressOutputBody = components['schemas']['ProgressOutputBody']
+export type SchemaPutMangaDownloadSettingsInputBody =
+	components['schemas']['PutMangaDownloadSettingsInputBody']
 export type SchemaPutMangaLinkInputBody = components['schemas']['PutMangaLinkInputBody']
 export type SchemaReadBody = components['schemas']['ReadBody']
 export type SchemaReadOutputBody = components['schemas']['ReadOutputBody']
@@ -3649,6 +3815,217 @@ export interface operations {
 				content: {
 					'application/json': components['schemas']['ScanRunOutputBody']
 				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listMangaDownloads: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['MangaDownloadsOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	enqueueMangaDownloads: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['EnqueueMangaDownloadsInputBody']
+			}
+		}
+		responses: {
+			/** @description Accepted */
+			202: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['MangaDownloadsOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getMangaDownloadSettings: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['MangaDownloadSettingsBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	putMangaDownloadSettings: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['PutMangaDownloadSettingsInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['MangaDownloadSettingsBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	forgetMangaDownload: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	cancelMangaDownload: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	retryMangaDownload: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
 			}
 			/** @description Error */
 			default: {

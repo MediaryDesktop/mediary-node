@@ -16,6 +16,25 @@
 		font-weight: 650;
 	}
 
+	.actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+
+	.saving {
+		display: grid;
+		flex: none;
+		place-items: center;
+		min-width: 7rem;
+		padding: 0 0.75rem;
+		border-radius: var(--radius);
+		background: var(--surface);
+		color: var(--text-secondary);
+		font-size: 0.8125rem;
+		font-variant-numeric: tabular-nums;
+	}
+
 	.toolbar {
 		display: flex;
 		flex-wrap: wrap;

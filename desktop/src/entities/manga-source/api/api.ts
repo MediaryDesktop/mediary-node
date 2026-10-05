@@ -115,3 +115,40 @@ export const fetchMangaChaptersFx = createEffect(async (mediaRef: string) => ({
 	mediaRef,
 	...(await requestMangaChaptersFx(mediaRef))
 }))
+
+export type MangaDownload = NodeSchemas['MangaDownloadBody']
+
+export const fetchMangaDownloadsFx = createNodeRequestFx<void, NodeSchemas['MangaDownloadsOutputBody']>(
+	() => ({
+		url: '/v1/manga/downloads'
+	})
+)
+
+export const enqueueMangaDownloadsFx = createNodeRequestFx<string[], NodeSchemas['MangaDownloadsOutputBody']>(
+	refs => ({ url: '/v1/manga/downloads', method: 'POST', body: { refs } })
+)
+
+export const cancelMangaDownloadFx = createNodeRequestFx<number, void>(id => ({
+	url: `/v1/manga/downloads/${id}/cancel`,
+	method: 'POST'
+}))
+
+export const retryMangaDownloadFx = createNodeRequestFx<number, void>(id => ({
+	url: `/v1/manga/downloads/${id}/retry`,
+	method: 'POST'
+}))
+
+export const forgetMangaDownloadFx = createNodeRequestFx<number, void>(id => ({
+	url: `/v1/manga/downloads/${id}`,
+	method: 'DELETE'
+}))
+
+export const fetchMangaDownloadSettingsFx = createNodeRequestFx<
+	void,
+	NodeSchemas['MangaDownloadSettingsBody']
+>(() => ({ url: '/v1/manga/downloads/settings' }))
+
+export const putMangaDownloadSettingsFx = createNodeRequestFx<
+	number,
+	NodeSchemas['MangaDownloadSettingsBody']
+>(rootId => ({ url: '/v1/manga/downloads/settings', method: 'PUT', body: { root_id: rootId } }))

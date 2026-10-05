@@ -111,3 +111,24 @@ export function isChapterRead(number: string | null, progress: number): boolean 
 
 	return value !== null && value > 0 && value <= progress
 }
+
+const NUMBERED = /(?:\bch(?:apter|\.)?|#)\s*(\d+(?:\.\d+)?)/i
+const TRAILING = /(\d+(?:\.\d+)?)\s*$/
+
+// chapterNumberFromName reads the chapter number out of a file name, for a file the
+// library holds without one: it counts whole chapters only, so a saved extra such
+// as "Berserk - Ch. 013.5.cbz" joins the title with no number of its own. The rules
+// are the node's for OPDS titles: a chapter marker first, then a trailing number.
+export function chapterNumberFromName(path: string): string | null {
+	const name = (path.split(/[\\/]/).pop() ?? '').replace(/\.[^.]+$/, '')
+	const match = NUMBERED.exec(name) ?? TRAILING.exec(name)
+
+	if (!match?.[1]) {
+		return null
+	}
+
+	const [whole = '', fraction] = match[1].split('.')
+	const trimmed = whole.replace(/^0+(?=\d)/, '')
+
+	return fraction ? `${trimmed}.${fraction}` : trimmed
+}

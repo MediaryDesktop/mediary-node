@@ -4,6 +4,7 @@ import clsx from 'clsx'
 import { useTranslation } from '@shared/i18n'
 
 import { PlayerModeSwitcher } from '@features/choose-player'
+import { DownloadFolderSetting } from '@features/download-chapters'
 import { LibraryRootsSettings } from '@features/manage-library-roots'
 import { OPDSServersSettings } from '@features/manage-opds-servers'
 import { LanguageSwitcher } from '@features/switch-language'
@@ -61,6 +62,15 @@ export function SettingsPage() {
 				</span>
 
 				<OPDSServersSettings />
+			</section>
+
+			<section className={styles.section}>
+				<span className={styles.label}>
+					<span className={styles.name}>{t('settings.mangaDownloads.name')}</span>
+					<span className={styles.hint}>{t('settings.mangaDownloads.hint')}</span>
+				</span>
+
+				<DownloadFolderSetting />
 			</section>
 
 			<section className={styles.section}>
