@@ -20,6 +20,8 @@ type chapterKey struct {
 	Pages    int    `json:"n"`
 	Title    string `json:"t,omitempty"`
 	Number   string `json:"c,omitempty"`
+	// Archive is the book's own CBZ on the server, for a download to keep as it is.
+	Archive string `json:"a,omitempty"`
 }
 
 // The largest page count a chapter may claim, the same as a local archive.
@@ -48,7 +50,8 @@ func decodeKey(raw string) (chapterKey, error) {
 	}
 
 	if !strings.HasPrefix(key.Series, "/") || !strings.HasPrefix(key.Template, "/") ||
-		!strings.Contains(key.Template, "{pageNumber}") || key.Pages <= 0 || key.Pages > maxChapterPages {
+		!strings.Contains(key.Template, "{pageNumber}") || key.Pages <= 0 || key.Pages > maxChapterPages ||
+		(key.Archive != "" && !strings.HasPrefix(key.Archive, "/")) {
 		return chapterKey{}, invalid
 	}
 

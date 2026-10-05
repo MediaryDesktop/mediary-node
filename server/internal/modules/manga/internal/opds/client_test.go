@@ -3,6 +3,7 @@ package opds
 import (
 	"context"
 	"errors"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -46,6 +47,9 @@ func komga(t *testing.T) Server {
 			serve("search.xml", "application/atom+xml")
 		case r.URL.Path == "/opds/v1.2/series/0RTZ92JHQ80P8":
 			serve("series.xml", "application/atom+xml")
+		case r.URL.Path == "/opds/v1.2/books/0RTZ92JHZ8C7B/file/Berserk Chapter 12.cbz":
+			w.Header().Set("Content-Type", "application/zip")
+			_, _ = w.Write([]byte("PK archive"))
 		case strings.HasPrefix(r.URL.Path, "/opds/v1.2/books/0RTZ92JHZ8C7B/pages/"):
 			w.Header().Set("Content-Type", "image/png")
 			_, _ = w.Write([]byte("\x89PNG page " + strings.TrimPrefix(r.URL.Path, "/opds/v1.2/books/0RTZ92JHZ8C7B/pages/")))
@@ -91,6 +95,20 @@ func TestBooksCarryNumbersAndPageStreams(t *testing.T) {
 	twelve := numbers["12"]
 	if twelve.PageTemplate != "/opds/v1.2/books/0RTZ92JHZ8C7B/pages/{pageNumber}" {
 		t.Errorf("template = %q", twelve.PageTemplate)
+	}
+
+	if twelve.Archive != "/opds/v1.2/books/0RTZ92JHZ8C7B/file/Berserk%20Chapter%2012.cbz" {
+		t.Errorf("archive = %q", twelve.Archive)
+	}
+
+	archive, err := client.Archive(context.Background(), server, twelve.Archive)
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, _ := io.ReadAll(archive)
+	_ = archive.Close()
+	if string(body) != "PK archive" {
+		t.Errorf("archive body = %q", body)
 	}
 
 	data, contentType, err := client.Page(context.Background(), server, twelve.PageTemplate, 3)

@@ -101,3 +101,17 @@ func opdsKey(chapter reader.ChapterRef) (serverID int64, key string, err error) 
 
 	return serverID, key, nil
 }
+
+// downloadFolders lets the manga module save chapters into library folders and add
+// them to the library, without knowing the library module.
+type downloadFolders struct {
+	library *library.Module
+}
+
+func (d downloadFolders) RootPath(ctx context.Context, rootID int64) (path string, found bool, err error) {
+	return d.library.RootPath(ctx, rootID)
+}
+
+func (d downloadFolders) ImportFile(ctx context.Context, rootID int64, relPath, mediaRef string, chapter *int) (int64, error) {
+	return d.library.ImportFile(ctx, rootID, relPath, mediaRef, chapter)
+}

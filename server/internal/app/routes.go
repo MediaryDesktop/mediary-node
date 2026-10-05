@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"database/sql"
 	"path/filepath"
 	"time"
@@ -51,7 +52,7 @@ type Deps struct {
 }
 
 // Register mounts every module and returns what has to run on shutdown.
-func Register(api huma.API, deps Deps) (shutdown func()) {
+func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 	httpapi.RegisterHealth(api, deps.Build, deps.Linked)
 
 	trackerModule := tracker.New(tracker.Deps{
@@ -114,13 +115,25 @@ func Register(api huma.API, deps Deps) (shutdown func()) {
 	})
 	playbackModule.Register(api)
 
+	// Downloaded chapters are written into a library folder and join the library
+	// through it: the manga module never touches the library's tables.
 	mangaModule := manga.New(manga.Deps{
 		DB:          deps.DB,
 		Logger:      moduleLogger(deps.Logger, "manga"),
+		Events:      deps.Events,
+		Library:     downloadFolders{library: libraryModule},
 		SecretsPath: filepath.Join(deps.DataDir, "opds-secrets.json"),
 		UserAgent:   "mediary-node/" + deps.Build.Version,
 	})
 	mangaModule.Register(api)
+
+	queueCtx, stopQueue := context.WithCancel(ctx)
+
+	// The OpenAPI generator registers the routes without a database; there is no
+	// queue to work through then.
+	if deps.DB != nil {
+		mangaModule.Start(queueCtx)
+	}
 
 	// The reader reads the library's files and, through the manga module, chapters
 	// on the user's OPDS servers. Every edge is a port joined here.
@@ -143,7 +156,10 @@ func Register(api huma.API, deps Deps) (shutdown func()) {
 		Logger: moduleLogger(deps.Logger, "extension"),
 	}).Register(api)
 
-	return playbackModule.Close
+	return func() {
+		stopQueue()
+		playbackModule.Close()
+	}
 }
 
 func moduleLogger(logger zerolog.Logger, module string) zerolog.Logger {

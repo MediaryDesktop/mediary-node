@@ -29,6 +29,6 @@ func TestEveryModuleRegistersTogether(t *testing.T) {
 
 	_, api := humatest.New(t)
 
-	shutdown := Register(api, Deps{Logger: zerolog.Nop(), DB: database, DataDir: dir})
+	shutdown := Register(ctx, api, Deps{Logger: zerolog.Nop(), DB: database, DataDir: dir})
 	shutdown()
 }

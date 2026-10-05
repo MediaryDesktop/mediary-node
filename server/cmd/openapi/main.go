@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -32,7 +33,7 @@ func run() error {
 		Logger:  zerolog.Nop(),
 	})
 
-	app.Register(api, app.Deps{
+	app.Register(context.Background(), api, app.Deps{
 		Logger: zerolog.Nop(),
 		Build:  httpapi.BuildInfo{Version: version},
 	})

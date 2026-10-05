@@ -203,6 +203,7 @@ func (s *Service) Chapters(ctx context.Context, mediaRef string) ([]ChapterInfo,
 				Pages:    book.Pages,
 				Title:    book.Title,
 				Number:   book.Number,
+				Archive:  book.Archive,
 			})
 			if err != nil {
 				return nil, nil, err

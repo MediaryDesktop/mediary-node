@@ -99,7 +99,7 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 		Logger:         logger,
 	})
 
-	shutdownModules := Register(api, Deps{
+	shutdownModules := Register(ctx, api, Deps{
 		Logger: logger,
 		DB:     database,
 		Events: hub,

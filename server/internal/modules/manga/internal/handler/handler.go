@@ -7,15 +7,17 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 
 	"github.com/mediaryorg/mediary-node/server/internal/httpapi"
+	"github.com/mediaryorg/mediary-node/server/internal/modules/manga/internal/download"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/manga/internal/service"
 )
 
 type Handler struct {
-	svc *service.Service
+	svc   *service.Service
+	queue *download.Queue
 }
 
-func New(svc *service.Service) *Handler {
-	return &Handler{svc: svc}
+func New(svc *service.Service, queue *download.Queue) *Handler {
+	return &Handler{svc: svc, queue: queue}
 }
 
 type OPDSServerBody struct {
@@ -160,6 +162,7 @@ type MangaChaptersOutput struct {
 func (h *Handler) Register(api huma.API) {
 	h.registerServers(api)
 	h.registerTitles(api)
+	h.registerDownloads(api)
 }
 
 func (h *Handler) registerServers(api huma.API) {

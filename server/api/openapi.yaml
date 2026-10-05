@@ -433,6 +433,28 @@ components:
         - media
         - sources
       type: object
+    EnqueueMangaDownloadsInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/EnqueueMangaDownloadsInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        refs:
+          description: Chapter references, as the chapter listing gives them.
+          items:
+            type: string
+          maxItems: 500
+          minItems: 1
+          type:
+            - array
+            - "null"
+      required:
+        - refs
+      type: object
     EntriesOutputBody:
       additionalProperties: false
       properties:
@@ -1124,6 +1146,90 @@ components:
       required:
         - chapters
         - problems
+      type: object
+    MangaDownloadBody:
+      additionalProperties: false
+      properties:
+        chapter_ref:
+          type: string
+        error:
+          type: string
+        id:
+          format: int64
+          type: integer
+        media_ref:
+          type: string
+        number:
+          type: string
+        pages_done:
+          format: int64
+          type: integer
+        pages_total:
+          format: int64
+          type: integer
+        rel_path:
+          description: Where the chapter is saved, inside the download folder.
+          type: string
+        series:
+          type: string
+        source_name:
+          type: string
+        state:
+          enum:
+            - queued
+            - running
+            - done
+            - failed
+            - cancelled
+          type: string
+        title:
+          type: string
+      required:
+        - id
+        - chapter_ref
+        - media_ref
+        - series
+        - title
+        - source_name
+        - state
+        - pages_done
+        - pages_total
+      type: object
+    MangaDownloadSettingsBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/MangaDownloadSettingsBody.json
+          format: uri
+          readOnly: true
+          type: string
+        root_id:
+          description: Library folder chapters are saved to; 0 while none is chosen.
+          format: int64
+          type: integer
+      required:
+        - root_id
+      type: object
+    MangaDownloadsOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/MangaDownloadsOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        downloads:
+          items:
+            $ref: "#/components/schemas/MangaDownloadBody"
+          type:
+            - array
+            - "null"
+      required:
+        - downloads
       type: object
     MangaLinkBody:
       additionalProperties: false
@@ -1969,6 +2075,23 @@ components:
           type: boolean
       required:
         - watched
+      type: object
+    PutMangaDownloadSettingsInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/PutMangaDownloadSettingsInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        root_id:
+          format: int64
+          minimum: 1
+          type: integer
+      required:
+        - root_id
       type: object
     PutMangaLinkInputBody:
       additionalProperties: false
@@ -3790,6 +3913,162 @@ paths:
       summary: One past scan
       tags:
         - library
+  /v1/manga/downloads:
+    get:
+      description: The queue and recent downloads, newest first. Changes arrive on the manga.download topic.
+      operationId: listMangaDownloads
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MangaDownloadsOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Chapter downloads
+      tags:
+        - manga
+    post:
+      description: Queues the chapters as CBZ files in the download folder. A chapter already queued or saved is left as it is; a failed one is queued again.
+      operationId: enqueueMangaDownloads
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EnqueueMangaDownloadsInputBody"
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MangaDownloadsOutputBody"
+          description: Accepted
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Save chapters to disk
+      tags:
+        - manga
+  /v1/manga/downloads/settings:
+    get:
+      operationId: getMangaDownloadSettings
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MangaDownloadSettingsBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Where chapters are saved
+      tags:
+        - manga
+    put:
+      description: One of the library folders, so a saved chapter is part of the library at once.
+      operationId: putMangaDownloadSettings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PutMangaDownloadSettingsInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MangaDownloadSettingsBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Choose where chapters are saved
+      tags:
+        - manga
+  /v1/manga/downloads/{id}:
+    delete:
+      description: The saved file stays where it is.
+      operationId: forgetMangaDownload
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            format: int64
+            type: integer
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Remove a finished download from the list
+      tags:
+        - manga
+  /v1/manga/downloads/{id}/cancel:
+    post:
+      operationId: cancelMangaDownload
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            format: int64
+            type: integer
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Stop a download
+      tags:
+        - manga
+  /v1/manga/downloads/{id}/retry:
+    post:
+      operationId: retryMangaDownload
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            format: int64
+            type: integer
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Try a failed download again
+      tags:
+        - manga
   /v1/manga/opds/check:
     post:
       description: "Reads the catalogue's root with the given credentials and says what is wrong, if anything. Answers 200 either way: a failed check is a result, not an error."

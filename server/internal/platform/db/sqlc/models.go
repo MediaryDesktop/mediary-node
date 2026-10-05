@@ -85,6 +85,24 @@ type ListIcon struct {
 	Icon   string `json:"icon"`
 }
 
+type MangaDownload struct {
+	ID         int64  `json:"id"`
+	ChapterRef string `json:"chapter_ref"`
+	MediaRef   string `json:"media_ref"`
+	Series     string `json:"series"`
+	Title      string `json:"title"`
+	Number     string `json:"number"`
+	SourceName string `json:"source_name"`
+	RootID     int64  `json:"root_id"`
+	State      string `json:"state"`
+	PagesDone  int64  `json:"pages_done"`
+	PagesTotal int64  `json:"pages_total"`
+	RelPath    string `json:"rel_path"`
+	Error      string `json:"error"`
+	CreatedAt  string `json:"created_at"`
+	UpdatedAt  string `json:"updated_at"`
+}
+
 type MangaSourceLink struct {
 	MediaRef    string `json:"media_ref"`
 	Source      string `json:"source"`

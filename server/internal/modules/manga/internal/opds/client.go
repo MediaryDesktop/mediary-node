@@ -30,6 +30,9 @@ const (
 	// Series feeds are paged. A series with more pages than this is not one the
 	// reader can list sensibly anyway.
 	maxSeriesPages = 50
+
+	// A whole chapter archive; a volume of a large manga is well under this.
+	MaxArchiveBytes = 1 << 30
 )
 
 // Server is one catalogue and the credentials for it.
@@ -81,7 +84,10 @@ type Book struct {
 	// the number of pages. Both are empty for a book that cannot be streamed.
 	PageTemplate string
 	Pages        int
-	Updated      time.Time
+	// Archive is the path of the book's own comic archive, when the server offers
+	// it as one, so a download can keep the file exactly as the server has it.
+	Archive string
+	Updated time.Time
 }
 
 // Check reads the catalogue's root, which is enough to tell a wrong address from
@@ -184,6 +190,14 @@ func book(base *url.URL, entry Entry) Book {
 		out.Updated = updated
 	}
 
+	for _, link := range entry.Links {
+		if link.Rel == RelAcquisition && isComicArchive(link) {
+			if path, err := serverPath(base, link.Href); err == nil {
+				out.Archive = path
+			}
+		}
+	}
+
 	if stream, ok := entry.Link(RelPSEStream); ok && stream.Count > 0 && strings.Contains(stream.Href, "{pageNumber}") {
 		// The template is resolved by hand: url.Parse would escape its braces.
 		if path, err := serverPath(base, stream.Href); err == nil {
@@ -227,6 +241,50 @@ func (c *Client) Page(ctx context.Context, server Server, template string, index
 
 	return data, contentType, nil
 }
+
+// isComicArchive says whether an acquisition link is a CBZ. Servers name the type
+// several ways; an EPUB or a PDF is not one the reader opens.
+func isComicArchive(link Link) bool {
+	switch strings.ToLower(strings.TrimSpace(strings.Split(link.Type, ";")[0])) {
+	case "application/zip", "application/x-cbz", "application/vnd.comicbook+zip":
+		return true
+	}
+
+	return strings.HasSuffix(strings.ToLower(strings.Split(link.Href, "?")[0]), ".cbz")
+}
+
+// Archive opens a book's archive for reading. The caller closes it; reading past
+// MaxArchiveBytes fails rather than filling the disk.
+func (c *Client) Archive(ctx context.Context, server Server, path string) (io.ReadCloser, error) {
+	req, err := c.request(ctx, server, path)
+	if err != nil {
+		return nil, err
+	}
+
+	// The client's timeout covers the whole body, and an archive takes longer to
+	// arrive than a feed; the caller's context bounds it instead.
+	archiveClient := *c.http
+	archiveClient.Timeout = 0
+
+	resp, err := archiveClient.Do(req)
+	if err != nil {
+		return nil, unreachable(err)
+	}
+
+	if statusErr := status(resp); statusErr != nil {
+		_ = resp.Body.Close()
+		return nil, statusErr
+	}
+
+	return limitedBody{Reader: io.LimitReader(resp.Body, MaxArchiveBytes+1), body: resp.Body}, nil
+}
+
+type limitedBody struct {
+	io.Reader
+	body io.Closer
+}
+
+func (l limitedBody) Close() error { return l.body.Close() }
 
 func (c *Client) feed(ctx context.Context, server Server, path string) (*Feed, error) {
 	body, err := c.get(ctx, server, path, maxFeedBytes)

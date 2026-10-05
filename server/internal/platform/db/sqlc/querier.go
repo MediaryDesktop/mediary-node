@@ -29,15 +29,20 @@ type Querier interface {
 	DeleteLibraryFile(ctx context.Context, id int64) (int64, error)
 	DeleteLibraryRoot(ctx context.Context, id int64) (int64, error)
 	DeleteListIcon(ctx context.Context, listID string) error
+	DeleteMangaDownload(ctx context.Context, id int64) (int64, error)
 	DeleteMangaSourceLink(ctx context.Context, arg DeleteMangaSourceLinkParams) (int64, error)
 	DeleteMangaSourceLinksBySource(ctx context.Context, source string) error
 	DeleteOPDSServer(ctx context.Context, id int64) (int64, error)
 	DeleteSourceCacheOlderThan(ctx context.Context, arg DeleteSourceCacheOlderThanParams) error
+	// A chapter already queued, running or done stays as it is; a failed or cancelled
+	// one goes back in the queue.
+	EnqueueMangaDownload(ctx context.Context, arg EnqueueMangaDownloadParams) (MangaDownload, error)
 	GetAniListMirror(ctx context.Context, kind string) (AnilistMirror, error)
 	GetAniListOutboxEntry(ctx context.Context, arg GetAniListOutboxEntryParams) (AnilistOutbox, error)
 	GetCustomList(ctx context.Context, id int64) (CustomList, error)
 	GetLibraryFile(ctx context.Context, id int64) (GetLibraryFileRow, error)
 	GetLibraryRoot(ctx context.Context, id int64) (LibraryRoot, error)
+	GetMangaDownload(ctx context.Context, id int64) (MangaDownload, error)
 	GetMangaSourceLinkBySeries(ctx context.Context, arg GetMangaSourceLinkBySeriesParams) (MangaSourceLink, error)
 	// Phase 0 queries, proving `task sqlc` produces compiling Go. Module queries
 	// go in db/queries/<module>.sql.
@@ -68,6 +73,7 @@ type Querier interface {
 	ListLibraryFiles(ctx context.Context, arg ListLibraryFilesParams) ([]ListLibraryFilesRow, error)
 	ListLibraryRoots(ctx context.Context) ([]ListLibraryRootsRow, error)
 	ListListIcons(ctx context.Context) ([]ListIcon, error)
+	ListMangaDownloads(ctx context.Context, limit int64) ([]MangaDownload, error)
 	ListMangaSourceLinks(ctx context.Context, mediaRef string) ([]MangaSourceLink, error)
 	ListNodeMeta(ctx context.Context) ([]NodeMetum, error)
 	ListOPDSServers(ctx context.Context) ([]OpdsServer, error)
@@ -82,13 +88,19 @@ type Querier interface {
 	MarkLibraryFileMissing(ctx context.Context, arg MarkLibraryFileMissingParams) error
 	MoveListIcon(ctx context.Context, arg MoveListIconParams) error
 	NextCustomListPosition(ctx context.Context, mediaType string) (int64, error)
+	NextQueuedMangaDownload(ctx context.Context) (MangaDownload, error)
 	// A local database has no reason to grow scan history forever; the newest runs
 	// are the only ones anyone comes back to read.
 	PruneScanRuns(ctx context.Context, limit int64) error
 	RecordAniListOutboxFailure(ctx context.Context, arg RecordAniListOutboxFailureParams) error
 	RenameCustomList(ctx context.Context, arg RenameCustomListParams) (int64, error)
+	RequeueRunningMangaDownloads(ctx context.Context, updatedAt string) ([]MangaDownload, error)
+	RetryMangaDownload(ctx context.Context, arg RetryMangaDownloadParams) (int64, error)
 	SetLibraryFileIgnored(ctx context.Context, arg SetLibraryFileIgnoredParams) (int64, error)
 	SetListIcon(ctx context.Context, arg SetListIconParams) error
+	SetMangaDownloadProgress(ctx context.Context, arg SetMangaDownloadProgressParams) error
+	SetMangaDownloadState(ctx context.Context, arg SetMangaDownloadStateParams) error
+	SetMangaDownloadTarget(ctx context.Context, arg SetMangaDownloadTargetParams) error
 	TouchLibraryRoot(ctx context.Context, arg TouchLibraryRootParams) error
 	UpdateLibraryFile(ctx context.Context, arg UpdateLibraryFileParams) error
 	// Only the parsed columns: the file itself did not change, a newer parser reads

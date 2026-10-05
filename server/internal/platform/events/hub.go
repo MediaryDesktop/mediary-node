@@ -16,6 +16,7 @@ const (
 	TopicNotification  Topic = "notification"
 	TopicTracker       Topic = "tracker"
 	TopicAniListAuth   Topic = "anilist.session"
+	TopicMangaDownload Topic = "manga.download"
 )
 
 type Event struct {

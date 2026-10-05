@@ -43,6 +43,18 @@ func (q *Queries) CreateOPDSServer(ctx context.Context, arg CreateOPDSServerPara
 	return i, err
 }
 
+const deleteMangaDownload = `-- name: DeleteMangaDownload :execrows
+DELETE FROM manga_download WHERE id = ? AND state IN ('done', 'failed', 'cancelled')
+`
+
+func (q *Queries) DeleteMangaDownload(ctx context.Context, id int64) (int64, error) {
+	result, err := q.db.ExecContext(ctx, deleteMangaDownload, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
 const deleteMangaSourceLink = `-- name: DeleteMangaSourceLink :execrows
 DELETE FROM manga_source_link WHERE media_ref = ? AND source = ?
 `
@@ -79,6 +91,91 @@ func (q *Queries) DeleteOPDSServer(ctx context.Context, id int64) (int64, error)
 		return 0, err
 	}
 	return result.RowsAffected()
+}
+
+const enqueueMangaDownload = `-- name: EnqueueMangaDownload :one
+INSERT INTO manga_download (chapter_ref, media_ref, series, title, number, source_name, root_id, state, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, 'queued', ?, ?)
+ON CONFLICT (chapter_ref) DO UPDATE
+SET state = CASE WHEN manga_download.state IN ('failed', 'cancelled') THEN 'queued' ELSE manga_download.state END,
+    error = CASE WHEN manga_download.state IN ('failed', 'cancelled') THEN '' ELSE manga_download.error END,
+    root_id = CASE WHEN manga_download.state IN ('failed', 'cancelled') THEN excluded.root_id ELSE manga_download.root_id END,
+    updated_at = excluded.updated_at
+RETURNING id, chapter_ref, media_ref, series, title, number, source_name, root_id, state, pages_done, pages_total, rel_path, error, created_at, updated_at
+`
+
+type EnqueueMangaDownloadParams struct {
+	ChapterRef string `json:"chapter_ref"`
+	MediaRef   string `json:"media_ref"`
+	Series     string `json:"series"`
+	Title      string `json:"title"`
+	Number     string `json:"number"`
+	SourceName string `json:"source_name"`
+	RootID     int64  `json:"root_id"`
+	CreatedAt  string `json:"created_at"`
+	UpdatedAt  string `json:"updated_at"`
+}
+
+// A chapter already queued, running or done stays as it is; a failed or cancelled
+// one goes back in the queue.
+func (q *Queries) EnqueueMangaDownload(ctx context.Context, arg EnqueueMangaDownloadParams) (MangaDownload, error) {
+	row := q.db.QueryRowContext(ctx, enqueueMangaDownload,
+		arg.ChapterRef,
+		arg.MediaRef,
+		arg.Series,
+		arg.Title,
+		arg.Number,
+		arg.SourceName,
+		arg.RootID,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
+	var i MangaDownload
+	err := row.Scan(
+		&i.ID,
+		&i.ChapterRef,
+		&i.MediaRef,
+		&i.Series,
+		&i.Title,
+		&i.Number,
+		&i.SourceName,
+		&i.RootID,
+		&i.State,
+		&i.PagesDone,
+		&i.PagesTotal,
+		&i.RelPath,
+		&i.Error,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getMangaDownload = `-- name: GetMangaDownload :one
+SELECT id, chapter_ref, media_ref, series, title, number, source_name, root_id, state, pages_done, pages_total, rel_path, error, created_at, updated_at FROM manga_download WHERE id = ?
+`
+
+func (q *Queries) GetMangaDownload(ctx context.Context, id int64) (MangaDownload, error) {
+	row := q.db.QueryRowContext(ctx, getMangaDownload, id)
+	var i MangaDownload
+	err := row.Scan(
+		&i.ID,
+		&i.ChapterRef,
+		&i.MediaRef,
+		&i.Series,
+		&i.Title,
+		&i.Number,
+		&i.SourceName,
+		&i.RootID,
+		&i.State,
+		&i.PagesDone,
+		&i.PagesTotal,
+		&i.RelPath,
+		&i.Error,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const getMangaSourceLinkBySeries = `-- name: GetMangaSourceLinkBySeries :one
@@ -120,6 +217,49 @@ func (q *Queries) GetOPDSServer(ctx context.Context, id int64) (OpdsServer, erro
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const listMangaDownloads = `-- name: ListMangaDownloads :many
+SELECT id, chapter_ref, media_ref, series, title, number, source_name, root_id, state, pages_done, pages_total, rel_path, error, created_at, updated_at FROM manga_download ORDER BY id DESC LIMIT ?
+`
+
+func (q *Queries) ListMangaDownloads(ctx context.Context, limit int64) ([]MangaDownload, error) {
+	rows, err := q.db.QueryContext(ctx, listMangaDownloads, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []MangaDownload{}
+	for rows.Next() {
+		var i MangaDownload
+		if err := rows.Scan(
+			&i.ID,
+			&i.ChapterRef,
+			&i.MediaRef,
+			&i.Series,
+			&i.Title,
+			&i.Number,
+			&i.SourceName,
+			&i.RootID,
+			&i.State,
+			&i.PagesDone,
+			&i.PagesTotal,
+			&i.RelPath,
+			&i.Error,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listMangaSourceLinks = `-- name: ListMangaSourceLinks :many
@@ -188,6 +328,153 @@ func (q *Queries) ListOPDSServers(ctx context.Context) ([]OpdsServer, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const nextQueuedMangaDownload = `-- name: NextQueuedMangaDownload :one
+SELECT id, chapter_ref, media_ref, series, title, number, source_name, root_id, state, pages_done, pages_total, rel_path, error, created_at, updated_at FROM manga_download WHERE state = 'queued' ORDER BY id LIMIT 1
+`
+
+func (q *Queries) NextQueuedMangaDownload(ctx context.Context) (MangaDownload, error) {
+	row := q.db.QueryRowContext(ctx, nextQueuedMangaDownload)
+	var i MangaDownload
+	err := row.Scan(
+		&i.ID,
+		&i.ChapterRef,
+		&i.MediaRef,
+		&i.Series,
+		&i.Title,
+		&i.Number,
+		&i.SourceName,
+		&i.RootID,
+		&i.State,
+		&i.PagesDone,
+		&i.PagesTotal,
+		&i.RelPath,
+		&i.Error,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const requeueRunningMangaDownloads = `-- name: RequeueRunningMangaDownloads :many
+UPDATE manga_download SET state = 'queued', pages_done = 0, updated_at = ?
+WHERE state = 'running'
+RETURNING id, chapter_ref, media_ref, series, title, number, source_name, root_id, state, pages_done, pages_total, rel_path, error, created_at, updated_at
+`
+
+func (q *Queries) RequeueRunningMangaDownloads(ctx context.Context, updatedAt string) ([]MangaDownload, error) {
+	rows, err := q.db.QueryContext(ctx, requeueRunningMangaDownloads, updatedAt)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []MangaDownload{}
+	for rows.Next() {
+		var i MangaDownload
+		if err := rows.Scan(
+			&i.ID,
+			&i.ChapterRef,
+			&i.MediaRef,
+			&i.Series,
+			&i.Title,
+			&i.Number,
+			&i.SourceName,
+			&i.RootID,
+			&i.State,
+			&i.PagesDone,
+			&i.PagesTotal,
+			&i.RelPath,
+			&i.Error,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const retryMangaDownload = `-- name: RetryMangaDownload :execrows
+UPDATE manga_download SET state = 'queued', error = '', pages_done = 0, updated_at = ?
+WHERE id = ? AND state IN ('failed', 'cancelled')
+`
+
+type RetryMangaDownloadParams struct {
+	UpdatedAt string `json:"updated_at"`
+	ID        int64  `json:"id"`
+}
+
+func (q *Queries) RetryMangaDownload(ctx context.Context, arg RetryMangaDownloadParams) (int64, error) {
+	result, err := q.db.ExecContext(ctx, retryMangaDownload, arg.UpdatedAt, arg.ID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+const setMangaDownloadProgress = `-- name: SetMangaDownloadProgress :exec
+UPDATE manga_download SET pages_done = ?, updated_at = ? WHERE id = ?
+`
+
+type SetMangaDownloadProgressParams struct {
+	PagesDone int64  `json:"pages_done"`
+	UpdatedAt string `json:"updated_at"`
+	ID        int64  `json:"id"`
+}
+
+func (q *Queries) SetMangaDownloadProgress(ctx context.Context, arg SetMangaDownloadProgressParams) error {
+	_, err := q.db.ExecContext(ctx, setMangaDownloadProgress, arg.PagesDone, arg.UpdatedAt, arg.ID)
+	return err
+}
+
+const setMangaDownloadState = `-- name: SetMangaDownloadState :exec
+UPDATE manga_download SET state = ?, error = ?, updated_at = ? WHERE id = ?
+`
+
+type SetMangaDownloadStateParams struct {
+	State     string `json:"state"`
+	Error     string `json:"error"`
+	UpdatedAt string `json:"updated_at"`
+	ID        int64  `json:"id"`
+}
+
+func (q *Queries) SetMangaDownloadState(ctx context.Context, arg SetMangaDownloadStateParams) error {
+	_, err := q.db.ExecContext(ctx, setMangaDownloadState,
+		arg.State,
+		arg.Error,
+		arg.UpdatedAt,
+		arg.ID,
+	)
+	return err
+}
+
+const setMangaDownloadTarget = `-- name: SetMangaDownloadTarget :exec
+UPDATE manga_download SET rel_path = ?, pages_total = ?, updated_at = ? WHERE id = ?
+`
+
+type SetMangaDownloadTargetParams struct {
+	RelPath    string `json:"rel_path"`
+	PagesTotal int64  `json:"pages_total"`
+	UpdatedAt  string `json:"updated_at"`
+	ID         int64  `json:"id"`
+}
+
+func (q *Queries) SetMangaDownloadTarget(ctx context.Context, arg SetMangaDownloadTargetParams) error {
+	_, err := q.db.ExecContext(ctx, setMangaDownloadTarget,
+		arg.RelPath,
+		arg.PagesTotal,
+		arg.UpdatedAt,
+		arg.ID,
+	)
+	return err
 }
 
 const updateOPDSServer = `-- name: UpdateOPDSServer :one

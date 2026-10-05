@@ -8,33 +8,52 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/rs/zerolog"
 
+	"github.com/mediaryorg/mediary-node/server/internal/modules/manga/internal/download"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/manga/internal/handler"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/manga/internal/opds"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/manga/internal/secrets"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/manga/internal/service"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/manga/internal/store"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
 )
 
 type Deps struct {
 	DB     *sql.DB
 	Logger zerolog.Logger
+	Events *events.Hub
+
+	// Library is where downloaded chapters go and how they join the library.
+	Library Library
 
 	// SecretsPath is the file that holds the OPDS servers' passwords.
 	SecretsPath string
 	UserAgent   string
 }
 
+// Library is the library module as downloads need it, wired by internal/app.
+type Library = download.Library
+
 func New(deps Deps) *Module {
-	svc := service.New(store.New(deps.DB), secrets.New(deps.SecretsPath), deps.Logger, service.Options{
+	st := store.New(deps.DB)
+
+	svc := service.New(st, secrets.New(deps.SecretsPath), deps.Logger, service.Options{
 		Client: opds.New(30*time.Second, deps.UserAgent),
 	})
 
-	return &Module{handler: handler.New(svc), svc: svc}
+	queue := download.New(st, svc.DownloadSource(), deps.Library, deps.Events, deps.Logger)
+
+	return &Module{handler: handler.New(svc, queue), svc: svc, queue: queue}
 }
 
 type Module struct {
 	handler *handler.Handler
 	svc     *service.Service
+	queue   *download.Queue
+}
+
+// Start resumes the download queue and works through it until ctx ends.
+func (m *Module) Start(ctx context.Context) {
+	m.queue.Start(ctx)
 }
 
 func (m *Module) Register(api huma.API) {
