@@ -791,7 +791,10 @@ export const ru: Translation = {
 			}
 		},
 		chapters: {
-			title: 'Главы онлайн',
+			library: 'Библиотека',
+			all: 'Все источники',
+			filter: 'Источник',
+			copies: 'Другие копии',
 			link: 'Найти на сервере',
 			relink: 'Сменить серию',
 			unlink: 'Отвязать',

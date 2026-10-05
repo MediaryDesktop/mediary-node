@@ -21,29 +21,3 @@ export function prefetchIndexes(page: number, total: number, ahead = 2): number[
 
 	return out
 }
-
-export interface ChapterLink {
-	ref: string
-	chapter: number | null | undefined
-}
-
-// Neighbours in reading order, which is chapter number order. A chapter without a
-// number has no place in that order and is not offered as a neighbour.
-export function neighbourChapters(
-	chapters: ChapterLink[],
-	ref: string
-): { previous: ChapterLink | null; next: ChapterLink | null } {
-	const numbered = chapters
-		.filter((item): item is ChapterLink & { chapter: number } => typeof item.chapter === 'number')
-		.sort((a, b) => a.chapter - b.chapter)
-
-	const at = numbered.findIndex(item => item.ref === ref)
-	if (at < 0) {
-		return { previous: null, next: null }
-	}
-
-	return {
-		previous: numbered[at - 1] ?? null,
-		next: numbered[at + 1] ?? null
-	}
-}

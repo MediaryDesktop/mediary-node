@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { clampPage, isLastPage, neighbourChapters, prefetchIndexes } from './pages'
+import { clampPage, isLastPage, prefetchIndexes } from './pages'
 
 describe('clampPage', () => {
 	it('keeps the page inside the chapter', () => {
@@ -30,30 +30,5 @@ describe('prefetchIndexes', () => {
 	it('stops at the end of the chapter', () => {
 		expect(prefetchIndexes(8, 10)).toEqual([9])
 		expect(prefetchIndexes(9, 10)).toEqual([])
-	})
-})
-
-describe('neighbourChapters', () => {
-	const chapters = [
-		{ ref: 'local:3', chapter: 3 },
-		{ ref: 'local:1', chapter: 1 },
-		{ ref: 'local:9', chapter: null },
-		{ ref: 'local:2', chapter: 2 }
-	]
-
-	it('finds the chapters either side in number order', () => {
-		expect(neighbourChapters(chapters, 'local:2')).toEqual({
-			previous: { ref: 'local:1', chapter: 1 },
-			next: { ref: 'local:3', chapter: 3 }
-		})
-	})
-
-	it('has no neighbour past either end', () => {
-		expect(neighbourChapters(chapters, 'local:1').previous).toBeNull()
-		expect(neighbourChapters(chapters, 'local:3').next).toBeNull()
-	})
-
-	it('offers nothing for an unnumbered chapter', () => {
-		expect(neighbourChapters(chapters, 'local:9')).toEqual({ previous: null, next: null })
 	})
 })

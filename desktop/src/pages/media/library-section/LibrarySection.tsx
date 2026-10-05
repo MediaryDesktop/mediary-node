@@ -19,7 +19,6 @@ import { episodeNumber, groupTitleFiles, isWatched } from '../lib/episodes'
 import { ChapterList } from './ChapterList'
 import { EpisodeImage } from './EpisodeImage'
 import styles from './LibrarySection.module.scss'
-import { OnlineChapters } from './OnlineChapters'
 
 const MAX_EPISODE_PLACEHOLDERS = 28
 
@@ -37,19 +36,12 @@ export interface LibrarySectionProps {
 export function LibrarySection(props: LibrarySectionProps) {
 	if (props.mediaType === 'manga') {
 		return (
-			<>
-				<ChapterList
-					mediaRef={props.mediaRef}
-					progress={props.progress}
-					coverColor={props.coverColor}
-				/>
-				<OnlineChapters
-					mediaRef={props.mediaRef}
-					title={props.title}
-					progress={props.progress}
-					coverColor={props.coverColor}
-				/>
-			</>
+			<ChapterList
+				mediaRef={props.mediaRef}
+				title={props.title}
+				progress={props.progress}
+				coverColor={props.coverColor}
+			/>
 		)
 	}
 

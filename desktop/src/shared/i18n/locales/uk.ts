@@ -789,7 +789,10 @@ export const uk: Translation = {
 			}
 		},
 		chapters: {
-			title: 'Розділи онлайн',
+			library: 'Бібліотека',
+			all: 'Усі джерела',
+			filter: 'Джерело',
+			copies: 'Інші копії',
 			link: 'Знайти на сервері',
 			relink: 'Змінити серію',
 			unlink: 'Відв’язати',

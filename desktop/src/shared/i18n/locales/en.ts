@@ -790,7 +790,10 @@ export const en = {
 			}
 		},
 		chapters: {
-			title: 'Online chapters',
+			library: 'Library',
+			all: 'All sources',
+			filter: 'Source',
+			copies: 'Other copies',
 			link: 'Find on a server',
 			relink: 'Change series',
 			unlink: 'Unlink',
