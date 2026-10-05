@@ -1,6 +1,8 @@
 import { RouterProvider } from '@tanstack/react-router'
 import { useEffect } from 'react'
 
+import { ScrollProgress } from '@shared/ui'
+
 import { nodeBridgeMounted, subscribeToNodeState } from '@infra/node'
 
 import { sessionModel } from '@entities/session'
@@ -24,6 +26,7 @@ export function App() {
 			<WindowDragStrip />
 			<RouterProvider router={router} />
 			<WindowChrome />
+			<ScrollProgress />
 		</AppProviders>
 	)
 }

@@ -58,6 +58,15 @@ a {
 	scrollbar-color: var(--border-strong) transparent;
 }
 
+// The window's own scrollbar is hidden: ScrollProgress shows the position instead.
+html {
+	scrollbar-width: none;
+}
+
+html::-webkit-scrollbar {
+	display: none;
+}
+
 *::-webkit-scrollbar {
 	width: 10px;
 	height: 10px;
