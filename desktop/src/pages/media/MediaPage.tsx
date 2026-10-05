@@ -5,6 +5,8 @@ import { useEffect } from 'react'
 import { useTranslation } from '@shared/i18n'
 import { Button, Icon, PageTransition } from '@shared/ui'
 
+import { $nodeReady } from '@infra/node'
+
 import { aniListAccountModel } from '@entities/anilist-account'
 import { mediaDetailsModel } from '@entities/media'
 import { useTrackedEntry } from '@entities/tracker'
@@ -21,19 +23,26 @@ export function MediaPage({ mediaRef }: MediaPageProps) {
 	const { t } = useTranslation()
 	const router = useRouter()
 
-	const { data, failedMediaRef, requestDetails, connected } = useUnit({
+	const { data, failedMediaRef, requestDetails, connected, nodeReady } = useUnit({
 		data: mediaDetailsModel.$data,
 		failedMediaRef: mediaDetailsModel.$failedMediaRef,
 		requestDetails: mediaDetailsModel.detailsRequested,
-		connected: aniListAccountModel.$connected
+		connected: aniListAccountModel.$connected,
+		nodeReady: $nodeReady
 	})
 
 	const entry = useTrackedEntry(mediaRef, connected)
 
 	useEffect(() => {
 		window.scrollTo({ top: 0 })
-		requestDetails(mediaRef)
-	}, [mediaRef, requestDetails])
+	}, [mediaRef])
+
+	// A reload of this page asks before the node is up, and that request fails.
+	useEffect(() => {
+		if (nodeReady) {
+			requestDetails(mediaRef)
+		}
+	}, [mediaRef, requestDetails, nodeReady])
 
 	const details = data?.media.media_ref === mediaRef ? data : null
 	const failed = !details && failedMediaRef === mediaRef
