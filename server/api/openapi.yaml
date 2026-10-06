@@ -82,6 +82,15 @@ components:
         choose_files:
           description: Hold the torrent in the client until its files are chosen with PUT .../files.
           type: boolean
+        episodes:
+          description: The episodes the download is for. With choose_files, the node itself takes only their files once the file list arrives.
+          items:
+            format: int64
+            type: integer
+          maxItems: 2000
+          type:
+            - array
+            - "null"
         magnet:
           description: A magnet link with a BitTorrent v1 hash. Give this or torrent.
           maxLength: 65536
@@ -3513,6 +3522,14 @@ components:
         created_at:
           format: date-time
           type: string
+        episodes:
+          description: The episodes it was added for, when it was.
+          items:
+            format: int64
+            type: integer
+          type:
+            - array
+            - "null"
         error:
           type: string
         id:

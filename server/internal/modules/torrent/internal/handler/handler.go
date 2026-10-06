@@ -35,6 +35,7 @@ type AddTorrentDownloadInput struct {
 		Torrent     []byte `json:"torrent,omitempty" doc:"A .torrent file, base64-encoded. Give this or magnet."`
 		ChooseFiles bool   `json:"choose_files,omitempty" doc:"Hold the torrent in the client until its files are chosen with PUT .../files."`
 		ReleaseID   string `json:"release_id,omitempty" maxLength:"100" doc:"A search result to download. Give this, magnet or torrent."`
+		Episodes    []int  `json:"episodes,omitempty" maxItems:"2000" doc:"The episodes the download is for. With choose_files, the node itself takes only their files once the file list arrives."`
 	}
 }
 
@@ -134,6 +135,7 @@ func (h *Handler) Register(api huma.API) {
 
 			ChooseFiles: in.Body.ChooseFiles,
 			ReleaseID:   in.Body.ReleaseID,
+			Episodes:    in.Body.Episodes,
 		})
 		if err != nil {
 			return nil, httpapi.ToHTTP(err)

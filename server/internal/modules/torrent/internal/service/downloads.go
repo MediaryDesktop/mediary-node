@@ -55,6 +55,7 @@ type TorrentDownload struct {
 	Source      string       `json:"source" enum:"magnet,file"`
 	State       string       `json:"state" enum:"downloading,importing,done,failed" doc:"The node's state: a done download's files are in the library; the client may still be seeding it."`
 	Choosing    bool         `json:"choosing" doc:"The client holds the torrent until its files are chosen."`
+	Episodes    []int        `json:"episodes,omitempty" doc:"The episodes it was added for, when it was."`
 	Imported    int          `json:"imported" doc:"Files that joined the library."`
 	Error       string       `json:"error,omitempty"`
 	CreatedAt   time.Time    `json:"created_at"`
@@ -227,6 +228,7 @@ func (s *Service) view(row store.Download) TorrentDownload {
 		Source:      row.Source,
 		State:       row.State,
 		Choosing:    row.Choosing,
+		Episodes:    row.Episodes,
 		Imported:    row.Imported,
 		Error:       row.Error,
 		CreatedAt:   row.CreatedAt,
