@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react'
 import { useTranslation } from '@shared/i18n'
 import { Button, Icon } from '@shared/ui'
 
+import { AutoDownloadPanel } from '@features/auto-download-torrents'
 import { AddTorrentDrawer, TorrentDownloadList } from '@features/download-torrent'
 import { TorrentSearch } from '@features/search-torrents'
 
@@ -30,6 +31,8 @@ export function TorrentSection({ mediaRef, title }: TorrentSectionProps) {
 					{t('torrents.add')}
 				</Button>
 			</div>
+
+			<AutoDownloadPanel mediaRef={mediaRef} title={title} />
 
 			<TorrentSearch mediaRef={mediaRef} title={title} />
 

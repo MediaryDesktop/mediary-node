@@ -6,16 +6,21 @@ import { nodeTopic } from '@infra/node'
 import {
 	addTorrentFx,
 	checkTorrentClientFx,
+	checkTorrentRuleFx,
 	checkTorrentSourceFx,
 	createTorrentSourceFx,
+	deleteTorrentRuleFx,
 	deleteTorrentSourceFx,
 	fetchTorrentDownloadsFx,
 	fetchTorrentFilesFx,
 	fetchTorrentProfileFx,
+	fetchTorrentRuleFx,
+	fetchTorrentRulesFx,
 	fetchTorrentSettingsFx,
 	fetchTorrentSourcesFx,
 	pauseTorrentFx,
 	putTorrentProfileFx,
+	putTorrentRuleFx,
 	putTorrentSettingsFx,
 	removeTorrentFx,
 	resumeTorrentFx,
@@ -140,3 +145,38 @@ export const putTorrentProfileMutation = createMutation({
 })
 
 keepFresh(torrentProfileQuery, { triggers: [putTorrentProfileMutation.finished.success] })
+
+export const torrentRulesQuery = createQuery({ effect: fetchTorrentRulesFx, name: 'torrentRules' })
+
+// One title's rule, for its page.
+export const torrentRuleQuery = createQuery({ effect: fetchTorrentRuleFx, name: 'torrentRule' })
+
+export const putTorrentRuleMutation = createMutation({ effect: putTorrentRuleFx, name: 'putTorrentRule' })
+
+export const deleteTorrentRuleMutation = createMutation({
+	effect: deleteTorrentRuleFx,
+	name: 'deleteTorrentRule'
+})
+
+export const checkTorrentRuleMutation = createMutation({
+	effect: checkTorrentRuleFx,
+	name: 'checkTorrentRule'
+})
+
+const rulesChanged = nodeTopic('torrent').filter({ fn: event => event.payload?.reason === 'rules' })
+
+keepFresh(torrentRulesQuery, {
+	triggers: [
+		rulesChanged,
+		putTorrentRuleMutation.finished.success,
+		deleteTorrentRuleMutation.finished.success
+	]
+})
+
+keepFresh(torrentRuleQuery, {
+	triggers: [
+		rulesChanged,
+		putTorrentRuleMutation.finished.success,
+		deleteTorrentRuleMutation.finished.success
+	]
+})

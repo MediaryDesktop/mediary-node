@@ -10,6 +10,19 @@ export type TorrentCheckResult = NodeSchemas['TorrentCheckResult']
 export type TorrentFile = NodeSchemas['TorrentFile']
 export type TorrentSource = NodeSchemas['TorrentSource']
 export type TorrentProfile = Omit<NodeSchemas['TorrentProfile'], '$schema'>
+export type TorrentRule = NodeSchemas['TorrentRule']
+export type TorrentRuleCheck = NodeSchemas['TorrentRuleCheck']
+export type TorrentRuleBody = Omit<NodeSchemas['PutTorrentRuleInputBody'], '$schema'>
+
+export interface PutTorrentRuleParams {
+	mediaRef: string
+	body: TorrentRuleBody
+}
+
+export interface CheckTorrentRuleParams {
+	mediaRef: string
+	preview: boolean
+}
 export type TorrentSourceCaps = NodeSchemas['TorrentSourceCaps']
 export type TorrentRelease = NodeSchemas['TorrentRelease']
 export type TorrentSearchResult = NodeSchemas['TorrentSearchResult']
@@ -155,3 +168,37 @@ export const putTorrentProfileFx = createNodeRequestFx<TorrentProfile, TorrentPr
 	method: 'PUT',
 	body
 }))
+
+export const fetchTorrentRulesFx = createNodeRequestFx<void, NodeSchemas['TorrentRulesOutputBody']>(() => ({
+	url: '/v1/torrent/rules'
+}))
+
+export const fetchTorrentRuleFx = createNodeRequestFx<string, NodeSchemas['TorrentRuleOutputBody']>(
+	mediaRef => ({
+		url: `/v1/torrent/rules/${encodeURIComponent(mediaRef)}`
+	})
+)
+
+export const putTorrentRuleFx = createNodeRequestFx<
+	PutTorrentRuleParams,
+	NodeSchemas['TorrentRuleOutputBody']
+>(({ mediaRef, body }) => ({
+	url: `/v1/torrent/rules/${encodeURIComponent(mediaRef)}`,
+	method: 'PUT',
+	body
+}))
+
+export const deleteTorrentRuleFx = createNodeRequestFx<string, void>(mediaRef => ({
+	url: `/v1/torrent/rules/${encodeURIComponent(mediaRef)}`,
+	method: 'DELETE'
+}))
+
+export const checkTorrentRuleFx = createNodeRequestFx<CheckTorrentRuleParams, TorrentRuleCheck>(
+	({ mediaRef, preview }) => ({
+		url: `/v1/torrent/rules/${encodeURIComponent(mediaRef)}/check`,
+		method: 'POST',
+		query: { preview: preview || undefined },
+		// A check searches every source and may add several torrents.
+		timeout: 60_000
+	})
+)

@@ -1232,6 +1232,68 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/v1/torrent/rules': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Auto-download rules
+		 * @description Titles whose new episodes the node downloads by itself. Every 30 minutes each enabled rule searches the sources for releases named after the title and adds the best release of every episode it is missing; an episode no single release holds comes from a batch, of which only the missing episodes' files are downloaded.
+		 */
+		get: operations['listTorrentRules']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/torrent/rules/{media_ref}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/** A title's auto-download rule */
+		get: operations['getTorrentRule']
+		/** Create or change a title's auto-download rule */
+		put: operations['putTorrentRule']
+		post?: never
+		/**
+		 * Remove a title's auto-download rule
+		 * @description Downloads the rule already added stay.
+		 */
+		delete: operations['deleteTorrentRule']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/torrent/rules/{media_ref}/check': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Look for a title's missing episodes now
+		 * @description Runs the rule at once, enabled or not. With preview, nothing is added: the answer is what would be.
+		 */
+		post: operations['checkTorrentRule']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/v1/torrent/search': {
 		parameters: {
 			query?: never
@@ -2624,6 +2686,24 @@ export interface components {
 			series_id: string
 			series_title?: string
 		}
+		PutTorrentRuleInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/PutTorrentRuleInputBody.json
+			 */
+			readonly $schema?: string
+			enabled: boolean
+			/**
+			 * Format: int64
+			 * @description Left out starts after the last episode the library has.
+			 */
+			from_episode?: number
+			/** @description Searched for instead of the title's names. */
+			query?: string
+			/** @description The title's name; it names the folder downloads go into. */
+			title: string
+		}
 		PutTorrentSettingsInputBody: {
 			/**
 			 * Format: uri
@@ -3484,6 +3564,10 @@ export interface components {
 			client: string
 			node: string
 		}
+		TorrentPlannedDownload: {
+			episodes: number[] | null
+			release: components['schemas']['TorrentRelease']
+		}
 		TorrentProfile: {
 			/**
 			 * Format: uri
@@ -3554,6 +3638,60 @@ export interface components {
 			source_id: number
 			source_name: string
 			title: string
+		}
+		TorrentRule: {
+			enabled: boolean
+			/**
+			 * Format: int64
+			 * @description Episodes before this one are never downloaded by the rule.
+			 */
+			from_episode: number
+			/**
+			 * Format: int64
+			 * @description Downloads the last check added.
+			 */
+			last_added: number
+			/** Format: date-time */
+			last_checked?: string
+			last_error?: string
+			media_ref: string
+			/** @description Searched for instead of the title's names when not empty. */
+			query: string
+			title: string
+		}
+		TorrentRuleCheck: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TorrentRuleCheck.json
+			 */
+			readonly $schema?: string
+			/**
+			 * Format: int64
+			 * @description How many of the planned downloads were added; always 0 for a preview.
+			 */
+			added: number
+			error?: string
+			planned: components['schemas']['TorrentPlannedDownload'][] | null
+		}
+		TorrentRuleOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TorrentRuleOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description Null when the title has no rule. */
+			rule: components['schemas']['TorrentRule']
+		}
+		TorrentRulesOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TorrentRulesOutputBody.json
+			 */
+			readonly $schema?: string
+			rules: components['schemas']['TorrentRule'][] | null
 		}
 		TorrentSearchResult: {
 			/**
@@ -3787,6 +3925,7 @@ export type SchemaPutMangaDexSettingsInputBody = components['schemas']['PutManga
 export type SchemaPutMangaDownloadSettingsInputBody =
 	components['schemas']['PutMangaDownloadSettingsInputBody']
 export type SchemaPutMangaLinkInputBody = components['schemas']['PutMangaLinkInputBody']
+export type SchemaPutTorrentRuleInputBody = components['schemas']['PutTorrentRuleInputBody']
 export type SchemaPutTorrentSettingsInputBody = components['schemas']['PutTorrentSettingsInputBody']
 export type SchemaReadBody = components['schemas']['ReadBody']
 export type SchemaReadOutputBody = components['schemas']['ReadOutputBody']
@@ -3834,8 +3973,13 @@ export type SchemaTorrentFile = components['schemas']['TorrentFile']
 export type SchemaTorrentFilesOutputBody = components['schemas']['TorrentFilesOutputBody']
 export type SchemaTorrentLive = components['schemas']['TorrentLive']
 export type SchemaTorrentPathMap = components['schemas']['TorrentPathMap']
+export type SchemaTorrentPlannedDownload = components['schemas']['TorrentPlannedDownload']
 export type SchemaTorrentProfile = components['schemas']['TorrentProfile']
 export type SchemaTorrentRelease = components['schemas']['TorrentRelease']
+export type SchemaTorrentRule = components['schemas']['TorrentRule']
+export type SchemaTorrentRuleCheck = components['schemas']['TorrentRuleCheck']
+export type SchemaTorrentRuleOutputBody = components['schemas']['TorrentRuleOutputBody']
+export type SchemaTorrentRulesOutputBody = components['schemas']['TorrentRulesOutputBody']
 export type SchemaTorrentSearchResult = components['schemas']['TorrentSearchResult']
 export type SchemaTorrentSettings = components['schemas']['TorrentSettings']
 export type SchemaTorrentSource = components['schemas']['TorrentSource']
@@ -6287,6 +6431,164 @@ export interface operations {
 				}
 				content: {
 					'application/json': components['schemas']['TorrentProfile']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listTorrentRules: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentRulesOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getTorrentRule: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				media_ref: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentRuleOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	putTorrentRule: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				media_ref: string
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['PutTorrentRuleInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentRuleOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	deleteTorrentRule: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				media_ref: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	checkTorrentRule: {
+		parameters: {
+			query?: {
+				/** @description Only say what would be downloaded. */
+				preview?: boolean
+			}
+			header?: never
+			path: {
+				media_ref: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentRuleCheck']
 				}
 			}
 			/** @description Error */
