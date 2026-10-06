@@ -34,9 +34,11 @@ type Querier interface {
 	DeleteMangaSourceLinksBySource(ctx context.Context, source string) error
 	DeleteOPDSServer(ctx context.Context, id int64) (int64, error)
 	DeleteSourceCacheOlderThan(ctx context.Context, arg DeleteSourceCacheOlderThanParams) error
+	DeleteTorrentDownload(ctx context.Context, id int64) (int64, error)
 	// A chapter already queued, running or done stays as it is; a failed or cancelled
 	// one goes back in the queue.
 	EnqueueMangaDownload(ctx context.Context, arg EnqueueMangaDownloadParams) (MangaDownload, error)
+	FinishTorrentDownload(ctx context.Context, arg FinishTorrentDownloadParams) error
 	GetAniListMirror(ctx context.Context, kind string) (AnilistMirror, error)
 	GetAniListOutboxEntry(ctx context.Context, arg GetAniListOutboxEntryParams) (AnilistOutbox, error)
 	GetCustomList(ctx context.Context, id int64) (CustomList, error)
@@ -50,6 +52,8 @@ type Querier interface {
 	GetOPDSServer(ctx context.Context, id int64) (OpdsServer, error)
 	GetScanRun(ctx context.Context, id int64) (ScanRun, error)
 	GetSourceCache(ctx context.Context, arg GetSourceCacheParams) (SourceCache, error)
+	GetTorrentDownload(ctx context.Context, id int64) (TorrentDownload, error)
+	GetTorrentDownloadByHash(ctx context.Context, infoHash string) (TorrentDownload, error)
 	InsertCustomList(ctx context.Context, arg InsertCustomListParams) (CustomList, error)
 	InsertLibraryFile(ctx context.Context, arg InsertLibraryFileParams) (int64, error)
 	InsertLibraryRoot(ctx context.Context, arg InsertLibraryRootParams) (LibraryRoot, error)
@@ -57,6 +61,7 @@ type Querier interface {
 	InsertScanRunFileLog(ctx context.Context, arg InsertScanRunFileLogParams) error
 	InsertScanRunGroup(ctx context.Context, arg InsertScanRunGroupParams) error
 	InsertScanRunRoot(ctx context.Context, arg InsertScanRunRootParams) error
+	InsertTorrentDownload(ctx context.Context, arg InsertTorrentDownloadParams) (TorrentDownload, error)
 	// Every file at once, for the explorer's tree. The tree is the whole library by
 	// definition, so paging it would only mean the client asking for page after page
 	// before it can draw anything.
@@ -81,6 +86,8 @@ type Querier interface {
 	ListScanRunGroups(ctx context.Context, scanRunID int64) ([]ScanRunGroup, error)
 	ListScanRunRoots(ctx context.Context, scanRunID int64) ([]ScanRunRoot, error)
 	ListScanRuns(ctx context.Context, arg ListScanRunsParams) ([]ScanRun, error)
+	ListTorrentDownloads(ctx context.Context, limit int64) ([]TorrentDownload, error)
+	ListUnfinishedTorrentDownloads(ctx context.Context) ([]TorrentDownload, error)
 	// Files the matcher still has to work out, ordered so that every episode of one
 	// title arrives together: the candidates are then looked up once per title
 	// instead of once per file.
@@ -101,6 +108,8 @@ type Querier interface {
 	SetMangaDownloadProgress(ctx context.Context, arg SetMangaDownloadProgressParams) error
 	SetMangaDownloadState(ctx context.Context, arg SetMangaDownloadStateParams) error
 	SetMangaDownloadTarget(ctx context.Context, arg SetMangaDownloadTargetParams) error
+	SetTorrentDownloadName(ctx context.Context, arg SetTorrentDownloadNameParams) error
+	SetTorrentDownloadState(ctx context.Context, arg SetTorrentDownloadStateParams) error
 	TouchLibraryRoot(ctx context.Context, arg TouchLibraryRootParams) error
 	UpdateLibraryFile(ctx context.Context, arg UpdateLibraryFileParams) error
 	// Only the parsed columns: the file itself did not change, a newer parser reads

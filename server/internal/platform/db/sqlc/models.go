@@ -182,3 +182,20 @@ type SourceCache struct {
 	Payload    string `json:"payload"`
 	FetchedAt  int64  `json:"fetched_at"`
 }
+
+type TorrentDownload struct {
+	ID          int64  `json:"id"`
+	InfoHash    string `json:"info_hash"`
+	MediaRef    string `json:"media_ref"`
+	Title       string `json:"title"`
+	Name        string `json:"name"`
+	RootID      int64  `json:"root_id"`
+	RelDir      string `json:"rel_dir"`
+	Source      string `json:"source"`
+	State       string `json:"state"`
+	Imported    int64  `json:"imported"`
+	Error       string `json:"error"`
+	CreatedAt   string `json:"created_at"`
+	UpdatedAt   string `json:"updated_at"`
+	CompletedAt string `json:"completed_at"`
+}

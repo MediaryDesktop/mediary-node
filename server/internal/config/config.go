@@ -84,7 +84,10 @@ type Library struct {
 }
 
 type Torrent struct {
-	Client       string `env:"NODE_TORRENT_CLIENT" envDefault:"embedded"`
+	// none: the user connects qBittorrent in the settings. qbittorrent: the
+	// connection below, for a headless node. embedded: reserved for the built-in
+	// client, which does not exist yet, so it behaves as none.
+	Client       string `env:"NODE_TORRENT_CLIENT" envDefault:"none"`
 	DownloadDir  string `env:"NODE_TORRENT_DOWNLOAD_DIR"`
 	ListenPort   int    `env:"NODE_TORRENT_LISTEN_PORT" envDefault:"0"`
 	MaxDownloads int    `env:"NODE_TORRENT_MAX_DOWNLOADS" envDefault:"3"`
@@ -202,13 +205,13 @@ func (c *Config) validate() error {
 	}
 
 	switch c.Torrent.Client {
-	case "embedded":
+	case "none", "embedded":
 	case "qbittorrent":
 		if c.Torrent.ExternalURL == "" {
 			return errors.New("NODE_TORRENT_EXTERNAL_URL is required when NODE_TORRENT_CLIENT=qbittorrent")
 		}
 	default:
-		return fmt.Errorf("NODE_TORRENT_CLIENT must be embedded or qbittorrent, got %q", c.Torrent.Client)
+		return fmt.Errorf("NODE_TORRENT_CLIENT must be none, qbittorrent or embedded, got %q", c.Torrent.Client)
 	}
 
 	if c.AniList.RefreshInterval < time.Minute {

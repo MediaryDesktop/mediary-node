@@ -13,6 +13,7 @@ import (
 
 	"github.com/mediaryorg/mediary-node/server/internal/config"
 	"github.com/mediaryorg/mediary-node/server/internal/httpapi"
+	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/cloud"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/db"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
@@ -124,6 +125,8 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 		Transcode:        cfg.Playback.EnableTranscoding,
 		TranscodeDir:     cfg.Playback.TranscodeDir,
 		TranscodeHWAccel: cfg.Playback.TranscodeHWAccel,
+
+		TorrentClient: torrentClient(cfg.Torrent),
 	})
 	defer shutdownModules()
 
@@ -173,4 +176,14 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 	logger.Info().Msg("stopped cleanly")
 
 	return nil
+}
+
+// torrentClient is the connection the environment names, used until the user
+// saves one in the settings.
+func torrentClient(cfg config.Torrent) torrent.Connection {
+	if cfg.Client != "qbittorrent" {
+		return torrent.Connection{}
+	}
+
+	return torrent.Connection{URL: cfg.ExternalURL, Username: cfg.ExternalUser, Password: cfg.ExternalPassword}
 }

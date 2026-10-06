@@ -51,6 +51,8 @@ type Deps struct {
 	Transcode        bool
 	TranscodeDir     string
 	TranscodeHWAccel string
+
+	TorrentClient torrent.Connection
 }
 
 // Register mounts every module and returns what has to run on shutdown.
@@ -93,12 +95,6 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 	})
 	libraryModule.Register(api)
 
-	torrent.New(torrent.Deps{
-		DB:     deps.DB,
-		Logger: moduleLogger(deps.Logger, "torrent"),
-		Events: deps.Events,
-	}).Register(api)
-
 	// The player opens files the library scanned and reports what was watched to the
 	// tracker. Both edges are ports, joined here: playback knows neither module.
 	playbackModule := playback.New(playback.Deps{
@@ -133,12 +129,25 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 	})
 	mangaModule.Register(api)
 
+	// Torrents are saved into a library folder and their videos join the library
+	// through it, like downloaded chapters.
+	torrentModule := torrent.New(torrent.Deps{
+		DB:          deps.DB,
+		Logger:      moduleLogger(deps.Logger, "torrent"),
+		Events:      deps.Events,
+		Library:     downloadFolders{library: libraryModule},
+		SecretsPath: filepath.Join(deps.DataDir, "torrent-secrets.json"),
+		Client:      deps.TorrentClient,
+	})
+	torrentModule.Register(api)
+
 	queueCtx, stopQueue := context.WithCancel(ctx)
 
 	// The OpenAPI generator registers the routes without a database; there is no
 	// queue to work through then.
 	if deps.DB != nil {
 		mangaModule.Start(queueCtx)
+		torrentModule.Start(queueCtx)
 	}
 
 	// The reader reads the library's files and, through the manga module, chapters
