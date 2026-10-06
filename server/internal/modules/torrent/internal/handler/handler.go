@@ -327,7 +327,46 @@ type SearchTorrentsOutput struct {
 	Body service.TorrentSearchResult
 }
 
+type TorrentProfileOutput struct {
+	Body service.TorrentProfile
+}
+
+type PutTorrentProfileInput struct {
+	Body service.TorrentProfile
+}
+
 func (h *Handler) registerSearch(api huma.API) {
+	huma.Register(api, huma.Operation{
+		OperationID: "getTorrentProfile",
+		Method:      http.MethodGet,
+		Path:        "/v1/torrent/profile",
+		Summary:     "Release profile",
+		Description: "What the user likes in a release. Search scores every result by it and marks the best.",
+		Tags:        []string{"torrent"},
+	}, func(ctx context.Context, _ *struct{}) (*TorrentProfileOutput, error) {
+		profile, err := h.svc.Profile(ctx)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return &TorrentProfileOutput{Body: *profile}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "putTorrentProfile",
+		Method:      http.MethodPut,
+		Path:        "/v1/torrent/profile",
+		Summary:     "Save the release profile",
+		Tags:        []string{"torrent"},
+	}, func(ctx context.Context, in *PutTorrentProfileInput) (*TorrentProfileOutput, error) {
+		profile, err := h.svc.SetProfile(ctx, in.Body)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return &TorrentProfileOutput{Body: *profile}, nil
+	})
+
 	huma.Register(api, huma.Operation{
 		OperationID: "listTorrentSources",
 		Method:      http.MethodGet,

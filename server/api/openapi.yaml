@@ -3640,14 +3640,75 @@ components:
         - client
         - node
       type: object
+    TorrentProfile:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/TorrentProfile.json
+          format: uri
+          readOnly: true
+          type: string
+        codec:
+          description: Preferred codec. Empty for any.
+          enum:
+            - ""
+            - HEVC
+            - AVC
+            - AV1
+          type: string
+        excluded:
+          description: Words that keep a release from being the best, e.g. a dub or a codec the TV cannot play.
+          items:
+            type: string
+          maxItems: 20
+          type:
+            - array
+            - "null"
+        min_seeders:
+          description: Fewer seeders keeps a release from being the best.
+          format: int64
+          minimum: 0
+          type: integer
+        preferred:
+          description: Words a release name should have — groups, sites, "multi-sub" — best first.
+          items:
+            type: string
+          maxItems: 20
+          type:
+            - array
+            - "null"
+        resolution:
+          description: Preferred resolution; lower ones follow in order. Empty for any.
+          enum:
+            - ""
+            - 2160p
+            - 1080p
+            - 720p
+            - 480p
+          type: string
+      required:
+        - resolution
+        - codec
+        - preferred
+        - excluded
+        - min_seeders
+      type: object
     TorrentRelease:
       additionalProperties: false
       properties:
         batch:
           type: boolean
+        best:
+          description: The one result the profile would pick.
+          type: boolean
         codec:
           description: e.g. HEVC
           type: string
+        eligible:
+          description: False when an excluded word or too few seeders keep it from being the best.
+          type: boolean
         episodes:
           $ref: "#/components/schemas/Episodes"
           description: Absent when the name gives no episode.
@@ -3683,6 +3744,10 @@ components:
         resolution:
           description: e.g. 1080p
           type: string
+        score:
+          description: How well it fits the release profile; higher is better.
+          format: int64
+          type: integer
         seeders:
           format: int64
           type: integer
@@ -3706,6 +3771,9 @@ components:
         - peers
         - grabs
         - match
+        - score
+        - eligible
+        - best
         - batch
       type: object
     TorrentSearchResult:
@@ -6204,6 +6272,50 @@ paths:
                 $ref: "#/components/schemas/ErrorModel"
           description: Error
       summary: Resume a torrent download
+      tags:
+        - torrent
+  /v1/torrent/profile:
+    get:
+      description: What the user likes in a release. Search scores every result by it and marks the best.
+      operationId: getTorrentProfile
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TorrentProfile"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Release profile
+      tags:
+        - torrent
+    put:
+      operationId: putTorrentProfile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TorrentProfile"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TorrentProfile"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Save the release profile
       tags:
         - torrent
   /v1/torrent/search:

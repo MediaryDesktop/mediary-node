@@ -61,6 +61,10 @@ type TorrentRelease struct {
 
 	Match string `json:"match" enum:"episode,batch,unknown,any" doc:"How it fits the episode searched for: the episode alone, a batch that holds it, a name without episodes, or no episode was asked."`
 
+	Score    int  `json:"score" doc:"How well it fits the release profile; higher is better."`
+	Eligible bool `json:"eligible" doc:"False when an excluded word or too few seeders keep it from being the best."`
+	Best     bool `json:"best" doc:"The one result the profile would pick."`
+
 	// Kept on the node: a link may carry the source's key.
 	magnet string
 	link   string
@@ -134,17 +138,17 @@ func (s *Service) Search(ctx context.Context, req SearchRequest) (*TorrentSearch
 	var wg sync.WaitGroup
 
 	for _, source := range sources {
-		key, err := s.secrets.Get(sourceKey(source.ID))
-		if err != nil {
-			return nil, apperr.Wrap(err, apperr.KindInternal, "read a search source's key")
+		key, keyErr := s.secrets.Get(sourceKey(source.ID))
+		if keyErr != nil {
+			return nil, apperr.Wrap(keyErr, apperr.KindInternal, "read a search source's key")
 		}
 
 		for _, query := range queries {
 			wg.Add(1)
 			go func(source store.Source, query string) {
 				defer wg.Done()
-				items, err := s.ask(ctx, source, key, query)
-				answers <- answer{source: source, items: items, err: err}
+				items, askErr := s.ask(ctx, source, key, query)
+				answers <- answer{source: source, items: items, err: askErr}
 			}(source, query)
 		}
 	}
@@ -191,6 +195,12 @@ func (s *Service) Search(ctx context.Context, req SearchRequest) (*TorrentSearch
 		releases = append(releases, found)
 	}
 
+	profile, err := s.Profile(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	rank(releases, profile)
 	sortReleases(releases)
 	s.keep(releases)
 
@@ -330,8 +340,14 @@ func sortReleases(releases []TorrentRelease) {
 	sort.SliceStable(releases, func(i, j int) bool {
 		a, b := &releases[i], &releases[j]
 
+		if a.Best != b.Best {
+			return a.Best
+		}
 		if matchRank[a.Match] != matchRank[b.Match] {
 			return matchRank[a.Match] < matchRank[b.Match]
+		}
+		if a.Score != b.Score {
+			return a.Score > b.Score
 		}
 		if a.Seeders != b.Seeders {
 			return a.Seeders > b.Seeders
