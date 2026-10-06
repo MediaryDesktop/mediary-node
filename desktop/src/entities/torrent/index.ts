@@ -26,6 +26,14 @@ export {
 	updateTorrentSourceMutation
 } from './model/model'
 
+// The add effect itself, for a model that adds several releases one after another.
+export { addTorrentFx } from './api/api'
+
+export { useTorrentSetup } from './lib/useTorrentSetup'
+export { TorrentSetupNotice } from './ui/TorrentSetupNotice'
+export type { TorrentSetupNoticeProps } from './ui/TorrentSetupNotice'
+export type { TorrentSetup } from './lib/useTorrentSetup'
+
 export type {
 	AddTorrentParams,
 	RemoveTorrentParams,

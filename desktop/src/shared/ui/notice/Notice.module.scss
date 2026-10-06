@@ -1,0 +1,80 @@
+.notice {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0.75rem 1rem;
+	border: 1px solid transparent;
+	border-radius: var(--radius);
+
+	.icon {
+		display: inline-flex;
+		flex: none;
+		align-self: flex-start;
+		padding-top: 0.0625rem;
+	}
+
+	.body {
+		display: flex;
+		flex: 1;
+		flex-direction: column;
+		gap: 0.125rem;
+		min-width: 0;
+
+		.title {
+			margin: 0;
+			color: var(--text);
+			font-size: 0.9rem;
+			font-weight: 600;
+		}
+
+		.text {
+			color: var(--text-secondary);
+			font-size: 0.85rem;
+			line-height: 1.45;
+			overflow-wrap: anywhere;
+		}
+	}
+
+	.action {
+		display: flex;
+		flex: none;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	&.info {
+		border-color: var(--border);
+		background: var(--info-muted);
+
+		.icon {
+			color: var(--info-text);
+		}
+	}
+
+	&.warning {
+		border-color: var(--border);
+		background: var(--warning-muted);
+
+		.icon {
+			color: var(--warning-text);
+		}
+	}
+
+	&.danger {
+		border-color: var(--border);
+		background: var(--danger-muted);
+
+		.icon {
+			color: var(--danger-text);
+		}
+	}
+
+	&.success {
+		border-color: var(--border);
+		background: var(--success-muted);
+
+		.icon {
+			color: var(--success-text);
+		}
+	}
+}

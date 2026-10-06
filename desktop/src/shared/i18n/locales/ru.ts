@@ -553,6 +553,11 @@ export const ru: Translation = {
 	},
 
 	media: {
+		searchTorrents: 'Искать торренты',
+		downloadMissing_one: 'Загрузить · не хватает {{count}}',
+		downloadMissing_few: 'Загрузить · не хватает {{count}}',
+		downloadMissing_many: 'Загрузить · не хватает {{count}}',
+		downloadMissing_other: 'Загрузить · не хватает {{count}}',
 		back: 'Назад',
 		failed: 'Не удалось загрузить тайтл',
 		retry: 'Повторить',
@@ -861,6 +866,17 @@ export const ru: Translation = {
 		}
 	},
 	torrents: {
+		section: {
+			hint: 'Ищите раздачи, добавляйте свои и получайте новые серии автоматически'
+		},
+		setup: {
+			openSettings: 'Открыть настройки',
+			noClient: 'Торрент-клиент не выбран',
+			noClientHint: 'Выберите встроенный клиент или подключите qBittorrent в настройках.',
+			unreachable: 'Торрент-клиент не отвечает',
+			noSources: 'Нет источника поиска',
+			noSourcesHint: 'Добавьте Jackett или Prowlarr в настройках, чтобы искать раздачи.'
+		},
 		add: 'Добавить торрент',
 		drawer: {
 			title: 'Добавить торрент',
@@ -892,6 +908,32 @@ export const ru: Translation = {
 			inLibrary: 'в библиотеке'
 		},
 		search: {
+			addedMany_one: 'Добавлена {{count}} загрузка',
+			addedMany_few: 'Добавлено {{count}} загрузки',
+			addedMany_many: 'Добавлено {{count}} загрузок',
+			addedMany_other: 'Добавлено {{count}} загрузок',
+			covers_one: '{{count}} недостающая серия',
+			covers_few: '{{count}} недостающие серии',
+			covers_many: '{{count}} недостающих серий',
+			covers_other: '{{count}} недостающих серий',
+			noEpisode: 'Без номера серии в названии',
+			emptyHint: 'Попробуйте другой запрос или выключите фильтры.',
+			results_one: '{{count}} результат',
+			results_few: '{{count}} результата',
+			results_many: '{{count}} результатов',
+			results_other: '{{count}} результатов',
+			onlyMissing: 'Только с недостающими сериями',
+			kind: {
+				label: 'Раздачи',
+				all: 'Все',
+				episodes: 'Серии',
+				batches: 'Пакеты'
+			},
+			downloadSelected: 'Загрузить ({{count}})',
+			nothingMissing: 'Все серии уже есть',
+			missing: 'Недостающие серии:',
+			open: 'Искать торренты',
+			drawerTitle: 'Поиск торрентов',
 			placeholder: 'Поиск по названиям тайтла или своему запросу',
 			episode: 'Серия',
 			submit: 'Искать',
@@ -948,6 +990,17 @@ export const ru: Translation = {
 			saveFailed: 'Не удалось сохранить предпочтения'
 		},
 		auto: {
+			addedToast_one: 'Добавлена {{count}} загрузка',
+			addedToast_few: 'Добавлено {{count}} загрузки',
+			addedToast_many: 'Добавлено {{count}} загрузок',
+			addedToast_other: 'Добавлено {{count}} загрузок',
+			queryShort: 'поиск «{{query}}»',
+			emptyHint: 'Включите автозагрузку на вкладке «Торренты» тайтла.',
+			emptyTitle: 'Правил пока нет',
+			intro: 'Правила каждые 30 минут ищут в ваших источниках и добавляют лучшую раздачу каждой новой серии. Правило включается и настраивается на вкладке «Торренты» тайтла.',
+			settings: 'Настройки правила',
+			panelHint: 'Новые серии загружаются сами, проверка каждые 30 минут',
+			panelTitle: 'Автозагрузка',
 			enable: 'Автоматически загружать новые серии',
 			remove: 'Убрать правило',
 			hint: 'Каждые 30 минут Mediary ищет в ваших источниках и добавляет лучшую раздачу каждой серии, которой нет в библиотеке, а из пакетной раздачи берёт только недостающие серии.',
@@ -978,6 +1031,10 @@ export const ru: Translation = {
 			off: 'Выключено'
 		},
 		list: {
+			emptyForTitleHint: 'Найдите раздачи или добавьте magnet-ссылку.',
+			emptyHint: 'Найдите раздачу на вкладке «Торренты» тайтла.',
+			inLibrary: 'В библиотеке: {{count}}',
+			active: 'Активные: {{count}}',
 			title: 'Торренты',
 			forTitle: 'Загрузки этого тайтла',
 			empty: 'Торрент-загрузок пока нет',
@@ -998,6 +1055,7 @@ export const ru: Translation = {
 			unknown: 'Ожидает qBittorrent'
 		},
 		meta: {
+			down: 'Скорость загрузки',
 			speed: '{{speed}}/с',
 			seeds: '{{seeds}} сидов · {{peers}} пиров',
 			eta: 'осталось {{time}}',
@@ -1048,6 +1106,14 @@ export const ru: Translation = {
 			mappingNode: 'Та же папка на этом компьютере',
 			save: 'Сохранить',
 			saveFailed: 'Не удалось сохранить настройки'
+		}
+	},
+	downloads: {
+		subtitle: 'Торренты, правила, которые добавляют их сами, и сохранённые главы манги',
+		tabs: {
+			torrents: 'Торренты',
+			auto: 'Автозагрузка',
+			manga: 'Главы манги'
 		}
 	},
 	settings: {

@@ -100,3 +100,6 @@ export type { TabItem, TabsProps } from './tabs/Tabs'
 
 export { Tooltip } from './tooltip/Tooltip'
 export type { TooltipProps } from './tooltip/Tooltip'
+
+export { Notice } from './notice/Notice'
+export type { NoticeProps, NoticeTone } from './notice/Notice'

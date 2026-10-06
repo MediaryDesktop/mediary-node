@@ -202,25 +202,27 @@ function ClientForm({ settings, onDone }: { settings: TorrentSettings; onDone: (
 			)}
 
 			{client !== NONE && (
-				<div className={styles.check}>
-					<Button
-						size='small'
-						startIcon={<Icon name='common/signal' size={16} />}
-						loading={checking}
-						disabled={missingUrl || saving}
-						onClick={runCheck}
-					>
-						{t('torrents.settings.check')}
-					</Button>
+				<DrawerSection>
+					<div className={styles.check}>
+						<Button
+							size='small'
+							startIcon={<Icon name='common/signal' size={16} />}
+							loading={checking}
+							disabled={missingUrl || saving}
+							onClick={runCheck}
+						>
+							{t('torrents.settings.check')}
+						</Button>
 
-					{result && (
-						<span className={result.ok ? styles.ok : styles.problem} role='status'>
-							{result.ok
-								? t('torrents.settings.ok', { version: result.version })
-								: result.problem}
-						</span>
-					)}
-				</div>
+						{result && (
+							<span className={result.ok ? styles.ok : styles.problem} role='status'>
+								{result.ok
+									? t('torrents.settings.ok', { version: result.version })
+									: result.problem}
+							</span>
+						)}
+					</div>
+				</DrawerSection>
 			)}
 
 			<DrawerSection

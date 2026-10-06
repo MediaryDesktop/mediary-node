@@ -553,6 +553,11 @@ export const en = {
 	},
 
 	media: {
+		searchTorrents: 'Search torrents',
+		downloadMissing_one: 'Download · {{count}} missing',
+		downloadMissing_few: 'Download · {{count}} missing',
+		downloadMissing_many: 'Download · {{count}} missing',
+		downloadMissing_other: 'Download · {{count}} missing',
 		back: 'Back',
 		failed: 'Could not load this title',
 		retry: 'Retry',
@@ -860,6 +865,17 @@ export const en = {
 		}
 	},
 	torrents: {
+		section: {
+			hint: 'Search for releases, add your own, and get new episodes by themselves'
+		},
+		setup: {
+			openSettings: 'Open settings',
+			noClient: 'No torrent client',
+			noClientHint: 'Choose the built-in client or connect qBittorrent in the settings.',
+			unreachable: 'The torrent client does not answer',
+			noSources: 'No search source',
+			noSourcesHint: 'Add Jackett or Prowlarr in the settings to search for releases.'
+		},
 		add: 'Add torrent',
 		drawer: {
 			title: 'Add a torrent',
@@ -891,6 +907,32 @@ export const en = {
 			inLibrary: 'in library'
 		},
 		search: {
+			addedMany_one: 'Added {{count}} download',
+			addedMany_few: 'Added {{count}} downloads',
+			addedMany_many: 'Added {{count}} downloads',
+			addedMany_other: 'Added {{count}} downloads',
+			covers_one: '{{count}} missing episode',
+			covers_few: '{{count}} missing episodes',
+			covers_many: '{{count}} missing episodes',
+			covers_other: '{{count}} missing episodes',
+			noEpisode: 'No episode in the name',
+			emptyHint: 'Try another query, or turn the filters off.',
+			results_one: '{{count}} result',
+			results_few: '{{count}} results',
+			results_many: '{{count}} results',
+			results_other: '{{count}} results',
+			onlyMissing: 'Only with missing episodes',
+			kind: {
+				label: 'Releases',
+				all: 'All',
+				episodes: 'Episodes',
+				batches: 'Batches'
+			},
+			downloadSelected: 'Download ({{count}})',
+			nothingMissing: 'No episode is missing',
+			missing: 'Missing episodes:',
+			open: 'Search torrents',
+			drawerTitle: 'Search torrents',
 			placeholder: 'Search by the title’s names, or type your own query',
 			episode: 'Episode',
 			submit: 'Search',
@@ -947,6 +989,17 @@ export const en = {
 			saveFailed: 'Could not save the preferences'
 		},
 		auto: {
+			addedToast_one: 'Added {{count}} download',
+			addedToast_few: 'Added {{count}} downloads',
+			addedToast_many: 'Added {{count}} downloads',
+			addedToast_other: 'Added {{count}} downloads',
+			queryShort: 'searching “{{query}}”',
+			emptyHint: 'Turn on auto-download on a title’s Torrents tab.',
+			emptyTitle: 'No rules yet',
+			intro: 'Rules search your sources every 30 minutes and add the best release of each new episode. A rule is turned on and tuned on its title’s Torrents tab.',
+			settings: 'Rule settings',
+			panelHint: 'New episodes download by themselves, checked every 30 minutes',
+			panelTitle: 'Auto-download',
 			enable: 'Download new episodes automatically',
 			remove: 'Remove the rule',
 			hint: 'Every 30 minutes Mediary searches your sources and adds the best release of each episode the library is missing, taking from a batch only the episodes that are missing.',
@@ -977,6 +1030,10 @@ export const en = {
 			off: 'Off'
 		},
 		list: {
+			emptyForTitleHint: 'Search for releases or add a magnet link.',
+			emptyHint: 'Search for a release on a title’s Torrents tab.',
+			inLibrary: 'In library: {{count}}',
+			active: 'Active: {{count}}',
 			title: 'Torrents',
 			forTitle: 'Downloads for this title',
 			empty: 'No torrent downloads yet',
@@ -997,6 +1054,7 @@ export const en = {
 			unknown: 'Waiting for qBittorrent'
 		},
 		meta: {
+			down: 'Download speed',
 			speed: '{{speed}}/s',
 			seeds: '{{seeds}} seeds · {{peers}} peers',
 			eta: '{{time}} left',
@@ -1047,6 +1105,14 @@ export const en = {
 			mappingNode: 'The same folder on this computer',
 			save: 'Save',
 			saveFailed: 'Could not save the settings'
+		}
+	},
+	downloads: {
+		subtitle: 'Torrents, the rules that add them by themselves, and saved manga chapters',
+		tabs: {
+			torrents: 'Torrents',
+			auto: 'Auto-download',
+			manga: 'Manga chapters'
 		}
 	},
 	settings: {

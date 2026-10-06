@@ -155,23 +155,28 @@ function SourceForm({ source, onDone }: { source: TorrentSource | null; onDone: 
 				/>
 			</DrawerSection>
 
-			<div className={styles.check}>
-				<Button
-					size='small'
-					startIcon={<Icon name='common/signal' size={16} />}
-					loading={checking}
-					disabled={url.trim() === '' || submitting}
-					onClick={runCheck}
-				>
-					{t('torrents.sources.check')}
-				</Button>
+			<DrawerSection>
+				<div className={styles.check}>
+					<Button
+						size='small'
+						startIcon={<Icon name='common/signal' size={16} />}
+						loading={checking}
+						disabled={url.trim() === '' || submitting}
+						onClick={runCheck}
+					>
+						{t('torrents.sources.check')}
+					</Button>
 
-				{result && (
-					<span className={result.ok && result.search ? styles.ok : styles.problem} role='status'>
-						{checkMessage(result)}
-					</span>
-				)}
-			</div>
+					{result && (
+						<span
+							className={result.ok && result.search ? styles.ok : styles.problem}
+							role='status'
+						>
+							{checkMessage(result)}
+						</span>
+					)}
+				</div>
+			</DrawerSection>
 		</DrawerForm>
 	)
 }

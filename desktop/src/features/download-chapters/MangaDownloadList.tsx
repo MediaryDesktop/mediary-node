@@ -19,7 +19,12 @@ import styles from './MangaDownloadList.module.scss'
 
 // The download queue and what it saved, newest first. The node pushes every
 // change, so the list moves while chapters download.
-export function MangaDownloadList() {
+export interface MangaDownloadListProps {
+	// Leaves the heading to a page that names the list already, a tab above all.
+	hideTitle?: boolean
+}
+
+export function MangaDownloadList({ hideTitle }: MangaDownloadListProps = {}) {
 	const { t } = useTranslation()
 
 	const [data, load, cancel, retry, forget, nodeReady] = useUnit([
@@ -56,7 +61,7 @@ export function MangaDownloadList() {
 
 	return (
 		<section className={styles.root}>
-			<h2 className={styles.title}>{t('mangaSources.downloads.title')}</h2>
+			{!hideTitle && <h2 className={styles.title}>{t('mangaSources.downloads.title')}</h2>}
 
 			{downloads.length === 0 ? (
 				<p className={styles.empty}>{t('mangaSources.downloads.empty')}</p>

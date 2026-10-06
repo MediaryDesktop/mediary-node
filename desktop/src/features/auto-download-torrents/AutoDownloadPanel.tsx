@@ -1,10 +1,11 @@
+import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
 import type { TFunction } from 'i18next'
 import { useEffect, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { formatRelativeTime } from '@shared/lib'
-import { Button, Icon, Input, Switch, toast } from '@shared/ui'
+import { Button, Disclosure, Icon, Input, Switch, toast } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
 
@@ -12,7 +13,9 @@ import {
 	checkTorrentRuleMutation,
 	deleteTorrentRuleMutation,
 	putTorrentRuleMutation,
-	torrentRuleQuery
+	torrentRuleQuery,
+	TorrentSetupNotice,
+	useTorrentSetup
 } from '@entities/torrent'
 import type { TorrentRule, TorrentRuleCheck } from '@entities/torrent'
 
@@ -31,11 +34,10 @@ type Failure = { error: { body?: { detail?: string } | null } }
 export function AutoDownloadPanel({ mediaRef, title }: AutoDownloadPanelProps) {
 	const { t } = useTranslation()
 
-	const [data, load, put, remove, saving, nodeReady] = useUnit([
+	const [data, load, put, saving, nodeReady] = useUnit([
 		torrentRuleQuery.$data,
 		torrentRuleQuery.start,
 		putTorrentRuleMutation.start,
-		deleteTorrentRuleMutation.start,
 		putTorrentRuleMutation.$pending,
 		$nodeReady
 	])
@@ -76,37 +78,35 @@ export function AutoDownloadPanel({ mediaRef, title }: AutoDownloadPanelProps) {
 	return (
 		<section className={styles.root}>
 			<div className={styles.head}>
+				<span className={styles.icon}>
+					<Icon name='common/reset' size={18} />
+				</span>
+				<div className={styles.text}>
+					<h3 className={styles.title}>{t('torrents.auto.panelTitle')}</h3>
+					<p className={styles.hint}>{t('torrents.auto.panelHint')}</p>
+				</div>
 				<Switch
 					checked={rule?.enabled ?? false}
 					onChange={toggle}
-					label={t('torrents.auto.enable')}
+					label={rule?.enabled ? t('torrents.auto.on') : t('torrents.auto.off')}
 					disabled={saving}
 				/>
-				{rule && (
-					<Button
-						size='small'
-						variant='ghost'
-						startIcon={<Icon name='common/trash' size={14} />}
-						onClick={() => remove(mediaRef)}
-					>
-						{t('torrents.auto.remove')}
-					</Button>
-				)}
 			</div>
 
-			<p className={styles.hint}>{t('torrents.auto.hint')}</p>
-
-			{rule && <RuleForm key={`${rule.from_episode}|${rule.query}`} rule={rule} />}
+			{rule && <RuleDetails key={`${rule.from_episode}|${rule.query}`} rule={rule} />}
 		</section>
 	)
 }
 
-function RuleForm({ rule }: { rule: TorrentRule }) {
+function RuleDetails({ rule }: { rule: TorrentRule }) {
 	const { t, i18n } = useTranslation()
+	const navigate = useNavigate()
+	const setup = useTorrentSetup()
 
-	const [put, check, saving, checking] = useUnit([
+	const [put, check, remove, saving, checking] = useUnit([
 		putTorrentRuleMutation.start,
 		checkTorrentRuleMutation.start,
+		deleteTorrentRuleMutation.start,
 		putTorrentRuleMutation.$pending,
 		checkTorrentRuleMutation.$pending
 	])
@@ -133,6 +133,11 @@ function RuleForm({ rule }: { rule: TorrentRule }) {
 
 	const dirty = from !== String(rule.from_episode) || query.trim() !== rule.query
 
+	// A missing client or source says it better than the rule's last error, which
+	// is that same thing in the node's words.
+	const setupMissing =
+		setup.loaded && (!setup.clientConfigured || setup.clientReachable === false || !setup.hasSources)
+
 	const save = () =>
 		put({
 			mediaRef: rule.media_ref,
@@ -157,67 +162,59 @@ function RuleForm({ rule }: { rule: TorrentRule }) {
 		result && result.check.added === planned.length ? episodeCount : (result?.check.added ?? 0)
 
 	return (
-		<div className={styles.form}>
-			<div className={styles.fields}>
-				<label className={styles.field}>
-					{t('torrents.auto.from')}
-					<Input
-						type='number'
-						min={1}
-						value={from}
-						onChange={event => setFrom(event.target.value)}
-						disabled={saving}
-					/>
-				</label>
-				<label className={styles.field}>
-					{t('torrents.auto.query')}
-					<Input
-						value={query}
-						onChange={event => setQuery(event.target.value)}
-						disabled={saving}
-						spellCheck={false}
-						placeholder={t('torrents.auto.queryPlaceholder')}
-					/>
-				</label>
-			</div>
+		<div className={styles.details}>
+			<TorrentSetupNotice
+				setup={setup}
+				needSearch
+				onOpenSettings={() => navigate({ to: '/settings' })}
+			/>
+
+			<p className={styles.status}>
+				{t('torrents.auto.fromShort', { episode: rule.from_episode })}
+				{rule.last_checked && (
+					<>
+						{' · '}
+						{t('torrents.auto.lastChecked', {
+							when: formatRelativeTime(rule.last_checked, i18n.language),
+							count: rule.last_added
+						})}
+					</>
+				)}
+			</p>
+
+			{rule.last_error && !setupMissing && <p className={styles.problem}>{rule.last_error}</p>}
 
 			<div className={styles.actions}>
-				{dirty && (
-					<Button size='small' loading={saving} onClick={save}>
-						{t('torrents.auto.save')}
-					</Button>
-				)}
 				<Button
 					size='small'
-					variant='ghost'
+					variant='secondary'
 					startIcon={<Icon name='common/eye' size={14} />}
 					loading={checking && lastPreview}
-					disabled={checking || dirty}
+					disabled={checking || dirty || setupMissing}
 					onClick={() => run(true)}
 				>
 					{t('torrents.auto.preview')}
 				</Button>
 				<Button
 					size='small'
-					variant='ghost'
+					variant='secondary'
 					startIcon={<Icon name='common/download' size={14} />}
 					loading={checking && !lastPreview}
-					disabled={checking || dirty}
+					disabled={checking || dirty || setupMissing}
 					onClick={() => run(false)}
 				>
 					{t('torrents.auto.checkNow')}
 				</Button>
+				<Button
+					size='small'
+					variant='ghost'
+					startIcon={<Icon name='common/trash' size={14} />}
+					className={styles.remove}
+					onClick={() => remove(rule.media_ref)}
+				>
+					{t('torrents.auto.remove')}
+				</Button>
 			</div>
-
-			{rule.last_checked && (
-				<p className={styles.status}>
-					{t('torrents.auto.lastChecked', {
-						when: formatRelativeTime(rule.last_checked, i18n.language),
-						count: rule.last_added
-					})}
-				</p>
-			)}
-			{rule.last_error && <p className={styles.problem}>{rule.last_error}</p>}
 
 			{result && (
 				<div className={styles.result}>
@@ -245,6 +242,40 @@ function RuleForm({ rule }: { rule: TorrentRule }) {
 					)}
 				</div>
 			)}
+
+			<Disclosure summary={t('torrents.auto.settings')} className={styles.settings}>
+				<div className={styles.fields}>
+					<label className={styles.field}>
+						{t('torrents.auto.from')}
+						<Input
+							type='number'
+							min={1}
+							value={from}
+							onChange={event => setFrom(event.target.value)}
+							disabled={saving}
+						/>
+					</label>
+					<label className={styles.field}>
+						{t('torrents.auto.query')}
+						<Input
+							value={query}
+							onChange={event => setQuery(event.target.value)}
+							disabled={saving}
+							spellCheck={false}
+							placeholder={t('torrents.auto.queryPlaceholder')}
+						/>
+					</label>
+				</div>
+				<Button
+					size='small'
+					loading={saving}
+					disabled={!dirty}
+					onClick={save}
+					className={styles.save}
+				>
+					{t('torrents.auto.save')}
+				</Button>
+			</Disclosure>
 		</div>
 	)
 }

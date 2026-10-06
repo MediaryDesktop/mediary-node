@@ -22,10 +22,13 @@ export interface MediaActionsProps {
 	sources: MediaSource[]
 	mediaType: string
 	siteUrl: string
-	total: number | null | undefined
 	view: MediaView
 	// Absent where torrents make no sense: manga is read, not downloaded as video.
 	onViewChange?: (view: MediaView) => void
+	// How many released episodes the library lacks; null when unknown.
+	missingCount?: number | null
+	// Opens the torrent search; absent where there are no torrents.
+	onDownload?: () => void
 	onOpenDetails: () => void
 }
 
@@ -36,9 +39,10 @@ export function MediaActions({
 	sources,
 	mediaType,
 	siteUrl,
-	total,
 	view,
 	onViewChange,
+	missingCount,
+	onDownload,
 	onOpenDetails
 }: MediaActionsProps) {
 	const { t } = useTranslation()
@@ -127,13 +131,13 @@ export function MediaActions({
 					items={items}
 				/>
 
-				<Tooltip content={t('media.comingSoon')}>
-					<span className={styles.iconActionWrap}>
-						<Button disabled startIcon={<Icon name='common/download' size={20} />}>
-							{t('media.downloadBatch', { count: total ?? 0 })}
-						</Button>
-					</span>
-				</Tooltip>
+				{onDownload && (
+					<Button startIcon={<Icon name='common/download' size={20} />} onClick={onDownload}>
+						{missingCount
+							? t('media.downloadMissing', { count: missingCount })
+							: t('media.searchTorrents')}
+					</Button>
+				)}
 			</div>
 
 			<div className={styles.viewTabs} role='tablist'>

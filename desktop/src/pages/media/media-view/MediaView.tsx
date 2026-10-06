@@ -1,3 +1,4 @@
+import { useUnit } from 'effector-react'
 import { useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
@@ -7,6 +8,8 @@ import { Icon, Modal } from '@shared/ui'
 import { mediaTitle } from '@entities/media'
 import type { MediaDetails, MediaSource } from '@entities/media'
 import type { TrackerEntry } from '@entities/tracker'
+
+import { searchOpened, TorrentSearchDrawer, useMissingEpisodes } from '@features/search-torrents'
 
 import { resolveSubject } from '../lib/media-view'
 import { LibrarySection } from '../library-section/LibrarySection'
@@ -31,8 +34,10 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 	const [descriptionOpen, setDescriptionOpen] = useState(false)
 	const [detailsOpen, setDetailsOpen] = useState(false)
 	const [view, setView] = useState<MediaViewKind>('library')
+	const openSearch = useUnit(searchOpened)
 
 	const subject = resolveSubject(media, entry)
+	const missing = useMissingEpisodes(mediaRef, releasedEpisodes(media, subject?.total))
 
 	if (!subject) {
 		return null
@@ -43,6 +48,7 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 	const title = mediaTitle(base.title)
 	const description = media?.description ?? ''
 	const airing = media?.next_airing_episode
+	const torrents = mediaType !== 'manga'
 
 	return (
 		<>
@@ -64,11 +70,21 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 				sources={sources}
 				mediaType={mediaType}
 				siteUrl={base.site_url}
-				total={total}
 				view={view}
-				onViewChange={mediaType === 'manga' ? undefined : setView}
+				onViewChange={torrents ? setView : undefined}
+				missingCount={missing?.length ?? null}
+				onDownload={
+					torrents
+						? () => {
+								setView('torrent')
+								openSearch()
+							}
+						: undefined
+				}
 				onOpenDetails={() => setDetailsOpen(true)}
 			/>
+
+			{torrents && <TorrentSearchDrawer mediaRef={mediaRef} title={title} missing={missing} />}
 
 			{airing && (
 				<p className={styles.nextAiring}>
@@ -124,4 +140,15 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 			)}
 		</>
 	)
+}
+
+// The episodes out so far: up to the one before the next to air for a title still
+// airing, all of them otherwise. Null when the count is unknown.
+function releasedEpisodes(media: MediaDetails | null, total: number | null | undefined): number | null {
+	const next = media?.next_airing_episode?.episode
+	if (next) {
+		return next - 1
+	}
+
+	return total ?? null
 }

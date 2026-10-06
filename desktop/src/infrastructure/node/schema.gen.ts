@@ -1562,6 +1562,8 @@ export interface components {
 			readonly $schema?: string
 			/** @description Hold the torrent in the client until its files are chosen with PUT .../files. */
 			choose_files?: boolean
+			/** @description The episodes the download is for. With choose_files, the node itself takes only their files once the file list arrives. */
+			episodes?: number[] | null
 			/** @description A magnet link with a BitTorrent v1 hash. Give this or torrent. */
 			magnet?: string
 			/** @description The title the download is for; its files are matched to it. */
@@ -3481,6 +3483,8 @@ export interface components {
 			completed_at?: string
 			/** Format: date-time */
 			created_at: string
+			/** @description The episodes it was added for, when it was. */
+			episodes?: number[] | null
 			error?: string
 			/** Format: int64 */
 			id: number

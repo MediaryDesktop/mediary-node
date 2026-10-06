@@ -154,25 +154,27 @@ function ServerForm({ server, onDone }: { server: OPDSServer | null; onDone: () 
 				/>
 			</DrawerSection>
 
-			<div className={styles.check}>
-				<Button
-					size='small'
-					startIcon={<Icon name='common/signal' size={16} />}
-					loading={checking}
-					disabled={url.trim() === '' || submitting}
-					onClick={runCheck}
-				>
-					{t('mangaSources.drawer.check')}
-				</Button>
+			<DrawerSection>
+				<div className={styles.check}>
+					<Button
+						size='small'
+						startIcon={<Icon name='common/signal' size={16} />}
+						loading={checking}
+						disabled={url.trim() === '' || submitting}
+						onClick={runCheck}
+					>
+						{t('mangaSources.drawer.check')}
+					</Button>
 
-				{result && (
-					<span className={result.ok ? styles.ok : styles.problem} role='status'>
-						{result.ok
-							? t('mangaSources.drawer.ok')
-							: t(`mangaSources.drawer.problems.${result.problem ?? 'unreachable'}`)}
-					</span>
-				)}
-			</div>
+					{result && (
+						<span className={result.ok ? styles.ok : styles.problem} role='status'>
+							{result.ok
+								? t('mangaSources.drawer.ok')
+								: t(`mangaSources.drawer.problems.${result.problem ?? 'unreachable'}`)}
+						</span>
+					)}
+				</div>
+			</DrawerSection>
 		</DrawerForm>
 	)
 }
