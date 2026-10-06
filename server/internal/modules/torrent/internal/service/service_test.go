@@ -621,3 +621,42 @@ func TestAFileChoiceTheTorrentCannotTake(t *testing.T) {
 		}
 	}
 }
+
+func TestTheBuiltInClientSavesStraightIntoTheFolder(t *testing.T) {
+	h := newHarness(t)
+	builtin := newFakeClient()
+	h.svc.opts.Embedded = builtin
+	ctx := context.Background()
+
+	_, err := h.svc.UpdateSettings(ctx, TorrentSettingsUpdate{
+		Client:  ClientEmbedded,
+		RootID:  1,
+		PathMap: TorrentPathMap{Client: "/downloads", Node: h.root},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	h.add(t)
+
+	if len(builtin.added) != 1 || len(h.client.added) != 0 {
+		t.Fatalf("built-in got %d, qBittorrent got %d", len(builtin.added), len(h.client.added))
+	}
+	if got := builtin.added[0].SavePath; got != filepath.Join(h.root, "Sousou no Frieren") {
+		t.Fatalf("save path = %q, want the node's own folder: the mapping is qBittorrent's", got)
+	}
+
+	_, status, err := h.svc.List(ctx)
+	if err != nil || !status.Configured || status.Kind != ClientEmbedded {
+		t.Fatalf("status = %+v, %v", status, err)
+	}
+
+	check, err := h.svc.Check(ctx, Connection{Kind: ClientEmbedded}, false)
+	if err != nil || check.Version == "" {
+		t.Fatalf("check = %+v, %v", check, err)
+	}
+
+	if _, err := h.svc.UpdateSettings(ctx, TorrentSettingsUpdate{Client: "transmission"}); apperr.KindOf(err) != apperr.KindInvalid {
+		t.Fatalf("an unknown client: %v, want invalid", err)
+	}
+}

@@ -278,19 +278,24 @@ components:
           format: uri
           readOnly: true
           type: string
+        client:
+          description: embedded checks the node's own client; anything else, qBittorrent at url.
+          enum:
+            - ""
+            - qbittorrent
+            - embedded
+          type: string
         password:
           description: Left out uses the saved password.
           maxLength: 1024
           type: string
         url:
           maxLength: 2048
-          minLength: 1
           type: string
         username:
           maxLength: 256
           type: string
       required:
-        - url
         - username
       type: object
     CheckTorrentSourceInputBody:
@@ -2332,6 +2337,13 @@ components:
           format: uri
           readOnly: true
           type: string
+        client:
+          description: The user's qBittorrent, the node's own client, or none.
+          enum:
+            - ""
+            - qbittorrent
+            - embedded
+          type: string
         password:
           description: Left out keeps the saved password; empty removes it.
           maxLength: 1024
@@ -2352,6 +2364,7 @@ components:
           maxLength: 256
           type: string
       required:
+        - client
         - url
         - username
         - root_id
@@ -3468,10 +3481,17 @@ components:
           type: boolean
         error:
           type: string
+        kind:
+          enum:
+            - ""
+            - qbittorrent
+            - embedded
+          type: string
         reachable:
           type: boolean
       required:
         - configured
+        - kind
         - reachable
       type: object
     TorrentDownload:
@@ -3959,6 +3979,13 @@ components:
           format: uri
           readOnly: true
           type: string
+        client:
+          description: The user's qBittorrent, the node's own client, or none.
+          enum:
+            - ""
+            - qbittorrent
+            - embedded
+          type: string
         has_password:
           type: boolean
         path_map:
@@ -3971,6 +3998,7 @@ components:
         username:
           type: string
       required:
+        - client
         - url
         - username
         - has_password

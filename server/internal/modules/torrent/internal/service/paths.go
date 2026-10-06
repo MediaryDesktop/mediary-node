@@ -38,6 +38,16 @@ func folderName(title string) string {
 	return name
 }
 
+// savePath is where the client should save a folder: the node's own client sees
+// the node's disk, qBittorrent may see it under other names.
+func savePath(nodePath string, settings *TorrentSettings) string {
+	if settings.Client == ClientEmbedded {
+		return nodePath
+	}
+
+	return clientPath(nodePath, settings.PathMap)
+}
+
 // clientPath is where the client should save a folder the node knows by
 // nodePath. Without a mapping both see the same disk.
 func clientPath(nodePath string, mapping TorrentPathMap) string {

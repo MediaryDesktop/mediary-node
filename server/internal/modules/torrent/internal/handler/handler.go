@@ -70,6 +70,7 @@ type TorrentSettingsOutput struct {
 
 type PutTorrentSettingsInput struct {
 	Body struct {
+		Client   string                 `json:"client" enum:",qbittorrent,embedded" doc:"The user's qBittorrent, the node's own client, or none."`
 		URL      string                 `json:"url" maxLength:"2048" doc:"qBittorrent WebUI address; empty disconnects."`
 		Username string                 `json:"username" maxLength:"256"`
 		Password *string                `json:"password,omitempty" maxLength:"1024" doc:"Left out keeps the saved password; empty removes it."`
@@ -80,7 +81,8 @@ type PutTorrentSettingsInput struct {
 
 type CheckTorrentClientInput struct {
 	Body struct {
-		URL      string  `json:"url" minLength:"1" maxLength:"2048"`
+		Client   string  `json:"client,omitempty" enum:",qbittorrent,embedded" doc:"embedded checks the node's own client; anything else, qBittorrent at url."`
+		URL      string  `json:"url,omitempty" maxLength:"2048"`
 		Username string  `json:"username" maxLength:"256"`
 		Password *string `json:"password,omitempty" maxLength:"1024" doc:"Left out uses the saved password."`
 	}
@@ -242,6 +244,7 @@ func (h *Handler) Register(api huma.API) {
 		Tags:        []string{"torrent"},
 	}, func(ctx context.Context, in *PutTorrentSettingsInput) (*TorrentSettingsOutput, error) {
 		settings, err := h.svc.UpdateSettings(ctx, service.TorrentSettingsUpdate{
+			Client:   in.Body.Client,
 			URL:      in.Body.URL,
 			Username: in.Body.Username,
 			Password: in.Body.Password,
@@ -263,7 +266,7 @@ func (h *Handler) Register(api huma.API) {
 		Description: "Signs in to qBittorrent with the given address and credentials, saved or not, and reports its version.",
 		Tags:        []string{"torrent"},
 	}, func(ctx context.Context, in *CheckTorrentClientInput) (*TorrentCheckOutput, error) {
-		conn := service.Connection{URL: in.Body.URL, Username: in.Body.Username}
+		conn := service.Connection{Kind: in.Body.Client, URL: in.Body.URL, Username: in.Body.Username}
 		if in.Body.Password != nil {
 			conn.Password = *in.Body.Password
 		}

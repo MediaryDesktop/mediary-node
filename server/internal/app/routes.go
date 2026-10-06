@@ -52,7 +52,9 @@ type Deps struct {
 	TranscodeDir     string
 	TranscodeHWAccel string
 
-	TorrentClient torrent.Connection
+	TorrentClient     torrent.Connection
+	TorrentListenPort int
+	TorrentEnableUPnP bool
 }
 
 // Register mounts every module and returns what has to run on shutdown.
@@ -138,6 +140,9 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 		Library:     downloadFolders{library: libraryModule},
 		SecretsPath: filepath.Join(deps.DataDir, "torrent-secrets.json"),
 		Client:      deps.TorrentClient,
+		EmbeddedDir: filepath.Join(deps.DataDir, "torrent-client"),
+		ListenPort:  deps.TorrentListenPort,
+		EnableUPnP:  deps.TorrentEnableUPnP,
 		Titles:      releaseTitles{media: mediaModule},
 		UserAgent:   "mediary-node/" + deps.Build.Version,
 	})
@@ -179,6 +184,7 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 	return func() {
 		stopQueue()
 		playbackModule.Close()
+		torrentModule.Close()
 	}
 }
 

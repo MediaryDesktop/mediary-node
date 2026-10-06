@@ -126,7 +126,9 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 		TranscodeDir:     cfg.Playback.TranscodeDir,
 		TranscodeHWAccel: cfg.Playback.TranscodeHWAccel,
 
-		TorrentClient: torrentClient(cfg.Torrent),
+		TorrentClient:     torrentClient(cfg.Torrent),
+		TorrentListenPort: cfg.Torrent.ListenPort,
+		TorrentEnableUPnP: cfg.Torrent.EnableUPnP,
 	})
 	defer shutdownModules()
 
@@ -181,9 +183,12 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 // torrentClient is the connection the environment names, used until the user
 // saves one in the settings.
 func torrentClient(cfg config.Torrent) torrent.Connection {
-	if cfg.Client != "qbittorrent" {
+	switch cfg.Client {
+	case "embedded":
+		return torrent.Connection{Kind: "embedded"}
+	case "qbittorrent":
+		return torrent.Connection{Kind: "qbittorrent", URL: cfg.ExternalURL, Username: cfg.ExternalUser, Password: cfg.ExternalPassword}
+	default:
 		return torrent.Connection{}
 	}
-
-	return torrent.Connection{URL: cfg.ExternalURL, Username: cfg.ExternalUser, Password: cfg.ExternalPassword}
 }

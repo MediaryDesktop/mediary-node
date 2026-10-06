@@ -40,8 +40,16 @@ type Library interface {
 	Episodes(ctx context.Context, mediaRef string) ([]int, error)
 }
 
-// Connection is how to reach the client.
+// Client kinds: the user's qBittorrent, the node's own client, or none.
+const (
+	ClientNone        = ""
+	ClientQBittorrent = "qbittorrent"
+	ClientEmbedded    = "embedded"
+)
+
+// Connection is which client to use and, for qBittorrent, how to reach it.
 type Connection struct {
+	Kind     string
 	URL      string
 	Username string
 	Password string
@@ -52,8 +60,12 @@ type Options struct {
 	// saves one; a headless node is set up this way.
 	Defaults Connection
 
-	// NewClient builds a client for a connection; tests swap it.
+	// NewClient builds a qBittorrent client for a connection; tests swap it.
 	NewClient func(Connection) (Client, error)
+
+	// Embedded is the node's own client, used when the user picks it; nil where
+	// it is not available.
+	Embedded Client
 
 	// Torznab searches the user's sources; Titles names the title searched for.
 	Torznab *torznab.Client

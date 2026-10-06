@@ -65,6 +65,7 @@ type TorrentDownload struct {
 // TorrentClientStatus says whether the downloads' live fields can be trusted.
 type TorrentClientStatus struct {
 	Configured bool   `json:"configured"`
+	Kind       string `json:"kind" enum:",qbittorrent,embedded"`
 	Reachable  bool   `json:"reachable"`
 	Error      string `json:"error,omitempty"`
 }
@@ -137,7 +138,7 @@ func (s *Service) Add(ctx context.Context, req AddRequest) (*TorrentDownload, er
 	err = client.Add(ctx, qbittorrent.AddRequest{
 		Magnet:   req.Magnet,
 		Torrent:  req.Torrent,
-		SavePath: clientPath(filepath.Join(rootPath, relDir), settings.PathMap),
+		SavePath: savePath(filepath.Join(rootPath, relDir), settings),
 		Category: torrentFolder,
 		Tags:     []string{torrentTag},
 		Hold:     req.ChooseFiles,
@@ -204,9 +205,11 @@ func (s *Service) List(ctx context.Context) ([]TorrentDownload, TorrentClientSta
 	}
 
 	s.mu.Lock()
+	configured := conn.Kind == ClientEmbedded || (conn.Kind == ClientQBittorrent && conn.URL != "")
 	status := TorrentClientStatus{
-		Configured: conn.URL != "",
-		Reachable:  conn.URL != "" && s.polled && s.clientError == "",
+		Configured: configured,
+		Kind:       conn.Kind,
+		Reachable:  configured && s.polled && s.clientError == "",
 		Error:      s.clientError,
 	}
 	s.mu.Unlock()

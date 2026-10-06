@@ -8,6 +8,7 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/rs/zerolog"
 
+	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/embedded"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/handler"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/service"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/store"
@@ -31,6 +32,12 @@ type Deps struct {
 	// one in the settings.
 	Client Connection
 
+	// The node's own client: where it keeps its list of torrents, the port peers
+	// reach it on, and whether it may open that port on the router.
+	EmbeddedDir string
+	ListenPort  int
+	EnableUPnP  bool
+
 	// Titles names a title for a release search.
 	Titles    Titles
 	UserAgent string
@@ -46,6 +53,13 @@ type Library = service.Library
 type Connection = service.Connection
 
 func New(deps Deps) *Module {
+	builtin := embedded.New(embedded.Options{
+		StateDir:   deps.EmbeddedDir,
+		ListenPort: deps.ListenPort,
+		EnableUPnP: deps.EnableUPnP,
+		Logger:     deps.Logger,
+	})
+
 	svc := service.New(
 		store.New(deps.DB),
 		secrets.New(deps.SecretsPath),
@@ -54,17 +68,25 @@ func New(deps Deps) *Module {
 		deps.Logger,
 		service.Options{
 			Defaults: deps.Client,
+			Embedded: builtin,
 			Titles:   deps.Titles,
 			Torznab:  torznab.New(20*time.Second, deps.UserAgent),
 		},
 	)
 
-	return &Module{handler: handler.New(svc), svc: svc}
+	return &Module{handler: handler.New(svc), svc: svc, embedded: builtin}
 }
 
 type Module struct {
-	handler *handler.Handler
-	svc     *service.Service
+	handler  *handler.Handler
+	svc      *service.Service
+	embedded *embedded.Client
+}
+
+// Close stops the node's own client, if it ever started; its torrents resume
+// on the next start.
+func (m *Module) Close() {
+	m.embedded.Close()
 }
 
 // Start follows the downloads until ctx ends.

@@ -84,9 +84,9 @@ type Library struct {
 }
 
 type Torrent struct {
-	// none: the user connects qBittorrent in the settings. qbittorrent: the
-	// connection below, for a headless node. embedded: reserved for the built-in
-	// client, which does not exist yet, so it behaves as none.
+	// Which client to use until the user picks one in the settings. none: no
+	// client; embedded: the node's own; qbittorrent: the connection below, for a
+	// headless node.
 	Client       string `env:"NODE_TORRENT_CLIENT" envDefault:"none"`
 	DownloadDir  string `env:"NODE_TORRENT_DOWNLOAD_DIR"`
 	ListenPort   int    `env:"NODE_TORRENT_LISTEN_PORT" envDefault:"0"`

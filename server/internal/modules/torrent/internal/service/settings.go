@@ -10,6 +10,7 @@ import (
 )
 
 const (
+	keyKind       = "torrent.client.kind"
 	keyURL        = "torrent.client.url"
 	keyUsername   = "torrent.client.username"
 	keyRoot       = "torrent.download_root"
@@ -29,6 +30,7 @@ type TorrentPathMap struct {
 }
 
 type TorrentSettings struct {
+	Client      string         `json:"client" enum:",qbittorrent,embedded" doc:"The user's qBittorrent, the node's own client, or none."`
 	URL         string         `json:"url"`
 	Username    string         `json:"username"`
 	HasPassword bool           `json:"has_password"`
@@ -37,6 +39,7 @@ type TorrentSettings struct {
 }
 
 type TorrentSettingsUpdate struct {
+	Client   string
 	URL      string
 	Username string
 	// Nil keeps the saved password; "" removes it.
@@ -51,7 +54,7 @@ func (s *Service) Settings(ctx context.Context) (*TorrentSettings, error) {
 		return nil, err
 	}
 
-	settings := &TorrentSettings{URL: conn.URL, Username: conn.Username, HasPassword: conn.Password != ""}
+	settings := &TorrentSettings{Client: conn.Kind, URL: conn.URL, Username: conn.Username, HasPassword: conn.Password != ""}
 
 	if raw, _, err := s.store.Meta(ctx, keyRoot); err != nil {
 		return nil, apperr.Wrap(err, apperr.KindInternal, "read the download folder")
@@ -73,6 +76,24 @@ func (s *Service) Settings(ctx context.Context) (*TorrentSettings, error) {
 func (s *Service) UpdateSettings(ctx context.Context, update TorrentSettingsUpdate) (*TorrentSettings, error) {
 	update.URL = strings.TrimSpace(update.URL)
 	update.PathMap.Client = strings.TrimSpace(update.PathMap.Client)
+
+	// A desktop from before the built-in client sends an address and no kind.
+	if update.Client == ClientNone && update.URL != "" {
+		update.Client = ClientQBittorrent
+	}
+
+	switch update.Client {
+	case ClientNone, ClientEmbedded:
+	case ClientQBittorrent:
+		if update.URL == "" {
+			return nil, apperr.Invalid("url", "the qBittorrent address is empty")
+		}
+	default:
+		return nil, apperr.Invalid("client", "unknown torrent client %q", update.Client)
+	}
+	if update.Client == ClientEmbedded && s.opts.Embedded == nil {
+		return nil, apperr.Invalid("client", "this node has no built-in torrent client")
+	}
 	update.PathMap.Node = strings.TrimSpace(update.PathMap.Node)
 
 	if update.URL != "" {
@@ -94,6 +115,7 @@ func (s *Service) UpdateSettings(ctx context.Context, update TorrentSettingsUpda
 	}
 
 	values := map[string]string{
+		keyKind:      update.Client,
 		keyURL:       update.URL,
 		keyUsername:  update.Username,
 		keyRoot:      "",
@@ -130,6 +152,19 @@ type TorrentCheckResult struct {
 // Check tries a connection before or after it is saved. An empty password with
 // the saved URL means the saved password, so the user need not type it again.
 func (s *Service) Check(ctx context.Context, conn Connection, keepPassword bool) (*TorrentCheckResult, error) {
+	if conn.Kind == ClientEmbedded {
+		if s.opts.Embedded == nil {
+			return nil, apperr.New(apperr.KindUnavailable, "this node has no built-in torrent client")
+		}
+
+		version, err := s.opts.Embedded.Version(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		return &TorrentCheckResult{Version: version}, nil
+	}
+
 	conn.URL = strings.TrimSpace(conn.URL)
 	if conn.URL == "" {
 		return nil, apperr.Invalid("url", "the qBittorrent address is empty")
@@ -157,13 +192,23 @@ func (s *Service) Check(ctx context.Context, conn Connection, keepPassword bool)
 }
 
 // connection is the saved connection, or the environment's until one is saved.
+// Settings saved before the built-in client existed hold only an address, which
+// meant qBittorrent.
 func (s *Service) connection(ctx context.Context) (Connection, error) {
-	url, saved, err := s.store.Meta(ctx, keyURL)
+	kind, kindSaved, err := s.store.Meta(ctx, keyKind)
 	if err != nil {
 		return Connection{}, apperr.Wrap(err, apperr.KindInternal, "read torrent settings")
 	}
-	if !saved {
+
+	url, urlSaved, err := s.store.Meta(ctx, keyURL)
+	if err != nil {
+		return Connection{}, apperr.Wrap(err, apperr.KindInternal, "read torrent settings")
+	}
+	if !kindSaved && !urlSaved {
 		return s.opts.Defaults, nil
+	}
+	if !kindSaved && url != "" {
+		kind = ClientQBittorrent
 	}
 
 	username, _, err := s.store.Meta(ctx, keyUsername)
@@ -176,7 +221,7 @@ func (s *Service) connection(ctx context.Context) (Connection, error) {
 		return Connection{}, apperr.Wrap(err, apperr.KindInternal, "read the qBittorrent password")
 	}
 
-	return Connection{URL: url, Username: username, Password: password}, nil
+	return Connection{Kind: kind, URL: url, Username: username, Password: password}, nil
 }
 
 // currentClient is the client for the saved connection, or nil when there is
@@ -186,7 +231,18 @@ func (s *Service) currentClient(ctx context.Context) (Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	if conn.URL == "" {
+
+	switch conn.Kind {
+	case ClientEmbedded:
+		if s.opts.Embedded == nil {
+			return nil, apperr.New(apperr.KindUnavailable, "this node has no built-in torrent client")
+		}
+		return s.opts.Embedded, nil
+	case ClientQBittorrent:
+		if conn.URL == "" {
+			return nil, nil
+		}
+	default:
 		return nil, nil
 	}
 
@@ -213,7 +269,7 @@ func (s *Service) requireClient(ctx context.Context) (Client, error) {
 		return nil, err
 	}
 	if client == nil {
-		return nil, apperr.New(apperr.KindPrecondition, "connect qBittorrent in the settings first")
+		return nil, apperr.New(apperr.KindPrecondition, "choose a torrent client in the settings first")
 	}
 
 	return client, nil
