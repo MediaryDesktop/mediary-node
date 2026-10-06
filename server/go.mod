@@ -31,6 +31,10 @@ require (
 )
 
 require (
+	// Pinned past the release that split compute/metadata into a module of its
+	// own: anacrolix/torrent pulls an old oauth2 that wants v0.34.0, and in the
+	// go.work workspace that clashes with mediary-cloud's compute/metadata.
+	cloud.google.com/go v0.123.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/RoaringBitmap/roaring v1.2.3 // indirect
 	github.com/alecthomas/atomic v0.1.0-alpha2 // indirect
