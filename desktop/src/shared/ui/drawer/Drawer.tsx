@@ -17,6 +17,9 @@ export interface DrawerProps {
 	side?: 'right' | 'left' | 'bottom'
 	size?: 'sm' | 'md' | 'lg' | 'xl' | 'sheet'
 	children?: ReactNode
+	// Where focus lands on open. Radix selects the text of a field it focuses; a
+	// caller that wants the caret without the selection takes over here.
+	onOpenAutoFocus?: (event: Event) => void
 }
 
 export function Drawer({
@@ -28,7 +31,8 @@ export function Drawer({
 	closable = true,
 	side = 'right',
 	size = 'md',
-	children
+	children,
+	onOpenAutoFocus
 }: DrawerProps) {
 	const { t } = useTranslation()
 
@@ -40,6 +44,7 @@ export function Drawer({
 				<Dialog.Content
 					className={clsx(styles.panel, styles[side], styles[size])}
 					aria-describedby={undefined}
+					onOpenAutoFocus={onOpenAutoFocus}
 					onEscapeKeyDown={event => {
 						// An open popup inside the drawer closes itself on Escape; the drawer
 						// stays. Radix listens on the document, so it hears the key first.

@@ -39,6 +39,16 @@ export function LinkSourceDrawer({ open, onClose, ...props }: LinkSourceDrawerPr
 			onOpenChange={next => !next && onClose()}
 			title={t('mangaSources.link.title')}
 			description={t('mangaSources.link.description')}
+			closable={false}
+			size='lg'
+			onOpenAutoFocus={event => {
+				// Focus the search field without selecting its text: the title is
+				// already in it, and a selected one looks like it is about to be replaced.
+				event.preventDefault()
+				if (event.currentTarget instanceof HTMLElement) {
+					event.currentTarget.querySelector('input')?.focus({ preventScroll: true })
+				}
+			}}
 		>
 			{open && <LinkForm key={props.mediaRef} {...props} onDone={onClose} />}
 		</Drawer>
