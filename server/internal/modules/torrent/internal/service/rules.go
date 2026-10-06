@@ -228,7 +228,9 @@ func (s *Service) plan(ctx context.Context, rule *store.Rule) ([]TorrentPlannedD
 
 	queued, err := s.store.DownloadEpisodes(ctx, rule.MediaRef)
 	if err != nil {
-		return nil, apperr.Wrap(err, apperr.KindInternal, "list downloaded episodes")
+		s.logger.Error().Err(err).Str("media_ref", rule.MediaRef).Str("query", rule.Query).
+			Msg("auto-download check: could not read the title's downloads")
+		return nil, apperr.New(apperr.KindInternal, "could not read the title's downloads: details are in the log")
 	}
 
 	have := map[int]bool{}
@@ -254,6 +256,8 @@ func (s *Service) plan(ctx context.Context, rule *store.Rule) ([]TorrentPlannedD
 
 	result, err := s.Search(ctx, SearchRequest{MediaRef: rule.MediaRef, Query: rule.Query})
 	if err != nil {
+		s.logger.Error().Err(err).Str("media_ref", rule.MediaRef).Str("query", rule.Query).
+			Msg("auto-download check: search failed")
 		return nil, err
 	}
 
