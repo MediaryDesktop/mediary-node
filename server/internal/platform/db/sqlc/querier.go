@@ -6,6 +6,7 @@ package sqlc
 
 import (
 	"context"
+	"database/sql"
 )
 
 type Querier interface {
@@ -35,6 +36,7 @@ type Querier interface {
 	DeleteOPDSServer(ctx context.Context, id int64) (int64, error)
 	DeleteSourceCacheOlderThan(ctx context.Context, arg DeleteSourceCacheOlderThanParams) error
 	DeleteTorrentDownload(ctx context.Context, id int64) (int64, error)
+	DeleteTorrentRule(ctx context.Context, mediaRef string) (int64, error)
 	DeleteTorznabSource(ctx context.Context, id int64) (int64, error)
 	// A chapter already queued, running or done stays as it is; a failed or cancelled
 	// one goes back in the queue.
@@ -55,6 +57,7 @@ type Querier interface {
 	GetSourceCache(ctx context.Context, arg GetSourceCacheParams) (SourceCache, error)
 	GetTorrentDownload(ctx context.Context, id int64) (TorrentDownload, error)
 	GetTorrentDownloadByHash(ctx context.Context, infoHash string) (TorrentDownload, error)
+	GetTorrentRuleByMedia(ctx context.Context, mediaRef string) (TorrentRule, error)
 	GetTorznabSource(ctx context.Context, id int64) (TorznabSource, error)
 	InsertCustomList(ctx context.Context, arg InsertCustomListParams) (CustomList, error)
 	InsertLibraryFile(ctx context.Context, arg InsertLibraryFileParams) (int64, error)
@@ -89,7 +92,9 @@ type Querier interface {
 	ListScanRunGroups(ctx context.Context, scanRunID int64) ([]ScanRunGroup, error)
 	ListScanRunRoots(ctx context.Context, scanRunID int64) ([]ScanRunRoot, error)
 	ListScanRuns(ctx context.Context, arg ListScanRunsParams) ([]ScanRun, error)
+	ListTorrentDownloadEpisodes(ctx context.Context, mediaRef string) ([]sql.NullString, error)
 	ListTorrentDownloads(ctx context.Context, limit int64) ([]TorrentDownload, error)
+	ListTorrentRules(ctx context.Context) ([]TorrentRule, error)
 	ListTorznabSources(ctx context.Context) ([]TorznabSource, error)
 	ListUnfinishedTorrentDownloads(ctx context.Context) ([]TorrentDownload, error)
 	// Files the matcher still has to work out, ordered so that every episode of one
@@ -115,6 +120,7 @@ type Querier interface {
 	SetTorrentDownloadChoosing(ctx context.Context, arg SetTorrentDownloadChoosingParams) error
 	SetTorrentDownloadName(ctx context.Context, arg SetTorrentDownloadNameParams) error
 	SetTorrentDownloadState(ctx context.Context, arg SetTorrentDownloadStateParams) error
+	SetTorrentRuleChecked(ctx context.Context, arg SetTorrentRuleCheckedParams) error
 	TouchLibraryRoot(ctx context.Context, arg TouchLibraryRootParams) error
 	UpdateLibraryFile(ctx context.Context, arg UpdateLibraryFileParams) error
 	// Only the parsed columns: the file itself did not change, a newer parser reads
@@ -132,6 +138,7 @@ type Querier interface {
 	UpsertManualFileMatch(ctx context.Context, arg UpsertManualFileMatchParams) error
 	UpsertNodeMeta(ctx context.Context, arg UpsertNodeMetaParams) (NodeMetum, error)
 	UpsertSourceCache(ctx context.Context, arg UpsertSourceCacheParams) error
+	UpsertTorrentRule(ctx context.Context, arg UpsertTorrentRuleParams) (TorrentRule, error)
 }
 
 var _ Querier = (*Queries)(nil)

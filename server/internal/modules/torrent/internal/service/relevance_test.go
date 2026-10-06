@@ -1,0 +1,38 @@
+package service
+
+import "testing"
+
+func TestNamesTitle(t *testing.T) {
+	season3 := []string{"Tensei Kizoku, Kantei Skill de Nariagaru 3rd Season"}
+	season1 := []string{"Tensei Kizoku, Kantei Skill de Nariagaru", "As a Reincarnated Aristocrat, I'll Use My Appraisal Skill to Rise in the World"}
+	frieren := []string{"Frieren: Beyond Journey's End", "Sousou no Frieren"}
+
+	cases := []struct {
+		release string
+		names   []string
+		want    bool
+	}{
+		// Real AniLiberty names from Jackett, 06.10.2026.
+		{"Перерождение в аристократа со способностью анализа 3 / E01-E02 Tensei Kizoku, Kantei Skill de Nariagaru 3rd Season - AniLiberty.TOP [WEB-DL 1080p][HEVC][1-2]", season3, true},
+		{"О моём перерождении в меч 2 / E01 Tensei Shitara Ken Deshita 2nd Season - AniLiberty.TOP [WEB-DL 1080p][HEVC][1]", season3, false},
+		{"Тёмное прошлое перевоплощённой злодейки / E01-E12 Tensei Akujo no Kuro Rekishi - AniLiberty.TOP [WEBRip 1080p][HEVC][1-12]", season3, false},
+		{"Перерождение в аристократа со способностью анализа 2 / E01-E12 Tensei Kizoku, Kantei Skill de Nariagaru 2nd Season - AniLiberty.TOP [WEB-DL 1080p][HEVC][1-12]", season3, false},
+
+		// The first season's name sits inside every sequel's.
+		{"Перерождение в аристократа со способностью анализа / E01-E12 Tensei Kizoku, Kantei Skill de Nariagaru - AniLiberty.TOP [WEBRip 1080p][HEVC][1-12]", season1, true},
+		{"Перерождение в аристократа со способностью анализа 3 / E01-E02 Tensei Kizoku, Kantei Skill de Nariagaru 3rd Season - AniLiberty.TOP [WEB-DL 1080p][HEVC][1-2]", season1, false},
+		{"[Group] Tensei Kizoku, Kantei Skill de Nariagaru S2 - 05 [1080p]", season1, false},
+
+		{"[SubsPlease] Sousou no Frieren - 13 (1080p)", frieren, true},
+		{"Frieren - Beyond Journey's End S01E07 1080p WEB H.264", frieren, true},
+		{"[SubsPlease] Sousou no Frieren 2 - 05 (1080p)", frieren, false},
+		{"[SubsPlease] Sousou no Frierenx - 05 (1080p)", frieren, false},
+		{"Anything at all", nil, false},
+	}
+
+	for _, tc := range cases {
+		if got := namesTitle(tc.release, tc.names); got != tc.want {
+			t.Errorf("namesTitle(%q, %v) = %v, want %v", tc.release, tc.names, got, tc.want)
+		}
+	}
+}

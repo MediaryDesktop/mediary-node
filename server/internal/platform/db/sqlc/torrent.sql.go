@@ -7,6 +7,7 @@ package sqlc
 
 import (
 	"context"
+	"database/sql"
 )
 
 const deleteTorrentDownload = `-- name: DeleteTorrentDownload :execrows
@@ -15,6 +16,18 @@ DELETE FROM torrent_download WHERE id = ?
 
 func (q *Queries) DeleteTorrentDownload(ctx context.Context, id int64) (int64, error) {
 	result, err := q.db.ExecContext(ctx, deleteTorrentDownload, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+const deleteTorrentRule = `-- name: DeleteTorrentRule :execrows
+DELETE FROM torrent_rule WHERE media_ref = ?
+`
+
+func (q *Queries) DeleteTorrentRule(ctx context.Context, mediaRef string) (int64, error) {
+	result, err := q.db.ExecContext(ctx, deleteTorrentRule, mediaRef)
 	if err != nil {
 		return 0, err
 	}
@@ -57,7 +70,7 @@ func (q *Queries) FinishTorrentDownload(ctx context.Context, arg FinishTorrentDo
 }
 
 const getTorrentDownload = `-- name: GetTorrentDownload :one
-SELECT id, info_hash, media_ref, title, name, root_id, rel_dir, source, state, imported, error, created_at, updated_at, completed_at, choosing FROM torrent_download WHERE id = ?
+SELECT id, info_hash, media_ref, title, name, root_id, rel_dir, source, state, imported, error, created_at, updated_at, completed_at, choosing, episodes FROM torrent_download WHERE id = ?
 `
 
 func (q *Queries) GetTorrentDownload(ctx context.Context, id int64) (TorrentDownload, error) {
@@ -79,12 +92,13 @@ func (q *Queries) GetTorrentDownload(ctx context.Context, id int64) (TorrentDown
 		&i.UpdatedAt,
 		&i.CompletedAt,
 		&i.Choosing,
+		&i.Episodes,
 	)
 	return i, err
 }
 
 const getTorrentDownloadByHash = `-- name: GetTorrentDownloadByHash :one
-SELECT id, info_hash, media_ref, title, name, root_id, rel_dir, source, state, imported, error, created_at, updated_at, completed_at, choosing FROM torrent_download WHERE info_hash = ?
+SELECT id, info_hash, media_ref, title, name, root_id, rel_dir, source, state, imported, error, created_at, updated_at, completed_at, choosing, episodes FROM torrent_download WHERE info_hash = ?
 `
 
 func (q *Queries) GetTorrentDownloadByHash(ctx context.Context, infoHash string) (TorrentDownload, error) {
@@ -106,6 +120,30 @@ func (q *Queries) GetTorrentDownloadByHash(ctx context.Context, infoHash string)
 		&i.UpdatedAt,
 		&i.CompletedAt,
 		&i.Choosing,
+		&i.Episodes,
+	)
+	return i, err
+}
+
+const getTorrentRuleByMedia = `-- name: GetTorrentRuleByMedia :one
+SELECT id, media_ref, title, "query", from_episode, enabled, last_checked_at, last_added, last_error, created_at, updated_at FROM torrent_rule WHERE media_ref = ?
+`
+
+func (q *Queries) GetTorrentRuleByMedia(ctx context.Context, mediaRef string) (TorrentRule, error) {
+	row := q.db.QueryRowContext(ctx, getTorrentRuleByMedia, mediaRef)
+	var i TorrentRule
+	err := row.Scan(
+		&i.ID,
+		&i.MediaRef,
+		&i.Title,
+		&i.Query,
+		&i.FromEpisode,
+		&i.Enabled,
+		&i.LastCheckedAt,
+		&i.LastAdded,
+		&i.LastError,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
@@ -128,21 +166,22 @@ func (q *Queries) GetTorznabSource(ctx context.Context, id int64) (TorznabSource
 }
 
 const insertTorrentDownload = `-- name: InsertTorrentDownload :one
-INSERT INTO torrent_download (info_hash, media_ref, title, root_id, rel_dir, source, choosing, state, created_at, updated_at)
-VALUES (?, ?, ?, ?, ?, ?, ?, 'downloading', ?, ?)
-RETURNING id, info_hash, media_ref, title, name, root_id, rel_dir, source, state, imported, error, created_at, updated_at, completed_at, choosing
+INSERT INTO torrent_download (info_hash, media_ref, title, root_id, rel_dir, source, choosing, episodes, state, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'downloading', ?, ?)
+RETURNING id, info_hash, media_ref, title, name, root_id, rel_dir, source, state, imported, error, created_at, updated_at, completed_at, choosing, episodes
 `
 
 type InsertTorrentDownloadParams struct {
-	InfoHash  string `json:"info_hash"`
-	MediaRef  string `json:"media_ref"`
-	Title     string `json:"title"`
-	RootID    int64  `json:"root_id"`
-	RelDir    string `json:"rel_dir"`
-	Source    string `json:"source"`
-	Choosing  int64  `json:"choosing"`
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
+	InfoHash  string         `json:"info_hash"`
+	MediaRef  string         `json:"media_ref"`
+	Title     string         `json:"title"`
+	RootID    int64          `json:"root_id"`
+	RelDir    string         `json:"rel_dir"`
+	Source    string         `json:"source"`
+	Choosing  int64          `json:"choosing"`
+	Episodes  sql.NullString `json:"episodes"`
+	CreatedAt string         `json:"created_at"`
+	UpdatedAt string         `json:"updated_at"`
 }
 
 func (q *Queries) InsertTorrentDownload(ctx context.Context, arg InsertTorrentDownloadParams) (TorrentDownload, error) {
@@ -154,6 +193,7 @@ func (q *Queries) InsertTorrentDownload(ctx context.Context, arg InsertTorrentDo
 		arg.RelDir,
 		arg.Source,
 		arg.Choosing,
+		arg.Episodes,
 		arg.CreatedAt,
 		arg.UpdatedAt,
 	)
@@ -174,6 +214,7 @@ func (q *Queries) InsertTorrentDownload(ctx context.Context, arg InsertTorrentDo
 		&i.UpdatedAt,
 		&i.CompletedAt,
 		&i.Choosing,
+		&i.Episodes,
 	)
 	return i, err
 }
@@ -209,8 +250,36 @@ func (q *Queries) InsertTorznabSource(ctx context.Context, arg InsertTorznabSour
 	return i, err
 }
 
+const listTorrentDownloadEpisodes = `-- name: ListTorrentDownloadEpisodes :many
+SELECT episodes FROM torrent_download
+WHERE media_ref = ? AND episodes IS NOT NULL AND state != 'failed'
+`
+
+func (q *Queries) ListTorrentDownloadEpisodes(ctx context.Context, mediaRef string) ([]sql.NullString, error) {
+	rows, err := q.db.QueryContext(ctx, listTorrentDownloadEpisodes, mediaRef)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []sql.NullString{}
+	for rows.Next() {
+		var episodes sql.NullString
+		if err := rows.Scan(&episodes); err != nil {
+			return nil, err
+		}
+		items = append(items, episodes)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listTorrentDownloads = `-- name: ListTorrentDownloads :many
-SELECT id, info_hash, media_ref, title, name, root_id, rel_dir, source, state, imported, error, created_at, updated_at, completed_at, choosing FROM torrent_download ORDER BY id DESC LIMIT ?
+SELECT id, info_hash, media_ref, title, name, root_id, rel_dir, source, state, imported, error, created_at, updated_at, completed_at, choosing, episodes FROM torrent_download ORDER BY id DESC LIMIT ?
 `
 
 func (q *Queries) ListTorrentDownloads(ctx context.Context, limit int64) ([]TorrentDownload, error) {
@@ -238,6 +307,46 @@ func (q *Queries) ListTorrentDownloads(ctx context.Context, limit int64) ([]Torr
 			&i.UpdatedAt,
 			&i.CompletedAt,
 			&i.Choosing,
+			&i.Episodes,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listTorrentRules = `-- name: ListTorrentRules :many
+SELECT id, media_ref, title, "query", from_episode, enabled, last_checked_at, last_added, last_error, created_at, updated_at FROM torrent_rule ORDER BY id
+`
+
+func (q *Queries) ListTorrentRules(ctx context.Context) ([]TorrentRule, error) {
+	rows, err := q.db.QueryContext(ctx, listTorrentRules)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []TorrentRule{}
+	for rows.Next() {
+		var i TorrentRule
+		if err := rows.Scan(
+			&i.ID,
+			&i.MediaRef,
+			&i.Title,
+			&i.Query,
+			&i.FromEpisode,
+			&i.Enabled,
+			&i.LastCheckedAt,
+			&i.LastAdded,
+			&i.LastError,
+			&i.CreatedAt,
+			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -286,7 +395,7 @@ func (q *Queries) ListTorznabSources(ctx context.Context) ([]TorznabSource, erro
 }
 
 const listUnfinishedTorrentDownloads = `-- name: ListUnfinishedTorrentDownloads :many
-SELECT id, info_hash, media_ref, title, name, root_id, rel_dir, source, state, imported, error, created_at, updated_at, completed_at, choosing FROM torrent_download WHERE state IN ('downloading', 'importing') ORDER BY id
+SELECT id, info_hash, media_ref, title, name, root_id, rel_dir, source, state, imported, error, created_at, updated_at, completed_at, choosing, episodes FROM torrent_download WHERE state IN ('downloading', 'importing') ORDER BY id
 `
 
 func (q *Queries) ListUnfinishedTorrentDownloads(ctx context.Context) ([]TorrentDownload, error) {
@@ -314,6 +423,7 @@ func (q *Queries) ListUnfinishedTorrentDownloads(ctx context.Context) ([]Torrent
 			&i.UpdatedAt,
 			&i.CompletedAt,
 			&i.Choosing,
+			&i.Episodes,
 		); err != nil {
 			return nil, err
 		}
@@ -379,6 +489,27 @@ func (q *Queries) SetTorrentDownloadState(ctx context.Context, arg SetTorrentDow
 	return err
 }
 
+const setTorrentRuleChecked = `-- name: SetTorrentRuleChecked :exec
+UPDATE torrent_rule SET last_checked_at = ?, last_added = ?, last_error = ? WHERE id = ?
+`
+
+type SetTorrentRuleCheckedParams struct {
+	LastCheckedAt string `json:"last_checked_at"`
+	LastAdded     int64  `json:"last_added"`
+	LastError     string `json:"last_error"`
+	ID            int64  `json:"id"`
+}
+
+func (q *Queries) SetTorrentRuleChecked(ctx context.Context, arg SetTorrentRuleCheckedParams) error {
+	_, err := q.db.ExecContext(ctx, setTorrentRuleChecked,
+		arg.LastCheckedAt,
+		arg.LastAdded,
+		arg.LastError,
+		arg.ID,
+	)
+	return err
+}
+
 const updateTorznabSource = `-- name: UpdateTorznabSource :one
 UPDATE torznab_source SET name = ?, url = ?, updated_at = ? WHERE id = ?
 RETURNING id, name, url, created_at, updated_at
@@ -403,6 +534,55 @@ func (q *Queries) UpdateTorznabSource(ctx context.Context, arg UpdateTorznabSour
 		&i.ID,
 		&i.Name,
 		&i.Url,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const upsertTorrentRule = `-- name: UpsertTorrentRule :one
+INSERT INTO torrent_rule (media_ref, title, query, from_episode, enabled, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?)
+ON CONFLICT (media_ref) DO UPDATE
+SET title = excluded.title,
+    query = excluded.query,
+    from_episode = excluded.from_episode,
+    enabled = excluded.enabled,
+    updated_at = excluded.updated_at
+RETURNING id, media_ref, title, "query", from_episode, enabled, last_checked_at, last_added, last_error, created_at, updated_at
+`
+
+type UpsertTorrentRuleParams struct {
+	MediaRef    string `json:"media_ref"`
+	Title       string `json:"title"`
+	Query       string `json:"query"`
+	FromEpisode int64  `json:"from_episode"`
+	Enabled     int64  `json:"enabled"`
+	CreatedAt   string `json:"created_at"`
+	UpdatedAt   string `json:"updated_at"`
+}
+
+func (q *Queries) UpsertTorrentRule(ctx context.Context, arg UpsertTorrentRuleParams) (TorrentRule, error) {
+	row := q.db.QueryRowContext(ctx, upsertTorrentRule,
+		arg.MediaRef,
+		arg.Title,
+		arg.Query,
+		arg.FromEpisode,
+		arg.Enabled,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
+	var i TorrentRule
+	err := row.Scan(
+		&i.ID,
+		&i.MediaRef,
+		&i.Title,
+		&i.Query,
+		&i.FromEpisode,
+		&i.Enabled,
+		&i.LastCheckedAt,
+		&i.LastAdded,
+		&i.LastError,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)

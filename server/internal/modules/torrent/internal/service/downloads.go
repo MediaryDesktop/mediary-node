@@ -27,6 +27,9 @@ type AddRequest struct {
 	ReleaseID string
 	// ChooseFiles holds the torrent in the client until the user picks its files.
 	ChooseFiles bool
+	// Episodes the download is for, when it is for some. With ChooseFiles, the
+	// node itself picks their files once the torrent's file list arrives.
+	Episodes []int
 }
 
 // TorrentLive is what the client last said about a torrent; absent when it has not been
@@ -151,6 +154,7 @@ func (s *Service) Add(ctx context.Context, req AddRequest) (*TorrentDownload, er
 		RelDir:   relDir,
 		Source:   source,
 		Choosing: req.ChooseFiles,
+		Episodes: req.Episodes,
 	}, s.opts.Now())
 	if err != nil {
 		return nil, apperr.Wrap(err, apperr.KindInternal, "save the download")

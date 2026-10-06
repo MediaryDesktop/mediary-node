@@ -36,6 +36,15 @@ func (r releaseTitles) Names(ctx context.Context, mediaRef string) ([]string, er
 	return names, nil
 }
 
+func (r releaseTitles) TotalEpisodes(ctx context.Context, mediaRef string) (*int, error) {
+	details, err := r.media.Cached(ctx, mediaRef)
+	if err != nil || details == nil {
+		return nil, err
+	}
+
+	return details.Episodes, nil
+}
+
 func latin(name string) bool {
 	letters := 0
 	for _, r := range name {

@@ -144,7 +144,8 @@ type imported struct {
 }
 
 type fakeLibrary struct {
-	roots map[int64]string
+	roots    map[int64]string
+	episodes map[string][]int
 
 	mu       sync.Mutex
 	imported []imported
@@ -165,6 +166,10 @@ func (l *fakeLibrary) ImportFile(_ context.Context, _ int64, relPath, mediaRef s
 	l.imported = append(l.imported, imported{relPath: relPath, mediaRef: mediaRef})
 
 	return int64(len(l.imported)), nil
+}
+
+func (l *fakeLibrary) Episodes(_ context.Context, mediaRef string) ([]int, error) {
+	return l.episodes[mediaRef], nil
 }
 
 // NameEpisode reads "<anything> - NN.mkv" the way the library's parser would.

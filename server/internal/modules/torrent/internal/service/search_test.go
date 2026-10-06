@@ -20,6 +20,11 @@ func (f fakeTitles) Names(_ context.Context, mediaRef string) ([]string, error) 
 	return f[mediaRef], nil
 }
 
+func (f fakeTitles) TotalEpisodes(context.Context, string) (*int, error) {
+	total := 28
+	return &total, nil
+}
+
 // A .torrent the fake indexer serves for its one result without a magnet.
 const batchTorrent = "d4:infod6:lengthi1e4:name13:Frieren Batch12:piece lengthi16384e6:pieces20:aaaaaaaaaaaaaaaaaaaaee"
 

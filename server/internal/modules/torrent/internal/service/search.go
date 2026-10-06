@@ -32,6 +32,8 @@ type Titles interface {
 	// Names are the title's names worth searching for, best first; none when the
 	// node does not know the title.
 	Names(ctx context.Context, mediaRef string) ([]string, error)
+	// TotalEpisodes is how many episodes the title has, when the source knows.
+	TotalEpisodes(ctx context.Context, mediaRef string) (*int, error)
 }
 
 type SearchRequest struct {
@@ -269,9 +271,13 @@ func (s *Service) ask(ctx context.Context, source store.Source, key, query strin
 		return nil, err
 	}
 
-	s.search.mu.Lock()
-	s.search.answers[cacheKey] = cachedAnswer{items: items, at: now}
-	s.search.mu.Unlock()
+	// An empty answer is not kept: Jackett can answer a cold query with nothing
+	// and the same query a moment later with results.
+	if len(items) > 0 {
+		s.search.mu.Lock()
+		s.search.answers[cacheKey] = cachedAnswer{items: items, at: now}
+		s.search.mu.Unlock()
+	}
 
 	return items, nil
 }

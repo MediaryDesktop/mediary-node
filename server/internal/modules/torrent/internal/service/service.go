@@ -36,6 +36,8 @@ type Library interface {
 	// NameEpisode reads a file's path the way the library would: whether it keeps
 	// it as a video, and the episode its name gives.
 	NameEpisode(relPath string) (video bool, episode *int)
+	// Episodes are the episodes of a title the library has on disk.
+	Episodes(ctx context.Context, mediaRef string) ([]int, error)
 }
 
 // Connection is how to reach the client.
@@ -61,6 +63,8 @@ type Options struct {
 	// while none is.
 	ActiveInterval time.Duration
 	IdleInterval   time.Duration
+	// How often the auto-download rules look for new episodes.
+	RuleInterval time.Duration
 
 	Now func() time.Time
 }
@@ -101,6 +105,9 @@ func New(st *store.Store, secretFile *secrets.Store, library Library, hub *event
 	}
 	if opts.IdleInterval <= 0 {
 		opts.IdleInterval = 30 * time.Second
+	}
+	if opts.RuleInterval <= 0 {
+		opts.RuleInterval = defaultRuleInterval
 	}
 	if opts.Now == nil {
 		opts.Now = time.Now

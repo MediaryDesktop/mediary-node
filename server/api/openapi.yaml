@@ -2292,6 +2292,36 @@ components:
       required:
         - series_id
       type: object
+    PutTorrentRuleInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/PutTorrentRuleInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        enabled:
+          type: boolean
+        from_episode:
+          description: Left out starts after the last episode the library has.
+          format: int64
+          minimum: 1
+          type: integer
+        query:
+          description: Searched for instead of the title's names.
+          maxLength: 200
+          type: string
+        title:
+          description: The title's name; it names the folder downloads go into.
+          maxLength: 500
+          minLength: 1
+          type: string
+      required:
+        - title
+        - enabled
+      type: object
     PutTorrentSettingsInputBody:
       additionalProperties: false
       properties:
@@ -3640,6 +3670,22 @@ components:
         - client
         - node
       type: object
+    TorrentPlannedDownload:
+      additionalProperties: false
+      properties:
+        episodes:
+          items:
+            format: int64
+            type: integer
+          type:
+            - array
+            - "null"
+        release:
+          $ref: "#/components/schemas/TorrentRelease"
+      required:
+        - episodes
+        - release
+      type: object
     TorrentProfile:
       additionalProperties: false
       properties:
@@ -3775,6 +3821,100 @@ components:
         - eligible
         - best
         - batch
+      type: object
+    TorrentRule:
+      additionalProperties: false
+      properties:
+        enabled:
+          type: boolean
+        from_episode:
+          description: Episodes before this one are never downloaded by the rule.
+          format: int64
+          type: integer
+        last_added:
+          description: Downloads the last check added.
+          format: int64
+          type: integer
+        last_checked:
+          format: date-time
+          type: string
+        last_error:
+          type: string
+        media_ref:
+          type: string
+        query:
+          description: Searched for instead of the title's names when not empty.
+          type: string
+        title:
+          type: string
+      required:
+        - media_ref
+        - title
+        - query
+        - from_episode
+        - enabled
+        - last_added
+      type: object
+    TorrentRuleCheck:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/TorrentRuleCheck.json
+          format: uri
+          readOnly: true
+          type: string
+        added:
+          description: How many of the planned downloads were added; always 0 for a preview.
+          format: int64
+          type: integer
+        error:
+          type: string
+        planned:
+          items:
+            $ref: "#/components/schemas/TorrentPlannedDownload"
+          type:
+            - array
+            - "null"
+      required:
+        - planned
+        - added
+      type: object
+    TorrentRuleOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/TorrentRuleOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        rule:
+          $ref: "#/components/schemas/TorrentRule"
+          description: Null when the title has no rule.
+      required:
+        - rule
+      type: object
+    TorrentRulesOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/TorrentRulesOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        rules:
+          items:
+            $ref: "#/components/schemas/TorrentRule"
+          type:
+            - array
+            - "null"
+      required:
+        - rules
       type: object
     TorrentSearchResult:
       additionalProperties: false
@@ -6316,6 +6456,143 @@ paths:
                 $ref: "#/components/schemas/ErrorModel"
           description: Error
       summary: Save the release profile
+      tags:
+        - torrent
+  /v1/torrent/rules:
+    get:
+      description: Titles whose new episodes the node downloads by itself. Every 30 minutes each enabled rule searches the sources for releases named after the title and adds the best release of every episode it is missing; an episode no single release holds comes from a batch, of which only the missing episodes' files are downloaded.
+      operationId: listTorrentRules
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TorrentRulesOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Auto-download rules
+      tags:
+        - torrent
+  /v1/torrent/rules/{media_ref}:
+    delete:
+      description: Downloads the rule already added stay.
+      operationId: deleteTorrentRule
+      parameters:
+        - in: path
+          name: media_ref
+          required: true
+          schema:
+            examples:
+              - anilist:154587
+            type: string
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Remove a title's auto-download rule
+      tags:
+        - torrent
+    get:
+      operationId: getTorrentRule
+      parameters:
+        - in: path
+          name: media_ref
+          required: true
+          schema:
+            examples:
+              - anilist:154587
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TorrentRuleOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: A title's auto-download rule
+      tags:
+        - torrent
+    put:
+      operationId: putTorrentRule
+      parameters:
+        - in: path
+          name: media_ref
+          required: true
+          schema:
+            examples:
+              - anilist:154587
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PutTorrentRuleInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TorrentRuleOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Create or change a title's auto-download rule
+      tags:
+        - torrent
+  /v1/torrent/rules/{media_ref}/check:
+    post:
+      description: "Runs the rule at once, enabled or not. With preview, nothing is added: the answer is what would be."
+      operationId: checkTorrentRule
+      parameters:
+        - in: path
+          name: media_ref
+          required: true
+          schema:
+            examples:
+              - anilist:154587
+            type: string
+        - description: Only say what would be downloaded.
+          explode: false
+          in: query
+          name: preview
+          schema:
+            description: Only say what would be downloaded.
+            type: boolean
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TorrentRuleCheck"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Look for a title's missing episodes now
       tags:
         - torrent
   /v1/torrent/search:

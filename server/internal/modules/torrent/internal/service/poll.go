@@ -5,11 +5,13 @@ import (
 	"errors"
 	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/qbittorrent"
+	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/release"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/store"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
 )
@@ -23,6 +25,7 @@ const missingPolls = 3
 // for.
 func (s *Service) Start(ctx context.Context) {
 	go s.loop(ctx)
+	go s.watchRules(ctx)
 }
 
 func (s *Service) loop(ctx context.Context) {
@@ -145,6 +148,11 @@ func (s *Service) follow(ctx context.Context, client Client, download store.Down
 		}
 	}
 
+	if download.Choosing && len(download.Episodes) > 0 {
+		s.pickEpisodes(ctx, client, download)
+		return
+	}
+
 	if download.State == store.StateDownloading {
 		if !complete(torrent) {
 			return
@@ -246,4 +254,65 @@ func (s *Service) fail(ctx context.Context, download store.Download, reason stri
 	}
 
 	s.publish("failed", download.ID)
+}
+
+// pickEpisodes chooses a held batch's files for the episodes it was added for,
+// once the client has its file list: their videos, and the files that belong to
+// no other episode — fonts, a shared subtitle. A batch without any of them is
+// given up and taken out of the client before it downloads anything.
+func (s *Service) pickEpisodes(ctx context.Context, client Client, download store.Download) {
+	files, err := client.Files(ctx, download.InfoHash)
+	if err != nil || len(files) == 0 {
+		return
+	}
+
+	wanted := map[int]bool{}
+	for _, episode := range download.Episodes {
+		wanted[episode] = true
+	}
+
+	var selected []int
+	videos := 0
+
+	for i := range files {
+		video, episode := s.library.NameEpisode(relPath(download, files[i]))
+
+		switch {
+		case video && episode != nil && wanted[*episode]:
+			selected = append(selected, files[i].Index)
+			videos++
+		case video:
+		case belongsTo(files[i].Name, wanted):
+			selected = append(selected, files[i].Index)
+		}
+	}
+
+	if videos == 0 {
+		if err := client.Delete(ctx, download.InfoHash, true); err != nil {
+			s.logger.Warn().Err(err).Int64("id", download.ID).Msg("remove a batch without the wanted episodes")
+		}
+		s.fail(ctx, download, "the torrent holds none of the episodes it was added for")
+		return
+	}
+
+	if err := s.SelectFiles(ctx, download.ID, selected); err != nil {
+		s.logger.Warn().Err(err).Int64("id", download.ID).Msg("choose a batch's episodes")
+	}
+}
+
+// belongsTo reports whether a file that is not a video goes with the wanted
+// episodes: one whose name gives none of the other episodes' numbers.
+func belongsTo(name string, wanted map[int]bool) bool {
+	episodes := release.Parse(path.Base(name)).Episodes
+	if episodes == nil {
+		return true
+	}
+
+	for episode := episodes.From; episode <= episodes.To; episode++ {
+		if wanted[episode] {
+			return true
+		}
+	}
+
+	return false
 }

@@ -92,6 +92,7 @@ type TorrentCheckOutput struct {
 
 func (h *Handler) Register(api huma.API) {
 	h.registerSearch(api)
+	h.registerRules(api)
 
 	huma.Register(api, huma.Operation{
 		OperationID: "listTorrentDownloads",
@@ -333,6 +334,135 @@ type TorrentProfileOutput struct {
 
 type PutTorrentProfileInput struct {
 	Body service.TorrentProfile
+}
+
+type TorrentRulesOutput struct {
+	Body struct {
+		Rules []service.TorrentRule `json:"rules"`
+	}
+}
+
+type TorrentRuleMediaInput struct {
+	MediaRef string `path:"media_ref" example:"anilist:154587"`
+}
+
+type TorrentRuleOutput struct {
+	Body struct {
+		Rule *service.TorrentRule `json:"rule" doc:"Null when the title has no rule."`
+	}
+}
+
+type PutTorrentRuleInput struct {
+	MediaRef string `path:"media_ref" example:"anilist:154587"`
+	Body     struct {
+		Title       string `json:"title" minLength:"1" maxLength:"500" doc:"The title's name; it names the folder downloads go into."`
+		Query       string `json:"query,omitempty" maxLength:"200" doc:"Searched for instead of the title's names."`
+		FromEpisode *int   `json:"from_episode,omitempty" minimum:"1" doc:"Left out starts after the last episode the library has."`
+		Enabled     bool   `json:"enabled"`
+	}
+}
+
+type CheckTorrentRuleInput struct {
+	MediaRef string `path:"media_ref" example:"anilist:154587"`
+	Preview  bool   `query:"preview" doc:"Only say what would be downloaded."`
+}
+
+type TorrentRuleCheckOutput struct {
+	Body service.TorrentRuleCheck
+}
+
+func (h *Handler) registerRules(api huma.API) {
+	huma.Register(api, huma.Operation{
+		OperationID: "listTorrentRules",
+		Method:      http.MethodGet,
+		Path:        "/v1/torrent/rules",
+		Summary:     "Auto-download rules",
+		Description: "Titles whose new episodes the node downloads by itself. Every 30 minutes each enabled rule searches the sources for releases named after the title and adds the best release of every episode it is missing; an episode no single release holds comes from a batch, of which only the missing episodes' files are downloaded.",
+		Tags:        []string{"torrent"},
+	}, func(ctx context.Context, _ *struct{}) (*TorrentRulesOutput, error) {
+		rules, err := h.svc.Rules(ctx)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		out := &TorrentRulesOutput{}
+		out.Body.Rules = rules
+
+		return out, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "getTorrentRule",
+		Method:      http.MethodGet,
+		Path:        "/v1/torrent/rules/{media_ref}",
+		Summary:     "A title's auto-download rule",
+		Tags:        []string{"torrent"},
+	}, func(ctx context.Context, in *TorrentRuleMediaInput) (*TorrentRuleOutput, error) {
+		rule, err := h.svc.Rule(ctx, in.MediaRef)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		out := &TorrentRuleOutput{}
+		out.Body.Rule = rule
+
+		return out, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "putTorrentRule",
+		Method:      http.MethodPut,
+		Path:        "/v1/torrent/rules/{media_ref}",
+		Summary:     "Create or change a title's auto-download rule",
+		Tags:        []string{"torrent"},
+	}, func(ctx context.Context, in *PutTorrentRuleInput) (*TorrentRuleOutput, error) {
+		rule, err := h.svc.PutRule(ctx, service.RuleInput{
+			MediaRef:    in.MediaRef,
+			Title:       in.Body.Title,
+			Query:       in.Body.Query,
+			FromEpisode: in.Body.FromEpisode,
+			Enabled:     in.Body.Enabled,
+		})
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		out := &TorrentRuleOutput{}
+		out.Body.Rule = rule
+
+		return out, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID:   "deleteTorrentRule",
+		Method:        http.MethodDelete,
+		Path:          "/v1/torrent/rules/{media_ref}",
+		Summary:       "Remove a title's auto-download rule",
+		Description:   "Downloads the rule already added stay.",
+		Tags:          []string{"torrent"},
+		DefaultStatus: http.StatusNoContent,
+	}, func(ctx context.Context, in *TorrentRuleMediaInput) (*struct{}, error) {
+		if err := h.svc.DeleteRule(ctx, in.MediaRef); err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+		return nil, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "checkTorrentRule",
+		Method:      http.MethodPost,
+		Path:        "/v1/torrent/rules/{media_ref}/check",
+		Summary:     "Look for a title's missing episodes now",
+		Description: "Runs the rule at once, enabled or not. With preview, nothing is added: the answer is what would be.",
+		Tags:        []string{"torrent"},
+	}, func(ctx context.Context, in *CheckTorrentRuleInput) (*TorrentRuleCheckOutput, error) {
+		check, err := h.svc.CheckRule(ctx, in.MediaRef, in.Preview)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return &TorrentRuleCheckOutput{Body: *check}, nil
+	})
 }
 
 func (h *Handler) registerSearch(api huma.API) {

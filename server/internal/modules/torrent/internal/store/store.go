@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -40,7 +41,9 @@ type Download struct {
 	State    string
 	// Choosing is true while the client holds the torrent for the user to pick
 	// its files.
-	Choosing    bool
+	Choosing bool
+	// Episodes the download was added for; a held batch gets only their files.
+	Episodes    []int
 	Imported    int
 	Error       string
 	CreatedAt   time.Time
@@ -56,6 +59,8 @@ type NewDownload struct {
 	RelDir   string
 	Source   string
 	Choosing bool
+	// Episodes are the episodes the download was added for, when it was.
+	Episodes []int
 }
 
 func (s *Store) Insert(ctx context.Context, in NewDownload, now time.Time) (*Download, error) {
@@ -69,6 +74,7 @@ func (s *Store) Insert(ctx context.Context, in NewDownload, now time.Time) (*Dow
 		RelDir:    in.RelDir,
 		Source:    in.Source,
 		Choosing:  boolInt(in.Choosing),
+		Episodes:  episodesText(in.Episodes),
 		CreatedAt: stamp,
 		UpdatedAt: stamp,
 	})
@@ -247,6 +253,7 @@ func downloadFrom(row sqlc.TorrentDownload) Download {
 		Source:    row.Source,
 		State:     row.State,
 		Choosing:  row.Choosing != 0,
+		Episodes:  episodesOf(row.Episodes),
 		Imported:  int(row.Imported),
 		Error:     row.Error,
 		CreatedAt: created,
@@ -265,4 +272,41 @@ func boolInt(value bool) int64 {
 		return 1
 	}
 	return 0
+}
+
+// DownloadEpisodes are the episodes of a title already added as downloads that
+// have not failed.
+func (s *Store) DownloadEpisodes(ctx context.Context, mediaRef string) ([]int, error) {
+	rows, err := sqlc.New(s.db).ListTorrentDownloadEpisodes(ctx, mediaRef)
+	if err != nil {
+		return nil, fmt.Errorf("list downloaded episodes: %w", err)
+	}
+
+	var episodes []int
+	for _, row := range rows {
+		episodes = append(episodes, episodesOf(row)...)
+	}
+
+	return episodes, nil
+}
+
+func episodesText(episodes []int) sql.NullString {
+	if len(episodes) == 0 {
+		return sql.NullString{}
+	}
+
+	data, _ := json.Marshal(episodes)
+
+	return sql.NullString{String: string(data), Valid: true}
+}
+
+func episodesOf(text sql.NullString) []int {
+	if !text.Valid {
+		return nil
+	}
+
+	var episodes []int
+	_ = json.Unmarshal([]byte(text.String), &episodes)
+
+	return episodes
 }

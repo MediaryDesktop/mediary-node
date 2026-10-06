@@ -184,21 +184,36 @@ type SourceCache struct {
 }
 
 type TorrentDownload struct {
-	ID          int64  `json:"id"`
-	InfoHash    string `json:"info_hash"`
-	MediaRef    string `json:"media_ref"`
-	Title       string `json:"title"`
-	Name        string `json:"name"`
-	RootID      int64  `json:"root_id"`
-	RelDir      string `json:"rel_dir"`
-	Source      string `json:"source"`
-	State       string `json:"state"`
-	Imported    int64  `json:"imported"`
-	Error       string `json:"error"`
-	CreatedAt   string `json:"created_at"`
-	UpdatedAt   string `json:"updated_at"`
-	CompletedAt string `json:"completed_at"`
-	Choosing    int64  `json:"choosing"`
+	ID          int64          `json:"id"`
+	InfoHash    string         `json:"info_hash"`
+	MediaRef    string         `json:"media_ref"`
+	Title       string         `json:"title"`
+	Name        string         `json:"name"`
+	RootID      int64          `json:"root_id"`
+	RelDir      string         `json:"rel_dir"`
+	Source      string         `json:"source"`
+	State       string         `json:"state"`
+	Imported    int64          `json:"imported"`
+	Error       string         `json:"error"`
+	CreatedAt   string         `json:"created_at"`
+	UpdatedAt   string         `json:"updated_at"`
+	CompletedAt string         `json:"completed_at"`
+	Choosing    int64          `json:"choosing"`
+	Episodes    sql.NullString `json:"episodes"`
+}
+
+type TorrentRule struct {
+	ID            int64  `json:"id"`
+	MediaRef      string `json:"media_ref"`
+	Title         string `json:"title"`
+	Query         string `json:"query"`
+	FromEpisode   int64  `json:"from_episode"`
+	Enabled       int64  `json:"enabled"`
+	LastCheckedAt string `json:"last_checked_at"`
+	LastAdded     int64  `json:"last_added"`
+	LastError     string `json:"last_error"`
+	CreatedAt     string `json:"created_at"`
+	UpdatedAt     string `json:"updated_at"`
 }
 
 type TorznabSource struct {

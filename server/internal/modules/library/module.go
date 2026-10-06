@@ -109,3 +109,34 @@ func (m *Module) NameEpisode(relPath string) (video bool, episode *int) {
 
 	return true, parsed.Episode
 }
+
+// Episodes are the episodes of a title the library has on disk: matched video
+// files, not missing, read from the match or else from the name.
+func (m *Module) Episodes(ctx context.Context, mediaRef string) ([]int, error) {
+	page, err := m.svc.Files(ctx, service.FileQuery{MediaRef: mediaRef, Kind: string(scanner.KindVideo), Limit: 500})
+	if err != nil {
+		return nil, err
+	}
+
+	seen := map[int]bool{}
+	var episodes []int
+
+	for i := range page.Items {
+		file := &page.Items[i]
+		if file.Missing || file.Match == nil {
+			continue
+		}
+
+		episode := file.Match.Episode
+		if episode == nil {
+			episode = file.Parsed.Episode
+		}
+
+		if episode != nil && !seen[*episode] {
+			seen[*episode] = true
+			episodes = append(episodes, *episode)
+		}
+	}
+
+	return episodes, nil
+}
