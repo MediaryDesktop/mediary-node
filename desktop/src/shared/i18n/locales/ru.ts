@@ -891,8 +891,52 @@ export const ru: Translation = {
 			episode: 'Сер. {{number}}',
 			inLibrary: 'в библиотеке'
 		},
+		search: {
+			placeholder: 'Поиск по названиям тайтла или своему запросу',
+			episode: 'Серия',
+			submit: 'Искать',
+			queries: 'Искали: {{queries}}',
+			noSources: 'Добавьте Jackett или Prowlarr в настройках, чтобы искать раздачи.',
+			failed: 'Поиск не удался',
+			sourceFailed: '{{name}} не ответил: {{error}}',
+			empty: 'Ничего не найдено',
+			download: 'Загрузить',
+			added: 'Добавлено в загрузки',
+			page: 'Открыть страницу раздачи',
+			episodes: 'Сер. {{from}}–{{to}}',
+			match: {
+				episode: 'Эта серия',
+				batch: 'Пакет'
+			}
+		},
+		sources: {
+			none: 'Источников поиска пока нет',
+			add: 'Добавить источник',
+			edit: 'Изменить',
+			remove: 'Удалить',
+			menu: 'Действия с источником',
+			removeFailed: 'Не удалось удалить источник',
+			createTitle: 'Новый источник поиска',
+			editTitle: 'Изменить источник поиска',
+			description: 'Torznab-лента из Jackett или Prowlarr. Какие сайты она ищет, настраивается там.',
+			nameLabel: 'Название',
+			urlLabel: 'Адрес Torznab',
+			urlHint:
+				'Jackett: «Copy Torznab Feed» у индексатора или лента «all». Prowlarr: Torznab-адрес индексатора',
+			keyLabel: 'API-ключ',
+			keyKept: 'Оставьте пустым, чтобы сохранить текущий ключ',
+			keyHint: 'Виден на главной странице Jackett или Prowlarr',
+			check: 'Проверить источник',
+			ok: '{{title}} отвечает и умеет искать',
+			noSearch: '{{title}} отвечает, но не принимает поиск',
+			unreachable: 'Источник не ответил',
+			save: 'Сохранить',
+			create: 'Добавить',
+			saveFailed: 'Не удалось сохранить источник'
+		},
 		list: {
 			title: 'Торренты',
+			forTitle: 'Загрузки этого тайтла',
 			empty: 'Торрент-загрузок пока нет',
 			emptyForTitle: 'Для этого тайтла пока ничего не загружено'
 		},
@@ -968,6 +1012,10 @@ export const ru: Translation = {
 		torrents: {
 			name: 'Торренты',
 			hint: 'qBittorrent, который загружает торренты в вашу библиотеку'
+		},
+		torrentSearch: {
+			name: 'Поиск торрентов',
+			hint: 'Ваш Jackett или Prowlarr через Torznab. Своих индексаторов в Mediary нет'
 		},
 		mangaSources: {
 			name: 'Источники манги',

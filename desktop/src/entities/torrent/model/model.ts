@@ -6,14 +6,20 @@ import { nodeTopic } from '@infra/node'
 import {
 	addTorrentFx,
 	checkTorrentClientFx,
+	checkTorrentSourceFx,
+	createTorrentSourceFx,
+	deleteTorrentSourceFx,
 	fetchTorrentDownloadsFx,
 	fetchTorrentFilesFx,
 	fetchTorrentSettingsFx,
+	fetchTorrentSourcesFx,
 	pauseTorrentFx,
 	putTorrentSettingsFx,
 	removeTorrentFx,
 	resumeTorrentFx,
-	selectTorrentFilesFx
+	searchTorrentsFx,
+	selectTorrentFilesFx,
+	updateTorrentSourceFx
 } from '../api/api'
 
 export const torrentDownloadsQuery = createQuery({
@@ -88,3 +94,38 @@ sample({
 })
 
 keepFresh(torrentSettingsQuery, { triggers: [putTorrentSettingsMutation.finished.success] })
+
+export const torrentSourcesQuery = createQuery({ effect: fetchTorrentSourcesFx, name: 'torrentSources' })
+
+export const createTorrentSourceMutation = createMutation({
+	effect: createTorrentSourceFx,
+	name: 'createTorrentSource'
+})
+
+export const updateTorrentSourceMutation = createMutation({
+	effect: updateTorrentSourceFx,
+	name: 'updateTorrentSource'
+})
+
+export const deleteTorrentSourceMutation = createMutation({
+	effect: deleteTorrentSourceFx,
+	name: 'deleteTorrentSource'
+})
+
+export const checkTorrentSourceMutation = createMutation({
+	effect: checkTorrentSourceFx,
+	name: 'checkTorrentSource'
+})
+
+keepFresh(torrentSourcesQuery, {
+	triggers: [
+		createTorrentSourceMutation.finished.success,
+		updateTorrentSourceMutation.finished.success,
+		deleteTorrentSourceMutation.finished.success
+	]
+})
+
+export const torrentSearchQuery = createQuery({ effect: searchTorrentsFx, name: 'torrentSearch' })
+
+// A new search makes the one still running moot.
+concurrency(torrentSearchQuery, { strategy: 'TAKE_LATEST' })

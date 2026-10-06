@@ -4,6 +4,7 @@ import { useTranslation } from '@shared/i18n'
 import { Button, Icon } from '@shared/ui'
 
 import { AddTorrentDrawer, TorrentDownloadList } from '@features/download-torrent'
+import { TorrentSearch } from '@features/search-torrents'
 
 import styles from './TorrentSection.module.scss'
 
@@ -12,9 +13,8 @@ export interface TorrentSectionProps {
 	title: string
 }
 
-// The title's torrents: what is downloading for it, and a way to add one. Search
-// for releases comes with the provider plugins; until then the user brings the
-// magnet or the .torrent file.
+// The title's torrents: a search of the user's own Jackett or Prowlarr, what is
+// downloading, and a way to add a magnet or a .torrent file by hand.
 export function TorrentSection({ mediaRef, title }: TorrentSectionProps) {
 	const { t } = useTranslation()
 
@@ -30,6 +30,10 @@ export function TorrentSection({ mediaRef, title }: TorrentSectionProps) {
 					{t('torrents.add')}
 				</Button>
 			</div>
+
+			<TorrentSearch mediaRef={mediaRef} title={title} />
+
+			<h3 className={styles.subtitle}>{t('torrents.list.forTitle')}</h3>
 
 			<TorrentDownloadList mediaRef={mediaRef} hideTitle />
 

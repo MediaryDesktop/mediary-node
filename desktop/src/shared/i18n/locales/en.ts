@@ -890,8 +890,52 @@ export const en = {
 			episode: 'Ep. {{number}}',
 			inLibrary: 'in library'
 		},
+		search: {
+			placeholder: 'Search by the title’s names, or type your own query',
+			episode: 'Episode',
+			submit: 'Search',
+			queries: 'Searched for: {{queries}}',
+			noSources: 'Add Jackett or Prowlarr in the settings to search for releases.',
+			failed: 'The search failed',
+			sourceFailed: '{{name}} did not answer: {{error}}',
+			empty: 'Nothing found',
+			download: 'Download',
+			added: 'Added to the downloads',
+			page: 'Open the release page',
+			episodes: 'Ep. {{from}}–{{to}}',
+			match: {
+				episode: 'This episode',
+				batch: 'Batch'
+			}
+		},
+		sources: {
+			none: 'No search source yet',
+			add: 'Add a source',
+			edit: 'Change',
+			remove: 'Remove',
+			menu: 'Source actions',
+			removeFailed: 'Could not remove the source',
+			createTitle: 'Add a search source',
+			editTitle: 'Change the search source',
+			description: 'A Torznab feed from Jackett or Prowlarr. Which sites it searches is set up there.',
+			nameLabel: 'Name',
+			urlLabel: 'Torznab address',
+			urlHint:
+				'Jackett: Copy Torznab Feed on an indexer, or the “all” feed. Prowlarr: an indexer’s Torznab URL',
+			keyLabel: 'API key',
+			keyKept: 'Leave empty to keep the saved key',
+			keyHint: 'Shown on the Jackett or Prowlarr dashboard',
+			check: 'Check the source',
+			ok: '{{title}} answers and can search',
+			noSearch: '{{title}} answers but does not take searches',
+			unreachable: 'The source did not answer',
+			save: 'Save',
+			create: 'Add',
+			saveFailed: 'Could not save the source'
+		},
 		list: {
 			title: 'Torrents',
+			forTitle: 'Downloads for this title',
 			empty: 'No torrent downloads yet',
 			emptyForTitle: 'Nothing downloaded for this title yet'
 		},
@@ -967,6 +1011,10 @@ export const en = {
 		torrents: {
 			name: 'Torrents',
 			hint: 'qBittorrent that downloads torrents into your library'
+		},
+		torrentSearch: {
+			name: 'Torrent search',
+			hint: 'Your Jackett or Prowlarr, searched through Torznab. Mediary has no indexers of its own'
 		},
 		mangaSources: {
 			name: 'Manga sources',

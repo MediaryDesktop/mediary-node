@@ -1,6 +1,9 @@
 export {
 	addTorrentMutation,
 	checkTorrentClientMutation,
+	checkTorrentSourceMutation,
+	createTorrentSourceMutation,
+	deleteTorrentSourceMutation,
 	pauseTorrentMutation,
 	putTorrentSettingsMutation,
 	removeTorrentMutation,
@@ -10,7 +13,10 @@ export {
 	torrentFilesClosed,
 	torrentFilesOpened,
 	torrentFilesQuery,
-	torrentSettingsQuery
+	torrentSearchQuery,
+	torrentSettingsQuery,
+	torrentSourcesQuery,
+	updateTorrentSourceMutation
 } from './model/model'
 
 export type {
@@ -24,6 +30,14 @@ export type {
 	TorrentDownloads,
 	TorrentFile,
 	TorrentPathMap,
+	TorrentRelease,
+	TorrentSearchParams,
+	TorrentSearchResult,
 	TorrentSettings,
-	TorrentSettingsUpdate
+	TorrentSettingsUpdate,
+	TorrentSource,
+	TorrentSourceBody,
+	TorrentSourceCaps,
+	TorrentSourceCheckParams,
+	UpdateTorrentSourceParams
 } from './api/api'

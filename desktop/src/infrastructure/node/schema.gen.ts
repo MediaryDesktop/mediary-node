@@ -1211,6 +1211,26 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/v1/torrent/search': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Search for releases
+		 * @description Asks every source for the title's names, or for q, merges what they find by info hash, and reads episodes, quality and group from each name. With an episode, releases that cannot hold it are left out and the rest come in order: the episode alone, batches that hold it, names without episodes. A source that fails is reported in sources, and the others still answer.
+		 */
+		get: operations['searchTorrents']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/v1/torrent/settings': {
 		parameters: {
 			query?: never
@@ -1230,6 +1250,71 @@ export interface paths {
 		put: operations['putTorrentSettings']
 		post?: never
 		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/torrent/sources': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Release search sources
+		 * @description The user's Torznab endpoints — Jackett, Prowlarr. The node ships no indexers of its own.
+		 */
+		get: operations['listTorrentSources']
+		put?: never
+		/**
+		 * Add a release search source
+		 * @description The API key goes to the node's secrets file, not the database.
+		 */
+		post: operations['createTorrentSource']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/torrent/sources/check': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Try a release search source
+		 * @description Asks the endpoint for its capabilities, before or after it is saved.
+		 */
+		post: operations['checkTorrentSource']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/torrent/sources/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		/** Change a release search source */
+		put: operations['updateTorrentSource']
+		post?: never
+		/**
+		 * Remove a release search source
+		 * @description Forgets the source and its key.
+		 */
+		delete: operations['deleteTorrentSource']
 		options?: never
 		head?: never
 		patch?: never
@@ -1398,6 +1483,8 @@ export interface components {
 			magnet?: string
 			/** @description The title the download is for; its files are matched to it. */
 			media_ref: string
+			/** @description A search result to download. Give this, magnet or torrent. */
+			release_id?: string
 			/** @description The title's name, which names the folder the torrent is saved into. */
 			title?: string
 			/** @description A .torrent file, base64-encoded. Give this or magnet. */
@@ -1500,6 +1587,21 @@ export interface components {
 			password?: string
 			url: string
 			username: string
+		}
+		CheckTorrentSourceInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/CheckTorrentSourceInputBody.json
+			 */
+			readonly $schema?: string
+			api_key?: string
+			/**
+			 * Format: int64
+			 * @description A saved source whose key to use when api_key is left out.
+			 */
+			source_id?: number
+			url: string
 		}
 		CollectionOutputBody: {
 			/**
@@ -1721,6 +1823,12 @@ export interface components {
 			 * @description Episodes the title has, or that have aired while the final count is unknown. Absent when no source can say.
 			 */
 			total: number | null
+		}
+		Episodes: {
+			/** Format: int64 */
+			from: number
+			/** Format: int64 */
+			to: number
 		}
 		EpisodesOutputBody: {
 			/**
@@ -3355,6 +3463,52 @@ export interface components {
 			client: string
 			node: string
 		}
+		TorrentRelease: {
+			batch: boolean
+			/** @description e.g. HEVC */
+			codec?: string
+			/** @description Absent when the name gives no episode. */
+			episodes?: components['schemas']['Episodes']
+			/** Format: int64 */
+			grabs: number
+			group?: string
+			/** @description Pass as release_id to download it. */
+			id: string
+			/** @description The site behind the source, when the source says. */
+			indexer?: string
+			info_hash?: string
+			/**
+			 * @description How it fits the episode searched for: the episode alone, a batch that holds it, a name without episodes, or no episode was asked.
+			 * @enum {string}
+			 */
+			match: 'episode' | 'batch' | 'unknown' | 'any'
+			page_url?: string
+			/** Format: int64 */
+			peers: number
+			/** Format: date-time */
+			published_at?: string
+			/** @description e.g. 1080p */
+			resolution?: string
+			/** Format: int64 */
+			seeders: number
+			/** Format: int64 */
+			size: number
+			/** Format: int64 */
+			source_id: number
+			source_name: string
+			title: string
+		}
+		TorrentSearchResult: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TorrentSearchResult.json
+			 */
+			readonly $schema?: string
+			queries: string[] | null
+			releases: components['schemas']['TorrentRelease'][] | null
+			sources: components['schemas']['TorrentSourceOutcome'][] | null
+		}
 		TorrentSettings: {
 			/**
 			 * Format: uri
@@ -3368,6 +3522,64 @@ export interface components {
 			root_id: number
 			url: string
 			username: string
+		}
+		TorrentSource: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TorrentSource.json
+			 */
+			readonly $schema?: string
+			has_api_key: boolean
+			/** Format: int64 */
+			id: number
+			name: string
+			url: string
+		}
+		TorrentSourceBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TorrentSourceBody.json
+			 */
+			readonly $schema?: string
+			/** @description Left out keeps the saved key; empty removes it. */
+			api_key?: string
+			/** @example Jackett */
+			name: string
+			/**
+			 * @description The Torznab feed address; a pasted query, the key with it, is dropped.
+			 * @example http://localhost:9117/api/v2.0/indexers/all/results/torznab/
+			 */
+			url: string
+		}
+		TorrentSourceCaps: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TorrentSourceCaps.json
+			 */
+			readonly $schema?: string
+			/** @description Whether the endpoint takes a free-text search. */
+			search: boolean
+			title: string
+		}
+		TorrentSourceOutcome: {
+			error?: string
+			/** Format: int64 */
+			id: number
+			name: string
+			/** Format: int64 */
+			results: number
+		}
+		TorrentSourcesOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TorrentSourcesOutputBody.json
+			 */
+			readonly $schema?: string
+			sources: components['schemas']['TorrentSource'][] | null
 		}
 		Trailer: {
 			/** @description Video id on the hosting site. */
@@ -3453,6 +3665,7 @@ export type SchemaChapterOutputBody = components['schemas']['ChapterOutputBody']
 export type SchemaCheckOpdsServerInputBody = components['schemas']['CheckOPDSServerInputBody']
 export type SchemaCheckOpdsServerOutputBody = components['schemas']['CheckOPDSServerOutputBody']
 export type SchemaCheckTorrentClientInputBody = components['schemas']['CheckTorrentClientInputBody']
+export type SchemaCheckTorrentSourceInputBody = components['schemas']['CheckTorrentSourceInputBody']
 export type SchemaCollectionOutputBody = components['schemas']['CollectionOutputBody']
 export type SchemaControlInputBody = components['schemas']['ControlInputBody']
 export type SchemaCounts = components['schemas']['Counts']
@@ -3465,6 +3678,7 @@ export type SchemaEntriesOutputBody = components['schemas']['EntriesOutputBody']
 export type SchemaEntry = components['schemas']['Entry']
 export type SchemaEpisode = components['schemas']['Episode']
 export type SchemaEpisodeList = components['schemas']['EpisodeList']
+export type SchemaEpisodes = components['schemas']['Episodes']
 export type SchemaEpisodesOutputBody = components['schemas']['EpisodesOutputBody']
 export type SchemaErrorDetail = components['schemas']['ErrorDetail']
 export type SchemaErrorModel = components['schemas']['ErrorModel']
@@ -3563,7 +3777,14 @@ export type SchemaTorrentFile = components['schemas']['TorrentFile']
 export type SchemaTorrentFilesOutputBody = components['schemas']['TorrentFilesOutputBody']
 export type SchemaTorrentLive = components['schemas']['TorrentLive']
 export type SchemaTorrentPathMap = components['schemas']['TorrentPathMap']
+export type SchemaTorrentRelease = components['schemas']['TorrentRelease']
+export type SchemaTorrentSearchResult = components['schemas']['TorrentSearchResult']
 export type SchemaTorrentSettings = components['schemas']['TorrentSettings']
+export type SchemaTorrentSource = components['schemas']['TorrentSource']
+export type SchemaTorrentSourceBody = components['schemas']['TorrentSourceBody']
+export type SchemaTorrentSourceCaps = components['schemas']['TorrentSourceCaps']
+export type SchemaTorrentSourceOutcome = components['schemas']['TorrentSourceOutcome']
+export type SchemaTorrentSourcesOutputBody = components['schemas']['TorrentSourcesOutputBody']
 export type SchemaTrailer = components['schemas']['Trailer']
 export type SchemaUpdateEntryInputBody = components['schemas']['UpdateEntryInputBody']
 export type SchemaVideo = components['schemas']['Video']
@@ -5959,6 +6180,42 @@ export interface operations {
 			}
 		}
 	}
+	searchTorrents: {
+		parameters: {
+			query?: {
+				/** @description The title searched for; its names are the queries unless q is given. */
+				media_ref?: string
+				/** @description Only releases that hold this episode; 0 for any. */
+				episode?: number
+				/** @description Search for this instead of the title's names. */
+				q?: string
+			}
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentSearchResult']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
 	getTorrentSettings: {
 		parameters: {
 			query?: never
@@ -6009,6 +6266,165 @@ export interface operations {
 				content: {
 					'application/json': components['schemas']['TorrentSettings']
 				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listTorrentSources: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentSourcesOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	createTorrentSource: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['TorrentSourceBody']
+			}
+		}
+		responses: {
+			/** @description Created */
+			201: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentSource']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	checkTorrentSource: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['CheckTorrentSourceInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentSourceCaps']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	updateTorrentSource: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['TorrentSourceBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentSource']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	deleteTorrentSource: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
 			}
 			/** @description Error */
 			default: {

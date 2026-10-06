@@ -8,6 +8,25 @@ export type TorrentSettings = NodeSchemas['TorrentSettings']
 export type TorrentPathMap = NodeSchemas['TorrentPathMap']
 export type TorrentCheckResult = NodeSchemas['TorrentCheckResult']
 export type TorrentFile = NodeSchemas['TorrentFile']
+export type TorrentSource = NodeSchemas['TorrentSource']
+export type TorrentSourceCaps = NodeSchemas['TorrentSourceCaps']
+export type TorrentRelease = NodeSchemas['TorrentRelease']
+export type TorrentSearchResult = NodeSchemas['TorrentSearchResult']
+export type TorrentSourceBody = Omit<NodeSchemas['TorrentSourceBody'], '$schema'>
+export type TorrentSourceCheckParams = Omit<NodeSchemas['CheckTorrentSourceInputBody'], '$schema'>
+
+export interface UpdateTorrentSourceParams {
+	id: number
+	body: TorrentSourceBody
+}
+
+export interface TorrentSearchParams {
+	mediaRef: string
+	// 0 for any episode.
+	episode: number
+	// Replaces the title's names when not empty.
+	query: string
+}
 
 export type AddTorrentParams = Omit<NodeSchemas['AddTorrentDownloadInputBody'], '$schema'>
 export type TorrentSettingsUpdate = Omit<NodeSchemas['PutTorrentSettingsInputBody'], '$schema'>
@@ -82,3 +101,46 @@ export const checkTorrentClientFx = createNodeRequestFx<TorrentCheckParams, Torr
 	body,
 	timeout: 20_000
 }))
+
+export const fetchTorrentSourcesFx = createNodeRequestFx<void, NodeSchemas['TorrentSourcesOutputBody']>(
+	() => ({
+		url: '/v1/torrent/sources'
+	})
+)
+
+export const createTorrentSourceFx = createNodeRequestFx<TorrentSourceBody, TorrentSource>(body => ({
+	url: '/v1/torrent/sources',
+	method: 'POST',
+	body
+}))
+
+export const updateTorrentSourceFx = createNodeRequestFx<UpdateTorrentSourceParams, TorrentSource>(
+	({ id, body }) => ({
+		url: `/v1/torrent/sources/${id}`,
+		method: 'PUT',
+		body
+	})
+)
+
+export const deleteTorrentSourceFx = createNodeRequestFx<number, void>(id => ({
+	url: `/v1/torrent/sources/${id}`,
+	method: 'DELETE'
+}))
+
+export const checkTorrentSourceFx = createNodeRequestFx<TorrentSourceCheckParams, TorrentSourceCaps>(
+	body => ({
+		url: '/v1/torrent/sources/check',
+		method: 'POST',
+		body,
+		timeout: 25_000
+	})
+)
+
+export const searchTorrentsFx = createNodeRequestFx<TorrentSearchParams, TorrentSearchResult>(
+	({ mediaRef, episode, query }) => ({
+		url: '/v1/torrent/search',
+		query: { media_ref: mediaRef, episode: episode || undefined, q: query.trim() || undefined },
+		// The node waits for the slowest source, up to 25 s.
+		timeout: 30_000
+	})
+)
