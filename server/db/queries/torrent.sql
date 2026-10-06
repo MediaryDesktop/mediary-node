@@ -1,6 +1,6 @@
 -- name: InsertTorrentDownload :one
-INSERT INTO torrent_download (info_hash, media_ref, title, root_id, rel_dir, source, state, created_at, updated_at)
-VALUES (?, ?, ?, ?, ?, ?, 'downloading', ?, ?)
+INSERT INTO torrent_download (info_hash, media_ref, title, root_id, rel_dir, source, choosing, state, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, 'downloading', ?, ?)
 RETURNING *;
 
 -- name: ListTorrentDownloads :many
@@ -28,3 +28,6 @@ WHERE id = ?;
 
 -- name: DeleteTorrentDownload :execrows
 DELETE FROM torrent_download WHERE id = ?;
+
+-- name: SetTorrentDownloadChoosing :exec
+UPDATE torrent_download SET choosing = ?, updated_at = ? WHERE id = ?;

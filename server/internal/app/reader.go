@@ -118,6 +118,10 @@ func (d downloadFolders) ImportFile(ctx context.Context, rootID int64, relPath, 
 	return d.library.ImportFile(ctx, rootID, relPath, mediaRef, chapter)
 }
 
+func (d downloadFolders) NameEpisode(relPath string) (video bool, episode *int) {
+	return d.library.NameEpisode(relPath)
+}
+
 // mangaDexChapters lets the reader open MangaDex chapters through the manga module.
 type mangaDexChapters struct {
 	manga *manga.Module

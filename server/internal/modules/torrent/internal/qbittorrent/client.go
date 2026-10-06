@@ -104,6 +104,10 @@ type AddRequest struct {
 	SavePath string
 	Category string
 	Tags     []string
+	// Hold is for a torrent whose files the user picks first: a .torrent file is
+	// added stopped; a magnet has no file list yet, so it is stopped once its
+	// metadata arrives.
+	Hold bool
 }
 
 // Version is the qBittorrent version, e.g. "v5.0.2". It doubles as the check that
@@ -131,6 +135,24 @@ func (c *Client) Add(ctx context.Context, req AddRequest) error {
 	}
 	if req.Magnet != "" {
 		fields["urls"] = req.Magnet
+	}
+
+	if req.Hold {
+		if req.Magnet != "" {
+			// Clients before 4.5 do not know the stop condition and start the torrent
+			// right away; the file choice then only trims what is left to download.
+			fields["stopCondition"] = "MetadataReceived"
+		} else {
+			newer, err := c.atLeast(ctx, stopStartVersion)
+			if err != nil {
+				return err
+			}
+			if newer {
+				fields["stopped"] = "true"
+			} else {
+				fields["paused"] = "true"
+			}
+		}
 	}
 
 	for name, value := range fields {
@@ -222,6 +244,34 @@ func (c *Client) Files(ctx context.Context, hash string) ([]File, error) {
 	}
 
 	return files, nil
+}
+
+// Priorities of a torrent's files: skipped, or downloaded normally.
+const (
+	PrioritySkip   = 0
+	PriorityNormal = 1
+)
+
+// SetFilePriority sets the priority of the files with these indices.
+func (c *Client) SetFilePriority(ctx context.Context, hash string, indices []int, priority int) error {
+	if len(indices) == 0 {
+		return nil
+	}
+
+	ids := make([]string, 0, len(indices))
+	for _, index := range indices {
+		ids = append(ids, strconv.Itoa(index))
+	}
+
+	values := url.Values{
+		"hash":     {hash},
+		"id":       {strings.Join(ids, "|")},
+		"priority": {strconv.Itoa(priority)},
+	}
+
+	_, err := c.call(ctx, http.MethodPost, "torrents/filePrio", formBody(values), formType)
+
+	return err
 }
 
 func (c *Client) Pause(ctx context.Context, hash string) error {

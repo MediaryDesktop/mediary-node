@@ -215,6 +215,12 @@ func rebase(physical, logical, path string) (string, error) {
 	return filepath.Join(logical, rel), nil
 }
 
+// KindOf is what the library would keep a file with this name as, and false for a
+// file it does not keep.
+func KindOf(name string) (Kind, bool) {
+	return classify(filepath.Base(name))
+}
+
 func classify(name string) (Kind, bool) {
 	// A dotfile is configuration or an AppleDouble sidecar, which carries the
 	// extension of the file it describes.

@@ -79,6 +79,9 @@ components:
           format: uri
           readOnly: true
           type: string
+        choose_files:
+          description: Hold the torrent in the client until its files are chosen with PUT .../files.
+          type: boolean
         magnet:
           description: A magnet link with a BitTorrent v1 hash. Give this or torrent.
           maxLength: 65536
@@ -2971,6 +2974,29 @@ components:
         - total
         - has_next_page
       type: object
+    SelectTorrentFilesInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/SelectTorrentFilesInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        selected:
+          description: Indices of the files to download; every other file is skipped.
+          items:
+            format: int64
+            type: integer
+          maxItems: 10000
+          minItems: 1
+          type:
+            - array
+            - "null"
+      required:
+        - selected
+      type: object
     SessionOutputBody:
       additionalProperties: false
       properties:
@@ -3387,6 +3413,9 @@ components:
           format: uri
           readOnly: true
           type: string
+        choosing:
+          description: The client holds the torrent until its files are chosen.
+          type: boolean
         completed_at:
           format: date-time
           type: string
@@ -3433,6 +3462,7 @@ components:
         - name
         - source
         - state
+        - choosing
         - imported
         - created_at
       type: object
@@ -3457,6 +3487,61 @@ components:
       required:
         - downloads
         - client
+      type: object
+    TorrentFile:
+      additionalProperties: false
+      properties:
+        episode:
+          description: The episode its name gives; absent for an extra or a name without one.
+          format: int64
+          type: integer
+        index:
+          format: int64
+          type: integer
+        name:
+          description: Path inside the torrent, with forward slashes.
+          type: string
+        progress:
+          format: double
+          maximum: 1
+          minimum: 0
+          type: number
+        selected:
+          description: Whether the client downloads it.
+          type: boolean
+        size:
+          format: int64
+          type: integer
+        video:
+          description: Whether the library keeps it as a video.
+          type: boolean
+      required:
+        - index
+        - name
+        - size
+        - progress
+        - selected
+        - video
+      type: object
+    TorrentFilesOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/TorrentFilesOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        files:
+          description: Empty until a magnet's metadata has arrived.
+          items:
+            $ref: "#/components/schemas/TorrentFile"
+          type:
+            - array
+            - "null"
+      required:
+        - files
       type: object
     TorrentLive:
       additionalProperties: false
@@ -5766,6 +5851,61 @@ paths:
                 $ref: "#/components/schemas/ErrorModel"
           description: Error
       summary: Remove a torrent download
+      tags:
+        - torrent
+  /v1/torrent/downloads/{id}/files:
+    get:
+      description: Every file in the torrent with the episode the library reads from its name, and whether the client downloads it.
+      operationId: listTorrentFiles
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            format: int64
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TorrentFilesOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Files of a torrent
+      tags:
+        - torrent
+    put:
+      description: The client downloads only these files. A torrent added with choose_files starts once the choice is made.
+      operationId: selectTorrentFiles
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            format: int64
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SelectTorrentFilesInputBody"
+        required: true
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Choose which files to download
       tags:
         - torrent
   /v1/torrent/downloads/{id}/pause:

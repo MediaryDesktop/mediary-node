@@ -256,3 +256,38 @@ func TestOnlyHTTPAddressesAreAccepted(t *testing.T) {
 		}
 	}
 }
+
+func TestHoldStopsATorrentFileAndAMagnetAtItsMetadata(t *testing.T) {
+	for ver, want := range map[string]string{"2.9.3": "paused", "2.11.0": "stopped"} {
+		f := newFakeWebUI(t, ver)
+		client := newClient(t, f, "secret")
+
+		if err := client.Add(context.Background(), AddRequest{Torrent: []byte("d4:infod4:name1:aee"), SavePath: "/d", Hold: true}); err != nil {
+			t.Fatal(err)
+		}
+		if form := f.forms[len(f.forms)-1]; form[want] != "true" {
+			t.Errorf("API %s: add form = %v, want %s", ver, form, want)
+		}
+	}
+
+	f := newFakeWebUI(t, "2.11.0")
+	if err := newClient(t, f, "secret").Add(context.Background(), AddRequest{Magnet: "magnet:?xt=urn:btih:abc", SavePath: "/d", Hold: true}); err != nil {
+		t.Fatal(err)
+	}
+	if form := f.forms[len(f.forms)-1]; form["stopCondition"] != "MetadataReceived" || form["stopped"] != "" {
+		t.Errorf("magnet add form = %v", form)
+	}
+}
+
+func TestSetFilePrioritySendsTheIndices(t *testing.T) {
+	f := newFakeWebUI(t, "2.11.0")
+
+	if err := newClient(t, f, "secret").SetFilePriority(context.Background(), "abc", []int{0, 3, 4}, PrioritySkip); err != nil {
+		t.Fatal(err)
+	}
+
+	form := f.forms[len(f.forms)-1]
+	if form["hash"] != "abc" || form["id"] != "0|3|4" || form["priority"] != "0" {
+		t.Fatalf("filePrio form = %v", form)
+	}
+}

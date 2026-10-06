@@ -45,7 +45,7 @@ func (q *Queries) FinishTorrentDownload(ctx context.Context, arg FinishTorrentDo
 }
 
 const getTorrentDownload = `-- name: GetTorrentDownload :one
-SELECT id, info_hash, media_ref, title, name, root_id, rel_dir, source, state, imported, error, created_at, updated_at, completed_at FROM torrent_download WHERE id = ?
+SELECT id, info_hash, media_ref, title, name, root_id, rel_dir, source, state, imported, error, created_at, updated_at, completed_at, choosing FROM torrent_download WHERE id = ?
 `
 
 func (q *Queries) GetTorrentDownload(ctx context.Context, id int64) (TorrentDownload, error) {
@@ -66,12 +66,13 @@ func (q *Queries) GetTorrentDownload(ctx context.Context, id int64) (TorrentDown
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.CompletedAt,
+		&i.Choosing,
 	)
 	return i, err
 }
 
 const getTorrentDownloadByHash = `-- name: GetTorrentDownloadByHash :one
-SELECT id, info_hash, media_ref, title, name, root_id, rel_dir, source, state, imported, error, created_at, updated_at, completed_at FROM torrent_download WHERE info_hash = ?
+SELECT id, info_hash, media_ref, title, name, root_id, rel_dir, source, state, imported, error, created_at, updated_at, completed_at, choosing FROM torrent_download WHERE info_hash = ?
 `
 
 func (q *Queries) GetTorrentDownloadByHash(ctx context.Context, infoHash string) (TorrentDownload, error) {
@@ -92,14 +93,15 @@ func (q *Queries) GetTorrentDownloadByHash(ctx context.Context, infoHash string)
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.CompletedAt,
+		&i.Choosing,
 	)
 	return i, err
 }
 
 const insertTorrentDownload = `-- name: InsertTorrentDownload :one
-INSERT INTO torrent_download (info_hash, media_ref, title, root_id, rel_dir, source, state, created_at, updated_at)
-VALUES (?, ?, ?, ?, ?, ?, 'downloading', ?, ?)
-RETURNING id, info_hash, media_ref, title, name, root_id, rel_dir, source, state, imported, error, created_at, updated_at, completed_at
+INSERT INTO torrent_download (info_hash, media_ref, title, root_id, rel_dir, source, choosing, state, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, 'downloading', ?, ?)
+RETURNING id, info_hash, media_ref, title, name, root_id, rel_dir, source, state, imported, error, created_at, updated_at, completed_at, choosing
 `
 
 type InsertTorrentDownloadParams struct {
@@ -109,6 +111,7 @@ type InsertTorrentDownloadParams struct {
 	RootID    int64  `json:"root_id"`
 	RelDir    string `json:"rel_dir"`
 	Source    string `json:"source"`
+	Choosing  int64  `json:"choosing"`
 	CreatedAt string `json:"created_at"`
 	UpdatedAt string `json:"updated_at"`
 }
@@ -121,6 +124,7 @@ func (q *Queries) InsertTorrentDownload(ctx context.Context, arg InsertTorrentDo
 		arg.RootID,
 		arg.RelDir,
 		arg.Source,
+		arg.Choosing,
 		arg.CreatedAt,
 		arg.UpdatedAt,
 	)
@@ -140,12 +144,13 @@ func (q *Queries) InsertTorrentDownload(ctx context.Context, arg InsertTorrentDo
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.CompletedAt,
+		&i.Choosing,
 	)
 	return i, err
 }
 
 const listTorrentDownloads = `-- name: ListTorrentDownloads :many
-SELECT id, info_hash, media_ref, title, name, root_id, rel_dir, source, state, imported, error, created_at, updated_at, completed_at FROM torrent_download ORDER BY id DESC LIMIT ?
+SELECT id, info_hash, media_ref, title, name, root_id, rel_dir, source, state, imported, error, created_at, updated_at, completed_at, choosing FROM torrent_download ORDER BY id DESC LIMIT ?
 `
 
 func (q *Queries) ListTorrentDownloads(ctx context.Context, limit int64) ([]TorrentDownload, error) {
@@ -172,6 +177,7 @@ func (q *Queries) ListTorrentDownloads(ctx context.Context, limit int64) ([]Torr
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.CompletedAt,
+			&i.Choosing,
 		); err != nil {
 			return nil, err
 		}
@@ -187,7 +193,7 @@ func (q *Queries) ListTorrentDownloads(ctx context.Context, limit int64) ([]Torr
 }
 
 const listUnfinishedTorrentDownloads = `-- name: ListUnfinishedTorrentDownloads :many
-SELECT id, info_hash, media_ref, title, name, root_id, rel_dir, source, state, imported, error, created_at, updated_at, completed_at FROM torrent_download WHERE state IN ('downloading', 'importing') ORDER BY id
+SELECT id, info_hash, media_ref, title, name, root_id, rel_dir, source, state, imported, error, created_at, updated_at, completed_at, choosing FROM torrent_download WHERE state IN ('downloading', 'importing') ORDER BY id
 `
 
 func (q *Queries) ListUnfinishedTorrentDownloads(ctx context.Context) ([]TorrentDownload, error) {
@@ -214,6 +220,7 @@ func (q *Queries) ListUnfinishedTorrentDownloads(ctx context.Context) ([]Torrent
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.CompletedAt,
+			&i.Choosing,
 		); err != nil {
 			return nil, err
 		}
@@ -226,6 +233,21 @@ func (q *Queries) ListUnfinishedTorrentDownloads(ctx context.Context) ([]Torrent
 		return nil, err
 	}
 	return items, nil
+}
+
+const setTorrentDownloadChoosing = `-- name: SetTorrentDownloadChoosing :exec
+UPDATE torrent_download SET choosing = ?, updated_at = ? WHERE id = ?
+`
+
+type SetTorrentDownloadChoosingParams struct {
+	Choosing  int64  `json:"choosing"`
+	UpdatedAt string `json:"updated_at"`
+	ID        int64  `json:"id"`
+}
+
+func (q *Queries) SetTorrentDownloadChoosing(ctx context.Context, arg SetTorrentDownloadChoosingParams) error {
+	_, err := q.db.ExecContext(ctx, setTorrentDownloadChoosing, arg.Choosing, arg.UpdatedAt, arg.ID)
+	return err
 }
 
 const setTorrentDownloadName = `-- name: SetTorrentDownloadName :exec

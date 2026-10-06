@@ -29,15 +29,18 @@ func New(db *sql.DB) *Store {
 }
 
 type Download struct {
-	ID          int64
-	InfoHash    string
-	MediaRef    string
-	Title       string
-	Name        string
-	RootID      int64
-	RelDir      string
-	Source      string
-	State       string
+	ID       int64
+	InfoHash string
+	MediaRef string
+	Title    string
+	Name     string
+	RootID   int64
+	RelDir   string
+	Source   string
+	State    string
+	// Choosing is true while the client holds the torrent for the user to pick
+	// its files.
+	Choosing    bool
 	Imported    int
 	Error       string
 	CreatedAt   time.Time
@@ -52,6 +55,7 @@ type NewDownload struct {
 	RootID   int64
 	RelDir   string
 	Source   string
+	Choosing bool
 }
 
 func (s *Store) Insert(ctx context.Context, in NewDownload, now time.Time) (*Download, error) {
@@ -64,6 +68,7 @@ func (s *Store) Insert(ctx context.Context, in NewDownload, now time.Time) (*Dow
 		RootID:    in.RootID,
 		RelDir:    in.RelDir,
 		Source:    in.Source,
+		Choosing:  boolInt(in.Choosing),
 		CreatedAt: stamp,
 		UpdatedAt: stamp,
 	})
@@ -153,6 +158,19 @@ func (s *Store) SetName(ctx context.Context, id int64, name string, now time.Tim
 	return nil
 }
 
+func (s *Store) SetChoosing(ctx context.Context, id int64, choosing bool, now time.Time) error {
+	err := sqlc.New(s.db).SetTorrentDownloadChoosing(ctx, sqlc.SetTorrentDownloadChoosingParams{
+		Choosing:  boolInt(choosing),
+		UpdatedAt: stampOf(now),
+		ID:        id,
+	})
+	if err != nil {
+		return fmt.Errorf("save torrent file choice: %w", err)
+	}
+
+	return nil
+}
+
 func (s *Store) Finish(ctx context.Context, id int64, imported int, now time.Time) error {
 	stamp := stampOf(now)
 
@@ -228,6 +246,7 @@ func downloadFrom(row sqlc.TorrentDownload) Download {
 		RelDir:    row.RelDir,
 		Source:    row.Source,
 		State:     row.State,
+		Choosing:  row.Choosing != 0,
 		Imported:  int(row.Imported),
 		Error:     row.Error,
 		CreatedAt: created,
@@ -239,4 +258,11 @@ func downloadFrom(row sqlc.TorrentDownload) Download {
 	}
 
 	return download
+}
+
+func boolInt(value bool) int64 {
+	if value {
+		return 1
+	}
+	return 0
 }

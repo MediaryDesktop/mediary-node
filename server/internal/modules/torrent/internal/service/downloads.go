@@ -23,6 +23,8 @@ type AddRequest struct {
 	Magnet string
 	// Torrent is a .torrent file's content, when there is no magnet.
 	Torrent []byte
+	// ChooseFiles holds the torrent in the client until the user picks its files.
+	ChooseFiles bool
 }
 
 // TorrentLive is what the client last said about a torrent; absent when it has not been
@@ -47,6 +49,7 @@ type TorrentDownload struct {
 	Name        string       `json:"name"`
 	Source      string       `json:"source" enum:"magnet,file"`
 	State       string       `json:"state" enum:"downloading,importing,done,failed" doc:"The node's state: a done download's files are in the library; the client may still be seeding it."`
+	Choosing    bool         `json:"choosing" doc:"The client holds the torrent until its files are chosen."`
 	Imported    int          `json:"imported" doc:"Files that joined the library."`
 	Error       string       `json:"error,omitempty"`
 	CreatedAt   time.Time    `json:"created_at"`
@@ -118,6 +121,7 @@ func (s *Service) Add(ctx context.Context, req AddRequest) (*TorrentDownload, er
 		SavePath: clientPath(filepath.Join(rootPath, relDir), settings.PathMap),
 		Category: torrentFolder,
 		Tags:     []string{torrentTag},
+		Hold:     req.ChooseFiles,
 	})
 	if err != nil {
 		return nil, err
@@ -130,6 +134,7 @@ func (s *Service) Add(ctx context.Context, req AddRequest) (*TorrentDownload, er
 		RootID:   settings.RootID,
 		RelDir:   relDir,
 		Source:   source,
+		Choosing: req.ChooseFiles,
 	}, s.opts.Now())
 	if err != nil {
 		return nil, apperr.Wrap(err, apperr.KindInternal, "save the download")
@@ -198,6 +203,7 @@ func (s *Service) view(row store.Download) TorrentDownload {
 		Name:        row.Name,
 		Source:      row.Source,
 		State:       row.State,
+		Choosing:    row.Choosing,
 		Imported:    row.Imported,
 		Error:       row.Error,
 		CreatedAt:   row.CreatedAt,

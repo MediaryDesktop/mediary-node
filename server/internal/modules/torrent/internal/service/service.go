@@ -19,6 +19,7 @@ type Client interface {
 	Add(ctx context.Context, req qbittorrent.AddRequest) error
 	Torrents(ctx context.Context, hashes []string) ([]qbittorrent.Torrent, error)
 	Files(ctx context.Context, hash string) ([]qbittorrent.File, error)
+	SetFilePriority(ctx context.Context, hash string, indices []int, priority int) error
 	Pause(ctx context.Context, hash string) error
 	Resume(ctx context.Context, hash string) error
 	Delete(ctx context.Context, hash string, withFiles bool) error
@@ -29,6 +30,9 @@ type Client interface {
 type Library interface {
 	RootPath(ctx context.Context, rootID int64) (path string, found bool, err error)
 	ImportFile(ctx context.Context, rootID int64, relPath, mediaRef string, episode *int) (int64, error)
+	// NameEpisode reads a file's path the way the library would: whether it keeps
+	// it as a video, and the episode its name gives.
+	NameEpisode(relPath string) (video bool, episode *int)
 }
 
 // Connection is how to reach the client.

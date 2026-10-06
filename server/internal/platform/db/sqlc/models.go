@@ -198,4 +198,5 @@ type TorrentDownload struct {
 	CreatedAt   string `json:"created_at"`
 	UpdatedAt   string `json:"updated_at"`
 	CompletedAt string `json:"completed_at"`
+	Choosing    int64  `json:"choosing"`
 }

@@ -28,10 +28,11 @@ type TorrentDownloadsOutput struct {
 
 type AddTorrentDownloadInput struct {
 	Body struct {
-		MediaRef string `json:"media_ref" minLength:"1" doc:"The title the download is for; its files are matched to it."`
-		Title    string `json:"title,omitempty" maxLength:"500" doc:"The title's name, which names the folder the torrent is saved into."`
-		Magnet   string `json:"magnet,omitempty" maxLength:"65536" doc:"A magnet link with a BitTorrent v1 hash. Give this or torrent."`
-		Torrent  []byte `json:"torrent,omitempty" doc:"A .torrent file, base64-encoded. Give this or magnet."`
+		MediaRef    string `json:"media_ref" minLength:"1" doc:"The title the download is for; its files are matched to it."`
+		Title       string `json:"title,omitempty" maxLength:"500" doc:"The title's name, which names the folder the torrent is saved into."`
+		Magnet      string `json:"magnet,omitempty" maxLength:"65536" doc:"A magnet link with a BitTorrent v1 hash. Give this or torrent."`
+		Torrent     []byte `json:"torrent,omitempty" doc:"A .torrent file, base64-encoded. Give this or magnet."`
+		ChooseFiles bool   `json:"choose_files,omitempty" doc:"Hold the torrent in the client until its files are chosen with PUT .../files."`
 	}
 }
 
@@ -46,6 +47,19 @@ type TorrentDownloadIDInput struct {
 type RemoveTorrentDownloadInput struct {
 	ID        int64 `path:"id"`
 	WithFiles bool  `query:"with_files" doc:"Also delete the downloaded files from disk."`
+}
+
+type TorrentFilesOutput struct {
+	Body struct {
+		Files []service.TorrentFile `json:"files" doc:"Empty until a magnet's metadata has arrived."`
+	}
+}
+
+type SelectTorrentFilesInput struct {
+	ID   int64 `path:"id"`
+	Body struct {
+		Selected []int `json:"selected" minItems:"1" maxItems:"10000" doc:"Indices of the files to download; every other file is skipped."`
+	}
 }
 
 type TorrentSettingsOutput struct {
@@ -110,6 +124,8 @@ func (h *Handler) Register(api huma.API) {
 			Title:    in.Body.Title,
 			Magnet:   in.Body.Magnet,
 			Torrent:  in.Body.Torrent,
+
+			ChooseFiles: in.Body.ChooseFiles,
 		})
 		if err != nil {
 			return nil, httpapi.ToHTTP(err)
@@ -156,6 +172,40 @@ func (h *Handler) Register(api huma.API) {
 		DefaultStatus: http.StatusNoContent,
 	}, func(ctx context.Context, in *RemoveTorrentDownloadInput) (*struct{}, error) {
 		if err := h.svc.Remove(ctx, in.ID, in.WithFiles); err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+		return nil, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "listTorrentFiles",
+		Method:      http.MethodGet,
+		Path:        "/v1/torrent/downloads/{id}/files",
+		Summary:     "Files of a torrent",
+		Description: "Every file in the torrent with the episode the library reads from its name, and whether the client downloads it.",
+		Tags:        []string{"torrent"},
+	}, func(ctx context.Context, in *TorrentDownloadIDInput) (*TorrentFilesOutput, error) {
+		files, err := h.svc.Files(ctx, in.ID)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		out := &TorrentFilesOutput{}
+		out.Body.Files = files
+
+		return out, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID:   "selectTorrentFiles",
+		Method:        http.MethodPut,
+		Path:          "/v1/torrent/downloads/{id}/files",
+		Summary:       "Choose which files to download",
+		Description:   "The client downloads only these files. A torrent added with choose_files starts once the choice is made.",
+		Tags:          []string{"torrent"},
+		DefaultStatus: http.StatusNoContent,
+	}, func(ctx context.Context, in *SelectTorrentFilesInput) (*struct{}, error) {
+		if err := h.svc.SelectFiles(ctx, in.ID, in.Body.Selected); err != nil {
 			return nil, httpapi.ToHTTP(err)
 		}
 		return nil, nil

@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -31,13 +32,16 @@ type fakeClient struct {
 	files       map[string][]qbittorrent.File
 	deleted     map[string]bool
 	paused      []string
+	resumed     []string
+	priorities  map[string]map[int]int
 }
 
 func newFakeClient() *fakeClient {
 	return &fakeClient{
-		torrents: map[string]qbittorrent.Torrent{},
-		files:    map[string][]qbittorrent.File{},
-		deleted:  map[string]bool{},
+		torrents:   map[string]qbittorrent.Torrent{},
+		files:      map[string][]qbittorrent.File{},
+		deleted:    map[string]bool{},
+		priorities: map[string]map[int]int{},
 	}
 }
 
@@ -94,10 +98,26 @@ func (f *fakeClient) Pause(_ context.Context, hash string) error {
 	return f.down()
 }
 
-func (f *fakeClient) Resume(context.Context, string) error {
+func (f *fakeClient) Resume(_ context.Context, hash string) error {
 	f.mu.Lock()
 	defer f.mu.Unlock()
+	f.resumed = append(f.resumed, hash)
 	return f.down()
+}
+
+func (f *fakeClient) SetFilePriority(_ context.Context, hash string, indices []int, priority int) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if err := f.down(); err != nil {
+		return err
+	}
+	if f.priorities[hash] == nil {
+		f.priorities[hash] = map[int]int{}
+	}
+	for _, index := range indices {
+		f.priorities[hash][index] = priority
+	}
+	return nil
 }
 
 func (f *fakeClient) Delete(_ context.Context, hash string, withFiles bool) error {
@@ -145,6 +165,22 @@ func (l *fakeLibrary) ImportFile(_ context.Context, _ int64, relPath, mediaRef s
 	l.imported = append(l.imported, imported{relPath: relPath, mediaRef: mediaRef})
 
 	return int64(len(l.imported)), nil
+}
+
+// NameEpisode reads "<anything> - NN.mkv" the way the library's parser would.
+func (l *fakeLibrary) NameEpisode(relPath string) (video bool, episode *int) {
+	if !strings.HasSuffix(relPath, ".mkv") {
+		return false, nil
+	}
+
+	name := strings.TrimSuffix(relPath, ".mkv")
+	if dash := strings.LastIndex(name, " - "); dash >= 0 {
+		if number, err := strconv.Atoi(name[dash+3:]); err == nil {
+			return true, &number
+		}
+	}
+
+	return true, nil
 }
 
 type harness struct {
@@ -500,5 +536,83 @@ func TestTheEnvironmentsConnectionHoldsUntilOneIsSaved(t *testing.T) {
 	}
 	if settings.URL != "http://qbittorrent:8080" || settings.Username != "env" {
 		t.Fatalf("settings = %+v", settings)
+	}
+}
+
+func TestChoosingFilesHoldsTheTorrentUntilTheChoice(t *testing.T) {
+	h := newHarness(t)
+	h.configure(t)
+	ctx := context.Background()
+
+	download, err := h.svc.Add(ctx, AddRequest{
+		MediaRef:    "anilist:154587",
+		Title:       "Sousou no Frieren",
+		Magnet:      frierenMagnet,
+		ChooseFiles: true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !download.Choosing || !h.client.added[0].Hold {
+		t.Fatalf("download = %+v, add = %+v; want it held", download, h.client.added[0])
+	}
+
+	h.client.set(
+		qbittorrent.Torrent{Hash: frierenHash, State: "stoppedDL"},
+		qbittorrent.File{Index: 0, Name: "Frieren/Frieren - 01.mkv", Priority: 1},
+		qbittorrent.File{Index: 1, Name: "Frieren/Frieren - 02.mkv", Priority: 1},
+		qbittorrent.File{Index: 2, Name: "Frieren/Frieren - 02.ass", Priority: 1},
+	)
+
+	files, err := h.svc.Files(ctx, download.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(files) != 3 || files[1].Episode == nil || *files[1].Episode != 2 || !files[1].Video || files[2].Video {
+		t.Fatalf("files = %+v", files)
+	}
+
+	if err := h.svc.SelectFiles(ctx, download.ID, []int{1, 2}); err != nil {
+		t.Fatal(err)
+	}
+
+	if got := h.client.priorities[frierenHash]; got[0] != qbittorrent.PrioritySkip || got[1] != qbittorrent.PriorityNormal || got[2] != qbittorrent.PriorityNormal {
+		t.Fatalf("priorities = %v", got)
+	}
+	if len(h.client.resumed) != 1 {
+		t.Fatalf("a held torrent starts once its files are chosen, resumed = %v", h.client.resumed)
+	}
+	if listed := h.only(t); listed.Choosing {
+		t.Fatalf("download = %+v, want the choice made", listed)
+	}
+
+	// Choosing again later changes the files without starting anything.
+	if err := h.svc.SelectFiles(ctx, download.ID, []int{0, 1}); err != nil {
+		t.Fatal(err)
+	}
+	if len(h.client.resumed) != 1 {
+		t.Fatalf("resumed = %v, want no second start", h.client.resumed)
+	}
+}
+
+func TestAFileChoiceTheTorrentCannotTake(t *testing.T) {
+	h := newHarness(t)
+	h.configure(t)
+	ctx := context.Background()
+	download := h.add(t)
+
+	if err := h.svc.SelectFiles(ctx, download.ID, []int{0}); apperr.KindOf(err) != apperr.KindConflict {
+		t.Fatalf("before the file list arrives: %v, want conflict", err)
+	}
+
+	h.client.set(
+		qbittorrent.Torrent{Hash: frierenHash, State: "downloading"},
+		qbittorrent.File{Index: 0, Name: "Frieren - 01.mkv", Priority: 1},
+	)
+
+	for name, selected := range map[string][]int{"nothing": nil, "a file it does not have": {0, 7}} {
+		if err := h.svc.SelectFiles(ctx, download.ID, selected); apperr.KindOf(err) != apperr.KindInvalid {
+			t.Errorf("%s: %v, want invalid", name, err)
+		}
 	}
 }

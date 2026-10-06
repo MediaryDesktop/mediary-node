@@ -108,6 +108,7 @@ type Querier interface {
 	SetMangaDownloadProgress(ctx context.Context, arg SetMangaDownloadProgressParams) error
 	SetMangaDownloadState(ctx context.Context, arg SetMangaDownloadStateParams) error
 	SetMangaDownloadTarget(ctx context.Context, arg SetMangaDownloadTargetParams) error
+	SetTorrentDownloadChoosing(ctx context.Context, arg SetTorrentDownloadChoosingParams) error
 	SetTorrentDownloadName(ctx context.Context, arg SetTorrentDownloadNameParams) error
 	SetTorrentDownloadState(ctx context.Context, arg SetTorrentDownloadStateParams) error
 	TouchLibraryRoot(ctx context.Context, arg TouchLibraryRootParams) error

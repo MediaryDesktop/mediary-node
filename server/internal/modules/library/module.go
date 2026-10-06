@@ -8,6 +8,8 @@ import (
 	"github.com/rs/zerolog"
 
 	"github.com/mediaryorg/mediary-node/server/internal/modules/library/internal/handler"
+	"github.com/mediaryorg/mediary-node/server/internal/modules/library/internal/parser"
+	"github.com/mediaryorg/mediary-node/server/internal/modules/library/internal/scanner"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/library/internal/service"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/library/internal/store"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
@@ -89,4 +91,21 @@ func (m *Module) ImportFile(ctx context.Context, rootID int64, relPath, mediaRef
 	}
 
 	return file.ID, nil
+}
+
+// NameEpisode is what the library makes of a file it does not have yet, from its
+// path alone: whether it would keep it as a video, and the episode the name
+// gives. An extra is a video without an episode.
+func (m *Module) NameEpisode(relPath string) (video bool, episode *int) {
+	kind, ok := scanner.KindOf(relPath)
+	if !ok || kind != scanner.KindVideo {
+		return false, nil
+	}
+
+	parsed := parser.Parse(relPath, kind)
+	if parsed.Form == parser.FormExtra {
+		return true, nil
+	}
+
+	return true, parsed.Episode
 }
