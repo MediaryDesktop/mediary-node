@@ -49,3 +49,28 @@ func TestImportFileStaysInsideTheFolder(t *testing.T) {
 		}
 	}
 }
+
+func TestImportFileTakesTheEpisodeFromAVideosName(t *testing.T) {
+	h := newHarness(t)
+	dir := t.TempDir()
+	root := h.addRoot(t, dir)
+
+	writeFile(t, filepath.Join(dir, "Frieren", "[SubsPlease] Sousou no Frieren - 07 (1080p).mkv"), "video")
+	writeFile(t, filepath.Join(dir, "Frieren", "[SubsPlease] Sousou no Frieren - NCOP01 (1080p).mkv"), "video")
+
+	file, err := h.svc.ImportFile(context.Background(), root.ID, "Frieren/[SubsPlease] Sousou no Frieren - 07 (1080p).mkv", "anilist:154587", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if file.Match == nil || file.Match.Episode == nil || *file.Match.Episode != 7 {
+		t.Fatalf("match = %+v, want episode 7 from the name", file.Match)
+	}
+
+	extra, err := h.svc.ImportFile(context.Background(), root.ID, "Frieren/[SubsPlease] Sousou no Frieren - NCOP01 (1080p).mkv", "anilist:154587", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if extra.Match == nil || extra.Match.Episode != nil {
+		t.Fatalf("an opening keeps no episode, got %+v", extra.Match)
+	}
+}

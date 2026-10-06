@@ -72,6 +72,12 @@ func (s *Service) ImportFile(ctx context.Context, rootID int64, relPath, mediaRe
 		return nil, apperr.New(apperr.KindInternal, "%s was added but cannot be found", relPath)
 	}
 
+	if episode == nil {
+		if episode, err = s.parsedEpisode(ctx, fileID); err != nil {
+			return nil, err
+		}
+	}
+
 	matched, err := s.SetMatch(ctx, fileID, mediaRef, nil, episode)
 	if err != nil {
 		return nil, err
@@ -80,4 +86,19 @@ func (s *Service) ImportFile(ctx context.Context, rootID int64, relPath, mediaRe
 	s.hub.Publish(events.TopicLibraryUpdate, map[string]any{"reason": "imported"})
 
 	return matched, nil
+}
+
+// parsedEpisode is the episode the parser read from a video's name, for a caller
+// that knows the title but not the episode — a torrent hands over whole folders
+// of them. An extra keeps no number: NCOP01 is an opening, not the first episode.
+func (s *Service) parsedEpisode(ctx context.Context, fileID int64) (*int, error) {
+	file, err := s.store.File(ctx, fileID)
+	if err != nil {
+		return nil, apperr.Wrap(err, apperr.KindInternal, "read library file")
+	}
+	if file == nil || file.Kind != string(scanner.KindVideo) || file.Parsed.Form == "extra" {
+		return nil, nil
+	}
+
+	return file.Parsed.Episode, nil
 }
