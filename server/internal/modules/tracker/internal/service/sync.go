@@ -236,7 +236,7 @@ func (s *Service) UpdateEntry(ctx context.Context, mediaRef string, patch EntryP
 		return nil, err
 	}
 	if mirrored == nil {
-		return nil, apperr.New(apperr.KindNotFound, "this title is not in your AniList list")
+		return s.createEntry(ctx, mediaID, patch)
 	}
 
 	if err := s.checkCustomLists(ctx, mediaType, patch); err != nil {
@@ -288,6 +288,90 @@ func (s *Service) UpdateEntry(ctx context.Context, mediaRef string, patch EntryP
 
 	return &view, nil
 }
+
+// createEntry adds a title that is not in the user's lists yet. Unlike an edit it
+// is not queued: the mirror has nothing about the title to show until AniList
+// answers with it, so an offline add would look saved and then be missing.
+func (s *Service) createEntry(ctx context.Context, mediaID int, patch EntryPatch) (*Entry, error) {
+	if patch.Status == nil {
+		patch.Status = strPointer("PLANNING")
+	}
+
+	declared, err := s.declaredCustomLists(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if patch.CustomLists != nil {
+		for _, name := range *patch.CustomLists {
+			if !declared[MediaTypeAnime][name] && !declared[MediaTypeManga][name] {
+				return nil, apperr.Invalid("custom_lists", "no list named %q", name)
+			}
+		}
+	}
+
+	saved, err := s.opts.AniList.SaveEntry(ctx, patch.change(mediaID))
+	if err != nil {
+		if anilist.IsTokenRejected(err) {
+			return nil, s.handleRejected(ctx, err)
+		}
+		return nil, err
+	}
+
+	mediaType := MediaType(strings.ToLower(saved.Media.Type))
+	if mediaType != MediaTypeAnime && mediaType != MediaTypeManga {
+		return nil, apperr.New(apperr.KindUpstream, "anilist returned media %d with type %q", mediaID, saved.Media.Type)
+	}
+
+	// A name is only declared for one media type, and AniList silently drops a
+	// list of the other type — so the mirror keeps only the ones that took.
+	lists := []string{}
+	if patch.CustomLists != nil {
+		for _, name := range *patch.CustomLists {
+			if declared[mediaType][name] {
+				lists = append(lists, name)
+			}
+		}
+	}
+
+	entry, err := s.replaceMirroredEntry(ctx, mediaType, saved, lists)
+	if err != nil {
+		return nil, err
+	}
+
+	s.hub.Publish(events.TopicTracker, map[string]any{
+		"media_type": string(mediaType),
+		"reason":     "updated",
+	})
+
+	return entry, nil
+}
+
+func (s *Service) declaredCustomLists(ctx context.Context) (map[MediaType]map[string]bool, error) {
+	declared := map[MediaType]map[string]bool{}
+
+	for _, mediaType := range []MediaType{MediaTypeAnime, MediaTypeManga} {
+		declared[mediaType] = map[string]bool{}
+
+		collection, err := s.mirroredCollection(ctx, mediaType)
+		if err != nil {
+			return nil, err
+		}
+		if collection == nil {
+			continue
+		}
+
+		for _, list := range collection.Lists {
+			if list.Custom {
+				declared[mediaType][list.Name] = true
+			}
+		}
+	}
+
+	return declared, nil
+}
+
+func strPointer(value string) *string { return &value }
 
 // checkCustomLists rejects a list AniList does not know about. The mutation
 // takes list names and silently drops the ones the account has not declared, so
@@ -507,7 +591,12 @@ func (s *Service) deliver(ctx context.Context, account *Account, change store.Ou
 		return err
 	}
 
-	if replaceErr := s.replaceMirroredEntry(ctx, MediaType(change.MediaType), saved); replaceErr != nil {
+	var lists []string
+	if patch.CustomLists != nil {
+		lists = *patch.CustomLists
+	}
+
+	if _, replaceErr := s.replaceMirroredEntry(ctx, MediaType(change.MediaType), saved, lists); replaceErr != nil {
 		return replaceErr
 	}
 
@@ -530,21 +619,35 @@ func keepHigherRemoteProgress(patch *EntryPatch, remote *anilist.RemoteProgress)
 	}
 }
 
-func (s *Service) replaceMirroredEntry(ctx context.Context, mediaType MediaType, saved *anilist.ListEntry) error {
-	collection, err := s.mirroredCollection(ctx, mediaType)
-	if err != nil {
-		return err
-	}
-	if collection == nil {
-		return nil
+// replaceMirroredEntry writes what AniList saved into the mirror. The mutation's
+// answer carries no custom lists, so lists is what the change set them to, and
+// nil keeps the ones the mirror already has.
+func (s *Service) replaceMirroredEntry(
+	ctx context.Context,
+	mediaType MediaType,
+	saved *anilist.ListEntry,
+	lists []string,
+) (*Entry, error) {
+	updated := entryFromAniList(saved, mediaType)
+	if lists != nil {
+		updated.CustomLists = append([]string{}, lists...)
 	}
 
-	updated := entryFromAniList(saved, mediaType)
+	collection, err := s.mirroredCollection(ctx, mediaType)
+	if err != nil {
+		return nil, err
+	}
+	if collection == nil {
+		return &updated, nil
+	}
+
 	found := false
 
 	for i := range collection.Entries {
 		if collection.Entries[i].MediaRef == updated.MediaRef {
-			updated.CustomLists = collection.Entries[i].CustomLists
+			if lists == nil {
+				updated.CustomLists = collection.Entries[i].CustomLists
+			}
 			collection.Entries[i] = updated
 			found = true
 			break
@@ -559,14 +662,14 @@ func (s *Service) replaceMirroredEntry(ctx context.Context, mediaType MediaType,
 
 	payload, err := json.Marshal(collection)
 	if err != nil {
-		return apperr.Wrap(err, apperr.KindInternal, "encode anilist collection")
+		return nil, apperr.Wrap(err, apperr.KindInternal, "encode anilist collection")
 	}
 
 	if err := s.store.PutMirror(ctx, string(mediaType), payload, collection.FetchedAt); err != nil {
-		return apperr.Wrap(err, apperr.KindInternal, "store anilist collection")
+		return nil, apperr.Wrap(err, apperr.KindInternal, "store anilist collection")
 	}
 
-	return nil
+	return &updated, nil
 }
 
 func recountStatusLists(collection *Collection) {

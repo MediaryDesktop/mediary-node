@@ -168,6 +168,12 @@ export const en = {
 			offline: 'AniList is unreachable, so this list cannot be changed right now',
 			failed: 'Could not save the list. Try again'
 		},
+		addEntry: {
+			action: 'Add to list',
+			title: 'Add to list',
+			save: 'Add',
+			done: 'Added {{title}} to your AniList list'
+		},
 		manageEntry: {
 			action: 'Manage lists',
 			title: 'Manage lists',

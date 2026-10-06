@@ -4,7 +4,12 @@ import { atom } from '@shared/factory'
 import { translate } from '@shared/i18n'
 import { toast } from '@shared/ui'
 
-import { trackerListsQuery, trackerModel, updateTrackerEntryMutation } from '@entities/tracker'
+import {
+	preferredTitle,
+	trackerListsQuery,
+	trackerModel,
+	updateTrackerEntryMutation
+} from '@entities/tracker'
 import type { TrackerEntry, TrackerEntryPatch, TrackerMediaType, TrackerStatus } from '@entities/tracker'
 
 import { dateToInput, inputToDate, today } from '../lib/entry-dates'
@@ -62,34 +67,66 @@ export interface EntryTarget {
 	mediaType: TrackerMediaType
 }
 
+// A title that is not on any list yet, as search, the library or the title page
+// know it.
+export interface NewEntryTarget {
+	mediaRef: string
+	mediaType: TrackerMediaType
+	title: string
+}
+
+interface ManageTarget {
+	mediaRef: string
+	mediaType: TrackerMediaType
+	title: string
+	entry: TrackerEntry | null
+}
+
 function sameLists(left: string[], right: string[]): boolean {
 	return left.length === right.length && left.every(name => right.includes(name))
 }
 
 export const manageEntryModel = atom(() => {
 	const opened = createEvent<EntryTarget>()
+	const addOpened = createEvent<NewEntryTarget>()
 	const closed = createEvent()
 	const statusChanged = createEvent<TrackerStatus>()
 	const listsChanged = createEvent<string[]>()
 	const submitted = createEvent()
 
-	const $target = createStore<EntryTarget | null>(null).on(opened, (_, target) => target)
+	const $target = createStore<ManageTarget | null>(null)
+		.on(opened, (_, { entry, mediaType }) => ({
+			mediaRef: entry.media_ref,
+			mediaType,
+			title: preferredTitle(entry.media.title),
+			entry
+		}))
+		.on(addOpened, (_, target) => ({ ...target, entry: null }))
+
+	const $adding = $target.map(target => target !== null && target.entry === null)
 
 	const $open = createStore(false)
-		.on(opened, () => true)
+		.on([opened, addOpened], () => true)
 		.reset(closed)
 
 	const $status = createStore<TrackerStatus>('CURRENT')
 		.on(opened, (_, { entry }) => entry.status as TrackerStatus)
+		.on(addOpened, () => 'PLANNING')
 		.on(statusChanged, (_, status) => status)
 
 	const $lists = createStore<string[]>([])
 		.on(opened, (_, { entry }) => entry.custom_lists ?? [])
+		.on(addOpened, () => [])
 		.on(listsChanged, (_, lists) => lists)
 
 	const $dirty = combine($target, $status, $lists, (target, status, lists) => {
 		if (!target) {
 			return false
+		}
+
+		// Adding is a change by itself, even with the defaults left as they are.
+		if (!target.entry) {
+			return true
 		}
 
 		return target.entry.status !== status || !sameLists(target.entry.custom_lists ?? [], lists)
@@ -100,42 +137,56 @@ export const manageEntryModel = atom(() => {
 		source: { target: $target, status: $status, lists: $lists },
 		filter: ({ target }) => target !== null,
 		fn: ({ target, status, lists }) => {
-			const entry = (target as EntryTarget).entry
+			const { mediaRef, entry } = target as ManageTarget
 			const patch: TrackerEntryPatch = {}
 
-			if (entry.status !== status) {
+			if (!entry || entry.status !== status) {
 				patch.status = status
 
-				if (!entry.started_at?.year && (status === 'CURRENT' || status === 'COMPLETED')) {
+				if (!entry?.started_at?.year && (status === 'CURRENT' || status === 'COMPLETED')) {
 					patch.started_at = inputToDate(today())
 				}
 
-				if (!entry.completed_at?.year && status === 'COMPLETED') {
+				if (!entry?.completed_at?.year && status === 'COMPLETED') {
 					patch.completed_at = inputToDate(today())
 				}
 			}
 
-			if (!sameLists(entry.custom_lists ?? [], lists)) {
+			if (!sameLists(entry?.custom_lists ?? [], lists)) {
 				patch.custom_lists = lists
 			}
 
-			return { mediaRef: entry.media_ref, patch }
+			return { mediaRef, patch }
 		},
 		target: updateTrackerEntryMutation.start
 	})
 
+	const added = sample({
+		clock: updateTrackerEntryMutation.finished.success,
+		source: $target,
+		filter: (target, { params }) => target?.entry === null && target.mediaRef === params.mediaRef
+	})
+
+	added.watch(target => {
+		if (target) {
+			toast.success(translate('lists.addEntry.done', { title: target.title }))
+		}
+	})
+
 	sample({ clock: updateTrackerEntryMutation.finished.success, target: closed })
 
-	sample({ clock: opened, target: trackerListsQuery.start })
+	sample({ clock: [opened, addOpened], target: trackerListsQuery.start })
 
 	return {
 		$open,
 		$target,
+		$adding,
 		$status,
 		$lists,
 		$dirty,
 		$saving: updateTrackerEntryMutation.$pending,
 		opened,
+		addOpened,
 		closed,
 		statusChanged,
 		listsChanged,

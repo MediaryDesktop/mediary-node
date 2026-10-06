@@ -1,6 +1,6 @@
 import * as Primitive from '@radix-ui/react-dropdown-menu'
 import clsx from 'clsx'
-import type { CSSProperties, ReactNode } from 'react'
+import type { CSSProperties, ReactElement, ReactNode } from 'react'
 import { useEffect, useState } from 'react'
 
 import { Icon } from '../icon/Icon'
@@ -12,7 +12,9 @@ import styles from './DropdownMenu.module.scss'
 export interface DropdownMenuItem {
 	id: string
 	label: string
-	icon?: IconName
+	// A sprite name, or a ready element (e.g. from react-icons) for glyphs the
+	// sprite does not have.
+	icon?: IconName | ReactElement
 	danger?: boolean
 	disabled?: boolean
 	checked?: boolean
@@ -41,7 +43,11 @@ function MenuItem({ item, index }: MenuItemProps) {
 			className={clsx(styles.item, item.danger && styles.danger)}
 			style={{ '--index': index } as CSSProperties}
 		>
-			{item.icon && <Icon name={item.icon} size={20} className={styles.icon} />}
+			{typeof item.icon === 'string' ? (
+				<Icon name={item.icon} size={20} className={styles.icon} />
+			) : (
+				item.icon && <span className={styles.icon}>{item.icon}</span>
+			)}
 			<span className={styles.text}>{item.label}</span>
 			{item.checked && <Icon name='common/check' size={18} className={styles.check} />}
 		</Primitive.Item>

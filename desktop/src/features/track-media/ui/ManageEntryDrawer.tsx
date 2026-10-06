@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 import { useTranslation } from '@shared/i18n'
 import { Drawer, DrawerForm, DrawerSection, SelectionGroup } from '@shared/ui'
 
-import { preferredTitle, TRACKER_STATUSES, trackerListsQuery } from '@entities/tracker'
+import { TRACKER_STATUSES, trackerListsQuery } from '@entities/tracker'
 
 import { manageEntryModel } from '../model/model'
 
@@ -13,19 +13,31 @@ import { EntryListPicker } from './list-picker/EntryListPicker'
 export function ManageEntryDrawer() {
 	const { t } = useTranslation()
 
-	const [open, target, status, lists, dirty, saving, closed, statusChanged, listsChanged, submitted] =
-		useUnit([
-			manageEntryModel.$open,
-			manageEntryModel.$target,
-			manageEntryModel.$status,
-			manageEntryModel.$lists,
-			manageEntryModel.$dirty,
-			manageEntryModel.$saving,
-			manageEntryModel.closed,
-			manageEntryModel.statusChanged,
-			manageEntryModel.listsChanged,
-			manageEntryModel.submitted
-		])
+	const [
+		open,
+		target,
+		adding,
+		status,
+		lists,
+		dirty,
+		saving,
+		closed,
+		statusChanged,
+		listsChanged,
+		submitted
+	] = useUnit([
+		manageEntryModel.$open,
+		manageEntryModel.$target,
+		manageEntryModel.$adding,
+		manageEntryModel.$status,
+		manageEntryModel.$lists,
+		manageEntryModel.$dirty,
+		manageEntryModel.$saving,
+		manageEntryModel.closed,
+		manageEntryModel.statusChanged,
+		manageEntryModel.listsChanged,
+		manageEntryModel.submitted
+	])
 
 	const collection = useUnit(trackerListsQuery.$data)
 	const mediaType = target?.mediaType ?? 'anime'
@@ -47,14 +59,14 @@ export function ManageEntryDrawer() {
 		<Drawer
 			open={open}
 			onOpenChange={next => !next && closed()}
-			title={t('lists.manageEntry.title')}
-			description={target ? preferredTitle(target.entry.media.title) : undefined}
+			title={adding ? t('lists.addEntry.title') : t('lists.manageEntry.title')}
+			description={target?.title}
 			closable={false}
 		>
 			<DrawerForm
 				onSubmit={submitted}
 				onCancel={closed}
-				submitLabel={t('lists.manageEntry.save')}
+				submitLabel={adding ? t('lists.addEntry.save') : t('lists.manageEntry.save')}
 				submitDisabled={!dirty || saving}
 				cancelDisabled={saving}
 				submitting={saving}

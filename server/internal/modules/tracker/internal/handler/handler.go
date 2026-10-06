@@ -190,7 +190,7 @@ func (h *Handler) Register(api huma.API) {
 		Method:      http.MethodPut,
 		Path:        "/v1/tracker/entries/{media_ref}",
 		Summary:     "Update a tracker entry",
-		Description: "Applies the change locally and queues it for AniList, so it works offline. The returned entry already carries the change with `sync_pending: true`; a `tracker` event with reason `synced` follows once AniList has it. A progress lower than what AniList already holds is only sent when it is lower than what the user saw — so an older offline edit never rolls back progress made on another device.",
+		Description: "Applies the change locally and queues it for AniList, so it works offline. The returned entry already carries the change with `sync_pending: true`; a `tracker` event with reason `synced` follows once AniList has it. A progress lower than what AniList already holds is only sent when it is lower than what the user saw — so an older offline edit never rolls back progress made on another device. A title not in the lists yet is added instead: that goes straight to AniList and needs it reachable, lands in `PLANNING` unless a status is given, and comes back already synced.",
 		Tags:        []string{"tracker"},
 	}, func(ctx context.Context, in *UpdateEntryInput) (*EntryOutput, error) {
 		entry, err := h.svc.UpdateEntry(ctx, in.MediaRef, service.EntryPatch{

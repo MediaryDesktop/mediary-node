@@ -23,11 +23,16 @@ export const updateTrackerEntryMutation = createMutation({
 })
 
 function withEntry(collection: TrackerCollection, entry: TrackerEntry): TrackerCollection {
+	const entries = collection.entries ?? []
+
+	// A title added from search or the library is not in the collection yet.
+	if (!entries.some(current => current.media_ref === entry.media_ref)) {
+		return { ...collection, entries: [...entries, entry] }
+	}
+
 	return {
 		...collection,
-		entries: (collection.entries ?? []).map(current =>
-			current.media_ref === entry.media_ref ? entry : current
-		)
+		entries: entries.map(current => (current.media_ref === entry.media_ref ? entry : current))
 	}
 }
 

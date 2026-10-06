@@ -55,6 +55,8 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 			/>
 
 			<MediaActions
+				mediaRef={mediaRef}
+				title={title}
 				entry={entry}
 				sources={sources}
 				mediaType={mediaType}

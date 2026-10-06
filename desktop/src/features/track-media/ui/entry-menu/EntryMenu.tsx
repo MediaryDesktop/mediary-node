@@ -1,4 +1,5 @@
 import { useUnit } from 'effector-react'
+import { MdFormatListBulletedAdd } from 'react-icons/md'
 
 import { useTranslation } from '@shared/i18n'
 import { DropdownMenu, Icon } from '@shared/ui'
@@ -11,49 +12,89 @@ import { manageEntryModel, rateEntryModel } from '../../model/model'
 
 import styles from './EntryMenu.module.scss'
 
-export interface EntryMenuProps {
-	entry: TrackerEntry
+export interface EntryMenuMedia {
+	mediaRef: string
 	mediaType: TrackerMediaType
+	title: string
+	siteUrl?: string
+}
+
+export interface EntryMenuProps {
+	media: EntryMenuMedia
+	// Null when the title is on no list yet: the menu then offers to add it.
+	entry: TrackerEntry | null
+	// The custom list the card is shown in, which the menu can take it out of.
 	listName?: string
 }
 
-export function EntryMenu({ entry, mediaType, listName }: EntryMenuProps) {
+// The library knows a title only by its reference, so the AniList page is
+// rebuilt from it when no catalog link came along.
+function aniListUrl({ mediaRef, mediaType, siteUrl }: EntryMenuMedia): string | null {
+	if (siteUrl) {
+		return siteUrl
+	}
+
+	const [provider, id] = mediaRef.split(':')
+
+	return provider === 'anilist' && id ? `https://anilist.co/${mediaType}/${id}` : null
+}
+
+export function EntryMenu({ media, entry, listName }: EntryMenuProps) {
 	const { t } = useTranslation()
 
-	const [updating, requestUpdate, manageOpened, rateOpened] = useUnit([
+	const [updating, requestUpdate, manageOpened, addOpened, rateOpened] = useUnit([
 		trackerModel.$updating,
 		trackerModel.entryUpdateRequested,
 		manageEntryModel.opened,
+		manageEntryModel.addOpened,
 		rateEntryModel.opened
 	])
 
-	const busy = Boolean(updating[entry.media_ref])
-	const target = { entry, mediaType }
+	const busy = Boolean(updating[media.mediaRef])
+	const items: DropdownMenuItem[] = []
 
-	const items: DropdownMenuItem[] = [
-		{
-			id: 'manage',
-			label: t('lists.manageEntry.action'),
-			icon: 'common/folder',
+	if (entry) {
+		const target = { entry, mediaType: media.mediaType }
+
+		items.push(
+			{
+				id: 'manage',
+				label: t('lists.manageEntry.action'),
+				icon: 'common/folder',
+				disabled: busy,
+				onSelect: () => manageOpened(target)
+			},
+			{
+				id: 'rate',
+				label: t('lists.rateEntry.action'),
+				icon: 'common/pencil',
+				disabled: busy,
+				onSelect: () => rateOpened(target)
+			}
+		)
+	} else {
+		items.push({
+			id: 'add',
+			label: t('lists.addEntry.action'),
+			icon: <MdFormatListBulletedAdd size={20} />,
 			disabled: busy,
-			onSelect: () => manageOpened(target)
-		},
-		{
-			id: 'rate',
-			label: t('lists.rateEntry.action'),
-			icon: 'common/pencil',
-			disabled: busy,
-			onSelect: () => rateOpened(target)
-		},
-		{
+			onSelect: () =>
+				addOpened({ mediaRef: media.mediaRef, mediaType: media.mediaType, title: media.title })
+		})
+	}
+
+	const url = aniListUrl(media)
+
+	if (url) {
+		items.push({
 			id: 'anilist',
 			label: t('media.openOn', { name: 'AniList' }),
 			icon: 'common/external-link',
-			onSelect: () => window.open(entry.media.site_url, '_blank', 'noreferrer')
-		}
-	]
+			onSelect: () => window.open(url, '_blank', 'noreferrer')
+		})
+	}
 
-	if (listName) {
+	if (entry && listName) {
 		items.push({
 			id: 'remove',
 			label: t('lists.removeFromList'),

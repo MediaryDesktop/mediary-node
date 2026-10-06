@@ -4,6 +4,7 @@ import { useTranslation } from '@shared/i18n'
 import { Button, DropdownMenu, Icon, Tooltip } from '@shared/ui'
 import type { DropdownMenuItem } from '@shared/ui'
 
+import { aniListAccountModel } from '@entities/anilist-account'
 import type { MediaSource } from '@entities/media'
 import { isTrackerMediaType } from '@entities/tracker'
 import type { TrackerEntry } from '@entities/tracker'
@@ -13,6 +14,8 @@ import { manageEntryModel, rateEntryModel } from '@features/track-media'
 import styles from './MediaActions.module.scss'
 
 export interface MediaActionsProps {
+	mediaRef: string
+	title: string
 	entry: TrackerEntry | null
 	sources: MediaSource[]
 	mediaType: string
@@ -22,6 +25,8 @@ export interface MediaActionsProps {
 }
 
 export function MediaActions({
+	mediaRef,
+	title,
 	entry,
 	sources,
 	mediaType,
@@ -31,7 +36,12 @@ export function MediaActions({
 }: MediaActionsProps) {
 	const { t } = useTranslation()
 
-	const [manageOpened, rateOpened] = useUnit([manageEntryModel.opened, rateEntryModel.opened])
+	const [connected, manageOpened, addOpened, rateOpened] = useUnit([
+		aniListAccountModel.$connected,
+		manageEntryModel.opened,
+		manageEntryModel.addOpened,
+		rateEntryModel.opened
+	])
 
 	const trackerType = isTrackerMediaType(mediaType) ? mediaType : null
 	const target = entry && trackerType ? { entry, mediaType: trackerType } : null
@@ -82,21 +92,19 @@ export function MediaActions({
 							<Icon name='common/pencil' size={16} />
 						</Button>
 					</Tooltip>
-				) : (
-					<Tooltip content={t('media.comingSoon')}>
-						<span className={styles.iconActionWrap}>
-							<Button
-								iconOnly
-								variant='ghost'
-								disabled
-								className={styles.iconAction}
-								aria-label={t('media.addToList')}
-							>
-								<Icon name='common/plus' size={16} />
-							</Button>
-						</span>
+				) : connected && trackerType ? (
+					<Tooltip content={t('media.addToList')}>
+						<Button
+							iconOnly
+							variant='ghost'
+							className={styles.iconAction}
+							aria-label={t('media.addToList')}
+							onClick={() => addOpened({ mediaRef, mediaType: trackerType, title })}
+						>
+							<Icon name='common/plus' size={16} />
+						</Button>
 					</Tooltip>
-				)}
+				) : null}
 
 				<DropdownMenu
 					trigger={

@@ -7,7 +7,13 @@ import { EmptyState, PageHeader, PageTransition } from '@shared/ui'
 
 import { aniListAccountModel } from '@entities/anilist-account'
 import { MediaCard } from '@entities/media'
-import { entryTracking, ListIcon, trackerListsQuery, useTrackedEntries } from '@entities/tracker'
+import {
+	entryTracking,
+	ListIcon,
+	preferredTitle,
+	trackerListsQuery,
+	useTrackedEntries
+} from '@entities/tracker'
 import type { TrackerCustomList, TrackerEntry, TrackerMediaType } from '@entities/tracker'
 
 import { DeleteListDialog, ListDrawer, ListOptionsMenu, manageListsModel } from '@features/manage-lists'
@@ -144,8 +150,13 @@ export function ListDetailPage({ listId }: ListDetailPageProps) {
 									tracking={entryTracking(entry, t)}
 									menu={
 										<EntryMenu
+											media={{
+												mediaRef: entry.media_ref,
+												mediaType: entry.media_type as TrackerMediaType,
+												title: preferredTitle(entry.media.title),
+												siteUrl: entry.media.site_url
+											}}
 											entry={entry}
-											mediaType={entry.media_type as TrackerMediaType}
 											listName={list?.provider === 'anilist' ? list.name : undefined}
 										/>
 									}

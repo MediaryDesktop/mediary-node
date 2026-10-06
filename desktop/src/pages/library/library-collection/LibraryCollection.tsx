@@ -8,7 +8,9 @@ import { Icon } from '@shared/ui'
 import { aniListAccountModel } from '@entities/anilist-account'
 import type { LibraryCollectionEntry } from '@entities/library-item'
 import { MediaCard } from '@entities/media'
-import { entryTracking, useTrackedEntries } from '@entities/tracker'
+import { entryTracking, isTrackerMediaType, useTrackedEntries } from '@entities/tracker'
+
+import { EntryMenu } from '@features/track-media'
 
 import styles from './LibraryCollection.module.scss'
 
@@ -28,6 +30,7 @@ export function LibraryCollection({ entries }: LibraryCollectionProps) {
 		<ul className={styles.grid}>
 			{entries.map(entry => {
 				const trackedEntry = trackedByRef.get(entry.media_ref)
+				const mediaType = trackedEntry?.media_type ?? entry.title?.media_type
 
 				return (
 					<li key={entry.media_ref}>
@@ -49,6 +52,19 @@ export function LibraryCollection({ entries }: LibraryCollectionProps) {
 							// otherwise — so the library shelf reads like the rest of the app.
 							previewRef={entry.media_ref}
 							tracking={trackedEntry ? entryTracking(trackedEntry, t) : null}
+							menu={
+								connected && mediaType && isTrackerMediaType(mediaType) ? (
+									<EntryMenu
+										media={{
+											mediaRef: entry.media_ref,
+											mediaType,
+											title: entry.title?.title ?? entry.media_ref,
+											siteUrl: trackedEntry?.media.site_url
+										}}
+										entry={trackedEntry ?? null}
+									/>
+								) : undefined
+							}
 							previewExtra={
 								<span className={styles.episodesMeta}>
 									<Icon name='common/play' size={13} />

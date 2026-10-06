@@ -166,6 +166,12 @@ export const uk: Translation = {
 			offline: 'AniList недоступний, тож зараз цей список не змінити',
 			failed: 'Не вдалося зберегти список. Спробуйте ще раз'
 		},
+		addEntry: {
+			action: 'Додати до списку',
+			title: 'Додати до списку',
+			save: 'Додати',
+			done: '{{title}} додано до вашого списку AniList'
+		},
 		manageEntry: {
 			action: 'Керувати списками',
 			title: 'Керувати списками',

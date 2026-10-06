@@ -1,20 +1,27 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
 import { useMemo } from 'react'
+import type { ReactNode } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { Button, EmptyState, Skeleton } from '@shared/ui'
 
 import { aniListAccountModel } from '@entities/anilist-account'
 import { MediaCard } from '@entities/media'
+import type { MediaSummary } from '@entities/media'
 import { entryTracking, useTrackedEntries } from '@entities/tracker'
+import type { TrackerEntry } from '@entities/tracker'
 
 import { searchMediaModel } from './model'
 import styles from './SearchResults.module.scss'
 
 const SKELETON_COUNT = 12
 
-export function SearchResults() {
+export interface SearchResultsProps {
+	renderMenu?: (media: MediaSummary, entry: TrackerEntry | null) => ReactNode
+}
+
+export function SearchResults({ renderMenu }: SearchResultsProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
 
@@ -75,6 +82,7 @@ export function SearchResults() {
 								media={media}
 								scoreBadge={media.average_score ?? undefined}
 								tracking={entry ? entryTracking(entry, t) : null}
+								menu={renderMenu?.(media, entry ?? null)}
 								previewRef={media.media_ref}
 								onOpen={() =>
 									navigate({

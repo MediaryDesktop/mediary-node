@@ -1139,7 +1139,7 @@ export interface paths {
 		get?: never
 		/**
 		 * Update a tracker entry
-		 * @description Applies the change locally and queues it for AniList, so it works offline. The returned entry already carries the change with `sync_pending: true`; a `tracker` event with reason `synced` follows once AniList has it. A progress lower than what AniList already holds is only sent when it is lower than what the user saw — so an older offline edit never rolls back progress made on another device.
+		 * @description Applies the change locally and queues it for AniList, so it works offline. The returned entry already carries the change with `sync_pending: true`; a `tracker` event with reason `synced` follows once AniList has it. A progress lower than what AniList already holds is only sent when it is lower than what the user saw — so an older offline edit never rolls back progress made on another device. A title not in the lists yet is added instead: that goes straight to AniList and needs it reachable, lands in `PLANNING` unless a status is given, and comes back already synced.
 		 */
 		put: operations['updateTrackerEntry']
 		post?: never

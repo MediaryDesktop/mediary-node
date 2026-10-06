@@ -107,6 +107,31 @@ describe('tracker updates', () => {
 		expect(scope.getState(trackerQueries.manga.$data)?.entries?.[0]).toEqual(ENTRY)
 		expect(scope.getState(trackerModel.$updating)).toEqual({})
 	})
+
+	it('add a title that was on no list to its own media type only', async () => {
+		const added: TrackerEntry = { ...ENTRY, media_ref: 'anilist:200', status: 'PLANNING' }
+
+		const scope = fork({
+			handlers: [
+				[
+					fetchTrackerEntriesFx,
+					(type: string) => Promise.resolve({ ...EMPTY, media_type: type, entries: [ENTRY] })
+				],
+				[updateTrackerEntryFx, () => Promise.resolve(added)]
+			]
+		})
+
+		await allSettled(trackerQueries.anime.start, { scope })
+		await allSettled(trackerQueries.manga.start, { scope })
+
+		await allSettled(updateTrackerEntryMutation.start, {
+			scope,
+			params: { mediaRef: 'anilist:200', patch: { status: 'PLANNING' } }
+		})
+
+		expect(scope.getState(trackerQueries.anime.$data)?.entries).toEqual([ENTRY, added])
+		expect(scope.getState(trackerQueries.manga.$data)?.entries).toEqual([ENTRY])
+	})
 })
 
 describe('tracker formatting', () => {

@@ -342,11 +342,15 @@ func TestUpdateValidation(t *testing.T) {
 		patch EntryPatch
 		kind  apperr.Kind
 	}{
-		"empty patch":       {"anilist:100", EntryPatch{}, apperr.KindInvalid},
-		"unknown status":    {"anilist:100", EntryPatch{Status: strPtr("WATCHING")}, apperr.KindInvalid},
-		"score above 100":   {"anilist:100", EntryPatch{Score: intPtr(101)}, apperr.KindInvalid},
-		"foreign provider":  {"tmdb:5", EntryPatch{Progress: intPtr(1)}, apperr.KindInvalid},
-		"title not in list": {"anilist:999", EntryPatch{Progress: intPtr(1)}, apperr.KindNotFound},
+		"empty patch":      {"anilist:100", EntryPatch{}, apperr.KindInvalid},
+		"unknown status":   {"anilist:100", EntryPatch{Status: strPtr("WATCHING")}, apperr.KindInvalid},
+		"score above 100":  {"anilist:100", EntryPatch{Score: intPtr(101)}, apperr.KindInvalid},
+		"foreign provider": {"tmdb:5", EntryPatch{Progress: intPtr(1)}, apperr.KindInvalid},
+		"adding into a list the account does not have": {
+			"anilist:999",
+			EntryPatch{CustomLists: &[]string{"Nowhere"}},
+			apperr.KindInvalid,
+		},
 		"month out of range": {
 			"anilist:100",
 			EntryPatch{StartedAt: &Date{Year: intPtr(2024), Month: intPtr(13)}},
@@ -434,5 +438,91 @@ func TestUpdateCarriesNotesDatesAndListsToAniList(t *testing.T) {
 	lists, ok := save["customLists"].([]any)
 	if !ok || len(lists) != 1 || lists[0] != "Favourites 2025" {
 		t.Fatalf("the lists must reach anilist, got %v", save["customLists"])
+	}
+}
+
+func TestAddingATitleSavesItToAniListAndTheMirror(t *testing.T) {
+	fake := newSyncFake(t)
+	h := newSyncHarness(t, fake.server.URL)
+	h.signIn(t)
+	ctx := context.Background()
+
+	added, err := h.svc.UpdateEntry(ctx, "anilist:999", EntryPatch{CustomLists: &[]string{"Favourites 2025"}})
+	if err != nil {
+		t.Fatalf("add: %v", err)
+	}
+
+	if added.Status != "PLANNING" || added.SyncPending {
+		t.Fatalf("a new title lands in planning and is already saved, got %+v", added)
+	}
+
+	if len(added.CustomLists) != 1 || added.CustomLists[0] != "Favourites 2025" {
+		t.Fatalf("the response must carry the lists, got %v", added.CustomLists)
+	}
+
+	saves := fake.savedCalls()
+	if len(saves) != 1 || saves[0]["status"] != "PLANNING" || saves[0]["mediaId"] != float64(999) {
+		t.Fatalf("expected one save of 999 as planning, got %v", saves)
+	}
+
+	listed, err := h.svc.Entries(ctx, MediaTypeAnime)
+	if err != nil {
+		t.Fatalf("entries: %v", err)
+	}
+	if entry := entryByRef(t, listed, "anilist:999"); entry.Status != "PLANNING" || len(entry.CustomLists) != 1 {
+		t.Fatalf("the mirror must hold the new title, got %+v", entry)
+	}
+
+	pending, err := h.store.Outbox(ctx, 42)
+	if err != nil {
+		t.Fatalf("outbox: %v", err)
+	}
+	if len(pending) != 0 {
+		t.Fatalf("an add is not queued, got %+v", pending)
+	}
+}
+
+func TestAddingATitleOfflineFailsInsteadOfQueueing(t *testing.T) {
+	fake := newSyncFake(t)
+	h := newSyncHarness(t, fake.server.URL)
+	h.signIn(t)
+	ctx := context.Background()
+
+	fake.server.Close()
+
+	_, err := h.svc.UpdateEntry(ctx, "anilist:999", EntryPatch{Status: strPtr("CURRENT")})
+	if apperr.KindOf(err) != apperr.KindUnavailable {
+		t.Fatalf("an add without a network must say AniList is unreachable, got %v", err)
+	}
+
+	pending, err := h.store.Outbox(ctx, 42)
+	if err != nil {
+		t.Fatalf("outbox: %v", err)
+	}
+	if len(pending) != 0 {
+		t.Fatalf("nothing is queued for a failed add, got %+v", pending)
+	}
+}
+
+func TestSyncedListChangeStaysInTheMirror(t *testing.T) {
+	fake := newSyncFake(t)
+	h := newSyncHarness(t, fake.server.URL)
+	h.signIn(t)
+	ctx := context.Background()
+
+	if _, err := h.svc.UpdateEntry(ctx, "anilist:100", EntryPatch{CustomLists: &[]string{"Favourites 2025"}}); err != nil {
+		t.Fatalf("update: %v", err)
+	}
+
+	h.svc.flush(ctx)
+
+	listed, err := h.svc.Entries(ctx, MediaTypeAnime)
+	if err != nil {
+		t.Fatalf("entries: %v", err)
+	}
+
+	entry := entryByRef(t, listed, "anilist:100")
+	if entry.SyncPending || len(entry.CustomLists) != 1 || entry.CustomLists[0] != "Favourites 2025" {
+		t.Fatalf("after sync the mirror must keep the new lists, got %+v", entry)
 	}
 }
