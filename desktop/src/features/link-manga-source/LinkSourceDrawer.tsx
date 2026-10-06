@@ -2,7 +2,17 @@ import { useUnit } from 'effector-react'
 import { useEffect, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, Drawer, DrawerSection, Icon, Input, ReelLoader, SelectionGroup, toast } from '@shared/ui'
+import {
+	Badge,
+	Button,
+	Drawer,
+	DrawerSection,
+	Icon,
+	Input,
+	ReelLoader,
+	SelectionGroup,
+	toast
+} from '@shared/ui'
 
 import { mangaSearchQuery, putMangaLinkMutation } from '@entities/manga-source'
 import type { MangaSource } from '@entities/manga-source'
@@ -60,9 +70,9 @@ function LinkForm({ mediaRef, title, sources, initialSource, onDone }: LinkFormP
 	useEffect(() => {
 		reset()
 		if (source && title.trim()) {
-			search({ source, query: title.trim() })
+			search({ source, query: title.trim(), mediaRef })
 		}
-	}, [reset, search, source, title])
+	}, [reset, search, source, title, mediaRef])
 
 	useEffect(() => {
 		const stop = [
@@ -77,7 +87,7 @@ function LinkForm({ mediaRef, title, sources, initialSource, onDone }: LinkFormP
 
 	const submitSearch = () => {
 		if (source && query.trim()) {
-			search({ source, query: query.trim() })
+			search({ source, query: query.trim(), mediaRef })
 		}
 	}
 
@@ -129,7 +139,15 @@ function LinkForm({ mediaRef, title, sources, initialSource, onDone }: LinkFormP
 				<ul className={styles.results}>
 					{results.map(series => (
 						<li key={series.id} className={styles.result}>
-							<span className={styles.name}>{series.title}</span>
+							<span className={styles.name}>
+								{series.title}
+								{series.detail && <span className={styles.detail}> · {series.detail}</span>}
+								{series.matched && (
+									<Badge tone='success' className={styles.matched}>
+										{t('mangaSources.link.matched')}
+									</Badge>
+								)}
+							</span>
 							<Button
 								size='small'
 								variant='primary'

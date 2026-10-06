@@ -47,5 +47,13 @@
 			text-overflow: ellipsis;
 			white-space: nowrap;
 		}
+
+		.detail {
+			color: var(--text-muted);
+		}
+
+		.matched {
+			margin-left: 0.5rem;
+		}
 	}
 }

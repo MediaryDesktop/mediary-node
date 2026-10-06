@@ -11,12 +11,14 @@ import {
 	deleteOPDSServerFx,
 	enqueueMangaDownloadsFx,
 	fetchMangaChaptersFx,
+	fetchMangaDexSettingsFx,
 	fetchMangaDownloadSettingsFx,
 	fetchMangaDownloadsFx,
 	fetchMangaLinksFx,
 	fetchMangaSourcesFx,
 	fetchOPDSServersFx,
 	forgetMangaDownloadFx,
+	putMangaDexSettingsFx,
 	putMangaDownloadSettingsFx,
 	putMangaLinkFx,
 	retryMangaDownloadFx,
@@ -119,3 +121,20 @@ sample({
 })
 
 keepFresh(mangaDownloadSettingsQuery, { triggers: [putMangaDownloadSettingsMutation.finished.success] })
+
+export const mangaDexSettingsQuery = createQuery({
+	effect: fetchMangaDexSettingsFx,
+	name: 'mangaDexSettings'
+})
+
+export const putMangaDexSettingsMutation = createMutation({
+	effect: putMangaDexSettingsFx,
+	name: 'putMangaDexSettings'
+})
+
+keepFresh(mangaDexSettingsQuery, { triggers: [putMangaDexSettingsMutation.finished.success] })
+
+// Turning MangaDex on or off, or changing its languages, changes the sources and
+// the chapters every title lists.
+keepFresh(mangaSourcesQuery, { triggers: [putMangaDexSettingsMutation.finished.success] })
+keepFresh(mangaChaptersQuery, { triggers: [putMangaDexSettingsMutation.finished.success] })

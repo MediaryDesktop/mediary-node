@@ -10,8 +10,11 @@ export interface ChapterOption {
 	// "local" for the library, otherwise the source's id, such as "opds:3".
 	source: string
 	sourceName: string
-	// What tells this copy apart: a file name, a page count.
+	// What tells this copy apart: a file name, a page count, who translated it.
 	detail: string
+	// The publisher's page, for a chapter the source only links to: it opens in the
+	// browser rather than in the reader.
+	externalUrl?: string
 }
 
 export interface ChapterRow {

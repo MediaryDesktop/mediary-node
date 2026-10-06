@@ -124,6 +124,12 @@ export function ChapterList({ mediaRef, title, progress, coverColor }: ChapterLi
 	const unsaved = shown.map(savable).filter((option): option is ChapterOption => option !== null)
 
 	const open = (option: ChapterOption) => {
+		if (option.externalUrl) {
+			window.open(option.externalUrl, '_blank', 'noreferrer')
+
+			return
+		}
+
 		void navigate({ to: '/read/$ref', params: { ref: option.ref } })
 	}
 

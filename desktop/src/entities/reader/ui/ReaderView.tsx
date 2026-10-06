@@ -160,6 +160,11 @@ export function ReaderView({
 				<div className={styles.heading}>
 					<span className={styles.title}>{chapter.title}</span>
 					{label && <span className={styles.subtitle}>{label}</span>}
+					{chapter.source_name && (
+						<span className={styles.subtitle}>
+							{[chapter.source_name, ...(chapter.groups ?? [])].join(' · ')}
+						</span>
+					)}
 				</div>
 
 				{counted && (

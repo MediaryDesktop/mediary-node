@@ -95,13 +95,23 @@ export function useTitleChapters(mediaRef: string | undefined): TitleChapters {
 		}
 
 		for (const chapter of online?.chapters ?? []) {
+			// The source asks for the credit: language and translators sit next to
+			// the chapter wherever it is listed.
+			const credit = [chapter.language?.toUpperCase(), ...(chapter.groups ?? [])]
+				.filter(Boolean)
+				.join(' · ')
+			const size = chapter.external_url
+				? t('mangaSources.chapters.external')
+				: t('mangaSources.chapters.pages', { count: chapter.pages })
+
 			options.push({
 				ref: chapter.ref,
 				number: chapter.number ?? null,
 				title: chapter.title,
 				source: chapter.source,
 				sourceName: chapter.source_name,
-				detail: t('mangaSources.chapters.pages', { count: chapter.pages })
+				detail: credit ? `${credit} · ${size}` : size,
+				externalUrl: chapter.external_url
 			})
 		}
 

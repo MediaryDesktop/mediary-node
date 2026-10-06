@@ -55,14 +55,16 @@ export const fetchMangaSourcesFx = createNodeRequestFx<void, NodeSchemas['MangaS
 export interface SearchMangaSourceParams {
 	source: string
 	query: string
+	// The title being linked, so a source that knows it puts its series first.
+	mediaRef?: string
 }
 
 export const searchMangaSourceFx = createNodeRequestFx<
 	SearchMangaSourceParams,
 	NodeSchemas['MangaSearchOutputBody']
->(({ source, query }) => ({
+>(({ source, query, mediaRef }) => ({
 	url: `/v1/manga/sources/${segment(source)}/search`,
-	query: { q: query },
+	query: mediaRef ? { q: query, media_ref: mediaRef } : { q: query },
 	timeout: 35_000
 }))
 
@@ -152,3 +154,22 @@ export const putMangaDownloadSettingsFx = createNodeRequestFx<
 	number,
 	NodeSchemas['MangaDownloadSettingsBody']
 >(rootId => ({ url: '/v1/manga/downloads/settings', method: 'PUT', body: { root_id: rootId } }))
+
+export type MangaDexSettings = NodeSchemas['MangaDexSettingsBody']
+
+export const fetchMangaDexSettingsFx = createNodeRequestFx<void, MangaDexSettings>(() => ({
+	url: '/v1/manga/mangadex/settings'
+}))
+
+export interface PutMangaDexSettingsParams {
+	enabled: boolean
+	languages: string[]
+}
+
+export const putMangaDexSettingsFx = createNodeRequestFx<PutMangaDexSettingsParams, MangaDexSettings>(
+	body => ({
+		url: '/v1/manga/mangadex/settings',
+		method: 'PUT',
+		body
+	})
+)

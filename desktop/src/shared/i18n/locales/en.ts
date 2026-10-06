@@ -790,6 +790,7 @@ export const en = {
 			}
 		},
 		chapters: {
+			external: 'On the publisher’s site',
 			library: 'Library',
 			all: 'All sources',
 			filter: 'Source',
@@ -804,6 +805,14 @@ export const en = {
 			pages_few: '{{count}} pages',
 			pages_many: '{{count}} pages',
 			pages_other: '{{count}} pages'
+		},
+		mangadex: {
+			enable: 'Read chapters from MangaDex',
+			languages: 'Languages, in order of preference',
+			languagesPlaceholder: 'Choose languages',
+			note: 'Pages are read online through the node and are not saved. MangaDex and the translators are named next to every chapter.',
+			unavailable: 'MangaDex is turned off on this node',
+			saveFailed: 'Could not save the MangaDex settings'
 		},
 		downloads: {
 			save: 'Save to disk',
@@ -833,8 +842,9 @@ export const en = {
 			}
 		},
 		link: {
+			matched: 'Matches AniList',
 			title: 'Find the series',
-			description: 'Pick the series on your server that holds this title’s chapters',
+			description: 'Pick the series that holds this title’s chapters',
 			sourceLabel: 'Server',
 			searchLabel: 'Series name',
 			search: 'Search',
@@ -844,6 +854,10 @@ export const en = {
 		}
 	},
 	settings: {
+		mangaDex: {
+			name: 'MangaDex',
+			hint: 'Read chapters online from MangaDex'
+		},
 		mangaDownloads: {
 			name: 'Manga downloads',
 			hint: 'Library folder chapters are saved to, as CBZ files'

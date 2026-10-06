@@ -1,0 +1,1 @@
+export { MangaDexSettings } from './MangaDexSettings'

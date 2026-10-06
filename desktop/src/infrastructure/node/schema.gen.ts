@@ -420,6 +420,27 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/v1/manga/mangadex/settings': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/** Reading from MangaDex */
+		get: operations['getMangaDexSettings']
+		/**
+		 * Turn MangaDex on or off, and choose languages
+		 * @description Chapters from MangaDex are read online only: pages pass through the node and are not saved.
+		 */
+		put: operations['putMangaDexSettings']
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/v1/manga/opds/check': {
 		parameters: {
 			query?: never
@@ -1269,6 +1290,8 @@ export interface components {
 			 * @description Library file this chapter is. Absent for a chapter from any other source.
 			 */
 			file_id?: number
+			/** @description Who translated it, to credit them. */
+			groups?: string[] | null
 			/** @description Title this chapter is matched to. Absent while unmatched. */
 			media_ref?: string
 			/** @description Chapter number as the source writes it, such as 12 or 12.5. Absent for an unnumbered chapter. */
@@ -1277,6 +1300,8 @@ export interface components {
 			pages: components['schemas']['Page'][] | null
 			/** @description Chapter reference, for the page and progress endpoints. */
 			ref: string
+			/** @description Where an online chapter comes from, to credit it. */
+			source_name?: string
 			/** @description Title as the source names it, for the UI. */
 			title: string
 		}
@@ -1808,6 +1833,12 @@ export interface components {
 			sources: components['schemas']['Source'][] | null
 		}
 		MangaChapterBody: {
+			/** @description The publisher's page, for a chapter the source only links to. It has no pages to read here. */
+			external_url?: string
+			/** @description Who translated it. Shown next to the chapter: the source asks for the credit. */
+			groups?: string[] | null
+			/** @description Language of the translation, where the source says. */
+			language?: string
 			/** @description Chapter number as the source writes it. Absent for an unnumbered chapter. */
 			number?: string
 			/** Format: int64 */
@@ -1828,6 +1859,20 @@ export interface components {
 			chapters: components['schemas']['MangaChapterBody'][] | null
 			/** @description Linked sources that could not be read this time; the others are listed. */
 			problems: components['schemas']['MangaSourceProblemBody'][] | null
+		}
+		MangaDexSettingsBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/MangaDexSettingsBody.json
+			 */
+			readonly $schema?: string
+			/** @description False when the node is configured without MangaDex. */
+			available: boolean
+			/** @description Whether chapters are read from MangaDex. Off until the user turns it on. */
+			enabled: boolean
+			/** @description Translations to list, in order of preference. */
+			languages: string[] | null
 		}
 		MangaDownloadBody: {
 			chapter_ref: string
@@ -1897,8 +1942,12 @@ export interface components {
 			series: components['schemas']['MangaSeriesBody'][] | null
 		}
 		MangaSeriesBody: {
-			/** @description The series' path on the server, for linking a title to it. */
+			/** @description What tells similar names apart, such as a year. */
+			detail?: string
+			/** @description The series' id in its source: a path on an OPDS server, a MangaDex id. */
 			id: string
+			/** @description True when the source itself links this series to the title being linked. */
+			matched: boolean
 			title: string
 		}
 		MangaSourceBody: {
@@ -2257,6 +2306,17 @@ export interface components {
 			readonly $schema?: string
 			/** @description True once this file counts as watched and the tracker was told. */
 			watched: boolean
+		}
+		PutMangaDexSettingsInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/PutMangaDexSettingsInputBody.json
+			 */
+			readonly $schema?: string
+			enabled: boolean
+			/** @description Language codes such as en, uk or pt-br. */
+			languages: string[] | null
 		}
 		PutMangaDownloadSettingsInputBody: {
 			/**
@@ -3115,6 +3175,7 @@ export type SchemaList = components['schemas']['List']
 export type SchemaListsOutputBody = components['schemas']['ListsOutputBody']
 export type SchemaMangaChapterBody = components['schemas']['MangaChapterBody']
 export type SchemaMangaChaptersOutputBody = components['schemas']['MangaChaptersOutputBody']
+export type SchemaMangaDexSettingsBody = components['schemas']['MangaDexSettingsBody']
 export type SchemaMangaDownloadBody = components['schemas']['MangaDownloadBody']
 export type SchemaMangaDownloadSettingsBody = components['schemas']['MangaDownloadSettingsBody']
 export type SchemaMangaDownloadsOutputBody = components['schemas']['MangaDownloadsOutputBody']
@@ -3142,6 +3203,7 @@ export type SchemaPlaybackSession = components['schemas']['PlaybackSession']
 export type SchemaPlaybackStatus = components['schemas']['PlaybackStatus']
 export type SchemaProgressInputBody = components['schemas']['ProgressInputBody']
 export type SchemaProgressOutputBody = components['schemas']['ProgressOutputBody']
+export type SchemaPutMangaDexSettingsInputBody = components['schemas']['PutMangaDexSettingsInputBody']
 export type SchemaPutMangaDownloadSettingsInputBody =
 	components['schemas']['PutMangaDownloadSettingsInputBody']
 export type SchemaPutMangaLinkInputBody = components['schemas']['PutMangaLinkInputBody']
@@ -4038,6 +4100,68 @@ export interface operations {
 			}
 		}
 	}
+	getMangaDexSettings: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['MangaDexSettingsBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	putMangaDexSettings: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['PutMangaDexSettingsInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['MangaDexSettingsBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
 	checkOPDSServer: {
 		parameters: {
 			query?: never
@@ -4230,6 +4354,8 @@ export interface operations {
 		parameters: {
 			query?: {
 				q?: string
+				/** @description The title being linked, so a source that knows it can put its series first. */
+				media_ref?: string
 			}
 			header?: never
 			path: {

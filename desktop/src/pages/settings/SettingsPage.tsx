@@ -6,6 +6,7 @@ import { useTranslation } from '@shared/i18n'
 import { PlayerModeSwitcher } from '@features/choose-player'
 import { DownloadFolderSetting } from '@features/download-chapters'
 import { LibraryRootsSettings } from '@features/manage-library-roots'
+import { MangaDexSettings } from '@features/manage-mangadex'
 import { OPDSServersSettings } from '@features/manage-opds-servers'
 import { LanguageSwitcher } from '@features/switch-language'
 import { ThemeSwitcher } from '@features/switch-theme'
@@ -62,6 +63,15 @@ export function SettingsPage() {
 				</span>
 
 				<OPDSServersSettings />
+			</section>
+
+			<section className={clsx(styles.section, styles.block)}>
+				<span className={styles.label}>
+					<span className={styles.name}>{t('settings.mangaDex.name')}</span>
+					<span className={styles.hint}>{t('settings.mangaDex.hint')}</span>
+				</span>
+
+				<MangaDexSettings />
 			</section>
 
 			<section className={styles.section}>

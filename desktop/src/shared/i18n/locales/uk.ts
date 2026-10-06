@@ -789,6 +789,7 @@ export const uk: Translation = {
 			}
 		},
 		chapters: {
+			external: 'На сайті видавця',
 			library: 'Бібліотека',
 			all: 'Усі джерела',
 			filter: 'Джерело',
@@ -803,6 +804,14 @@ export const uk: Translation = {
 			pages_few: '{{count}} сторінки',
 			pages_many: '{{count}} сторінок',
 			pages_other: '{{count}} сторінки'
+		},
+		mangadex: {
+			enable: 'Читати розділи з MangaDex',
+			languages: 'Мови, за пріоритетом',
+			languagesPlaceholder: 'Виберіть мови',
+			note: 'Сторінки читаються онлайн через ноду й не зберігаються. MangaDex і перекладачі вказані біля кожного розділу.',
+			unavailable: 'MangaDex вимкнено на цій ноді',
+			saveFailed: 'Не вдалося зберегти налаштування MangaDex'
 		},
 		downloads: {
 			save: 'Зберегти на диск',
@@ -832,8 +841,9 @@ export const uk: Translation = {
 			}
 		},
 		link: {
+			matched: 'Збігається з AniList',
 			title: 'Знайти серію',
-			description: 'Виберіть серію на вашому сервері, в якій лежать розділи цього тайтлу',
+			description: 'Виберіть серію, в якій лежать розділи цього тайтлу',
 			sourceLabel: 'Сервер',
 			searchLabel: 'Назва серії',
 			search: 'Шукати',
@@ -843,6 +853,10 @@ export const uk: Translation = {
 		}
 	},
 	settings: {
+		mangaDex: {
+			name: 'MangaDex',
+			hint: 'Читати розділи онлайн з MangaDex'
+		},
 		mangaDownloads: {
 			name: 'Завантаження манги',
 			hint: 'Тека бібліотеки, куди зберігаються розділи у форматі CBZ'

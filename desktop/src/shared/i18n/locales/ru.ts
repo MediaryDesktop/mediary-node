@@ -791,6 +791,7 @@ export const ru: Translation = {
 			}
 		},
 		chapters: {
+			external: 'На сайте издателя',
 			library: 'Библиотека',
 			all: 'Все источники',
 			filter: 'Источник',
@@ -805,6 +806,14 @@ export const ru: Translation = {
 			pages_few: '{{count}} страницы',
 			pages_many: '{{count}} страниц',
 			pages_other: '{{count}} страницы'
+		},
+		mangadex: {
+			enable: 'Читать главы с MangaDex',
+			languages: 'Языки, по приоритету',
+			languagesPlaceholder: 'Выберите языки',
+			note: 'Страницы читаются онлайн через ноду и не сохраняются. MangaDex и переводчики указаны рядом с каждой главой.',
+			unavailable: 'MangaDex выключен на этой ноде',
+			saveFailed: 'Не удалось сохранить настройки MangaDex'
 		},
 		downloads: {
 			save: 'Сохранить на диск',
@@ -834,8 +843,9 @@ export const ru: Translation = {
 			}
 		},
 		link: {
+			matched: 'Совпадает с AniList',
 			title: 'Найти серию',
-			description: 'Выберите серию на вашем сервере, в которой лежат главы этого тайтла',
+			description: 'Выберите серию, в которой лежат главы этого тайтла',
 			sourceLabel: 'Сервер',
 			searchLabel: 'Название серии',
 			search: 'Искать',
@@ -845,6 +855,10 @@ export const ru: Translation = {
 		}
 	},
 	settings: {
+		mangaDex: {
+			name: 'MangaDex',
+			hint: 'Читать главы онлайн с MangaDex'
+		},
 		mangaDownloads: {
 			name: 'Загрузки манги',
 			hint: 'Папка библиотеки, куда сохраняются главы в формате CBZ'
