@@ -31,3 +31,21 @@ DELETE FROM torrent_download WHERE id = ?;
 
 -- name: SetTorrentDownloadChoosing :exec
 UPDATE torrent_download SET choosing = ?, updated_at = ? WHERE id = ?;
+
+-- name: ListTorznabSources :many
+SELECT * FROM torznab_source ORDER BY id;
+
+-- name: GetTorznabSource :one
+SELECT * FROM torznab_source WHERE id = ?;
+
+-- name: InsertTorznabSource :one
+INSERT INTO torznab_source (name, url, created_at, updated_at)
+VALUES (?, ?, ?, ?)
+RETURNING *;
+
+-- name: UpdateTorznabSource :one
+UPDATE torznab_source SET name = ?, url = ?, updated_at = ? WHERE id = ?
+RETURNING *;
+
+-- name: DeleteTorznabSource :execrows
+DELETE FROM torznab_source WHERE id = ?;

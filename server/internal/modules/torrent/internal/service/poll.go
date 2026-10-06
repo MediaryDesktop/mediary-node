@@ -115,13 +115,7 @@ func (s *Service) setClientError(err error) {
 
 	// The message alone: the cause is a Go network error, for the log, not for a
 	// person reading the settings screen.
-	var appErr *apperr.Error
-	if errors.As(err, &appErr) {
-		s.clientError = appErr.Message
-		return
-	}
-
-	s.clientError = err.Error()
+	s.clientError = messageOf(err)
 }
 
 func (s *Service) follow(ctx context.Context, client Client, download store.Download, torrent qbittorrent.Torrent, found bool) {

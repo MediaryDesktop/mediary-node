@@ -200,3 +200,11 @@ type TorrentDownload struct {
 	CompletedAt string `json:"completed_at"`
 	Choosing    int64  `json:"choosing"`
 }
+
+type TorznabSource struct {
+	ID        int64  `json:"id"`
+	Name      string `json:"name"`
+	Url       string `json:"url"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
+}

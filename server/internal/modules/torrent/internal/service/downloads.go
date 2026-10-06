@@ -23,6 +23,8 @@ type AddRequest struct {
 	Magnet string
 	// Torrent is a .torrent file's content, when there is no magnet.
 	Torrent []byte
+	// ReleaseID is a search result to download, in place of a magnet or a file.
+	ReleaseID string
 	// ChooseFiles holds the torrent in the client until the user picks its files.
 	ChooseFiles bool
 }
@@ -71,8 +73,22 @@ func (s *Service) Add(ctx context.Context, req AddRequest) (*TorrentDownload, er
 	if req.MediaRef == "" {
 		return nil, apperr.Invalid("media_ref", "a download has to be for a title")
 	}
-	if (req.Magnet == "") == (len(req.Torrent) == 0) {
-		return nil, apperr.Invalid("magnet", "give either a magnet link or a .torrent file")
+	given := 0
+	for _, set := range []bool{req.Magnet != "", len(req.Torrent) > 0, req.ReleaseID != ""} {
+		if set {
+			given++
+		}
+	}
+	if given != 1 {
+		return nil, apperr.Invalid("magnet", "give one of a magnet link, a .torrent file or a search result")
+	}
+
+	if req.ReleaseID != "" {
+		magnet, torrent, err := s.resolveRelease(ctx, req.ReleaseID)
+		if err != nil {
+			return nil, err
+		}
+		req.Magnet, req.Torrent = magnet, torrent
 	}
 
 	info, source, err := readTorrent(req)

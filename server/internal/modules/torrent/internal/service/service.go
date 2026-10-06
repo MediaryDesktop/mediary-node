@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"time"
 
@@ -9,6 +10,8 @@ import (
 
 	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/qbittorrent"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/store"
+	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/torznab"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/secrets"
 )
@@ -50,6 +53,10 @@ type Options struct {
 	// NewClient builds a client for a connection; tests swap it.
 	NewClient func(Connection) (Client, error)
 
+	// Torznab searches the user's sources; Titles names the title searched for.
+	Torznab *torznab.Client
+	Titles  Titles
+
 	// How often the client is asked about torrents while one is downloading, and
 	// while none is.
 	ActiveInterval time.Duration
@@ -79,6 +86,8 @@ type Service struct {
 	polled      bool
 	// How many polls in a row a torrent was missing from the client, by hash.
 	missing map[string]int
+
+	search searchCache
 }
 
 func New(st *store.Store, secretFile *secrets.Store, library Library, hub *events.Hub, logger zerolog.Logger, opts Options) *Service {
@@ -96,6 +105,9 @@ func New(st *store.Store, secretFile *secrets.Store, library Library, hub *event
 	if opts.Now == nil {
 		opts.Now = time.Now
 	}
+	if opts.Torznab == nil {
+		opts.Torznab = torznab.New(20*time.Second, "mediary-node")
+	}
 
 	return &Service{
 		store:   st,
@@ -107,7 +119,22 @@ func New(st *store.Store, secretFile *secrets.Store, library Library, hub *event
 		wake:    make(chan struct{}, 1),
 		live:    map[string]qbittorrent.Torrent{},
 		missing: map[string]int{},
+		search: searchCache{
+			answers:  map[string]cachedAnswer{},
+			releases: map[string]cachedRelease{},
+		},
 	}
+}
+
+// messageOf is what an error says to a person: an app error's message without
+// its kind and the Go error under it.
+func messageOf(err error) string {
+	var appErr *apperr.Error
+	if errors.As(err, &appErr) {
+		return appErr.Message
+	}
+
+	return err.Error()
 }
 
 func (s *Service) signal() {

@@ -138,6 +138,8 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 		Library:     downloadFolders{library: libraryModule},
 		SecretsPath: filepath.Join(deps.DataDir, "torrent-secrets.json"),
 		Client:      deps.TorrentClient,
+		Titles:      releaseTitles{media: mediaModule},
+		UserAgent:   "mediary-node/" + deps.Build.Version,
 	})
 	torrentModule.Register(api)
 

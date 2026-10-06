@@ -3,6 +3,7 @@ package torrent
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/rs/zerolog"
@@ -10,6 +11,7 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/handler"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/service"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/store"
+	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/torznab"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/secrets"
 )
@@ -28,7 +30,14 @@ type Deps struct {
 	// Client is the connection from the environment, used until the user saves
 	// one in the settings.
 	Client Connection
+
+	// Titles names a title for a release search.
+	Titles    Titles
+	UserAgent string
 }
+
+// Titles is where a release search gets a title's names, wired by internal/app.
+type Titles = service.Titles
 
 // Library is the library module as downloads need it, wired by internal/app.
 type Library = service.Library
@@ -43,7 +52,11 @@ func New(deps Deps) *Module {
 		deps.Library,
 		deps.Events,
 		deps.Logger,
-		service.Options{Defaults: deps.Client},
+		service.Options{
+			Defaults: deps.Client,
+			Titles:   deps.Titles,
+			Torznab:  torznab.New(20*time.Second, deps.UserAgent),
+		},
 	)
 
 	return &Module{handler: handler.New(svc), svc: svc}

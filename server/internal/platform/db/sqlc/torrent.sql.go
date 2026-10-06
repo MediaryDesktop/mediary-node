@@ -21,6 +21,18 @@ func (q *Queries) DeleteTorrentDownload(ctx context.Context, id int64) (int64, e
 	return result.RowsAffected()
 }
 
+const deleteTorznabSource = `-- name: DeleteTorznabSource :execrows
+DELETE FROM torznab_source WHERE id = ?
+`
+
+func (q *Queries) DeleteTorznabSource(ctx context.Context, id int64) (int64, error) {
+	result, err := q.db.ExecContext(ctx, deleteTorznabSource, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
 const finishTorrentDownload = `-- name: FinishTorrentDownload :exec
 UPDATE torrent_download
 SET state = 'done', error = '', imported = ?, completed_at = ?, updated_at = ?
@@ -98,6 +110,23 @@ func (q *Queries) GetTorrentDownloadByHash(ctx context.Context, infoHash string)
 	return i, err
 }
 
+const getTorznabSource = `-- name: GetTorznabSource :one
+SELECT id, name, url, created_at, updated_at FROM torznab_source WHERE id = ?
+`
+
+func (q *Queries) GetTorznabSource(ctx context.Context, id int64) (TorznabSource, error) {
+	row := q.db.QueryRowContext(ctx, getTorznabSource, id)
+	var i TorznabSource
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Url,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const insertTorrentDownload = `-- name: InsertTorrentDownload :one
 INSERT INTO torrent_download (info_hash, media_ref, title, root_id, rel_dir, source, choosing, state, created_at, updated_at)
 VALUES (?, ?, ?, ?, ?, ?, ?, 'downloading', ?, ?)
@@ -149,6 +178,37 @@ func (q *Queries) InsertTorrentDownload(ctx context.Context, arg InsertTorrentDo
 	return i, err
 }
 
+const insertTorznabSource = `-- name: InsertTorznabSource :one
+INSERT INTO torznab_source (name, url, created_at, updated_at)
+VALUES (?, ?, ?, ?)
+RETURNING id, name, url, created_at, updated_at
+`
+
+type InsertTorznabSourceParams struct {
+	Name      string `json:"name"`
+	Url       string `json:"url"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
+}
+
+func (q *Queries) InsertTorznabSource(ctx context.Context, arg InsertTorznabSourceParams) (TorznabSource, error) {
+	row := q.db.QueryRowContext(ctx, insertTorznabSource,
+		arg.Name,
+		arg.Url,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
+	var i TorznabSource
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Url,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const listTorrentDownloads = `-- name: ListTorrentDownloads :many
 SELECT id, info_hash, media_ref, title, name, root_id, rel_dir, source, state, imported, error, created_at, updated_at, completed_at, choosing FROM torrent_download ORDER BY id DESC LIMIT ?
 `
@@ -178,6 +238,39 @@ func (q *Queries) ListTorrentDownloads(ctx context.Context, limit int64) ([]Torr
 			&i.UpdatedAt,
 			&i.CompletedAt,
 			&i.Choosing,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listTorznabSources = `-- name: ListTorznabSources :many
+SELECT id, name, url, created_at, updated_at FROM torznab_source ORDER BY id
+`
+
+func (q *Queries) ListTorznabSources(ctx context.Context) ([]TorznabSource, error) {
+	rows, err := q.db.QueryContext(ctx, listTorznabSources)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []TorznabSource{}
+	for rows.Next() {
+		var i TorznabSource
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Url,
+			&i.CreatedAt,
+			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -284,4 +377,34 @@ func (q *Queries) SetTorrentDownloadState(ctx context.Context, arg SetTorrentDow
 		arg.ID,
 	)
 	return err
+}
+
+const updateTorznabSource = `-- name: UpdateTorznabSource :one
+UPDATE torznab_source SET name = ?, url = ?, updated_at = ? WHERE id = ?
+RETURNING id, name, url, created_at, updated_at
+`
+
+type UpdateTorznabSourceParams struct {
+	Name      string `json:"name"`
+	Url       string `json:"url"`
+	UpdatedAt string `json:"updated_at"`
+	ID        int64  `json:"id"`
+}
+
+func (q *Queries) UpdateTorznabSource(ctx context.Context, arg UpdateTorznabSourceParams) (TorznabSource, error) {
+	row := q.db.QueryRowContext(ctx, updateTorznabSource,
+		arg.Name,
+		arg.Url,
+		arg.UpdatedAt,
+		arg.ID,
+	)
+	var i TorznabSource
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Url,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }

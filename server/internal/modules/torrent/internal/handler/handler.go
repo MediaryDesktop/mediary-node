@@ -9,6 +9,7 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/httpapi"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/metainfo"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/service"
+	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/torznab"
 )
 
 type Handler struct {
@@ -33,6 +34,7 @@ type AddTorrentDownloadInput struct {
 		Magnet      string `json:"magnet,omitempty" maxLength:"65536" doc:"A magnet link with a BitTorrent v1 hash. Give this or torrent."`
 		Torrent     []byte `json:"torrent,omitempty" doc:"A .torrent file, base64-encoded. Give this or magnet."`
 		ChooseFiles bool   `json:"choose_files,omitempty" doc:"Hold the torrent in the client until its files are chosen with PUT .../files."`
+		ReleaseID   string `json:"release_id,omitempty" maxLength:"100" doc:"A search result to download. Give this, magnet or torrent."`
 	}
 }
 
@@ -89,6 +91,8 @@ type TorrentCheckOutput struct {
 }
 
 func (h *Handler) Register(api huma.API) {
+	h.registerSearch(api)
+
 	huma.Register(api, huma.Operation{
 		OperationID: "listTorrentDownloads",
 		Method:      http.MethodGet,
@@ -126,6 +130,7 @@ func (h *Handler) Register(api huma.API) {
 			Torrent:  in.Body.Torrent,
 
 			ChooseFiles: in.Body.ChooseFiles,
+			ReleaseID:   in.Body.ReleaseID,
 		})
 		if err != nil {
 			return nil, httpapi.ToHTTP(err)
@@ -268,5 +273,156 @@ func (h *Handler) Register(api huma.API) {
 		}
 
 		return &TorrentCheckOutput{Body: *result}, nil
+	})
+}
+
+type TorrentSourcesOutput struct {
+	Body struct {
+		Sources []service.TorrentSource `json:"sources"`
+	}
+}
+
+type TorrentSourceOutput struct {
+	Body service.TorrentSource
+}
+
+type TorrentSourceBody struct {
+	Name   string  `json:"name" minLength:"1" maxLength:"100" example:"Jackett"`
+	URL    string  `json:"url" minLength:"1" maxLength:"2048" example:"http://localhost:9117/api/v2.0/indexers/all/results/torznab/" doc:"The Torznab feed address; a pasted query, the key with it, is dropped."`
+	APIKey *string `json:"api_key,omitempty" maxLength:"256" doc:"Left out keeps the saved key; empty removes it."`
+}
+
+type CreateTorrentSourceInput struct {
+	Body TorrentSourceBody
+}
+
+type UpdateTorrentSourceInput struct {
+	ID   int64 `path:"id"`
+	Body TorrentSourceBody
+}
+
+type TorrentSourceIDInput struct {
+	ID int64 `path:"id"`
+}
+
+type CheckTorrentSourceInput struct {
+	Body struct {
+		SourceID int64   `json:"source_id,omitempty" doc:"A saved source whose key to use when api_key is left out."`
+		URL      string  `json:"url" minLength:"1" maxLength:"2048"`
+		APIKey   *string `json:"api_key,omitempty" maxLength:"256"`
+	}
+}
+
+type TorrentSourceCheckOutput struct {
+	Body torznab.TorrentSourceCaps
+}
+
+type SearchTorrentsInput struct {
+	MediaRef string `query:"media_ref" doc:"The title searched for; its names are the queries unless q is given."`
+	Episode  int    `query:"episode" minimum:"0" doc:"Only releases that hold this episode; 0 for any."`
+	Query    string `query:"q" maxLength:"200" doc:"Search for this instead of the title's names."`
+}
+
+type SearchTorrentsOutput struct {
+	Body service.TorrentSearchResult
+}
+
+func (h *Handler) registerSearch(api huma.API) {
+	huma.Register(api, huma.Operation{
+		OperationID: "listTorrentSources",
+		Method:      http.MethodGet,
+		Path:        "/v1/torrent/sources",
+		Summary:     "Release search sources",
+		Description: "The user's Torznab endpoints — Jackett, Prowlarr. The node ships no indexers of its own.",
+		Tags:        []string{"torrent"},
+	}, func(ctx context.Context, _ *struct{}) (*TorrentSourcesOutput, error) {
+		sources, err := h.svc.Sources(ctx)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		out := &TorrentSourcesOutput{}
+		out.Body.Sources = sources
+
+		return out, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID:   "createTorrentSource",
+		Method:        http.MethodPost,
+		Path:          "/v1/torrent/sources",
+		Summary:       "Add a release search source",
+		Description:   "The API key goes to the node's secrets file, not the database.",
+		Tags:          []string{"torrent"},
+		DefaultStatus: http.StatusCreated,
+	}, func(ctx context.Context, in *CreateTorrentSourceInput) (*TorrentSourceOutput, error) {
+		source, err := h.svc.CreateSource(ctx, service.SourceInput{Name: in.Body.Name, URL: in.Body.URL, APIKey: in.Body.APIKey})
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return &TorrentSourceOutput{Body: *source}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "updateTorrentSource",
+		Method:      http.MethodPut,
+		Path:        "/v1/torrent/sources/{id}",
+		Summary:     "Change a release search source",
+		Tags:        []string{"torrent"},
+	}, func(ctx context.Context, in *UpdateTorrentSourceInput) (*TorrentSourceOutput, error) {
+		source, err := h.svc.UpdateSource(ctx, in.ID, service.SourceInput{Name: in.Body.Name, URL: in.Body.URL, APIKey: in.Body.APIKey})
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return &TorrentSourceOutput{Body: *source}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID:   "deleteTorrentSource",
+		Method:        http.MethodDelete,
+		Path:          "/v1/torrent/sources/{id}",
+		Summary:       "Remove a release search source",
+		Description:   "Forgets the source and its key.",
+		Tags:          []string{"torrent"},
+		DefaultStatus: http.StatusNoContent,
+	}, func(ctx context.Context, in *TorrentSourceIDInput) (*struct{}, error) {
+		if err := h.svc.DeleteSource(ctx, in.ID); err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+		return nil, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "checkTorrentSource",
+		Method:      http.MethodPost,
+		Path:        "/v1/torrent/sources/check",
+		Summary:     "Try a release search source",
+		Description: "Asks the endpoint for its capabilities, before or after it is saved.",
+		Tags:        []string{"torrent"},
+	}, func(ctx context.Context, in *CheckTorrentSourceInput) (*TorrentSourceCheckOutput, error) {
+		caps, err := h.svc.CheckSource(ctx, in.Body.SourceID, in.Body.URL, in.Body.APIKey)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return &TorrentSourceCheckOutput{Body: *caps}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "searchTorrents",
+		Method:      http.MethodGet,
+		Path:        "/v1/torrent/search",
+		Summary:     "Search for releases",
+		Description: "Asks every source for the title's names, or for q, merges what they find by info hash, and reads episodes, quality and group from each name. With an episode, releases that cannot hold it are left out and the rest come in order: the episode alone, batches that hold it, names without episodes. A source that fails is reported in sources, and the others still answer.",
+		Tags:        []string{"torrent"},
+	}, func(ctx context.Context, in *SearchTorrentsInput) (*SearchTorrentsOutput, error) {
+		result, err := h.svc.Search(ctx, service.SearchRequest{MediaRef: in.MediaRef, Episode: in.Episode, Query: in.Query})
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return &SearchTorrentsOutput{Body: *result}, nil
 	})
 }

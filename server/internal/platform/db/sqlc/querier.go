@@ -35,6 +35,7 @@ type Querier interface {
 	DeleteOPDSServer(ctx context.Context, id int64) (int64, error)
 	DeleteSourceCacheOlderThan(ctx context.Context, arg DeleteSourceCacheOlderThanParams) error
 	DeleteTorrentDownload(ctx context.Context, id int64) (int64, error)
+	DeleteTorznabSource(ctx context.Context, id int64) (int64, error)
 	// A chapter already queued, running or done stays as it is; a failed or cancelled
 	// one goes back in the queue.
 	EnqueueMangaDownload(ctx context.Context, arg EnqueueMangaDownloadParams) (MangaDownload, error)
@@ -54,6 +55,7 @@ type Querier interface {
 	GetSourceCache(ctx context.Context, arg GetSourceCacheParams) (SourceCache, error)
 	GetTorrentDownload(ctx context.Context, id int64) (TorrentDownload, error)
 	GetTorrentDownloadByHash(ctx context.Context, infoHash string) (TorrentDownload, error)
+	GetTorznabSource(ctx context.Context, id int64) (TorznabSource, error)
 	InsertCustomList(ctx context.Context, arg InsertCustomListParams) (CustomList, error)
 	InsertLibraryFile(ctx context.Context, arg InsertLibraryFileParams) (int64, error)
 	InsertLibraryRoot(ctx context.Context, arg InsertLibraryRootParams) (LibraryRoot, error)
@@ -62,6 +64,7 @@ type Querier interface {
 	InsertScanRunGroup(ctx context.Context, arg InsertScanRunGroupParams) error
 	InsertScanRunRoot(ctx context.Context, arg InsertScanRunRootParams) error
 	InsertTorrentDownload(ctx context.Context, arg InsertTorrentDownloadParams) (TorrentDownload, error)
+	InsertTorznabSource(ctx context.Context, arg InsertTorznabSourceParams) (TorznabSource, error)
 	// Every file at once, for the explorer's tree. The tree is the whole library by
 	// definition, so paging it would only mean the client asking for page after page
 	// before it can draw anything.
@@ -87,6 +90,7 @@ type Querier interface {
 	ListScanRunRoots(ctx context.Context, scanRunID int64) ([]ScanRunRoot, error)
 	ListScanRuns(ctx context.Context, arg ListScanRunsParams) ([]ScanRun, error)
 	ListTorrentDownloads(ctx context.Context, limit int64) ([]TorrentDownload, error)
+	ListTorznabSources(ctx context.Context) ([]TorznabSource, error)
 	ListUnfinishedTorrentDownloads(ctx context.Context) ([]TorrentDownload, error)
 	// Files the matcher still has to work out, ordered so that every episode of one
 	// title arrives together: the candidates are then looked up once per title
@@ -119,6 +123,7 @@ type Querier interface {
 	// The file itself did not change; a newer prober reads its container again.
 	UpdateLibraryFileProbe(ctx context.Context, arg UpdateLibraryFileProbeParams) error
 	UpdateOPDSServer(ctx context.Context, arg UpdateOPDSServerParams) (OpdsServer, error)
+	UpdateTorznabSource(ctx context.Context, arg UpdateTorznabSourceParams) (TorznabSource, error)
 	UpsertAniListMirror(ctx context.Context, arg UpsertAniListMirrorParams) error
 	UpsertAniListOutboxEntry(ctx context.Context, arg UpsertAniListOutboxEntryParams) error
 	// A manual match is the user's decision, so an automatic one never replaces it.
