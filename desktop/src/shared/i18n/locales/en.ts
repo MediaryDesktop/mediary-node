@@ -1012,17 +1012,24 @@ export const en = {
 		menu: 'Download actions',
 		actionFailed: 'Could not change the download',
 		client: {
-			notConfigured: 'Connect qBittorrent in the settings to download torrents',
+			notConfigured: 'Choose a torrent client in the settings to download torrents',
 			unreachable: 'qBittorrent is not answering: {{error}}',
 			openSettings: 'Open settings'
 		},
 		settings: {
+			clientLabel: 'Torrent client',
+			embedded: 'Built-in',
+			none: 'None',
+			embeddedHint:
+				'Mediary downloads torrents itself; nothing else to install. It listens for peers on port 42069 and does not open it on the router.',
+			qbittorrentHint:
+				'Your own qBittorrent, through its Web UI. Turn the Web UI on in qBittorrent: Options → Web UI.',
+			noneHint: 'Torrents are off.',
 			notConfigured: 'Not connected',
 			configure: 'Connect',
 			edit: 'Change',
-			drawerTitle: 'qBittorrent',
-			drawerDescription:
-				'Mediary adds torrents to your qBittorrent through its Web UI. Turn the Web UI on in qBittorrent: Options → Web UI.',
+			drawerTitle: 'Torrent client',
+			drawerDescription: 'Which client downloads torrents for the library.',
 			urlLabel: 'Web UI address',
 			usernameLabel: 'Username',
 			passwordLabel: 'Password',
@@ -1053,7 +1060,7 @@ export const en = {
 		},
 		torrents: {
 			name: 'Torrents',
-			hint: 'qBittorrent that downloads torrents into your library'
+			hint: 'The client that downloads torrents into your library'
 		},
 		torrentSearch: {
 			name: 'Torrent search',

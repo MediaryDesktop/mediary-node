@@ -1012,17 +1012,24 @@ export const uk: Translation = {
 		menu: 'Дії із завантаженням',
 		actionFailed: 'Не вдалося змінити завантаження',
 		client: {
-			notConfigured: 'Підключіть qBittorrent у налаштуваннях, щоб завантажувати торенти',
+			notConfigured: 'Виберіть торент-клієнт у налаштуваннях, щоб завантажувати торенти',
 			unreachable: 'qBittorrent не відповідає: {{error}}',
 			openSettings: 'Відкрити налаштування'
 		},
 		settings: {
+			clientLabel: 'Торент-клієнт',
+			embedded: 'Вбудований',
+			none: 'Немає',
+			embeddedHint:
+				'Mediary завантажує торенти сама, нічого більше встановлювати не треба. Чекає на пірів на порту 42069 і не відкриває його на роутері.',
+			qbittorrentHint:
+				'Ваш qBittorrent через його Web UI. Увімкніть Web UI в qBittorrent: Налаштування → Веб-інтерфейс.',
+			noneHint: 'Торенти вимкнено.',
 			notConfigured: 'Не підключено',
 			configure: 'Підключити',
 			edit: 'Змінити',
-			drawerTitle: 'qBittorrent',
-			drawerDescription:
-				'Mediary додає торенти у ваш qBittorrent через його Web UI. Увімкніть Web UI в qBittorrent: Налаштування → Веб-інтерфейс.',
+			drawerTitle: 'Торент-клієнт',
+			drawerDescription: 'Який клієнт завантажує торенти в бібліотеку.',
 			urlLabel: 'Адреса Web UI',
 			usernameLabel: 'Ім’я користувача',
 			passwordLabel: 'Пароль',
@@ -1053,7 +1060,7 @@ export const uk: Translation = {
 		},
 		torrents: {
 			name: 'Торенти',
-			hint: 'qBittorrent, який завантажує торенти у вашу бібліотеку'
+			hint: 'Клієнт, який завантажує торенти у вашу бібліотеку'
 		},
 		torrentSearch: {
 			name: 'Пошук торентів',

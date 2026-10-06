@@ -2,7 +2,17 @@ import { useUnit } from 'effector-react'
 import { useEffect, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, Drawer, DrawerForm, DrawerSection, Icon, Input, SelectDropdown, toast } from '@shared/ui'
+import {
+	Button,
+	Drawer,
+	DrawerForm,
+	DrawerSection,
+	Icon,
+	Input,
+	SelectDropdown,
+	SelectionGroup,
+	toast
+} from '@shared/ui'
 
 import { libraryRootsQuery } from '@entities/library-item'
 import { checkTorrentClientMutation, putTorrentSettingsMutation } from '@entities/torrent'
@@ -18,8 +28,15 @@ export interface TorrentClientDrawerProps {
 
 type CheckState = { ok: true; version: string } | { ok: false; problem: string } | null
 
+type ClientKind = TorrentSettings['client']
+
+// The node's "no client" is an empty string, which a selection cannot hold.
+const NONE = 'none'
+type ClientChoice = Exclude<ClientKind, ''> | typeof NONE
+
 // The form is mounted afresh for every opening, so its fields start from the saved
-// settings.
+// settings. qBittorrent's address, sign-in and path mapping only show for it: the
+// node's own client needs none of them.
 export function TorrentClientDrawer({ open, settings, onClose }: TorrentClientDrawerProps) {
 	const { t } = useTranslation()
 
@@ -47,6 +64,7 @@ function ClientForm({ settings, onDone }: { settings: TorrentSettings; onDone: (
 		libraryRootsQuery.$data
 	])
 
+	const [client, setClient] = useState<ClientChoice>(settings.client || NONE)
 	const [url, setUrl] = useState(settings.url)
 	const [username, setUsername] = useState(settings.username)
 	const [password, setPassword] = useState('')
@@ -58,8 +76,12 @@ function ClientForm({ settings, onDone }: { settings: TorrentSettings; onDone: (
 	// An untouched password field keeps the saved password.
 	const passwordValue = settings.has_password && password === '' ? undefined : password
 
-	// The node refuses half a mapping; saying so before it does saves a round trip.
-	const mappingHalf = (mapClient.trim() === '') !== (mapNode.trim() === '')
+	const qbittorrent = client === 'qbittorrent'
+
+	// The node refuses half a mapping, or qBittorrent without an address; saying so
+	// before it does saves a round trip.
+	const mappingHalf = qbittorrent && (mapClient.trim() === '') !== (mapNode.trim() === '')
+	const missingUrl = qbittorrent && url.trim() === ''
 
 	// Only one form is open at a time, so whatever these mutations report is this form's.
 	useEffect(() => {
@@ -83,6 +105,7 @@ function ClientForm({ settings, onDone }: { settings: TorrentSettings; onDone: (
 
 	const submit = () =>
 		save({
+			client: client === NONE ? '' : client,
 			url,
 			username,
 			password: passwordValue,
@@ -92,7 +115,11 @@ function ClientForm({ settings, onDone }: { settings: TorrentSettings; onDone: (
 
 	const runCheck = () => {
 		setResult(null)
-		check({ url, username, password: passwordValue })
+		check(
+			qbittorrent
+				? { client, url, username, password: passwordValue }
+				: { client: 'embedded', username: '' }
+		)
 	}
 
 	return (
@@ -100,66 +127,101 @@ function ClientForm({ settings, onDone }: { settings: TorrentSettings; onDone: (
 			onSubmit={submit}
 			onCancel={onDone}
 			submitLabel={t('torrents.settings.save')}
-			submitDisabled={saving || mappingHalf}
+			submitDisabled={saving || mappingHalf || missingUrl}
 			cancelDisabled={saving}
 			submitting={saving}
 		>
-			<DrawerSection title={t('torrents.settings.urlLabel')}>
-				<Input
-					value={url}
-					onChange={event => setUrl(event.target.value)}
-					disabled={saving}
-					autoComplete='off'
-					spellCheck={false}
-					placeholder='http://localhost:8080'
-				/>
-			</DrawerSection>
-
-			<DrawerSection title={t('torrents.settings.usernameLabel')}>
-				<Input
-					value={username}
-					onChange={event => setUsername(event.target.value)}
-					disabled={saving}
-					autoComplete='off'
-					spellCheck={false}
-				/>
-			</DrawerSection>
-
 			<DrawerSection
-				title={t('torrents.settings.passwordLabel')}
+				title={t('torrents.settings.clientLabel')}
 				description={
-					settings.has_password
-						? t('torrents.settings.passwordKept')
-						: t('torrents.settings.passwordHint')
+					client === 'embedded'
+						? t('torrents.settings.embeddedHint')
+						: qbittorrent
+							? t('torrents.settings.qbittorrentHint')
+							: t('torrents.settings.noneHint')
 				}
 			>
-				<Input
-					type='password'
-					revealable
-					value={password}
-					onChange={event => setPassword(event.target.value)}
+				<SelectionGroup
+					options={[
+						{ value: 'embedded', label: t('torrents.settings.embedded') },
+						{ value: 'qbittorrent', label: 'qBittorrent' },
+						{ value: NONE, label: t('torrents.settings.none') }
+					]}
+					value={client}
+					onValueChange={next => {
+						setClient(next)
+						setResult(null)
+					}}
+					label={t('torrents.settings.clientLabel')}
 					disabled={saving}
-					autoComplete='new-password'
+					stretch
 				/>
 			</DrawerSection>
 
-			<div className={styles.check}>
-				<Button
-					size='small'
-					startIcon={<Icon name='common/signal' size={16} />}
-					loading={checking}
-					disabled={url.trim() === '' || saving}
-					onClick={runCheck}
-				>
-					{t('torrents.settings.check')}
-				</Button>
+			{qbittorrent && (
+				<>
+					<DrawerSection title={t('torrents.settings.urlLabel')}>
+						<Input
+							value={url}
+							onChange={event => setUrl(event.target.value)}
+							disabled={saving}
+							autoComplete='off'
+							spellCheck={false}
+							placeholder='http://localhost:8080'
+						/>
+					</DrawerSection>
 
-				{result && (
-					<span className={result.ok ? styles.ok : styles.problem} role='status'>
-						{result.ok ? t('torrents.settings.ok', { version: result.version }) : result.problem}
-					</span>
-				)}
-			</div>
+					<DrawerSection title={t('torrents.settings.usernameLabel')}>
+						<Input
+							value={username}
+							onChange={event => setUsername(event.target.value)}
+							disabled={saving}
+							autoComplete='off'
+							spellCheck={false}
+						/>
+					</DrawerSection>
+
+					<DrawerSection
+						title={t('torrents.settings.passwordLabel')}
+						description={
+							settings.has_password
+								? t('torrents.settings.passwordKept')
+								: t('torrents.settings.passwordHint')
+						}
+					>
+						<Input
+							type='password'
+							revealable
+							value={password}
+							onChange={event => setPassword(event.target.value)}
+							disabled={saving}
+							autoComplete='new-password'
+						/>
+					</DrawerSection>
+				</>
+			)}
+
+			{client !== NONE && (
+				<div className={styles.check}>
+					<Button
+						size='small'
+						startIcon={<Icon name='common/signal' size={16} />}
+						loading={checking}
+						disabled={missingUrl || saving}
+						onClick={runCheck}
+					>
+						{t('torrents.settings.check')}
+					</Button>
+
+					{result && (
+						<span className={result.ok ? styles.ok : styles.problem} role='status'>
+							{result.ok
+								? t('torrents.settings.ok', { version: result.version })
+								: result.problem}
+						</span>
+					)}
+				</div>
+			)}
 
 			<DrawerSection
 				title={t('torrents.settings.folderLabel')}
@@ -174,35 +236,37 @@ function ClientForm({ settings, onDone }: { settings: TorrentSettings; onDone: (
 				/>
 			</DrawerSection>
 
-			<DrawerSection
-				title={t('torrents.settings.mappingLabel')}
-				description={t('torrents.settings.mappingHint')}
-			>
-				<div className={styles.mapping}>
-					<label className={styles.field}>
-						{t('torrents.settings.mappingClient')}
-						<Input
-							value={mapClient}
-							onChange={event => setMapClient(event.target.value)}
-							disabled={saving}
-							autoComplete='off'
-							spellCheck={false}
-							placeholder='/downloads'
-						/>
-					</label>
-					<label className={styles.field}>
-						{t('torrents.settings.mappingNode')}
-						<Input
-							value={mapNode}
-							onChange={event => setMapNode(event.target.value)}
-							disabled={saving}
-							autoComplete='off'
-							spellCheck={false}
-							placeholder='D:\Anime'
-						/>
-					</label>
-				</div>
-			</DrawerSection>
+			{qbittorrent && (
+				<DrawerSection
+					title={t('torrents.settings.mappingLabel')}
+					description={t('torrents.settings.mappingHint')}
+				>
+					<div className={styles.mapping}>
+						<label className={styles.field}>
+							{t('torrents.settings.mappingClient')}
+							<Input
+								value={mapClient}
+								onChange={event => setMapClient(event.target.value)}
+								disabled={saving}
+								autoComplete='off'
+								spellCheck={false}
+								placeholder='/downloads'
+							/>
+						</label>
+						<label className={styles.field}>
+							{t('torrents.settings.mappingNode')}
+							<Input
+								value={mapNode}
+								onChange={event => setMapNode(event.target.value)}
+								disabled={saving}
+								autoComplete='off'
+								spellCheck={false}
+								placeholder='D:\Anime'
+							/>
+						</label>
+					</div>
+				</DrawerSection>
+			)}
 		</DrawerForm>
 	)
 }

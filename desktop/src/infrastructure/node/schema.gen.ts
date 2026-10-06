@@ -1666,9 +1666,14 @@ export interface components {
 			 * @example https://example.com/schemas/CheckTorrentClientInputBody.json
 			 */
 			readonly $schema?: string
+			/**
+			 * @description embedded checks the node's own client; anything else, qBittorrent at url.
+			 * @enum {string}
+			 */
+			client?: '' | 'qbittorrent' | 'embedded'
 			/** @description Left out uses the saved password. */
 			password?: string
-			url: string
+			url?: string
 			username: string
 		}
 		CheckTorrentSourceInputBody: {
@@ -2711,6 +2716,11 @@ export interface components {
 			 * @example https://example.com/schemas/PutTorrentSettingsInputBody.json
 			 */
 			readonly $schema?: string
+			/**
+			 * @description The user's qBittorrent, the node's own client, or none.
+			 * @enum {string}
+			 */
+			client: '' | 'qbittorrent' | 'embedded'
 			/** @description Left out keeps the saved password; empty removes it. */
 			password?: string
 			/** @description How the client names the node's folders, when it runs in Docker or on another machine. */
@@ -3454,6 +3464,8 @@ export interface components {
 		TorrentClientStatus: {
 			configured: boolean
 			error?: string
+			/** @enum {string} */
+			kind: '' | 'qbittorrent' | 'embedded'
 			reachable: boolean
 		}
 		TorrentDownload: {
@@ -3711,6 +3723,11 @@ export interface components {
 			 * @example https://example.com/schemas/TorrentSettings.json
 			 */
 			readonly $schema?: string
+			/**
+			 * @description The user's qBittorrent, the node's own client, or none.
+			 * @enum {string}
+			 */
+			client: '' | 'qbittorrent' | 'embedded'
 			has_password: boolean
 			path_map: components['schemas']['TorrentPathMap']
 			/** Format: int64 */

@@ -38,7 +38,13 @@ export function TorrentClientSettings() {
 		return null
 	}
 
-	const connected = settings.url !== ''
+	const connected = settings.client !== ''
+	const name =
+		settings.client === 'embedded'
+			? t('torrents.settings.embedded')
+			: settings.client === 'qbittorrent'
+				? settings.url
+				: t('torrents.settings.notConfigured')
 	const folder = (roots?.roots ?? []).find(root => root.id === settings.root_id)?.path
 
 	return (
@@ -49,9 +55,7 @@ export function TorrentClientSettings() {
 				</span>
 
 				<div className={styles.body}>
-					<p className={styles.name}>
-						{connected ? settings.url : t('torrents.settings.notConfigured')}
-					</p>
+					<p className={styles.name}>{name}</p>
 					{connected && (
 						<p className={styles.detail} title={folder}>
 							{folder ?? t('torrents.settings.folderPlaceholder')}

@@ -1013,17 +1013,24 @@ export const ru: Translation = {
 		menu: 'Действия с загрузкой',
 		actionFailed: 'Не удалось изменить загрузку',
 		client: {
-			notConfigured: 'Подключите qBittorrent в настройках, чтобы загружать торренты',
+			notConfigured: 'Выберите торрент-клиент в настройках, чтобы загружать торренты',
 			unreachable: 'qBittorrent не отвечает: {{error}}',
 			openSettings: 'Открыть настройки'
 		},
 		settings: {
+			clientLabel: 'Торрент-клиент',
+			embedded: 'Встроенный',
+			none: 'Нет',
+			embeddedHint:
+				'Mediary загружает торренты сама, больше ничего устанавливать не нужно. Ждёт пиров на порту 42069 и не открывает его на роутере.',
+			qbittorrentHint:
+				'Ваш qBittorrent через его Web UI. Включите Web UI в qBittorrent: Настройки → Веб-интерфейс.',
+			noneHint: 'Торренты выключены.',
 			notConfigured: 'Не подключено',
 			configure: 'Подключить',
 			edit: 'Изменить',
-			drawerTitle: 'qBittorrent',
-			drawerDescription:
-				'Mediary добавляет торренты в ваш qBittorrent через его Web UI. Включите Web UI в qBittorrent: Настройки → Веб-интерфейс.',
+			drawerTitle: 'Торрент-клиент',
+			drawerDescription: 'Какой клиент загружает торренты в библиотеку.',
 			urlLabel: 'Адрес Web UI',
 			usernameLabel: 'Имя пользователя',
 			passwordLabel: 'Пароль',
@@ -1054,7 +1061,7 @@ export const ru: Translation = {
 		},
 		torrents: {
 			name: 'Торренты',
-			hint: 'qBittorrent, который загружает торренты в вашу библиотеку'
+			hint: 'Клиент, который загружает торренты в вашу библиотеку'
 		},
 		torrentSearch: {
 			name: 'Поиск торрентов',
