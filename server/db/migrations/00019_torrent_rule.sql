@@ -19,17 +19,16 @@ CREATE TABLE torrent_rule (
     updated_at      TEXT    NOT NULL
 ) STRICT;
 
--- The episodes a download was added for, as a JSON array, when it was added for
--- some: a rule must not add an episode again while the first copy is still on its
--- way, and a batch held for them gets only their files.
-ALTER TABLE torrent_download ADD COLUMN episodes TEXT;
+-- The episode a download was added for, when one was: a rule must not add the
+-- same episode again while the first copy is still on its way.
+ALTER TABLE torrent_download ADD COLUMN episode INTEGER;
 
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
 
-ALTER TABLE torrent_download DROP COLUMN episodes;
+ALTER TABLE torrent_download DROP COLUMN episode;
 DROP TABLE torrent_rule;
 
 -- +goose StatementEnd
