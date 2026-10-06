@@ -159,7 +159,7 @@ func TestALinkedSeriesListsChaptersTheReaderCanOpen(t *testing.T) {
 	}
 	source := sourceID(server.ID)
 
-	hits, err := h.svc.Search(ctx, source, "berserk")
+	hits, err := h.svc.Search(ctx, source, "berserk", "")
 	if err != nil || len(hits) != 1 {
 		t.Fatalf("search = %+v, %v", hits, err)
 	}

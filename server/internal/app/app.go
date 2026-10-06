@@ -109,6 +109,7 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 
 		AniList:             aniList,
 		AniZip:              aniZip,
+		MangaDex:            cfg.MangaDex,
 		AniListClientID:     cfg.AniList.ClientID,
 		AniListAuthorizeURL: cfg.AniList.AuthorizeURL,
 		AniListRefresh:      cfg.AniList.RefreshInterval,

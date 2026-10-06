@@ -62,8 +62,11 @@ func decodeKey(raw string) (chapterKey, error) {
 type ReadChapter struct {
 	Title    string
 	MediaRef string
-	Number   string
-	Pages    int
+	// SourceName and Groups are the credit the reader shows.
+	SourceName string
+	Groups     []string
+	Number     string
+	Pages      int
 }
 
 // Chapter describes a chapter on a server. Its title is whichever title is linked
@@ -82,7 +85,7 @@ func (s *Service) Chapter(ctx context.Context, serverID int64, rawKey string) (*
 		return nil, apperr.New(apperr.KindNotFound, "OPDS server %d does not exist", serverID)
 	}
 
-	chapter := &ReadChapter{Title: key.Title, Number: key.Number, Pages: key.Pages}
+	chapter := &ReadChapter{Title: key.Title, Number: key.Number, Pages: key.Pages, SourceName: row.Name}
 
 	link, err := s.store.LinkBySeries(ctx, sourceID(serverID), key.Series)
 	if err != nil {

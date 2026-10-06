@@ -9,6 +9,7 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/rs/zerolog"
 
+	"github.com/mediaryorg/mediary-node/server/internal/config"
 	"github.com/mediaryorg/mediary-node/server/internal/httpapi"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/extension"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/library"
@@ -35,6 +36,7 @@ type Deps struct {
 
 	AniList             *anilist.Client
 	AniZip              *anizip.Client
+	MangaDex            config.MangaDex
 	AniListClientID     string
 	AniListAuthorizeURL string
 	AniListRefresh      time.Duration
@@ -124,6 +126,10 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 		Library:     downloadFolders{library: libraryModule},
 		SecretsPath: filepath.Join(deps.DataDir, "opds-secrets.json"),
 		UserAgent:   "mediary-node/" + deps.Build.Version,
+
+		MangaDexEndpoint:       deps.MangaDex.Endpoint,
+		MangaDexReportEndpoint: deps.MangaDex.ReportEndpoint,
+		MangaDexTimeout:        deps.MangaDex.Timeout,
 	})
 	mangaModule.Register(api)
 
@@ -141,7 +147,10 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 		Logger:   moduleLogger(deps.Logger, "reader"),
 		Library:  readableFiles{library: libraryModule},
 		Progress: readChapters{tracker: trackerModule},
-		Sources:  map[string]reader.ChapterSource{reader.SourceOPDS: opdsChapters{manga: mangaModule}},
+		Sources: map[string]reader.ChapterSource{
+			reader.SourceOPDS:     opdsChapters{manga: mangaModule},
+			reader.SourceMangaDex: mangaDexChapters{manga: mangaModule},
+		},
 	}).Register(api)
 
 	sync.New(sync.Deps{

@@ -90,13 +90,16 @@ type MangaSourcesOutput struct {
 }
 
 type MangaSearchInput struct {
-	Source string `path:"source" example:"opds:3"`
-	Query  string `query:"q" minLength:"1" maxLength:"200"`
+	Source   string `path:"source" example:"opds:3"`
+	Query    string `query:"q" minLength:"1" maxLength:"200"`
+	MediaRef string `query:"media_ref" doc:"The title being linked, so a source that knows it can put its series first."`
 }
 
 type MangaSeriesBody struct {
-	ID    string `json:"id" doc:"The series' path on the server, for linking a title to it."`
-	Title string `json:"title"`
+	ID      string `json:"id" doc:"The series' id in its source: a path on an OPDS server, a MangaDex id."`
+	Title   string `json:"title"`
+	Detail  string `json:"detail,omitempty" doc:"What tells similar names apart, such as a year."`
+	Matched bool   `json:"matched" doc:"True when the source itself links this series to the title being linked."`
 }
 
 type MangaSearchOutput struct {
@@ -138,12 +141,15 @@ type DeleteMangaLinkInput struct {
 }
 
 type MangaChapterBody struct {
-	Ref        string `json:"ref" doc:"Chapter reference for the reader's endpoints."`
-	Source     string `json:"source"`
-	SourceName string `json:"source_name"`
-	Number     string `json:"number,omitempty" doc:"Chapter number as the source writes it. Absent for an unnumbered chapter."`
-	Title      string `json:"title"`
-	Pages      int    `json:"pages"`
+	Ref         string   `json:"ref" doc:"Chapter reference for the reader's endpoints."`
+	Source      string   `json:"source"`
+	SourceName  string   `json:"source_name"`
+	Number      string   `json:"number,omitempty" doc:"Chapter number as the source writes it. Absent for an unnumbered chapter."`
+	Title       string   `json:"title"`
+	Pages       int      `json:"pages"`
+	Language    string   `json:"language,omitempty" doc:"Language of the translation, where the source says."`
+	Groups      []string `json:"groups,omitempty" doc:"Who translated it. Shown next to the chapter: the source asks for the credit."`
+	ExternalURL string   `json:"external_url,omitempty" doc:"The publisher's page, for a chapter the source only links to. It has no pages to read here."`
 }
 
 type MangaSourceProblemBody struct {
@@ -163,6 +169,57 @@ func (h *Handler) Register(api huma.API) {
 	h.registerServers(api)
 	h.registerTitles(api)
 	h.registerDownloads(api)
+	h.registerMangaDex(api)
+}
+
+type MangaDexSettingsBody struct {
+	Available bool     `json:"available" doc:"False when the node is configured without MangaDex."`
+	Enabled   bool     `json:"enabled" doc:"Whether chapters are read from MangaDex. Off until the user turns it on."`
+	Languages []string `json:"languages" doc:"Translations to list, in order of preference."`
+}
+
+type MangaDexSettingsOutput struct {
+	Body MangaDexSettingsBody
+}
+
+type PutMangaDexSettingsInput struct {
+	Body struct {
+		Enabled   bool     `json:"enabled"`
+		Languages []string `json:"languages" minItems:"1" maxItems:"10" doc:"Language codes such as en, uk or pt-br."`
+	}
+}
+
+func (h *Handler) registerMangaDex(api huma.API) {
+	huma.Register(api, huma.Operation{
+		OperationID: "getMangaDexSettings",
+		Method:      http.MethodGet,
+		Path:        "/v1/manga/mangadex/settings",
+		Summary:     "Reading from MangaDex",
+		Tags:        []string{"manga"},
+	}, func(ctx context.Context, _ *struct{}) (*MangaDexSettingsOutput, error) {
+		settings, err := h.svc.MangaDexSettings(ctx)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return &MangaDexSettingsOutput{Body: MangaDexSettingsBody(*settings)}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "putMangaDexSettings",
+		Method:      http.MethodPut,
+		Path:        "/v1/manga/mangadex/settings",
+		Summary:     "Turn MangaDex on or off, and choose languages",
+		Description: "Chapters from MangaDex are read online only: pages pass through the node and are not saved.",
+		Tags:        []string{"manga"},
+	}, func(ctx context.Context, in *PutMangaDexSettingsInput) (*MangaDexSettingsOutput, error) {
+		settings, err := h.svc.SetMangaDexSettings(ctx, in.Body.Enabled, in.Body.Languages)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return &MangaDexSettingsOutput{Body: MangaDexSettingsBody(*settings)}, nil
+	})
 }
 
 func (h *Handler) registerServers(api huma.API) {
@@ -299,7 +356,7 @@ func (h *Handler) registerTitles(api huma.API) {
 		Description: "For linking a title to the series that holds its chapters.",
 		Tags:        []string{"manga"},
 	}, func(ctx context.Context, in *MangaSearchInput) (*MangaSearchOutput, error) {
-		hits, err := h.svc.Search(ctx, in.Source, in.Query)
+		hits, err := h.svc.Search(ctx, in.Source, in.Query, in.MediaRef)
 		if err != nil {
 			return nil, httpapi.ToHTTP(err)
 		}
@@ -307,7 +364,7 @@ func (h *Handler) registerTitles(api huma.API) {
 		out := &MangaSearchOutput{}
 		out.Body.Series = make([]MangaSeriesBody, 0, len(hits))
 		for _, hit := range hits {
-			out.Body.Series = append(out.Body.Series, MangaSeriesBody{ID: hit.ID, Title: hit.Title})
+			out.Body.Series = append(out.Body.Series, MangaSeriesBody{ID: hit.ID, Title: hit.Title, Detail: hit.Detail, Matched: hit.Matched})
 		}
 
 		return out, nil
@@ -386,8 +443,19 @@ func (h *Handler) registerTitles(api huma.API) {
 
 		out := &MangaChaptersOutput{}
 		out.Body.Chapters = make([]MangaChapterBody, 0, len(chapters))
-		for _, chapter := range chapters {
-			out.Body.Chapters = append(out.Body.Chapters, MangaChapterBody(chapter))
+		for i := range chapters {
+			chapter := &chapters[i]
+			out.Body.Chapters = append(out.Body.Chapters, MangaChapterBody{
+				Ref:         chapter.Ref,
+				Source:      chapter.Source,
+				SourceName:  chapter.SourceName,
+				Number:      chapter.Number,
+				Title:       chapter.Title,
+				Pages:       chapter.Pages,
+				Language:    chapter.Language,
+				Groups:      chapter.Groups,
+				ExternalURL: chapter.ExternalURL,
+			})
 		}
 		out.Body.Problems = make([]MangaSourceProblemBody, 0, len(problems))
 		for _, problem := range problems {

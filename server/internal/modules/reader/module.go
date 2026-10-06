@@ -26,7 +26,10 @@ type (
 )
 
 // SourceOPDS is the reference prefix of chapters on the user's OPDS servers.
-const SourceOPDS = ref.SourceOPDS
+const (
+	SourceOPDS     = ref.SourceOPDS
+	SourceMangaDex = ref.SourceMangaDex
+)
 
 type Deps struct {
 	Logger zerolog.Logger

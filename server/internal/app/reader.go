@@ -67,11 +67,13 @@ func (o opdsChapters) Chapter(ctx context.Context, chapter reader.ChapterRef) (*
 	}
 
 	return &reader.Chapter{
-		Ref:      chapter,
-		Title:    found.Title,
-		MediaRef: found.MediaRef,
-		Number:   found.Number,
-		Pages:    pages,
+		Ref:        chapter,
+		Title:      found.Title,
+		MediaRef:   found.MediaRef,
+		Number:     found.Number,
+		Pages:      pages,
+		SourceName: found.SourceName,
+		Groups:     found.Groups,
 	}, nil
 }
 
@@ -114,4 +116,40 @@ func (d downloadFolders) RootPath(ctx context.Context, rootID int64) (path strin
 
 func (d downloadFolders) ImportFile(ctx context.Context, rootID int64, relPath, mediaRef string, chapter *int) (int64, error) {
 	return d.library.ImportFile(ctx, rootID, relPath, mediaRef, chapter)
+}
+
+// mangaDexChapters lets the reader open MangaDex chapters through the manga module.
+type mangaDexChapters struct {
+	manga *manga.Module
+}
+
+func (m mangaDexChapters) Chapter(ctx context.Context, chapter reader.ChapterRef) (*reader.Chapter, error) {
+	found, err := m.manga.MangaDexChapter(ctx, chapter.Key)
+	if err != nil {
+		return nil, err
+	}
+
+	pages := make([]reader.Page, found.Pages)
+	for i := range pages {
+		pages[i] = reader.Page{Index: i}
+	}
+
+	return &reader.Chapter{
+		Ref:        chapter,
+		Title:      found.Title,
+		MediaRef:   found.MediaRef,
+		Number:     found.Number,
+		Pages:      pages,
+		SourceName: found.SourceName,
+		Groups:     found.Groups,
+	}, nil
+}
+
+func (m mangaDexChapters) Page(ctx context.Context, chapter reader.ChapterRef, index int) (reader.Image, error) {
+	data, contentType, err := m.manga.MangaDexPage(ctx, chapter.Key, index)
+	if err != nil {
+		return reader.Image{}, err
+	}
+
+	return reader.Image{Data: data, ContentType: contentType}, nil
 }

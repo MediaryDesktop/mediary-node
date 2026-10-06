@@ -29,6 +29,7 @@ type Config struct {
 	Cloud    Cloud
 	AniList  AniList
 	AniZip   AniZip
+	MangaDex MangaDex
 	Log      Log
 }
 
@@ -63,6 +64,15 @@ func (h HTTP) Addr() string {
 type AniZip struct {
 	Endpoint string        `env:"NODE_ANIZIP_ENDPOINT" envDefault:"https://api.ani.zip"`
 	Timeout  time.Duration `env:"NODE_ANIZIP_TIMEOUT"  envDefault:"15s"`
+}
+
+// MangaDex is the online manga source. An empty endpoint turns it off on this node;
+// with it on, the user still has to turn MangaDex on in the app before anything is
+// asked of it.
+type MangaDex struct {
+	Endpoint       string        `env:"NODE_MANGADEX_ENDPOINT"        envDefault:"https://api.mangadex.org"`
+	ReportEndpoint string        `env:"NODE_MANGADEX_REPORT_ENDPOINT" envDefault:"https://api.mangadex.network/report"`
+	Timeout        time.Duration `env:"NODE_MANGADEX_TIMEOUT"         envDefault:"20s"`
 }
 
 type Library struct {

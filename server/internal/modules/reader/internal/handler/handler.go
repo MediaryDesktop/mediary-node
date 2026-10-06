@@ -62,6 +62,9 @@ type ChapterBody struct {
 	MediaRef string         `json:"media_ref,omitempty" doc:"Title this chapter is matched to. Absent while unmatched."`
 	Number   string         `json:"number,omitempty" doc:"Chapter number as the source writes it, such as 12 or 12.5. Absent for an unnumbered chapter."`
 	Pages    []archive.Page `json:"pages" doc:"Every page, in reading order."`
+
+	SourceName string   `json:"source_name,omitempty" doc:"Where an online chapter comes from, to credit it."`
+	Groups     []string `json:"groups,omitempty" doc:"Who translated it, to credit them."`
 }
 
 type ChapterOutput struct {
@@ -219,6 +222,9 @@ func (h *Handler) chapter(ctx context.Context, chapterRef ref.ChapterRef) (*Chap
 		MediaRef: chapter.MediaRef,
 		Number:   chapter.Number,
 		Pages:    chapter.Pages,
+
+		SourceName: chapter.SourceName,
+		Groups:     chapter.Groups,
 	}
 
 	return out, nil

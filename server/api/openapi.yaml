@@ -135,6 +135,13 @@ components:
           description: Library file this chapter is. Absent for a chapter from any other source.
           format: int64
           type: integer
+        groups:
+          description: Who translated it, to credit them.
+          items:
+            type: string
+          type:
+            - array
+            - "null"
         media_ref:
           description: Title this chapter is matched to. Absent while unmatched.
           type: string
@@ -150,6 +157,9 @@ components:
             - "null"
         ref:
           description: Chapter reference, for the page and progress endpoints.
+          type: string
+        source_name:
+          description: Where an online chapter comes from, to credit it.
           type: string
         title:
           description: Title as the source names it, for the UI.
@@ -1098,6 +1108,19 @@ components:
     MangaChapterBody:
       additionalProperties: false
       properties:
+        external_url:
+          description: The publisher's page, for a chapter the source only links to. It has no pages to read here.
+          type: string
+        groups:
+          description: "Who translated it. Shown next to the chapter: the source asks for the credit."
+          items:
+            type: string
+          type:
+            - array
+            - "null"
+        language:
+          description: Language of the translation, where the source says.
+          type: string
         number:
           description: Chapter number as the source writes it. Absent for an unnumbered chapter.
           type: string
@@ -1146,6 +1169,34 @@ components:
       required:
         - chapters
         - problems
+      type: object
+    MangaDexSettingsBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/MangaDexSettingsBody.json
+          format: uri
+          readOnly: true
+          type: string
+        available:
+          description: False when the node is configured without MangaDex.
+          type: boolean
+        enabled:
+          description: Whether chapters are read from MangaDex. Off until the user turns it on.
+          type: boolean
+        languages:
+          description: Translations to list, in order of preference.
+          items:
+            type: string
+          type:
+            - array
+            - "null"
+      required:
+        - available
+        - enabled
+        - languages
       type: object
     MangaDownloadBody:
       additionalProperties: false
@@ -1294,14 +1345,21 @@ components:
     MangaSeriesBody:
       additionalProperties: false
       properties:
-        id:
-          description: The series' path on the server, for linking a title to it.
+        detail:
+          description: What tells similar names apart, such as a year.
           type: string
+        id:
+          description: "The series' id in its source: a path on an OPDS server, a MangaDex id."
+          type: string
+        matched:
+          description: True when the source itself links this series to the title being linked.
+          type: boolean
         title:
           type: string
       required:
         - id
         - title
+        - matched
       type: object
     MangaSourceBody:
       additionalProperties: false
@@ -2075,6 +2133,31 @@ components:
           type: boolean
       required:
         - watched
+      type: object
+    PutMangaDexSettingsInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/PutMangaDexSettingsInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        enabled:
+          type: boolean
+        languages:
+          description: Language codes such as en, uk or pt-br.
+          items:
+            type: string
+          maxItems: 10
+          minItems: 1
+          type:
+            - array
+            - "null"
+      required:
+        - enabled
+        - languages
       type: object
     PutMangaDownloadSettingsInputBody:
       additionalProperties: false
@@ -4069,6 +4152,50 @@ paths:
       summary: Try a failed download again
       tags:
         - manga
+  /v1/manga/mangadex/settings:
+    get:
+      operationId: getMangaDexSettings
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MangaDexSettingsBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Reading from MangaDex
+      tags:
+        - manga
+    put:
+      description: "Chapters from MangaDex are read online only: pages pass through the node and are not saved."
+      operationId: putMangaDexSettings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PutMangaDexSettingsInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MangaDexSettingsBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Turn MangaDex on or off, and choose languages
+      tags:
+        - manga
   /v1/manga/opds/check:
     post:
       description: "Reads the catalogue's root with the given credentials and says what is wrong, if anything. Answers 200 either way: a failed check is a result, not an error."
@@ -4231,6 +4358,13 @@ paths:
           schema:
             maxLength: 200
             minLength: 1
+            type: string
+        - description: The title being linked, so a source that knows it can put its series first.
+          explode: false
+          in: query
+          name: media_ref
+          schema:
+            description: The title being linked, so a source that knows it can put its series first.
             type: string
       responses:
         "200":

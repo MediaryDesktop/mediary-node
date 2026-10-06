@@ -23,9 +23,17 @@ func (s *Service) Sources(ctx context.Context) ([]SourceInfo, error) {
 		return nil, err
 	}
 
-	sources := make([]SourceInfo, 0, len(servers))
+	sources := make([]SourceInfo, 0, len(servers)+1)
 	for _, server := range servers {
 		sources = append(sources, SourceInfo{ID: sourceID(server.ID), Name: server.Name, Kind: "opds"})
+	}
+
+	dex, err := s.MangaDexSettings(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if dex.Enabled {
+		sources = append(sources, SourceInfo{ID: SourceMangaDex, Name: mangaDexName, Kind: SourceMangaDex})
 	}
 
 	return sources, nil
@@ -34,13 +42,23 @@ func (s *Service) Sources(ctx context.Context) ([]SourceInfo, error) {
 type SeriesHit struct {
 	ID    string
 	Title string
+	// Detail tells similar names apart: a year, for MangaDex.
+	Detail string
+	// Matched is true when the source itself links the series to the title being
+	// linked, as MangaDex does with AniList ids.
+	Matched bool
 }
 
-// Search finds series in one source, for the user to link a title to.
-func (s *Service) Search(ctx context.Context, source, query string) ([]SeriesHit, error) {
+// Search finds series in one source, for the user to link a title to. mediaRef is
+// the title being linked, when the source can say which result belongs to it.
+func (s *Service) Search(ctx context.Context, source, query, mediaRef string) ([]SeriesHit, error) {
 	query = strings.TrimSpace(query)
 	if query == "" {
 		return nil, apperr.Invalid("q", "the search is empty")
+	}
+
+	if source == SourceMangaDex {
+		return s.searchMangaDex(ctx, query, mediaRef)
 	}
 
 	serverID, ok := serverOf(source)
@@ -105,6 +123,15 @@ func (s *Service) SetLink(ctx context.Context, mediaRef, source, seriesID, serie
 	if strings.TrimSpace(mediaRef) == "" {
 		return apperr.Invalid("media_ref", "the title is missing")
 	}
+
+	if source == SourceMangaDex {
+		if !uuidPattern.MatchString(seriesID) {
+			return apperr.Invalid("series_id", "a MangaDex series is named by its id, as the search returns it")
+		}
+
+		return s.putLink(ctx, mediaRef, source, seriesID, seriesTitle)
+	}
+
 	if !strings.HasPrefix(seriesID, "/") {
 		return apperr.Invalid("series_id", "a series is named by its path on the server, as the search returns it")
 	}
@@ -119,6 +146,10 @@ func (s *Service) SetLink(ctx context.Context, mediaRef, source, seriesID, serie
 		return apperr.New(apperr.KindNotFound, "OPDS server %d does not exist", serverID)
 	}
 
+	return s.putLink(ctx, mediaRef, source, seriesID, seriesTitle)
+}
+
+func (s *Service) putLink(ctx context.Context, mediaRef, source, seriesID, seriesTitle string) error {
 	return s.store.PutLink(ctx, store.Link{
 		MediaRef:    mediaRef,
 		Source:      source,
@@ -149,6 +180,11 @@ type ChapterInfo struct {
 	Number     string
 	Title      string
 	Pages      int
+	// Language and Groups credit who translated it, where the source says.
+	Language string
+	Groups   []string
+	// ExternalURL is the publisher's page for a chapter the source only links to.
+	ExternalURL string
 }
 
 // SourceProblem is a linked source that could not be read; the others still are.
@@ -170,6 +206,22 @@ func (s *Service) Chapters(ctx context.Context, mediaRef string) ([]ChapterInfo,
 	problems := []SourceProblem{}
 
 	for _, link := range links {
+		if link.Source == SourceMangaDex {
+			found, err := s.mangaDexChapters(ctx, link.SeriesID, link.SeriesTitle)
+			if err != nil {
+				if ctx.Err() != nil {
+					return nil, nil, ctx.Err()
+				}
+				problems = append(problems, SourceProblem{Source: link.Source, SourceName: mangaDexName, Detail: err.Error()})
+
+				continue
+			}
+
+			chapters = append(chapters, found...)
+
+			continue
+		}
+
 		serverID, ok := serverOf(link.Source)
 		if !ok {
 			continue

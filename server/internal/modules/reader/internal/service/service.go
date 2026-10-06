@@ -80,6 +80,10 @@ type Chapter struct {
 	// for an extra. Only a whole number moves progress; see ProgressChapter.
 	Number string
 	Pages  []archive.Page
+
+	// SourceName and Groups are the credit shown with an online chapter.
+	SourceName string
+	Groups     []string
 }
 
 // Chapter lists the pages of a chapter in reading order.

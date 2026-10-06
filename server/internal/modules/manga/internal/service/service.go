@@ -11,6 +11,7 @@ import (
 
 	"github.com/rs/zerolog"
 
+	"github.com/mediaryorg/mediary-node/server/internal/modules/manga/internal/mangadex"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/manga/internal/opds"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/manga/internal/store"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
@@ -26,7 +27,9 @@ type Passwords interface {
 
 type Options struct {
 	Client *opds.Client
-	Now    func() time.Time
+	// MangaDex is nil when the node is configured without it.
+	MangaDex *mangadex.Client
+	Now      func() time.Time
 }
 
 type Service struct {
@@ -34,6 +37,7 @@ type Service struct {
 	passwords Passwords
 	logger    zerolog.Logger
 	opts      Options
+	dex       *dexCache
 }
 
 func New(st *store.Store, passwords Passwords, logger zerolog.Logger, opts Options) *Service {
@@ -41,7 +45,7 @@ func New(st *store.Store, passwords Passwords, logger zerolog.Logger, opts Optio
 		opts.Now = time.Now
 	}
 
-	return &Service{store: st, passwords: passwords, logger: logger, opts: opts}
+	return &Service{store: st, passwords: passwords, logger: logger, opts: opts, dex: newDexCache()}
 }
 
 // Server is an OPDS server as the API shows it: never with its password.
