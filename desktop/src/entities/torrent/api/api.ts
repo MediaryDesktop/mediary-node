@@ -9,6 +9,7 @@ export type TorrentPathMap = NodeSchemas['TorrentPathMap']
 export type TorrentCheckResult = NodeSchemas['TorrentCheckResult']
 export type TorrentFile = NodeSchemas['TorrentFile']
 export type TorrentSource = NodeSchemas['TorrentSource']
+export type TorrentProfile = Omit<NodeSchemas['TorrentProfile'], '$schema'>
 export type TorrentSourceCaps = NodeSchemas['TorrentSourceCaps']
 export type TorrentRelease = NodeSchemas['TorrentRelease']
 export type TorrentSearchResult = NodeSchemas['TorrentSearchResult']
@@ -144,3 +145,13 @@ export const searchTorrentsFx = createNodeRequestFx<TorrentSearchParams, Torrent
 		timeout: 30_000
 	})
 )
+
+export const fetchTorrentProfileFx = createNodeRequestFx<void, TorrentProfile>(() => ({
+	url: '/v1/torrent/profile'
+}))
+
+export const putTorrentProfileFx = createNodeRequestFx<TorrentProfile, TorrentProfile>(body => ({
+	url: '/v1/torrent/profile',
+	method: 'PUT',
+	body
+}))

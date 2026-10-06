@@ -894,6 +894,9 @@ export const en = {
 			placeholder: 'Search by the title’s names, or type your own query',
 			episode: 'Episode',
 			submit: 'Search',
+			best: 'Best',
+			bestIs: 'Best match: {{title}}',
+			downloadBest: 'Download best',
 			queries: 'Searched for: {{queries}}',
 			noSources: 'Add Jackett or Prowlarr in the settings to search for releases.',
 			failed: 'The search failed',
@@ -932,6 +935,16 @@ export const en = {
 			save: 'Save',
 			create: 'Add',
 			saveFailed: 'Could not save the source'
+		},
+		profile: {
+			resolution: 'Resolution',
+			codec: 'Codec',
+			any: 'Any',
+			minSeeders: 'Minimum seeders',
+			preferred: 'Preferred words, best first — groups, sites',
+			excluded: 'Never pick releases with these words',
+			save: 'Save preferences',
+			saveFailed: 'Could not save the preferences'
 		},
 		list: {
 			title: 'Torrents',
@@ -1015,6 +1028,10 @@ export const en = {
 		torrentSearch: {
 			name: 'Torrent search',
 			hint: 'Your Jackett or Prowlarr, searched through Torznab. Mediary has no indexers of its own'
+		},
+		releaseProfile: {
+			name: 'Release preferences',
+			hint: 'What search ranks first and picks as the best release'
 		},
 		mangaSources: {
 			name: 'Manga sources',

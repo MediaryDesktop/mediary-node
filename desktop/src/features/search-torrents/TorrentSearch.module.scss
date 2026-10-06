@@ -41,6 +41,26 @@
 		font-size: 0.8125rem;
 	}
 
+	.bestBar {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.625rem 1rem;
+		border: 1px solid var(--border);
+		border-radius: var(--radius);
+		background: var(--bg-subtle);
+
+		.bestName {
+			flex: 1;
+			min-width: 0;
+			overflow: hidden;
+			color: var(--text-secondary);
+			font-size: 0.875rem;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+	}
+
 	.list {
 		display: flex;
 		flex-direction: column;
@@ -102,6 +122,10 @@
 			flex: none;
 			align-items: center;
 			gap: 0.25rem;
+		}
+
+		&.ineligible .body {
+			opacity: 0.6;
 		}
 	}
 }

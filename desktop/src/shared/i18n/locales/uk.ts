@@ -894,6 +894,9 @@ export const uk: Translation = {
 			placeholder: 'Пошук за назвами тайтлу або власним запитом',
 			episode: 'Серія',
 			submit: 'Шукати',
+			best: 'Найкраща',
+			bestIs: 'Найкраща: {{title}}',
+			downloadBest: 'Завантажити найкращу',
 			queries: 'Шукали: {{queries}}',
 			noSources: 'Додайте Jackett або Prowlarr у налаштуваннях, щоб шукати роздачі.',
 			failed: 'Пошук не вдався',
@@ -932,6 +935,16 @@ export const uk: Translation = {
 			save: 'Зберегти',
 			create: 'Додати',
 			saveFailed: 'Не вдалося зберегти джерело'
+		},
+		profile: {
+			resolution: 'Роздільність',
+			codec: 'Кодек',
+			any: 'Будь-яка',
+			minSeeders: 'Мінімум сидів',
+			preferred: 'Бажані слова, від найважливішого — групи, сайти',
+			excluded: 'Ніколи не обирати роздачі з цими словами',
+			save: 'Зберегти уподобання',
+			saveFailed: 'Не вдалося зберегти уподобання'
 		},
 		list: {
 			title: 'Торенти',
@@ -1015,6 +1028,10 @@ export const uk: Translation = {
 		torrentSearch: {
 			name: 'Пошук торентів',
 			hint: 'Ваш Jackett або Prowlarr через Torznab. Власних індексаторів у Mediary немає'
+		},
+		releaseProfile: {
+			name: 'Уподобання щодо роздач',
+			hint: 'Що пошук ставить першим і обирає як найкращу роздачу'
 		},
 		mangaSources: {
 			name: 'Джерела манги',

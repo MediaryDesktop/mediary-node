@@ -895,6 +895,9 @@ export const ru: Translation = {
 			placeholder: 'Поиск по названиям тайтла или своему запросу',
 			episode: 'Серия',
 			submit: 'Искать',
+			best: 'Лучшая',
+			bestIs: 'Лучшая: {{title}}',
+			downloadBest: 'Загрузить лучшую',
 			queries: 'Искали: {{queries}}',
 			noSources: 'Добавьте Jackett или Prowlarr в настройках, чтобы искать раздачи.',
 			failed: 'Поиск не удался',
@@ -933,6 +936,16 @@ export const ru: Translation = {
 			save: 'Сохранить',
 			create: 'Добавить',
 			saveFailed: 'Не удалось сохранить источник'
+		},
+		profile: {
+			resolution: 'Разрешение',
+			codec: 'Кодек',
+			any: 'Любое',
+			minSeeders: 'Минимум сидов',
+			preferred: 'Желаемые слова, от самого важного — группы, сайты',
+			excluded: 'Никогда не выбирать раздачи с этими словами',
+			save: 'Сохранить предпочтения',
+			saveFailed: 'Не удалось сохранить предпочтения'
 		},
 		list: {
 			title: 'Торренты',
@@ -1016,6 +1029,10 @@ export const ru: Translation = {
 		torrentSearch: {
 			name: 'Поиск торрентов',
 			hint: 'Ваш Jackett или Prowlarr через Torznab. Своих индексаторов в Mediary нет'
+		},
+		releaseProfile: {
+			name: 'Предпочтения по раздачам',
+			hint: 'Что поиск ставит первым и выбирает как лучшую раздачу'
 		},
 		mangaSources: {
 			name: 'Источники манги',

@@ -1211,6 +1211,27 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/v1/torrent/profile': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Release profile
+		 * @description What the user likes in a release. Search scores every result by it and marks the best.
+		 */
+		get: operations['getTorrentProfile']
+		/** Save the release profile */
+		put: operations['putTorrentProfile']
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/v1/torrent/search': {
 		parameters: {
 			query?: never
@@ -3463,10 +3484,41 @@ export interface components {
 			client: string
 			node: string
 		}
+		TorrentProfile: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TorrentProfile.json
+			 */
+			readonly $schema?: string
+			/**
+			 * @description Preferred codec. Empty for any.
+			 * @enum {string}
+			 */
+			codec: '' | 'HEVC' | 'AVC' | 'AV1'
+			/** @description Words that keep a release from being the best, e.g. a dub or a codec the TV cannot play. */
+			excluded: string[] | null
+			/**
+			 * Format: int64
+			 * @description Fewer seeders keeps a release from being the best.
+			 */
+			min_seeders: number
+			/** @description Words a release name should have — groups, sites, "multi-sub" — best first. */
+			preferred: string[] | null
+			/**
+			 * @description Preferred resolution; lower ones follow in order. Empty for any.
+			 * @enum {string}
+			 */
+			resolution: '' | '2160p' | '1080p' | '720p' | '480p'
+		}
 		TorrentRelease: {
 			batch: boolean
+			/** @description The one result the profile would pick. */
+			best: boolean
 			/** @description e.g. HEVC */
 			codec?: string
+			/** @description False when an excluded word or too few seeders keep it from being the best. */
+			eligible: boolean
 			/** @description Absent when the name gives no episode. */
 			episodes?: components['schemas']['Episodes']
 			/** Format: int64 */
@@ -3489,6 +3541,11 @@ export interface components {
 			published_at?: string
 			/** @description e.g. 1080p */
 			resolution?: string
+			/**
+			 * Format: int64
+			 * @description How well it fits the release profile; higher is better.
+			 */
+			score: number
 			/** Format: int64 */
 			seeders: number
 			/** Format: int64 */
@@ -3777,6 +3834,7 @@ export type SchemaTorrentFile = components['schemas']['TorrentFile']
 export type SchemaTorrentFilesOutputBody = components['schemas']['TorrentFilesOutputBody']
 export type SchemaTorrentLive = components['schemas']['TorrentLive']
 export type SchemaTorrentPathMap = components['schemas']['TorrentPathMap']
+export type SchemaTorrentProfile = components['schemas']['TorrentProfile']
 export type SchemaTorrentRelease = components['schemas']['TorrentRelease']
 export type SchemaTorrentSearchResult = components['schemas']['TorrentSearchResult']
 export type SchemaTorrentSettings = components['schemas']['TorrentSettings']
@@ -6168,6 +6226,68 @@ export interface operations {
 					[name: string]: unknown
 				}
 				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getTorrentProfile: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentProfile']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	putTorrentProfile: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['TorrentProfile']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentProfile']
+				}
 			}
 			/** @description Error */
 			default: {

@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router'
+import clsx from 'clsx'
 import { useUnit } from 'effector-react'
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
@@ -77,6 +78,7 @@ export function TorrentSearch({ mediaRef, title }: TorrentSearchProps) {
 		error && 'body' in error ? (error.body as { detail?: string; status?: number } | null) : null
 	const failedSources = (result?.sources ?? []).filter(source => source.error)
 	const releases = result?.releases ?? []
+	const best = releases.find(found => found.best)
 
 	return (
 		<section className={styles.root}>
@@ -129,16 +131,38 @@ export function TorrentSearch({ mediaRef, title }: TorrentSearchProps) {
 
 			{result && releases.length === 0 && <p className={styles.empty}>{t('torrents.search.empty')}</p>}
 
+			{best && (
+				<div className={styles.bestBar}>
+					<span className={styles.bestName} title={best.title}>
+						{t('torrents.search.bestIs', { title: best.title })}
+					</span>
+					<Button
+						size='small'
+						startIcon={<Icon name='common/sparkles' size={14} />}
+						loading={adding === best.id}
+						disabled={adding !== null}
+						onClick={() => download(best)}
+					>
+						{t('torrents.search.downloadBest')}
+					</Button>
+				</div>
+			)}
+
 			{releases.length > 0 && (
 				<ul className={styles.list}>
 					{releases.map(found => (
-						<li key={found.id} className={styles.row}>
+						<li key={found.id} className={clsx(styles.row, !found.eligible && styles.ineligible)}>
 							<div className={styles.body}>
 								<p className={styles.name} title={found.title}>
 									{found.title}
 								</p>
 
 								<div className={styles.badges}>
+									{found.best && (
+										<Badge tone='warning' icon='common/star'>
+											{t('torrents.search.best')}
+										</Badge>
+									)}
 									{found.match === 'episode' && (
 										<Badge tone='success'>{t('torrents.search.match.episode')}</Badge>
 									)}

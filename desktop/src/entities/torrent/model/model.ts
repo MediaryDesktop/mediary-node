@@ -11,9 +11,11 @@ import {
 	deleteTorrentSourceFx,
 	fetchTorrentDownloadsFx,
 	fetchTorrentFilesFx,
+	fetchTorrentProfileFx,
 	fetchTorrentSettingsFx,
 	fetchTorrentSourcesFx,
 	pauseTorrentFx,
+	putTorrentProfileFx,
 	putTorrentSettingsFx,
 	removeTorrentFx,
 	resumeTorrentFx,
@@ -129,3 +131,12 @@ export const torrentSearchQuery = createQuery({ effect: searchTorrentsFx, name: 
 
 // A new search makes the one still running moot.
 concurrency(torrentSearchQuery, { strategy: 'TAKE_LATEST' })
+
+export const torrentProfileQuery = createQuery({ effect: fetchTorrentProfileFx, name: 'torrentProfile' })
+
+export const putTorrentProfileMutation = createMutation({
+	effect: putTorrentProfileFx,
+	name: 'putTorrentProfile'
+})
+
+keepFresh(torrentProfileQuery, { triggers: [putTorrentProfileMutation.finished.success] })
