@@ -1089,7 +1089,27 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
-	'/v1/torrent/status': {
+	'/v1/torrent/check': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Try a torrent client connection
+		 * @description Signs in to qBittorrent with the given address and credentials, saved or not, and reports its version.
+		 */
+		post: operations['checkTorrentClient']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/torrent/downloads': {
 		parameters: {
 			query?: never
 			header?: never
@@ -1097,11 +1117,93 @@ export interface paths {
 			cookie?: never
 		}
 		/**
-		 * Torrent module status
-		 * @description Reports whether the torrent module is wired. Placeholder for phase 0.
+		 * Torrent downloads
+		 * @description Downloads the node added to the torrent client, newest first, each with what the client last said about it. Changes arrive on the torrent topic.
 		 */
-		get: operations['getTorrentStatus']
+		get: operations['listTorrentDownloads']
 		put?: never
+		/**
+		 * TorrentDownload a torrent for a title
+		 * @description Adds a magnet link or a .torrent file to the torrent client, saving into the title's folder inside the download folder. When it finishes, its videos join the library matched to the title, each with the episode its name gives.
+		 */
+		post: operations['addTorrentDownload']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/torrent/downloads/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		post?: never
+		/**
+		 * Remove a torrent download
+		 * @description Takes the torrent out of the client and the download off the list. Needs the client reachable, so no torrent is left running that the node no longer knows. Files already in the library stay there unless with_files.
+		 */
+		delete: operations['removeTorrentDownload']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/torrent/downloads/{id}/pause': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/** Pause a torrent download */
+		post: operations['pauseTorrentDownload']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/torrent/downloads/{id}/resume': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/** Resume a torrent download */
+		post: operations['resumeTorrentDownload']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/torrent/settings': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Torrent client settings
+		 * @description The password is never returned; has_password says whether one is saved.
+		 */
+		get: operations['getTorrentSettings']
+		/**
+		 * Save torrent client settings
+		 * @description The password goes to the node's secrets file, not the database.
+		 */
+		put: operations['putTorrentSettings']
 		post?: never
 		delete?: never
 		options?: never
@@ -1259,6 +1361,22 @@ export interface components {
 			 */
 			path: string
 		}
+		AddTorrentDownloadInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/AddTorrentDownloadInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description A magnet link with a BitTorrent v1 hash. Give this or torrent. */
+			magnet?: string
+			/** @description The title the download is for; its files are matched to it. */
+			media_ref: string
+			/** @description The title's name, which names the folder the torrent is saved into. */
+			title?: string
+			/** @description A .torrent file, base64-encoded. Give this or magnet. */
+			torrent?: string
+		}
 		AiringEpisode: {
 			/** Format: date-time */
 			airing_at: string
@@ -1344,6 +1462,18 @@ export interface components {
 			 * @enum {string}
 			 */
 			problem?: 'unauthorized' | 'not_opds' | 'unreachable' | 'other_host'
+		}
+		CheckTorrentClientInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/CheckTorrentClientInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description Left out uses the saved password. */
+			password?: string
+			url: string
+			username: string
 		}
 		CollectionOutputBody: {
 			/**
@@ -2339,6 +2469,26 @@ export interface components {
 			series_id: string
 			series_title?: string
 		}
+		PutTorrentSettingsInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/PutTorrentSettingsInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description Left out keeps the saved password; empty removes it. */
+			password?: string
+			/** @description How the client names the node's folders, when it runs in Docker or on another machine. */
+			path_map: components['schemas']['TorrentPathMap']
+			/**
+			 * Format: int64
+			 * @description Library folder torrents are saved into; 0 while none is chosen.
+			 */
+			root_id: number
+			/** @description qBittorrent WebUI address; empty disconnects. */
+			url: string
+			username: string
+		}
 		ReadBody: {
 			/**
 			 * Format: uri
@@ -2921,7 +3071,7 @@ export interface components {
 			readonly $schema?: string
 			/**
 			 * @description Module name.
-			 * @example torrent
+			 * @example reader
 			 */
 			module: string
 			/** @description True when the module's dependencies are wired. */
@@ -2936,7 +3086,7 @@ export interface components {
 			readonly $schema?: string
 			/**
 			 * @description Module name.
-			 * @example reader
+			 * @example sync
 			 */
 			module: string
 			/** @description True when the module's dependencies are wired. */
@@ -2947,21 +3097,6 @@ export interface components {
 			 * Format: uri
 			 * @description A URL to the JSON Schema for this object.
 			 * @example https://example.com/schemas/StatusOutputBody2.json
-			 */
-			readonly $schema?: string
-			/**
-			 * @description Module name.
-			 * @example sync
-			 */
-			module: string
-			/** @description True when the module's dependencies are wired. */
-			ready: boolean
-		}
-		StatusOutputBody3: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/StatusOutputBody3.json
 			 */
 			readonly $schema?: string
 			/**
@@ -3062,6 +3197,111 @@ export interface components {
 			romaji: string | null
 			user_preferred: string | null
 		}
+		TorrentCheckResult: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TorrentCheckResult.json
+			 */
+			readonly $schema?: string
+			version: string
+		}
+		TorrentClientStatus: {
+			configured: boolean
+			error?: string
+			reachable: boolean
+		}
+		TorrentDownload: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TorrentDownload.json
+			 */
+			readonly $schema?: string
+			/** Format: date-time */
+			completed_at?: string
+			/** Format: date-time */
+			created_at: string
+			error?: string
+			/** Format: int64 */
+			id: number
+			/**
+			 * Format: int64
+			 * @description Files that joined the library.
+			 */
+			imported: number
+			info_hash: string
+			live?: components['schemas']['TorrentLive']
+			media_ref: string
+			name: string
+			/** @enum {string} */
+			source: 'magnet' | 'file'
+			/**
+			 * @description The node's state: a done download's files are in the library; the client may still be seeding it.
+			 * @enum {string}
+			 */
+			state: 'downloading' | 'importing' | 'done' | 'failed'
+			title: string
+		}
+		TorrentDownloadsOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TorrentDownloadsOutputBody.json
+			 */
+			readonly $schema?: string
+			client: components['schemas']['TorrentClientStatus']
+			downloads: components['schemas']['TorrentDownload'][] | null
+		}
+		TorrentLive: {
+			/**
+			 * Format: int64
+			 * @description Bytes per second.
+			 */
+			dl_speed: number
+			/**
+			 * Format: int64
+			 * @description Seconds left; absent when the client cannot tell.
+			 */
+			eta?: number
+			paused: boolean
+			/** Format: int64 */
+			peers: number
+			/** Format: double */
+			progress: number
+			/** Format: int64 */
+			seeds: number
+			/**
+			 * Format: int64
+			 * @description Bytes the selected files take.
+			 */
+			size: number
+			/** @description qBittorrent's own state name, e.g. downloading, stalledDL, pausedDL, uploading. */
+			state: string
+			/**
+			 * Format: int64
+			 * @description Bytes per second.
+			 */
+			up_speed: number
+		}
+		TorrentPathMap: {
+			client: string
+			node: string
+		}
+		TorrentSettings: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TorrentSettings.json
+			 */
+			readonly $schema?: string
+			has_password: boolean
+			path_map: components['schemas']['TorrentPathMap']
+			/** Format: int64 */
+			root_id: number
+			url: string
+			username: string
+		}
 		Trailer: {
 			/** @description Video id on the hosting site. */
 			id: string
@@ -3137,6 +3377,7 @@ export interface components {
 export type SchemaAcceptedOutputBody = components['schemas']['AcceptedOutputBody']
 export type SchemaAccount = components['schemas']['Account']
 export type SchemaAddRootInputBody = components['schemas']['AddRootInputBody']
+export type SchemaAddTorrentDownloadInputBody = components['schemas']['AddTorrentDownloadInputBody']
 export type SchemaAiringEpisode = components['schemas']['AiringEpisode']
 export type SchemaAudio = components['schemas']['Audio']
 export type SchemaChapter = components['schemas']['Chapter']
@@ -3144,6 +3385,7 @@ export type SchemaChapterBody = components['schemas']['ChapterBody']
 export type SchemaChapterOutputBody = components['schemas']['ChapterOutputBody']
 export type SchemaCheckOpdsServerInputBody = components['schemas']['CheckOPDSServerInputBody']
 export type SchemaCheckOpdsServerOutputBody = components['schemas']['CheckOPDSServerOutputBody']
+export type SchemaCheckTorrentClientInputBody = components['schemas']['CheckTorrentClientInputBody']
 export type SchemaCollectionOutputBody = components['schemas']['CollectionOutputBody']
 export type SchemaControlInputBody = components['schemas']['ControlInputBody']
 export type SchemaCounts = components['schemas']['Counts']
@@ -3207,6 +3449,7 @@ export type SchemaPutMangaDexSettingsInputBody = components['schemas']['PutManga
 export type SchemaPutMangaDownloadSettingsInputBody =
 	components['schemas']['PutMangaDownloadSettingsInputBody']
 export type SchemaPutMangaLinkInputBody = components['schemas']['PutMangaLinkInputBody']
+export type SchemaPutTorrentSettingsInputBody = components['schemas']['PutTorrentSettingsInputBody']
 export type SchemaReadBody = components['schemas']['ReadBody']
 export type SchemaReadOutputBody = components['schemas']['ReadOutputBody']
 export type SchemaRelatedMedia = components['schemas']['RelatedMedia']
@@ -3237,7 +3480,6 @@ export type SchemaStartInputBody = components['schemas']['StartInputBody']
 export type SchemaStatusOutputBody = components['schemas']['StatusOutputBody']
 export type SchemaStatusOutputBody1 = components['schemas']['StatusOutputBody1']
 export type SchemaStatusOutputBody2 = components['schemas']['StatusOutputBody2']
-export type SchemaStatusOutputBody3 = components['schemas']['StatusOutputBody3']
 export type SchemaStream = components['schemas']['Stream']
 export type SchemaStreamOutputBody = components['schemas']['StreamOutputBody']
 export type SchemaSubtitle = components['schemas']['Subtitle']
@@ -3245,6 +3487,13 @@ export type SchemaSuggestion = components['schemas']['Suggestion']
 export type SchemaSuggestionsOutputBody = components['schemas']['SuggestionsOutputBody']
 export type SchemaTitle = components['schemas']['Title']
 export type SchemaTitleNames = components['schemas']['TitleNames']
+export type SchemaTorrentCheckResult = components['schemas']['TorrentCheckResult']
+export type SchemaTorrentClientStatus = components['schemas']['TorrentClientStatus']
+export type SchemaTorrentDownload = components['schemas']['TorrentDownload']
+export type SchemaTorrentDownloadsOutputBody = components['schemas']['TorrentDownloadsOutputBody']
+export type SchemaTorrentLive = components['schemas']['TorrentLive']
+export type SchemaTorrentPathMap = components['schemas']['TorrentPathMap']
+export type SchemaTorrentSettings = components['schemas']['TorrentSettings']
 export type SchemaTrailer = components['schemas']['Trailer']
 export type SchemaUpdateEntryInputBody = components['schemas']['UpdateEntryInputBody']
 export type SchemaVideo = components['schemas']['Video']
@@ -3354,7 +3603,7 @@ export interface operations {
 					[name: string]: unknown
 				}
 				content: {
-					'application/json': components['schemas']['StatusOutputBody3']
+					'application/json': components['schemas']['StatusOutputBody2']
 				}
 			}
 			/** @description Error */
@@ -5348,7 +5597,7 @@ export interface operations {
 					[name: string]: unknown
 				}
 				content: {
-					'application/json': components['schemas']['StatusOutputBody1']
+					'application/json': components['schemas']['StatusOutputBody']
 				}
 			}
 			/** @description Error */
@@ -5377,7 +5626,7 @@ export interface operations {
 					[name: string]: unknown
 				}
 				content: {
-					'application/json': components['schemas']['StatusOutputBody2']
+					'application/json': components['schemas']['StatusOutputBody1']
 				}
 			}
 			/** @description Error */
@@ -5391,7 +5640,40 @@ export interface operations {
 			}
 		}
 	}
-	getTorrentStatus: {
+	checkTorrentClient: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['CheckTorrentClientInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentCheckResult']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listTorrentDownloads: {
 		parameters: {
 			query?: never
 			header?: never
@@ -5406,7 +5688,192 @@ export interface operations {
 					[name: string]: unknown
 				}
 				content: {
-					'application/json': components['schemas']['StatusOutputBody']
+					'application/json': components['schemas']['TorrentDownloadsOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	addTorrentDownload: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['AddTorrentDownloadInputBody']
+			}
+		}
+		responses: {
+			/** @description Created */
+			201: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentDownload']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	removeTorrentDownload: {
+		parameters: {
+			query?: {
+				/** @description Also delete the downloaded files from disk. */
+				with_files?: boolean
+			}
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	pauseTorrentDownload: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	resumeTorrentDownload: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getTorrentSettings: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentSettings']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	putTorrentSettings: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['PutTorrentSettingsInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentSettings']
 				}
 			}
 			/** @description Error */

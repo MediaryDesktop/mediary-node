@@ -13,6 +13,8 @@ import { manageEntryModel, rateEntryModel } from '@features/track-media'
 
 import styles from './MediaActions.module.scss'
 
+export type MediaView = 'library' | 'torrent'
+
 export interface MediaActionsProps {
 	mediaRef: string
 	title: string
@@ -21,6 +23,9 @@ export interface MediaActionsProps {
 	mediaType: string
 	siteUrl: string
 	total: number | null | undefined
+	view: MediaView
+	// Absent where torrents make no sense: manga is read, not downloaded as video.
+	onViewChange?: (view: MediaView) => void
 	onOpenDetails: () => void
 }
 
@@ -32,6 +37,8 @@ export function MediaActions({
 	mediaType,
 	siteUrl,
 	total,
+	view,
+	onViewChange,
 	onOpenDetails
 }: MediaActionsProps) {
 	const { t } = useTranslation()
@@ -132,27 +139,27 @@ export function MediaActions({
 			<div className={styles.viewTabs} role='tablist'>
 				<Button
 					role='tab'
-					aria-selected
+					aria-selected={view === 'library'}
 					variant='ghost'
 					className={styles.viewTab}
 					startIcon={<Icon name='common/library' size={20} />}
+					onClick={() => onViewChange?.('library')}
 				>
 					{t('media.views.library')}
 				</Button>
 
-				<Tooltip content={t('media.comingSoon')}>
-					<span className={styles.iconActionWrap}>
-						<Button
-							role='tab'
-							aria-selected={false}
-							disabled
-							variant='ghost'
-							className={styles.viewTab}
-						>
-							{t('media.views.torrent')}
-						</Button>
-					</span>
-				</Tooltip>
+				{onViewChange && (
+					<Button
+						role='tab'
+						aria-selected={view === 'torrent'}
+						variant='ghost'
+						className={styles.viewTab}
+						startIcon={<Icon name='common/download' size={20} />}
+						onClick={() => onViewChange('torrent')}
+					>
+						{t('media.views.torrent')}
+					</Button>
+				)}
 			</div>
 		</div>
 	)

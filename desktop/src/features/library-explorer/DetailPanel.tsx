@@ -2,6 +2,7 @@ import clsx from 'clsx'
 import type { ReactNode } from 'react'
 
 import { useTranslation } from '@shared/i18n'
+import { formatBytes } from '@shared/lib'
 import { Badge, Icon } from '@shared/ui'
 
 import { fileDuration, fileNumber, fileSeason, isMatched } from '@entities/library-item'
@@ -13,20 +14,6 @@ import type { TreeNode } from './lib/build-tree'
 export interface DetailPanelProps {
 	node: TreeNode | null
 	titles: LibraryTitle[]
-}
-
-function formatSize(bytes: number): string {
-	const units = ['B', 'KB', 'MB', 'GB', 'TB']
-
-	let value = bytes
-	let unit = 0
-
-	while (value >= 1024 && unit < units.length - 1) {
-		value /= 1024
-		unit += 1
-	}
-
-	return `${value.toFixed(unit === 0 ? 0 : 1)} ${units[unit]}`
 }
 
 function extensionOf(name: string): string {
@@ -110,7 +97,7 @@ export function DetailPanel({ node, titles }: DetailPanelProps) {
 									{fileDuration(file) ?? '—'}
 								</Field>
 								<Field label={t('library.explorer.size')}>
-									{formatSize(file.size_bytes)}
+									{formatBytes(file.size_bytes)}
 								</Field>
 							</div>
 
@@ -142,15 +129,7 @@ export function DetailPanel({ node, titles }: DetailPanelProps) {
 	)
 }
 
-function Field({
-	label,
-	inline,
-	children
-}: {
-	label: string
-	inline?: boolean
-	children: ReactNode
-}) {
+function Field({ label, inline, children }: { label: string; inline?: boolean; children: ReactNode }) {
 	return (
 		<div className={clsx(styles.field, inline && styles.inline)}>
 			<dt>{label}</dt>

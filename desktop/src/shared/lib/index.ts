@@ -1,4 +1,4 @@
-export { formatCompact, formatDateTime, formatDuration, formatWeekday } from './format'
+export { formatBytes, formatCompact, formatDateTime, formatDuration, formatWeekday } from './format'
 export { formatRelativeTime } from './relative-time'
 export type { RelativeTimeOptions } from './relative-time'
 export { firstPresent } from './text'

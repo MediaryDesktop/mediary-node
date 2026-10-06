@@ -566,7 +566,7 @@ export const ru: Translation = {
 		nextAiringDay: 'Эпизод {{episode}} {{when}}',
 		views: {
 			library: 'Локальная библиотека',
-			torrent: 'Торрент-стриминг'
+			torrent: 'Торренты'
 		},
 		chapters: {
 			title: 'Главы · {{count}}'
@@ -860,6 +860,84 @@ export const ru: Translation = {
 			failed: 'Не удалось привязать серию'
 		}
 	},
+	torrents: {
+		add: 'Добавить торрент',
+		drawer: {
+			title: 'Добавить торрент',
+			description: 'Для «{{title}}». После загрузки его видео появятся в библиотеке под этим тайтлом.',
+			magnetLabel: 'Magnet-ссылка',
+			magnetPlaceholder: 'magnet:?xt=urn:btih:…',
+			fileLabel: 'Или файл .torrent',
+			chooseFile: 'Выбрать файл .torrent',
+			clearFile: 'Убрать файл',
+			fileUnreadable: 'Не удалось прочитать этот файл',
+			submit: 'Загрузить',
+			failed: 'Не удалось добавить торрент'
+		},
+		list: {
+			title: 'Торренты',
+			empty: 'Торрент-загрузок пока нет',
+			emptyForTitle: 'Для этого тайтла пока ничего не загружено'
+		},
+		states: {
+			downloading: 'Загружается',
+			paused: 'На паузе',
+			stalled: 'Ищет пиров',
+			queued: 'В очереди qBittorrent',
+			checking: 'Проверка файлов',
+			metadata: 'Получение метаданных торрента',
+			error: 'qBittorrent сообщает об ошибке',
+			importing: 'Добавляется в библиотеку',
+			done: 'В библиотеке',
+			failed: 'Не удалось',
+			unknown: 'Ожидает qBittorrent'
+		},
+		meta: {
+			speed: '{{speed}}/с',
+			seeds: '{{seeds}} сидов · {{peers}} пиров',
+			eta: 'осталось {{time}}',
+			imported_one: '{{count}} файл в библиотеке',
+			imported_few: '{{count}} файла в библиотеке',
+			imported_many: '{{count}} файлов в библиотеке',
+			imported_other: '{{count}} файлов в библиотеке'
+		},
+		pause: 'Пауза',
+		resume: 'Продолжить',
+		remove: 'Убрать из списка',
+		removeWithFiles: 'Убрать вместе с файлами',
+		menu: 'Действия с загрузкой',
+		actionFailed: 'Не удалось изменить загрузку',
+		client: {
+			notConfigured: 'Подключите qBittorrent в настройках, чтобы загружать торренты',
+			unreachable: 'qBittorrent не отвечает: {{error}}',
+			openSettings: 'Открыть настройки'
+		},
+		settings: {
+			notConfigured: 'Не подключено',
+			configure: 'Подключить',
+			edit: 'Изменить',
+			drawerTitle: 'qBittorrent',
+			drawerDescription:
+				'Mediary добавляет торренты в ваш qBittorrent через его Web UI. Включите Web UI в qBittorrent: Настройки → Веб-интерфейс.',
+			urlLabel: 'Адрес Web UI',
+			usernameLabel: 'Имя пользователя',
+			passwordLabel: 'Пароль',
+			passwordKept: 'Оставьте пустым, чтобы сохранить текущий пароль',
+			passwordHint: 'Оставьте пустым, если Web UI пускает этот компьютер без пароля',
+			check: 'Проверить соединение',
+			ok: 'Подключено к qBittorrent {{version}}',
+			folderLabel: 'Папка загрузок',
+			folderHint: 'Папка библиотеки, куда сохраняются торренты, по подпапке на тайтл',
+			folderPlaceholder: 'Выберите папку библиотеки',
+			mappingLabel: 'Соответствие путей',
+			mappingHint:
+				'Только если qBittorrent работает в Docker или на другом компьютере и видит папку загрузок под другим путём. Заполните оба поля или ни одного.',
+			mappingClient: 'Папка, как её видит qBittorrent',
+			mappingNode: 'Та же папка на этом компьютере',
+			save: 'Сохранить',
+			saveFailed: 'Не удалось сохранить настройки'
+		}
+	},
 	settings: {
 		mangaDex: {
 			name: 'MangaDex',
@@ -868,6 +946,10 @@ export const ru: Translation = {
 		mangaDownloads: {
 			name: 'Загрузки манги',
 			hint: 'Папка библиотеки, куда сохраняются главы в формате CBZ'
+		},
+		torrents: {
+			name: 'Торренты',
+			hint: 'qBittorrent, который загружает торренты в вашу библиотеку'
 		},
 		mangaSources: {
 			name: 'Источники манги',

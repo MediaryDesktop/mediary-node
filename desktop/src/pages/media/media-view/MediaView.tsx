@@ -11,9 +11,11 @@ import type { TrackerEntry } from '@entities/tracker'
 import { resolveSubject } from '../lib/media-view'
 import { LibrarySection } from '../library-section/LibrarySection'
 import { MediaActions } from '../media-actions/MediaActions'
+import type { MediaView as MediaViewKind } from '../media-actions/MediaActions'
 import { MediaFacts } from '../media-facts/MediaFacts'
 import { MediaHero } from '../media-hero/MediaHero'
 import { RelationsSection } from '../relations-section/RelationsSection'
+import { TorrentSection } from '../torrent-section/TorrentSection'
 
 import styles from './MediaView.module.scss'
 
@@ -28,6 +30,7 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 	const { t, i18n } = useTranslation()
 	const [descriptionOpen, setDescriptionOpen] = useState(false)
 	const [detailsOpen, setDetailsOpen] = useState(false)
+	const [view, setView] = useState<MediaViewKind>('library')
 
 	const subject = resolveSubject(media, entry)
 
@@ -62,6 +65,8 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 				mediaType={mediaType}
 				siteUrl={base.site_url}
 				total={total}
+				view={view}
+				onViewChange={mediaType === 'manga' ? undefined : setView}
 				onOpenDetails={() => setDetailsOpen(true)}
 			/>
 
@@ -79,16 +84,20 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 			)}
 
 			<div className={styles.sections}>
-				<LibrarySection
-					mediaRef={mediaRef}
-					title={title}
-					cover={base.cover_image}
-					coverColor={base.cover_color}
-					banner={base.banner_image}
-					total={total}
-					mediaType={mediaType}
-					progress={entry?.progress ?? 0}
-				/>
+				{view === 'torrent' ? (
+					<TorrentSection mediaRef={mediaRef} title={title} />
+				) : (
+					<LibrarySection
+						mediaRef={mediaRef}
+						title={title}
+						cover={base.cover_image}
+						coverColor={base.cover_color}
+						banner={base.banner_image}
+						total={total}
+						mediaType={mediaType}
+						progress={entry?.progress ?? 0}
+					/>
+				)}
 
 				<RelationsSection relations={media?.relations ?? []} />
 			</div>

@@ -566,7 +566,7 @@ export const en = {
 		nextAiringDay: 'Episode {{episode}} {{when}}',
 		views: {
 			library: 'Local library',
-			torrent: 'Torrent streaming'
+			torrent: 'Torrents'
 		},
 		chapters: {
 			title: 'Chapters · {{count}}'
@@ -859,6 +859,84 @@ export const en = {
 			failed: 'Could not link the series'
 		}
 	},
+	torrents: {
+		add: 'Add torrent',
+		drawer: {
+			title: 'Add a torrent',
+			description: 'For {{title}}. Once downloaded, its videos join the library under this title.',
+			magnetLabel: 'Magnet link',
+			magnetPlaceholder: 'magnet:?xt=urn:btih:…',
+			fileLabel: 'Or a .torrent file',
+			chooseFile: 'Choose a .torrent file',
+			clearFile: 'Remove the file',
+			fileUnreadable: 'Could not read this file',
+			submit: 'Download',
+			failed: 'Could not add the torrent'
+		},
+		list: {
+			title: 'Torrents',
+			empty: 'No torrent downloads yet',
+			emptyForTitle: 'Nothing downloaded for this title yet'
+		},
+		states: {
+			downloading: 'Downloading',
+			paused: 'Paused',
+			stalled: 'Looking for peers',
+			queued: 'Queued in qBittorrent',
+			checking: 'Checking files',
+			metadata: 'Fetching the torrent’s metadata',
+			error: 'qBittorrent reports an error',
+			importing: 'Adding to the library',
+			done: 'In the library',
+			failed: 'Failed',
+			unknown: 'Waiting for qBittorrent'
+		},
+		meta: {
+			speed: '{{speed}}/s',
+			seeds: '{{seeds}} seeds · {{peers}} peers',
+			eta: '{{time}} left',
+			imported_one: '{{count}} file in the library',
+			imported_few: '{{count}} files in the library',
+			imported_many: '{{count}} files in the library',
+			imported_other: '{{count}} files in the library'
+		},
+		pause: 'Pause',
+		resume: 'Resume',
+		remove: 'Remove from the list',
+		removeWithFiles: 'Remove with the files',
+		menu: 'Download actions',
+		actionFailed: 'Could not change the download',
+		client: {
+			notConfigured: 'Connect qBittorrent in the settings to download torrents',
+			unreachable: 'qBittorrent is not answering: {{error}}',
+			openSettings: 'Open settings'
+		},
+		settings: {
+			notConfigured: 'Not connected',
+			configure: 'Connect',
+			edit: 'Change',
+			drawerTitle: 'qBittorrent',
+			drawerDescription:
+				'Mediary adds torrents to your qBittorrent through its Web UI. Turn the Web UI on in qBittorrent: Options → Web UI.',
+			urlLabel: 'Web UI address',
+			usernameLabel: 'Username',
+			passwordLabel: 'Password',
+			passwordKept: 'Leave empty to keep the saved password',
+			passwordHint: 'Leave empty if the Web UI lets this computer in without one',
+			check: 'Check the connection',
+			ok: 'Connected to qBittorrent {{version}}',
+			folderLabel: 'Download folder',
+			folderHint: 'The library folder torrents are saved into, one subfolder per title',
+			folderPlaceholder: 'Choose a library folder',
+			mappingLabel: 'Path mapping',
+			mappingHint:
+				'Only when qBittorrent runs in Docker or on another computer and sees the download folder under another path. Fill in both or neither.',
+			mappingClient: 'The folder as qBittorrent sees it',
+			mappingNode: 'The same folder on this computer',
+			save: 'Save',
+			saveFailed: 'Could not save the settings'
+		}
+	},
 	settings: {
 		mangaDex: {
 			name: 'MangaDex',
@@ -867,6 +945,10 @@ export const en = {
 		mangaDownloads: {
 			name: 'Manga downloads',
 			hint: 'Library folder chapters are saved to, as CBZ files'
+		},
+		torrents: {
+			name: 'Torrents',
+			hint: 'qBittorrent that downloads torrents into your library'
 		},
 		mangaSources: {
 			name: 'Manga sources',
