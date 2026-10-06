@@ -18,7 +18,9 @@ import {
 import type { TorrentDownload } from '@entities/torrent'
 
 import { displayState } from './lib/display-state'
+import { $filesFor, filesDismissed, filesRequested } from './model'
 import styles from './TorrentDownloadList.module.scss'
+import { TorrentFilesDrawer } from './TorrentFilesDrawer'
 
 export interface TorrentDownloadListProps {
 	// Only this title's downloads; all of them when left out.
@@ -32,13 +34,16 @@ export interface TorrentDownloadListProps {
 export function TorrentDownloadList({ mediaRef, hideTitle }: TorrentDownloadListProps) {
 	const { t } = useTranslation()
 
-	const [data, load, pause, resume, remove, nodeReady] = useUnit([
+	const [data, load, pause, resume, remove, nodeReady, filesFor, requestFiles, dismissFiles] = useUnit([
 		torrentDownloadsQuery.$data,
 		torrentDownloadsQuery.start,
 		pauseTorrentMutation.start,
 		resumeTorrentMutation.start,
 		removeTorrentMutation.start,
-		$nodeReady
+		$nodeReady,
+		$filesFor,
+		filesRequested,
+		filesDismissed
 	])
 
 	useEffect(() => {
@@ -62,6 +67,10 @@ export function TorrentDownloadList({ mediaRef, hideTitle }: TorrentDownloadList
 
 	const client = data?.client
 	const downloads = (data?.downloads ?? []).filter(item => !mediaRef || item.media_ref === mediaRef)
+
+	// Only the list that shows the download hosts the choice, so a page with two
+	// lists does not open it twice.
+	const choosing = downloads.find(item => item.id === filesFor) ?? null
 
 	return (
 		<section className={styles.root}>
@@ -96,10 +105,13 @@ export function TorrentDownloadList({ mediaRef, hideTitle }: TorrentDownloadList
 							onPause={() => pause(item.id)}
 							onResume={() => resume(item.id)}
 							onRemove={withFiles => remove({ id: item.id, withFiles })}
+							onChooseFiles={() => requestFiles(item.id)}
 						/>
 					))}
 				</ul>
 			)}
+
+			<TorrentFilesDrawer download={choosing} onClose={dismissFiles} />
 		</section>
 	)
 }
@@ -110,9 +122,10 @@ interface DownloadRowProps {
 	onPause: () => void
 	onResume: () => void
 	onRemove: (withFiles: boolean) => void
+	onChooseFiles: () => void
 }
 
-function DownloadRow({ item, showTitle, onPause, onResume, onRemove }: DownloadRowProps) {
+function DownloadRow({ item, showTitle, onPause, onResume, onRemove, onChooseFiles }: DownloadRowProps) {
 	const { t } = useTranslation()
 
 	const state = displayState(item)
@@ -159,7 +172,13 @@ function DownloadRow({ item, showTitle, onPause, onResume, onRemove }: DownloadR
 			</div>
 
 			<div className={styles.actions}>
-				{downloading && live && (
+				{item.choosing && (
+					<Button size='small' onClick={onChooseFiles}>
+						{t('torrents.files.choose')}
+					</Button>
+				)}
+
+				{downloading && live && !item.choosing && (
 					<Button
 						size='small'
 						variant='ghost'
@@ -173,6 +192,16 @@ function DownloadRow({ item, showTitle, onPause, onResume, onRemove }: DownloadR
 
 				<DropdownMenu
 					items={[
+						...(downloading
+							? [
+									{
+										id: 'files',
+										label: t('torrents.files.choose'),
+										icon: 'common/list-checks' as const,
+										onSelect: onChooseFiles
+									}
+								]
+							: []),
 						{
 							id: 'remove',
 							label: t('torrents.remove'),

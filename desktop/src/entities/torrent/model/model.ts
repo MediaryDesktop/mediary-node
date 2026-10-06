@@ -1,5 +1,5 @@
 import { concurrency, createMutation, createQuery, keepFresh } from '@farfetched/core'
-import { sample } from 'effector'
+import { createEvent, createStore, sample } from 'effector'
 
 import { nodeTopic } from '@infra/node'
 
@@ -7,11 +7,13 @@ import {
 	addTorrentFx,
 	checkTorrentClientFx,
 	fetchTorrentDownloadsFx,
+	fetchTorrentFilesFx,
 	fetchTorrentSettingsFx,
 	pauseTorrentFx,
 	putTorrentSettingsFx,
 	removeTorrentFx,
-	resumeTorrentFx
+	resumeTorrentFx,
+	selectTorrentFilesFx
 } from '../api/api'
 
 export const torrentDownloadsQuery = createQuery({
@@ -28,6 +30,13 @@ export const pauseTorrentMutation = createMutation({ effect: pauseTorrentFx, nam
 export const resumeTorrentMutation = createMutation({ effect: resumeTorrentFx, name: 'resumeTorrent' })
 
 export const removeTorrentMutation = createMutation({ effect: removeTorrentFx, name: 'removeTorrent' })
+
+export const torrentFilesQuery = createQuery({ effect: fetchTorrentFilesFx, name: 'torrentFiles' })
+
+export const selectTorrentFilesMutation = createMutation({
+	effect: selectTorrentFilesFx,
+	name: 'selectTorrentFiles'
+})
 
 export const putTorrentSettingsMutation = createMutation({
 	effect: putTorrentSettingsFx,
@@ -49,9 +58,33 @@ sample({
 		addTorrentMutation.finished.success,
 		pauseTorrentMutation.finished.finally,
 		resumeTorrentMutation.finished.finally,
-		removeTorrentMutation.finished.success
+		removeTorrentMutation.finished.success,
+		selectTorrentFilesMutation.finished.success
 	],
 	target: torrentDownloadsQuery.start
+})
+
+// The download whose files are on screen, or null.
+export const torrentFilesOpened = createEvent<number>()
+export const torrentFilesClosed = createEvent()
+
+const $filesOf = createStore<number | null>(null)
+	.on(torrentFilesOpened, (_, id) => id)
+	.reset(torrentFilesClosed)
+
+sample({ clock: torrentFilesOpened, target: [torrentFilesQuery.reset, torrentFilesQuery.start] })
+sample({ clock: torrentFilesClosed, target: torrentFilesQuery.reset })
+
+// A magnet's file list arrives with its metadata; until then the list is empty, so
+// it is asked for again on every word from the node.
+concurrency(torrentFilesQuery, { strategy: 'TAKE_LATEST' })
+
+sample({
+	clock: nodeTopic('torrent'),
+	source: { id: $filesOf, data: torrentFilesQuery.$data },
+	filter: ({ id, data }) => id !== null && (data?.files ?? []).length === 0,
+	fn: ({ id }) => id as number,
+	target: torrentFilesQuery.start
 })
 
 keepFresh(torrentSettingsQuery, { triggers: [putTorrentSettingsMutation.finished.success] })

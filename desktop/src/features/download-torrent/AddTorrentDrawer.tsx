@@ -2,7 +2,7 @@ import { useUnit } from 'effector-react'
 import { useEffect, useRef, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, Drawer, DrawerForm, DrawerSection, Icon, Textarea, toast } from '@shared/ui'
+import { Button, Checkbox, Drawer, DrawerForm, DrawerSection, Icon, Textarea, toast } from '@shared/ui'
 
 import { addTorrentMutation } from '@entities/torrent'
 
@@ -61,6 +61,8 @@ function AddForm({ mediaRef, title, onDone }: { mediaRef: string; title: string;
 
 	const [magnet, setMagnet] = useState('')
 	const [file, setFile] = useState<TorrentFile | null>(null)
+	// On by default: a batch is the common case, and picking from it is the point.
+	const [chooseFiles, setChooseFiles] = useState(true)
 	const picker = useRef<HTMLInputElement>(null)
 
 	useEffect(() => {
@@ -90,8 +92,8 @@ function AddForm({ mediaRef, title, onDone }: { mediaRef: string; title: string;
 	const submit = () =>
 		add(
 			file
-				? { media_ref: mediaRef, title, torrent: file.content }
-				: { media_ref: mediaRef, title, magnet: magnet.trim() }
+				? { media_ref: mediaRef, title, torrent: file.content, choose_files: chooseFiles }
+				: { media_ref: mediaRef, title, magnet: magnet.trim(), choose_files: chooseFiles }
 		)
 
 	return (
@@ -154,6 +156,13 @@ function AddForm({ mediaRef, title, onDone }: { mediaRef: string; title: string;
 					</Button>
 				)}
 			</DrawerSection>
+
+			<Checkbox
+				checked={chooseFiles}
+				onCheckedChange={setChooseFiles}
+				label={t('torrents.drawer.chooseFiles')}
+				disabled={adding}
+			/>
 		</DrawerForm>
 	)
 }

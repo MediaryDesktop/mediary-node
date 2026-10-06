@@ -12,6 +12,7 @@ const BASE: TorrentDownload = {
 	name: 'Frieren S01',
 	source: 'magnet',
 	state: 'downloading',
+	choosing: false,
 	imported: 0,
 	created_at: '2026-10-06T12:00:00Z'
 }
@@ -28,6 +29,10 @@ describe('torrent display state', () => {
 		expect(displayState({ ...BASE, state: 'importing' })).toBe('importing')
 		expect(displayState({ ...BASE, state: 'done' })).toBe('done')
 		expect(displayState({ ...BASE, state: 'failed' })).toBe('failed')
+	})
+
+	it('waits for the file choice before anything else', () => {
+		expect(displayState({ ...live('stoppedDL', true), choosing: true })).toBe('choosing')
 	})
 
 	it('waits for qBittorrent before it has said anything', () => {

@@ -871,7 +871,24 @@ export const en = {
 			clearFile: 'Remove the file',
 			fileUnreadable: 'Could not read this file',
 			submit: 'Download',
-			failed: 'Could not add the torrent'
+			failed: 'Could not add the torrent',
+			chooseFiles: 'Choose the episodes before downloading'
+		},
+		files: {
+			title: 'Choose files',
+			choose: 'Choose files',
+			start: 'Download selected',
+			save: 'Save',
+			failed: 'Could not change the files',
+			loading: 'Loading the file list…',
+			waiting: 'Waiting for the torrent’s file list. A magnet link gets it from its peers first.',
+			selected: '{{count}} selected · {{size}}',
+			hint: 'Episodes already in your library are left out',
+			all: 'All',
+			missing: 'Missing episodes',
+			none: 'None',
+			episode: 'Ep. {{number}}',
+			inLibrary: 'in library'
 		},
 		list: {
 			title: 'Torrents',
@@ -879,6 +896,7 @@ export const en = {
 			emptyForTitle: 'Nothing downloaded for this title yet'
 		},
 		states: {
+			choosing: 'Waiting for your choice of files',
 			downloading: 'Downloading',
 			paused: 'Paused',
 			stalled: 'Looking for peers',

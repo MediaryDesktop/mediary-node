@@ -7,10 +7,16 @@ export type TorrentClientStatus = NodeSchemas['TorrentClientStatus']
 export type TorrentSettings = NodeSchemas['TorrentSettings']
 export type TorrentPathMap = NodeSchemas['TorrentPathMap']
 export type TorrentCheckResult = NodeSchemas['TorrentCheckResult']
+export type TorrentFile = NodeSchemas['TorrentFile']
 
 export type AddTorrentParams = Omit<NodeSchemas['AddTorrentDownloadInputBody'], '$schema'>
 export type TorrentSettingsUpdate = Omit<NodeSchemas['PutTorrentSettingsInputBody'], '$schema'>
 export type TorrentCheckParams = Omit<NodeSchemas['CheckTorrentClientInputBody'], '$schema'>
+
+export interface SelectTorrentFilesParams {
+	id: number
+	selected: number[]
+}
 
 export interface RemoveTorrentParams {
 	id: number
@@ -44,6 +50,21 @@ export const removeTorrentFx = createNodeRequestFx<RemoveTorrentParams, void>(({
 	method: 'DELETE',
 	query: { with_files: withFiles }
 }))
+
+export const fetchTorrentFilesFx = createNodeRequestFx<number, NodeSchemas['TorrentFilesOutputBody']>(id => ({
+	url: `/v1/torrent/downloads/${id}/files`,
+	// The node asks qBittorrent for the list.
+	timeout: 20_000
+}))
+
+export const selectTorrentFilesFx = createNodeRequestFx<SelectTorrentFilesParams, void>(
+	({ id, selected }) => ({
+		url: `/v1/torrent/downloads/${id}/files`,
+		method: 'PUT',
+		body: { selected },
+		timeout: 20_000
+	})
+)
 
 export const fetchTorrentSettingsFx = createNodeRequestFx<void, TorrentSettings>(() => ({
 	url: '/v1/torrent/settings'

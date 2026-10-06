@@ -1,6 +1,7 @@
 import type { TorrentDownload } from '@entities/torrent'
 
 export type TorrentDisplayState =
+	| 'choosing'
 	| 'downloading'
 	| 'paused'
 	| 'stalled'
@@ -19,6 +20,10 @@ export type TorrentDisplayState =
 export function displayState(download: TorrentDownload): TorrentDisplayState {
 	if (download.state !== 'downloading') {
 		return download.state
+	}
+
+	if (download.choosing) {
+		return 'choosing'
 	}
 
 	const live = download.live
