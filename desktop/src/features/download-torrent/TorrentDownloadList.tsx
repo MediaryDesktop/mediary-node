@@ -10,6 +10,7 @@ import type { BadgeTone } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
 
+import { mediaPreviewModel } from '@entities/media'
 import {
 	pauseTorrentMutation,
 	removeTorrentMutation,
@@ -54,7 +55,19 @@ export function TorrentDownloadList({ mediaRef, poster }: TorrentDownloadListPro
 	const navigate = useNavigate()
 	const setup = useTorrentSetup()
 
-	const [data, load, pause, resume, remove, nodeReady, filesFor, requestFiles, dismissFiles] = useUnit([
+	const [
+		data,
+		load,
+		pause,
+		resume,
+		remove,
+		nodeReady,
+		filesFor,
+		requestFiles,
+		dismissFiles,
+		previews,
+		requestPreview
+	] = useUnit([
 		torrentDownloadsQuery.$data,
 		torrentDownloadsQuery.start,
 		pauseTorrentMutation.start,
@@ -63,7 +76,9 @@ export function TorrentDownloadList({ mediaRef, poster }: TorrentDownloadListPro
 		$nodeReady,
 		$filesFor,
 		filesRequested,
-		filesDismissed
+		filesDismissed,
+		mediaPreviewModel.$previews,
+		mediaPreviewModel.previewRequested
 	])
 
 	useEffect(() => {
@@ -86,6 +101,16 @@ export function TorrentDownloadList({ mediaRef, poster }: TorrentDownloadListPro
 	}, [t])
 
 	const downloads = (data?.downloads ?? []).filter(item => !mediaRef || item.media_ref === mediaRef)
+
+	// The caller already has the poster when it scopes the list to one title; for
+	// the all-titles list every row needs its own, fetched (and cached) by ref.
+	useEffect(() => {
+		if (poster !== undefined) return
+
+		for (const ref of new Set(downloads.map(item => item.media_ref))) {
+			requestPreview(ref)
+		}
+	}, [poster, requestPreview, downloads])
 
 	// Only the list that shows the download hosts the choice, so a page with two
 	// lists does not open it twice.
@@ -143,7 +168,7 @@ export function TorrentDownloadList({ mediaRef, poster }: TorrentDownloadListPro
 							key={item.id}
 							item={item}
 							showTitle={!mediaRef}
-							poster={poster}
+							poster={poster ?? previews[item.media_ref]?.cover_image}
 							onPause={() => pause(item.id)}
 							onResume={() => resume(item.id)}
 							onRemove={withFiles => remove({ id: item.id, withFiles })}
@@ -291,9 +316,13 @@ function DownloadRow({
 						}
 					]}
 					trigger={
-						<button type='button' className={styles.menu} aria-label={t('torrents.menu')}>
-							<Icon name='common/more-vertical' size={16} />
-						</button>
+						<Button
+							size='small'
+							variant='ghost'
+							iconOnly
+							aria-label={t('torrents.menu')}
+							startIcon={<Icon name='common/more-vertical' size={16} />}
+						/>
 					}
 				/>
 			</div>

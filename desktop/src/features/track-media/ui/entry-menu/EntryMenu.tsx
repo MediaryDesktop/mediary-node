@@ -2,7 +2,7 @@ import { useUnit } from 'effector-react'
 import { MdFormatListBulletedAdd } from 'react-icons/md'
 
 import { useTranslation } from '@shared/i18n'
-import { DropdownMenu, Icon } from '@shared/ui'
+import { DropdownMenu, Icon, RippleButton } from '@shared/ui'
 import type { DropdownMenuItem } from '@shared/ui'
 
 import { trackerModel } from '@entities/tracker'
@@ -115,9 +115,9 @@ export function EntryMenu({ media, entry, listName }: EntryMenuProps) {
 		<DropdownMenu
 			items={items}
 			trigger={
-				<button type='button' className={styles.trigger} aria-label={t('lists.menu')}>
+				<RippleButton className={styles.trigger} aria-label={t('lists.menu')}>
 					<Icon name='common/more-vertical' size={20} />
-				</button>
+				</RippleButton>
 			}
 		/>
 	)

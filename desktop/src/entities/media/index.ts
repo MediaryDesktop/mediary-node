@@ -7,6 +7,7 @@ export {
 	mediaDetailsQuery,
 	mediaEpisodesQuery,
 	mediaFilterOptionsQuery,
+	mediaPreviewModel,
 	mediaSearchQuery,
 	mediaTitle,
 	scoreTone

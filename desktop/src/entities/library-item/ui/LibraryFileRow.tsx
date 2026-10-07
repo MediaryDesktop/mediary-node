@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 
 import { useTranslation } from '@shared/i18n'
-import { Badge, DropdownMenu, Icon } from '@shared/ui'
+import { Badge, DropdownMenu, Icon, RippleButton } from '@shared/ui'
 import type { DropdownMenuItem, IconName } from '@shared/ui'
 
 import type { LibraryFile, LibraryMediaForm } from '../api/api'
@@ -155,9 +155,9 @@ export function LibraryFileRow({
 					<DropdownMenu
 						items={menu}
 						trigger={
-							<button type='button' className={styles.more} aria-label={t('library.file.menu')}>
+							<RippleButton className={styles.more} aria-label={t('library.file.menu')}>
 								<Icon name='common/more-vertical' size={16} />
-							</button>
+							</RippleButton>
 						}
 					/>
 				)}

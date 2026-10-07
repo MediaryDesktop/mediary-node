@@ -5,10 +5,11 @@ import { useEffect, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { formatRelativeTime } from '@shared/lib'
-import { Button, DropdownMenu, EmptyState, Icon, Switch, toast } from '@shared/ui'
+import { Button, DropdownMenu, EmptyState, Icon, PosterFade, Switch, toast } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
 
+import { mediaPreviewModel } from '@entities/media'
 import {
 	checkTorrentRuleMutation,
 	deleteTorrentRuleMutation,
@@ -28,7 +29,13 @@ export function AutoDownloadRules() {
 	const navigate = useNavigate()
 	const setup = useTorrentSetup()
 
-	const [data, load, nodeReady] = useUnit([torrentRulesQuery.$data, torrentRulesQuery.start, $nodeReady])
+	const [data, load, nodeReady, previews, requestPreview] = useUnit([
+		torrentRulesQuery.$data,
+		torrentRulesQuery.start,
+		$nodeReady,
+		mediaPreviewModel.$previews,
+		mediaPreviewModel.previewRequested
+	])
 
 	useEffect(() => {
 		if (nodeReady) {
@@ -57,6 +64,14 @@ export function AutoDownloadRules() {
 	}, [t])
 
 	const rules = data?.rules ?? []
+
+	useEffect(() => {
+		for (const ref of new Set(rules.map(rule => rule.media_ref))) {
+			requestPreview(ref)
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- `rules` is stable enough: it only grows a new identity when `data` itself does.
+	}, [data, requestPreview])
+
 	const setupMissing =
 		setup.loaded && (!setup.clientConfigured || setup.clientReachable === false || !setup.hasSources)
 
@@ -85,7 +100,12 @@ export function AutoDownloadRules() {
 			) : (
 				<ul className={styles.list}>
 					{rules.map(rule => (
-						<RuleRow key={rule.media_ref} rule={rule} setupMissing={setupMissing} />
+						<RuleRow
+							key={rule.media_ref}
+							rule={rule}
+							setupMissing={setupMissing}
+							poster={previews[rule.media_ref]?.cover_image}
+						/>
 					))}
 				</ul>
 			)}
@@ -93,7 +113,15 @@ export function AutoDownloadRules() {
 	)
 }
 
-function RuleRow({ rule, setupMissing }: { rule: TorrentRule; setupMissing: boolean }) {
+function RuleRow({
+	rule,
+	setupMissing,
+	poster
+}: {
+	rule: TorrentRule
+	setupMissing: boolean
+	poster?: string | null
+}) {
 	const { t, i18n } = useTranslation()
 
 	const [put, check, remove, checking] = useUnit([
@@ -109,6 +137,8 @@ function RuleRow({ rule, setupMissing }: { rule: TorrentRule; setupMissing: bool
 
 	return (
 		<li className={clsx(styles.row, !rule.enabled && styles.off)}>
+			{poster && <PosterFade src={poster} className={styles.poster} />}
+
 			<div className={styles.body}>
 				<Link to='/media/$mediaRef' params={{ mediaRef: rule.media_ref }} className={styles.name}>
 					{rule.title}
@@ -173,9 +203,13 @@ function RuleRow({ rule, setupMissing }: { rule: TorrentRule; setupMissing: bool
 						}
 					]}
 					trigger={
-						<button type='button' className={styles.menu} aria-label={t('torrents.menu')}>
-							<Icon name='common/more-vertical' size={16} />
-						</button>
+						<Button
+							size='small'
+							variant='ghost'
+							iconOnly
+							aria-label={t('torrents.menu')}
+							startIcon={<Icon name='common/more-vertical' size={16} />}
+						/>
 					}
 				/>
 			</div>

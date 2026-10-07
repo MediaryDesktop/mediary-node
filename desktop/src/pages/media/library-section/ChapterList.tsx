@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from 'react'
 import type { CSSProperties } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Badge, Button, DropdownMenu, Icon, SegmentedControl } from '@shared/ui'
+import { Badge, Button, DropdownMenu, Icon, RippleButton, SegmentedControl } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
 
@@ -202,13 +202,12 @@ export function ChapterList({ mediaRef, title, progress, coverColor }: ChapterLi
 									}
 								]}
 								trigger={
-									<button
-										type='button'
+									<RippleButton
 										className={styles.linkMenu}
 										aria-label={t('mangaSources.menu')}
 									>
 										<Icon name='common/more-vertical' size={16} />
-									</button>
+									</RippleButton>
 								}
 							/>
 						</span>
@@ -330,14 +329,13 @@ function ChapterRow({ row, read, accent, onOpen, download, onSave }: ChapterRowP
 						onSelect: () => onOpen(option)
 					}))}
 					trigger={
-						<button
-							type='button'
+						<RippleButton
 							className={styles.copies}
 							aria-label={t('mangaSources.chapters.copies')}
 							title={t('mangaSources.chapters.copies')}
 						>
 							<Icon name='common/more-vertical' size={16} />
-						</button>
+						</RippleButton>
 					}
 				/>
 			)}

@@ -2,7 +2,7 @@ import { useUnit } from 'effector-react'
 import { useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Icon, PageHeader, PageTransition, Tabs } from '@shared/ui'
+import { Icon, PageHeader, PageTransition, SegmentedControl } from '@shared/ui'
 
 import { mangaDownloadsQuery } from '@entities/manga-source'
 import { torrentDownloadsQuery, torrentRulesQuery } from '@entities/torrent'
@@ -28,12 +28,7 @@ export function DownloadsPage() {
 		mangaDownloadsQuery.$data
 	])
 
-	const label = (text: string, count: number | undefined) => (
-		<span className={styles.tab}>
-			{text}
-			{count ? <span className={styles.count}>{count}</span> : null}
-		</span>
-	)
+	const label = (text: string, count: number | undefined) => (count ? `${text} (${count})` : text)
 
 	return (
 		<PageTransition className={styles.root}>
@@ -43,28 +38,25 @@ export function DownloadsPage() {
 				subtitle={t('downloads.subtitle')}
 			/>
 
-			<Tabs
+			<SegmentedControl
+				size='large'
+				className={styles.switcher}
+				label={t('nav.downloads')}
 				value={tab}
 				onValueChange={setTab}
-				label={t('nav.downloads')}
 				items={[
 					{
 						value: 'torrents',
-						label: label(t('downloads.tabs.torrents'), torrents?.downloads?.length),
-						content: <TorrentDownloadList />
+						label: label(t('downloads.tabs.torrents'), torrents?.downloads?.length)
 					},
-					{
-						value: 'auto',
-						label: label(t('downloads.tabs.auto'), rules?.rules?.length),
-						content: <AutoDownloadRules />
-					},
-					{
-						value: 'manga',
-						label: label(t('downloads.tabs.manga'), manga?.downloads?.length),
-						content: <MangaDownloadList hideTitle />
-					}
+					{ value: 'auto', label: label(t('downloads.tabs.auto'), rules?.rules?.length) },
+					{ value: 'manga', label: label(t('downloads.tabs.manga'), manga?.downloads?.length) }
 				]}
 			/>
+
+			{tab === 'torrents' && <TorrentDownloadList />}
+			{tab === 'auto' && <AutoDownloadRules />}
+			{tab === 'manga' && <MangaDownloadList hideTitle />}
 		</PageTransition>
 	)
 }
