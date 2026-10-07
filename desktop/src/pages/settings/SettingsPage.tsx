@@ -3,7 +3,7 @@ import clsx from 'clsx'
 import type { ReactNode } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Icon, PageTransition } from '@shared/ui'
+import { Icon, PageTransition, RippleButton } from '@shared/ui'
 
 import { PlayerModeSwitcher } from '@features/choose-player'
 import { DownloadFolderSetting } from '@features/download-chapters'
@@ -34,14 +34,11 @@ export function SettingsPage({ section }: SettingsPageProps) {
 	return (
 		<PageTransition className={styles.root}>
 			<nav className={styles.nav} aria-label={t('nav.settings')}>
-				<h1 className={styles.title}>{t('nav.settings')}</h1>
-
 				{SECTION_GROUPS.map(group => (
 					<ul key={group[0]!.id} className={styles.group}>
 						{group.map(item => (
 							<li key={item.id}>
-								<button
-									type='button'
+								<RippleButton
 									className={clsx(styles.item, item.id === current.id && styles.active)}
 									aria-current={item.id === current.id ? 'page' : undefined}
 									onClick={() =>
@@ -50,7 +47,7 @@ export function SettingsPage({ section }: SettingsPageProps) {
 								>
 									<Icon name={item.icon} size={18} />
 									{t(`settings.sections.${item.key}.title`)}
-								</button>
+								</RippleButton>
 							</li>
 						))}
 					</ul>
