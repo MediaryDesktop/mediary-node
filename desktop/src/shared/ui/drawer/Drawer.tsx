@@ -45,6 +45,16 @@ export function Drawer({
 					className={clsx(styles.panel, styles[side], styles[size])}
 					aria-describedby={undefined}
 					onOpenAutoFocus={onOpenAutoFocus}
+					onInteractOutside={event => {
+						// A select's list lives on the body, outside the drawer; picking from it
+						// is still working inside the drawer.
+						if (
+							event.target instanceof Element &&
+							event.target.closest('[data-floating-panel]')
+						) {
+							event.preventDefault()
+						}
+					}}
 					onEscapeKeyDown={event => {
 						// An open popup inside the drawer closes itself on Escape; the drawer
 						// stays. Radix listens on the document, so it hears the key first.

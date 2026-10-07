@@ -319,6 +319,7 @@ export function SelectDropdown(props: SelectDropdownProps) {
 					<div
 						ref={panelRef}
 						className={styles.panel}
+						data-floating-panel=''
 						style={{ top: position.top, left: position.left, width: position.width }}
 					>
 						<div

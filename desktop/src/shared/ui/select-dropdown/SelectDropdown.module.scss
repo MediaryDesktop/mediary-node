@@ -203,6 +203,7 @@
 .panel {
 	position: fixed;
 	z-index: 900;
+	pointer-events: auto;
 	overflow: hidden;
 	border: 1px solid var(--border-strong);
 	border-radius: var(--radius-md);
