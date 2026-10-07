@@ -5,7 +5,7 @@ import { useEffect } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { formatBytes, formatDuration } from '@shared/lib'
-import { Badge, Button, DropdownMenu, EmptyState, Icon, ProgressBar, toast } from '@shared/ui'
+import { Badge, Button, DropdownMenu, EmptyState, Icon, PosterFade, ProgressBar, toast } from '@shared/ui'
 import type { BadgeTone } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
@@ -29,6 +29,7 @@ import { TorrentFilesDrawer } from './TorrentFilesDrawer'
 export interface TorrentDownloadListProps {
 	// Only this title's downloads; all of them, with a summary, when left out.
 	mediaRef?: string
+	poster?: string | null
 }
 
 const STATE_TONE: Record<TorrentDisplayState, BadgeTone> = {
@@ -48,7 +49,7 @@ const STATE_TONE: Record<TorrentDisplayState, BadgeTone> = {
 
 // Torrents the node added to its client, newest first. The node polls the client
 // and announces each change, so the list moves while a torrent downloads.
-export function TorrentDownloadList({ mediaRef }: TorrentDownloadListProps) {
+export function TorrentDownloadList({ mediaRef, poster }: TorrentDownloadListProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
 	const setup = useTorrentSetup()
@@ -142,6 +143,7 @@ export function TorrentDownloadList({ mediaRef }: TorrentDownloadListProps) {
 							key={item.id}
 							item={item}
 							showTitle={!mediaRef}
+							poster={poster}
 							onPause={() => pause(item.id)}
 							onResume={() => resume(item.id)}
 							onRemove={withFiles => remove({ id: item.id, withFiles })}
@@ -159,13 +161,22 @@ export function TorrentDownloadList({ mediaRef }: TorrentDownloadListProps) {
 interface DownloadRowProps {
 	item: TorrentDownload
 	showTitle: boolean
+	poster?: string | null
 	onPause: () => void
 	onResume: () => void
 	onRemove: (withFiles: boolean) => void
 	onChooseFiles: () => void
 }
 
-function DownloadRow({ item, showTitle, onPause, onResume, onRemove, onChooseFiles }: DownloadRowProps) {
+function DownloadRow({
+	item,
+	showTitle,
+	poster,
+	onPause,
+	onResume,
+	onRemove,
+	onChooseFiles
+}: DownloadRowProps) {
 	const { t } = useTranslation()
 
 	const state = displayState(item)
@@ -175,6 +186,8 @@ function DownloadRow({ item, showTitle, onPause, onResume, onRemove, onChooseFil
 
 	return (
 		<li className={clsx(styles.row, styles[state])}>
+			{poster && <PosterFade src={poster} className={styles.poster} />}
+
 			<div className={styles.body}>
 				<p className={styles.name} title={item.name || item.title}>
 					{item.name || item.title}

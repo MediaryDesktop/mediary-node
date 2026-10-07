@@ -54,6 +54,12 @@ export function TorrentFilesDrawer({ download, onClose }: TorrentFilesDrawerProp
 	)
 }
 
+// A batch keeps every file in the release's folder; repeating it on each row
+// only pushes the part that differs out of sight.
+function baseName(path: string): string {
+	return path.slice(path.lastIndexOf('/') + 1)
+}
+
 function FilesForm({ download, onDone }: { download: TorrentDownload; onDone: () => void }) {
 	const { t } = useTranslation()
 
@@ -179,24 +185,39 @@ function FilesForm({ download, onDone }: { download: TorrentDownload; onDone: ()
 							const inLibrary =
 								file.video && file.episode !== undefined && owned.has(file.episode)
 
+							const checked = selected.has(file.index)
+
 							return (
 								<li
 									key={file.index}
-									className={clsx(styles.file, !file.video && styles.other)}
+									role='presentation'
+									className={clsx(
+										styles.file,
+										!file.video && styles.other,
+										!checked && styles.off
+									)}
+									onClick={() => !saving && toggle(file.index, !checked)}
 								>
 									<Checkbox
-										checked={selected.has(file.index)}
+										checked={checked}
 										onCheckedChange={on => toggle(file.index, on)}
 										label={file.name}
 										disabled={saving}
-										className={styles.check}
 									/>
+
+									{file.episode !== undefined ? (
+										<span className={styles.episode}>
+											{t('torrents.files.episode', { number: file.episode })}
+										</span>
+									) : (
+										<span className={styles.noEpisode} />
+									)}
+
+									<span className={styles.name} title={file.name}>
+										{baseName(file.name)}
+									</span>
+
 									<span className={styles.meta}>
-										{file.episode !== undefined && (
-											<span className={styles.episode}>
-												{t('torrents.files.episode', { number: file.episode })}
-											</span>
-										)}
 										{inLibrary && (
 											<span className={styles.owned}>
 												{t('torrents.files.inLibrary')}

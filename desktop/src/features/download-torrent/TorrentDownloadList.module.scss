@@ -47,6 +47,8 @@
 	}
 
 	.row {
+		position: relative;
+		isolation: isolate;
 		display: flex;
 		align-items: center;
 		gap: 1rem;
@@ -84,6 +86,11 @@
 
 		&.paused .body {
 			opacity: 0.7;
+		}
+
+		// Leaves the state stripe on the left edge uncovered.
+		.poster {
+			left: 3px;
 		}
 
 		.body {

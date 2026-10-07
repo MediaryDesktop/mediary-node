@@ -84,7 +84,14 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 				onOpenDetails={() => setDetailsOpen(true)}
 			/>
 
-			{torrents && <TorrentSearchDrawer mediaRef={mediaRef} title={title} missing={missing} />}
+			{torrents && (
+				<TorrentSearchDrawer
+					mediaRef={mediaRef}
+					title={title}
+					missing={missing}
+					poster={base.cover_image}
+				/>
+			)}
 
 			{airing && (
 				<p className={styles.nextAiring}>
@@ -101,7 +108,7 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 
 			<div className={styles.sections}>
 				{view === 'torrent' ? (
-					<TorrentSection mediaRef={mediaRef} title={title} />
+					<TorrentSection mediaRef={mediaRef} title={title} poster={base.cover_image} />
 				) : (
 					<LibrarySection
 						mediaRef={mediaRef}

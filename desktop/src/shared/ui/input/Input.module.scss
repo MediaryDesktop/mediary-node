@@ -78,6 +78,18 @@
 				}
 
 			}
+
+			&[type='number'] {
+				appearance: textfield;
+				-moz-appearance: textfield;
+
+				&::-webkit-outer-spin-button,
+				&::-webkit-inner-spin-button {
+					margin: 0;
+					appearance: none;
+					-webkit-appearance: none;
+				}
+			}
 		}
 
 		.action {

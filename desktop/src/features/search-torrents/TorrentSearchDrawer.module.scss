@@ -1,18 +1,14 @@
+.descriptionRow {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
 .root {
 	display: flex;
 	flex-direction: column;
 	gap: 1rem;
 	padding-bottom: 0.5rem;
-
-	.missing {
-		margin: 0;
-		color: var(--text-secondary);
-		font-size: 0.95rem;
-
-		strong {
-			color: var(--text);
-		}
-	}
 
 	.bar {
 		display: flex;
@@ -67,9 +63,12 @@
 	}
 
 	.card {
+		position: relative;
+		isolation: isolate;
 		display: flex;
 		align-items: center;
 		gap: 1rem;
+		overflow: hidden;
 		padding: 0.875rem 1rem;
 		border: 1px solid var(--border);
 		border-radius: var(--radius);

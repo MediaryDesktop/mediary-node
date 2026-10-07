@@ -13,12 +13,13 @@ import styles from './TorrentSection.module.scss'
 export interface TorrentSectionProps {
 	mediaRef: string
 	title: string
+	poster?: string | null
 }
 
 // The title's torrents: search and manual adding up top, new episodes on their
 // own below that, and what is downloading for it. The search itself is a sheet
 // the title page holds, so the header's download button opens the same one.
-export function TorrentSection({ mediaRef, title }: TorrentSectionProps) {
+export function TorrentSection({ mediaRef, title, poster }: TorrentSectionProps) {
 	const { t } = useTranslation()
 
 	const openSearch = useUnit(searchOpened)
@@ -51,7 +52,7 @@ export function TorrentSection({ mediaRef, title }: TorrentSectionProps) {
 
 			<div className={styles.block}>
 				<h3 className={styles.subtitle}>{t('torrents.list.forTitle')}</h3>
-				<TorrentDownloadList mediaRef={mediaRef} />
+				<TorrentDownloadList mediaRef={mediaRef} poster={poster} />
 			</div>
 
 			<AddTorrentDrawer open={adding} mediaRef={mediaRef} title={title} onClose={close} />

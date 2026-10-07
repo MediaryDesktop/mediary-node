@@ -15,6 +15,7 @@ import {
 	EmptyState,
 	Icon,
 	Input,
+	PosterFade,
 	SelectionGroup,
 	Skeleton,
 	toast
@@ -33,6 +34,7 @@ export interface TorrentSearchDrawerProps {
 	title: string
 	// The episodes out that the library lacks; null when the count is unknown.
 	missing: number[] | null
+	poster?: string | null
 }
 
 type Kind = 'all' | 'episodes' | 'batches'
@@ -40,7 +42,7 @@ type Kind = 'all' | 'episodes' | 'batches'
 // Search for a title's releases in a sheet, as Seanime does it: the missing
 // episodes on top, the results below to tick, one button to download them. A
 // batch only brings the episodes that are missing.
-export function TorrentSearchDrawer({ mediaRef, title, missing }: TorrentSearchDrawerProps) {
+export function TorrentSearchDrawer({ mediaRef, title, missing, poster }: TorrentSearchDrawerProps) {
 	const { t } = useTranslation()
 
 	const [open, close] = useUnit([$searchOpen, searchClosed])
@@ -50,16 +52,35 @@ export function TorrentSearchDrawer({ mediaRef, title, missing }: TorrentSearchD
 			open={open}
 			onOpenChange={next => !next && close()}
 			title={t('torrents.search.drawerTitle')}
-			description={title}
+			description={
+				<span className={styles.descriptionRow}>
+					{title}
+					{missing && (
+						<Badge tone={missing.length > 0 ? 'warning' : 'success'}>
+							{missing.length > 0
+								? summarizeEpisodes(missing)
+								: t('torrents.search.nothingMissing')}
+						</Badge>
+					)}
+				</span>
+			}
 			side='bottom'
 			size='sheet'
 		>
-			{open && <SearchForm mediaRef={mediaRef} title={title} missing={missing} onDone={close} />}
+			{open && (
+				<SearchForm mediaRef={mediaRef} title={title} missing={missing} poster={poster} onDone={close} />
+			)}
 		</Drawer>
 	)
 }
 
-function SearchForm({ mediaRef, title, missing, onDone }: TorrentSearchDrawerProps & { onDone: () => void }) {
+function SearchForm({
+	mediaRef,
+	title,
+	missing,
+	poster,
+	onDone
+}: TorrentSearchDrawerProps & { onDone: () => void }) {
 	const { t, i18n } = useTranslation()
 	const navigate = useNavigate()
 	const setup = useTorrentSetup()
@@ -177,18 +198,6 @@ function SearchForm({ mediaRef, title, missing, onDone }: TorrentSearchDrawerPro
 					}
 				/>
 
-				{missing && (
-					<p className={styles.missing}>
-						{missing.length > 0 ? (
-							<>
-								<strong>{t('torrents.search.missing')}</strong> {summarizeEpisodes(missing)}
-							</>
-						) : (
-							t('torrents.search.nothingMissing')
-						)}
-					</p>
-				)}
-
 				<div className={styles.bar}>
 					<Input
 						value={query}
@@ -251,7 +260,7 @@ function SearchForm({ mediaRef, title, missing, onDone }: TorrentSearchDrawerPro
 					</p>
 				))}
 
-				{pending && !result ? (
+				{pending ? (
 					<ul className={styles.list}>
 						{Array.from({ length: 4 }, (_, index) => (
 							<li key={index}>
@@ -279,6 +288,8 @@ function SearchForm({ mediaRef, title, missing, onDone }: TorrentSearchDrawerPro
 											!found.eligible && styles.ineligible
 										)}
 									>
+										{poster && <PosterFade src={poster} />}
+
 										<Checkbox
 											checked={checked}
 											onCheckedChange={on => toggle(found.id, on)}

@@ -62,6 +62,9 @@ export type { HoverCardProps } from './hover-card/HoverCard'
 export { Stepper } from './stepper/Stepper'
 export type { StepperProps } from './stepper/Stepper'
 
+export { PosterFade } from './poster-fade/PosterFade'
+export type { PosterFadeProps } from './poster-fade/PosterFade'
+
 export { Textarea } from './textarea/Textarea'
 export type { TextareaProps } from './textarea/Textarea'
 

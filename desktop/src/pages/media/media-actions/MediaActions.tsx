@@ -1,4 +1,5 @@
 import { useUnit } from 'effector-react'
+import { MdFormatListBulletedAdd } from 'react-icons/md'
 
 import { useTranslation } from '@shared/i18n'
 import { Button, DropdownMenu, Icon, Tooltip } from '@shared/ui'
@@ -112,7 +113,7 @@ export function MediaActions({
 							aria-label={t('media.addToList')}
 							onClick={() => addOpened({ mediaRef, mediaType: trackerType, title })}
 						>
-							<Icon name='common/plus' size={16} />
+							<MdFormatListBulletedAdd size={22} />
 						</Button>
 					</Tooltip>
 				) : null}
