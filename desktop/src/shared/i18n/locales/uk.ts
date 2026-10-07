@@ -1116,6 +1116,44 @@ export const uk: Translation = {
 		}
 	},
 	settings: {
+		sections: {
+			app: {
+				title: 'Застосунок',
+				subtitle: 'Вигляд, мова та первинне налаштування'
+			},
+			library: {
+				title: 'Локальна бібліотека',
+				subtitle: 'Теки, які нода сканує на медіа'
+			},
+			player: {
+				title: 'Відтворення відео',
+				subtitle: 'Яким плеєром відкривати відео'
+			},
+			torrentClient: {
+				title: 'Торент-клієнт',
+				subtitle: 'Куди завантажуються торенти'
+			},
+			torrentSearch: {
+				title: 'Пошук торентів',
+				subtitle: 'Джерела Torznab для пошуку роздач'
+			},
+			torrentPreferences: {
+				title: 'Вибір роздач',
+				subtitle: 'Які роздачі пошук ставить першими'
+			},
+			mangaSources: {
+				title: 'Джерела манги',
+				subtitle: 'Каталоги OPDS з мангою та книгами'
+			},
+			mangaDex: {
+				title: 'MangaDex',
+				subtitle: 'Читання розділів онлайн'
+			},
+			mangaDownloads: {
+				title: 'Завантаження манги',
+				subtitle: 'Де зберігаються завантажені розділи'
+			}
+		},
 		mangaDex: {
 			name: 'MangaDex',
 			hint: 'Читати розділи онлайн з MangaDex'

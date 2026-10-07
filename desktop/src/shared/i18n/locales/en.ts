@@ -1116,6 +1116,44 @@ export const en = {
 		}
 	},
 	settings: {
+		sections: {
+			app: {
+				title: 'App',
+				subtitle: 'Appearance, language and first-time setup'
+			},
+			library: {
+				title: 'Local library',
+				subtitle: 'Folders the node scans for media'
+			},
+			player: {
+				title: 'Video playback',
+				subtitle: 'Which player opens your videos'
+			},
+			torrentClient: {
+				title: 'Torrent client',
+				subtitle: 'Where torrents are downloaded'
+			},
+			torrentSearch: {
+				title: 'Torrent search',
+				subtitle: 'Torznab sources for finding releases'
+			},
+			torrentPreferences: {
+				title: 'Release preferences',
+				subtitle: 'Which releases search ranks first'
+			},
+			mangaSources: {
+				title: 'Manga sources',
+				subtitle: 'OPDS catalogs with manga and books'
+			},
+			mangaDex: {
+				title: 'MangaDex',
+				subtitle: 'Reading chapters online'
+			},
+			mangaDownloads: {
+				title: 'Manga downloads',
+				subtitle: 'Where downloaded chapters are kept'
+			}
+		},
 		mangaDex: {
 			name: 'MangaDex',
 			hint: 'Read chapters online from MangaDex'

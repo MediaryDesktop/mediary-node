@@ -7,8 +7,11 @@ export interface TorrentSetupNoticeProps {
 	setup: TorrentSetup
 	// Search and the rules also need a source; a downloads list does not.
 	needSearch?: boolean
-	onOpenSettings: () => void
+	// Which setting is missing, so the caller can open the section that fixes it.
+	onOpenSettings: (missing: TorrentSetupGap) => void
 }
+
+export type TorrentSetupGap = 'client' | 'sources'
 
 // Says what is missing before torrents work, and leads to where it is fixed. One
 // message at a time, the most basic first: without a client nothing else helps.
@@ -19,15 +22,15 @@ export function TorrentSetupNotice({ setup, needSearch, onOpenSettings }: Torren
 		return null
 	}
 
-	const action = (
-		<Button size='small' variant='secondary' onClick={onOpenSettings}>
+	const action = (missing: TorrentSetupGap) => (
+		<Button size='small' variant='secondary' onClick={() => onOpenSettings(missing)}>
 			{t('torrents.setup.openSettings')}
 		</Button>
 	)
 
 	if (!setup.clientConfigured) {
 		return (
-			<Notice tone='warning' title={t('torrents.setup.noClient')} action={action}>
+			<Notice tone='warning' title={t('torrents.setup.noClient')} action={action('client')}>
 				{t('torrents.setup.noClientHint')}
 			</Notice>
 		)
@@ -35,7 +38,7 @@ export function TorrentSetupNotice({ setup, needSearch, onOpenSettings }: Torren
 
 	if (setup.clientReachable === false) {
 		return (
-			<Notice tone='danger' title={t('torrents.setup.unreachable')} action={action}>
+			<Notice tone='danger' title={t('torrents.setup.unreachable')} action={action('client')}>
 				{setup.clientError}
 			</Notice>
 		)
@@ -43,7 +46,7 @@ export function TorrentSetupNotice({ setup, needSearch, onOpenSettings }: Torren
 
 	if (needSearch && !setup.hasSources) {
 		return (
-			<Notice tone='info' title={t('torrents.setup.noSources')} action={action}>
+			<Notice tone='info' title={t('torrents.setup.noSources')} action={action('sources')}>
 				{t('torrents.setup.noSourcesHint')}
 			</Notice>
 		)

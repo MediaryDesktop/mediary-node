@@ -96,7 +96,15 @@ export function TorrentDownloadList({ mediaRef }: TorrentDownloadListProps) {
 
 	return (
 		<section className={styles.root}>
-			<TorrentSetupNotice setup={setup} onOpenSettings={() => navigate({ to: '/settings' })} />
+			<TorrentSetupNotice
+				setup={setup}
+				onOpenSettings={missing =>
+					navigate({
+						to: '/settings',
+						search: { section: missing === 'client' ? 'torrent-client' : 'torrent-search' }
+					})
+				}
+			/>
 
 			{!mediaRef && downloads.length > 0 && (
 				<div className={styles.summary}>

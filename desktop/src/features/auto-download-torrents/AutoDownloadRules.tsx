@@ -68,7 +68,12 @@ export function AutoDownloadRules() {
 				<TorrentSetupNotice
 					setup={setup}
 					needSearch
-					onOpenSettings={() => navigate({ to: '/settings' })}
+					onOpenSettings={missing =>
+						navigate({
+							to: '/settings',
+							search: { section: missing === 'client' ? 'torrent-client' : 'torrent-search' }
+						})
+					}
 				/>
 			)}
 

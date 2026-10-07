@@ -169,7 +169,12 @@ function SearchForm({ mediaRef, title, missing, onDone }: TorrentSearchDrawerPro
 				<TorrentSetupNotice
 					setup={setup}
 					needSearch
-					onOpenSettings={() => navigate({ to: '/settings' })}
+					onOpenSettings={missing =>
+						navigate({
+							to: '/settings',
+							search: { section: missing === 'client' ? 'torrent-client' : 'torrent-search' }
+						})
+					}
 				/>
 
 				{missing && (

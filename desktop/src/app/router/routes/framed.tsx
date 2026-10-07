@@ -7,7 +7,8 @@ import { LibraryPage, ScanHistoryPage } from '@pages/library'
 import { ListDetailPage, ListsPage } from '@pages/lists'
 import { MediaPage } from '@pages/media'
 import { SearchPage } from '@pages/search'
-import { SettingsPage } from '@pages/settings'
+import { isSettingsSection, SettingsPage } from '@pages/settings'
+import type { SettingsSection } from '@pages/settings'
 
 import { AppLayout } from '../../layout/AppLayout'
 
@@ -86,7 +87,12 @@ const downloadsRoute = createRoute({
 const settingsRoute = createRoute({
 	getParentRoute: () => framedRoute,
 	path: '/settings',
-	component: SettingsPage
+	validateSearch: (search: Record<string, unknown>): { section?: SettingsSection } =>
+		isSettingsSection(search.section) ? { section: search.section } : {},
+	component: function SettingsScreen() {
+		const { section } = settingsRoute.useSearch()
+		return <SettingsPage section={section ?? 'app'} />
+	}
 })
 
 export const framedTree = framedRoute.addChildren([

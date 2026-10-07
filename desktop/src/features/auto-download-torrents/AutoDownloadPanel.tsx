@@ -166,7 +166,12 @@ function RuleDetails({ rule }: { rule: TorrentRule }) {
 			<TorrentSetupNotice
 				setup={setup}
 				needSearch
-				onOpenSettings={() => navigate({ to: '/settings' })}
+				onOpenSettings={missing =>
+					navigate({
+						to: '/settings',
+						search: { section: missing === 'client' ? 'torrent-client' : 'torrent-search' }
+					})
+				}
 			/>
 
 			<p className={styles.status}>

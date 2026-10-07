@@ -1117,6 +1117,44 @@ export const ru: Translation = {
 		}
 	},
 	settings: {
+		sections: {
+			app: {
+				title: 'Приложение',
+				subtitle: 'Внешний вид, язык и первичная настройка'
+			},
+			library: {
+				title: 'Локальная библиотека',
+				subtitle: 'Папки, которые нода сканирует на медиа'
+			},
+			player: {
+				title: 'Воспроизведение видео',
+				subtitle: 'Каким плеером открывать видео'
+			},
+			torrentClient: {
+				title: 'Торрент-клиент',
+				subtitle: 'Куда загружаются торренты'
+			},
+			torrentSearch: {
+				title: 'Поиск торрентов',
+				subtitle: 'Источники Torznab для поиска раздач'
+			},
+			torrentPreferences: {
+				title: 'Выбор раздач',
+				subtitle: 'Какие раздачи поиск ставит первыми'
+			},
+			mangaSources: {
+				title: 'Источники манги',
+				subtitle: 'Каталоги OPDS с мангой и книгами'
+			},
+			mangaDex: {
+				title: 'MangaDex',
+				subtitle: 'Чтение глав онлайн'
+			},
+			mangaDownloads: {
+				title: 'Загрузка манги',
+				subtitle: 'Где хранятся загруженные главы'
+			}
+		},
 		mangaDex: {
 			name: 'MangaDex',
 			hint: 'Читать главы онлайн с MangaDex'
