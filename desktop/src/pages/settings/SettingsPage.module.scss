@@ -61,10 +61,13 @@
 			}
 
 			&.active {
-				border-color: var(--border-strong);
-				background: var(--surface-active);
-				color: var(--text);
+				background: var(--accent-muted);
+				color: var(--accent-text);
 				font-weight: 600;
+
+				&:hover {
+					background: var(--accent-muted-hover);
+				}
 			}
 		}
 	}
