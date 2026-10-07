@@ -284,6 +284,35 @@ func TestParseKeepsReleaseDetails(t *testing.T) {
 	}
 }
 
+// AniLiberty writes the episode in brackets of its own, which habari reads as
+// the release group: without the fallback every file was a movie with no episode.
+func TestParseBracketedEpisode(t *testing.T) {
+	cases := []struct {
+		relPath string
+		episode *int
+	}{
+		{"Ranma 1_2 (2024) 3 - AniLiberty [WEB-DL 1080p HEVC]/Ranma_1_2_(2024)_3_[01]_[HEVC].mkv", number(1)},
+		{"Sousou_no_Frieren_[28]_[AniLiberty]_[WEBRip_1080p].mkv", number(28)},
+		{"Spirited Away [2001].mkv", nil},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.relPath, func(t *testing.T) {
+			got := Parse(tc.relPath, scanner.KindVideo)
+
+			assertNumber(t, "episode", got.Episode, tc.episode)
+			if tc.episode != nil {
+				if got.Form != FormSeries {
+					t.Errorf("form = %q, want series", got.Form)
+				}
+				if got.ReleaseGroup == "01" || got.ReleaseGroup == "28" {
+					t.Errorf("release group = %q, want the episode not to stand in for it", got.ReleaseGroup)
+				}
+			}
+		})
+	}
+}
+
 func assertNumber(t *testing.T, field string, got, want *int) {
 	t.Helper()
 

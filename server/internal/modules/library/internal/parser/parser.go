@@ -25,7 +25,7 @@ import (
 // Version is stored next to every parsed row. Bumping it makes the next scan
 // re-parse names recorded by an older build, without re-reading the files: a
 // better parser is worth nothing if the library keeps the old answers.
-const Version = 2
+const Version = 3
 
 // Form is what the file holds, as far as its name tells. Unlike scanner.Kind,
 // which only looks at the extension, this separates an episode from a movie and
@@ -206,6 +206,15 @@ func parseVideo(dirs []string, filename string) Result {
 		Resolution:   meta.VideoResolution,
 	}
 
+	if result.Episode == nil {
+		if number := bracketedEpisode(filename); number != "" {
+			result.Episode = parseNumber(number)
+			if result.ReleaseGroup == number {
+				result.ReleaseGroup = ""
+			}
+		}
+	}
+
 	if isIgnoredTitle(result.Title) {
 		result.Title = ""
 	}
@@ -240,6 +249,25 @@ func parseVideo(dirs []string, filename string) Result {
 	}
 
 	return result
+}
+
+var bracketNumber = regexp.MustCompile(`\[(\d{1,4})\]`)
+
+// bracketedEpisode reads the episode AniLiberty and other dubbing teams put in
+// brackets of its own — Title_[01]_[HEVC].mkv — which habari takes for the
+// release group. A year in brackets is not one.
+func bracketedEpisode(filename string) string {
+	match := bracketNumber.FindStringSubmatch(stripExtension(filename))
+	if match == nil {
+		return ""
+	}
+
+	number := match[1]
+	if len(number) == 4 && (strings.HasPrefix(number, "19") || strings.HasPrefix(number, "20")) {
+		return ""
+	}
+
+	return number
 }
 
 func videoForm(fileTypes []string, folders []folder, episode *int) Form {
