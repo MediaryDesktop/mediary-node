@@ -2,7 +2,7 @@ import { useUnit } from 'effector-react'
 import { useCallback, useEffect, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, DropdownMenu, Icon, toast } from '@shared/ui'
+import { Button, DropdownMenu, Icon, ListTile, toast } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
 
@@ -50,46 +50,43 @@ export function OPDSServersSettings() {
 			) : (
 				<ul className={styles.servers}>
 					{servers.map(server => (
-						<li key={server.id} className={styles.server}>
-							<span className={styles.icon}>
-								<Icon name='common/database' size={18} />
-							</span>
-
-							<div className={styles.body}>
-								<p className={styles.name}>{server.name}</p>
-								<p className={styles.url} title={server.url}>
-									{server.username ? `${server.username} · ${server.url}` : server.url}
-								</p>
-							</div>
-
-							<DropdownMenu
-								items={[
-									{
-										id: 'edit',
-										label: t('mangaSources.edit'),
-										icon: 'common/pencil',
-										onSelect: () => setEditing(server)
-									},
-									{
-										id: 'remove',
-										label: t('mangaSources.remove'),
-										icon: 'common/trash',
-										danger: true,
-										disabled: removing,
-										onSelect: () => remove(server.id)
+						<ListTile
+							key={server.id}
+							as='li'
+							icon='common/database'
+							title={server.name}
+							subtitle={server.username ? `${server.username} · ${server.url}` : server.url}
+							subtitleHint={server.url}
+							actions={
+								<DropdownMenu
+									items={[
+										{
+											id: 'edit',
+											label: t('mangaSources.edit'),
+											icon: 'common/pencil',
+											onSelect: () => setEditing(server)
+										},
+										{
+											id: 'remove',
+											label: t('mangaSources.remove'),
+											icon: 'common/trash',
+											danger: true,
+											disabled: removing,
+											onSelect: () => remove(server.id)
+										}
+									]}
+									trigger={
+										<Button
+											size='small'
+											variant='ghost'
+											iconOnly
+											aria-label={t('mangaSources.menu')}
+											startIcon={<Icon name='common/more-vertical' size={16} />}
+										/>
 									}
-								]}
-								trigger={
-									<button
-										type='button'
-										className={styles.action}
-										aria-label={t('mangaSources.menu')}
-									>
-										<Icon name='common/more-vertical' size={16} />
-									</button>
-								}
-							/>
-						</li>
+								/>
+							}
+						/>
 					))}
 				</ul>
 			)}

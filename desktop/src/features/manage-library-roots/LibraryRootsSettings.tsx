@@ -2,7 +2,7 @@ import { useUnit } from 'effector-react'
 import { useEffect } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, DropdownMenu, Icon, toast } from '@shared/ui'
+import { Button, DropdownMenu, Icon, ListTile, toast } from '@shared/ui'
 
 import { deleteLibraryRootMutation, libraryModel, libraryRootsQuery } from '@entities/library-item'
 
@@ -52,59 +52,53 @@ export function LibraryRootsSettings() {
 			) : (
 				<ul className={styles.roots}>
 					{roots.map(root => (
-						<li key={root.id} className={styles.folder}>
-							<span className={styles.icon}>
-								<Icon name='common/folder' size={18} />
-							</span>
-
-							<div className={styles.body}>
-								<p className={styles.path} title={root.path}>
-									{root.path}
-								</p>
-
-								<p className={styles.counts}>
-									{[
-										t('library.root.files', { count: root.file_count }),
-										root.unmatched_count > 0
-											? t('library.summary.unmatched', { count: root.unmatched_count })
-											: null,
-										root.missing_count > 0
-											? t('library.root.missing', { count: root.missing_count })
-											: null
-									]
-										.filter(Boolean)
-										.join(' · ')}
-								</p>
-							</div>
-
-							<DropdownMenu
-								items={[
-									{
-										id: 'rescan',
-										label: t('library.root.rescan'),
-										icon: 'common/reset',
-										onSelect: () => scanRequested(root.id)
-									},
-									{
-										id: 'remove',
-										label: t('library.root.remove'),
-										icon: 'common/trash',
-										danger: true,
-										disabled: removing,
-										onSelect: () => remove(root.id)
+						<ListTile
+							key={root.id}
+							as='li'
+							icon='common/folder'
+							title={root.path}
+							titleHint={root.path}
+							subtitle={[
+								t('library.root.files', { count: root.file_count }),
+								root.unmatched_count > 0
+									? t('library.summary.unmatched', { count: root.unmatched_count })
+									: null,
+								root.missing_count > 0
+									? t('library.root.missing', { count: root.missing_count })
+									: null
+							]
+								.filter(Boolean)
+								.join(' · ')}
+							actions={
+								<DropdownMenu
+									items={[
+										{
+											id: 'rescan',
+											label: t('library.root.rescan'),
+											icon: 'common/reset',
+											onSelect: () => scanRequested(root.id)
+										},
+										{
+											id: 'remove',
+											label: t('library.root.remove'),
+											icon: 'common/trash',
+											danger: true,
+											disabled: removing,
+											onSelect: () => remove(root.id)
+										}
+									]}
+									trigger={
+										<Button
+											size='small'
+											variant='ghost'
+											iconOnly
+											aria-label={t('library.root.menu')}
+											startIcon={<Icon name='common/more-vertical' size={16} />}
+										/>
 									}
-								]}
-								trigger={
-									<button
-										type='button'
-										className={styles.action}
-										aria-label={t('library.root.menu')}
-									>
-										<Icon name='common/more-vertical' size={16} />
-									</button>
-								}
-							/>
-						</li>
+								/>
+							}
+						/>
 					))}
 				</ul>
 			)}

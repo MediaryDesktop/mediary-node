@@ -20,24 +20,3 @@
 	color: var(--text);
 	font-size: 0.875rem;
 }
-
-.file {
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-	padding: 0.5rem 0.75rem;
-	border: 1px solid var(--border);
-	border-radius: var(--radius-sm);
-	background: var(--bg-subtle);
-	color: var(--text-muted);
-
-	.fileName {
-		flex: 1;
-		min-width: 0;
-		overflow: hidden;
-		color: var(--text);
-		font-size: 0.875rem;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-}

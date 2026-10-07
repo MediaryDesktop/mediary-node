@@ -2,7 +2,17 @@ import { useUnit } from 'effector-react'
 import { useEffect, useRef, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, Checkbox, Drawer, DrawerForm, DrawerSection, Icon, Textarea, toast } from '@shared/ui'
+import {
+	Button,
+	Checkbox,
+	Drawer,
+	DrawerForm,
+	DrawerSection,
+	Icon,
+	ListTile,
+	Textarea,
+	toast
+} from '@shared/ui'
 
 import { addTorrentMutation } from '@entities/torrent'
 
@@ -129,22 +139,23 @@ function AddForm({ mediaRef, title, onDone }: { mediaRef: string; title: string;
 				/>
 
 				{file ? (
-					<div className={styles.file}>
-						<Icon name='common/link' size={16} />
-						<span className={styles.fileName} title={file.name}>
-							{file.name}
-						</span>
-						<Button
-							size='small'
-							variant='ghost'
-							iconOnly
-							aria-label={t('torrents.drawer.clearFile')}
-							title={t('torrents.drawer.clearFile')}
-							startIcon={<Icon name='common/close' size={14} />}
-							disabled={adding}
-							onClick={() => setFile(null)}
-						/>
-					</div>
+					<ListTile
+						icon='common/link'
+						title={file.name}
+						titleHint={file.name}
+						actions={
+							<Button
+								size='small'
+								variant='ghost'
+								iconOnly
+								aria-label={t('torrents.drawer.clearFile')}
+								title={t('torrents.drawer.clearFile')}
+								startIcon={<Icon name='common/close' size={14} />}
+								disabled={adding}
+								onClick={() => setFile(null)}
+							/>
+						}
+					/>
 				) : (
 					<Button
 						size='small'

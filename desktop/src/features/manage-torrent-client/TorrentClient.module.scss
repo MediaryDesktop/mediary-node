@@ -6,47 +6,6 @@
 	width: 100%;
 }
 
-.summary {
-	display: flex;
-	align-items: center;
-	gap: 0.75rem;
-	width: 100%;
-	padding: 0.625rem 0.75rem;
-	border: 1px solid var(--border);
-	border-radius: var(--radius-md);
-	background: var(--bg-subtle);
-
-	.icon {
-		display: inline-flex;
-		flex: none;
-		align-items: center;
-		justify-content: center;
-		width: 2rem;
-		height: 2rem;
-		color: var(--text-muted);
-	}
-
-	.body {
-		flex: 1;
-		min-width: 0;
-
-		.name {
-			margin: 0;
-			color: var(--text);
-			font-size: 0.875rem;
-		}
-
-		.detail {
-			margin: 0.125rem 0 0;
-			overflow: hidden;
-			color: var(--text-muted);
-			font-size: 0.75rem;
-			text-overflow: ellipsis;
-			white-space: nowrap;
-		}
-	}
-}
-
 .check {
 	display: flex;
 	flex-wrap: wrap;

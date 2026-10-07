@@ -2,7 +2,7 @@ import { useUnit } from 'effector-react'
 import { useCallback, useEffect, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, Icon } from '@shared/ui'
+import { Button, ListTile } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
 
@@ -49,24 +49,17 @@ export function TorrentClientSettings() {
 
 	return (
 		<div className={styles.root}>
-			<div className={styles.summary}>
-				<span className={styles.icon}>
-					<Icon name='common/download' size={18} />
-				</span>
-
-				<div className={styles.body}>
-					<p className={styles.name}>{name}</p>
-					{connected && (
-						<p className={styles.detail} title={folder}>
-							{folder ?? t('torrents.settings.folderPlaceholder')}
-						</p>
-					)}
-				</div>
-
-				<Button size='small' onClick={() => setOpen(true)}>
-					{connected ? t('torrents.settings.edit') : t('torrents.settings.configure')}
-				</Button>
-			</div>
+			<ListTile
+				icon='common/download'
+				title={name}
+				subtitle={connected ? (folder ?? t('torrents.settings.folderPlaceholder')) : undefined}
+				subtitleHint={folder}
+				actions={
+					<Button size='small' onClick={() => setOpen(true)}>
+						{connected ? t('torrents.settings.edit') : t('torrents.settings.configure')}
+					</Button>
+				}
+			/>
 
 			<TorrentClientDrawer open={open} settings={settings} onClose={close} />
 		</div>

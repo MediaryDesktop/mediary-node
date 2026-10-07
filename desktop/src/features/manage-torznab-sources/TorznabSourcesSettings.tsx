@@ -2,7 +2,7 @@ import { useUnit } from 'effector-react'
 import { useCallback, useEffect, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, DropdownMenu, Icon, toast } from '@shared/ui'
+import { Button, DropdownMenu, Icon, ListTile, toast } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
 
@@ -51,46 +51,43 @@ export function TorznabSourcesSettings() {
 			) : (
 				<ul className={styles.servers}>
 					{sources.map(source => (
-						<li key={source.id} className={styles.server}>
-							<span className={styles.icon}>
-								<Icon name='common/search' size={18} />
-							</span>
-
-							<div className={styles.body}>
-								<p className={styles.name}>{source.name}</p>
-								<p className={styles.url} title={source.url}>
-									{source.url}
-								</p>
-							</div>
-
-							<DropdownMenu
-								items={[
-									{
-										id: 'edit',
-										label: t('torrents.sources.edit'),
-										icon: 'common/pencil',
-										onSelect: () => setEditing(source)
-									},
-									{
-										id: 'remove',
-										label: t('torrents.sources.remove'),
-										icon: 'common/trash',
-										danger: true,
-										disabled: removing,
-										onSelect: () => remove(source.id)
+						<ListTile
+							key={source.id}
+							as='li'
+							icon='common/search'
+							title={source.name}
+							subtitle={source.url}
+							subtitleHint={source.url}
+							actions={
+								<DropdownMenu
+									items={[
+										{
+											id: 'edit',
+											label: t('torrents.sources.edit'),
+											icon: 'common/pencil',
+											onSelect: () => setEditing(source)
+										},
+										{
+											id: 'remove',
+											label: t('torrents.sources.remove'),
+											icon: 'common/trash',
+											danger: true,
+											disabled: removing,
+											onSelect: () => remove(source.id)
+										}
+									]}
+									trigger={
+										<Button
+											size='small'
+											variant='ghost'
+											iconOnly
+											aria-label={t('torrents.sources.menu')}
+											startIcon={<Icon name='common/more-vertical' size={16} />}
+										/>
 									}
-								]}
-								trigger={
-									<button
-										type='button'
-										className={styles.action}
-										aria-label={t('torrents.sources.menu')}
-									>
-										<Icon name='common/more-vertical' size={16} />
-									</button>
-								}
-							/>
-						</li>
+								/>
+							}
+						/>
 					))}
 				</ul>
 			)}
