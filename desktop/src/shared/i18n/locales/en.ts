@@ -1049,7 +1049,7 @@ export const en = {
 			metadata: 'Fetching the torrent’s metadata',
 			error: 'qBittorrent reports an error',
 			importing: 'Adding to the library',
-			done: 'In the library',
+			done: 'In Library',
 			failed: 'Failed',
 			unknown: 'Waiting for qBittorrent'
 		},
@@ -1058,10 +1058,10 @@ export const en = {
 			speed: '{{speed}}/s',
 			seeds: '{{seeds}} seeds · {{peers}} peers',
 			eta: '{{time}} left',
-			imported_one: '{{count}} file in the library',
-			imported_few: '{{count}} files in the library',
-			imported_many: '{{count}} files in the library',
-			imported_other: '{{count}} files in the library'
+			imported_one: '{{count}} local file',
+			imported_few: '{{count}} local files',
+			imported_many: '{{count}} local files',
+			imported_other: '{{count}} local files'
 		},
 		pause: 'Pause',
 		resume: 'Resume',

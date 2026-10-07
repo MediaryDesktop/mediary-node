@@ -264,7 +264,7 @@ export const sprites = defineSpriteMap([
 				defineSpriteSymbol(['arrow-right'], [24]),
 				defineSpriteSymbol(['book-open'], [24]),
 				defineSpriteSymbol(['calendar'], [24]),
-				defineSpriteSymbol(['check'], [24]),
+				defineSpriteSymbol(['check'], [64, '0 0 24 24']),
 				defineSpriteSymbol(['chevron-down'], [24]),
 				defineSpriteSymbol(['clock'], [24]),
 				defineSpriteSymbol(['close'], [24]),
@@ -286,7 +286,6 @@ export const sprites = defineSpriteMap([
 				defineSpriteSymbol(['heart'], [24]),
 				defineSpriteSymbol(['home'], [24]),
 				defineSpriteSymbol(['info'], [24]),
-				defineSpriteSymbol(['library'], [24]),
 				defineSpriteSymbol(['link'], [24]),
 				defineSpriteSymbol(['list-checks'], [24]),
 				defineSpriteSymbol(['list'], [64, '0 0 24 24']),
@@ -365,7 +364,6 @@ export type SpritesMeta = {
 		| 'heart'
 		| 'home'
 		| 'info'
-		| 'library'
 		| 'link'
 		| 'list-checks'
 		| 'list'

@@ -1059,10 +1059,10 @@ export const ru: Translation = {
 			speed: '{{speed}}/с',
 			seeds: '{{seeds}} сидов · {{peers}} пиров',
 			eta: 'осталось {{time}}',
-			imported_one: '{{count}} файл в библиотеке',
-			imported_few: '{{count}} файла в библиотеке',
-			imported_many: '{{count}} файлов в библиотеке',
-			imported_other: '{{count}} файлов в библиотеке'
+			imported_one: '{{count}} локальный файл',
+			imported_few: '{{count}} локальных файла',
+			imported_many: '{{count}} локальных файлов',
+			imported_other: '{{count}} локальных файлов'
 		},
 		pause: 'Пауза',
 		resume: 'Продолжить',

@@ -2,6 +2,7 @@ import { Link, useNavigate } from '@tanstack/react-router'
 import clsx from 'clsx'
 import { useUnit } from 'effector-react'
 import { useEffect } from 'react'
+import { IoLibraryOutline } from 'react-icons/io5'
 
 import { useTranslation } from '@shared/i18n'
 import { formatBytes, formatDuration } from '@shared/lib'
@@ -43,7 +44,7 @@ const STATE_TONE: Record<TorrentDisplayState, BadgeTone> = {
 	metadata: 'info',
 	error: 'danger',
 	importing: 'info',
-	done: 'success',
+	done: 'accent',
 	failed: 'danger',
 	unknown: 'neutral'
 }
@@ -229,7 +230,12 @@ function DownloadRow({
 				)}
 
 				<div className={styles.stats}>
-					<Badge tone={STATE_TONE[state]}>{t(`torrents.states.${state}`)}</Badge>
+					<Badge
+						tone={STATE_TONE[state]}
+						icon={state === 'done' ? <IoLibraryOutline size={14} /> : undefined}
+					>
+						{t(`torrents.states.${state}`)}
+					</Badge>
 
 					{downloading && live && live.size > 0 && (
 						<span className={styles.progress}>

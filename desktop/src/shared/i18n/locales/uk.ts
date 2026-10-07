@@ -1058,10 +1058,10 @@ export const uk: Translation = {
 			speed: '{{speed}}/с',
 			seeds: '{{seeds}} сидів · {{peers}} пірів',
 			eta: 'лишилось {{time}}',
-			imported_one: '{{count}} файл у бібліотеці',
-			imported_few: '{{count}} файли в бібліотеці',
-			imported_many: '{{count}} файлів у бібліотеці',
-			imported_other: '{{count}} файлів у бібліотеці'
+			imported_one: '{{count}} локальний файл',
+			imported_few: '{{count}} локальні файли',
+			imported_many: '{{count}} локальних файлів',
+			imported_other: '{{count}} локальних файлів'
 		},
 		pause: 'Пауза',
 		resume: 'Продовжити',

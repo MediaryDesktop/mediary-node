@@ -1,5 +1,6 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
+import { IoLibraryOutline } from 'react-icons/io5'
 
 import { useTranslation } from '@shared/i18n'
 import { Button, DropdownMenu, Icon } from '@shared/ui'
@@ -45,7 +46,7 @@ export function LibraryToolbar({ hasEntries, hasRoots, unmatched }: LibraryToolb
 		menuItems.push({
 			id: 'unmatched',
 			label: t('library.toolbar.resolveUnmatched', { count: unmatched }),
-			icon: 'common/library',
+			icon: <IoLibraryOutline size={20} />,
 			onSelect: () => unmatchedRequested()
 		})
 	}

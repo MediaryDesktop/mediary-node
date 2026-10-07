@@ -24,8 +24,8 @@ export {
 } from './slide-transition'
 export type { SlideDirection } from './slide-transition'
 
-export { Icon } from './icon/Icon'
-export type { IconName } from './icon/Icon'
+export { Icon, renderIcon } from './icon/Icon'
+export type { IconLike, IconName } from './icon/Icon'
 
 export { SelectDropdown } from './select-dropdown'
 export type { SelectDropdownOption, SelectDropdownProps } from './select-dropdown'

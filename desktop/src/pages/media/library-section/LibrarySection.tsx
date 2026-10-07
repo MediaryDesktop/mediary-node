@@ -2,6 +2,7 @@ import clsx from 'clsx'
 import { useUnit } from 'effector-react'
 import { useEffect, useMemo, useRef } from 'react'
 import type { ReactNode } from 'react'
+import { IoLibraryOutline } from 'react-icons/io5'
 
 import { useTranslation } from '@shared/i18n'
 import { Badge, Button, Icon, Skeleton, toast, Tooltip } from '@shared/ui'
@@ -462,7 +463,7 @@ function NotInLibrary({ cover, coverColor, banner, total, meta }: NotInLibraryPr
 	return (
 		<section className={styles.section}>
 			<h2 className={styles.libraryTitle}>
-				<Icon name='common/library' size={20} />
+				<IoLibraryOutline size={20} />
 				{t('media.library.notInLibrary')}
 			</h2>
 

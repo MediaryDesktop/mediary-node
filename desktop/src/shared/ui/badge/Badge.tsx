@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import type { ReactNode } from 'react'
 
-import { Icon } from '../icon/Icon'
-import type { IconName } from '../icon/Icon'
+import { renderIcon } from '../icon/Icon'
+import type { IconLike } from '../icon/Icon'
 
 import styles from './Badge.module.scss'
 
@@ -10,7 +10,7 @@ export type BadgeTone = 'neutral' | 'accent' | 'success' | 'warning' | 'danger' 
 
 export interface BadgeProps {
 	tone?: BadgeTone
-	icon?: IconName
+	icon?: IconLike
 	children: ReactNode
 	className?: string
 }
@@ -18,7 +18,7 @@ export interface BadgeProps {
 export function Badge({ tone = 'neutral', icon, children, className }: BadgeProps) {
 	return (
 		<span className={clsx(styles.badge, styles[tone], className)}>
-			{icon && <Icon name={icon} size={14} />}
+			{icon && renderIcon(icon, 14)}
 			{children}
 		</span>
 	)

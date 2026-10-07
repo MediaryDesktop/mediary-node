@@ -1,4 +1,6 @@
-import type { IconName } from '@shared/ui'
+import { IoLibraryOutline } from 'react-icons/io5'
+
+import type { IconLike } from '@shared/ui'
 
 // The settings sections, in the order the menu lists them. The id is what the
 // address carries, so a notice elsewhere can open the section it is about.
@@ -22,7 +24,7 @@ export function isSettingsSection(value: unknown): value is SettingsSection {
 
 export interface SectionInfo {
 	id: SettingsSection
-	icon: IconName
+	icon: IconLike
 	// The section's keys under settings.sections.
 	key:
 		| 'app'
@@ -40,7 +42,7 @@ export interface SectionInfo {
 export const SECTION_GROUPS: readonly (readonly SectionInfo[])[] = [
 	[{ id: 'app', icon: 'common/settings', key: 'app' }],
 	[
-		{ id: 'library', icon: 'common/library', key: 'library' },
+		{ id: 'library', icon: <IoLibraryOutline size={18} />, key: 'library' },
 		{ id: 'player', icon: 'common/player', key: 'player' }
 	],
 	[

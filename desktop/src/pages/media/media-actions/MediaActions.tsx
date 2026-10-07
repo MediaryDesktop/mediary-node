@@ -1,4 +1,5 @@
 import { useUnit } from 'effector-react'
+import { IoLibraryOutline } from 'react-icons/io5'
 import { MdFormatListBulletedAdd } from 'react-icons/md'
 
 import { useTranslation } from '@shared/i18n'
@@ -74,7 +75,7 @@ export function MediaActions({
 		{
 			id: 'library',
 			label: t('media.menu.addToLibrary'),
-			icon: 'common/library',
+			icon: <IoLibraryOutline size={20} />,
 			disabled: true,
 			onSelect: () => {}
 		}
@@ -147,7 +148,7 @@ export function MediaActions({
 					aria-selected={view === 'library'}
 					variant='ghost'
 					className={styles.viewTab}
-					startIcon={<Icon name='common/library' size={20} />}
+					startIcon={<IoLibraryOutline size={20} />}
 					onClick={() => onViewChange?.('library')}
 				>
 					{t('media.views.library')}

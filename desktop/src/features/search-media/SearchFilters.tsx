@@ -1,5 +1,6 @@
 import { useUnit } from 'effector-react'
 import { useMemo } from 'react'
+import { IoLibraryOutline } from 'react-icons/io5'
 
 import { useTranslation } from '@shared/i18n'
 import { Button, Icon, SelectDropdown, Switch } from '@shared/ui'
@@ -106,7 +107,7 @@ export function SearchFilters() {
 				onChange={value => patch({ type: (value ?? 'anime') as MediaSearchType })}
 				options={SEARCH_TYPES.map(type => ({ value: type, label: t(`search.type.${type}`) }))}
 				accentWhenSelected
-				startIcon={<Icon name='common/library' size={18} />}
+				startIcon={<IoLibraryOutline size={18} />}
 			/>
 
 			<SelectDropdown

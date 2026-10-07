@@ -2,6 +2,7 @@ import { useNavigate } from '@tanstack/react-router'
 import clsx from 'clsx'
 import { useUnit } from 'effector-react'
 import { useEffect, useMemo, useState } from 'react'
+import { CiGrid2H, CiGrid41 } from 'react-icons/ci'
 
 import { useTranslation } from '@shared/i18n'
 import {
@@ -11,11 +12,12 @@ import {
 	Input,
 	PageHeader,
 	PageTransition,
+	renderIcon,
 	SegmentedControl,
 	SelectDropdown,
 	SelectionGroup
 } from '@shared/ui'
-import type { IconName } from '@shared/ui'
+import type { IconLike } from '@shared/ui'
 
 import { aniListAccountModel } from '@entities/anilist-account'
 import {
@@ -42,9 +44,9 @@ const SORT_KEYS: readonly SortKey[] = ['recent', 'name', 'size']
 
 const VIEWS: readonly View[] = ['grid', 'rows']
 
-const VIEW_ICONS: Record<View, IconName> = {
-	grid: 'common/library',
-	rows: 'common/list-checks'
+const VIEW_ICONS: Record<View, IconLike> = {
+	grid: <CiGrid41 size={20} />,
+	rows: <CiGrid2H size={20} />
 }
 
 function changedAt(list: TrackerCustomList): number {
@@ -191,7 +193,7 @@ export function ListsPage() {
 							size='large'
 							items={VIEWS.map(mode => ({
 								value: mode,
-								label: <Icon name={VIEW_ICONS[mode]} size={16} />,
+								label: renderIcon(VIEW_ICONS[mode], 16),
 								ariaLabel: t(`lists.view.${mode}`)
 							}))}
 							value={view}

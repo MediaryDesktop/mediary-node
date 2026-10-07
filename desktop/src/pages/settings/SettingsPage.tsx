@@ -3,7 +3,7 @@ import clsx from 'clsx'
 import type { ReactNode } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Icon, PageTransition, RippleButton } from '@shared/ui'
+import { PageTransition, renderIcon, RippleButton } from '@shared/ui'
 
 import { PlayerModeSwitcher } from '@features/choose-player'
 import { DownloadFolderSetting } from '@features/download-chapters'
@@ -45,7 +45,7 @@ export function SettingsPage({ section }: SettingsPageProps) {
 										navigate({ to: '/settings', search: { section: item.id } })
 									}
 								>
-									<Icon name={item.icon} size={18} />
+									{renderIcon(item.icon, 18)}
 									{t(`settings.sections.${item.key}.title`)}
 								</RippleButton>
 							</li>
@@ -56,9 +56,7 @@ export function SettingsPage({ section }: SettingsPageProps) {
 
 			<section className={styles.panel}>
 				<header className={styles.header}>
-					<span className={styles.headerIcon}>
-						<Icon name={current.icon} size={24} />
-					</span>
+					<span className={styles.headerIcon}>{renderIcon(current.icon, 24)}</span>
 					<div>
 						<h2 className={styles.headerTitle}>{t(`settings.sections.${current.key}.title`)}</h2>
 						<p className={styles.headerSubtitle}>

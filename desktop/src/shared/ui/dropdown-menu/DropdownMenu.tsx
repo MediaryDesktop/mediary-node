@@ -1,10 +1,10 @@
 import * as Primitive from '@radix-ui/react-dropdown-menu'
 import clsx from 'clsx'
-import type { CSSProperties, ReactElement, ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { useEffect, useState } from 'react'
 
 import { Icon } from '../icon/Icon'
-import type { IconName } from '../icon/Icon'
+import type { IconLike } from '../icon/Icon'
 import { useRipple } from '../ripple/useRipple'
 
 import styles from './DropdownMenu.module.scss'
@@ -12,9 +12,7 @@ import styles from './DropdownMenu.module.scss'
 export interface DropdownMenuItem {
 	id: string
 	label: string
-	// A sprite name, or a ready element (e.g. from react-icons) for glyphs the
-	// sprite does not have.
-	icon?: IconName | ReactElement
+	icon?: IconLike
 	danger?: boolean
 	disabled?: boolean
 	checked?: boolean

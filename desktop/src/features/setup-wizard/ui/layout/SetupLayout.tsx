@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import type { ReactNode } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, Icon, Logo } from '@shared/ui'
+import { Button, Icon, Logo, renderIcon } from '@shared/ui'
 
 import { SETUP_STEPS } from '../../config/steps'
 import type { SetupStepId } from '../../config/steps'
@@ -58,9 +58,7 @@ export function SetupLayout({
 							disabled={!onSelectStep || index > currentIndex}
 							onClick={() => onSelectStep?.(step.id)}
 						>
-							<span className={styles.badge}>
-								<Icon name={step.icon} size={24} />
-							</span>
+							<span className={styles.badge}>{renderIcon(step.icon, 24)}</span>
 
 							<span className={styles.label}>{t(step.labelKey)}</span>
 						</button>

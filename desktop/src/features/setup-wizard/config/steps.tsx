@@ -1,10 +1,12 @@
-import type { IconName } from '@shared/ui'
+import { IoLibraryOutline } from 'react-icons/io5'
+
+import type { IconLike } from '@shared/ui'
 
 export type SetupStepId = 'anilist' | 'account' | 'library' | 'player' | 'downloads' | 'debrid'
 
 export interface SetupStep {
 	id: SetupStepId
-	icon: IconName
+	icon: IconLike
 	labelKey: `setup.steps.${SetupStepId}.label`
 	titleKey: `setup.steps.${SetupStepId}.title`
 	descriptionKey: `setup.steps.${SetupStepId}.description`
@@ -27,7 +29,7 @@ export const SETUP_STEPS: readonly SetupStep[] = [
 	},
 	{
 		id: 'library',
-		icon: 'common/library',
+		icon: <IoLibraryOutline size={24} />,
 		labelKey: 'setup.steps.library.label',
 		titleKey: 'setup.steps.library.title',
 		descriptionKey: 'setup.steps.library.description'
