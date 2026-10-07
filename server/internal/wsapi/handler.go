@@ -13,7 +13,8 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
 )
 
-const (
+// Variables so a test can run through several pings quickly.
+var (
 	writeTimeout = 10 * time.Second
 
 	pingInterval = 30 * time.Second
@@ -42,7 +43,9 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	defer func() { _ = conn.CloseNow() }()
 
-	ctx := r.Context()
+	// Clients only listen, but a pong is only seen while something reads the
+	// connection; without a reader every ping times out and drops the client.
+	ctx := conn.CloseRead(r.Context())
 
 	stream, unsubscribe := h.hub.Subscribe(topicsFromQuery(r)...)
 	defer unsubscribe()

@@ -2,7 +2,7 @@ export { $nodeReady, $nodeState, nodeBridgeMounted, subscribeToNodeState } from 
 
 export { createNodeRequestFx, nodeMediaUrl, openNodeEventStream } from './client'
 
-export { nodeEventReceived, nodeOnline, nodeTopic } from './events'
+export { nodeEventReceived, nodeOnline, nodeStreamResumed, nodeTopic } from './events'
 export type { NodeEvent } from './events'
 
 export { nodeHealthQuery } from './health.query'

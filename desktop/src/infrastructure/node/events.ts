@@ -14,6 +14,12 @@ const RECONNECT_DELAY_MS = 2_000
 
 export const nodeEventReceived = createEvent<NodeEvent>()
 
+// The stream is back after a drop. What the node published in the gap is gone,
+// so whatever lives off its events should ask again.
+export const nodeStreamResumed = createEvent()
+
+let openedBefore = false
+
 const $nodeOnline = combine($nodeReady, $nodeConnection, (ready, connection) => ready && connection !== null)
 
 let socket: WebSocket | null = null
@@ -57,6 +63,17 @@ const openStreamFx = createEffect(() => {
 
 	const stream = openNodeEventStream()
 	socket = stream
+
+	stream.addEventListener('open', () => {
+		if (socket !== stream) {
+			return
+		}
+
+		if (openedBefore) {
+			nodeStreamResumed()
+		}
+		openedBefore = true
+	})
 
 	stream.addEventListener('message', message => {
 		const event = parseNodeEvent(message.data)

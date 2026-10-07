@@ -1,7 +1,7 @@
 import { concurrency, createMutation, createQuery, keepFresh } from '@farfetched/core'
 import { createEvent, createStore, sample } from 'effector'
 
-import { nodeTopic } from '@infra/node'
+import { nodeStreamResumed, nodeTopic } from '@infra/node'
 
 import {
 	addTorrentFx,
@@ -68,6 +68,7 @@ concurrency(torrentDownloadsQuery, { strategy: 'TAKE_LATEST' })
 sample({
 	clock: [
 		nodeTopic('torrent'),
+		nodeStreamResumed,
 		addTorrentMutation.finished.success,
 		pauseTorrentMutation.finished.finally,
 		resumeTorrentMutation.finished.finally,

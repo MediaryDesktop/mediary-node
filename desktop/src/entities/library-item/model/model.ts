@@ -4,7 +4,7 @@ import { createEffect, createEvent, createStore, sample } from 'effector'
 import { atom } from '@shared/factory'
 import { formatDuration } from '@shared/lib'
 
-import { nodeTopic } from '@infra/node'
+import { nodeStreamResumed, nodeTopic } from '@infra/node'
 
 import {
 	addLibraryRootFx,
@@ -136,11 +136,12 @@ export const deleteLibraryMatchMutation = createMutation({
 // The node says when its own rows changed, so nothing here polls: a scan that
 // finds a file, a match the matcher worked out, a folder that was removed — each
 // arrives as an event, and the query refetches once.
-keepFresh(libraryRootsQuery, { triggers: [libraryUpdated] })
+keepFresh(libraryRootsQuery, { triggers: [libraryUpdated, nodeStreamResumed] })
 
 keepFresh(libraryCollectionQuery, {
 	triggers: [
 		libraryUpdated,
+		nodeStreamResumed,
 		setLibraryMatchMutation.finished.success,
 		deleteLibraryMatchMutation.finished.success,
 		setLibraryFileIgnoredMutation.finished.success,
@@ -154,6 +155,7 @@ keepFresh(libraryCollectionQuery, {
 
 const filesChanged = [
 	libraryUpdated,
+	nodeStreamResumed,
 	setLibraryMatchMutation.finished.success,
 	deleteLibraryMatchMutation.finished.success,
 	setLibraryFileIgnoredMutation.finished.success,
