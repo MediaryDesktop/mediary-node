@@ -157,12 +157,19 @@ function AddForm({ mediaRef, title, onDone }: { mediaRef: string; title: string;
 				)}
 			</DrawerSection>
 
-			<Checkbox
-				checked={chooseFiles}
-				onCheckedChange={setChooseFiles}
-				label={t('torrents.drawer.chooseFiles')}
-				disabled={adding}
-			/>
+			<div
+				role='presentation'
+				className={styles.checkRow}
+				onClick={() => !adding && setChooseFiles(!chooseFiles)}
+			>
+				<Checkbox
+					checked={chooseFiles}
+					onCheckedChange={setChooseFiles}
+					label={t('torrents.drawer.chooseFiles')}
+					disabled={adding}
+				/>
+				<span className={styles.checkLabel}>{t('torrents.drawer.chooseFiles')}</span>
+			</div>
 		</DrawerForm>
 	)
 }

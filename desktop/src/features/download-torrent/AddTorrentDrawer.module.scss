@@ -2,6 +2,25 @@
 	display: none;
 }
 
+.checkRow {
+	display: flex;
+	align-items: center;
+	gap: 0.625rem;
+	padding: 0.5rem;
+	border-radius: var(--radius-md);
+	cursor: pointer;
+
+	&:hover {
+		background: var(--surface-hover);
+	}
+}
+
+.checkLabel {
+	min-width: 0;
+	color: var(--text);
+	font-size: 0.875rem;
+}
+
 .file {
 	display: flex;
 	align-items: center;
