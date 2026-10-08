@@ -5,9 +5,11 @@ import { useMemo } from 'react'
 import { useTranslation } from '@shared/i18n'
 
 import { aniListAccountModel } from '@entities/anilist-account'
-import { enumLabel, MediaCard } from '@entities/media'
+import { enumLabel, MediaCard, mediaTitle } from '@entities/media'
 import type { MediaDetails } from '@entities/media'
-import { entryTracking, useTrackedEntries } from '@entities/tracker'
+import { entryTracking, isTrackerMediaType, useTrackedEntries } from '@entities/tracker'
+
+import { EntryMenu } from '@features/track-media'
 
 import styles from './RelationsSection.module.scss'
 
@@ -44,6 +46,18 @@ export function RelationsSection({ relations }: RelationsSectionProps) {
 								media={relation}
 								cornerLabel={enumLabel(t, 'relation', relation.relation_type)}
 								tracking={entry ? entryTracking(entry, t) : null}
+								menu={
+									connected && isTrackerMediaType(relation.media_type) ? (
+										<EntryMenu
+											media={{
+												mediaRef: relation.media_ref,
+												mediaType: relation.media_type,
+												title: mediaTitle(relation.title)
+											}}
+											entry={entry ?? null}
+										/>
+									) : undefined
+								}
 								previewRef={relation.media_ref}
 								onOpen={() =>
 									navigate({
