@@ -2,9 +2,9 @@ import { useUnit } from 'effector-react'
 import { useMemo } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Drawer, DrawerForm, DrawerSection, SelectionGroup } from '@shared/ui'
+import { Button, Drawer, DrawerForm, DrawerSection, Icon, SelectionGroup } from '@shared/ui'
 
-import { TRACKER_STATUSES, trackerListsQuery } from '@entities/tracker'
+import { isLocalTrackerType, TRACKER_STATUSES, trackerListsQuery } from '@entities/tracker'
 
 import { manageEntryModel } from '../model/model'
 
@@ -24,7 +24,8 @@ export function ManageEntryDrawer() {
 		closed,
 		statusChanged,
 		listsChanged,
-		submitted
+		submitted,
+		createListRequested
 	] = useUnit([
 		manageEntryModel.$open,
 		manageEntryModel.$target,
@@ -36,7 +37,8 @@ export function ManageEntryDrawer() {
 		manageEntryModel.closed,
 		manageEntryModel.statusChanged,
 		manageEntryModel.listsChanged,
-		manageEntryModel.submitted
+		manageEntryModel.submitted,
+		manageEntryModel.createListRequested
 	])
 
 	const collection = useUnit(trackerListsQuery.$data)
@@ -73,7 +75,11 @@ export function ManageEntryDrawer() {
 			>
 				<DrawerSection
 					title={t('lists.editor.status')}
-					description={t('lists.manageEntry.statusHint')}
+					description={t(
+						isLocalTrackerType(mediaType)
+							? 'lists.manageEntry.statusHintLocal'
+							: 'lists.manageEntry.statusHint'
+					)}
 				>
 					<SelectionGroup
 						options={statusOptions}
@@ -87,6 +93,17 @@ export function ManageEntryDrawer() {
 
 				<DrawerSection
 					title={t('lists.manageEntry.lists')}
+					action={
+						<Button
+							size='small'
+							variant='ghost'
+							startIcon={<Icon name='common/plus' size={16} />}
+							disabled={saving}
+							onClick={() => createListRequested()}
+						>
+							{t('lists.manageEntry.newList')}
+						</Button>
+					}
 					description={
 						options.length > 0
 							? t('lists.manageEntry.listsHint')

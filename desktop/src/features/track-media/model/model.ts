@@ -94,6 +94,11 @@ export const manageEntryModel = atom(() => {
 	const listsChanged = createEvent<string[]>()
 	const submitted = createEvent()
 
+	// Asking for a list that does not exist yet; whoever owns list creation answers
+	// with listCreated, and the new list comes ticked.
+	const createListRequested = createEvent()
+	const listCreated = createEvent<string>()
+
 	const $target = createStore<ManageTarget | null>(null)
 		.on(opened, (_, { entry, mediaType }) => ({
 			mediaRef: entry.media_ref,
@@ -118,6 +123,7 @@ export const manageEntryModel = atom(() => {
 		.on(opened, (_, { entry }) => entry.custom_lists ?? [])
 		.on(addOpened, () => [])
 		.on(listsChanged, (_, lists) => lists)
+		.on(listCreated, (lists, name) => (lists.includes(name) ? lists : [...lists, name]))
 
 	const $dirty = combine($target, $status, $lists, (target, status, lists) => {
 		if (!target) {
@@ -190,7 +196,9 @@ export const manageEntryModel = atom(() => {
 		closed,
 		statusChanged,
 		listsChanged,
-		submitted
+		submitted,
+		createListRequested,
+		listCreated
 	}
 })
 

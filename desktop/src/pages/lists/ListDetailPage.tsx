@@ -17,7 +17,7 @@ import {
 } from '@entities/tracker'
 import type { TrackerCustomList, TrackerEntry, TrackerMediaType } from '@entities/tracker'
 
-import { DeleteListDialog, ListDrawer, ListOptionsMenu, manageListsModel } from '@features/manage-lists'
+import { ListOptionsMenu, manageListsModel } from '@features/manage-lists'
 import { EntryMenu } from '@features/track-media'
 
 import { applyEntryFilters, formatsOf, genresOf, INITIAL_ENTRY_FILTERS } from './lib/entry-filters'
@@ -174,9 +174,6 @@ export function ListDetailPage({ listId }: ListDetailPageProps) {
 					</ul>
 				)}
 			</PageTransition>
-
-			<ListDrawer />
-			<DeleteListDialog />
 		</>
 	)
 }

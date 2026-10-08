@@ -5,10 +5,12 @@ import type { ReactNode } from 'react'
 import { NowPlayingBar, playbackQuery } from '@entities/playback'
 
 import { DownloadFolderPrompt } from '@features/download-chapters'
+import { DeleteListDialog, ListDrawer } from '@features/manage-lists'
 import { ScanProgress } from '@features/scan-library'
 import { ManageEntryDrawer, RateEntryDrawer } from '@features/track-media'
 
 import styles from './AppLayout.module.scss'
+import './list-wiring'
 import { Sidebar } from './Sidebar'
 
 export function AppLayout({ children }: { children: ReactNode }) {
@@ -28,6 +30,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
 			<ManageEntryDrawer />
 			<RateEntryDrawer />
+			{/* After the entry drawer, so a list created from it opens on top. */}
+			<ListDrawer />
+			<DeleteListDialog />
 			<DownloadFolderPrompt />
 
 			<ScanProgress />

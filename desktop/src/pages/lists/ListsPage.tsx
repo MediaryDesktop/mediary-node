@@ -30,7 +30,7 @@ import {
 import type { ListMediaType, TrackerCustomList } from '@entities/tracker'
 
 import { ConnectAniList } from '@features/connect-anilist'
-import { DeleteListDialog, ListDrawer, manageListsModel } from '@features/manage-lists'
+import { manageListsModel } from '@features/manage-lists'
 
 import { ListCard } from './list-card/ListCard'
 import styles from './ListsPage.module.scss'
@@ -234,9 +234,6 @@ export function ListsPage() {
 					<EmptyState title={allLists.length === 0 ? t('lists.noLists') : t('lists.noMatches')} />
 				)}
 			</section>
-
-			<ListDrawer />
-			<DeleteListDialog />
 		</PageTransition>
 	)
 }

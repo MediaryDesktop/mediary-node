@@ -179,6 +179,8 @@ export const en = {
 			title: 'Manage lists',
 			save: 'Save changes',
 			statusHint: 'Where this title sits in your AniList lists',
+			statusHintLocal: 'This title’s status on your own list',
+			newList: 'New list',
 			lists: 'Lists',
 			listsHint: 'Tap a list to add or remove this title',
 			listsEmpty: 'No custom list for this media type yet'
