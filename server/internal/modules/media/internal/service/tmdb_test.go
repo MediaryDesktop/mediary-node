@@ -56,7 +56,7 @@ const showFixture = `{
   ]}
 }`
 
-const tvGenresFixture = `{"genres":[{"id":18,"name":"Drama"},{"id":16,"name":"Animation"},{"id":35,"name":"Comedy"}]}`
+const tvGenresFixture = `{"genres":[{"id":18,"name":"Drama"},{"id":16,"name":"Animation"},{"id":35,"name":"Comedy"},{"id":10767,"name":"Talk"}]}`
 
 const tvSearchFixture = `{"page":1,"total_pages":3,"total_results":45,"results":[
   {"id":1,"name":"Crash Landing on You","original_name":"사랑의 불시착","original_language":"ko","origin_country":["KR"],"genre_ids":[18,35],"first_air_date":"2019-12-14","vote_average":8.7,"vote_count":900,"poster_path":"/cloy.jpg"},
@@ -335,7 +335,7 @@ func TestTMDBBrowsingMapsSortsAndFilters(t *testing.T) {
 	query := h.last("/discover/tv")
 	for name, want := range map[string]string{
 		"with_origin_country": "KR|CN|TW|HK|JP|TH",
-		"without_genres":      "16",
+		"without_genres":      "10763,10764,10767,16",
 		"with_genres":         "35",
 		"sort_by":             "vote_average.desc",
 		"vote_count.gte":      "200",
@@ -355,6 +355,14 @@ func TestTMDBBrowsingMapsSortsAndFilters(t *testing.T) {
 		t.Fatalf("newest first must stop at today, got %v", query)
 	}
 
+	if _, err := h.svc.Search(ctx, SearchParams{MediaType: "series", Genres: []string{"Talk"}}); err != nil {
+		t.Fatalf("browse talk shows: %v", err)
+	}
+
+	if query = h.last("/discover/tv"); query.Get("with_genres") != "10767" || query.Get("without_genres") != "10763,10764" || query.Get("vote_count.gte") != "50" {
+		t.Fatalf("a genre the user asked for is not excluded, got %v", query)
+	}
+
 	before := len(h.paths())
 	if _, err := h.svc.Search(ctx, SearchParams{MediaType: "series", Genres: []string{"Western"}}); apperr.KindOf(err) != apperr.KindInvalid {
 		t.Fatalf("an unknown genre must be rejected, got %v", err)
@@ -372,7 +380,7 @@ func TestTMDBFilterOptionsLeaveAnimationOutOfDoramas(t *testing.T) {
 		t.Fatalf("filter options: %v", err)
 	}
 
-	if strings.Join(options.Genres, "|") != "Drama|Comedy" || len(options.Tags) != 0 {
+	if strings.Join(options.Genres, "|") != "Drama|Comedy|Talk" || len(options.Tags) != 0 {
 		t.Fatalf("options %+v", options)
 	}
 }

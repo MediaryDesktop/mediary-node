@@ -19,9 +19,17 @@ const (
 	KindTV    Kind = "tv"
 )
 
-// GenreAnimation is the one genre the node reads by id: Japanese animation is
-// AniList's to describe, not TMDB's.
+// GenreAnimation is read by id because Japanese animation is AniList's to
+// describe, not TMDB's.
 const GenreAnimation = 16
+
+// Television genres that are not shows to follow: browsing by popularity would
+// otherwise open on late-night talk shows and the news.
+const (
+	GenreNews    = 10763
+	GenreReality = 10764
+	GenreTalk    = 10767
+)
 
 const imageBase = "https://image.tmdb.org/t/p/"
 

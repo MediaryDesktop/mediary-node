@@ -38,6 +38,10 @@ const (
 	// would outrank every classic.
 	scoreSortMinVotes  = 200
 	scoreFloorMinVotes = 50
+
+	// TMDB's popularity among shows counts long-running local soaps and sport
+	// broadcasts nobody rates; a handful of votes keeps the browse on shows.
+	popularShowMinVotes = 50
 )
 
 // A show from these countries that is not animation is a dorama. Japanese
@@ -248,17 +252,31 @@ func (s *Service) discoverParams(ctx context.Context, kind tmdb.Kind, params Sea
 		discover.MinVoteCount = max(discover.MinVoteCount, scoreFloorMinVotes)
 	}
 
-	if params.MediaType == MediaTypeDorama {
-		discover.OriginCountries = doramaCountries
-		discover.WithoutGenres = []int{tmdb.GenreAnimation}
-	}
-
 	if len(params.Genres) > 0 {
 		ids, err := s.tmdbGenreIDs(ctx, kind, params.Genres)
 		if err != nil {
 			return tmdb.DiscoverParams{}, err
 		}
 		discover.Genres = ids
+	}
+
+	if kind == tmdb.KindTV && discover.SortBy == "popularity.desc" {
+		discover.MinVoteCount = max(discover.MinVoteCount, popularShowMinVotes)
+	}
+
+	if kind == tmdb.KindTV {
+		// Talk shows, the news and reality TV top TMDB's popularity; a user who
+		// browses shows is looking for something else, unless they asked for one.
+		for _, genre := range []int{tmdb.GenreNews, tmdb.GenreReality, tmdb.GenreTalk} {
+			if !slices.Contains(discover.Genres, genre) {
+				discover.WithoutGenres = append(discover.WithoutGenres, genre)
+			}
+		}
+	}
+
+	if params.MediaType == MediaTypeDorama {
+		discover.OriginCountries = doramaCountries
+		discover.WithoutGenres = append(discover.WithoutGenres, tmdb.GenreAnimation)
 	}
 
 	return discover, nil
