@@ -325,3 +325,38 @@ func assertNumber(t *testing.T, field string, got, want *int) {
 		t.Errorf("%s = %d, want %d", field, *got, *want)
 	}
 }
+
+func TestAFilmsTrailingYearIsItsYear(t *testing.T) {
+	cases := []struct {
+		path  string
+		title string
+		year  int
+	}{
+		{"Movies/The.Matrix.1999.1080p.BluRay.x264.mkv", "The Matrix", 1999},
+		{"Movies/Матриця (1999)/Матриця.1999.WEB-DL.1080p.mkv", "Матриця", 1999},
+		{"Movies/Inception (2010).mkv", "Inception", 2010},
+		{"Movies/Blade.Runner.2049.2017.1080p.mkv", "Blade Runner 2049", 2017},
+	}
+
+	for _, c := range cases {
+		got := Parse(c.path, scanner.KindVideo)
+		if got.Form != FormMovie || got.Title != c.title || got.Year == nil || *got.Year != c.year {
+			t.Errorf("%s = %s %q %v, want movie %q %d", c.path, got.Form, got.Title, got.Year, c.title, c.year)
+		}
+	}
+}
+
+func TestSplitTrailingYearLeavesANameAlone(t *testing.T) {
+	if title, year := splitTrailingYear("Blade Runner 2049", nil, 2026); title != "Blade Runner 2049" || year != nil {
+		t.Errorf("a year past next year is part of the name, got %q %v", title, year)
+	}
+
+	released := 2020
+	if title, year := splitTrailingYear("Wonder Woman 1984", &released, 2026); title != "Wonder Woman 1984" || *year != 2020 {
+		t.Errorf("a number that disagrees with the year is part of the name, got %q %v", title, *year)
+	}
+
+	if title, year := splitTrailingYear("1917", nil, 2026); title != "1917" || year != nil {
+		t.Errorf("a title that is only a year stays, got %q %v", title, year)
+	}
+}

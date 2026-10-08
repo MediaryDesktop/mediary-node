@@ -15,6 +15,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 	"unicode"
 
 	habari "github.com/5rahim/habari"
@@ -25,7 +26,7 @@ import (
 // Version is stored next to every parsed row. Bumping it makes the next scan
 // re-parse names recorded by an older build, without re-reading the files: a
 // better parser is worth nothing if the library keeps the old answers.
-const Version = 3
+const Version = 4
 
 // Form is what the file holds, as far as its name tells. Unlike scanner.Kind,
 // which only looks at the extension, this separates an episode from a movie and
@@ -248,7 +249,32 @@ func parseVideo(dirs []string, filename string) Result {
 		result.Episode = nil
 	}
 
+	if result.Form == FormMovie {
+		result.Title, result.Year = splitTrailingYear(result.Title, result.Year, time.Now().Year())
+	}
+
 	return result
+}
+
+var trailingYear = regexp.MustCompile(`^(.+?)\s+((?:19|20)\d{2})$`)
+
+// splitTrailingYear takes the release year off a film's title: the parser reads
+// release names written for anime, and "The.Matrix.1999.1080p" leaves the year
+// in the title, where it would only make the name harder to match. A year past
+// next year is part of the name — "Blade Runner 2049" — and so is one that
+// disagrees with a year already found elsewhere: "Wonder Woman 1984" from 2020.
+func splitTrailingYear(title string, year *int, thisYear int) (name string, released *int) {
+	found := trailingYear.FindStringSubmatch(title)
+	if found == nil {
+		return title, year
+	}
+
+	number, err := strconv.Atoi(found[2])
+	if err != nil || number > thisYear+1 || (year != nil && *year != number) {
+		return title, year
+	}
+
+	return strings.TrimSpace(found[1]), &number
 }
 
 var bracketNumber = regexp.MustCompile(`\[(\d{1,4})\]`)
