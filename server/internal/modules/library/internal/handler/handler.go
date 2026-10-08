@@ -27,7 +27,15 @@ type RootsOutput struct {
 
 type AddRootInput struct {
 	Body struct {
-		Path string `json:"path" minLength:"1" maxLength:"4096" example:"D:\\Anime" doc:"Absolute path to an existing folder on this machine."`
+		Path    string `json:"path" minLength:"1" maxLength:"4096" example:"D:\\Anime" doc:"Absolute path to an existing folder on this machine."`
+		Content string `json:"content,omitempty" enum:"anime,movies_and_shows" doc:"What the videos in the folder are. Left out means anime."`
+	}
+}
+
+type UpdateRootInput struct {
+	ID   int64 `path:"id" doc:"Identifier of the root."`
+	Body struct {
+		Content string `json:"content" enum:"anime,movies_and_shows" required:"true" doc:"What the videos in the folder are."`
 	}
 }
 
@@ -171,7 +179,26 @@ func (h *Handler) Register(api huma.API) {
 		Tags:          []string{"library"},
 		DefaultStatus: http.StatusCreated,
 	}, func(ctx context.Context, in *AddRootInput) (*RootOutput, error) {
-		root, err := h.svc.AddRoot(ctx, in.Body.Path)
+		root, err := h.svc.AddRoot(ctx, in.Body.Path, in.Body.Content)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		out := &RootOutput{}
+		out.Body.Root = root
+
+		return out, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "updateLibraryRoot",
+		Method:      http.MethodPatch,
+		Path:        "/v1/library/roots/{id}",
+		Summary:     "Say what a library folder holds",
+		Description: "Switching between anime and movies and shows drops the automatic matches of the folder's videos — they point at the other source — and scans it again to redo them. Matches the user made by hand stay.",
+		Tags:        []string{"library"},
+	}, func(ctx context.Context, in *UpdateRootInput) (*RootOutput, error) {
+		root, err := h.svc.SetRootContent(ctx, in.ID, in.Body.Content)
 		if err != nil {
 			return nil, httpapi.ToHTTP(err)
 		}

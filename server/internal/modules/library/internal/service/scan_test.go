@@ -103,7 +103,7 @@ func writeFile(t *testing.T, path, content string) {
 func (h *harness) addRoot(t *testing.T, path string) *Root {
 	t.Helper()
 
-	root, err := h.svc.AddRoot(context.Background(), path)
+	root, err := h.svc.AddRoot(context.Background(), path, "")
 	if err != nil {
 		t.Fatalf("add root %s: %v", path, err)
 	}
@@ -308,13 +308,13 @@ func TestAddRootRejectsOverlappingFolders(t *testing.T) {
 	h.addRoot(t, root)
 
 	for _, path := range []string{root, nested} {
-		_, err := h.svc.AddRoot(context.Background(), path)
+		_, err := h.svc.AddRoot(context.Background(), path, "")
 		if apperr.KindOf(err) != apperr.KindConflict {
 			t.Errorf("adding %s again returned %v, want a conflict", path, err)
 		}
 	}
 
-	_, err := h.svc.AddRoot(context.Background(), filepath.Join(root, "missing"))
+	_, err := h.svc.AddRoot(context.Background(), filepath.Join(root, "missing"), "")
 	if apperr.KindOf(err) != apperr.KindInvalid {
 		t.Errorf("adding a folder that does not exist returned %v, want invalid", err)
 	}

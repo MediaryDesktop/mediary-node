@@ -63,6 +63,7 @@ func (s *Service) Roots(ctx context.Context) ([]Root, error) {
 		roots = append(roots, Root{
 			ID:             row.ID,
 			Path:           row.Path,
+			Content:        row.Content,
 			AddedAt:        row.AddedAt,
 			LastScanAt:     row.LastScanAt,
 			FileCount:      row.FileCount,
@@ -74,7 +75,14 @@ func (s *Service) Roots(ctx context.Context) ([]Root, error) {
 	return roots, nil
 }
 
-func (s *Service) AddRoot(ctx context.Context, path string) (*Root, error) {
+func (s *Service) AddRoot(ctx context.Context, path, content string) (*Root, error) {
+	if content == "" {
+		content = ContentAnime
+	}
+	if !validContent(content) {
+		return nil, apperr.Invalid("content", "unknown library content %q", content)
+	}
+
 	cleaned, err := s.validateRootPath(path)
 	if err != nil {
 		return nil, err
@@ -99,7 +107,7 @@ func (s *Service) AddRoot(ctx context.Context, path string) (*Root, error) {
 		}
 	}
 
-	root, err := s.store.AddRoot(ctx, cleaned, s.opts.Now())
+	root, err := s.store.AddRoot(ctx, cleaned, content, s.opts.Now())
 	if err != nil {
 		return nil, apperr.Wrap(err, apperr.KindInternal, "add library root")
 	}
@@ -109,7 +117,50 @@ func (s *Service) AddRoot(ctx context.Context, path string) (*Root, error) {
 		"path":   cleaned,
 	})
 
-	return &Root{ID: root.ID, Path: root.Path, AddedAt: root.AddedAt}, nil
+	return &Root{ID: root.ID, Path: root.Path, Content: root.Content, AddedAt: root.AddedAt}, nil
+}
+
+// SetRootContent says what a root's videos are. Their automatic matches went to
+// the other source, so they are dropped and the root is scanned again to redo
+// them; what the user matched by hand stays.
+func (s *Service) SetRootContent(ctx context.Context, id int64, content string) (*Root, error) {
+	if !validContent(content) {
+		return nil, apperr.Invalid("content", "unknown library content %q", content)
+	}
+
+	current, err := s.store.Root(ctx, id)
+	if err != nil {
+		return nil, apperr.Wrap(err, apperr.KindInternal, "read library root")
+	}
+	if current == nil {
+		return nil, apperr.New(apperr.KindNotFound, "library root %d does not exist", id)
+	}
+
+	if current.Content != content {
+		if _, err = s.store.SetRootContent(ctx, id, content); err != nil {
+			return nil, apperr.Wrap(err, apperr.KindInternal, "change library root")
+		}
+
+		s.hub.Publish(events.TopicLibraryUpdate, map[string]any{"reason": "root_changed", "root_id": id})
+
+		// A scan already running picks the files up on its next pass, or the next scan does.
+		if _, scanErr := s.StartScan(ctx, id); scanErr != nil && apperr.KindOf(scanErr) != apperr.KindConflict {
+			s.logger.Warn().Err(scanErr).Int64("root_id", id).Msg("rescan after a content change")
+		}
+	}
+
+	roots, err := s.Roots(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	for i := range roots {
+		if roots[i].ID == id {
+			return &roots[i], nil
+		}
+	}
+
+	return nil, apperr.New(apperr.KindNotFound, "library root %d does not exist", id)
 }
 
 func (s *Service) DeleteRoot(ctx context.Context, id int64) error {

@@ -305,3 +305,29 @@ func TestRankIsOrderedAndStable(t *testing.T) {
 		}
 	}
 }
+
+// A TMDB show holds every season, so a season 3 file belongs to it as much as a
+// season 1 file does — where an AniList entry for season 1 would rightly lose it.
+func TestRankMatchesAnyEpisodeOfAShowThatSpansSeasons(t *testing.T) {
+	show := Candidate{MediaRef: "tmdb:tv:1396", Titles: []string{"Breaking Bad"}, Format: "TV", SpansSeasons: true}
+
+	best := bestOf(t, File{Title: "Breaking Bad", Form: "series", Season: number(3), Episode: number(7)}, show)
+
+	if best.Confidence < AutoThreshold {
+		t.Errorf("confidence = %.2f, want at least %.2f", best.Confidence, AutoThreshold)
+	}
+}
+
+// "Во все тяжкие" is Breaking Bad's Russian name and the start of a spin-off's.
+// Both clear the threshold with room to spare, and the exact name has to win
+// rather than whichever the source happened to list first.
+func TestRankPrefersTheExactNameWhenBothClearTheTop(t *testing.T) {
+	spinOff := Candidate{MediaRef: "tmdb:tv:208208", Titles: []string{"Breaking Bear", "Breaking Bear", "Во все тяжкие: Медведи"}, Format: "TV", SpansSeasons: true}
+	show := Candidate{MediaRef: "tmdb:tv:1396", Titles: []string{"Breaking Bad", "Breaking Bad", "Во все тяжкие"}, Format: "TV", SpansSeasons: true}
+
+	best := bestOf(t, File{Title: "Во все тяжкие", Form: "series", Season: number(1), Episode: number(3)}, spinOff, show)
+
+	if best.Candidate.MediaRef != show.MediaRef {
+		t.Fatalf("picked %s, want the show whose name is exactly the file's", best.Candidate.MediaRef)
+	}
+}

@@ -23,6 +23,9 @@ type Querier interface {
 	DeleteAniListOutbox(ctx context.Context) error
 	DeleteAniListOutboxEntryIfUnchanged(ctx context.Context, arg DeleteAniListOutboxEntryIfUnchangedParams) (int64, error)
 	DeleteAniListOutboxForOtherAccounts(ctx context.Context, accountID int64) error
+	// Videos matched under the old content type point at the wrong source. The
+	// user's own choices stay: a manual match is never undone by a setting.
+	DeleteAutoVideoMatchesForRoot(ctx context.Context, rootID int64) error
 	DeleteCustomList(ctx context.Context, id int64) (int64, error)
 	DeleteCustomListItemsForRef(ctx context.Context, mediaRef string) error
 	DeleteFileMatch(ctx context.Context, fileID int64) (int64, error)
@@ -48,7 +51,7 @@ type Querier interface {
 	GetAniListOutboxEntry(ctx context.Context, arg GetAniListOutboxEntryParams) (AnilistOutbox, error)
 	GetCustomList(ctx context.Context, id int64) (CustomList, error)
 	GetLibraryFile(ctx context.Context, id int64) (GetLibraryFileRow, error)
-	GetLibraryRoot(ctx context.Context, id int64) (LibraryRoot, error)
+	GetLibraryRoot(ctx context.Context, id int64) (GetLibraryRootRow, error)
 	GetMangaDownload(ctx context.Context, id int64) (MangaDownload, error)
 	GetMangaSourceLinkBySeries(ctx context.Context, arg GetMangaSourceLinkBySeriesParams) (MangaSourceLink, error)
 	// Phase 0 queries, proving `task sqlc` produces compiling Go. Module queries
@@ -65,7 +68,7 @@ type Querier interface {
 	InsertCustomList(ctx context.Context, arg InsertCustomListParams) (CustomList, error)
 	InsertCustomListItem(ctx context.Context, arg InsertCustomListItemParams) error
 	InsertLibraryFile(ctx context.Context, arg InsertLibraryFileParams) (int64, error)
-	InsertLibraryRoot(ctx context.Context, arg InsertLibraryRootParams) (LibraryRoot, error)
+	InsertLibraryRoot(ctx context.Context, arg InsertLibraryRootParams) (InsertLibraryRootRow, error)
 	InsertScanRun(ctx context.Context, arg InsertScanRunParams) (int64, error)
 	InsertScanRunFileLog(ctx context.Context, arg InsertScanRunFileLogParams) error
 	InsertScanRunGroup(ctx context.Context, arg InsertScanRunGroupParams) error
@@ -119,6 +122,7 @@ type Querier interface {
 	RequeueRunningMangaDownloads(ctx context.Context, updatedAt string) ([]MangaDownload, error)
 	RetryMangaDownload(ctx context.Context, arg RetryMangaDownloadParams) (int64, error)
 	SetLibraryFileIgnored(ctx context.Context, arg SetLibraryFileIgnoredParams) (int64, error)
+	SetLibraryRootContent(ctx context.Context, arg SetLibraryRootContentParams) (int64, error)
 	SetListIcon(ctx context.Context, arg SetListIconParams) error
 	SetMangaDownloadProgress(ctx context.Context, arg SetMangaDownloadProgressParams) error
 	SetMangaDownloadState(ctx context.Context, arg SetMangaDownloadStateParams) error

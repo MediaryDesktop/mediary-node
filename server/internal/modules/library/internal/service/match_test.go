@@ -22,14 +22,19 @@ type fakeTitles struct {
 	described []TitleDescription
 	searches  []string
 
+	// types is the media type each Tracked and Search call asked for, in order.
+	types []string
+
 	trackedErr  error
 	searchErr   error
 	describeErr error
 }
 
-func (f *fakeTitles) Tracked(_ context.Context, _ string) ([]TitleCandidate, error) {
+func (f *fakeTitles) Tracked(_ context.Context, mediaType string) ([]TitleCandidate, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
+
+	f.types = append(f.types, mediaType)
 
 	if f.trackedErr != nil {
 		return nil, f.trackedErr
@@ -38,11 +43,12 @@ func (f *fakeTitles) Tracked(_ context.Context, _ string) ([]TitleCandidate, err
 	return f.tracked, nil
 }
 
-func (f *fakeTitles) Search(_ context.Context, query, _ string) ([]TitleCandidate, error) {
+func (f *fakeTitles) Search(_ context.Context, query, mediaType string) ([]TitleCandidate, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 
 	f.searches = append(f.searches, query)
+	f.types = append(f.types, mediaType)
 
 	if f.searchErr != nil {
 		return nil, f.searchErr

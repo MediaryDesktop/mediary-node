@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -53,7 +54,7 @@ func (s *Service) Suggestions(ctx context.Context, fileID int64) ([]Suggestion, 
 		return nil, apperr.New(apperr.KindPrecondition, "nothing in this file's name to search by")
 	}
 
-	mediaType, supported := mediaTypeForForm(file.Parsed.Form)
+	mediaType, supported := mediaTypeForForm(file.Parsed.Form, file.RootContent)
 	if !supported {
 		return nil, apperr.New(apperr.KindPrecondition,
 			"the node has no source for %q files yet", file.Parsed.Form)
@@ -83,7 +84,8 @@ func (s *Service) Suggestions(ctx context.Context, fileID int64) ([]Suggestion, 
 	posters := postersByRef(tracked, found)
 
 	suggestions := make([]Suggestion, 0, min(len(ranked), maxSuggestions))
-	for _, scored := range ranked[:min(len(ranked), maxSuggestions)] {
+	for i := range ranked[:min(len(ranked), maxSuggestions)] {
+		scored := &ranked[i]
 		art := posters[scored.Candidate.MediaRef]
 
 		suggestions = append(suggestions, Suggestion{
@@ -162,14 +164,15 @@ func (s *Service) matchFiles(ctx context.Context) matchOutcome {
 			break
 		}
 
-		mediaType, supported := mediaTypeForForm(group.form)
+		mediaType, supported := mediaTypeForForm(group.form, group.content)
 		if !supported {
 			continue
 		}
 
 		best, matched := s.bestForGroup(ctx, group, mediaType, trackedByType)
 		if !matched {
-			for _, file := range group.files {
+			for i := range group.files {
+				file := &group.files[i]
 				outcome.FileLogs = append(outcome.FileLogs, matchFileOutcome{
 					FileID:      file.ID,
 					RelPath:     file.RelPath,
@@ -187,7 +190,8 @@ func (s *Service) matchFiles(ctx context.Context) matchOutcome {
 			Tracked:   best.Candidate.Tracked,
 		})
 
-		for _, file := range group.files {
+		for i := range group.files {
+			file := &group.files[i]
 			stored := store.Match{
 				MediaRef:   best.Candidate.MediaRef,
 				Season:     file.Parsed.Season,
@@ -219,7 +223,27 @@ func (s *Service) matchFiles(ctx context.Context) matchOutcome {
 		})
 	}
 
+	s.announceMatched(ctx, outcome.Groups)
+
 	return outcome
+}
+
+func (s *Service) announceMatched(ctx context.Context, groups []matchGroupOutcome) {
+	listener, ok := s.opts.Titles.(MatchListener)
+	if !ok || ctx.Err() != nil {
+		return
+	}
+
+	refs := make([]string, 0, len(groups))
+	for _, group := range groups {
+		if !group.Tracked && !slices.Contains(refs, group.MediaRef) {
+			refs = append(refs, group.MediaRef)
+		}
+	}
+
+	if len(refs) > 0 {
+		listener.Matched(ctx, refs)
+	}
 }
 
 // bestForGroup ranks a group's candidates and reports whether the best one
@@ -298,10 +322,11 @@ func (s *Service) trackedCandidates(
 }
 
 type unmatchedGroup struct {
-	form   string
-	title  string
-	season *int
-	year   *int
+	content string
+	form    string
+	title   string
+	season  *int
+	year    *int
 
 	// The highest episode in the group: if that one fits inside the entry, the
 	// rest do too.
@@ -316,23 +341,25 @@ func groupUnmatched(files []store.Unmatched) []unmatchedGroup {
 	groups := make([]unmatchedGroup, 0, 8)
 	index := make(map[string]int, 8)
 
-	for _, file := range files {
-		key := file.Parsed.Form + "\x00" + strings.ToLower(file.Parsed.Title) + "\x00" + seasonKey(file.Parsed.Season)
+	for i := range files {
+		file := &files[i]
+		key := file.Content + "\x00" + file.Parsed.Form + "\x00" + strings.ToLower(file.Parsed.Title) + "\x00" + seasonKey(file.Parsed.Season)
 
 		position, seen := index[key]
 		if !seen {
 			groups = append(groups, unmatchedGroup{
-				form:   file.Parsed.Form,
-				title:  file.Parsed.Title,
-				season: file.Parsed.Season,
-				year:   file.Parsed.Year,
+				content: file.Content,
+				form:    file.Parsed.Form,
+				title:   file.Parsed.Title,
+				season:  file.Parsed.Season,
+				year:    file.Parsed.Year,
 			})
 			position = len(groups) - 1
 			index[key] = position
 		}
 
 		group := &groups[position]
-		group.files = append(group.files, file)
+		group.files = append(group.files, *file)
 
 		if episode := episodeOrChapter(file.Parsed); episode != nil {
 			if group.highestEpisode == nil || *episode > *group.highestEpisode {

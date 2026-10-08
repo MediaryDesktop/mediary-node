@@ -59,6 +59,12 @@ components:
           format: uri
           readOnly: true
           type: string
+        content:
+          description: What the videos in the folder are. Left out means anime.
+          enum:
+            - anime
+            - movies_and_shows
+          type: string
         path:
           description: Absolute path to an existing folder on this machine.
           examples:
@@ -2493,6 +2499,12 @@ components:
           description: When the user added the root.
           format: date-time
           type: string
+        content:
+          description: "What the videos in the folder are: anime, matched against AniList, or movies and shows, matched against TMDB. Comics and books are told apart by their extension either way."
+          enum:
+            - anime
+            - movies_and_shows
+          type: string
         file_count:
           description: Media files currently present under the root.
           format: int64
@@ -2519,6 +2531,7 @@ components:
       required:
         - id
         - path
+        - content
         - added_at
         - file_count
         - missing_count
@@ -4261,6 +4274,25 @@ components:
             - REPEATING
           type: string
       type: object
+    UpdateRootInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/UpdateRootInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        content:
+          description: What the videos in the folder are.
+          enum:
+            - anime
+            - movies_and_shows
+          type: string
+      required:
+        - content
+      type: object
     Video:
       additionalProperties: false
       properties:
@@ -4767,6 +4799,40 @@ paths:
                 $ref: "#/components/schemas/ErrorModel"
           description: Error
       summary: Stop watching a folder
+      tags:
+        - library
+    patch:
+      description: Switching between anime and movies and shows drops the automatic matches of the folder's videos — they point at the other source — and scans it again to redo them. Matches the user made by hand stay.
+      operationId: updateLibraryRoot
+      parameters:
+        - description: Identifier of the root.
+          in: path
+          name: id
+          required: true
+          schema:
+            description: Identifier of the root.
+            format: int64
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateRootInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RootOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Say what a library folder holds
       tags:
         - library
   /v1/library/scan:

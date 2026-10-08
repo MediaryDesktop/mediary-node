@@ -30,6 +30,16 @@ type TrackedTitle struct {
 // Whoever matches local files against it has to work offline, and looking at the
 // list is not a reason to spend a request on refreshing it.
 func (s *Service) TrackedTitles(ctx context.Context, mediaType MediaType) ([]TrackedTitle, error) {
+	if mediaType.local() {
+		// A dorama is a series to a file's name; the folder of shows holds both.
+		types := []MediaType{mediaType}
+		if mediaType == MediaTypeSeries {
+			types = append(types, MediaTypeDorama)
+		}
+
+		return s.localTracked(ctx, types)
+	}
+
 	collection, err := s.mirroredCollection(ctx, mediaType)
 	if err != nil {
 		return nil, err
@@ -58,6 +68,52 @@ func (s *Service) TrackedTitles(ctx context.Context, mediaType MediaType) ([]Tra
 			CoverImage: entry.Media.CoverImage,
 			CoverColor: entry.Media.CoverColor,
 		})
+	}
+
+	return titles, nil
+}
+
+// localTracked lists the node's own entries by title, named from the cache: a
+// title the node holds nothing about has no name to recognize a file by yet.
+func (s *Service) localTracked(ctx context.Context, types []MediaType) ([]TrackedTitle, error) {
+	if s.opts.Titles == nil {
+		return nil, nil
+	}
+
+	var titles []TrackedTitle
+
+	for _, mediaType := range types {
+		rows, err := s.store.LocalEntries(ctx, string(mediaType))
+		if err != nil {
+			return nil, apperr.Wrap(err, apperr.KindInternal, "read %s list", mediaType)
+		}
+
+		refs := make([]string, 0, len(rows))
+		for i := range rows {
+			refs = append(refs, rows[i].MediaRef)
+		}
+
+		described := s.opts.Titles.Describe(ctx, refs)
+
+		for _, ref := range refs {
+			title, ok := described[ref]
+			if !ok {
+				continue
+			}
+
+			media := &title.Media
+
+			titles = append(titles, TrackedTitle{
+				MediaRef:   ref,
+				Titles:     append(spellings(media.Title), media.Synonyms...),
+				Format:     value(media.Format),
+				Year:       media.SeasonYear,
+				Episodes:   media.Episodes,
+				Display:    displayTitle(media.Title),
+				CoverImage: media.CoverImage,
+				CoverColor: media.CoverColor,
+			})
+		}
 	}
 
 	return titles, nil

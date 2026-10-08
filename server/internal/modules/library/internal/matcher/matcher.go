@@ -57,6 +57,10 @@ type Candidate struct {
 	// Only a title that came from a source search carries these — see
 	// withSequelCandidates for what they are used for.
 	Sequels []RelatedCandidate
+
+	// SpansSeasons marks an entry holding every season of a show, as TMDB's do:
+	// a season 3 file belongs to it as much as a season 1 file does.
+	SpansSeasons bool
 }
 
 // RelatedCandidate is enough of a sequel entry to score a file against it: its
@@ -73,6 +77,12 @@ type RelatedCandidate struct {
 type Scored struct {
 	Candidate  Candidate
 	Confidence float64
+
+	// raw is the score before it is clamped into 0..1. Two candidates can both
+	// clear 1 — an exact name and a longer one that contains it, each with a
+	// season and a format that agree — and ranking them by the clamped value would
+	// leave the order to chance.
+	raw float64
 }
 
 // Rank scores every candidate against the file, best first. The caller decides
@@ -92,9 +102,11 @@ func Rank(file File, candidates []Candidate) []Scored {
 
 	scored := make([]Scored, 0, len(candidates))
 	for i := range candidates {
+		raw := score(file, fileTitle, &candidates[i])
 		scored = append(scored, Scored{
 			Candidate:  candidates[i],
-			Confidence: score(file, fileTitle, &candidates[i]),
+			Confidence: clamp(raw),
+			raw:        raw,
 		})
 	}
 
@@ -103,7 +115,7 @@ func Rank(file File, candidates []Candidate) []Scored {
 	// else here — certainly better than comparing identifiers, which once put
 	// "Berserk of Gluttony" ahead of "Berserk" for having a smaller id.
 	slices.SortStableFunc(scored, func(left, right Scored) int {
-		if byConfidence := cmp.Compare(right.Confidence, left.Confidence); byConfidence != 0 {
+		if byConfidence := cmp.Compare(right.raw, left.raw); byConfidence != 0 {
 			return byConfidence
 		}
 
@@ -176,7 +188,7 @@ func score(file File, fileTitle Title, candidate *Candidate) float64 {
 		best += trackedBonus
 	}
 
-	return clamp(best)
+	return best
 }
 
 func titleSimilarity(file, candidate Title) float64 {
@@ -243,6 +255,10 @@ func precisionWeighted(precision, recall float64) float64 {
 // season is usually left unwritten on both sides. A synthetic sequel candidate
 // knows its season by construction instead, and overrides the text.
 func numberingAdjustment(file File, candidateTitle Title, owner *Candidate) float64 {
+	if owner.SpansSeasons {
+		return seasonAgrees
+	}
+
 	candidateSeason := orOne(candidateTitle.Season)
 	if owner.Season != nil {
 		candidateSeason = *owner.Season

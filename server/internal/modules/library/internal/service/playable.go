@@ -18,6 +18,9 @@ type PlayableFile struct {
 	MediaRef string
 	Episode  *int
 
+	// Season is set for a show whose source numbers episodes within seasons.
+	Season *int
+
 	// Duration is what the scan read out of the container. Nil when it could not.
 	Duration *time.Duration
 
@@ -52,6 +55,7 @@ func (s *Service) Playable(ctx context.Context, fileID int64) (*PlayableFile, er
 	if row.Match != nil {
 		playable.MediaRef = row.Match.MediaRef
 		playable.Episode = row.Match.Episode
+		playable.Season = row.Match.Season
 	}
 
 	return playable, nil

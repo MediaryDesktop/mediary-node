@@ -1,5 +1,5 @@
 -- name: ListLibraryRoots :many
-SELECT r.id, r.path, r.added_at, r.last_scan_at,
+SELECT r.id, r.path, r.content, r.added_at, r.last_scan_at,
        (SELECT COUNT(*) FROM library_file f
          WHERE f.root_id = r.id AND f.missing_since IS NULL) AS file_count,
        (SELECT COUNT(*) FROM library_file f
@@ -14,14 +14,26 @@ FROM library_root r
 ORDER BY r.path;
 
 -- name: GetLibraryRoot :one
-SELECT id, path, added_at, last_scan_at
+SELECT id, path, content, added_at, last_scan_at
 FROM library_root
 WHERE id = ?;
 
 -- name: InsertLibraryRoot :one
-INSERT INTO library_root (path, added_at)
-VALUES (?, ?)
-RETURNING id, path, added_at, last_scan_at;
+INSERT INTO library_root (path, content, added_at)
+VALUES (?, ?, ?)
+RETURNING id, path, content, added_at, last_scan_at;
+
+-- name: SetLibraryRootContent :execrows
+UPDATE library_root
+SET content = ?
+WHERE id = ?;
+
+-- Videos matched under the old content type point at the wrong source. The
+-- user's own choices stay: a manual match is never undone by a setting.
+-- name: DeleteAutoVideoMatchesForRoot :exec
+DELETE FROM file_match
+WHERE source = 'auto'
+  AND file_id IN (SELECT id FROM library_file WHERE root_id = ? AND kind = 'video');
 
 -- name: DeleteLibraryRoot :execrows
 DELETE FROM library_root
@@ -145,7 +157,7 @@ WHERE (CAST(sqlc.arg(root_id) AS INTEGER) = 0 OR f.root_id = CAST(sqlc.arg(root_
   AND (CAST(sqlc.arg(media_form) AS TEXT) = '' OR f.media_form = CAST(sqlc.arg(media_form) AS TEXT));
 
 -- name: GetLibraryFile :one
-SELECT f.id, f.root_id, r.path AS root_path, f.rel_path, f.kind, f.size_bytes,
+SELECT f.id, f.root_id, r.path AS root_path, r.content AS root_content, f.rel_path, f.kind, f.size_bytes,
        f.mtime, f.scanned_at, f.missing_since, f.ignored_at,
        f.media_form, f.parsed_title, f.parsed_year, f.parsed_season,
        f.parsed_episode, f.parsed_chapter, f.parsed_volume, f.duration_seconds,
@@ -159,9 +171,10 @@ WHERE f.id = ?;
 -- title arrives together: the candidates are then looked up once per title
 -- instead of once per file.
 -- name: ListUnmatchedFiles :many
-SELECT f.id, f.rel_path, f.kind, f.media_form, f.parsed_title, f.parsed_year,
+SELECT f.id, f.rel_path, f.kind, r.content AS root_content, f.media_form, f.parsed_title, f.parsed_year,
        f.parsed_season, f.parsed_episode, f.parsed_chapter, f.parsed_volume
 FROM library_file f
+         JOIN library_root r ON r.id = f.root_id
          LEFT JOIN file_match m ON m.file_id = f.id
 WHERE m.file_id IS NULL
   AND f.missing_since IS NULL
@@ -171,7 +184,7 @@ WHERE m.file_id IS NULL
   -- An opening or a trailer belongs to no episode, so there is nothing to match.
   AND f.media_form IS NOT NULL
   AND f.media_form <> 'extra'
-ORDER BY f.media_form, f.parsed_title, f.parsed_season, f.id
+ORDER BY r.content, f.media_form, f.parsed_title, f.parsed_season, f.id
 LIMIT ?;
 
 -- name: UpsertManualFileMatch :exec

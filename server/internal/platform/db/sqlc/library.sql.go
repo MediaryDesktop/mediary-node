@@ -119,6 +119,19 @@ func (q *Queries) CountLibraryFiles(ctx context.Context, arg CountLibraryFilesPa
 	return total, err
 }
 
+const deleteAutoVideoMatchesForRoot = `-- name: DeleteAutoVideoMatchesForRoot :exec
+DELETE FROM file_match
+WHERE source = 'auto'
+  AND file_id IN (SELECT id FROM library_file WHERE root_id = ? AND kind = 'video')
+`
+
+// Videos matched under the old content type point at the wrong source. The
+// user's own choices stay: a manual match is never undone by a setting.
+func (q *Queries) DeleteAutoVideoMatchesForRoot(ctx context.Context, rootID int64) error {
+	_, err := q.db.ExecContext(ctx, deleteAutoVideoMatchesForRoot, rootID)
+	return err
+}
+
 const deleteFileMatch = `-- name: DeleteFileMatch :execrows
 DELETE FROM file_match
 WHERE file_id = ?
@@ -161,7 +174,7 @@ func (q *Queries) DeleteLibraryRoot(ctx context.Context, id int64) (int64, error
 }
 
 const getLibraryFile = `-- name: GetLibraryFile :one
-SELECT f.id, f.root_id, r.path AS root_path, f.rel_path, f.kind, f.size_bytes,
+SELECT f.id, f.root_id, r.path AS root_path, r.content AS root_content, f.rel_path, f.kind, f.size_bytes,
        f.mtime, f.scanned_at, f.missing_since, f.ignored_at,
        f.media_form, f.parsed_title, f.parsed_year, f.parsed_season,
        f.parsed_episode, f.parsed_chapter, f.parsed_volume, f.duration_seconds,
@@ -176,6 +189,7 @@ type GetLibraryFileRow struct {
 	ID              int64           `json:"id"`
 	RootID          int64           `json:"root_id"`
 	RootPath        string          `json:"root_path"`
+	RootContent     string          `json:"root_content"`
 	RelPath         string          `json:"rel_path"`
 	Kind            string          `json:"kind"`
 	SizeBytes       int64           `json:"size_bytes"`
@@ -205,6 +219,7 @@ func (q *Queries) GetLibraryFile(ctx context.Context, id int64) (GetLibraryFileR
 		&i.ID,
 		&i.RootID,
 		&i.RootPath,
+		&i.RootContent,
 		&i.RelPath,
 		&i.Kind,
 		&i.SizeBytes,
@@ -230,17 +245,26 @@ func (q *Queries) GetLibraryFile(ctx context.Context, id int64) (GetLibraryFileR
 }
 
 const getLibraryRoot = `-- name: GetLibraryRoot :one
-SELECT id, path, added_at, last_scan_at
+SELECT id, path, content, added_at, last_scan_at
 FROM library_root
 WHERE id = ?
 `
 
-func (q *Queries) GetLibraryRoot(ctx context.Context, id int64) (LibraryRoot, error) {
+type GetLibraryRootRow struct {
+	ID         int64         `json:"id"`
+	Path       string        `json:"path"`
+	Content    string        `json:"content"`
+	AddedAt    int64         `json:"added_at"`
+	LastScanAt sql.NullInt64 `json:"last_scan_at"`
+}
+
+func (q *Queries) GetLibraryRoot(ctx context.Context, id int64) (GetLibraryRootRow, error) {
 	row := q.db.QueryRowContext(ctx, getLibraryRoot, id)
-	var i LibraryRoot
+	var i GetLibraryRootRow
 	err := row.Scan(
 		&i.ID,
 		&i.Path,
+		&i.Content,
 		&i.AddedAt,
 		&i.LastScanAt,
 	)
@@ -300,22 +324,32 @@ func (q *Queries) InsertLibraryFile(ctx context.Context, arg InsertLibraryFilePa
 }
 
 const insertLibraryRoot = `-- name: InsertLibraryRoot :one
-INSERT INTO library_root (path, added_at)
-VALUES (?, ?)
-RETURNING id, path, added_at, last_scan_at
+INSERT INTO library_root (path, content, added_at)
+VALUES (?, ?, ?)
+RETURNING id, path, content, added_at, last_scan_at
 `
 
 type InsertLibraryRootParams struct {
 	Path    string `json:"path"`
+	Content string `json:"content"`
 	AddedAt int64  `json:"added_at"`
 }
 
-func (q *Queries) InsertLibraryRoot(ctx context.Context, arg InsertLibraryRootParams) (LibraryRoot, error) {
-	row := q.db.QueryRowContext(ctx, insertLibraryRoot, arg.Path, arg.AddedAt)
-	var i LibraryRoot
+type InsertLibraryRootRow struct {
+	ID         int64         `json:"id"`
+	Path       string        `json:"path"`
+	Content    string        `json:"content"`
+	AddedAt    int64         `json:"added_at"`
+	LastScanAt sql.NullInt64 `json:"last_scan_at"`
+}
+
+func (q *Queries) InsertLibraryRoot(ctx context.Context, arg InsertLibraryRootParams) (InsertLibraryRootRow, error) {
+	row := q.db.QueryRowContext(ctx, insertLibraryRoot, arg.Path, arg.Content, arg.AddedAt)
+	var i InsertLibraryRootRow
 	err := row.Scan(
 		&i.ID,
 		&i.Path,
+		&i.Content,
 		&i.AddedAt,
 		&i.LastScanAt,
 	)
@@ -614,7 +648,7 @@ func (q *Queries) ListLibraryFiles(ctx context.Context, arg ListLibraryFilesPara
 }
 
 const listLibraryRoots = `-- name: ListLibraryRoots :many
-SELECT r.id, r.path, r.added_at, r.last_scan_at,
+SELECT r.id, r.path, r.content, r.added_at, r.last_scan_at,
        (SELECT COUNT(*) FROM library_file f
          WHERE f.root_id = r.id AND f.missing_since IS NULL) AS file_count,
        (SELECT COUNT(*) FROM library_file f
@@ -632,6 +666,7 @@ ORDER BY r.path
 type ListLibraryRootsRow struct {
 	ID             int64         `json:"id"`
 	Path           string        `json:"path"`
+	Content        string        `json:"content"`
 	AddedAt        int64         `json:"added_at"`
 	LastScanAt     sql.NullInt64 `json:"last_scan_at"`
 	FileCount      int64         `json:"file_count"`
@@ -651,6 +686,7 @@ func (q *Queries) ListLibraryRoots(ctx context.Context) ([]ListLibraryRootsRow, 
 		if err := rows.Scan(
 			&i.ID,
 			&i.Path,
+			&i.Content,
 			&i.AddedAt,
 			&i.LastScanAt,
 			&i.FileCount,
@@ -671,9 +707,10 @@ func (q *Queries) ListLibraryRoots(ctx context.Context) ([]ListLibraryRootsRow, 
 }
 
 const listUnmatchedFiles = `-- name: ListUnmatchedFiles :many
-SELECT f.id, f.rel_path, f.kind, f.media_form, f.parsed_title, f.parsed_year,
+SELECT f.id, f.rel_path, f.kind, r.content AS root_content, f.media_form, f.parsed_title, f.parsed_year,
        f.parsed_season, f.parsed_episode, f.parsed_chapter, f.parsed_volume
 FROM library_file f
+         JOIN library_root r ON r.id = f.root_id
          LEFT JOIN file_match m ON m.file_id = f.id
 WHERE m.file_id IS NULL
   AND f.missing_since IS NULL
@@ -683,7 +720,7 @@ WHERE m.file_id IS NULL
   -- An opening or a trailer belongs to no episode, so there is nothing to match.
   AND f.media_form IS NOT NULL
   AND f.media_form <> 'extra'
-ORDER BY f.media_form, f.parsed_title, f.parsed_season, f.id
+ORDER BY r.content, f.media_form, f.parsed_title, f.parsed_season, f.id
 LIMIT ?
 `
 
@@ -691,6 +728,7 @@ type ListUnmatchedFilesRow struct {
 	ID            int64          `json:"id"`
 	RelPath       string         `json:"rel_path"`
 	Kind          string         `json:"kind"`
+	RootContent   string         `json:"root_content"`
 	MediaForm     sql.NullString `json:"media_form"`
 	ParsedTitle   sql.NullString `json:"parsed_title"`
 	ParsedYear    sql.NullInt64  `json:"parsed_year"`
@@ -716,6 +754,7 @@ func (q *Queries) ListUnmatchedFiles(ctx context.Context, limit int64) ([]ListUn
 			&i.ID,
 			&i.RelPath,
 			&i.Kind,
+			&i.RootContent,
 			&i.MediaForm,
 			&i.ParsedTitle,
 			&i.ParsedYear,
@@ -766,6 +805,25 @@ type SetLibraryFileIgnoredParams struct {
 
 func (q *Queries) SetLibraryFileIgnored(ctx context.Context, arg SetLibraryFileIgnoredParams) (int64, error) {
 	result, err := q.db.ExecContext(ctx, setLibraryFileIgnored, arg.IgnoredAt, arg.ID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+const setLibraryRootContent = `-- name: SetLibraryRootContent :execrows
+UPDATE library_root
+SET content = ?
+WHERE id = ?
+`
+
+type SetLibraryRootContentParams struct {
+	Content string `json:"content"`
+	ID      int64  `json:"id"`
+}
+
+func (q *Queries) SetLibraryRootContent(ctx context.Context, arg SetLibraryRootContentParams) (int64, error) {
+	result, err := q.db.ExecContext(ctx, setLibraryRootContent, arg.Content, arg.ID)
 	if err != nil {
 		return 0, err
 	}

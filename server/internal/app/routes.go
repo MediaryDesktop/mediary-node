@@ -92,7 +92,7 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 
 	var titles library.TitleSource
 	if deps.AniList != nil {
-		titles = titleSource{tracker: trackerModule, media: mediaModule, aniList: deps.AniList}
+		titles = titleSource{tracker: trackerModule, media: mediaModule, aniList: deps.AniList, tmdb: deps.TMDB}
 	}
 
 	libraryModule := library.New(library.Deps{
@@ -113,7 +113,7 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 		FFmpegPath:  deps.FFmpegPath,
 		FFprobePath: deps.FFprobePath,
 		DataDir:     deps.DataDir,
-		Library:     playableFiles{library: libraryModule},
+		Library:     playableFiles{library: libraryModule, media: mediaModule},
 		Progress:    watchedEpisodes{tracker: trackerModule},
 
 		Transcode:        deps.Transcode,

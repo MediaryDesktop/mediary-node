@@ -78,6 +78,7 @@ type LibraryRoot struct {
 	Path       string        `json:"path"`
 	AddedAt    int64         `json:"added_at"`
 	LastScanAt sql.NullInt64 `json:"last_scan_at"`
+	Content    string        `json:"content"`
 }
 
 type ListIcon struct {

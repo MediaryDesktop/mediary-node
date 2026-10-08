@@ -2,9 +2,21 @@ package service
 
 import "time"
 
+// What the videos in a root are: anime is matched against AniList, movies and
+// shows against TMDB.
+const (
+	ContentAnime          = "anime"
+	ContentMoviesAndShows = "movies_and_shows"
+)
+
+func validContent(content string) bool {
+	return content == ContentAnime || content == ContentMoviesAndShows
+}
+
 type Root struct {
 	ID      int64     `json:"id" doc:"Identifier of the root, stable across scans."`
 	Path    string    `json:"path" doc:"Absolute path on this machine."`
+	Content string    `json:"content" enum:"anime,movies_and_shows" doc:"What the videos in the folder are: anime, matched against AniList, or movies and shows, matched against TMDB. Comics and books are told apart by their extension either way."`
 	AddedAt time.Time `json:"added_at" doc:"When the user added the root."`
 
 	LastScanAt *time.Time `json:"last_scan_at,omitempty" doc:"When the root was last walked. Absent until the first scan."`

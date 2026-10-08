@@ -21,6 +21,7 @@ func New(db *sql.DB) *Store {
 type Root struct {
 	ID         int64
 	Path       string
+	Content    string
 	AddedAt    time.Time
 	LastScanAt *time.Time
 
@@ -55,14 +56,15 @@ type Parsed struct {
 }
 
 type File struct {
-	ID        int64
-	RootID    int64
-	RootPath  string
-	RelPath   string
-	Kind      string
-	Size      int64
-	Mtime     time.Time
-	ScannedAt time.Time
+	ID          int64
+	RootID      int64
+	RootPath    string
+	RootContent string
+	RelPath     string
+	Kind        string
+	Size        int64
+	Mtime       time.Time
+	ScannedAt   time.Time
 
 	MissingSince *time.Time
 	IgnoredSince *time.Time
@@ -92,6 +94,7 @@ func (s *Store) Roots(ctx context.Context) ([]Root, error) {
 		roots = append(roots, Root{
 			ID:             row.ID,
 			Path:           row.Path,
+			Content:        row.Content,
 			AddedAt:        time.Unix(row.AddedAt, 0).UTC(),
 			LastScanAt:     optionalTime(row.LastScanAt),
 			FileCount:      int(row.FileCount),
@@ -115,14 +118,16 @@ func (s *Store) Root(ctx context.Context, id int64) (*Root, error) {
 	return &Root{
 		ID:         row.ID,
 		Path:       row.Path,
+		Content:    row.Content,
 		AddedAt:    time.Unix(row.AddedAt, 0).UTC(),
 		LastScanAt: optionalTime(row.LastScanAt),
 	}, nil
 }
 
-func (s *Store) AddRoot(ctx context.Context, path string, now time.Time) (*Root, error) {
+func (s *Store) AddRoot(ctx context.Context, path, content string, now time.Time) (*Root, error) {
 	row, err := sqlc.New(s.db).InsertLibraryRoot(ctx, sqlc.InsertLibraryRootParams{
 		Path:    path,
+		Content: content,
 		AddedAt: now.Unix(),
 	})
 	if err != nil {
@@ -132,8 +137,39 @@ func (s *Store) AddRoot(ctx context.Context, path string, now time.Time) (*Root,
 	return &Root{
 		ID:      row.ID,
 		Path:    row.Path,
+		Content: row.Content,
 		AddedAt: time.Unix(row.AddedAt, 0).UTC(),
 	}, nil
+}
+
+// SetRootContent changes what a root holds and drops the automatic matches of its
+// videos, which point at the other source; the next match pass redoes them.
+func (s *Store) SetRootContent(ctx context.Context, id int64, content string) (bool, error) {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return false, fmt.Errorf("begin root update: %w", err)
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	queries := sqlc.New(s.db).WithTx(tx)
+
+	changed, err := queries.SetLibraryRootContent(ctx, sqlc.SetLibraryRootContentParams{Content: content, ID: id})
+	if err != nil {
+		return false, fmt.Errorf("set content of root %d: %w", id, err)
+	}
+	if changed == 0 {
+		return false, nil
+	}
+
+	if err = queries.DeleteAutoVideoMatchesForRoot(ctx, id); err != nil {
+		return false, fmt.Errorf("drop matches of root %d: %w", id, err)
+	}
+
+	if err = tx.Commit(); err != nil {
+		return false, fmt.Errorf("commit root update: %w", err)
+	}
+
+	return true, nil
 }
 
 func (s *Store) DeleteRoot(ctx context.Context, id int64) (bool, error) {
@@ -437,6 +473,7 @@ func (s *Store) File(ctx context.Context, id int64) (*File, error) {
 		ID:           row.ID,
 		RootID:       row.RootID,
 		RootPath:     row.RootPath,
+		RootContent:  row.RootContent,
 		RelPath:      row.RelPath,
 		Kind:         row.Kind,
 		Size:         row.SizeBytes,
@@ -458,6 +495,10 @@ type Unmatched struct {
 	ID      int64
 	RelPath string
 	Kind    string
+
+	// Content is what the file's root holds, which decides the source a video is
+	// matched against.
+	Content string
 	Parsed  Parsed
 }
 
@@ -475,6 +516,7 @@ func (s *Store) UnmatchedFiles(ctx context.Context, limit int) ([]Unmatched, err
 			ID:      row.ID,
 			RelPath: row.RelPath,
 			Kind:    row.Kind,
+			Content: row.RootContent,
 			Parsed: parsedFrom(row.MediaForm, row.ParsedTitle, row.ParsedYear,
 				row.ParsedSeason, row.ParsedEpisode, row.ParsedChapter, row.ParsedVolume),
 		})

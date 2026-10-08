@@ -23,6 +23,10 @@ type TitleCandidate struct {
 	CoverImage *string
 	CoverColor *string
 
+	// SpansSeasons marks an entry that holds every season of a show, as TMDB's
+	// do; AniList keeps one entry per season instead.
+	SpansSeasons bool
+
 	// Sequels this candidate's source knows about, one relation hop forward —
 	// see matcher.Candidate.Sequels for what the matcher does with them. Only a
 	// title that came from Search carries these; the user's own collection does
@@ -70,18 +74,37 @@ type TitleSource interface {
 	Describe(ctx context.Context, mediaRefs []string) ([]TitleDescription, error)
 }
 
-// mediaTypeForForm maps what the file's name said onto the source that owns that
-// kind of media. Books have no source in the node yet, and an extra belongs to no
-// title at all, so both are left alone.
-func mediaTypeForForm(form string) (string, bool) {
+// MatchListener is told which titles a scan matched files to that the user's own
+// list did not hold — titles the node may know nothing about yet. A TitleSource
+// that implements it can fetch what the library will want to show for them.
+type MatchListener interface {
+	Matched(ctx context.Context, mediaRefs []string)
+}
+
+// mediaTypeForForm maps what the file's name said, and what its folder holds,
+// onto the media type whose source matches it. A comic is manga wherever it
+// lies. Books have no source in the node yet, and an extra belongs to no title at
+// all, so both are left alone.
+func mediaTypeForForm(form, content string) (string, bool) {
 	switch form {
-	case "series", "movie", "special":
-		return "anime", true
 	case "manga":
 		return "manga", true
+	case "series", "movie", "special":
 	default:
 		return "", false
 	}
+
+	if content != ContentMoviesAndShows {
+		return "anime", true
+	}
+
+	// A special of a live-action show is filed with the show; TMDB keeps no
+	// separate entry for it.
+	if form == "movie" {
+		return "movie", true
+	}
+
+	return "series", true
 }
 
 func candidates(source []TitleCandidate, tracked bool) []matcher.Candidate {
@@ -96,6 +119,8 @@ func candidates(source []TitleCandidate, tracked bool) []matcher.Candidate {
 			Episodes: source[i].Episodes,
 			Tracked:  tracked,
 			Sequels:  sequels(source[i].Sequels),
+
+			SpansSeasons: source[i].SpansSeasons,
 		})
 	}
 

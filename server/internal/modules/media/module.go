@@ -28,6 +28,8 @@ type Deps struct {
 // Wired by internal/app; no module imports another.
 type MediaDetails = service.MediaDetails
 
+type EpisodeList = service.EpisodeList
+
 func New(deps Deps) *Module {
 	svc := service.New(store.New(deps.DB), deps.Logger, service.Options{AniList: deps.AniList, AniZip: deps.AniZip, TMDB: deps.TMDB})
 
@@ -47,6 +49,11 @@ func (m *Module) Register(api huma.API) {
 // from the source.
 func (m *Module) Details(ctx context.Context, mediaRef string) (*MediaDetails, error) {
 	return m.svc.Details(ctx, mediaRef)
+}
+
+// Episodes lists a title's episodes, for the parts of the node that number them.
+func (m *Module) Episodes(ctx context.Context, mediaRef string) (*EpisodeList, error) {
+	return m.svc.Episodes(ctx, mediaRef)
 }
 
 // Cached answers from the node's own details cache and never reaches the source.
