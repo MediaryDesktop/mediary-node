@@ -15,7 +15,7 @@ import {
 } from '@entities/torrent'
 import type { TorrentDownload } from '@entities/torrent'
 
-import { initialSelection, sortFiles } from './lib/file-selection'
+import { initialSelection, OwnedEpisodes, sortFiles } from './lib/file-selection'
 import styles from './TorrentFilesDrawer.module.scss'
 
 export interface TorrentFilesDrawerProps {
@@ -89,19 +89,14 @@ function FilesForm({ download, onDone }: { download: TorrentDownload; onDone: ()
 
 	const files = useMemo(() => sortFiles(data?.files ?? []), [data])
 
+	// A show numbered by season repeats its episode numbers in every season.
+	const seasonal = download.media_ref.startsWith('tmdb:tv:')
+
 	// The episodes already on disk for this title; a missing file is not one.
-	const owned = useMemo(() => {
-		const episodes = new Set<number>()
-
-		for (const file of library?.files.items ?? []) {
-			const episode = file.match?.episode ?? file.parsed.episode
-			if (!file.missing && episode !== undefined && episode !== null) {
-				episodes.add(episode)
-			}
-		}
-
-		return episodes
-	}, [library])
+	const owned = useMemo(
+		() => OwnedEpisodes.fromLibrary(library?.files.items ?? [], seasonal),
+		[library, seasonal]
+	)
 
 	// Ticks are the user's from the first change on; until then they follow what
 	// the torrent and the library say, which may still be arriving.
@@ -153,18 +148,7 @@ function FilesForm({ download, onDone }: { download: TorrentDownload; onDone: ()
 							disabled={saving}
 							onClick={() =>
 								setTouched(
-									new Set(
-										files
-											.filter(
-												file =>
-													!(
-														file.video &&
-														file.episode !== undefined &&
-														owned.has(file.episode)
-													)
-											)
-											.map(file => file.index)
-									)
+									new Set(files.filter(file => !owned.has(file)).map(file => file.index))
 								)
 							}
 						>
@@ -182,8 +166,7 @@ function FilesForm({ download, onDone }: { download: TorrentDownload; onDone: ()
 
 					<ul className={styles.list}>
 						{files.map(file => {
-							const inLibrary =
-								file.video && file.episode !== undefined && owned.has(file.episode)
+							const inLibrary = owned.has(file)
 
 							const checked = selected.has(file.index)
 
@@ -207,7 +190,12 @@ function FilesForm({ download, onDone }: { download: TorrentDownload; onDone: ()
 
 									{file.episode !== undefined ? (
 										<span className={styles.episode}>
-											{t('torrents.files.episode', { number: file.episode })}
+											{seasonal && file.season
+												? t('torrents.files.seasonEpisode', {
+														season: file.season,
+														number: file.episode
+													})
+												: t('torrents.files.episode', { number: file.episode })}
 										</span>
 									) : (
 										<span className={styles.noEpisode} />

@@ -22,7 +22,7 @@ import {
 } from '@shared/ui'
 
 import { torrentSearchQuery, TorrentSetupNotice, useTorrentSetup } from '@entities/torrent'
-import type { AddTorrentParams } from '@entities/torrent'
+import type { AddTorrentParams, TorrentRelease } from '@entities/torrent'
 
 import { coveredEpisodes, summarizeEpisodes } from './lib/episodes'
 import { $searchOpen, downloadReleasesFx, searchClosed } from './model'
@@ -68,7 +68,13 @@ export function TorrentSearchDrawer({ mediaRef, title, missing, poster }: Torren
 			size='sheet'
 		>
 			{open && (
-				<SearchForm mediaRef={mediaRef} title={title} missing={missing} poster={poster} onDone={close} />
+				<SearchForm
+					mediaRef={mediaRef}
+					title={title}
+					missing={missing}
+					poster={poster}
+					onDone={close}
+				/>
 			)}
 		</Drawer>
 	)
@@ -95,13 +101,35 @@ function SearchForm({
 
 	const [query, setQuery] = useState('')
 	const [episode, setEpisode] = useState('')
+	const [season, setSeason] = useState('')
+
+	// A show's releases are named by season, and its episodes count within one.
+	const seasonal = mediaRef.startsWith('tmdb:tv:')
 	const [kind, setKind] = useState<Kind>('all')
 	const [onlyMissing, setOnlyMissing] = useState(Boolean(missing?.length))
 	const [selected, setSelected] = useState<Set<string>>(new Set())
 
+	// What a release holds: its season, when its name gives one, and its episodes.
+	const releaseLabel = (found: TorrentRelease): string => {
+		const range = found.episodes
+		const episodes = range
+			? range.from === range.to
+				? t('torrents.files.episode', { number: range.from })
+				: t('torrents.search.episodes', { from: range.from, to: range.to })
+			: null
+
+		if (found.season) {
+			return episodes
+				? `${t('torrents.search.seasonNumber', { number: found.season })} · ${episodes}`
+				: t('torrents.search.wholeSeason', { number: found.season })
+		}
+
+		return episodes ?? t('torrents.search.noEpisode')
+	}
+
 	const run = () => {
 		setSelected(new Set())
-		search({ mediaRef, episode: Number(episode) || 0, query })
+		search({ mediaRef, episode: Number(episode) || 0, season: Number(season) || 0, query })
 	}
 
 	// Opening the sheet is asking for releases: the first search needs no click.
@@ -208,6 +236,18 @@ function SearchForm({
 						className={styles.query}
 						aria-label={t('torrents.search.placeholder')}
 					/>
+					{seasonal && (
+						<Input
+							type='number'
+							min={1}
+							value={season}
+							onChange={event => setSeason(event.target.value)}
+							onKeyDown={searchOnEnter}
+							placeholder={t('torrents.search.season')}
+							className={styles.episode}
+							aria-label={t('torrents.search.season')}
+						/>
+					)}
 					<Input
 						type='number'
 						min={0}
@@ -298,18 +338,7 @@ function SearchForm({
 										/>
 
 										<div className={styles.body}>
-											<span className={styles.episodeLabel}>
-												{found.episodes
-													? found.episodes.from === found.episodes.to
-														? t('torrents.files.episode', {
-																number: found.episodes.from
-															})
-														: t('torrents.search.episodes', {
-																from: found.episodes.from,
-																to: found.episodes.to
-															})
-													: t('torrents.search.noEpisode')}
-											</span>
+											<span className={styles.episodeLabel}>{releaseLabel(found)}</span>
 											<p className={styles.name} title={found.title}>
 												{found.title}
 											</p>

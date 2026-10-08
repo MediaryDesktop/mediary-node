@@ -954,6 +954,7 @@ export const ru: Translation = {
 			missing: 'Недостающие серии',
 			none: 'Ни одного',
 			episode: 'Сер. {{number}}',
+			seasonEpisode: 'Сезон {{season}} · Серия {{number}}',
 			inLibrary: 'в библиотеке'
 		},
 		search: {
@@ -998,6 +999,9 @@ export const ru: Translation = {
 			added: 'Добавлено в загрузки',
 			page: 'Открыть страницу раздачи',
 			episodes: 'Сер. {{from}}–{{to}}',
+			season: 'Сезон',
+			seasonNumber: 'Сезон {{number}}',
+			wholeSeason: 'Сезон {{number}} целиком',
 			match: {
 				episode: 'Эта серия',
 				batch: 'Пакет'

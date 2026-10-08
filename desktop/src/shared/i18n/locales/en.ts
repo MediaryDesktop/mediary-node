@@ -953,6 +953,7 @@ export const en = {
 			missing: 'Missing episodes',
 			none: 'None',
 			episode: 'Ep. {{number}}',
+			seasonEpisode: 'Season {{season}} · Episode {{number}}',
 			inLibrary: 'in library'
 		},
 		search: {
@@ -997,6 +998,9 @@ export const en = {
 			added: 'Added to the downloads',
 			page: 'Open the release page',
 			episodes: 'Ep. {{from}}–{{to}}',
+			season: 'Season',
+			seasonNumber: 'Season {{number}}',
+			wholeSeason: 'Season {{number}}, complete',
 			match: {
 				episode: 'This episode',
 				batch: 'Batch'

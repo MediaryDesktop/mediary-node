@@ -48,7 +48,9 @@ export function TorrentSection({ mediaRef, title, poster }: TorrentSectionProps)
 				</div>
 			</div>
 
-			<AutoDownloadPanel mediaRef={mediaRef} title={title} />
+			{/* Rules count one run of episodes, as anime numbers them; a show
+			    numbered by season is not supported by the node yet. */}
+			{!mediaRef.startsWith('tmdb:tv:') && <AutoDownloadPanel mediaRef={mediaRef} title={title} />}
 
 			<div className={styles.block}>
 				<h3 className={styles.subtitle}>{t('torrents.list.forTitle')}</h3>

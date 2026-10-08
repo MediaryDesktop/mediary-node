@@ -38,6 +38,9 @@ export interface TorrentSearchParams {
 	mediaRef: string
 	// 0 for any episode.
 	episode: number
+	// For a show numbered by season: only releases of it, the episode counting
+	// within it. 0 for any.
+	season?: number
 	// Replaces the title's names when not empty.
 	query: string
 }
@@ -151,9 +154,14 @@ export const checkTorrentSourceFx = createNodeRequestFx<TorrentSourceCheckParams
 )
 
 export const searchTorrentsFx = createNodeRequestFx<TorrentSearchParams, TorrentSearchResult>(
-	({ mediaRef, episode, query }) => ({
+	({ mediaRef, episode, season, query }) => ({
 		url: '/v1/torrent/search',
-		query: { media_ref: mediaRef, episode: episode || undefined, q: query.trim() || undefined },
+		query: {
+			media_ref: mediaRef,
+			episode: episode || undefined,
+			season: season || undefined,
+			q: query.trim() || undefined
+		},
 		// The node waits for the slowest source, up to 25 s.
 		timeout: 30_000
 	})

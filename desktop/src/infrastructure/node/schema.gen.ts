@@ -3607,6 +3607,11 @@ export interface components {
 			name: string
 			/** Format: double */
 			progress: number
+			/**
+			 * Format: int64
+			 * @description The season its name gives, for a show numbered by season; the episode then counts within it.
+			 */
+			season?: number
 			/** @description Whether the client downloads it. */
 			selected: boolean
 			/** Format: int64 */
@@ -3725,6 +3730,11 @@ export interface components {
 			 * @description How well it fits the release profile; higher is better.
 			 */
 			score: number
+			/**
+			 * Format: int64
+			 * @description The season, when the name says: S02E05, S02, Season 2. Episodes then count within it.
+			 */
+			season?: number
 			/** Format: int64 */
 			seeders: number
 			/** Format: int64 */
@@ -6826,6 +6836,8 @@ export interface operations {
 				media_ref?: string
 				/** @description Only releases that hold this episode; 0 for any. */
 				episode?: number
+				/** @description Only releases of this season, for a show numbered by season; the episode then counts within it. 0 for any. */
+				season?: number
 				/** @description Search for this instead of the title's names. */
 				q?: string
 			}

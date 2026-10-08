@@ -953,6 +953,7 @@ export const uk: Translation = {
 			missing: 'Відсутні серії',
 			none: 'Жодного',
 			episode: 'Сер. {{number}}',
+			seasonEpisode: 'Сезон {{season}} · Серія {{number}}',
 			inLibrary: 'у бібліотеці'
 		},
 		search: {
@@ -997,6 +998,9 @@ export const uk: Translation = {
 			added: 'Додано до завантажень',
 			page: 'Відкрити сторінку роздачі',
 			episodes: 'Сер. {{from}}–{{to}}',
+			season: 'Сезон',
+			seasonNumber: 'Сезон {{number}}',
+			wholeSeason: 'Сезон {{number}} повністю',
 			match: {
 				episode: 'Ця серія',
 				batch: 'Пакет'
