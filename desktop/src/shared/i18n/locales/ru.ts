@@ -700,7 +700,10 @@ export const ru: Translation = {
 		scoreAtLeast: 'От {{score}}%',
 		type: {
 			anime: 'Аниме',
-			manga: 'Манга'
+			manga: 'Манга',
+			movie: 'Фильмы',
+			series: 'Сериалы',
+			dorama: 'Дорамы'
 		},
 		sort: {
 			POPULARITY_DESC: 'Самые популярные',

@@ -698,7 +698,10 @@ export const uk: Translation = {
 		scoreAtLeast: 'Від {{score}}%',
 		type: {
 			anime: 'Аніме',
-			manga: 'Манга'
+			manga: 'Манга',
+			movie: 'Фільми',
+			series: 'Серіали',
+			dorama: 'Дорами'
 		},
 		sort: {
 			POPULARITY_DESC: 'Найпопулярніші',

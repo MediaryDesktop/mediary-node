@@ -4,7 +4,7 @@ import { debounce } from 'patronum'
 import { atom } from '@shared/factory'
 
 import { mediaFilterOptionsQuery, mediaSearchQuery } from '@entities/media'
-import type { MediaSummary } from '@entities/media'
+import type { MediaSearchType, MediaSummary } from '@entities/media'
 
 import { BROWSE_SORT, CHANGE_PAUSE_MS, RELEVANCE_SORT } from './config'
 import {
@@ -54,7 +54,21 @@ export const searchMediaModel = atom(() => {
 	)
 
 	const $hasNextPage = mediaSearchQuery.$data.map(data => data?.results.has_next_page ?? false)
-	const $filterOptions = mediaFilterOptionsQuery.$data.map(data => data?.options ?? null)
+
+	// Every catalog has its own genres; the ones on screen must belong to the type
+	// being searched, not to the one the list was last fetched for.
+	const $type = $filters.map(filters => filters.type)
+	const $optionsType = createStore<MediaSearchType | null>(null).on(
+		mediaFilterOptionsQuery.finished.success,
+		(_, { params }) => params
+	)
+
+	const $filterOptions = combine(
+		mediaFilterOptionsQuery.$data,
+		$optionsType,
+		$type,
+		(data, optionsType, type) => (optionsType === type ? (data?.options ?? null) : null)
+	)
 
 	sample({
 		clock: nextPageRequested,
@@ -82,9 +96,13 @@ export const searchMediaModel = atom(() => {
 
 	sample({
 		clock: pageOpened,
-		filter: mediaFilterOptionsQuery.$data.map(options => options === null),
+		source: { type: $type, optionsType: $optionsType },
+		filter: ({ type, optionsType }) => type !== optionsType,
+		fn: ({ type }) => type,
 		target: mediaFilterOptionsQuery.start
 	})
+
+	sample({ clock: $type.updates, target: mediaFilterOptionsQuery.start })
 
 	const $items = createStore<MediaSummary[]>([]).on(
 		mediaSearchQuery.finished.success,

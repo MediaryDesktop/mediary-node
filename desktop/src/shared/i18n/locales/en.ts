@@ -700,7 +700,10 @@ export const en = {
 		scoreAtLeast: '{{score}}% and above',
 		type: {
 			anime: 'Anime',
-			manga: 'Manga'
+			manga: 'Manga',
+			movie: 'Movies',
+			series: 'Series',
+			dorama: 'Doramas'
 		},
 		sort: {
 			POPULARITY_DESC: 'Most popular',

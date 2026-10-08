@@ -153,6 +153,68 @@ describe('search filters', () => {
 		)
 	})
 
+	it('keeps only what TMDB can filter by when switching to movies', async () => {
+		const search = vi.fn().mockResolvedValue(page([], false))
+		const scope = searchScope(search)
+
+		await allSettled(searchMediaModel.filtersPatched, {
+			scope,
+			params: {
+				genres: ['Action'],
+				tags: ['Isekai'],
+				statuses: ['FINISHED'],
+				season: 'FALL',
+				year: 2020
+			}
+		})
+		await allSettled(searchMediaModel.filtersPatched, { scope, params: { type: 'movie' } })
+
+		const filters = scope.getState(searchMediaModel.$filters)
+		expect([filters.genres, filters.tags, filters.statuses, filters.season, filters.year]).toEqual([
+			[],
+			[],
+			[],
+			null,
+			2020
+		])
+		expect(search).toHaveBeenLastCalledWith(
+			expect.objectContaining({
+				type: 'movie',
+				tags: undefined,
+				statuses: undefined,
+				season: undefined
+			})
+		)
+	})
+
+	it('keeps the genres between two types that share them', async () => {
+		const scope = searchScope(() => Promise.resolve(page([], false)))
+
+		await allSettled(searchMediaModel.filtersPatched, { scope, params: { type: 'series' } })
+		await allSettled(searchMediaModel.filtersPatched, { scope, params: { genres: ['Drama'] } })
+		await allSettled(searchMediaModel.filtersPatched, { scope, params: { type: 'dorama' } })
+
+		expect(scope.getState(searchMediaModel.$filters).genres).toEqual(['Drama'])
+	})
+
+	it('lists the genres of the type being searched', async () => {
+		const options = vi.fn((type: string) =>
+			Promise.resolve({ options: { genres: [type], tags: [], fetched_at: '' }, sources: [] })
+		)
+		const scope = fork({
+			handlers: [
+				[searchMediaFx, () => Promise.resolve(page([], false))],
+				[fetchMediaFilterOptionsFx, options]
+			]
+		})
+
+		await allSettled(searchMediaModel.pageOpened, { scope })
+		await allSettled(searchMediaModel.filtersPatched, { scope, params: { type: 'movie' } })
+
+		expect(options.mock.calls.map(([type]) => type)).toEqual(['anime', 'movie'])
+		expect(scope.getState(searchMediaModel.$filterOptions)?.genres).toEqual(['movie'])
+	})
+
 	it('counts only the groups the user narrowed', async () => {
 		const scope = searchScope(() => Promise.resolve(page([], false)))
 

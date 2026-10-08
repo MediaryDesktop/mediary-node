@@ -1,6 +1,6 @@
-import type { MediaSearchQuery } from '@entities/media'
+import type { MediaSearchQuery, MediaSearchType } from '@entities/media'
 
-import { BROWSE_SORT, PER_PAGE } from '../config'
+import { BROWSE_SORT, isAniListType, PER_PAGE } from '../config'
 import type { SearchCriteria, SearchFilters } from '../types'
 
 export const INITIAL_FILTERS: SearchFilters = {
@@ -31,12 +31,34 @@ export function activeGroups(filters: SearchFilters): number {
 	].filter(Boolean).length
 }
 
+// Which genre list a type draws from: AniList shares one between anime and manga,
+// TMDB keeps one for movies and another for shows.
+function genreVocabulary(type: MediaSearchType): string {
+	if (isAniListType(type)) {
+		return 'anilist'
+	}
+
+	return type === 'movie' ? 'tmdb-movie' : 'tmdb-tv'
+}
+
 export function applyPatch(filters: SearchFilters, patch: Partial<SearchFilters>): SearchFilters {
 	const next = { ...filters, ...patch }
 
+	if (!patch.type || patch.type === filters.type) {
+		return next
+	}
+
 	// A format belongs to one media type, so switching type cannot keep them.
-	if (patch.type && patch.type !== filters.type) {
-		next.formats = []
+	next.formats = []
+
+	if (genreVocabulary(patch.type) !== genreVocabulary(filters.type)) {
+		next.genres = []
+	}
+
+	if (!isAniListType(patch.type)) {
+		next.tags = []
+		next.statuses = []
+		next.season = null
 	}
 
 	return next
@@ -48,16 +70,17 @@ export function sameCriteria(a: SearchCriteria, b: SearchCriteria): boolean {
 
 export function requestOf(title: string, filters: SearchFilters, page: number): MediaSearchQuery {
 	const query = title.trim()
+	const aniList = isAniListType(filters.type)
 
 	return {
 		q: query || undefined,
 		type: filters.type,
 		sort: filters.sort,
 		genres: filters.genres.length > 0 ? filters.genres : undefined,
-		tags: filters.tags.length > 0 ? filters.tags : undefined,
-		formats: filters.formats.length > 0 ? [...filters.formats] : undefined,
-		statuses: filters.statuses.length > 0 ? [...filters.statuses] : undefined,
-		season: filters.season ?? undefined,
+		tags: aniList && filters.tags.length > 0 ? filters.tags : undefined,
+		formats: aniList && filters.formats.length > 0 ? [...filters.formats] : undefined,
+		statuses: aniList && filters.statuses.length > 0 ? [...filters.statuses] : undefined,
+		season: aniList ? (filters.season ?? undefined) : undefined,
 		year: filters.year ?? undefined,
 		min_score: filters.minScore ?? undefined,
 		adult: filters.adult || undefined,

@@ -162,7 +162,12 @@ export function MediaHero({
 								rel='noreferrer'
 								aria-label={t('media.openOn', { name: sources[0]?.name ?? 'AniList' })}
 							>
-								<Icon name='social/anilist' size={18} />
+								<Icon
+									name={
+										sources[0]?.id === 'tmdb' ? 'common/external-link' : 'social/anilist'
+									}
+									size={18}
+								/>
 							</a>
 
 							<Tooltip content={t('media.comingSoon')}>

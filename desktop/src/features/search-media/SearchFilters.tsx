@@ -17,6 +17,7 @@ import type {
 
 import {
 	EARLIEST_YEAR,
+	isAniListType,
 	SEARCH_FORMATS,
 	SEARCH_SCORES,
 	SEARCH_SEASONS,
@@ -90,6 +91,7 @@ export function SearchFilters() {
 	)
 
 	const years = useMemo(() => yearOptions(), [])
+	const aniList = isAniListType(filters.type)
 
 	const scores = useMemo<SelectDropdownOption[]>(
 		() =>
@@ -130,38 +132,44 @@ export function SearchFilters() {
 				startIcon={<Icon name='common/sparkles' size={18} />}
 			/>
 
-			<SelectDropdown
-				mode='multiple'
-				value={filters.tags}
-				onChange={value => patch({ tags: value })}
-				options={tags}
-				searchable
-				clearable
-				accentWhenSelected
-				placeholder={t('search.any.tags')}
-				startIcon={<Icon name='common/tag' size={18} />}
-			/>
+			{aniList && (
+				<SelectDropdown
+					mode='multiple'
+					value={filters.tags}
+					onChange={value => patch({ tags: value })}
+					options={tags}
+					searchable
+					clearable
+					accentWhenSelected
+					placeholder={t('search.any.tags')}
+					startIcon={<Icon name='common/tag' size={18} />}
+				/>
+			)}
 
-			<SelectDropdown
-				mode='multiple'
-				value={filters.formats}
-				onChange={value => patch({ formats: value as MediaSearchFormat[] })}
-				options={formats}
-				clearable
-				accentWhenSelected
-				placeholder={t('search.any.formats')}
-				startIcon={<Icon name='common/player' size={18} />}
-			/>
+			{aniList && (
+				<SelectDropdown
+					mode='multiple'
+					value={filters.formats}
+					onChange={value => patch({ formats: value as MediaSearchFormat[] })}
+					options={formats}
+					clearable
+					accentWhenSelected
+					placeholder={t('search.any.formats')}
+					startIcon={<Icon name='common/player' size={18} />}
+				/>
+			)}
 
-			<SelectDropdown
-				value={filters.season}
-				onChange={value => patch({ season: (value as MediaSearchSeason | null) ?? null })}
-				options={seasons}
-				clearable
-				accentWhenSelected
-				placeholder={t('search.any.seasons')}
-				startIcon={<Icon name='common/compass' size={18} />}
-			/>
+			{aniList && (
+				<SelectDropdown
+					value={filters.season}
+					onChange={value => patch({ season: (value as MediaSearchSeason | null) ?? null })}
+					options={seasons}
+					clearable
+					accentWhenSelected
+					placeholder={t('search.any.seasons')}
+					startIcon={<Icon name='common/compass' size={18} />}
+				/>
+			)}
 
 			<SelectDropdown
 				value={filters.year === null ? null : String(filters.year)}
@@ -174,16 +182,18 @@ export function SearchFilters() {
 				startIcon={<Icon name='common/calendar' size={18} />}
 			/>
 
-			<SelectDropdown
-				mode='multiple'
-				value={filters.statuses}
-				onChange={value => patch({ statuses: value as MediaSearchStatus[] })}
-				options={statuses}
-				clearable
-				accentWhenSelected
-				placeholder={t('search.any.statuses')}
-				startIcon={<Icon name='common/signal' size={18} />}
-			/>
+			{aniList && (
+				<SelectDropdown
+					mode='multiple'
+					value={filters.statuses}
+					onChange={value => patch({ statuses: value as MediaSearchStatus[] })}
+					options={statuses}
+					clearable
+					accentWhenSelected
+					placeholder={t('search.any.statuses')}
+					startIcon={<Icon name='common/signal' size={18} />}
+				/>
+			)}
 
 			<SelectDropdown
 				value={filters.minScore === null ? null : String(filters.minScore)}

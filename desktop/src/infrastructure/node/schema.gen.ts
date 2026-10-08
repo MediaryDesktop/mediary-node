@@ -610,7 +610,7 @@ export interface paths {
 		}
 		/**
 		 * Genres and tags to filter by
-		 * @description The source's own vocabulary, kept for at most a day. Formats, statuses and seasons are fixed enums of searchMedia and are not repeated here.
+		 * @description The source's own vocabulary, kept for at most a day. Formats, statuses and seasons are fixed enums of searchMedia and are not repeated here. TMDB has genres and no tags.
 		 */
 		get: operations['getMediaFilterOptions']
 		put?: never
@@ -650,7 +650,7 @@ export interface paths {
 		}
 		/**
 		 * Title details
-		 * @description Fetched from the source on demand and kept for at most a day, as the source's terms allow. Past that the node asks again; while the source is unreachable the request fails, and clients fall back to what the user's own list already knows about the title.
+		 * @description Fetched from the source on demand and kept for at most a day, as the source's terms allow. Past that the node asks again; while the source is unreachable the request fails, and clients fall back to what the user's own list already knows about the title. A reference is anilist:<id>, tmdb:movie:<id> or tmdb:tv:<id>.
 		 */
 		get: operations['getMediaDetails']
 		put?: never
@@ -670,7 +670,7 @@ export interface paths {
 		}
 		/**
 		 * Episodes of a title
-		 * @description Titles, synopses and stills per episode, gathered on demand from ani.zip and from the streaming listings AniList carries, each kept for at most a day. A source that fails or knows nothing only leaves its fields empty: the list always has one entry per episode the title is known to have.
+		 * @description Titles, synopses and stills per episode, gathered on demand from ani.zip and from the streaming listings AniList carries, each kept for at most a day. A source that fails or knows nothing only leaves its fields empty: the list always has one entry per episode the title is known to have. A TMDB show lists its regular seasons, numbered within each and specials left out; a movie is one episode.
 		 */
 		get: operations['getMediaEpisodes']
 		put?: never
@@ -1082,6 +1082,30 @@ export interface paths {
 		 */
 		get: operations['getSyncStatus']
 		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/tmdb/settings': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * TMDB connection
+		 * @description Whether movies and shows can be looked up, and with whose key. The key itself is never returned.
+		 */
+		get: operations['getTMDBSettings']
+		/**
+		 * Use your own TMDB key
+		 * @description Checks the key with TMDB, then keeps it in a file only the user can read, never in the database or a backup. A key TMDB refuses is not stored and answers 428.
+		 */
+		put: operations['setTMDBKey']
 		post?: never
 		delete?: never
 		options?: never
@@ -1580,6 +1604,11 @@ export interface components {
 			airing_at: string
 			/** Format: int64 */
 			episode: number
+			/**
+			 * Format: int64
+			 * @description Season the episode belongs to, for a show numbered by season. Absent for an anime, whose seasons are titles of their own.
+			 */
+			season?: number
 		}
 		Audio: {
 			/** Format: int32 */
@@ -1886,7 +1915,7 @@ export interface components {
 			image: string | null
 			/**
 			 * Format: int64
-			 * @description Episode number within the title, from 1.
+			 * @description Episode number within the title, from 1, or within the season when one is given.
 			 */
 			number: number
 			/** @description Synopsis, in English. */
@@ -1896,6 +1925,11 @@ export interface components {
 			 * @description Length in minutes, from the episode or, failing that, the title's typical length.
 			 */
 			runtime_minutes: number | null
+			/**
+			 * Format: int64
+			 * @description Season of a show numbered by season, from 1; the number then counts within it. Absent for an anime, whose seasons are titles of their own.
+			 */
+			season?: number
 			/** @description Episode title in the first language a source had it in, English first. */
 			title: string | null
 			/** @description The title per language, keyed by BCP 47 tag (x-jat is romanised Japanese), for the client to pick the user's own. */
@@ -3300,6 +3334,8 @@ export interface components {
 			 * @example AniList
 			 */
 			name: string
+			/** @description Text the source's terms require next to its data, word for word. */
+			notice?: string
 			/**
 			 * @description Where the attribution links to.
 			 * @example https://anilist.co
@@ -3441,6 +3477,31 @@ export interface components {
 			sources: components['schemas']['Source'][] | null
 			/** @description Candidate titles, best first. */
 			suggestions: components['schemas']['Suggestion'][] | null
+		}
+		TMDBKeyInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TMDBKeyInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The user's own TMDB API key (v3) or read access token (v4). TMDB is asked to accept it before it is stored. Empty forgets it and goes back to the key this build ships with. */
+			api_key: string
+		}
+		TMDBSettings: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TMDBSettings.json
+			 */
+			readonly $schema?: string
+			/** @description Whether this node reads TMDB at all. Off when the node was started with an empty TMDB endpoint. */
+			enabled: boolean
+			/**
+			 * @description Which key the node sends: the user's own, the one this build ships with, or none — then movies and shows cannot be looked up.
+			 * @enum {string}
+			 */
+			key_source: 'user' | 'build' | 'none'
 		}
 		Title: {
 			english: string | null
@@ -3984,6 +4045,8 @@ export type SchemaStreamOutputBody = components['schemas']['StreamOutputBody']
 export type SchemaSubtitle = components['schemas']['Subtitle']
 export type SchemaSuggestion = components['schemas']['Suggestion']
 export type SchemaSuggestionsOutputBody = components['schemas']['SuggestionsOutputBody']
+export type SchemaTmdbKeyInputBody = components['schemas']['TMDBKeyInputBody']
+export type SchemaTmdbSettings = components['schemas']['TMDBSettings']
 export type SchemaTitle = components['schemas']['Title']
 export type SchemaTitleNames = components['schemas']['TitleNames']
 export type SchemaTorrentCheckResult = components['schemas']['TorrentCheckResult']
@@ -5276,7 +5339,10 @@ export interface operations {
 	}
 	getMediaFilterOptions: {
 		parameters: {
-			query?: never
+			query?: {
+				/** @description Which catalog's vocabulary to list. */
+				type?: 'anime' | 'manga' | 'movie' | 'series' | 'dorama'
+			}
 			header?: never
 			path?: never
 			cookie?: never
@@ -5308,9 +5374,9 @@ export interface operations {
 			query?: {
 				/** @description Free text to match against every title the source knows. Empty browses by the filters alone. */
 				q?: string
-				/** @description Which catalog to search. Every source owns one kind of media, so this also picks the source. */
-				type?: 'anime' | 'manga'
-				/** @description Order of the results. Left out it means relevance while searching and popularity while browsing. */
+				/** @description Which catalog to search. Every source owns one kind of media, so this also picks the source: AniList for anime and manga, TMDB for the rest. A dorama is a live-action show from East Asia, and every dorama is a series too. */
+				type?: 'anime' | 'manga' | 'movie' | 'series' | 'dorama'
+				/** @description Order of the results. Left out it means relevance while searching and popularity while browsing. TMDB orders a text search by relevance only. */
 				sort?:
 					| 'SEARCH_MATCH'
 					| 'POPULARITY_DESC'
@@ -5319,11 +5385,11 @@ export interface operations {
 					| 'FAVOURITES_DESC'
 					| 'START_DATE_DESC'
 					| 'TITLE_ROMAJI'
-				/** @description Genres a title must all have, as listed by getMediaFilterOptions. */
+				/** @description Genres a title must all have, as listed by getMediaFilterOptions. TMDB applies them while browsing only. */
 				genres?: string[] | null
-				/** @description Tags a title must all have, as listed by getMediaFilterOptions. */
+				/** @description Tags a title must all have, as listed by getMediaFilterOptions. AniList only. */
 				tags?: string[] | null
-				/** @description Any of these formats. */
+				/** @description Any of these formats. AniList only. */
 				formats?:
 					| (
 							| 'TV'
@@ -5338,9 +5404,9 @@ export interface operations {
 							| 'ONE_SHOT'
 					  )[]
 					| null
-				/** @description Any of these release statuses. */
+				/** @description Any of these release statuses. AniList only. */
 				statuses?: ('FINISHED' | 'RELEASING' | 'NOT_YET_RELEASED' | 'CANCELLED' | 'HIATUS')[] | null
-				/** @description Season the title started in. */
+				/** @description Season the title started in. AniList only. */
 				season?: 'WINTER' | 'SPRING' | 'SUMMER' | 'FALL'
 				/** @description Year the title started in. */
 				year?: number
@@ -6141,6 +6207,68 @@ export interface operations {
 				}
 				content: {
 					'application/json': components['schemas']['StatusOutputBody1']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getTMDBSettings: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TMDBSettings']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	setTMDBKey: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['TMDBKeyInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TMDBSettings']
 				}
 			}
 			/** @description Error */

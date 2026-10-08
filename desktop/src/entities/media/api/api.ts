@@ -92,7 +92,10 @@ export const searchMediaFx = createNodeRequestFx<MediaSearchQuery, MediaSearchRe
 	timeout: 15_000
 }))
 
-export const fetchMediaFilterOptionsFx = createNodeRequestFx<void, MediaFilterOptionsResponse>({
-	url: '/v1/media/filter-options',
-	timeout: 15_000
-})
+export const fetchMediaFilterOptionsFx = createNodeRequestFx<MediaSearchType, MediaFilterOptionsResponse>(
+	type => ({
+		url: '/v1/media/filter-options',
+		query: { type },
+		timeout: 15_000
+	})
+)
