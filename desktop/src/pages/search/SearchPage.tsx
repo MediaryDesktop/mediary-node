@@ -7,7 +7,7 @@ import { Icon, PageHeader, PageTransition } from '@shared/ui'
 
 import { aniListAccountModel } from '@entities/anilist-account'
 import { mediaTitle } from '@entities/media'
-import { isTrackerMediaType } from '@entities/tracker'
+import { canTrack } from '@entities/tracker'
 
 import { SearchFilters, searchMediaModel, SearchResults, SearchToolbar } from '@features/search-media'
 import { EntryMenu } from '@features/track-media'
@@ -40,10 +40,10 @@ export function SearchPage() {
 			<div className={clsx(styles.layout, filtersOpen && styles.withFilters)}>
 				<div className={styles.results}>
 					<SearchResults
-						// Lists live in AniList, so without the account there is nothing to
-						// add a title to; other media types have no tracker yet.
+						// Anime and manga lists live in AniList and need the account; movies
+						// and shows go on the node's own list.
 						renderMenu={(media, entry) =>
-							connected && isTrackerMediaType(media.media_type) ? (
+							canTrack(media.media_type, connected) ? (
 								<EntryMenu
 									media={{
 										mediaRef: media.media_ref,

@@ -1,7 +1,7 @@
 import { createNodeRequestFx } from '@infra/node'
 import type { NodeSchemas } from '@infra/node'
 
-export type TrackerMediaType = 'anime' | 'manga'
+export type TrackerMediaType = 'anime' | 'manga' | 'movie' | 'series' | 'dorama'
 export type TrackerCollection = NodeSchemas['EntriesOutputBody']
 export type TrackerEntry = NodeSchemas['Entry']
 export type TrackerList = NodeSchemas['List']
@@ -27,6 +27,12 @@ export const updateTrackerEntryFx = createNodeRequestFx<UpdateTrackerEntryParams
 		body: patch
 	})
 )
+
+// Only the node's own entries (movies and shows) can be removed for now.
+export const deleteTrackerEntryFx = createNodeRequestFx<string, void>(mediaRef => ({
+	url: `/v1/tracker/entries/${encodeURIComponent(mediaRef)}`,
+	method: 'DELETE'
+}))
 
 export type TrackerCustomList = NodeSchemas['CustomList']
 export type TrackerListCollection = NodeSchemas['ListsOutputBody']

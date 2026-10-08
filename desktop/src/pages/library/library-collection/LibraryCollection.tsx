@@ -8,7 +8,7 @@ import { Icon } from '@shared/ui'
 import { aniListAccountModel } from '@entities/anilist-account'
 import type { LibraryCollectionEntry } from '@entities/library-item'
 import { MediaCard } from '@entities/media'
-import { entryTracking, isTrackerMediaType, useTrackedEntries } from '@entities/tracker'
+import { canTrack, entryTracking, useTrackedEntries } from '@entities/tracker'
 
 import { EntryMenu } from '@features/track-media'
 
@@ -53,7 +53,7 @@ export function LibraryCollection({ entries }: LibraryCollectionProps) {
 							previewRef={entry.media_ref}
 							tracking={trackedEntry ? entryTracking(trackedEntry, t) : null}
 							menu={
-								connected && mediaType && isTrackerMediaType(mediaType) ? (
+								mediaType && canTrack(mediaType, connected) ? (
 									<EntryMenu
 										media={{
 											mediaRef: entry.media_ref,

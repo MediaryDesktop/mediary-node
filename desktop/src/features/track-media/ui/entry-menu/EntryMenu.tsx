@@ -5,7 +5,7 @@ import { useTranslation } from '@shared/i18n'
 import { DropdownMenu, Icon, RippleButton } from '@shared/ui'
 import type { DropdownMenuItem } from '@shared/ui'
 
-import { trackerModel } from '@entities/tracker'
+import { isLocalTrackerType, trackerModel } from '@entities/tracker'
 import type { TrackerEntry, TrackerMediaType } from '@entities/tracker'
 
 import { manageEntryModel, rateEntryModel } from '../../model/model'
@@ -27,24 +27,35 @@ export interface EntryMenuProps {
 	listName?: string
 }
 
-// The library knows a title only by its reference, so the AniList page is
+interface SourceLink {
+	name: string
+	url: string
+}
+
+// The library knows a title only by its reference, so the source's page is
 // rebuilt from it when no catalog link came along.
-function aniListUrl({ mediaRef, mediaType, siteUrl }: EntryMenuMedia): string | null {
-	if (siteUrl) {
-		return siteUrl
+function sourceLink({ mediaRef, mediaType, siteUrl }: EntryMenuMedia): SourceLink | null {
+	const [provider, first, second] = mediaRef.split(':')
+
+	if (provider === 'tmdb') {
+		const url = siteUrl ?? (first && second ? `https://www.themoviedb.org/${first}/${second}` : null)
+
+		return url ? { name: 'TMDB', url } : null
 	}
 
-	const [provider, id] = mediaRef.split(':')
+	const url =
+		siteUrl ?? (provider === 'anilist' && first ? `https://anilist.co/${mediaType}/${first}` : null)
 
-	return provider === 'anilist' && id ? `https://anilist.co/${mediaType}/${id}` : null
+	return url ? { name: 'AniList', url } : null
 }
 
 export function EntryMenu({ media, entry, listName }: EntryMenuProps) {
 	const { t } = useTranslation()
 
-	const [updating, requestUpdate, manageOpened, addOpened, rateOpened] = useUnit([
+	const [updating, requestUpdate, requestDelete, manageOpened, addOpened, rateOpened] = useUnit([
 		trackerModel.$updating,
 		trackerModel.entryUpdateRequested,
+		trackerModel.entryDeleteRequested,
 		manageEntryModel.opened,
 		manageEntryModel.addOpened,
 		rateEntryModel.opened
@@ -83,14 +94,26 @@ export function EntryMenu({ media, entry, listName }: EntryMenuProps) {
 		})
 	}
 
-	const url = aniListUrl(media)
+	const link = sourceLink(media)
 
-	if (url) {
+	if (link) {
 		items.push({
-			id: 'anilist',
-			label: t('media.openOn', { name: 'AniList' }),
+			id: 'source',
+			label: t('media.openOn', { name: link.name }),
 			icon: 'common/external-link',
-			onSelect: () => window.open(url, '_blank', 'noreferrer')
+			onSelect: () => window.open(link.url, '_blank', 'noreferrer')
+		})
+	}
+
+	// Only the node's own list can drop a title outright; AniList's is edited there.
+	if (entry && !listName && isLocalTrackerType(media.mediaType)) {
+		items.push({
+			id: 'delete',
+			label: t('lists.deleteEntry'),
+			icon: 'common/trash',
+			danger: true,
+			disabled: busy,
+			onSelect: () => requestDelete(entry.media_ref)
 		})
 	}
 

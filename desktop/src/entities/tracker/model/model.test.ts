@@ -7,6 +7,7 @@ import { fetchTrackerEntriesFx, updateTrackerEntryFx } from '../api/api'
 import type { TrackerCollection, TrackerEntry } from '../api/api'
 
 import {
+	canTrack,
 	formatProgress,
 	preferredTitle,
 	trackerModel,
@@ -144,5 +145,15 @@ describe('tracker formatting', () => {
 		expect(
 			preferredTitle({ user_preferred: null, english: 'Frieren', romaji: 'Sousou', native: null })
 		).toBe('Frieren')
+	})
+})
+
+describe('canTrack', () => {
+	it('needs AniList for anime and manga only', () => {
+		expect(canTrack('anime', false)).toBe(false)
+		expect(canTrack('manga', true)).toBe(true)
+		expect(canTrack('movie', false)).toBe(true)
+		expect(canTrack('dorama', false)).toBe(true)
+		expect(canTrack('book', true)).toBe(false)
 	})
 })

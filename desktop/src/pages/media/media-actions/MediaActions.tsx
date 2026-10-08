@@ -8,7 +8,7 @@ import type { DropdownMenuItem } from '@shared/ui'
 
 import { aniListAccountModel } from '@entities/anilist-account'
 import type { MediaSource } from '@entities/media'
-import { isTrackerMediaType } from '@entities/tracker'
+import { canTrack, isTrackerMediaType } from '@entities/tracker'
 import type { TrackerEntry } from '@entities/tracker'
 
 import { manageEntryModel, rateEntryModel } from '@features/track-media'
@@ -105,14 +105,16 @@ export function MediaActions({
 							<Icon name='common/pencil' size={16} />
 						</Button>
 					</Tooltip>
-				) : connected && trackerType ? (
+				) : canTrack(mediaType, connected) ? (
 					<Tooltip content={t('media.addToList')}>
 						<Button
 							iconOnly
 							variant='ghost'
 							className={styles.iconAction}
 							aria-label={t('media.addToList')}
-							onClick={() => addOpened({ mediaRef, mediaType: trackerType, title })}
+							onClick={() =>
+								trackerType && addOpened({ mediaRef, mediaType: trackerType, title })
+							}
 						>
 							<MdFormatListBulletedAdd size={22} />
 						</Button>

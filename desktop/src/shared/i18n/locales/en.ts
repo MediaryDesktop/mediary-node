@@ -191,12 +191,18 @@ export const en = {
 			repeatHint: 'How many times you went through it again',
 			started: {
 				anime: 'Started watching',
-				manga: 'Started reading'
+				manga: 'Started reading',
+				movie: 'Started watching',
+				series: 'Started watching',
+				dorama: 'Started watching'
 			},
 			dateHint: 'Optional — leave it blank if you are not sure',
 			completed: {
 				anime: 'Finished watching',
-				manga: 'Finished reading'
+				manga: 'Finished reading',
+				movie: 'Finished watching',
+				series: 'Finished watching',
+				dorama: 'Finished watching'
 			},
 			completedLocked: 'Available once the title is completed, dropped or repeating',
 			notes: 'Notes',
@@ -204,6 +210,7 @@ export const en = {
 			notesPlaceholder: 'Anything you want to remember'
 		},
 		removeFromList: 'Remove from list',
+		deleteEntry: 'Remove from my list',
 		loading: 'Loading your lists…',
 		failed: 'Could not load your lists',
 		retry: 'Retry',
@@ -245,6 +252,30 @@ export const en = {
 				DROPPED: 'Dropped',
 				PAUSED: 'Paused',
 				REPEATING: 'Rereading'
+			},
+			movie: {
+				CURRENT: 'Watching',
+				PLANNING: 'Plan to watch',
+				COMPLETED: 'Completed',
+				DROPPED: 'Dropped',
+				PAUSED: 'Paused',
+				REPEATING: 'Rewatching'
+			},
+			series: {
+				CURRENT: 'Watching',
+				PLANNING: 'Plan to watch',
+				COMPLETED: 'Completed',
+				DROPPED: 'Dropped',
+				PAUSED: 'Paused',
+				REPEATING: 'Rewatching'
+			},
+			dorama: {
+				CURRENT: 'Watching',
+				PLANNING: 'Plan to watch',
+				COMPLETED: 'Completed',
+				DROPPED: 'Dropped',
+				PAUSED: 'Paused',
+				REPEATING: 'Rewatching'
 			}
 		}
 	},

@@ -1436,7 +1436,7 @@ export interface paths {
 		}
 		/**
 		 * Tracker entries
-		 * @description Served from the node's mirror, so it works offline. A stale mirror is returned immediately while a refresh runs; a `tracker` event announces the result.
+		 * @description Served from the node's mirror, so it works offline. A stale mirror is returned immediately while a refresh runs; a `tracker` event announces the result. Movies, series and doramas are the node's own list: always current, no AniList account needed.
 		 */
 		get: operations['listTrackerEntries']
 		put?: never
@@ -1457,11 +1457,15 @@ export interface paths {
 		get?: never
 		/**
 		 * Update a tracker entry
-		 * @description Applies the change locally and queues it for AniList, so it works offline. The returned entry already carries the change with `sync_pending: true`; a `tracker` event with reason `synced` follows once AniList has it. A progress lower than what AniList already holds is only sent when it is lower than what the user saw — so an older offline edit never rolls back progress made on another device. A title not in the lists yet is added instead: that goes straight to AniList and needs it reachable, lands in `PLANNING` unless a status is given, and comes back already synced.
+		 * @description An anime or manga entry is applied locally and queued for AniList, so it works offline. The returned entry already carries the change with `sync_pending: true`; a `tracker` event with reason `synced` follows once AniList has it. A progress lower than what AniList already holds is only sent when it is lower than what the user saw — so an older offline edit never rolls back progress made on another device. A title not in the lists yet is added instead: that goes straight to AniList and needs it reachable, lands in `PLANNING` unless a status is given, and comes back already synced. A movie, series or dorama (tmdb:…) is the node's own and saved at once; adding one the node has never fetched needs TMDB reachable. Progress on those starts the title and, at the last episode, completes it, as AniList's site does.
 		 */
 		put: operations['updateTrackerEntry']
 		post?: never
-		delete?: never
+		/**
+		 * Remove a title from the list
+		 * @description Takes the title off the node's own list and out of its custom lists. AniList entries are edited on AniList for now and answer 428.
+		 */
+		delete: operations['deleteTrackerEntry']
 		options?: never
 		head?: never
 		patch?: never
@@ -7011,8 +7015,8 @@ export interface operations {
 	listTrackerEntries: {
 		parameters: {
 			query: {
-				/** @description Which collection to read. */
-				type: 'anime' | 'manga'
+				/** @description Which collection to read. Anime and manga are the AniList account's; movies, series and doramas are this node's own list. */
+				type: 'anime' | 'manga' | 'movie' | 'series' | 'dorama'
 			}
 			header?: never
 			path?: never
@@ -7064,6 +7068,36 @@ export interface operations {
 				content: {
 					'application/json': components['schemas']['Entry']
 				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	deleteTrackerEntry: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description The entry's media reference. */
+				media_ref: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
 			}
 			/** @description Error */
 			default: {
@@ -7207,8 +7241,8 @@ export interface operations {
 	refreshTrackerEntries: {
 		parameters: {
 			query: {
-				/** @description Which collection to read. */
-				type: 'anime' | 'manga'
+				/** @description Which collection to read. Anime and manga are the AniList account's; movies, series and doramas are this node's own list. */
+				type: 'anime' | 'manga' | 'movie' | 'series' | 'dorama'
 			}
 			header?: never
 			path?: never

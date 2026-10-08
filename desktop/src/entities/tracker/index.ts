@@ -1,5 +1,8 @@
 export {
+	canTrack,
+	deleteTrackerEntryMutation,
 	formatProgress,
+	isLocalTrackerType,
 	isTrackerMediaType,
 	isTrackerStatus,
 	preferredTitle,

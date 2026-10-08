@@ -147,7 +147,7 @@ export function ListsPage() {
 				</section>
 			)}
 
-			{connected && entries.length > 0 && (
+			{entries.length > 0 && (
 				<PinnedShelf
 					entries={entries}
 					onOpen={openMedia}

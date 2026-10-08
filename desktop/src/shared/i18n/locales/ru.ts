@@ -190,12 +190,18 @@ export const ru: Translation = {
 			repeatHint: 'Сколько раз вы проходили это снова',
 			started: {
 				anime: 'Начало просмотра',
-				manga: 'Начало чтения'
+				manga: 'Начало чтения',
+				movie: 'Начало просмотра',
+				series: 'Начало просмотра',
+				dorama: 'Начало просмотра'
 			},
 			dateHint: 'Необязательно — оставьте пустым, если не помните',
 			completed: {
 				anime: 'Завершение просмотра',
-				manga: 'Завершение чтения'
+				manga: 'Завершение чтения',
+				movie: 'Завершение просмотра',
+				series: 'Завершение просмотра',
+				dorama: 'Завершение просмотра'
 			},
 			completedLocked: 'Доступно, когда тайтл завершён, брошен или пересматривается',
 			notes: 'Заметки',
@@ -203,6 +209,7 @@ export const ru: Translation = {
 			notesPlaceholder: 'Всё, что хотите запомнить'
 		},
 		removeFromList: 'Убрать из списка',
+		deleteEntry: 'Убрать из моего списка',
 		loading: 'Загружаем ваши списки…',
 		failed: 'Не удалось загрузить списки',
 		retry: 'Повторить',
@@ -245,6 +252,30 @@ export const ru: Translation = {
 				DROPPED: 'Брошено',
 				PAUSED: 'На паузе',
 				REPEATING: 'Перечитываю'
+			},
+			movie: {
+				CURRENT: 'Смотрю',
+				PLANNING: 'В планах',
+				COMPLETED: 'Просмотрено',
+				DROPPED: 'Брошено',
+				PAUSED: 'На паузе',
+				REPEATING: 'Пересматриваю'
+			},
+			series: {
+				CURRENT: 'Смотрю',
+				PLANNING: 'В планах',
+				COMPLETED: 'Просмотрено',
+				DROPPED: 'Брошено',
+				PAUSED: 'На паузе',
+				REPEATING: 'Пересматриваю'
+			},
+			dorama: {
+				CURRENT: 'Смотрю',
+				PLANNING: 'В планах',
+				COMPLETED: 'Просмотрено',
+				DROPPED: 'Брошено',
+				PAUSED: 'На паузе',
+				REPEATING: 'Пересматриваю'
 			}
 		}
 	},

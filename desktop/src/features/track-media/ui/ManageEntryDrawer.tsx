@@ -45,7 +45,7 @@ export function ManageEntryDrawer() {
 	const options = useMemo(
 		() =>
 			(collection?.lists ?? [])
-				.filter(list => list.provider === 'anilist' && list.media_type === mediaType)
+				.filter(list => list.media_type === mediaType)
 				.map(list => ({ value: list.name, label: list.name })),
 		[collection, mediaType]
 	)

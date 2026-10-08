@@ -6,7 +6,7 @@ import { firstPresent } from '@shared/lib'
 
 import { nodeTopic } from '@infra/node'
 
-import { fetchTrackerEntriesFx, updateTrackerEntryFx } from '../api/api'
+import { deleteTrackerEntryFx, fetchTrackerEntriesFx, updateTrackerEntryFx } from '../api/api'
 import type {
 	TrackerCollection,
 	TrackerEntry,
@@ -20,6 +20,11 @@ const trackerChanged = nodeTopic('tracker')
 export const updateTrackerEntryMutation = createMutation({
 	effect: updateTrackerEntryFx,
 	name: 'updateTrackerEntry'
+})
+
+export const deleteTrackerEntryMutation = createMutation({
+	effect: deleteTrackerEntryFx,
+	name: 'deleteTrackerEntry'
 })
 
 function withEntry(collection: TrackerCollection, entry: TrackerEntry): TrackerCollection {
@@ -47,6 +52,30 @@ function createTrackerQuery(mediaType: TrackerMediaType) {
 	})
 
 	update(query, {
+		on: deleteTrackerEntryMutation,
+		by: {
+			success: ({ query: state, mutation }) => {
+				if (state && 'error' in state) {
+					return { error: state.error }
+				}
+
+				const current = state?.result ?? null
+
+				if (!current) {
+					return { result: current }
+				}
+
+				return {
+					result: {
+						...current,
+						entries: (current.entries ?? []).filter(entry => entry.media_ref !== mutation.params)
+					}
+				}
+			}
+		}
+	})
+
+	update(query, {
 		on: updateTrackerEntryMutation,
 		by: {
 			success: ({ query: state, mutation }) => {
@@ -70,7 +99,10 @@ function createTrackerQuery(mediaType: TrackerMediaType) {
 
 export const trackerQueries = {
 	anime: createTrackerQuery('anime'),
-	manga: createTrackerQuery('manga')
+	manga: createTrackerQuery('manga'),
+	movie: createTrackerQuery('movie'),
+	series: createTrackerQuery('series'),
+	dorama: createTrackerQuery('dorama')
 } as const satisfies Record<TrackerMediaType, ReturnType<typeof createTrackerQuery>>
 
 export const trackerModel = atom(() => {
@@ -87,6 +119,8 @@ export const trackerModel = atom(() => {
 		entryUpdateRequested: updateTrackerEntryMutation.start,
 		entryUpdated: updateTrackerEntryMutation.finished.success,
 		entryUpdateFailed: updateTrackerEntryMutation.finished.failure,
+		entryDeleteRequested: deleteTrackerEntryMutation.start,
+		entryDeleteFailed: deleteTrackerEntryMutation.finished.failure,
 		entriesSynced: trackerChanged.filter({ fn: event => event.payload?.reason === 'synced' })
 	}
 })
@@ -110,10 +144,27 @@ export function isTrackerStatus(value: string): value is TrackerStatus {
 	return (TRACKER_STATUSES as readonly string[]).includes(value)
 }
 
-export const TRACKER_MEDIA_TYPES = ['anime', 'manga'] as const satisfies readonly TrackerMediaType[]
+export const TRACKER_MEDIA_TYPES = [
+	'anime',
+	'manga',
+	'movie',
+	'series',
+	'dorama'
+] as const satisfies readonly TrackerMediaType[]
 
 export function isTrackerMediaType(value: string): value is TrackerMediaType {
 	return (TRACKER_MEDIA_TYPES as readonly string[]).includes(value)
+}
+
+// Movies and shows are the node's own list: no AniList account, works offline.
+export function isLocalTrackerType(mediaType: TrackerMediaType): boolean {
+	return mediaType !== 'anime' && mediaType !== 'manga'
+}
+
+// Whether a title of this type can go on a list right now: anime and manga need
+// the AniList account, the node's own types do not.
+export function canTrack(mediaType: string, aniListConnected: boolean): mediaType is TrackerMediaType {
+	return isTrackerMediaType(mediaType) && (aniListConnected || isLocalTrackerType(mediaType))
 }
 
 export function preferredTitle(title: TrackerTitle): string {

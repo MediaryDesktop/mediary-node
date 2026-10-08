@@ -189,12 +189,18 @@ export const uk: Translation = {
 			repeatHint: 'Скільки разів ви проходили це знову',
 			started: {
 				anime: 'Початок перегляду',
-				manga: 'Початок читання'
+				manga: 'Початок читання',
+				movie: 'Початок перегляду',
+				series: 'Початок перегляду',
+				dorama: 'Початок перегляду'
 			},
 			dateHint: 'Необовʼязково — лишіть порожнім, якщо не памʼятаєте',
 			completed: {
 				anime: 'Завершення перегляду',
-				manga: 'Завершення читання'
+				manga: 'Завершення читання',
+				movie: 'Завершення перегляду',
+				series: 'Завершення перегляду',
+				dorama: 'Завершення перегляду'
 			},
 			completedLocked: 'Доступно, коли тайтл завершено, покинуто або переглядається повторно',
 			notes: 'Нотатки',
@@ -202,6 +208,7 @@ export const uk: Translation = {
 			notesPlaceholder: 'Усе, що хочете запамʼятати'
 		},
 		removeFromList: 'Прибрати зі списку',
+		deleteEntry: 'Прибрати з мого списку',
 		loading: 'Завантажуємо ваші списки…',
 		failed: 'Не вдалося завантажити списки',
 		retry: 'Повторити',
@@ -243,6 +250,30 @@ export const uk: Translation = {
 				DROPPED: 'Кинуто',
 				PAUSED: 'На паузі',
 				REPEATING: 'Перечитую'
+			},
+			movie: {
+				CURRENT: 'Дивлюсь',
+				PLANNING: 'Заплановано',
+				COMPLETED: 'Переглянуто',
+				DROPPED: 'Кинуто',
+				PAUSED: 'На паузі',
+				REPEATING: 'Передивляюсь'
+			},
+			series: {
+				CURRENT: 'Дивлюсь',
+				PLANNING: 'Заплановано',
+				COMPLETED: 'Переглянуто',
+				DROPPED: 'Кинуто',
+				PAUSED: 'На паузі',
+				REPEATING: 'Передивляюсь'
+			},
+			dorama: {
+				CURRENT: 'Дивлюсь',
+				PLANNING: 'Заплановано',
+				COMPLETED: 'Переглянуто',
+				DROPPED: 'Кинуто',
+				PAUSED: 'На паузі',
+				REPEATING: 'Передивляюсь'
 			}
 		}
 	},

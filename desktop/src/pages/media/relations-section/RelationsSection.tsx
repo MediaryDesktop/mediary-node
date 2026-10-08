@@ -7,7 +7,7 @@ import { useTranslation } from '@shared/i18n'
 import { aniListAccountModel } from '@entities/anilist-account'
 import { enumLabel, MediaCard, mediaTitle } from '@entities/media'
 import type { MediaDetails } from '@entities/media'
-import { entryTracking, isTrackerMediaType, useTrackedEntries } from '@entities/tracker'
+import { canTrack, entryTracking, useTrackedEntries } from '@entities/tracker'
 
 import { EntryMenu } from '@features/track-media'
 
@@ -47,7 +47,7 @@ export function RelationsSection({ relations }: RelationsSectionProps) {
 								cornerLabel={enumLabel(t, 'relation', relation.relation_type)}
 								tracking={entry ? entryTracking(entry, t) : null}
 								menu={
-									connected && isTrackerMediaType(relation.media_type) ? (
+									canTrack(relation.media_type, connected) ? (
 										<EntryMenu
 											media={{
 												mediaRef: relation.media_ref,

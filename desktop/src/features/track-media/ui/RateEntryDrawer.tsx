@@ -47,7 +47,7 @@ export function RateEntryDrawer() {
 
 	const entry = target?.entry
 	const mediaType = target?.mediaType ?? 'anime'
-	const total = mediaType === 'anime' ? entry?.media.episodes : entry?.media.chapters
+	const total = mediaType === 'manga' ? entry?.media.chapters : entry?.media.episodes
 	const finished = entry ? FINISHED_STATUSES.includes(entry.status) : false
 	const starsValue = score / RAW_PER_STAR_POINT
 
@@ -82,7 +82,7 @@ export function RateEntryDrawer() {
 				</DrawerSection>
 
 				<DrawerSection
-					title={t(mediaType === 'anime' ? 'lists.editor.episodes' : 'lists.editor.chapters')}
+					title={t(mediaType === 'manga' ? 'lists.editor.chapters' : 'lists.editor.episodes')}
 					description={t('lists.rateEntry.progressHint')}
 				>
 					<Stepper

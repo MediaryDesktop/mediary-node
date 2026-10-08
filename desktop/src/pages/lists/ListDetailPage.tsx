@@ -9,6 +9,7 @@ import { aniListAccountModel } from '@entities/anilist-account'
 import { MediaCard } from '@entities/media'
 import {
 	entryTracking,
+	isTrackerMediaType,
 	ListIcon,
 	preferredTitle,
 	trackerListsQuery,
@@ -81,7 +82,7 @@ export function ListDetailPage({ listId }: ListDetailPageProps) {
 			return tracked.filter(entry => entry.status === status)
 		}
 
-		if (!list || list.provider !== 'anilist') {
+		if (!list) {
 			return []
 		}
 
@@ -90,8 +91,8 @@ export function ListDetailPage({ listId }: ListDetailPageProps) {
 		)
 	}, [status, list, tracked])
 
-	const mediaType: TrackerMediaType =
-		list?.media_type === 'manga' || entries[0]?.media_type === 'manga' ? 'manga' : 'anime'
+	const listType = list?.media_type ?? entries[0]?.media_type
+	const mediaType: TrackerMediaType = listType && isTrackerMediaType(listType) ? listType : 'anime'
 
 	const formats = useMemo(() => formatsOf(entries), [entries])
 	const genres = useMemo(() => genresOf(entries), [entries])
