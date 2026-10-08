@@ -99,3 +99,19 @@ export const fetchMediaFilterOptionsFx = createNodeRequestFx<MediaSearchType, Me
 		timeout: 15_000
 	})
 )
+
+// Whether movies and shows can be looked up, and with whose key. The key itself
+// never comes back from the node.
+export type TMDBSettings = Omit<NodeSchemas['TMDBSettings'], '$schema'>
+
+export const fetchTMDBSettingsFx = createNodeRequestFx<void, TMDBSettings>({
+	url: '/v1/tmdb/settings'
+})
+
+// An empty key forgets the user's own and goes back to the one the build ships with.
+export const setTMDBKeyFx = createNodeRequestFx<string, TMDBSettings>(apiKey => ({
+	url: '/v1/tmdb/settings',
+	method: 'PUT',
+	body: { api_key: apiKey },
+	timeout: 20_000
+}))

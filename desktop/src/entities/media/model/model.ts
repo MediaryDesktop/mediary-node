@@ -1,4 +1,4 @@
-import { createQuery } from '@farfetched/core'
+import { createMutation, createQuery, keepFresh } from '@farfetched/core'
 import { createEffect, createEvent, createStore, sample } from 'effector'
 import type { TFunction } from 'i18next'
 
@@ -9,7 +9,9 @@ import {
 	fetchMediaDetailsFx,
 	fetchMediaEpisodesFx,
 	fetchMediaFilterOptionsFx,
-	searchMediaFx
+	fetchTMDBSettingsFx,
+	searchMediaFx,
+	setTMDBKeyFx
 } from '../api/api'
 import type { MediaDate, MediaDetails, MediaEpisode, MediaTitle } from '../api/api'
 
@@ -32,6 +34,18 @@ export const mediaFilterOptionsQuery = createQuery({
 	effect: fetchMediaFilterOptionsFx,
 	name: 'mediaFilterOptions'
 })
+
+export const tmdbSettingsQuery = createQuery({
+	effect: fetchTMDBSettingsFx,
+	name: 'tmdbSettings'
+})
+
+export const setTMDBKeyMutation = createMutation({
+	effect: setTMDBKeyFx,
+	name: 'setTMDBKey'
+})
+
+keepFresh(tmdbSettingsQuery, { triggers: [setTMDBKeyMutation.finished.success] })
 
 export const mediaDetailsModel = atom(() => {
 	const $failedMediaRef = createStore<string | null>(null)

@@ -1,6 +1,8 @@
 import { allSettled, fork } from 'effector'
 import { describe, expect, it, vi } from 'vitest'
 
+import { HttpRequestError } from '@shared/api'
+
 import { fetchMediaFilterOptionsFx, searchMediaFx } from '@entities/media'
 import type { MediaSearchQuery, MediaSearchResponse, MediaSummary } from '@entities/media'
 
@@ -228,5 +230,25 @@ describe('search filters', () => {
 
 		await allSettled(searchMediaModel.filtersCleared, { scope })
 		expect(scope.getState(searchMediaModel.$activeFilterCount)).toBe(0)
+	})
+})
+
+describe('search setup', () => {
+	it('passes on what the node says is missing', async () => {
+		const scope = searchScope(() =>
+			Promise.reject(
+				new HttpRequestError('precondition', {
+					status: 428,
+					body: { detail: 'TMDB is not set up: add an API key in the settings' }
+				})
+			)
+		)
+
+		await allSettled(searchMediaModel.filtersPatched, { scope, params: { type: 'movie' } })
+
+		expect(scope.getState(searchMediaModel.$failed)).toBe(true)
+		expect(scope.getState(searchMediaModel.$setupNeeded)).toBe(
+			'TMDB is not set up: add an API key in the settings'
+		)
 	})
 })

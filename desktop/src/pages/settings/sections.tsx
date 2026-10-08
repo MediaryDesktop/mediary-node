@@ -8,6 +8,7 @@ export const SETTINGS_SECTIONS = [
 	'app',
 	'library',
 	'player',
+	'tmdb',
 	'torrent-client',
 	'torrent-search',
 	'torrent-preferences',
@@ -30,6 +31,7 @@ export interface SectionInfo {
 		| 'app'
 		| 'library'
 		| 'player'
+		| 'tmdb'
 		| 'torrentClient'
 		| 'torrentSearch'
 		| 'torrentPreferences'
@@ -45,6 +47,7 @@ export const SECTION_GROUPS: readonly (readonly SectionInfo[])[] = [
 		{ id: 'library', icon: <IoLibraryOutline size={18} />, key: 'library' },
 		{ id: 'player', icon: 'common/player', key: 'player' }
 	],
+	[{ id: 'tmdb', icon: 'categories/movie', key: 'tmdb' }],
 	[
 		{ id: 'torrent-client', icon: 'common/download', key: 'torrentClient' },
 		{ id: 'torrent-search', icon: 'common/search', key: 'torrentSearch' },

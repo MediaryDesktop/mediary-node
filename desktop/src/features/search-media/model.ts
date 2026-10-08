@@ -128,6 +128,12 @@ export const searchMediaModel = atom(() => {
 		(error, pending, page) => error !== null && !pending && page === 1
 	)
 
+	// The source cannot answer until the user sets it up — TMDB without a key. The
+	// node says what is missing; anything else is an ordinary failure.
+	const $setupNeeded = mediaSearchQuery.$error.map(error =>
+		error?.status === 428 ? (error.body?.detail ?? '') : null
+	)
+
 	const $loadMoreFailed = combine(
 		mediaSearchQuery.$error,
 		mediaSearchQuery.$pending,
@@ -146,6 +152,7 @@ export const searchMediaModel = atom(() => {
 		$loadingFirstPage,
 		$loadingMore,
 		$failed,
+		$setupNeeded,
 		$loadMoreFailed,
 		pageOpened,
 		titleChanged,

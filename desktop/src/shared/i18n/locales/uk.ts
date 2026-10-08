@@ -1164,6 +1164,23 @@ export const uk: Translation = {
 			manga: 'Розділи манги'
 		}
 	},
+	tmdb: {
+		source: {
+			user: 'Використовується ваш власний ключ.',
+			build: 'Використовується ключ, вбудований у застосунок. Можна вказати власний.',
+			none: 'Ключа ще немає: фільми, серіали й дорами не знайти, доки його не додано.'
+		},
+		keyPlaceholder: 'API key або read access token',
+		save: 'Перевірити й зберегти',
+		getKey: 'Отримати безкоштовний ключ на TMDB',
+		useBuiltIn: 'Повернути вбудований ключ',
+		saved: 'TMDB прийняв ключ',
+		cleared: 'Повернуто вбудований ключ',
+		saveFailed: 'Не вдалося зберегти ключ',
+		disabled: 'TMDB вимкнено на цій ноді.',
+		note: 'Ключ зберігається у файлі, який можете прочитати лише ви на цьому компʼютері, — не в бекапах. This product uses the TMDB API but is not endorsed or certified by TMDB.',
+		openSettings: 'Відкрити налаштування TMDB'
+	},
 	settings: {
 		sections: {
 			app: {
@@ -1194,6 +1211,10 @@ export const uk: Translation = {
 				title: 'Джерела манги',
 				subtitle: 'Каталоги OPDS з мангою та книгами'
 			},
+			tmdb: {
+				title: 'TMDB',
+				subtitle: 'Фільми, серіали й дорами'
+			},
 			mangaDex: {
 				title: 'MangaDex',
 				subtitle: 'Читання розділів онлайн'
@@ -1202,6 +1223,10 @@ export const uk: Translation = {
 				title: 'Завантаження манги',
 				subtitle: 'Де зберігаються завантажені розділи'
 			}
+		},
+		tmdb: {
+			name: 'Ключ TMDB',
+			hint: 'Звідки беруться фільми, серіали й дорами'
 		},
 		mangaDex: {
 			name: 'MangaDex',

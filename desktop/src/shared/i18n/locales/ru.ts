@@ -1165,6 +1165,23 @@ export const ru: Translation = {
 			manga: 'Главы манги'
 		}
 	},
+	tmdb: {
+		source: {
+			user: 'Используется ваш собственный ключ.',
+			build: 'Используется ключ, встроенный в приложение. Можно указать свой.',
+			none: 'Ключа ещё нет: фильмы, сериалы и дорамы не найти, пока он не добавлен.'
+		},
+		keyPlaceholder: 'API key или read access token',
+		save: 'Проверить и сохранить',
+		getKey: 'Получить бесплатный ключ на TMDB',
+		useBuiltIn: 'Вернуть встроенный ключ',
+		saved: 'TMDB принял ключ',
+		cleared: 'Возвращён встроенный ключ',
+		saveFailed: 'Не удалось сохранить ключ',
+		disabled: 'TMDB выключен на этой ноде.',
+		note: 'Ключ хранится в файле, который можете прочитать только вы на этом компьютере, — не в бэкапах. This product uses the TMDB API but is not endorsed or certified by TMDB.',
+		openSettings: 'Открыть настройки TMDB'
+	},
 	settings: {
 		sections: {
 			app: {
@@ -1195,6 +1212,10 @@ export const ru: Translation = {
 				title: 'Источники манги',
 				subtitle: 'Каталоги OPDS с мангой и книгами'
 			},
+			tmdb: {
+				title: 'TMDB',
+				subtitle: 'Фильмы, сериалы и дорамы'
+			},
 			mangaDex: {
 				title: 'MangaDex',
 				subtitle: 'Чтение глав онлайн'
@@ -1203,6 +1224,10 @@ export const ru: Translation = {
 				title: 'Загрузка манги',
 				subtitle: 'Где хранятся загруженные главы'
 			}
+		},
+		tmdb: {
+			name: 'Ключ TMDB',
+			hint: 'Откуда берутся фильмы, сериалы и дорамы'
 		},
 		mangaDex: {
 			name: 'MangaDex',

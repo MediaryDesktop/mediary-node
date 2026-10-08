@@ -30,16 +30,18 @@ export function SearchResults({ renderMenu }: SearchResultsProps) {
 
 	const trackedByRef = useMemo(() => new Map(tracked.map(entry => [entry.media_ref, entry])), [tracked])
 
-	const [items, loading, loadingMore, failed, loadMoreFailed, hasNextPage, loadMore, retry] = useUnit([
-		searchMediaModel.$items,
-		searchMediaModel.$loadingFirstPage,
-		searchMediaModel.$loadingMore,
-		searchMediaModel.$failed,
-		searchMediaModel.$loadMoreFailed,
-		searchMediaModel.$hasNextPage,
-		searchMediaModel.nextPageRequested,
-		searchMediaModel.retried
-	])
+	const [items, loading, loadingMore, failed, setupNeeded, loadMoreFailed, hasNextPage, loadMore, retry] =
+		useUnit([
+			searchMediaModel.$items,
+			searchMediaModel.$loadingFirstPage,
+			searchMediaModel.$loadingMore,
+			searchMediaModel.$failed,
+			searchMediaModel.$setupNeeded,
+			searchMediaModel.$loadMoreFailed,
+			searchMediaModel.$hasNextPage,
+			searchMediaModel.nextPageRequested,
+			searchMediaModel.retried
+		])
 
 	if (loading) {
 		return (
@@ -50,6 +52,22 @@ export function SearchResults({ renderMenu }: SearchResultsProps) {
 					</li>
 				))}
 			</ul>
+		)
+	}
+
+	if (failed && setupNeeded !== null) {
+		return (
+			<EmptyState
+				title={setupNeeded || t('search.failed')}
+				action={
+					<Button
+						size='small'
+						onClick={() => navigate({ to: '/settings', search: { section: 'tmdb' } })}
+					>
+						{t('tmdb.openSettings')}
+					</Button>
+				}
+			/>
 		)
 	}
 

@@ -1164,6 +1164,23 @@ export const en = {
 			manga: 'Manga chapters'
 		}
 	},
+	tmdb: {
+		source: {
+			user: 'Using your own key.',
+			build: 'Using the key this build ships with. You can use your own instead.',
+			none: 'No key yet: movies, series and doramas cannot be looked up until you add one.'
+		},
+		keyPlaceholder: 'API key or read access token',
+		save: 'Check and save',
+		getKey: 'Get a free key on TMDB',
+		useBuiltIn: 'Use the built-in key',
+		saved: 'TMDB accepted the key',
+		cleared: 'Back to the built-in key',
+		saveFailed: 'Could not save the key',
+		disabled: 'TMDB is turned off on this node.',
+		note: 'The key stays in a file only you can read on this computer — not in backups. This product uses the TMDB API but is not endorsed or certified by TMDB.',
+		openSettings: 'Open TMDB settings'
+	},
 	settings: {
 		sections: {
 			app: {
@@ -1194,6 +1211,10 @@ export const en = {
 				title: 'Manga sources',
 				subtitle: 'OPDS catalogs with manga and books'
 			},
+			tmdb: {
+				title: 'TMDB',
+				subtitle: 'Movies, series and doramas'
+			},
 			mangaDex: {
 				title: 'MangaDex',
 				subtitle: 'Reading chapters online'
@@ -1202,6 +1223,10 @@ export const en = {
 				title: 'Manga downloads',
 				subtitle: 'Where downloaded chapters are kept'
 			}
+		},
+		tmdb: {
+			name: 'TMDB key',
+			hint: 'Where movies, series and doramas are looked up'
 		},
 		mangaDex: {
 			name: 'MangaDex',

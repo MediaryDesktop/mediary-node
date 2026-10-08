@@ -10,7 +10,9 @@ export {
 	mediaPreviewModel,
 	mediaSearchQuery,
 	mediaTitle,
-	scoreTone
+	scoreTone,
+	setTMDBKeyMutation,
+	tmdbSettingsQuery
 } from './model/model'
 export type { MediaEnumGroup, ScoreTone } from './model/model'
 
@@ -43,5 +45,6 @@ export type {
 	MediaSource,
 	MediaSummary,
 	MediaTitle,
-	RelatedMedia
+	RelatedMedia,
+	TMDBSettings
 } from './api/api'
