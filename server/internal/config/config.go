@@ -29,6 +29,7 @@ type Config struct {
 	Cloud    Cloud
 	AniList  AniList
 	AniZip   AniZip
+	TMDB     TMDB
 	MangaDex MangaDex
 	Log      Log
 }
@@ -64,6 +65,15 @@ func (h HTTP) Addr() string {
 type AniZip struct {
 	Endpoint string        `env:"NODE_ANIZIP_ENDPOINT" envDefault:"https://api.ani.zip"`
 	Timeout  time.Duration `env:"NODE_ANIZIP_TIMEOUT"  envDefault:"15s"`
+}
+
+// TMDB is the source for movies, series and doramas. An empty endpoint turns it
+// off. The key is the one the build ships with; a user's own key, saved in the
+// app, takes its place.
+type TMDB struct {
+	Endpoint string        `env:"NODE_TMDB_ENDPOINT" envDefault:"https://api.themoviedb.org/3"`
+	APIKey   string        `env:"NODE_TMDB_API_KEY"`
+	Timeout  time.Duration `env:"NODE_TMDB_TIMEOUT"  envDefault:"20s"`
 }
 
 // MangaDex is the online manga source. An empty endpoint turns it off on this node;

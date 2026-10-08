@@ -13,6 +13,7 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anizip"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/tmdb"
 )
 
 const aniListMaxAge = 24 * time.Hour
@@ -33,7 +34,11 @@ type cachedDetails struct {
 type Options struct {
 	AniList *anilist.Client
 	AniZip  *anizip.Client
-	Now     func() time.Time
+
+	// TMDB is nil when the node turned it off; movies and shows then have no source.
+	TMDB *tmdb.Client
+
+	Now func() time.Time
 }
 
 type Service struct {
@@ -51,20 +56,33 @@ func New(st *store.Store, logger zerolog.Logger, opts Options) *Service {
 }
 
 func parseMediaRef(mediaRef string) (int, error) {
-	provider, id, found := strings.Cut(mediaRef, ":")
-	if !found || provider != ProviderAniList {
-		return 0, apperr.Invalid("media_ref", "only anilist titles are supported for now")
+	ref, err := parseRef(mediaRef)
+	if err != nil {
+		return 0, err
 	}
 
-	mediaID, err := strconv.Atoi(id)
-	if err != nil || mediaID <= 0 {
-		return 0, apperr.Invalid("media_ref", "malformed media reference %q", mediaRef)
+	if ref.provider != ProviderAniList {
+		return 0, apperr.Invalid("media_ref", "%q is not an AniList title", mediaRef)
 	}
 
-	return mediaID, nil
+	return ref.id, nil
 }
 
 func (s *Service) Details(ctx context.Context, mediaRef string) (*MediaDetails, error) {
+	ref, err := parseRef(mediaRef)
+	if err != nil {
+		return nil, err
+	}
+
+	if ref.provider == ProviderTMDB {
+		entry, tmdbErr := s.tmdbTitle(ctx, ref)
+		if tmdbErr != nil {
+			return nil, tmdbErr
+		}
+
+		return &entry.Details, nil
+	}
+
 	entry, err := s.details(ctx, mediaRef)
 	if err != nil {
 		return nil, err
@@ -130,12 +148,24 @@ func (s *Service) details(ctx context.Context, mediaRef string) (*cachedDetails,
 // A stale payload is still returned: the age limit exists to keep the details
 // page current, and a poster does not go out of date.
 func (s *Service) CachedDetails(ctx context.Context, mediaRef string) (*MediaDetails, error) {
-	mediaID, err := parseMediaRef(mediaRef)
+	ref, err := parseRef(mediaRef)
 	if err != nil {
 		return nil, err
 	}
 
-	cached, err := s.store.Get(ctx, ProviderAniList, strconv.Itoa(mediaID))
+	if ref.provider == ProviderTMDB {
+		cached, readErr := s.store.Get(ctx, ProviderTMDB, ref.cacheKey())
+		if readErr != nil {
+			return nil, apperr.Wrap(readErr, apperr.KindInternal, "read media cache")
+		}
+		if cached == nil {
+			return nil, nil
+		}
+
+		return decodeCachedTMDB(cached.Payload), nil
+	}
+
+	cached, err := s.store.Get(ctx, ProviderAniList, strconv.Itoa(ref.id))
 	if err != nil {
 		return nil, apperr.Wrap(err, apperr.KindInternal, "read media cache")
 	}
@@ -197,6 +227,10 @@ func searchSort(params SearchParams) []string {
 }
 
 func (s *Service) Search(ctx context.Context, params SearchParams) (*SearchPage, error) {
+	if isTMDBType(params.MediaType) {
+		return s.searchTMDB(ctx, params)
+	}
+
 	mediaType, err := aniListMediaType(params.MediaType)
 	if err != nil {
 		return nil, err
@@ -261,7 +295,11 @@ func (s *Service) Search(ctx context.Context, params SearchParams) (*SearchPage,
 // title: AniList's genre and tag vocabulary, which the filter panel cannot be
 // drawn without. It follows the same one-day ceiling as every other AniList
 // payload.
-func (s *Service) FilterOptions(ctx context.Context) (*FilterOptions, error) {
+func (s *Service) FilterOptions(ctx context.Context, mediaType string) (*FilterOptions, error) {
+	if isTMDBType(mediaType) {
+		return s.tmdbFilterOptions(ctx, mediaType)
+	}
+
 	now := s.opts.Now()
 
 	cached, err := s.store.Get(ctx, ProviderAniList, filterOptionsCacheKey)

@@ -12,6 +12,7 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/modules/media/internal/store"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anizip"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/tmdb"
 )
 
 type Deps struct {
@@ -19,6 +20,7 @@ type Deps struct {
 	Logger  zerolog.Logger
 	AniList *anilist.Client
 	AniZip  *anizip.Client
+	TMDB    *tmdb.Client
 }
 
 // MediaDetails is the module's read-only port onto a title the node has already
@@ -27,7 +29,7 @@ type Deps struct {
 type MediaDetails = service.MediaDetails
 
 func New(deps Deps) *Module {
-	svc := service.New(store.New(deps.DB), deps.Logger, service.Options{AniList: deps.AniList, AniZip: deps.AniZip})
+	svc := service.New(store.New(deps.DB), deps.Logger, service.Options{AniList: deps.AniList, AniZip: deps.AniZip, TMDB: deps.TMDB})
 
 	return &Module{handler: handler.New(svc), svc: svc}
 }

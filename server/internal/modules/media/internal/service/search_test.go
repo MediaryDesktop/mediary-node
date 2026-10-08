@@ -216,7 +216,7 @@ func TestSearchRejectsUnknownTypeAndUnreachablePages(t *testing.T) {
 	h := newSearchHarness(t)
 	ctx := context.Background()
 
-	if _, err := h.svc.Search(ctx, SearchParams{MediaType: "movie"}); apperr.KindOf(err) != apperr.KindInvalid {
+	if _, err := h.svc.Search(ctx, SearchParams{MediaType: "book"}); apperr.KindOf(err) != apperr.KindInvalid {
 		t.Fatalf("a type no source owns must be rejected, got %v", err)
 	}
 
@@ -250,7 +250,7 @@ func TestFilterOptionsAreCachedForADay(t *testing.T) {
 	h.response = filterOptionsFixture
 	ctx := context.Background()
 
-	options, err := h.svc.FilterOptions(ctx)
+	options, err := h.svc.FilterOptions(ctx, "anime")
 	if err != nil {
 		t.Fatalf("filter options: %v", err)
 	}
@@ -260,7 +260,7 @@ func TestFilterOptionsAreCachedForADay(t *testing.T) {
 	}
 
 	h.now = h.now.Add(23 * time.Hour)
-	if _, err := h.svc.FilterOptions(ctx); err != nil {
+	if _, err := h.svc.FilterOptions(ctx, "anime"); err != nil {
 		t.Fatalf("cached options: %v", err)
 	}
 	if asked := h.asked(); asked != 1 {
@@ -268,7 +268,7 @@ func TestFilterOptionsAreCachedForADay(t *testing.T) {
 	}
 
 	h.now = h.now.Add(2 * time.Hour)
-	if _, err := h.svc.FilterOptions(ctx); err != nil {
+	if _, err := h.svc.FilterOptions(ctx, "anime"); err != nil {
 		t.Fatalf("refetched options: %v", err)
 	}
 	if asked := h.asked(); asked != 2 {

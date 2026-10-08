@@ -123,6 +123,10 @@ components:
         episode:
           format: int64
           type: integer
+        season:
+          description: Season the episode belongs to, for a show numbered by season. Absent for an anime, whose seasons are titles of their own.
+          format: int64
+          type: integer
       required:
         - episode
         - airing_at
@@ -698,7 +702,7 @@ components:
             - string
             - "null"
         number:
-          description: Episode number within the title, from 1.
+          description: Episode number within the title, from 1, or within the season when one is given.
           format: int64
           type: integer
         overview:
@@ -712,6 +716,10 @@ components:
           type:
             - integer
             - "null"
+        season:
+          description: Season of a show numbered by season, from 1; the number then counts within it. Absent for an anime, whose seasons are titles of their own.
+          format: int64
+          type: integer
         title:
           description: Episode title in the first language a source had it in, English first.
           type:
@@ -3188,6 +3196,9 @@ components:
           examples:
             - AniList
           type: string
+        notice:
+          description: Text the source's terms require next to its data, word for word.
+          type: string
         url:
           description: Where the attribution links to.
           examples:
@@ -3417,6 +3428,47 @@ components:
       required:
         - suggestions
         - sources
+      type: object
+    TMDBKeyInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/TMDBKeyInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        api_key:
+          description: The user's own TMDB API key (v3) or read access token (v4). TMDB is asked to accept it before it is stored. Empty forgets it and goes back to the key this build ships with.
+          maxLength: 1024
+          type: string
+      required:
+        - api_key
+      type: object
+    TMDBSettings:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/TMDBSettings.json
+          format: uri
+          readOnly: true
+          type: string
+        enabled:
+          description: Whether this node reads TMDB at all. Off when the node was started with an empty TMDB endpoint.
+          type: boolean
+        key_source:
+          description: "Which key the node sends: the user's own, the one this build ships with, or none — then movies and shows cannot be looked up."
+          enum:
+            - user
+            - build
+            - none
+          type: string
+      required:
+        - enabled
+        - key_source
       type: object
     Title:
       additionalProperties: false
@@ -5349,8 +5401,23 @@ paths:
         - manga
   /v1/media/filter-options:
     get:
-      description: The source's own vocabulary, kept for at most a day. Formats, statuses and seasons are fixed enums of searchMedia and are not repeated here.
+      description: The source's own vocabulary, kept for at most a day. Formats, statuses and seasons are fixed enums of searchMedia and are not repeated here. TMDB has genres and no tags.
       operationId: getMediaFilterOptions
+      parameters:
+        - description: Which catalog's vocabulary to list.
+          explode: false
+          in: query
+          name: type
+          schema:
+            default: anime
+            description: Which catalog's vocabulary to list.
+            enum:
+              - anime
+              - manga
+              - movie
+              - series
+              - dorama
+            type: string
       responses:
         "200":
           content:
@@ -5380,23 +5447,26 @@ paths:
             description: Free text to match against every title the source knows. Empty browses by the filters alone.
             maxLength: 100
             type: string
-        - description: Which catalog to search. Every source owns one kind of media, so this also picks the source.
+        - description: "Which catalog to search. Every source owns one kind of media, so this also picks the source: AniList for anime and manga, TMDB for the rest. A dorama is a live-action show from East Asia, and every dorama is a series too."
           explode: false
           in: query
           name: type
           schema:
             default: anime
-            description: Which catalog to search. Every source owns one kind of media, so this also picks the source.
+            description: "Which catalog to search. Every source owns one kind of media, so this also picks the source: AniList for anime and manga, TMDB for the rest. A dorama is a live-action show from East Asia, and every dorama is a series too."
             enum:
               - anime
               - manga
+              - movie
+              - series
+              - dorama
             type: string
-        - description: Order of the results. Left out it means relevance while searching and popularity while browsing.
+        - description: Order of the results. Left out it means relevance while searching and popularity while browsing. TMDB orders a text search by relevance only.
           explode: false
           in: query
           name: sort
           schema:
-            description: Order of the results. Left out it means relevance while searching and popularity while browsing.
+            description: Order of the results. Left out it means relevance while searching and popularity while browsing. TMDB orders a text search by relevance only.
             enum:
               - SEARCH_MATCH
               - POPULARITY_DESC
@@ -5406,34 +5476,34 @@ paths:
               - START_DATE_DESC
               - TITLE_ROMAJI
             type: string
-        - description: Genres a title must all have, as listed by getMediaFilterOptions.
+        - description: Genres a title must all have, as listed by getMediaFilterOptions. TMDB applies them while browsing only.
           explode: false
           in: query
           name: genres
           schema:
-            description: Genres a title must all have, as listed by getMediaFilterOptions.
+            description: Genres a title must all have, as listed by getMediaFilterOptions. TMDB applies them while browsing only.
             items:
               type: string
             type:
               - array
               - "null"
-        - description: Tags a title must all have, as listed by getMediaFilterOptions.
+        - description: Tags a title must all have, as listed by getMediaFilterOptions. AniList only.
           explode: false
           in: query
           name: tags
           schema:
-            description: Tags a title must all have, as listed by getMediaFilterOptions.
+            description: Tags a title must all have, as listed by getMediaFilterOptions. AniList only.
             items:
               type: string
             type:
               - array
               - "null"
-        - description: Any of these formats.
+        - description: Any of these formats. AniList only.
           explode: false
           in: query
           name: formats
           schema:
-            description: Any of these formats.
+            description: Any of these formats. AniList only.
             items:
               enum:
                 - TV
@@ -5450,12 +5520,12 @@ paths:
             type:
               - array
               - "null"
-        - description: Any of these release statuses.
+        - description: Any of these release statuses. AniList only.
           explode: false
           in: query
           name: statuses
           schema:
-            description: Any of these release statuses.
+            description: Any of these release statuses. AniList only.
             items:
               enum:
                 - FINISHED
@@ -5467,12 +5537,12 @@ paths:
             type:
               - array
               - "null"
-        - description: Season the title started in.
+        - description: Season the title started in. AniList only.
           explode: false
           in: query
           name: season
           schema:
-            description: Season the title started in.
+            description: Season the title started in. AniList only.
             enum:
               - WINTER
               - SPRING
@@ -5545,7 +5615,7 @@ paths:
         - media
   /v1/media/{media_ref}:
     get:
-      description: Fetched from the source on demand and kept for at most a day, as the source's terms allow. Past that the node asks again; while the source is unreachable the request fails, and clients fall back to what the user's own list already knows about the title.
+      description: Fetched from the source on demand and kept for at most a day, as the source's terms allow. Past that the node asks again; while the source is unreachable the request fails, and clients fall back to what the user's own list already knows about the title. A reference is anilist:<id>, tmdb:movie:<id> or tmdb:tv:<id>.
       operationId: getMediaDetails
       parameters:
         - description: The title's media reference.
@@ -5575,7 +5645,7 @@ paths:
         - media
   /v1/media/{media_ref}/episodes:
     get:
-      description: "Titles, synopses and stills per episode, gathered on demand from ani.zip and from the streaming listings AniList carries, each kept for at most a day. A source that fails or knows nothing only leaves its fields empty: the list always has one entry per episode the title is known to have."
+      description: "Titles, synopses and stills per episode, gathered on demand from ani.zip and from the streaming listings AniList carries, each kept for at most a day. A source that fails or knows nothing only leaves its fields empty: the list always has one entry per episode the title is known to have. A TMDB show lists its regular seasons, numbered within each and specials left out; a movie is one episode."
       operationId: getMediaEpisodes
       parameters:
         - description: The title's media reference.
@@ -6259,6 +6329,51 @@ paths:
       summary: Sync module status
       tags:
         - sync
+  /v1/tmdb/settings:
+    get:
+      description: Whether movies and shows can be looked up, and with whose key. The key itself is never returned.
+      operationId: getTMDBSettings
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TMDBSettings"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: TMDB connection
+      tags:
+        - media
+    put:
+      description: Checks the key with TMDB, then keeps it in a file only the user can read, never in the database or a backup. A key TMDB refuses is not stored and answers 428.
+      operationId: setTMDBKey
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TMDBKeyInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TMDBSettings"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Use your own TMDB key
+      tags:
+        - media
   /v1/torrent/check:
     post:
       description: Signs in to qBittorrent with the given address and credentials, saved or not, and reports its version.

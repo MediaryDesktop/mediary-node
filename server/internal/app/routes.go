@@ -24,6 +24,7 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anizip"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/tmdb"
 )
 
 type Deps struct {
@@ -36,6 +37,7 @@ type Deps struct {
 
 	AniList             *anilist.Client
 	AniZip              *anizip.Client
+	TMDB                *tmdb.Client
 	MangaDex            config.MangaDex
 	AniListClientID     string
 	AniListAuthorizeURL string
@@ -80,6 +82,7 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 		Logger:  moduleLogger(deps.Logger, "media"),
 		AniList: deps.AniList,
 		AniZip:  deps.AniZip,
+		TMDB:    deps.TMDB,
 	})
 	mediaModule.Register(api)
 

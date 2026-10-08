@@ -47,10 +47,16 @@ type cachedEpisodes struct {
 // nothing leaves its fields empty, and the list is still one entry per episode,
 // so the page always has something to draw and the library its files to attach.
 func (s *Service) Episodes(ctx context.Context, mediaRef string) (*EpisodeList, error) {
-	mediaID, err := parseMediaRef(mediaRef)
+	ref, err := parseRef(mediaRef)
 	if err != nil {
 		return nil, err
 	}
+
+	if ref.provider == ProviderTMDB {
+		return s.tmdbEpisodes(ctx, ref)
+	}
+
+	mediaID := ref.id
 
 	entry, err := s.details(ctx, mediaRef)
 	if err != nil {

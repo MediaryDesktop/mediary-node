@@ -16,6 +16,7 @@ type FuzzyDate struct {
 }
 
 type AiringEpisode struct {
+	Season   *int      `json:"season,omitempty" doc:"Season the episode belongs to, for a show numbered by season. Absent for an anime, whose seasons are titles of their own."`
 	Episode  int       `json:"episode"`
 	AiringAt time.Time `json:"airing_at"`
 }
@@ -135,7 +136,8 @@ type FilterOptions struct {
 // Episode is one episode as the title page lists it. Only the number is certain:
 // every other field is whatever some source knew, and absent when none did.
 type Episode struct {
-	Number int `json:"number" doc:"Episode number within the title, from 1."`
+	Season *int `json:"season,omitempty" doc:"Season of a show numbered by season, from 1; the number then counts within it. Absent for an anime, whose seasons are titles of their own."`
+	Number int  `json:"number" doc:"Episode number within the title, from 1, or within the season when one is given."`
 
 	Title  *string           `json:"title" doc:"Episode title in the first language a source had it in, English first."`
 	Titles map[string]string `json:"titles,omitempty" doc:"The title per language, keyed by BCP 47 tag (x-jat is romanised Japanese), for the client to pick the user's own."`

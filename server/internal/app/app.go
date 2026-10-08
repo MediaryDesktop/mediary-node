@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 
 	"github.com/go-chi/chi/v5"
@@ -18,8 +19,10 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/platform/db"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/logging"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/secrets"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anizip"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/tmdb"
 	"github.com/mediaryorg/mediary-node/server/internal/wsapi"
 )
 
@@ -93,6 +96,16 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 		})
 	}
 
+	var tmdbClient *tmdb.Client
+	if cfg.TMDB.Endpoint != "" {
+		tmdbClient = tmdb.New(tmdb.Options{
+			Endpoint:  cfg.TMDB.Endpoint,
+			Timeout:   cfg.TMDB.Timeout,
+			UserAgent: "mediary-node/" + build.Version,
+			Keys:      tmdb.NewKeys(secrets.New(filepath.Join(cfg.DataDir, "tmdb-secrets.json")), cfg.TMDB.APIKey),
+		})
+	}
+
 	router, api := httpapi.New(httpapi.Options{
 		Version:        build.Version,
 		Token:          token,
@@ -110,6 +123,7 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 
 		AniList:             aniList,
 		AniZip:              aniZip,
+		TMDB:                tmdbClient,
 		MangaDex:            cfg.MangaDex,
 		AniListClientID:     cfg.AniList.ClientID,
 		AniListAuthorizeURL: cfg.AniList.AuthorizeURL,

@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/danielgtaylor/huma/v2"
 
@@ -38,13 +39,13 @@ type EpisodesOutput struct {
 
 type SearchInput struct {
 	Query    string   `query:"q" maxLength:"100" doc:"Free text to match against every title the source knows. Empty browses by the filters alone."`
-	Type     string   `query:"type" enum:"anime,manga" default:"anime" doc:"Which catalog to search. Every source owns one kind of media, so this also picks the source."`
-	Sort     string   `query:"sort" enum:"SEARCH_MATCH,POPULARITY_DESC,TRENDING_DESC,SCORE_DESC,FAVOURITES_DESC,START_DATE_DESC,TITLE_ROMAJI" doc:"Order of the results. Left out it means relevance while searching and popularity while browsing."`
-	Genres   []string `query:"genres" doc:"Genres a title must all have, as listed by getMediaFilterOptions."`
-	Tags     []string `query:"tags" doc:"Tags a title must all have, as listed by getMediaFilterOptions."`
-	Formats  []string `query:"formats" enum:"TV,TV_SHORT,MOVIE,SPECIAL,OVA,ONA,MUSIC,MANGA,NOVEL,ONE_SHOT" doc:"Any of these formats."`
-	Statuses []string `query:"statuses" enum:"FINISHED,RELEASING,NOT_YET_RELEASED,CANCELLED,HIATUS" doc:"Any of these release statuses."`
-	Season   string   `query:"season" enum:"WINTER,SPRING,SUMMER,FALL" doc:"Season the title started in."`
+	Type     string   `query:"type" enum:"anime,manga,movie,series,dorama" default:"anime" doc:"Which catalog to search. Every source owns one kind of media, so this also picks the source: AniList for anime and manga, TMDB for the rest. A dorama is a live-action show from East Asia, and every dorama is a series too."`
+	Sort     string   `query:"sort" enum:"SEARCH_MATCH,POPULARITY_DESC,TRENDING_DESC,SCORE_DESC,FAVOURITES_DESC,START_DATE_DESC,TITLE_ROMAJI" doc:"Order of the results. Left out it means relevance while searching and popularity while browsing. TMDB orders a text search by relevance only."`
+	Genres   []string `query:"genres" doc:"Genres a title must all have, as listed by getMediaFilterOptions. TMDB applies them while browsing only."`
+	Tags     []string `query:"tags" doc:"Tags a title must all have, as listed by getMediaFilterOptions. AniList only."`
+	Formats  []string `query:"formats" enum:"TV,TV_SHORT,MOVIE,SPECIAL,OVA,ONA,MUSIC,MANGA,NOVEL,ONE_SHOT" doc:"Any of these formats. AniList only."`
+	Statuses []string `query:"statuses" enum:"FINISHED,RELEASING,NOT_YET_RELEASED,CANCELLED,HIATUS" doc:"Any of these release statuses. AniList only."`
+	Season   string   `query:"season" enum:"WINTER,SPRING,SUMMER,FALL" doc:"Season the title started in. AniList only."`
 	Year     int      `query:"year" minimum:"1940" maximum:"2100" doc:"Year the title started in."`
 	MinScore int      `query:"min_score" minimum:"0" maximum:"100" doc:"Keep titles scored above this, on a 0-100 scale."`
 	Adult    bool     `query:"adult" doc:"Include adult titles. They are left out unless this is set, and the source hides them entirely from a node with no account connected."`
@@ -56,6 +57,20 @@ type SearchOutput struct {
 	Body struct {
 		Results *service.SearchPage `json:"results" doc:"One page of titles, plus what it takes to ask for the next."`
 		Sources []httpapi.Source    `json:"sources" doc:"Attribution for every field that came from an external source."`
+	}
+}
+
+type FilterOptionsInput struct {
+	Type string `query:"type" enum:"anime,manga,movie,series,dorama" default:"anime" doc:"Which catalog's vocabulary to list."`
+}
+
+type TMDBSettingsOutput struct {
+	Body *service.TMDBSettings
+}
+
+type TMDBKeyInput struct {
+	Body struct {
+		APIKey string `json:"api_key" maxLength:"1024" doc:"The user's own TMDB API key (v3) or read access token (v4). TMDB is asked to accept it before it is stored. Empty forgets it and goes back to the key this build ships with."`
 	}
 }
 
@@ -96,7 +111,7 @@ func (h *Handler) Register(api huma.API) {
 
 		out := &SearchOutput{}
 		out.Body.Results = results
-		out.Body.Sources = []httpapi.Source{httpapi.AniListSource}
+		out.Body.Sources = []httpapi.Source{sourceOfType(in.Type)}
 
 		return out, nil
 	})
@@ -106,19 +121,51 @@ func (h *Handler) Register(api huma.API) {
 		Method:      http.MethodGet,
 		Path:        "/v1/media/filter-options",
 		Summary:     "Genres and tags to filter by",
-		Description: "The source's own vocabulary, kept for at most a day. Formats, statuses and seasons are fixed enums of searchMedia and are not repeated here.",
+		Description: "The source's own vocabulary, kept for at most a day. Formats, statuses and seasons are fixed enums of searchMedia and are not repeated here. TMDB has genres and no tags.",
 		Tags:        []string{"media"},
-	}, func(ctx context.Context, _ *struct{}) (*FilterOptionsOutput, error) {
-		options, err := h.svc.FilterOptions(ctx)
+	}, func(ctx context.Context, in *FilterOptionsInput) (*FilterOptionsOutput, error) {
+		options, err := h.svc.FilterOptions(ctx, in.Type)
 		if err != nil {
 			return nil, httpapi.ToHTTP(err)
 		}
 
 		out := &FilterOptionsOutput{}
 		out.Body.Options = options
-		out.Body.Sources = []httpapi.Source{httpapi.AniListSource}
+		out.Body.Sources = []httpapi.Source{sourceOfType(in.Type)}
 
 		return out, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "getTMDBSettings",
+		Method:      http.MethodGet,
+		Path:        "/v1/tmdb/settings",
+		Summary:     "TMDB connection",
+		Description: "Whether movies and shows can be looked up, and with whose key. The key itself is never returned.",
+		Tags:        []string{"media"},
+	}, func(_ context.Context, _ *struct{}) (*TMDBSettingsOutput, error) {
+		settings, err := h.svc.TMDBSettings()
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return &TMDBSettingsOutput{Body: settings}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "setTMDBKey",
+		Method:      http.MethodPut,
+		Path:        "/v1/tmdb/settings",
+		Summary:     "Use your own TMDB key",
+		Description: "Checks the key with TMDB, then keeps it in a file only the user can read, never in the database or a backup. A key TMDB refuses is not stored and answers 428.",
+		Tags:        []string{"media"},
+	}, func(ctx context.Context, in *TMDBKeyInput) (*TMDBSettingsOutput, error) {
+		settings, err := h.svc.SetTMDBKey(ctx, in.Body.APIKey)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return &TMDBSettingsOutput{Body: settings}, nil
 	})
 
 	huma.Register(api, huma.Operation{
@@ -126,7 +173,7 @@ func (h *Handler) Register(api huma.API) {
 		Method:      http.MethodGet,
 		Path:        "/v1/media/{media_ref}",
 		Summary:     "Title details",
-		Description: "Fetched from the source on demand and kept for at most a day, as the source's terms allow. Past that the node asks again; while the source is unreachable the request fails, and clients fall back to what the user's own list already knows about the title.",
+		Description: "Fetched from the source on demand and kept for at most a day, as the source's terms allow. Past that the node asks again; while the source is unreachable the request fails, and clients fall back to what the user's own list already knows about the title. A reference is anilist:<id>, tmdb:movie:<id> or tmdb:tv:<id>.",
 		Tags:        []string{"media"},
 	}, func(ctx context.Context, in *DetailsInput) (*DetailsOutput, error) {
 		details, err := h.svc.Details(ctx, in.MediaRef)
@@ -136,7 +183,7 @@ func (h *Handler) Register(api huma.API) {
 
 		out := &DetailsOutput{}
 		out.Body.Media = details
-		out.Body.Sources = []httpapi.Source{httpapi.AniListSource}
+		out.Body.Sources = []httpapi.Source{sourceOfRef(in.MediaRef)}
 
 		return out, nil
 	})
@@ -146,7 +193,7 @@ func (h *Handler) Register(api huma.API) {
 		Method:      http.MethodGet,
 		Path:        "/v1/media/{media_ref}/episodes",
 		Summary:     "Episodes of a title",
-		Description: "Titles, synopses and stills per episode, gathered on demand from ani.zip and from the streaming listings AniList carries, each kept for at most a day. A source that fails or knows nothing only leaves its fields empty: the list always has one entry per episode the title is known to have.",
+		Description: "Titles, synopses and stills per episode, gathered on demand from ani.zip and from the streaming listings AniList carries, each kept for at most a day. A source that fails or knows nothing only leaves its fields empty: the list always has one entry per episode the title is known to have. A TMDB show lists its regular seasons, numbered within each and specials left out; a movie is one episode.",
 		Tags:        []string{"media"},
 	}, func(ctx context.Context, in *DetailsInput) (*EpisodesOutput, error) {
 		episodes, err := h.svc.Episodes(ctx, in.MediaRef)
@@ -171,8 +218,27 @@ func sourcesOf(ids []string) []httpapi.Source {
 			sources = append(sources, httpapi.AniListSource)
 		case service.ProviderAniZip:
 			sources = append(sources, httpapi.AniZipSource)
+		case service.ProviderTMDB:
+			sources = append(sources, httpapi.TMDBSource)
 		}
 	}
 
 	return sources
+}
+
+func sourceOfType(mediaType string) httpapi.Source {
+	switch mediaType {
+	case service.MediaTypeMovie, service.MediaTypeSeries, service.MediaTypeDorama:
+		return httpapi.TMDBSource
+	default:
+		return httpapi.AniListSource
+	}
+}
+
+func sourceOfRef(mediaRef string) httpapi.Source {
+	if strings.HasPrefix(mediaRef, service.ProviderTMDB+":") {
+		return httpapi.TMDBSource
+	}
+
+	return httpapi.AniListSource
 }
