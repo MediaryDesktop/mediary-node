@@ -4,7 +4,7 @@ import { BROWSE_SORT, isAniListType, PER_PAGE } from '../config'
 import type { SearchCriteria, SearchFilters } from '../types'
 
 export const INITIAL_FILTERS: SearchFilters = {
-	type: 'anime',
+	type: 'series',
 	sort: BROWSE_SORT,
 	genres: [],
 	tags: [],

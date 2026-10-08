@@ -116,6 +116,8 @@ describe('search paging', () => {
 		expect(search).toHaveBeenCalledTimes(1)
 
 		await Promise.all([
+			// statuses is AniList-only, so the type has to be one for it to survive.
+			allSettled(searchMediaModel.filtersPatched, { scope, params: { type: 'anime' } }),
 			allSettled(searchMediaModel.filtersPatched, { scope, params: { genres: ['Action'] } }),
 			allSettled(searchMediaModel.filtersPatched, {
 				scope,
@@ -213,7 +215,7 @@ describe('search filters', () => {
 		await allSettled(searchMediaModel.pageOpened, { scope })
 		await allSettled(searchMediaModel.filtersPatched, { scope, params: { type: 'movie' } })
 
-		expect(options.mock.calls.map(([type]) => type)).toEqual(['anime', 'movie'])
+		expect(options.mock.calls.map(([type]) => type)).toEqual(['series', 'movie'])
 		expect(scope.getState(searchMediaModel.$filterOptions)?.genres).toEqual(['movie'])
 	})
 

@@ -113,7 +113,7 @@ export function SearchFilters() {
 		<div className={styles.panel}>
 			<SelectDropdown
 				value={filters.type}
-				onChange={value => patch({ type: (value ?? 'anime') as MediaSearchType })}
+				onChange={value => patch({ type: (value ?? 'series') as MediaSearchType })}
 				options={SEARCH_TYPES.map(type => ({
 					value: type,
 					label: t(`search.type.${type}`),
