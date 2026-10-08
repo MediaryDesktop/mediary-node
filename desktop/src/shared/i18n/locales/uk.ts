@@ -649,7 +649,10 @@ export const uk: Translation = {
 		sections: {
 			synopsis: 'Опис',
 			details: 'Подробиці',
-			relations: 'Повʼязані тайтли'
+			relations: 'Повʼязані тайтли',
+			recommendations: 'Рекомендації',
+			recommended: 'Рекомендовані',
+			similar: 'Схожі'
 		},
 		noDescription: 'Опису поки немає',
 		stats: {

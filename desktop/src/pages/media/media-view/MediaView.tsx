@@ -17,6 +17,7 @@ import { MediaActions } from '../media-actions/MediaActions'
 import type { MediaView as MediaViewKind } from '../media-actions/MediaActions'
 import { MediaFacts } from '../media-facts/MediaFacts'
 import { MediaHero } from '../media-hero/MediaHero'
+import { RecommendationsSection } from '../relations-section/RecommendationsSection'
 import { RelationsSection } from '../relations-section/RelationsSection'
 import { TorrentSection } from '../torrent-section/TorrentSection'
 
@@ -126,6 +127,11 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 				)}
 
 				<RelationsSection relations={media?.relations ?? []} />
+
+				<RecommendationsSection
+					recommendations={media?.recommendations ?? []}
+					similar={media?.similar ?? []}
+				/>
 
 				{sources
 					.filter(source => source.notice)

@@ -2469,10 +2469,14 @@ export interface components {
 			next_airing_episode: components['schemas']['AiringEpisode']
 			/** Format: int64 */
 			popularity: number | null
+			/** @description Titles suggested to people who liked this one: AniList users' recommendations, or TMDB's own picks. */
+			recommendations: components['schemas']['RelatedMedia'][] | null
 			relations: components['schemas']['RelatedMedia'][] | null
 			season: string | null
 			/** Format: int64 */
 			season_year: number | null
+			/** @description Titles alike in genre and keywords. TMDB only; empty for an AniList title. */
+			similar: components['schemas']['RelatedMedia'][] | null
 			site_url: string
 			source: string | null
 			start_date: components['schemas']['FuzzyDate']

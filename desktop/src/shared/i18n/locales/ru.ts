@@ -651,7 +651,10 @@ export const ru: Translation = {
 		sections: {
 			synopsis: 'Описание',
 			details: 'Подробности',
-			relations: 'Связанные тайтлы'
+			relations: 'Связанные тайтлы',
+			recommendations: 'Рекомендации',
+			recommended: 'Рекомендуемые',
+			similar: 'Похожие'
 		},
 		noDescription: 'Описания пока нет',
 		stats: {

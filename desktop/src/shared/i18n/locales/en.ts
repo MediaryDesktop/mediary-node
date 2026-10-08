@@ -651,7 +651,10 @@ export const en = {
 		sections: {
 			synopsis: 'Synopsis',
 			details: 'Details',
-			relations: 'Related titles'
+			relations: 'Related titles',
+			recommendations: 'Recommendations',
+			recommended: 'Recommended',
+			similar: 'Similar'
 		},
 		noDescription: 'No description yet',
 		stats: {
