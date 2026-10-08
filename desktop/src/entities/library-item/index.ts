@@ -26,7 +26,8 @@ export {
 	setLibraryMatchesMutation,
 	setLibraryMatchMutation,
 	startLibraryScanMutation,
-	titleFilesQuery
+	titleFilesQuery,
+	updateLibraryRootMutation
 } from './model/model'
 
 export type { BulkOutcome, ScanActivity, ScanPhase } from './model/model'
@@ -37,6 +38,7 @@ export type { LibraryFileRowProps } from './ui/LibraryFileRow'
 export type {
 	LibraryCollection,
 	LibraryCollectionEntry,
+	LibraryContent,
 	LibraryCounts,
 	LibraryFile,
 	LibraryFileKind,

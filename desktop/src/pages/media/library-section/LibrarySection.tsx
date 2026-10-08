@@ -15,7 +15,16 @@ import { episodeTitle, mediaEpisodesQuery } from '@entities/media'
 import type { MediaEpisode } from '@entities/media'
 import { $playerMode, playbackModel, playerOpened, thumbnailUrl } from '@entities/playback'
 
-import { episodeNumber, groupTitleFiles, isWatched } from '../lib/episodes'
+import {
+	episodeFor,
+	episodeNumber,
+	episodeOrder,
+	episodeSeason,
+	groupTitleFiles,
+	indexEpisodes,
+	isWatched
+} from '../lib/episodes'
+import type { EpisodeIndex } from '../lib/episodes'
 
 import { ChapterList } from './ChapterList'
 import { EpisodeImage } from './EpisodeImage'
@@ -46,19 +55,19 @@ export function LibrarySection(props: LibrarySectionProps) {
 		)
 	}
 
-	if (props.mediaType !== 'anime') {
+	if (!VIDEO_TYPES.includes(props.mediaType)) {
 		return null
 	}
 
 	return <EpisodeLibrary {...props} />
 }
 
-type EpisodeMeta = Map<number, MediaEpisode>
+const VIDEO_TYPES = ['anime', 'movie', 'series', 'dorama']
 
 // What the sources know about each episode, by number. Empty until they answer,
 // and for good when they know nothing: every part of the page has to read well
 // from the files alone.
-function useEpisodeMeta(mediaRef: string): { meta: EpisodeMeta; count: number | null } {
+function useEpisodeMeta(mediaRef: string): { meta: EpisodeIndex; count: number | null } {
 	const [data, load, nodeReady] = useUnit([mediaEpisodesQuery.$data, mediaEpisodesQuery.start, $nodeReady])
 
 	useEffect(() => {
@@ -74,7 +83,7 @@ function useEpisodeMeta(mediaRef: string): { meta: EpisodeMeta; count: number | 
 		const episodes = list?.episodes ?? []
 
 		return {
-			meta: new Map(episodes.map(episode => [episode.number, episode])),
+			meta: indexEpisodes(episodes),
 			count: list?.total ?? (episodes.length > 0 ? episodes.length : null)
 		}
 	}, [data, mediaRef])
@@ -83,11 +92,17 @@ function useEpisodeMeta(mediaRef: string): { meta: EpisodeMeta; count: number | 
 function useEpisodeText() {
 	const { t, i18n } = useTranslation()
 
-	const label = (file: LibraryFile): string => {
+	const label = (file: LibraryFile, seasonal = false): string => {
 		const number = episodeNumber(file)
 
 		// A movie or an unnumbered file has no "Episode N" to show, so it goes by its name.
-		return number === null ? fileTitle(file) : String(t('media.library.episode', { number }))
+		if (number === null) {
+			return fileTitle(file)
+		}
+
+		return seasonal
+			? String(t('media.library.seasonEpisode', { season: episodeSeason(file) ?? 1, number }))
+			: String(t('media.library.episode', { number }))
 	}
 
 	const name = (episode: MediaEpisode | undefined): string | null =>
@@ -119,12 +134,6 @@ function useEpisodeText() {
 	}
 
 	return { label, name, minutes, aired }
-}
-
-function metaFor(meta: EpisodeMeta, file: LibraryFile): MediaEpisode | undefined {
-	const number = episodeNumber(file)
-
-	return number === null ? undefined : meta.get(number)
 }
 
 function EpisodeLibrary({ mediaRef, cover, coverColor, banner, total, progress }: LibrarySectionProps) {
@@ -181,9 +190,13 @@ function EpisodeLibrary({ mediaRef, cover, coverColor, banner, total, progress }
 		)
 	}
 
-	const groups = groupTitleFiles(files, progress)
+	const order = episodeOrder(meta)
+	const groups = groupTitleFiles(files, progress, order)
 	const fallback = banner ?? cover
-	const of = total ?? count
+
+	// "/ 62" next to "S2 · E5" would compare a number within a season to the
+	// whole show's count.
+	const of = meta.seasonal ? null : (total ?? count)
 
 	// The source's still first: it is chosen to show the episode without spoiling
 	// it. A frame from the file stands in when the source has none.
@@ -194,16 +207,17 @@ function EpisodeLibrary({ mediaRef, cover, coverColor, banner, total, progress }
 	]
 
 	const item = (file: LibraryFile) => {
-		const episode = metaFor(meta, file)
+		const episode = episodeFor(meta, file)
 
 		return (
 			<EpisodeItem
 				key={file.id}
 				file={file}
 				episode={episode}
+				seasonal={meta.seasonal}
 				images={imagesFor(file, episode)}
 				coverColor={coverColor}
-				watched={isWatched(file, progress)}
+				watched={isWatched(file, progress, order)}
 				playing={session?.file_id === file.id}
 				disabled={starting}
 				onPlay={play}
@@ -216,7 +230,7 @@ function EpisodeLibrary({ mediaRef, cover, coverColor, banner, total, progress }
 			{groups.toWatch.length > 0 && (
 				<ToWatchRail>
 					{groups.toWatch.map(file => {
-						const episode = metaFor(meta, file)
+						const episode = episodeFor(meta, file)
 						const name = text.name(episode)
 						const duration = text.minutes(file, episode)
 						const number = episodeNumber(file)
@@ -227,7 +241,9 @@ function EpisodeLibrary({ mediaRef, cover, coverColor, banner, total, progress }
 									type='button'
 									className={styles.card}
 									disabled={starting}
-									aria-label={t('media.library.play', { name: text.label(file) })}
+									aria-label={t('media.library.play', {
+										name: text.label(file, meta.seasonal)
+									})}
 									onClick={() => play(file.id)}
 								>
 									<span
@@ -244,7 +260,7 @@ function EpisodeLibrary({ mediaRef, cover, coverColor, banner, total, progress }
 										{name && <span className={styles.cardName}>{name}</span>}
 										<span className={styles.cardRow}>
 											<span className={styles.cardTitle}>
-												{text.label(file)}
+												{text.label(file, meta.seasonal)}
 												{number !== null && of ? (
 													<span className={styles.cardOf}> / {of}</span>
 												) : null}
@@ -259,7 +275,16 @@ function EpisodeLibrary({ mediaRef, cover, coverColor, banner, total, progress }
 				</ToWatchRail>
 			)}
 
-			<ul className={styles.episodes}>{groups.main.map(item)}</ul>
+			{meta.seasonal ? (
+				seasonsOf(groups.main).map(([season, seasonFiles]) => (
+					<div key={season}>
+						<h3 className={styles.groupTitle}>{t('media.library.season', { number: season })}</h3>
+						<ul className={styles.episodes}>{seasonFiles.map(item)}</ul>
+					</div>
+				))
+			) : (
+				<ul className={styles.episodes}>{groups.main.map(item)}</ul>
+			)}
 
 			{groups.specials.length > 0 && (
 				<>
@@ -276,6 +301,24 @@ function EpisodeLibrary({ mediaRef, cover, coverColor, banner, total, progress }
 			)}
 		</section>
 	)
+}
+
+// Files in season order, already sorted, split where the season changes.
+function seasonsOf(files: LibraryFile[]): [number, LibraryFile[]][] {
+	const seasons: [number, LibraryFile[]][] = []
+
+	for (const file of files) {
+		const season = episodeSeason(file) ?? 1
+		const last = seasons.at(-1)
+
+		if (last && last[0] === season) {
+			last[1].push(file)
+		} else {
+			seasons.push([season, [file]])
+		}
+	}
+
+	return seasons
 }
 
 function ToWatchRail({ children }: { children: ReactNode }) {
@@ -320,6 +363,7 @@ function ToWatchRail({ children }: { children: ReactNode }) {
 interface EpisodeItemProps {
 	file: LibraryFile
 	episode: MediaEpisode | undefined
+	seasonal: boolean
 	images: (string | null | undefined)[]
 	coverColor: string | null
 	watched: boolean
@@ -331,6 +375,7 @@ interface EpisodeItemProps {
 function EpisodeItem({
 	file,
 	episode,
+	seasonal,
 	images,
 	coverColor,
 	watched,
@@ -340,7 +385,7 @@ function EpisodeItem({
 }: EpisodeItemProps) {
 	const { t } = useTranslation()
 	const text = useEpisodeText()
-	const label = text.label(file)
+	const label = text.label(file, seasonal)
 	const name = text.name(episode)
 	const duration = text.minutes(file, episode)
 
@@ -439,12 +484,18 @@ function EpisodeAside({ episode, watched }: { episode: MediaEpisode | undefined;
 	)
 }
 
+interface Placeholder {
+	key: string
+	label: string
+	episode: MediaEpisode | undefined
+}
+
 interface NotInLibraryProps {
 	cover: string | null
 	coverColor: string | null
 	banner: string | null
 	total: number | null | undefined
-	meta: EpisodeMeta
+	meta: EpisodeIndex
 }
 
 function NotInLibrary({ cover, coverColor, banner, total, meta }: NotInLibraryProps) {
@@ -455,10 +506,24 @@ function NotInLibrary({ cover, coverColor, banner, total, meta }: NotInLibraryPr
 		return null
 	}
 
-	const shown = Math.min(total, MAX_EPISODE_PLACEHOLDERS)
-	const episodes = Array.from({ length: shown }, (_, index) => index + 1)
+	// A show listed by season is drawn from the list itself, since numbers repeat
+	// across seasons; anything else from its count, with whatever the list knows.
+	const placeholders: Placeholder[] = meta.seasonal
+		? meta.list.slice(0, MAX_EPISODE_PLACEHOLDERS).map(episode => ({
+				key: `${episode.season}:${episode.number}`,
+				label: String(
+					t('media.library.seasonEpisode', { season: episode.season ?? 1, number: episode.number })
+				),
+				episode
+			}))
+		: Array.from({ length: Math.min(total, MAX_EPISODE_PLACEHOLDERS) }, (_, index) => ({
+				key: String(index + 1),
+				label: String(t('media.library.episode', { number: index + 1 })),
+				episode: meta.byKey.get(`:${index + 1}`)
+			}))
 
-	const known = [...meta.values()].some(episode => episode.title || episode.overview || episode.image)
+	const shown = placeholders.length
+	const known = meta.list.some(episode => episode.title || episode.overview || episode.image)
 
 	return (
 		<section className={styles.section}>
@@ -471,11 +536,9 @@ function NotInLibrary({ cover, coverColor, banner, total, meta }: NotInLibraryPr
 			{!known && <p className={styles.libraryNotice}>{t('media.library.metadataUnavailable')}</p>}
 
 			<ul className={styles.episodes}>
-				{episodes.map(number => {
-					const episode = meta.get(number)
-
+				{placeholders.map(({ key, label, episode }) => {
 					return (
-						<li key={number} className={styles.episode}>
+						<li key={key} className={styles.episode}>
 							<span
 								className={clsx(
 									styles.episodeImage,
@@ -488,7 +551,7 @@ function NotInLibrary({ cover, coverColor, banner, total, meta }: NotInLibraryPr
 
 							{known ? (
 								<EpisodeText
-									label={String(t('media.library.episode', { number }))}
+									label={label}
 									name={text.name(episode)}
 									duration={text.minutes(null, episode)}
 									overview={episode?.overview ?? null}
@@ -496,9 +559,7 @@ function NotInLibrary({ cover, coverColor, banner, total, meta }: NotInLibraryPr
 							) : (
 								<span className={styles.episodeContent}>
 									<span className={styles.episodeHeader}>
-										<span className={styles.episodeLabel}>
-											{t('media.library.episode', { number })}
-										</span>
+										<span className={styles.episodeLabel}>{label}</span>
 									</span>
 									<span className={styles.episodePlaceholder}>
 										<Skeleton width='70%' height='0.75rem' />
@@ -513,7 +574,9 @@ function NotInLibrary({ cover, coverColor, banner, total, meta }: NotInLibraryPr
 				})}
 			</ul>
 
-			{total > shown && <p className={styles.libraryText}>{t('media.library.andMore')}</p>}
+			{(meta.seasonal ? meta.list.length : total) > shown && (
+				<p className={styles.libraryText}>{t('media.library.andMore')}</p>
+			)}
 		</section>
 	)
 }

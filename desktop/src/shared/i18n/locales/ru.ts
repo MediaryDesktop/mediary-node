@@ -308,6 +308,19 @@ export const ru: Translation = {
 		},
 		root: {
 			add: 'Добавить папку',
+			content: {
+				anime: 'Аниме',
+				movies_and_shows: 'Фильмы и сериалы'
+			},
+			addAs: {
+				anime: 'Папка с аниме',
+				movies_and_shows: 'Папка с фильмами и сериалами'
+			},
+			switchTo: {
+				anime: 'Здесь аниме',
+				movies_and_shows: 'Здесь фильмы и сериалы'
+			},
+			contentFailed: 'Не удалось изменить содержимое папки',
 			remove: 'Убрать эту папку',
 			removeFailed: 'Не удалось убрать папку',
 			failed: 'Не удалось добавить папку',
@@ -611,6 +624,8 @@ export const ru: Translation = {
 			notInLibrary: 'Нет в вашей библиотеке',
 			episodesNotInLibrary: 'Этих эпизодов нет в вашей библиотеке:',
 			episode: 'Эпизод {{number}}',
+			seasonEpisode: 'Сезон {{season}} · Серия {{number}}',
+			season: 'Сезон {{number}}',
 			metadataUnavailable: 'Ни один источник пока не знает эпизодов этого тайтла',
 			andMore: 'И другие…',
 			toWatch: 'Дальше к просмотру',

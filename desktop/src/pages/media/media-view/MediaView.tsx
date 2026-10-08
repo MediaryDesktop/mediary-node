@@ -37,7 +37,10 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 	const openSearch = useUnit(searchOpened)
 
 	const subject = resolveSubject(media, entry)
-	const missing = useMissingEpisodes(mediaRef, releasedEpisodes(media, subject?.total))
+	// Files of a show numbered by season cannot be compared with its whole count,
+	// so it offers no "download what is missing" until downloads know seasons.
+	const seasonal = mediaRef.startsWith('tmdb:tv:')
+	const missing = useMissingEpisodes(mediaRef, seasonal ? null : releasedEpisodes(media, subject?.total))
 
 	if (!subject) {
 		return null

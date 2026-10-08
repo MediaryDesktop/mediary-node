@@ -26,6 +26,7 @@ function file(relPath: string, overrides: Partial<LibraryFile> = {}): LibraryFil
 const root: LibraryRoot = {
 	id: 1,
 	path: 'D:\\Anime',
+	content: 'anime',
 	added_at: '2026-01-01T00:00:00Z',
 	file_count: 0,
 	missing_count: 0,

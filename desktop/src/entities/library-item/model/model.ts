@@ -21,9 +21,16 @@ import {
 	fetchTitleFilesFx,
 	setLibraryFileIgnoredFx,
 	setLibraryMatchFx,
-	startLibraryScanFx
+	startLibraryScanFx,
+	updateLibraryRootFx
 } from '../api/api'
-import type { LibraryFile, SetLibraryFileIgnoredParams, SetLibraryMatchParams } from '../api/api'
+import type {
+	AddLibraryRootParams,
+	LibraryContent,
+	LibraryFile,
+	SetLibraryFileIgnoredParams,
+	SetLibraryMatchParams
+} from '../api/api'
 
 const libraryUpdated = nodeTopic('library.update')
 const libraryScanEvent = nodeTopic('library.scan')
@@ -65,6 +72,11 @@ export const libraryCandidatesQuery = createQuery({
 })
 
 export const addLibraryRootMutation = createMutation({ effect: addLibraryRootFx, name: 'addLibraryRoot' })
+
+export const updateLibraryRootMutation = createMutation({
+	effect: updateLibraryRootFx,
+	name: 'updateLibraryRoot'
+})
 
 export const deleteLibraryRootMutation = createMutation({
 	effect: deleteLibraryRootFx,
@@ -198,16 +210,20 @@ function activityNumber(payload: Record<string, unknown> | undefined, key: strin
 }
 
 export const libraryModel = atom(() => {
-	const folderRequested = createEvent()
+	const folderRequested = createEvent<LibraryContent>()
 
-	const pickFolderFx = createEffect<void, string | null>(() => window.mediary.dialog.pickFolder())
+	const pickFolderFx = createEffect<LibraryContent, AddLibraryRootParams | null>(async content => {
+		const path = await window.mediary.dialog.pickFolder()
+
+		return path === null ? null : { path, content }
+	})
 
 	sample({ clock: folderRequested, target: pickFolderFx })
 
 	// A cancelled dialog is an answer, not a failure: nothing happens.
 	sample({
 		clock: pickFolderFx.doneData,
-		filter: (path): path is string => path !== null,
+		filter: (picked): picked is AddLibraryRootParams => picked !== null,
 		target: addLibraryRootMutation.start
 	})
 
@@ -220,7 +236,11 @@ export const libraryModel = atom(() => {
 	})
 
 	sample({
-		clock: [addLibraryRootMutation.finished.success, deleteLibraryRootMutation.finished.success],
+		clock: [
+			addLibraryRootMutation.finished.success,
+			updateLibraryRootMutation.finished.success,
+			deleteLibraryRootMutation.finished.success
+		],
 		target: libraryRootsQuery.start
 	})
 
@@ -277,7 +297,8 @@ export const libraryModel = atom(() => {
 		scanRequested: startLibraryScanMutation.start,
 		scanFinished,
 		rootAddFailed: addLibraryRootMutation.finished.failure,
-		rootDeleteFailed: deleteLibraryRootMutation.finished.failure
+		rootDeleteFailed: deleteLibraryRootMutation.finished.failure,
+		rootUpdateFailed: updateLibraryRootMutation.finished.failure
 	}
 })
 

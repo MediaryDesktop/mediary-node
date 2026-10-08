@@ -254,7 +254,11 @@ export interface paths {
 		delete: operations['deleteLibraryRoot']
 		options?: never
 		head?: never
-		patch?: never
+		/**
+		 * Say what a library folder holds
+		 * @description Switching between anime and movies and shows drops the automatic matches of the folder's videos — they point at the other source — and scans it again to redo them. Matches the user made by hand stay.
+		 */
+		patch: operations['updateLibraryRoot']
 		trace?: never
 	}
 	'/v1/library/scan': {
@@ -1576,6 +1580,11 @@ export interface components {
 			 */
 			readonly $schema?: string
 			/**
+			 * @description What the videos in the folder are. Left out means anime.
+			 * @enum {string}
+			 */
+			content?: 'anime' | 'movies_and_shows'
+			/**
 			 * @description Absolute path to an existing folder on this machine.
 			 * @example D:\Anime
 			 */
@@ -2828,6 +2837,11 @@ export interface components {
 			 */
 			added_at: string
 			/**
+			 * @description What the videos in the folder are: anime, matched against AniList, or movies and shows, matched against TMDB. Comics and books are told apart by their extension either way.
+			 * @enum {string}
+			 */
+			content: 'anime' | 'movies_and_shows'
+			/**
 			 * Format: int64
 			 * @description Media files currently present under the root.
 			 */
@@ -3911,6 +3925,19 @@ export interface components {
 			 */
 			status?: 'CURRENT' | 'PLANNING' | 'COMPLETED' | 'DROPPED' | 'PAUSED' | 'REPEATING'
 		}
+		UpdateRootInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/UpdateRootInputBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * @description What the videos in the folder are.
+			 * @enum {string}
+			 */
+			content: 'anime' | 'movies_and_shows'
+		}
 		Video: {
 			/** Format: int32 */
 			bitrate: number
@@ -4077,6 +4104,7 @@ export type SchemaTorrentSourceOutcome = components['schemas']['TorrentSourceOut
 export type SchemaTorrentSourcesOutputBody = components['schemas']['TorrentSourcesOutputBody']
 export type SchemaTrailer = components['schemas']['Trailer']
 export type SchemaUpdateEntryInputBody = components['schemas']['UpdateEntryInputBody']
+export type SchemaUpdateRootInputBody = components['schemas']['UpdateRootInputBody']
 export type SchemaVideo = components['schemas']['Video']
 export type $defs = Record<string, never>
 export interface operations {
@@ -4575,6 +4603,42 @@ export interface operations {
 					[name: string]: unknown
 				}
 				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	updateLibraryRoot: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Identifier of the root. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['UpdateRootInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['RootOutputBody']
+				}
 			}
 			/** @description Error */
 			default: {

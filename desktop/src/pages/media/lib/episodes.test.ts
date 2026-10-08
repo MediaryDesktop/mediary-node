@@ -1,8 +1,16 @@
 import { describe, expect, it } from 'vitest'
 
 import type { LibraryFile } from '@entities/library-item'
+import type { MediaEpisode } from '@entities/media'
 
-import { episodeNumber, groupTitleFiles, isWatched } from './episodes'
+import {
+	episodeFor,
+	episodeNumber,
+	episodeOrder,
+	groupTitleFiles,
+	indexEpisodes,
+	isWatched
+} from './episodes'
 
 let nextId = 1
 
@@ -86,5 +94,58 @@ describe('isWatched', () => {
 
 		expect(isWatched(movie, 0)).toBe(false)
 		expect(isWatched(movie, 1)).toBe(true)
+	})
+})
+
+function showFile(path: string, season: number | undefined, episode: number): LibraryFile {
+	const made = file({ path, episode })
+	made.match = { ...made.match!, media_ref: 'tmdb:tv:1396', season }
+	made.parsed = { ...made.parsed, season }
+
+	return made
+}
+
+const breakingBad: MediaEpisode[] = [
+	{ season: 1, number: 1, title: 'Pilot' },
+	{ season: 1, number: 2, title: "Cat's in the Bag..." },
+	{ season: 2, number: 1, title: 'Seven Thirty-Seven' }
+] as MediaEpisode[]
+
+describe('a show numbered by season', () => {
+	const index = indexEpisodes(breakingBad)
+	const order = episodeOrder(index)
+
+	it('finds each file its own episode', () => {
+		expect(index.seasonal).toBe(true)
+		expect(episodeFor(index, showFile('s2e1.mkv', 2, 1))?.title).toBe('Seven Thirty-Seven')
+		expect(episodeFor(index, showFile('e2.mkv', undefined, 2))?.title).toBe("Cat's in the Bag...")
+	})
+
+	it('counts across seasons, as progress does', () => {
+		const second = showFile('s2e1.mkv', 2, 1)
+
+		expect(order(second)).toBe(3)
+		expect(isWatched(second, 2, order)).toBe(false)
+		expect(isWatched(second, 3, order)).toBe(true)
+	})
+
+	it('puts an episode the list does not hold after every known one', () => {
+		const groups = groupTitleFiles(
+			[showFile('s3e1.mkv', 3, 1), showFile('s2e1.mkv', 2, 1), showFile('s1e1.mkv', 1, 1)],
+			1,
+			order
+		)
+
+		expect(groups.main.map(made => made.rel_path)).toEqual(['s1e1.mkv', 's2e1.mkv', 's3e1.mkv'])
+		expect(groups.toWatch.map(made => made.rel_path)).toEqual(['s2e1.mkv', 's3e1.mkv'])
+		expect(isWatched(showFile('s3e1.mkv', 3, 1), 99, order)).toBe(false)
+	})
+
+	it('leaves an anime numbered as before', () => {
+		const anime = indexEpisodes([{ number: 1 }, { number: 2 }] as MediaEpisode[])
+
+		expect(anime.seasonal).toBe(false)
+		expect(episodeOrder(anime)).toBe(episodeNumber)
+		expect(episodeFor(anime, file({ path: 'e2.mkv', episode: 2 }))?.number).toBe(2)
 	})
 })

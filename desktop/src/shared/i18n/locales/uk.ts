@@ -306,6 +306,19 @@ export const uk: Translation = {
 		},
 		root: {
 			add: 'Додати теку',
+			content: {
+				anime: 'Аніме',
+				movies_and_shows: 'Фільми й серіали'
+			},
+			addAs: {
+				anime: 'Тека з аніме',
+				movies_and_shows: 'Тека з фільмами й серіалами'
+			},
+			switchTo: {
+				anime: 'Тут аніме',
+				movies_and_shows: 'Тут фільми й серіали'
+			},
+			contentFailed: 'Не вдалося змінити вміст теки',
 			remove: 'Прибрати цю теку',
 			removeFailed: 'Не вдалося прибрати теку',
 			failed: 'Не вдалося додати теку',
@@ -609,6 +622,8 @@ export const uk: Translation = {
 			notInLibrary: 'Немає у вашій бібліотеці',
 			episodesNotInLibrary: 'Цих епізодів немає у вашій бібліотеці:',
 			episode: 'Епізод {{number}}',
+			seasonEpisode: 'Сезон {{season}} · Серія {{number}}',
+			season: 'Сезон {{number}}',
 			metadataUnavailable: 'Жодне джерело поки не має даних про епізоди цього тайтлу',
 			andMore: 'Та інші…',
 			toWatch: 'Далі до перегляду',

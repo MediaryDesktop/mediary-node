@@ -26,10 +26,34 @@ export const fetchLibraryRootsFx = createNodeRequestFx<void, NodeSchemas['RootsO
 	url: '/v1/library/roots'
 }))
 
-export const addLibraryRootFx = createNodeRequestFx<string, NodeSchemas['RootOutputBody']>(path => ({
-	url: '/v1/library/roots',
-	method: 'POST',
-	body: { path }
+// What a folder's videos are: anime goes to AniList, movies and shows to TMDB.
+export type LibraryContent = LibraryRoot['content']
+
+export interface AddLibraryRootParams {
+	path: string
+	content: LibraryContent
+}
+
+export const addLibraryRootFx = createNodeRequestFx<AddLibraryRootParams, NodeSchemas['RootOutputBody']>(
+	({ path, content }) => ({
+		url: '/v1/library/roots',
+		method: 'POST',
+		body: { path, content }
+	})
+)
+
+export interface UpdateLibraryRootParams {
+	id: number
+	content: LibraryContent
+}
+
+export const updateLibraryRootFx = createNodeRequestFx<
+	UpdateLibraryRootParams,
+	NodeSchemas['RootOutputBody']
+>(({ id, content }) => ({
+	url: `/v1/library/roots/${id}`,
+	method: 'PATCH',
+	body: { content }
 }))
 
 export const deleteLibraryRootFx = createNodeRequestFx<number, void>(id => ({

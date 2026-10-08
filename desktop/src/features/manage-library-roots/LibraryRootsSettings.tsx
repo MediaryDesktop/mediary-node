@@ -4,9 +4,21 @@ import { useEffect } from 'react'
 import { useTranslation } from '@shared/i18n'
 import { Button, DropdownMenu, Icon, ListTile, toast } from '@shared/ui'
 
-import { deleteLibraryRootMutation, libraryModel, libraryRootsQuery } from '@entities/library-item'
+import {
+	deleteLibraryRootMutation,
+	libraryModel,
+	libraryRootsQuery,
+	updateLibraryRootMutation
+} from '@entities/library-item'
+import type { LibraryContent } from '@entities/library-item'
 
 import styles from './LibraryRootsSettings.module.scss'
+
+const CONTENTS = ['anime', 'movies_and_shows'] as const satisfies readonly LibraryContent[]
+
+function otherContent(content: LibraryContent): LibraryContent {
+	return content === 'anime' ? 'movies_and_shows' : 'anime'
+}
 
 export function LibraryRootsSettings() {
 	const { t } = useTranslation()
@@ -20,6 +32,7 @@ export function LibraryRootsSettings() {
 	])
 
 	const [remove, removing] = useUnit([deleteLibraryRootMutation.start, deleteLibraryRootMutation.$pending])
+	const [update, updating] = useUnit([updateLibraryRootMutation.start, updateLibraryRootMutation.$pending])
 
 	useEffect(() => {
 		startRoots()
@@ -37,6 +50,9 @@ export function LibraryRootsSettings() {
 			),
 			libraryModel.rootDeleteFailed.watch(() =>
 				toast.error(t('library.root.removeFailed'), { id: 'library-root-remove-failed' })
+			),
+			libraryModel.rootUpdateFailed.watch(() =>
+				toast.error(t('library.root.contentFailed'), { id: 'library-root-content-failed' })
 			)
 		]
 
@@ -59,6 +75,7 @@ export function LibraryRootsSettings() {
 							title={root.path}
 							titleHint={root.path}
 							subtitle={[
+								t(`library.root.content.${root.content}`),
 								t('library.root.files', { count: root.file_count }),
 								root.unmatched_count > 0
 									? t('library.summary.unmatched', { count: root.unmatched_count })
@@ -77,6 +94,14 @@ export function LibraryRootsSettings() {
 											label: t('library.root.rescan'),
 											icon: 'common/reset',
 											onSelect: () => scanRequested(root.id)
+										},
+										{
+											id: 'content',
+											label: t(`library.root.switchTo.${otherContent(root.content)}`),
+											icon: 'common/player',
+											disabled: updating,
+											onSelect: () =>
+												update({ id: root.id, content: otherContent(root.content) })
 										},
 										{
 											id: 'remove',
@@ -103,13 +128,20 @@ export function LibraryRootsSettings() {
 				</ul>
 			)}
 
-			<Button
-				startIcon={<Icon name='common/folder-open' size={16} />}
-				disabled={pickingFolder}
-				onClick={() => folderRequested()}
-			>
-				{t('library.root.add')}
-			</Button>
+			<DropdownMenu
+				items={CONTENTS.map(content => ({
+					id: content,
+					label: t(`library.root.addAs.${content}`),
+					icon: content === 'anime' ? 'categories/anime' : 'categories/movie',
+					disabled: pickingFolder,
+					onSelect: () => folderRequested(content)
+				}))}
+				trigger={
+					<Button startIcon={<Icon name='common/folder-open' size={16} />} disabled={pickingFolder}>
+						{t('library.root.add')}
+					</Button>
+				}
+			/>
 		</div>
 	)
 }

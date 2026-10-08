@@ -11,6 +11,7 @@ import { deleteLibraryRootMutation, libraryModel } from './model'
 const ROOT: LibraryRoot = {
 	id: 1,
 	path: 'D:\\Anime',
+	content: 'anime',
 	added_at: '2026-01-01T00:00:00Z',
 	file_count: 0,
 	missing_count: 0,
@@ -57,9 +58,9 @@ describe('library roots', () => {
 			]
 		})
 
-		await allSettled(libraryModel.folderRequested, { scope })
+		await allSettled(libraryModel.folderRequested, { scope, params: 'anime' })
 
-		expect(addRoot).toHaveBeenCalledWith('D:\\Anime')
+		expect(addRoot).toHaveBeenCalledWith({ path: 'D:\\Anime', content: 'anime' })
 		expect(startScan).toHaveBeenCalledWith(0)
 	})
 
@@ -70,7 +71,7 @@ describe('library roots', () => {
 
 		const scope = fork({ handlers: [[addLibraryRootFx, addRoot]] })
 
-		await allSettled(libraryModel.folderRequested, { scope })
+		await allSettled(libraryModel.folderRequested, { scope, params: 'anime' })
 
 		expect(addRoot).not.toHaveBeenCalled()
 	})
@@ -85,7 +86,7 @@ describe('library roots', () => {
 		const failures = vi.fn()
 		const unwatch = libraryModel.rootAddFailed.watch(failures)
 
-		await allSettled(libraryModel.folderRequested, { scope })
+		await allSettled(libraryModel.folderRequested, { scope, params: 'anime' })
 		unwatch()
 
 		expect(failures).toHaveBeenCalledTimes(1)

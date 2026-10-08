@@ -308,6 +308,19 @@ export const en = {
 		},
 		root: {
 			add: 'Add folder',
+			content: {
+				anime: 'Anime',
+				movies_and_shows: 'Movies & series'
+			},
+			addAs: {
+				anime: 'Folder of anime',
+				movies_and_shows: 'Folder of movies & series'
+			},
+			switchTo: {
+				anime: 'It holds anime',
+				movies_and_shows: 'It holds movies & series'
+			},
+			contentFailed: 'Could not change what the folder holds',
 			remove: 'Stop watching this folder',
 			removeFailed: 'Could not stop watching that folder',
 			failed: 'Could not add that folder',
@@ -611,6 +624,8 @@ export const en = {
 			notInLibrary: 'Not in your library',
 			episodesNotInLibrary: 'The following episodes are not in your library:',
 			episode: 'Episode {{number}}',
+			seasonEpisode: 'Season {{season}} · Episode {{number}}',
+			season: 'Season {{number}}',
 			metadataUnavailable: 'No source has episode details for this title yet',
 			andMore: 'And more…',
 			toWatch: 'Next to watch',
