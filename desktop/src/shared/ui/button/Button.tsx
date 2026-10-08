@@ -1,7 +1,8 @@
 import clsx from 'clsx'
 import { forwardRef } from 'react'
-import type { ButtonHTMLAttributes, ReactNode, Ref } from 'react'
+import type { ButtonHTMLAttributes, ReactNode } from 'react'
 
+import { mergeRefs } from '../ripple/merge-refs'
 import { useRipple } from '../ripple/useRipple'
 
 import styles from './Button.module.scss'
@@ -19,18 +20,6 @@ export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement
 	endIcon?: ReactNode
 	disableRipple?: boolean
 	children?: ReactNode
-}
-
-function mergeRefs<T>(...refs: (Ref<T> | undefined)[]) {
-	return (node: T | null) => {
-		for (const ref of refs) {
-			if (typeof ref === 'function') {
-				ref(node)
-			} else if (ref) {
-				;(ref as { current: T | null }).current = node
-			}
-		}
-	}
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(

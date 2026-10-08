@@ -115,7 +115,7 @@ export function EntryMenu({ media, entry, listName }: EntryMenuProps) {
 		<DropdownMenu
 			items={items}
 			trigger={
-				<RippleButton className={styles.trigger} aria-label={t('lists.menu')}>
+				<RippleButton className={styles.trigger} aria-label={t('lists.menu')} disableRipple>
 					<Icon name='common/more-vertical' size={20} />
 				</RippleButton>
 			}
