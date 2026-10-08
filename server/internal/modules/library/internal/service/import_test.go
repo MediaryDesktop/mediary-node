@@ -74,3 +74,20 @@ func TestImportFileTakesTheEpisodeFromAVideosName(t *testing.T) {
 		t.Fatalf("an opening keeps no episode, got %+v", extra.Match)
 	}
 }
+
+func TestImportFileKeepsTheSeasonOfAShowsEpisode(t *testing.T) {
+	h := newHarness(t)
+	dir := t.TempDir()
+	root := h.addRoot(t, dir)
+
+	writeFile(t, filepath.Join(dir, "Breaking Bad", "Breaking.Bad.S02E05.1080p.WEB-DL.mkv"), "video")
+
+	file, err := h.svc.ImportFile(context.Background(), root.ID, "Breaking Bad/Breaking.Bad.S02E05.1080p.WEB-DL.mkv", "tmdb:tv:1396", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if file.Match == nil || file.Match.Season == nil || *file.Match.Season != 2 || *file.Match.Episode != 5 {
+		t.Fatalf("match = %+v, want season 2 episode 5: S02E05 is not the fifth episode of the first season", file.Match)
+	}
+}
