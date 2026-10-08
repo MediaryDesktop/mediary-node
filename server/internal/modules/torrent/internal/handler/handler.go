@@ -326,6 +326,7 @@ type TorrentSourceCheckOutput struct {
 type SearchTorrentsInput struct {
 	MediaRef string `query:"media_ref" doc:"The title searched for; its names are the queries unless q is given."`
 	Episode  int    `query:"episode" minimum:"0" doc:"Only releases that hold this episode; 0 for any."`
+	Season   int    `query:"season" minimum:"0" doc:"Only releases of this season, for a show numbered by season; the episode then counts within it. 0 for any."`
 	Query    string `query:"q" maxLength:"200" doc:"Search for this instead of the title's names."`
 }
 
@@ -592,7 +593,7 @@ func (h *Handler) registerSearch(api huma.API) {
 		Description: "Asks every source for the title's names, or for q, merges what they find by info hash, and reads episodes, quality and group from each name. With an episode, releases that cannot hold it are left out and the rest come in order: the episode alone, batches that hold it, names without episodes. A source that fails is reported in sources, and the others still answer.",
 		Tags:        []string{"torrent"},
 	}, func(ctx context.Context, in *SearchTorrentsInput) (*SearchTorrentsOutput, error) {
-		result, err := h.svc.Search(ctx, service.SearchRequest{MediaRef: in.MediaRef, Episode: in.Episode, Query: in.Query})
+		result, err := h.svc.Search(ctx, service.SearchRequest{MediaRef: in.MediaRef, Episode: in.Episode, Season: in.Season, Query: in.Query})
 		if err != nil {
 			return nil, httpapi.ToHTTP(err)
 		}

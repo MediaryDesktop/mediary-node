@@ -122,6 +122,10 @@ func (d downloadFolders) NameEpisode(relPath string) (video bool, episode *int) 
 	return d.library.NameEpisode(relPath)
 }
 
+func (d downloadFolders) NameSeason(relPath string) *int {
+	return d.library.NameSeason(relPath)
+}
+
 func (d downloadFolders) Episodes(ctx context.Context, mediaRef string) ([]int, error) {
 	return d.library.Episodes(ctx, mediaRef)
 }

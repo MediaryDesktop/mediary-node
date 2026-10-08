@@ -36,6 +36,8 @@ type Library interface {
 	// NameEpisode reads a file's path the way the library would: whether it keeps
 	// it as a video, and the episode its name gives.
 	NameEpisode(relPath string) (video bool, episode *int)
+	// NameSeason is the season the path gives, for a show numbered by season.
+	NameSeason(relPath string) *int
 	// Episodes are the episodes of a title the library has on disk.
 	Episodes(ctx context.Context, mediaRef string) ([]int, error)
 }

@@ -101,6 +101,12 @@ func (s *Service) PutRule(ctx context.Context, in RuleInput) (*TorrentRule, erro
 	if in.MediaRef == "" {
 		return nil, apperr.Invalid("media_ref", "a rule has to be for a title")
 	}
+
+	// A rule counts episodes from N to the end, as anime numbers them; a show
+	// numbered by season would need a season too.
+	if strings.HasPrefix(in.MediaRef, "tmdb:tv:") {
+		return nil, apperr.New(apperr.KindPrecondition, "automatic downloads follow one run of episode numbers; shows numbered by season are not supported yet")
+	}
 	if in.Title == "" {
 		return nil, apperr.Invalid("title", "a rule needs the title's name for its folder")
 	}

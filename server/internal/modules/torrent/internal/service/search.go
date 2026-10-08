@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"sort"
 	"strconv"
 	"strings"
@@ -40,6 +41,9 @@ type SearchRequest struct {
 	MediaRef string
 	// Episode narrows the results to releases that hold it; 0 for any.
 	Episode int
+	// Season narrows the results to releases of that season, for a show numbered
+	// by season; Episode then counts within it. 0 for a title that is not.
+	Season int
 	// Query replaces the title's names.
 	Query string
 }
@@ -112,6 +116,9 @@ func (s *Service) forgetSearches() {
 func (s *Service) Search(ctx context.Context, req SearchRequest) (*TorrentSearchResult, error) {
 	if req.Episode < 0 {
 		return nil, apperr.Invalid("episode", "an episode number cannot be negative")
+	}
+	if req.Season < 0 {
+		return nil, apperr.Invalid("season", "a season number cannot be negative")
 	}
 
 	queries, err := s.queries(ctx, req)
@@ -190,7 +197,7 @@ func (s *Service) Search(ctx context.Context, req SearchRequest) (*TorrentSearch
 	releases := make([]TorrentRelease, 0, len(byID))
 	for id := range byID {
 		found := byID[id]
-		found.Match = matchOf(found.Episodes, req.Episode)
+		found.Match = matchOf(found.Info, req.Episode, req.Season)
 		if found.Match == "" {
 			continue
 		}
@@ -239,6 +246,13 @@ func (s *Service) queries(ctx context.Context, req SearchRequest) ([]string, err
 		}
 
 		seen[key] = true
+
+		// Indexers match words, and a show's releases carry "S02" in their names:
+		// asking for it narrows a long show to the season wanted.
+		if req.Season > 0 {
+			name = fmt.Sprintf("%s S%02d", name, req.Season)
+		}
+
 		queries = append(queries, name)
 
 		if len(queries) == maxQueries {
@@ -324,11 +338,23 @@ func better(candidate, existing TorrentRelease) bool {
 	return candidate.magnet != "" && existing.magnet == ""
 }
 
-// matchOf says how a release fits the episode asked for, or "" when it does not.
-func matchOf(episodes *release.Episodes, episode int) string {
+// matchOf says how a release fits the season and episode asked for, or "" when
+// it does not. A release of another season does not fit; one whose name gives no
+// season might.
+func matchOf(info release.Info, episode, season int) string {
+	if season > 0 && info.Season != nil && *info.Season != season {
+		return ""
+	}
+
+	episodes := info.Episodes
+
 	switch {
+	case episode == 0 && season > 0 && info.Season == nil:
+		return "unknown"
 	case episode == 0:
 		return "any"
+	case episodes == nil && season > 0 && info.Season != nil:
+		return "batch"
 	case episodes == nil:
 		return "unknown"
 	case !episodes.Contains(episode):

@@ -19,6 +19,7 @@ type TorrentFile struct {
 	Selected bool    `json:"selected" doc:"Whether the client downloads it."`
 	Video    bool    `json:"video" doc:"Whether the library keeps it as a video."`
 	Episode  *int    `json:"episode,omitempty" doc:"The episode its name gives; absent for an extra or a name without one."`
+	Season   *int    `json:"season,omitempty" doc:"The season its name gives, for a show numbered by season; the episode then counts within it."`
 }
 
 // Files lists the torrent's files. It is empty while a magnet's metadata has not
@@ -41,9 +42,11 @@ func (s *Service) Files(ctx context.Context, id int64) ([]TorrentFile, error) {
 
 	out := make([]TorrentFile, 0, len(files))
 	for i := range files {
-		video, episode := s.library.NameEpisode(relPath(*download, files[i]))
+		path := relPath(*download, files[i])
+		video, episode := s.library.NameEpisode(path)
 
 		out = append(out, TorrentFile{
+			Season:   s.library.NameSeason(path),
 			Index:    files[i].Index,
 			Name:     files[i].Name,
 			Size:     files[i].Size,

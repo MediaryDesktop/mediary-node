@@ -25,7 +25,9 @@ type Info struct {
 	Resolution string    `json:"resolution,omitempty" doc:"e.g. 1080p"`
 	Codec      string    `json:"codec,omitempty" doc:"e.g. HEVC"`
 	Episodes   *Episodes `json:"episodes,omitempty" doc:"Absent when the name gives no episode."`
-	// Batch is a release of several episodes, or one that calls itself complete.
+	Season     *int      `json:"season,omitempty" doc:"The season, when the name says: S02E05, S02, Season 2. Episodes then count within it."`
+	// Batch is a release of several episodes, a whole season, or one that calls
+	// itself complete.
 	Batch bool `json:"batch"`
 }
 
@@ -57,6 +59,10 @@ var (
 
 	// [13] or (13) on its own.
 	bracketEpisode = regexp.MustCompile(`[\[(](\d{1,4})(?:v\d)?[\])]`)
+
+	// S02E05, S02 on its own, Season 2. A show's releases are named by season;
+	// anime's rarely are, and "2nd Season" names a title rather than a season.
+	seasonPattern = regexp.MustCompile(`(?i)\bs(\d{1,2})(?:e\d|\b)|\bseason[\s._-]?(\d{1,2})\b`)
 
 	batchWords = regexp.MustCompile(`(?i)\b(?:batch|complete|season\s*pack|full\s*season)\b`)
 
@@ -90,8 +96,14 @@ func Parse(name string) Info {
 	clean = strings.TrimSuffix(clean, extension(clean))
 
 	info.Episodes = episodes(clean)
+	info.Season = season(name)
 
 	if info.Episodes != nil && info.Episodes.To > info.Episodes.From {
+		info.Batch = true
+	}
+
+	// A season named without an episode is the whole season.
+	if info.Season != nil && info.Episodes == nil {
 		info.Batch = true
 	}
 	if batchWords.MatchString(name) {
@@ -99,6 +111,25 @@ func Parse(name string) Info {
 	}
 
 	return info
+}
+
+func season(name string) *int {
+	match := seasonPattern.FindStringSubmatch(name)
+	if match == nil {
+		return nil
+	}
+
+	raw := match[1]
+	if raw == "" {
+		raw = match[2]
+	}
+
+	number, err := strconv.Atoi(raw)
+	if err != nil || number <= 0 {
+		return nil
+	}
+
+	return &number
 }
 
 func episodes(name string) *Episodes {

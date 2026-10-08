@@ -110,6 +110,22 @@ func (m *Module) NameEpisode(relPath string) (video bool, episode *int) {
 	return true, parsed.Episode
 }
 
+// NameSeason is the season a video's path gives — S02E05, Season 2/ — for a show
+// numbered by season; nil when it gives none, or when it is not a video.
+func (m *Module) NameSeason(relPath string) *int {
+	kind, ok := scanner.KindOf(relPath)
+	if !ok || kind != scanner.KindVideo {
+		return nil
+	}
+
+	parsed := parser.Parse(relPath, kind)
+	if parsed.Form == parser.FormExtra {
+		return nil
+	}
+
+	return parsed.Season
+}
+
 // Episodes are the episodes of a title the library has on disk: matched video
 // files, not missing, read from the match or else from the name.
 func (m *Module) Episodes(ctx context.Context, mediaRef string) ([]int, error) {

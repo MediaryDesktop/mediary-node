@@ -3679,6 +3679,10 @@ components:
           maximum: 1
           minimum: 0
           type: number
+        season:
+          description: The season its name gives, for a show numbered by season; the episode then counts within it.
+          format: int64
+          type: integer
         selected:
           description: Whether the client downloads it.
           type: boolean
@@ -3894,6 +3898,10 @@ components:
           type: string
         score:
           description: How well it fits the release profile; higher is better.
+          format: int64
+          type: integer
+        season:
+          description: "The season, when the name says: S02E05, S02, Season 2. Episodes then count within it."
           format: int64
           type: integer
         seeders:
@@ -6839,6 +6847,15 @@ paths:
           name: episode
           schema:
             description: Only releases that hold this episode; 0 for any.
+            format: int64
+            minimum: 0
+            type: integer
+        - description: Only releases of this season, for a show numbered by season; the episode then counts within it. 0 for any.
+          explode: false
+          in: query
+          name: season
+          schema:
+            description: Only releases of this season, for a show numbered by season; the episode then counts within it. 0 for any.
             format: int64
             minimum: 0
             type: integer

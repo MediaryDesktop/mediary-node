@@ -17,6 +17,10 @@ func TestNameEpisode(t *testing.T) {
 		{"Frieren/cover.jpg", false, 0},
 	}
 
+	if season := m.NameSeason("Breaking Bad/Season 2/Breaking.Bad.S02E05.1080p.mkv"); season == nil || *season != 2 {
+		t.Errorf("NameSeason = %v, want 2", season)
+	}
+
 	for _, tc := range cases {
 		video, episode := m.NameEpisode(tc.path)
 		got := 0

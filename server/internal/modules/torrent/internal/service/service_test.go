@@ -172,6 +172,8 @@ func (l *fakeLibrary) Episodes(_ context.Context, mediaRef string) ([]int, error
 	return l.episodes[mediaRef], nil
 }
 
+func (l *fakeLibrary) NameSeason(string) *int { return nil }
+
 // NameEpisode reads "<anything> - NN.mkv" the way the library's parser would.
 func (l *fakeLibrary) NameEpisode(relPath string) (video bool, episode *int) {
 	if !strings.HasSuffix(relPath, ".mkv") {

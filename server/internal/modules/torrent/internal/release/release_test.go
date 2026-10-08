@@ -65,3 +65,37 @@ func TestParse(t *testing.T) {
 		}
 	}
 }
+
+func TestParseSeasons(t *testing.T) {
+	cases := []struct {
+		name    string
+		season  int
+		episode int
+		batch   bool
+	}{
+		{"Breaking.Bad.S02E05.1080p.WEB-DL.x264", 2, 5, false},
+		{"Breaking Bad S02 1080p BluRay x265", 2, 0, true},
+		{"Breaking.Bad.Season.3.Complete.720p", 3, 0, true},
+		{"The Office (US) s03e07 Branch Wars", 3, 7, false},
+		{"[SubsPlease] Sousou no Frieren - 13 (1080p) [ABCD1234].mkv", 0, 13, false},
+		{"Squid Game 2021 1080p NF WEB-DL", 0, 0, false},
+	}
+
+	for _, c := range cases {
+		info := Parse(c.name)
+
+		season := 0
+		if info.Season != nil {
+			season = *info.Season
+		}
+
+		episode := 0
+		if info.Episodes != nil && info.Episodes.From == info.Episodes.To {
+			episode = info.Episodes.From
+		}
+
+		if season != c.season || episode != c.episode || info.Batch != c.batch {
+			t.Errorf("%s = season %d episode %d batch %v, want %d %d %v", c.name, season, episode, info.Batch, c.season, c.episode, c.batch)
+		}
+	}
+}

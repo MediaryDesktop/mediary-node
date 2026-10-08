@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/release"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/torznab"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
 )
@@ -216,5 +217,28 @@ func TestSourcesKeepTheirKeysApart(t *testing.T) {
 
 	if _, err := h.svc.CreateSource(ctx, SourceInput{Name: " ", URL: "http://x"}); apperr.KindOf(err) != apperr.KindInvalid {
 		t.Fatalf("a nameless source: %v, want invalid", err)
+	}
+}
+
+func TestMatchOfASeason(t *testing.T) {
+	season := release.Parse
+
+	cases := []struct {
+		name            string
+		episode, season int
+		want            string
+	}{
+		{"Breaking.Bad.S02E05.1080p", 5, 2, "episode"},
+		{"Breaking.Bad.S03E05.1080p", 5, 2, ""},
+		{"Breaking Bad S02 1080p", 5, 2, "batch"},
+		{"Breaking Bad S02 1080p", 0, 2, "any"},
+		{"Breaking Bad 1080p", 0, 2, "unknown"},
+		{"[SubsPlease] Frieren - 13 (1080p)", 13, 0, "episode"},
+	}
+
+	for _, c := range cases {
+		if got := matchOf(season(c.name), c.episode, c.season); got != c.want {
+			t.Errorf("%s for S%d E%d = %q, want %q", c.name, c.season, c.episode, got, c.want)
+		}
 	}
 }
