@@ -70,6 +70,10 @@ func (s *Service) MarkRead(ctx context.Context, mediaRef string, chapter int) er
 		return apperr.Invalid("chapter", "a chapter number starts at 1")
 	}
 
+	if isLocalRef(mediaRef) {
+		return s.raiseLocalProgress(ctx, mediaRef, chapter)
+	}
+
 	_, err := s.UpdateEntry(ctx, mediaRef, EntryPatch{Progress: &chapter})
 
 	return err
@@ -82,6 +86,10 @@ func (s *Service) MarkRead(ctx context.Context, mediaRef string, chapter int) er
 func (s *Service) MarkWatched(ctx context.Context, mediaRef string, episode int) error {
 	if episode <= 0 {
 		return apperr.Invalid("episode", "an episode number starts at 1")
+	}
+
+	if isLocalRef(mediaRef) {
+		return s.raiseLocalProgress(ctx, mediaRef, episode)
 	}
 
 	_, err := s.UpdateEntry(ctx, mediaRef, EntryPatch{Progress: &episode})

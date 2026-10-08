@@ -213,6 +213,10 @@ func (s *Service) UpdateEntry(ctx context.Context, mediaRef string, patch EntryP
 		return nil, err
 	}
 
+	if isLocalRef(mediaRef) {
+		return s.updateLocalEntry(ctx, mediaRef, patch)
+	}
+
 	mediaID, err := parseMediaRef(mediaRef)
 	if err != nil {
 		return nil, err

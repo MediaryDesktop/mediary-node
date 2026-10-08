@@ -223,3 +223,22 @@ type TorznabSource struct {
 	CreatedAt string `json:"created_at"`
 	UpdatedAt string `json:"updated_at"`
 }
+
+type TrackerEntry struct {
+	MediaRef       string        `json:"media_ref"`
+	MediaType      string        `json:"media_type"`
+	Status         string        `json:"status"`
+	Score          int64         `json:"score"`
+	Progress       int64         `json:"progress"`
+	Repeat         int64         `json:"repeat"`
+	Private        int64         `json:"private"`
+	Notes          string        `json:"notes"`
+	StartedYear    sql.NullInt64 `json:"started_year"`
+	StartedMonth   sql.NullInt64 `json:"started_month"`
+	StartedDay     sql.NullInt64 `json:"started_day"`
+	CompletedYear  sql.NullInt64 `json:"completed_year"`
+	CompletedMonth sql.NullInt64 `json:"completed_month"`
+	CompletedDay   sql.NullInt64 `json:"completed_day"`
+	CreatedAt      int64         `json:"created_at"`
+	UpdatedAt      int64         `json:"updated_at"`
+}

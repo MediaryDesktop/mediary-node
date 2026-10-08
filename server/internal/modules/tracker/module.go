@@ -24,6 +24,9 @@ type Deps struct {
 	AniListClientID     string
 	AniListAuthorizeURL string
 	RefreshInterval     time.Duration
+
+	// Titles names what is on the node's own lists; wired by internal/app.
+	Titles TitleInfo
 }
 
 // TrackedTitle is the module's read-only port onto the user's own collection, for
@@ -31,12 +34,23 @@ type Deps struct {
 // all. It is wired by internal/app; no module imports another.
 type TrackedTitle = service.TrackedTitle
 
+// TitleInfo, LocalTitle, Media and Title are the port through which the tracker
+// shows titles on the node's own lists without describing them itself.
+type (
+	TitleInfo  = service.TitleInfo
+	LocalTitle = service.LocalTitle
+	Media      = service.Media
+	Title      = service.Title
+	MediaType  = service.MediaType
+)
+
 func New(deps Deps) *Module {
 	svc := service.New(store.New(deps.DB), deps.Logger, deps.Events, service.Options{
 		AniList:         deps.AniList,
 		ClientID:        deps.AniListClientID,
 		AuthorizeURL:    deps.AniListAuthorizeURL,
 		RefreshInterval: deps.RefreshInterval,
+		Titles:          deps.Titles,
 	})
 
 	return &Module{handler: handler.New(svc), svc: svc}

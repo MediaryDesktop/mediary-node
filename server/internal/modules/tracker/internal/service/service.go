@@ -24,6 +24,9 @@ type Options struct {
 	RefreshInterval time.Duration
 	FlushDelay      time.Duration
 	Now             func() time.Time
+
+	// Titles describes what is on the node's own lists; nil leaves them unnamed.
+	Titles TitleInfo
 }
 
 type Service struct {
@@ -160,6 +163,10 @@ func (s *Service) SignOut(ctx context.Context) error {
 }
 
 func (s *Service) Entries(ctx context.Context, mediaType MediaType) (*Collection, error) {
+	if mediaType.local() {
+		return s.localCollection(ctx, mediaType)
+	}
+
 	connected, err := s.connected()
 	if err != nil {
 		return nil, err

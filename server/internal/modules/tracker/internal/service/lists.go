@@ -172,14 +172,24 @@ func (s *Service) Lists(ctx context.Context) ([]CustomList, error) {
 		return nil, apperr.Wrap(err, apperr.KindInternal, "read custom lists")
 	}
 
+	covers, err := s.localListCovers(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	for _, row := range rows {
+		listCovers := covers[row.ID]
+		if listCovers == nil {
+			listCovers = []string{}
+		}
+
 		lists = append(lists, CustomList{
 			ID:        localListID(row.ID),
 			Provider:  ListProviderLocal,
 			MediaType: ListMediaType(row.MediaType),
 			Name:      row.Name,
 			Count:     row.Count,
-			Covers:    []string{},
+			Covers:    listCovers,
 		})
 	}
 

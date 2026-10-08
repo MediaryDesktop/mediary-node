@@ -24,6 +24,7 @@ type Querier interface {
 	DeleteAniListOutboxEntryIfUnchanged(ctx context.Context, arg DeleteAniListOutboxEntryIfUnchangedParams) (int64, error)
 	DeleteAniListOutboxForOtherAccounts(ctx context.Context, accountID int64) error
 	DeleteCustomList(ctx context.Context, id int64) (int64, error)
+	DeleteCustomListItemsForRef(ctx context.Context, mediaRef string) error
 	DeleteFileMatch(ctx context.Context, fileID int64) (int64, error)
 	// The match hangs off the file row and goes with it: the user deleted the file
 	// itself, not only what it was tied to.
@@ -38,6 +39,7 @@ type Querier interface {
 	DeleteTorrentDownload(ctx context.Context, id int64) (int64, error)
 	DeleteTorrentRule(ctx context.Context, mediaRef string) (int64, error)
 	DeleteTorznabSource(ctx context.Context, id int64) (int64, error)
+	DeleteTrackerEntry(ctx context.Context, mediaRef string) (int64, error)
 	// A chapter already queued, running or done stays as it is; a failed or cancelled
 	// one goes back in the queue.
 	EnqueueMangaDownload(ctx context.Context, arg EnqueueMangaDownloadParams) (MangaDownload, error)
@@ -59,7 +61,9 @@ type Querier interface {
 	GetTorrentDownloadByHash(ctx context.Context, infoHash string) (TorrentDownload, error)
 	GetTorrentRuleByMedia(ctx context.Context, mediaRef string) (TorrentRule, error)
 	GetTorznabSource(ctx context.Context, id int64) (TorznabSource, error)
+	GetTrackerEntry(ctx context.Context, mediaRef string) (TrackerEntry, error)
 	InsertCustomList(ctx context.Context, arg InsertCustomListParams) (CustomList, error)
+	InsertCustomListItem(ctx context.Context, arg InsertCustomListItemParams) error
 	InsertLibraryFile(ctx context.Context, arg InsertLibraryFileParams) (int64, error)
 	InsertLibraryRoot(ctx context.Context, arg InsertLibraryRootParams) (LibraryRoot, error)
 	InsertScanRun(ctx context.Context, arg InsertScanRunParams) (int64, error)
@@ -74,6 +78,7 @@ type Querier interface {
 	ListAllLibraryFiles(ctx context.Context) ([]ListAllLibraryFilesRow, error)
 	ListAniListOutbox(ctx context.Context, accountID int64) ([]AnilistOutbox, error)
 	ListCustomListItems(ctx context.Context, listID int64) ([]CustomListItem, error)
+	ListCustomListMembership(ctx context.Context, mediaType string) ([]ListCustomListMembershipRow, error)
 	ListCustomLists(ctx context.Context) ([]ListCustomListsRow, error)
 	// The library as a list of titles rather than of files: one row per title the
 	// user has something of, which is what a shelf of posters is made from.
@@ -96,6 +101,7 @@ type Querier interface {
 	ListTorrentDownloads(ctx context.Context, limit int64) ([]TorrentDownload, error)
 	ListTorrentRules(ctx context.Context) ([]TorrentRule, error)
 	ListTorznabSources(ctx context.Context) ([]TorznabSource, error)
+	ListTrackerEntries(ctx context.Context, mediaType string) ([]TrackerEntry, error)
 	ListUnfinishedTorrentDownloads(ctx context.Context) ([]TorrentDownload, error)
 	// Files the matcher still has to work out, ordered so that every episode of one
 	// title arrives together: the candidates are then looked up once per title
@@ -139,6 +145,7 @@ type Querier interface {
 	UpsertNodeMeta(ctx context.Context, arg UpsertNodeMetaParams) (NodeMetum, error)
 	UpsertSourceCache(ctx context.Context, arg UpsertSourceCacheParams) error
 	UpsertTorrentRule(ctx context.Context, arg UpsertTorrentRuleParams) (TorrentRule, error)
+	UpsertTrackerEntry(ctx context.Context, arg UpsertTrackerEntryParams) error
 }
 
 var _ Querier = (*Queries)(nil)

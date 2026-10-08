@@ -38,7 +38,11 @@ type AccountOutput struct {
 }
 
 type MediaTypeQuery struct {
-	Type service.MediaType `query:"type" enum:"anime,manga" required:"true" doc:"Which collection to read."`
+	Type service.MediaType `query:"type" enum:"anime,manga,movie,series,dorama" required:"true" doc:"Which collection to read. Anime and manga are the AniList account's; movies, series and doramas are this node's own list."`
+}
+
+type EntryRefInput struct {
+	MediaRef string `path:"media_ref" example:"tmdb:movie:603" doc:"The entry's media reference."`
 }
 
 type EntriesOutput struct {
@@ -166,7 +170,7 @@ func (h *Handler) Register(api huma.API) {
 		Method:      http.MethodGet,
 		Path:        "/v1/tracker/entries",
 		Summary:     "Tracker entries",
-		Description: "Served from the node's mirror, so it works offline. A stale mirror is returned immediately while a refresh runs; a `tracker` event announces the result.",
+		Description: "Served from the node's mirror, so it works offline. A stale mirror is returned immediately while a refresh runs; a `tracker` event announces the result. Movies, series and doramas are the node's own list: always current, no AniList account needed.",
 		Tags:        []string{"tracker"},
 	}, func(ctx context.Context, in *MediaTypeQuery) (*EntriesOutput, error) {
 		collection, err := h.svc.Entries(ctx, in.Type)
@@ -181,6 +185,9 @@ func (h *Handler) Register(api huma.API) {
 		out.Body.FetchedAt = collection.FetchedAt
 		out.Body.Stale = collection.Stale
 		out.Body.Sources = []httpapi.Source{httpapi.AniListSource}
+		if in.Type != service.MediaTypeAnime && in.Type != service.MediaTypeManga {
+			out.Body.Sources = []httpapi.Source{httpapi.TMDBSource}
+		}
 
 		return out, nil
 	})
@@ -190,7 +197,7 @@ func (h *Handler) Register(api huma.API) {
 		Method:      http.MethodPut,
 		Path:        "/v1/tracker/entries/{media_ref}",
 		Summary:     "Update a tracker entry",
-		Description: "Applies the change locally and queues it for AniList, so it works offline. The returned entry already carries the change with `sync_pending: true`; a `tracker` event with reason `synced` follows once AniList has it. A progress lower than what AniList already holds is only sent when it is lower than what the user saw — so an older offline edit never rolls back progress made on another device. A title not in the lists yet is added instead: that goes straight to AniList and needs it reachable, lands in `PLANNING` unless a status is given, and comes back already synced.",
+		Description: "An anime or manga entry is applied locally and queued for AniList, so it works offline. The returned entry already carries the change with `sync_pending: true`; a `tracker` event with reason `synced` follows once AniList has it. A progress lower than what AniList already holds is only sent when it is lower than what the user saw — so an older offline edit never rolls back progress made on another device. A title not in the lists yet is added instead: that goes straight to AniList and needs it reachable, lands in `PLANNING` unless a status is given, and comes back already synced. A movie, series or dorama (tmdb:…) is the node's own and saved at once; adding one the node has never fetched needs TMDB reachable. Progress on those starts the title and, at the last episode, completes it, as AniList's site does.",
 		Tags:        []string{"tracker"},
 	}, func(ctx context.Context, in *UpdateEntryInput) (*EntryOutput, error) {
 		entry, err := h.svc.UpdateEntry(ctx, in.MediaRef, service.EntryPatch{
@@ -209,6 +216,22 @@ func (h *Handler) Register(api huma.API) {
 		}
 
 		return &EntryOutput{Body: entry}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID:   "deleteTrackerEntry",
+		Method:        http.MethodDelete,
+		Path:          "/v1/tracker/entries/{media_ref}",
+		Summary:       "Remove a title from the list",
+		Description:   "Takes the title off the node's own list and out of its custom lists. AniList entries are edited on AniList for now and answer 428.",
+		Tags:          []string{"tracker"},
+		DefaultStatus: http.StatusNoContent,
+	}, func(ctx context.Context, in *EntryRefInput) (*struct{}, error) {
+		if err := h.svc.DeleteEntry(ctx, in.MediaRef); err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return nil, nil
 	})
 
 	huma.Register(api, huma.Operation{

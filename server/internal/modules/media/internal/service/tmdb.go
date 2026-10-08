@@ -20,9 +20,11 @@ const (
 )
 
 const (
-	// TMDB's terms allow six months. A day keeps a show that is airing current
-	// and matches every other source the node reads.
-	tmdbMaxAge = 24 * time.Hour
+	// A title page asks TMDB again after a day, so a show that is airing stays
+	// current. What is older still names the titles on the user's own list,
+	// offline too, until the ceiling — TMDB's terms allow six months.
+	tmdbMaxAge  = 24 * time.Hour
+	tmdbCeiling = 150 * 24 * time.Hour
 
 	// Bump when cachedTMDB or cachedTMDBEpisodes changes shape.
 	tmdbCacheVersion = 1
@@ -136,7 +138,7 @@ func (s *Service) putTMDB(ctx context.Context, key string, value any, now time.T
 		s.logger.Warn().Err(putErr).Str("key", key).Msg("store tmdb payload")
 	}
 
-	if purgeErr := s.store.PurgeOlderThan(ctx, ProviderTMDB, now.Add(-tmdbMaxAge)); purgeErr != nil {
+	if purgeErr := s.store.PurgeOlderThan(ctx, ProviderTMDB, now.Add(-tmdbCeiling)); purgeErr != nil {
 		s.logger.Warn().Err(purgeErr).Msg("purge expired tmdb cache")
 	}
 }

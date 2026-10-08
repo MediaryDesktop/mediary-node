@@ -63,20 +63,6 @@ type Deps struct {
 func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 	httpapi.RegisterHealth(api, deps.Build, deps.Linked)
 
-	trackerModule := tracker.New(tracker.Deps{
-		DB:                  deps.DB,
-		Logger:              moduleLogger(deps.Logger, "tracker"),
-		Events:              deps.Events,
-		AniList:             deps.AniList,
-		AniListClientID:     deps.AniListClientID,
-		AniListAuthorizeURL: deps.AniListAuthorizeURL,
-		RefreshInterval:     deps.AniListRefresh,
-	})
-	trackerModule.Register(api)
-
-	// The library matches files against titles; the tracker knows which titles the
-	// user follows. Joining them is this file's job, so that neither module has to
-	// know the other exists.
 	mediaModule := media.New(media.Deps{
 		DB:      deps.DB,
 		Logger:  moduleLogger(deps.Logger, "media"),
@@ -85,6 +71,24 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 		TMDB:    deps.TMDB,
 	})
 	mediaModule.Register(api)
+
+	// The tracker keeps the user's own list of movies and shows; their names and
+	// posters are the media module's, reached through a port.
+	trackerModule := tracker.New(tracker.Deps{
+		DB:                  deps.DB,
+		Logger:              moduleLogger(deps.Logger, "tracker"),
+		Events:              deps.Events,
+		AniList:             deps.AniList,
+		AniListClientID:     deps.AniListClientID,
+		AniListAuthorizeURL: deps.AniListAuthorizeURL,
+		RefreshInterval:     deps.AniListRefresh,
+		Titles:              localTitles{media: mediaModule},
+	})
+	trackerModule.Register(api)
+
+	// The library matches files against titles; the tracker knows which titles the
+	// user follows. Joining them is this file's job, so that neither module has to
+	// know the other exists.
 
 	var titles library.TitleSource
 	if deps.AniList != nil {

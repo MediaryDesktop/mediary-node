@@ -43,6 +43,12 @@ func (m *Module) Register(api huma.API) {
 	m.handler.Register(api)
 }
 
+// Details is the title page's answer: from the cache while it is fresh, otherwise
+// from the source.
+func (m *Module) Details(ctx context.Context, mediaRef string) (*MediaDetails, error) {
+	return m.svc.Details(ctx, mediaRef)
+}
+
 // Cached answers from the node's own details cache and never reaches the source.
 // It returns nil for a title the node has never fetched, which is an ordinary
 // answer and not an error.
