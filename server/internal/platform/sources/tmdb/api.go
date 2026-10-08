@@ -275,12 +275,44 @@ type Details struct {
 	Videos            struct {
 		Results []Video `json:"results"`
 	} `json:"videos"`
+
+	// Recommendations are TMDB's picks for people who liked the title; Similar,
+	// titles alike in genre and keywords. Both come with the details.
+	Recommendations Page `json:"recommendations"`
+	Similar         Page `json:"similar"`
+
+	// Collection is the series of films a movie belongs to — a trilogy.
+	Collection *CollectionRef `json:"belongs_to_collection"`
 }
 
-// Title fetches a movie or a show with its other names and trailers in the same
-// request.
+type CollectionRef struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
+
+type Collection struct {
+	ID    int      `json:"id"`
+	Name  string   `json:"name"`
+	Parts []Result `json:"parts"`
+}
+
+// Collection fetches the films of a series.
+func (c *Client) Collection(ctx context.Context, id int, language string) (*Collection, error) {
+	query := url.Values{}
+	setLanguage(query, language)
+
+	var collection Collection
+	if err := c.call(ctx, fmt.Sprintf("/collection/%d", id), query, &collection); err != nil {
+		return nil, err
+	}
+
+	return &collection, nil
+}
+
+// Title fetches a movie or a show with its other names, trailers,
+// recommendations and similar titles in the same request.
 func (c *Client) Title(ctx context.Context, kind Kind, id int, language string) (*Details, error) {
-	query := url.Values{"append_to_response": {"alternative_titles,videos"}}
+	query := url.Values{"append_to_response": {"alternative_titles,videos,recommendations,similar"}}
 	setLanguage(query, language)
 
 	var details Details

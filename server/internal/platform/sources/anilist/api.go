@@ -357,20 +357,25 @@ type Titles struct {
 }
 
 type Relation struct {
-	RelationType string `json:"relationType"`
-	Node         struct {
-		ID         int     `json:"id"`
-		Type       string  `json:"type"`
-		Format     *string `json:"format"`
-		Status     *string `json:"status"`
-		SeasonYear *int    `json:"seasonYear"`
-		Title      Titles  `json:"title"`
-		CoverImage struct {
-			Large  *string `json:"large"`
-			Medium *string `json:"medium"`
-			Color  *string `json:"color"`
-		} `json:"coverImage"`
-	} `json:"node"`
+	RelationType string      `json:"relationType"`
+	Node         RelatedNode `json:"node"`
+}
+
+// RelatedNode is a title another one points at: a relation's target or a
+// recommendation.
+type RelatedNode struct {
+	ID         int     `json:"id"`
+	Type       string  `json:"type"`
+	Format     *string `json:"format"`
+	Status     *string `json:"status"`
+	SeasonYear *int    `json:"seasonYear"`
+	IsAdult    bool    `json:"isAdult"`
+	Title      Titles  `json:"title"`
+	CoverImage struct {
+		Large  *string `json:"large"`
+		Medium *string `json:"medium"`
+		Color  *string `json:"color"`
+	} `json:"coverImage"`
 }
 
 type MediaDetails struct {
@@ -424,6 +429,13 @@ type MediaDetails struct {
 	Relations struct {
 		Edges []Relation `json:"edges"`
 	} `json:"relations"`
+	// Recommendations are what AniList's users suggested to people who liked
+	// this title, best rated first. A node whose title was removed comes back null.
+	Recommendations struct {
+		Nodes []struct {
+			MediaRecommendation *RelatedNode `json:"mediaRecommendation"`
+		} `json:"nodes"`
+	} `json:"recommendations"`
 	StreamingEpisodes []StreamingEpisode `json:"streamingEpisodes"`
 }
 

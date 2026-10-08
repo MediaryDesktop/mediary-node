@@ -28,7 +28,12 @@ const detailsFixture = `{"data":{"Media":{
   "trailer":{"id":"ZEkwCGJ3o7M","site":"youtube","thumbnail":"https://img/trailer.jpg"},
   "nextAiringEpisode":null,
   "studios":{"nodes":[{"id":1,"name":"Madhouse"}]},
-  "relations":{"edges":[{"relationType":"SOURCE","node":{"id":118586,"type":"MANGA","format":"MANGA","title":{"userPreferred":"Frieren"},"coverImage":{"large":"https://img/manga.jpg"}}}]}
+  "relations":{"edges":[{"relationType":"SOURCE","node":{"id":118586,"type":"MANGA","format":"MANGA","title":{"userPreferred":"Frieren"},"coverImage":{"large":"https://img/manga.jpg"}}}]},
+  "recommendations":{"nodes":[
+    {"mediaRecommendation":{"id":21,"type":"ANIME","format":"TV","seasonYear":1999,"title":{"userPreferred":"One Piece"},"coverImage":{"large":"https://img/op.jpg","color":"#e4a15d"}}},
+    {"mediaRecommendation":null},
+    {"mediaRecommendation":{"id":9,"type":"ANIME","format":"OVA","isAdult":true,"title":{"userPreferred":"Adult"},"coverImage":{}}}
+  ]}
 }}}`
 
 type detailsHarness struct {
@@ -189,5 +194,28 @@ func TestDetailsRejectForeignReferences(t *testing.T) {
 
 	if h.requests.Load() != 0 {
 		t.Fatalf("an invalid reference must not reach the source, got %d requests", h.requests.Load())
+	}
+}
+
+func TestAniListRecommendationsSkipRemovedAndAdultTitles(t *testing.T) {
+	h := newDetailsHarness(t)
+
+	details, err := h.svc.Details(context.Background(), "anilist:154587")
+	if err != nil {
+		t.Fatalf("details: %v", err)
+	}
+
+	if len(details.Recommendations) != 1 {
+		t.Fatalf("recommendations %+v, want One Piece alone", details.Recommendations)
+	}
+
+	recommended := details.Recommendations[0]
+	if recommended.MediaRef != "anilist:21" || recommended.RelationType != "RECOMMENDATION" ||
+		*recommended.CoverImage != "https://img/op.jpg" || *recommended.CoverColor != "#e4a15d" {
+		t.Fatalf("recommendation %+v", recommended)
+	}
+
+	if details.Similar == nil || len(details.Similar) != 0 {
+		t.Fatalf("AniList has no similar titles of its own, got %v", details.Similar)
 	}
 }

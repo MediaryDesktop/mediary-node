@@ -27,7 +27,10 @@ const (
 	tmdbCeiling = 150 * 24 * time.Hour
 
 	// Bump when cachedTMDB or cachedTMDBEpisodes changes shape.
-	tmdbCacheVersion = 1
+	tmdbCacheVersion = 2
+
+	// How many suggestions a title page shows; TMDB returns twenty a page.
+	maxSuggestions = 16
 
 	tmdbLanguage = "en-US"
 	tmdbPerPage  = 20
@@ -118,6 +121,17 @@ func (s *Service) tmdbTitle(ctx context.Context, ref titleRef) (*cachedTMDB, err
 		Version: tmdbCacheVersion,
 		Details: detailsFromTMDB(ref.kind, source, now),
 		Seasons: regularSeasons(source.Seasons),
+	}
+
+	// The other films of a series are its relations. Without them the page is
+	// still whole, so a failure only leaves the section out.
+	if source.Collection != nil {
+		collection, collectionErr := client.Collection(ctx, source.Collection.ID, tmdbLanguage)
+		if collectionErr != nil {
+			s.logger.Warn().Err(collectionErr).Int("collection", source.Collection.ID).Msg("tmdb collection is unavailable")
+		} else {
+			entry.Details.Relations = collectionRelations(source, collection.Parts)
+		}
 	}
 
 	s.putTMDB(ctx, ref.cacheKey(), entry, now)
@@ -606,6 +620,8 @@ func detailsFromTMDB(kind tmdb.Kind, source *tmdb.Details, fetchedAt time.Time) 
 		SiteURL:         "https://www.themoviedb.org/" + string(kind) + "/" + strconv.Itoa(source.ID),
 		Trailer:         tmdbTrailer(source.Videos.Results),
 		Relations:       []RelatedMedia{},
+		Recommendations: suggestionsFromTMDB(kind, "RECOMMENDATION", source.Recommendations.Results),
+		Similar:         suggestionsFromTMDB(kind, "SIMILAR", source.Similar.Results),
 		FetchedAt:       fetchedAt.UTC(),
 	}
 
@@ -628,6 +644,77 @@ func detailsFromTMDB(kind tmdb.Kind, source *tmdb.Details, fetchedAt time.Time) 
 	}
 
 	return details
+}
+
+// suggestionsFromTMDB keeps what the user can open: Japanese animation is
+// AniList's, so it is left to that catalog.
+func suggestionsFromTMDB(kind tmdb.Kind, relationType string, results []tmdb.Result) []RelatedMedia {
+	suggestions := []RelatedMedia{}
+
+	for i := range results {
+		found := &results[i]
+		if ownedByAniList(found.GenreIDs, found.OriginalLanguage) || found.Adult {
+			continue
+		}
+
+		suggestions = append(suggestions, relatedFromTMDB(kind, relationType, found))
+
+		if len(suggestions) == maxSuggestions {
+			break
+		}
+	}
+
+	return suggestions
+}
+
+// collectionRelations names the other films of a series by when they came out:
+// earlier ones are prequels, later ones sequels, as AniList calls them.
+func collectionRelations(movie *tmdb.Details, parts []tmdb.Result) []RelatedMedia {
+	others := make([]tmdb.Result, 0, len(parts))
+	for i := range parts {
+		if parts[i].ID != movie.ID {
+			others = append(others, parts[i])
+		}
+	}
+
+	slices.SortStableFunc(others, func(a, b tmdb.Result) int { return strings.Compare(a.ReleaseDate, b.ReleaseDate) })
+
+	relations := make([]RelatedMedia, 0, len(others))
+
+	for i := range others {
+		part := &others[i]
+
+		relationType := "OTHER"
+		switch {
+		case part.ReleaseDate == "" || movie.ReleaseDate == "":
+		case part.ReleaseDate < movie.ReleaseDate:
+			relationType = "PREQUEL"
+		default:
+			relationType = "SEQUEL"
+		}
+
+		relations = append(relations, relatedFromTMDB(tmdb.KindMovie, relationType, part))
+	}
+
+	return relations
+}
+
+func relatedFromTMDB(kind tmdb.Kind, relationType string, found *tmdb.Result) RelatedMedia {
+	title, original, date := found.Name, found.OriginalName, found.FirstAirDate
+	format := "TV"
+	if kind == tmdb.KindMovie {
+		title, original, date, format = found.Title, found.OriginalTitle, found.ReleaseDate, "MOVIE"
+	}
+
+	return RelatedMedia{
+		RelationType: relationType,
+		MediaRef:     tmdbMediaRef(kind, found.ID),
+		MediaType:    classifyTMDB(kind, found.GenreIDs, found.OriginCountry),
+		Format:       &format,
+		SeasonYear:   parseDate(date).Year,
+		Title:        tmdbTitleNames(title, original),
+		CoverImage:   tmdb.ImageURL(found.PosterPath, posterSize),
+	}
 }
 
 func summaryFromTMDB(kind tmdb.Kind, source *tmdb.Result, genreNames map[int]string) MediaSummary {

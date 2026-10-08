@@ -87,5 +87,28 @@ query MediaDetails($id: Int) {
         }
       }
     }
+    recommendations(sort: RATING_DESC, perPage: 16) {
+      nodes {
+        mediaRecommendation {
+          id
+          type
+          format
+          status(version: 2)
+          seasonYear
+          isAdult
+          title {
+            userPreferred
+            romaji
+            english
+            native
+          }
+          coverImage {
+            large
+            medium
+            color
+          }
+        }
+      }
+    }
   }
 }

@@ -71,6 +71,8 @@ type MediaDetails struct {
 	Trailer           *Trailer       `json:"trailer"`
 	NextAiringEpisode *AiringEpisode `json:"next_airing_episode"`
 	Relations         []RelatedMedia `json:"relations"`
+	Recommendations   []RelatedMedia `json:"recommendations" doc:"Titles suggested to people who liked this one: AniList users' recommendations, or TMDB's own picks."`
+	Similar           []RelatedMedia `json:"similar" doc:"Titles alike in genre and keywords. TMDB only; empty for an AniList title."`
 	FetchedAt         time.Time      `json:"fetched_at"`
 }
 

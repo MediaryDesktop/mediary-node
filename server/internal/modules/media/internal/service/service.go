@@ -20,7 +20,7 @@ const aniListMaxAge = 24 * time.Hour
 
 // Bump when MediaDetails gains a field, so payloads cached by an older build
 // are fetched again instead of being served without it for up to a day.
-const detailsCacheVersion = 3
+const detailsCacheVersion = 4
 
 type cachedDetails struct {
 	Version int          `json:"version"`

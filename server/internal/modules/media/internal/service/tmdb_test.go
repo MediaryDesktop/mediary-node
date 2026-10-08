@@ -32,8 +32,25 @@ const matrixFixture = `{
     {"key":"fan","site":"YouTube","type":"Trailer","official":false},
     {"key":"teaser","site":"YouTube","type":"Teaser","official":true},
     {"key":"vKQi3bBA1y8","site":"YouTube","type":"Trailer","official":true}
+  ]},
+  "belongs_to_collection":{"id":2344,"name":"The Matrix Collection"},
+  "recommendations":{"results":[
+    {"id":604,"title":"The Matrix Reloaded","original_title":"The Matrix Reloaded","release_date":"2003-05-15","genre_ids":[28],"poster_path":"/reloaded.jpg"},
+    {"id":149,"title":"Akira","original_title":"AKIRA","original_language":"ja","release_date":"1988-07-16","genre_ids":[16,878]}
+  ]},
+  "similar":{"results":[
+    {"id":100,"title":"Dark City","release_date":"1998-02-27","genre_ids":[878]}
   ]}
 }`
+
+const matrixCollectionFixture = `{"id":2344,"name":"The Matrix Collection","parts":[
+  {"id":624860,"title":"The Matrix Resurrections","release_date":"2021-12-16"},
+  {"id":603,"title":"The Matrix","release_date":"1999-03-31"},
+  {"id":605,"title":"The Matrix Revolutions","release_date":"2003-11-05"},
+  {"id":604,"title":"The Matrix Reloaded","release_date":"2003-05-15"},
+  {"id":7,"title":"The Matrix Prologue","release_date":"1990-01-01"},
+  {"id":8,"title":"The Matrix 5","release_date":""}
+]}`
 
 const showFixture = `{
   "id":1396,"name":"Breaking Bad","original_name":"Breaking Bad","first_air_date":"2008-01-20","last_air_date":"2013-09-29",
@@ -141,7 +158,7 @@ func (h *tmdbHarness) last(path string) url.Values {
 }
 
 func TestTMDBMovieDetailsAreMappedAndCached(t *testing.T) {
-	h := newTMDBHarness(t, map[string]string{"/movie/603": matrixFixture})
+	h := newTMDBHarness(t, map[string]string{"/movie/603": matrixFixture, "/collection/2344": matrixCollectionFixture})
 	ctx := context.Background()
 
 	details, err := h.svc.Details(ctx, "tmdb:movie:603")
@@ -181,7 +198,7 @@ func TestTMDBMovieDetailsAreMappedAndCached(t *testing.T) {
 		t.Fatalf("site %s", details.SiteURL)
 	}
 
-	if query := h.last("/movie/603"); query.Get("append_to_response") != "alternative_titles,videos" || query.Get("api_key") != "key" {
+	if query := h.last("/movie/603"); query.Get("append_to_response") != "alternative_titles,videos,recommendations,similar" || query.Get("api_key") != "key" {
 		t.Fatalf("query %v", query)
 	}
 
@@ -194,16 +211,58 @@ func TestTMDBMovieDetailsAreMappedAndCached(t *testing.T) {
 		t.Fatalf("cached %+v, %v", cached, err)
 	}
 
-	if len(h.paths()) != 1 {
-		t.Fatalf("within a day TMDB is asked once, got %v", h.paths())
+	if len(h.paths()) != 2 {
+		t.Fatalf("within a day TMDB is asked once for the film and once for its series, got %v", h.paths())
 	}
 
 	h.now = h.now.Add(25 * time.Hour)
 	if _, err := h.svc.Details(ctx, "tmdb:movie:603"); err != nil {
 		t.Fatalf("refetched details: %v", err)
 	}
-	if len(h.paths()) != 2 {
+	if len(h.paths()) != 4 {
 		t.Fatalf("past a day TMDB is asked again, got %v", h.paths())
+	}
+}
+
+func TestTMDBMovieRelationsRecommendationsAndSimilar(t *testing.T) {
+	h := newTMDBHarness(t, map[string]string{"/movie/603": matrixFixture, "/collection/2344": matrixCollectionFixture})
+
+	details, err := h.svc.Details(context.Background(), "tmdb:movie:603")
+	if err != nil {
+		t.Fatalf("details: %v", err)
+	}
+
+	var relations []string
+	for _, relation := range details.Relations {
+		relations = append(relations, relation.RelationType+" "+relation.MediaRef)
+	}
+
+	want := "OTHER tmdb:movie:8, PREQUEL tmdb:movie:7, SEQUEL tmdb:movie:604, SEQUEL tmdb:movie:605, SEQUEL tmdb:movie:624860"
+	if strings.Join(relations, ", ") != want {
+		t.Fatalf("relations %v, want %s: the film itself left out, the rest by when they came out", relations, want)
+	}
+
+	if len(details.Recommendations) != 1 || details.Recommendations[0].MediaRef != "tmdb:movie:604" ||
+		*details.Recommendations[0].CoverImage != "https://image.tmdb.org/t/p/w500/reloaded.jpg" ||
+		details.Recommendations[0].RelationType != "RECOMMENDATION" || *details.Recommendations[0].SeasonYear != 2003 {
+		t.Fatalf("recommendations %+v: Japanese animation is AniList's and is left out", details.Recommendations)
+	}
+
+	if len(details.Similar) != 1 || details.Similar[0].MediaRef != "tmdb:movie:100" || details.Similar[0].MediaType != "movie" {
+		t.Fatalf("similar %+v", details.Similar)
+	}
+}
+
+func TestTMDBMovieWithoutItsSeriesStillLoads(t *testing.T) {
+	h := newTMDBHarness(t, map[string]string{"/movie/603": matrixFixture})
+
+	details, err := h.svc.Details(context.Background(), "tmdb:movie:603")
+	if err != nil {
+		t.Fatalf("details: %v", err)
+	}
+
+	if len(details.Relations) != 0 || len(details.Recommendations) != 1 {
+		t.Fatalf("relations %v recommendations %v", details.Relations, details.Recommendations)
 	}
 }
 

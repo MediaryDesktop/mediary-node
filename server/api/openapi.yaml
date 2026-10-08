@@ -1759,6 +1759,13 @@ components:
           type:
             - integer
             - "null"
+        recommendations:
+          description: "Titles suggested to people who liked this one: AniList users' recommendations, or TMDB's own picks."
+          items:
+            $ref: "#/components/schemas/RelatedMedia"
+          type:
+            - array
+            - "null"
         relations:
           items:
             $ref: "#/components/schemas/RelatedMedia"
@@ -1773,6 +1780,13 @@ components:
           format: int64
           type:
             - integer
+            - "null"
+        similar:
+          description: Titles alike in genre and keywords. TMDB only; empty for an AniList title.
+          items:
+            $ref: "#/components/schemas/RelatedMedia"
+          type:
+            - array
             - "null"
         site_url:
           type: string
@@ -1839,6 +1853,8 @@ components:
         - trailer
         - next_airing_episode
         - relations
+        - recommendations
+        - similar
         - fetched_at
       type: object
     MediaInfo:

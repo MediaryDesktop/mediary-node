@@ -95,7 +95,20 @@ func detailsFromAniList(source *anilist.MediaDetails, fetchedAt time.Time) Media
 		IsAdult:         source.IsAdult,
 		SiteURL:         source.SiteURL,
 		Relations:       []RelatedMedia{},
+		Recommendations: []RelatedMedia{},
+		Similar:         []RelatedMedia{},
 		FetchedAt:       fetchedAt.UTC(),
+	}
+
+	for _, node := range source.Recommendations.Nodes {
+		recommended := node.MediaRecommendation
+
+		// An adult title is only suggested from another one.
+		if recommended == nil || (recommended.IsAdult && !source.IsAdult) {
+			continue
+		}
+
+		details.Recommendations = append(details.Recommendations, relatedFromAniList("RECOMMENDATION", recommended))
 	}
 
 	for _, studio := range source.Studios.Nodes {
@@ -119,21 +132,24 @@ func detailsFromAniList(source *anilist.MediaDetails, fetchedAt time.Time) Media
 
 	for i := range source.Relations.Edges {
 		edge := &source.Relations.Edges[i]
-
-		details.Relations = append(details.Relations, RelatedMedia{
-			RelationType: edge.RelationType,
-			MediaRef:     aniListMediaRef(edge.Node.ID),
-			MediaType:    mediaTypes[edge.Node.Type],
-			Format:       edge.Node.Format,
-			Status:       edge.Node.Status,
-			SeasonYear:   edge.Node.SeasonYear,
-			Title:        titleNames(edge.Node.Title),
-			CoverImage:   firstPresent(edge.Node.CoverImage.Large, edge.Node.CoverImage.Medium),
-			CoverColor:   edge.Node.CoverImage.Color,
-		})
+		details.Relations = append(details.Relations, relatedFromAniList(edge.RelationType, &edge.Node))
 	}
 
 	return details
+}
+
+func relatedFromAniList(relationType string, node *anilist.RelatedNode) RelatedMedia {
+	return RelatedMedia{
+		RelationType: relationType,
+		MediaRef:     aniListMediaRef(node.ID),
+		MediaType:    mediaTypes[node.Type],
+		Format:       node.Format,
+		Status:       node.Status,
+		SeasonYear:   node.SeasonYear,
+		Title:        titleNames(node.Title),
+		CoverImage:   firstPresent(node.CoverImage.Large, node.CoverImage.Medium),
+		CoverColor:   node.CoverImage.Color,
+	}
 }
 
 func summaryFromAniList(source *anilist.MediaSummary) MediaSummary {
