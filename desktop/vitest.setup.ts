@@ -8,6 +8,33 @@ class ResizeObserverStub implements ResizeObserver {
 
 globalThis.ResizeObserver ??= ResizeObserverStub
 
+// jsdom has neither; the carousel's engine reads both.
+class IntersectionObserverStub implements IntersectionObserver {
+	readonly root = null
+	readonly rootMargin = ''
+	readonly thresholds = []
+	observe() {}
+	unobserve() {}
+	disconnect() {}
+	takeRecords() {
+		return []
+	}
+}
+
+globalThis.IntersectionObserver ??= IntersectionObserverStub
+
+window.matchMedia ??= (query: string) =>
+	({
+		matches: false,
+		media: query,
+		onchange: null,
+		addListener() {},
+		removeListener() {},
+		addEventListener() {},
+		removeEventListener() {},
+		dispatchEvent: () => false
+	}) as MediaQueryList
+
 Element.prototype.scrollIntoView ??= () => {}
 
 Object.defineProperty(window, 'mediary', {

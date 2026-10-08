@@ -1,10 +1,9 @@
 import { useUnit } from 'effector-react'
 import { useMemo } from 'react'
-import { IoLibraryOutline } from 'react-icons/io5'
 
 import { useTranslation } from '@shared/i18n'
 import { Button, Icon, SelectDropdown, Switch } from '@shared/ui'
-import type { SelectDropdownOption } from '@shared/ui'
+import type { IconName, SelectDropdownOption } from '@shared/ui'
 
 import { enumLabel } from '@entities/media'
 import type {
@@ -27,6 +26,14 @@ import {
 } from './config'
 import { searchMediaModel } from './model'
 import styles from './SearchFilters.module.scss'
+
+const TYPE_ICONS = {
+	anime: 'categories/anime',
+	manga: 'categories/manga',
+	movie: 'categories/movie',
+	series: 'categories/series',
+	dorama: 'categories/doramas'
+} as const satisfies Record<MediaSearchType, IconName>
 
 function yearOptions(): SelectDropdownOption[] {
 	const latest = new Date().getFullYear() + 1
@@ -107,9 +114,12 @@ export function SearchFilters() {
 			<SelectDropdown
 				value={filters.type}
 				onChange={value => patch({ type: (value ?? 'anime') as MediaSearchType })}
-				options={SEARCH_TYPES.map(type => ({ value: type, label: t(`search.type.${type}`) }))}
+				options={SEARCH_TYPES.map(type => ({
+					value: type,
+					label: t(`search.type.${type}`),
+					icon: TYPE_ICONS[type]
+				}))}
 				accentWhenSelected
-				startIcon={<IoLibraryOutline size={18} />}
 			/>
 
 			<SelectDropdown

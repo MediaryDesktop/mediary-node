@@ -1,0 +1,60 @@
+.root {
+	--carousel-gap: 1rem;
+	--carousel-fade: 2.5rem;
+
+	position: relative;
+	min-width: 0;
+
+	.viewport {
+		overflow: hidden;
+	}
+
+	.track {
+		display: flex;
+		gap: var(--carousel-gap);
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		touch-action: pan-y pinch-zoom;
+	}
+
+	.item {
+		flex: 0 0 var(--carousel-item);
+		min-width: 0;
+	}
+
+	// The edge that has more beyond it fades out, so a cut card reads as "more".
+	&.fadeStart .viewport,
+	&.fadeEnd .viewport {
+		mask-image: linear-gradient(
+			to right,
+			var(--fade-start, #000) 0,
+			#000 var(--carousel-fade),
+			#000 calc(100% - var(--carousel-fade)),
+			var(--fade-end, #000) 100%
+		);
+	}
+
+	&.fadeStart {
+		--fade-start: transparent;
+	}
+
+	&.fadeEnd {
+		--fade-end: transparent;
+	}
+
+	.arrow {
+		position: absolute;
+		top: 50%;
+		z-index: 1;
+		transform: translateY(-50%);
+	}
+
+	.previous {
+		left: 0.5rem;
+	}
+
+	.next {
+		right: 0.5rem;
+	}
+}

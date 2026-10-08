@@ -132,14 +132,6 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 					recommendations={media?.recommendations ?? []}
 					similar={media?.similar ?? []}
 				/>
-
-				{sources
-					.filter(source => source.notice)
-					.map(source => (
-						<p key={source.id} className={styles.attribution}>
-							{source.notice}
-						</p>
-					))}
 			</div>
 
 			<Modal

@@ -23,6 +23,7 @@ export function RelationsSection({ relations }: RelationsSectionProps) {
 
 			<RelatedCards
 				titles={relations}
+				aria-label={t('media.sections.relations')}
 				cornerLabel={relation => enumLabel(t, 'relation', relation.relation_type) ?? undefined}
 			/>
 		</section>

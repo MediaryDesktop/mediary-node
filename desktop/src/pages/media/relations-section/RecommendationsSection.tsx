@@ -48,7 +48,12 @@ export function RecommendationsSection({ recommendations, similar }: Recommendat
 				)}
 			</div>
 
-			<RelatedCards titles={shown === 'recommended' ? recommendations : similar} />
+			<RelatedCards
+				titles={shown === 'recommended' ? recommendations : similar}
+				aria-label={t(
+					shown === 'recommended' ? 'media.sections.recommended' : 'media.sections.similar'
+				)}
+			/>
 		</section>
 	)
 }

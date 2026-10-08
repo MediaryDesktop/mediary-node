@@ -89,6 +89,9 @@ export type { ReelLoaderProps } from './reel-loader/ReelLoader'
 export { SelectionGroup } from './selection-group/SelectionGroup'
 export type { SelectionGroupOption, SelectionGroupProps } from './selection-group/SelectionGroup'
 
+export { Carousel } from './carousel/Carousel'
+export type { CarouselProps } from './carousel/Carousel'
+
 export { SegmentedControl } from './segmented-control/SegmentedControl'
 export type { SegmentedControlItem, SegmentedControlProps } from './segmented-control/SegmentedControl'
 
