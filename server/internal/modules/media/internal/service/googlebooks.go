@@ -60,6 +60,12 @@ func (s *Service) googleBookDetails(ctx context.Context, volumeID string) (*Medi
 
 	volume, err := client.Volume(ctx, volumeID)
 	if err != nil {
+		if cached != nil {
+			if details := decodeCachedBook(cached.Payload); details != nil {
+				return details, nil
+			}
+		}
+
 		return nil, err
 	}
 

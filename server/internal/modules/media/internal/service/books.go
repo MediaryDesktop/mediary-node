@@ -111,6 +111,13 @@ func (s *Service) bookDetails(ctx context.Context, workID string) (*MediaDetails
 
 	work, err := client.Work(ctx, workID)
 	if err != nil {
+		// A day-old page is better than none while Open Library is down.
+		if cached != nil {
+			if details := decodeCachedBook(cached.Payload); details != nil {
+				return details, nil
+			}
+		}
+
 		return nil, err
 	}
 

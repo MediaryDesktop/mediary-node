@@ -56,6 +56,10 @@ type bookHarness struct {
 
 	mu       sync.Mutex
 	requests []*url.URL
+
+	// delay holds every answer back; down fails every work request.
+	delay time.Duration
+	down  bool
 }
 
 func newBookHarness(t *testing.T) *bookHarness {
@@ -79,7 +83,15 @@ func newBookHarness(t *testing.T) *bookHarness {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		h.mu.Lock()
 		h.requests = append(h.requests, r.URL)
+		delay, down := h.delay, h.down
 		h.mu.Unlock()
+
+		time.Sleep(delay)
+
+		if down && strings.HasPrefix(r.URL.Path, "/works/") {
+			w.WriteHeader(http.StatusBadGateway)
+			return
+		}
 
 		switch {
 		case r.URL.Path == "/works/OL893414W.json":
@@ -339,5 +351,65 @@ func TestGoogleBooksStaysOutOfWhatOpenLibraryAnswers(t *testing.T) {
 
 	if page.Items[0].MediaRef != "openlibrary:OL893414W" || len(page.Sources) != 0 {
 		t.Fatalf("page %+v", page)
+	}
+}
+
+func (h *bookHarness) workRequests() int {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	count := 0
+	for _, request := range h.requests {
+		if request.Path == "/works/OL893414W.json" {
+			count++
+		}
+	}
+
+	return count
+}
+
+func TestABookPageOutlivesAnImpatientClient(t *testing.T) {
+	h := newBookHarness(t)
+	h.delay = 150 * time.Millisecond
+
+	impatient, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+	defer cancel()
+
+	if _, err := h.svc.Details(impatient, "openlibrary:OL893414W"); apperr.KindOf(err) != apperr.KindUnavailable {
+		t.Fatalf("an abandoned request answered %v", err)
+	}
+
+	// Asked together, the book is fetched once.
+	var wg sync.WaitGroup
+	for range 3 {
+		wg.Go(func() {
+			if _, err := h.svc.Details(context.Background(), "openlibrary:OL893414W"); err != nil {
+				t.Error(err)
+			}
+		})
+	}
+	wg.Wait()
+
+	if works := h.workRequests(); works != 1 {
+		t.Errorf("fetched the work %d times, want once", works)
+	}
+}
+
+func TestAStalePageStandsInWhileOpenLibraryIsDown(t *testing.T) {
+	h := newBookHarness(t)
+	ctx := context.Background()
+
+	if _, err := h.svc.Details(ctx, "openlibrary:OL893414W"); err != nil {
+		t.Fatal(err)
+	}
+
+	h.mu.Lock()
+	h.down = true
+	h.mu.Unlock()
+	h.now = h.now.Add(48 * time.Hour)
+
+	details, err := h.svc.Details(ctx, "openlibrary:OL893414W")
+	if err != nil || details.Title.English == nil || *details.Title.English != "Dune" {
+		t.Fatalf("details %+v %v", details, err)
 	}
 }

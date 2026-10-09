@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -54,6 +55,9 @@ type Service struct {
 	store  *store.Store
 	logger zerolog.Logger
 	opts   Options
+
+	mu      sync.Mutex
+	flights map[string]*flight
 }
 
 func New(st *store.Store, logger zerolog.Logger, opts Options) *Service {
@@ -61,7 +65,7 @@ func New(st *store.Store, logger zerolog.Logger, opts Options) *Service {
 		opts.Now = time.Now
 	}
 
-	return &Service{store: st, logger: logger, opts: opts}
+	return &Service{store: st, logger: logger, opts: opts, flights: map[string]*flight{}}
 }
 
 func parseMediaRef(mediaRef string) (int, error) {
@@ -84,11 +88,15 @@ func (s *Service) Details(ctx context.Context, mediaRef string) (*MediaDetails, 
 	}
 
 	if ref.provider == ProviderOpenLibrary {
-		return s.bookDetails(ctx, ref.work)
+		return s.shared(ctx, mediaRef, func(fetchCtx context.Context) (*MediaDetails, error) {
+			return s.bookDetails(fetchCtx, ref.work)
+		})
 	}
 
 	if ref.provider == ProviderGoogleBooks {
-		return s.googleBookDetails(ctx, ref.work)
+		return s.shared(ctx, mediaRef, func(fetchCtx context.Context) (*MediaDetails, error) {
+			return s.googleBookDetails(fetchCtx, ref.work)
+		})
 	}
 
 	if ref.provider == ProviderTMDB {
