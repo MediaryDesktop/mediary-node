@@ -617,6 +617,7 @@ export const en = {
 		downloadMissing_other: 'Download · {{count}} missing',
 		back: 'Back',
 		failed: 'Could not load this title',
+		failedHint: 'The source did not answer in time. Try again in a moment.',
 		retry: 'Retry',
 		offline: 'Details are unavailable right now. Showing what your list knows',
 		openOn: 'Open on {{name}}',

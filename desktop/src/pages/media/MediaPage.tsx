@@ -3,7 +3,7 @@ import { useUnit } from 'effector-react'
 import { useEffect } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, Icon, PageTransition } from '@shared/ui'
+import { Button, EmptyState, Icon, PageTransition } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
 
@@ -76,12 +76,20 @@ export function MediaPage({ mediaRef }: MediaPageProps) {
 			)}
 
 			{failed && !entry && (
-				<div className={styles.failure}>
-					<p>{t('media.failed')}</p>
-					<Button size='small' onClick={() => requestDetails(mediaRef)}>
-						{t('media.retry')}
-					</Button>
-				</div>
+				<EmptyState
+					className={styles.failure}
+					title={t('media.failed')}
+					description={t('media.failedHint')}
+					action={
+						<Button
+							size='small'
+							startIcon={<Icon name='common/reset' size={16} />}
+							onClick={() => requestDetails(mediaRef)}
+						>
+							{t('media.retry')}
+						</Button>
+					}
+				/>
 			)}
 		</PageTransition>
 	)

@@ -77,8 +77,11 @@ function searchParams(query: MediaSearchQuery): Record<string, string> {
 	return params
 }
 
+// A book from Open Library takes two requests at one a second, and a page of cards
+// queues several: the node needs longer than the default to answer the last.
 export const fetchMediaDetailsFx = createNodeRequestFx<string, MediaDetailsResponse>(mediaRef => ({
-	url: `/v1/media/${encodeURIComponent(mediaRef)}`
+	url: `/v1/media/${encodeURIComponent(mediaRef)}`,
+	timeout: 20_000
 }))
 
 export const fetchMediaEpisodesFx = createNodeRequestFx<string, MediaEpisodesResponse>(mediaRef => ({
