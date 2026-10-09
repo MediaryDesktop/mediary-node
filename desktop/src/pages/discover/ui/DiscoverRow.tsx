@@ -59,7 +59,7 @@ export function DiscoverRow({ title, state, onRetry }: DiscoverRowProps) {
 				<h2 className={styles.title}>{title}</h2>
 				<div className={styles.skeletons}>
 					{Array.from({ length: SKELETONS }, (_, index) => (
-						<Skeleton key={index} className={styles.skeleton} radius='14px' />
+						<Skeleton key={index} height='auto' className={styles.skeleton} radius='14px' />
 					))}
 				</div>
 			</section>
