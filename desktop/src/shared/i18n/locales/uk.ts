@@ -631,6 +631,9 @@ export const uk: Translation = {
 		chapters: {
 			title: 'Глави · {{count}}'
 		},
+		books: {
+			title: 'Файли в бібліотеці'
+		},
 		library: {
 			notInLibrary: 'Немає у вашій бібліотеці',
 			episodesNotInLibrary: 'Цих епізодів немає у вашій бібліотеці:',
@@ -821,7 +824,24 @@ export const uk: Translation = {
 		nextChapter: 'Наступний розділ',
 		pageOf: '{{current}} / {{total}}',
 		end: 'Кінець розділу',
-		chapterNumber: 'Розділ {{number}}'
+		chapterNumber: 'Розділ {{number}}',
+		book: {
+			read: 'Читати',
+			loadFailed: 'Не вдалося відкрити книжку.',
+			unreadable: 'Цю книжку не вдалося показати. Можливо, файл пошкоджений або захищений.',
+			contents: 'Зміст',
+			smaller: 'Менший текст',
+			larger: 'Більший текст',
+			theme: {
+				dark: 'Темні сторінки',
+				sepia: 'Сепія',
+				light: 'Білі сторінки'
+			},
+			previousPage: 'Попередня сторінка',
+			nextPage: 'Наступна сторінка',
+			position: 'Місце в книжці',
+			percent: '{{percent}}%'
+		}
 	},
 	playback: {
 		episode: 'Серія {{number}}',

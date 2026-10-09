@@ -72,7 +72,7 @@ export const fetchLibraryTreeFx = createNodeRequestFx<void, NodeSchemas['FilesOu
 // season count, so a title page never has to page.
 export interface TitleFilesParams {
 	mediaRef: string
-	kind: 'video' | 'manga'
+	kind: 'video' | 'manga' | 'book'
 }
 
 // One title's files of one kind. 500 is the node's page ceiling and far above any

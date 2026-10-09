@@ -1,10 +1,9 @@
 import { useRouter } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
 import { useEffect, useMemo, useState } from 'react'
-import type { ReactNode } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, Icon, ReelLoader, WindowControls } from '@shared/ui'
+import { Button, ReelLoader } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
 
@@ -12,7 +11,7 @@ import { chapterQuery, neighbourChapters, ReaderView } from '@entities/reader'
 
 import { useTitleChapters } from '@features/title-chapters'
 
-import styles from './ReadPage.module.scss'
+import { Panel } from './Panel'
 
 export interface ReadPageProps {
 	chapterRef: string
@@ -77,26 +76,5 @@ export function ReadPage({ chapterRef, onOpenChapter }: ReadPageProps) {
 			next={neighbours.next}
 			onOpenChapter={onOpenChapter}
 		/>
-	)
-}
-
-function Panel({ onClose, children }: { onClose: () => void; children: ReactNode }) {
-	const { t } = useTranslation()
-
-	return (
-		<div className={styles.root}>
-			<header className={styles.top}>
-				<Button
-					variant='ghost'
-					size='small'
-					aria-label={t('reader.close')}
-					startIcon={<Icon name='common/arrow-left' size={18} />}
-					onClick={onClose}
-				/>
-				<WindowControls className={styles.window} />
-			</header>
-
-			<div className={styles.body}>{children}</div>
-		</div>
 	)
 }

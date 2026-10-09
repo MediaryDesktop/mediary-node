@@ -26,6 +26,7 @@ import {
 } from '../lib/episodes'
 import type { EpisodeIndex } from '../lib/episodes'
 
+import { BookFiles } from './BookFiles'
 import { ChapterList } from './ChapterList'
 import { EpisodeImage } from './EpisodeImage'
 import styles from './LibrarySection.module.scss'
@@ -53,6 +54,10 @@ export function LibrarySection(props: LibrarySectionProps) {
 				coverColor={props.coverColor}
 			/>
 		)
+	}
+
+	if (props.mediaType === 'book') {
+		return <BookFiles mediaRef={props.mediaRef} />
 	}
 
 	if (!VIDEO_TYPES.includes(props.mediaType)) {

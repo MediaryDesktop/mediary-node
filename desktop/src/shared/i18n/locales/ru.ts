@@ -633,6 +633,9 @@ export const ru: Translation = {
 		chapters: {
 			title: 'Главы · {{count}}'
 		},
+		books: {
+			title: 'Файлы в библиотеке'
+		},
 		library: {
 			notInLibrary: 'Нет в вашей библиотеке',
 			episodesNotInLibrary: 'Этих эпизодов нет в вашей библиотеке:',
@@ -823,7 +826,24 @@ export const ru: Translation = {
 		nextChapter: 'Следующая глава',
 		pageOf: '{{current}} / {{total}}',
 		end: 'Конец главы',
-		chapterNumber: 'Глава {{number}}'
+		chapterNumber: 'Глава {{number}}',
+		book: {
+			read: 'Читать',
+			loadFailed: 'Не удалось открыть книгу.',
+			unreadable: 'Эту книгу не удалось показать. Возможно, файл повреждён или защищён.',
+			contents: 'Оглавление',
+			smaller: 'Мельче',
+			larger: 'Крупнее',
+			theme: {
+				dark: 'Тёмные страницы',
+				sepia: 'Сепия',
+				light: 'Белые страницы'
+			},
+			previousPage: 'Предыдущая страница',
+			nextPage: 'Следующая страница',
+			position: 'Место в книге',
+			percent: '{{percent}}%'
+		}
 	},
 	playback: {
 		episode: 'Серия {{number}}',

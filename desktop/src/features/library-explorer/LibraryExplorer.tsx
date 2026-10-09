@@ -1,3 +1,4 @@
+import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
 import { useEffect, useMemo, useState } from 'react'
 import { FaFilter } from 'react-icons/fa6'
@@ -32,6 +33,7 @@ export interface LibraryExplorerProps {
 
 export function LibraryExplorer({ onMatchMany }: LibraryExplorerProps) {
 	const { t } = useTranslation()
+	const navigate = useNavigate()
 
 	const [open, closed, search, setSearch] = useUnit([
 		libraryExplorerModel.$open,
@@ -312,7 +314,13 @@ export function LibraryExplorer({ onMatchMany }: LibraryExplorerProps) {
 						</div>
 					</div>
 
-					<DetailPanel node={focused} titles={titles} />
+					<DetailPanel
+						node={focused}
+						titles={titles}
+						onRead={fileId =>
+							void navigate({ to: '/read-book/$fileId', params: { fileId: String(fileId) } })
+						}
+					/>
 				</div>
 			</Drawer>
 

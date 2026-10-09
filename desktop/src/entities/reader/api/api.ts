@@ -24,3 +24,27 @@ export const reportReaderPageFx = createNodeRequestFx<ReportPageParams, NodeSche
 		body: { page }
 	})
 )
+
+export type ReaderBook = NodeSchemas['BookInfo']
+export type ReaderBookPosition = NodeSchemas['BookPosition']
+export type ReaderBookState = Omit<NodeSchemas['BookPositionOutputBody'], '$schema'>
+
+// The book's name and type, and where it was left, before its bytes.
+export const fetchBookStateFx = createNodeRequestFx<number, ReaderBookState>(fileId => ({
+	url: `/v1/reader/files/${fileId}/book/position`
+}))
+
+export interface SaveBookPositionParams {
+	fileId: number
+	locator: string
+	fraction: number
+}
+
+// The node keeps the place and moves the user's list along with it.
+export const saveBookPositionFx = createNodeRequestFx<SaveBookPositionParams, ReaderBookState>(
+	({ fileId, locator, fraction }) => ({
+		url: `/v1/reader/files/${fileId}/book/position`,
+		method: 'PUT',
+		body: { locator, fraction }
+	})
+)

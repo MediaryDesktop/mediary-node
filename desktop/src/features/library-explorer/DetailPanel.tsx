@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { formatBytes } from '@shared/lib'
-import { Badge, Icon } from '@shared/ui'
+import { Badge, Button, Icon } from '@shared/ui'
 
 import { fileDuration, fileNumber, fileSeason, isMatched } from '@entities/library-item'
 import type { LibraryTitle } from '@entities/library-item'
@@ -14,6 +14,8 @@ import type { TreeNode } from './lib/build-tree'
 export interface DetailPanelProps {
 	node: TreeNode | null
 	titles: LibraryTitle[]
+	// Opens a book in the reader; matched or not, a book on disk can be read.
+	onRead?: (fileId: number) => void
 }
 
 function extensionOf(name: string): string {
@@ -22,7 +24,7 @@ function extensionOf(name: string): string {
 	return dot > 0 ? name.slice(dot + 1).toUpperCase() : ''
 }
 
-export function DetailPanel({ node, titles }: DetailPanelProps) {
+export function DetailPanel({ node, titles, onRead }: DetailPanelProps) {
 	const { t } = useTranslation()
 
 	if (node === null) {
@@ -49,6 +51,16 @@ export function DetailPanel({ node, titles }: DetailPanelProps) {
 
 				{extension && (
 					<span className={styles.chip}>{t('library.explorer.extension', { extension })}</span>
+				)}
+
+				{onRead && file?.kind === 'book' && !file.missing && (
+					<Button
+						size='small'
+						startIcon={<Icon name='common/book-open' size={16} />}
+						onClick={() => onRead(file.id)}
+					>
+						{t('reader.book.read')}
+					</Button>
 				)}
 			</section>
 

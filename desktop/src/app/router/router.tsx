@@ -5,12 +5,20 @@ import { NotFoundPage, RouteErrorPage } from '@pages/fallback'
 import { authTree } from './routes/auth'
 import { framedTree } from './routes/framed'
 import { readRoute } from './routes/read'
+import { readBookRoute } from './routes/read-book'
 import { rootRoute } from './routes/root'
 import { setupRoute } from './routes/setup'
 import { watchRoute } from './routes/watch'
 import { authViewTransition } from './transitions/auth.transition'
 
-const routeTree = rootRoute.addChildren([framedTree, setupRoute, watchRoute, readRoute, authTree])
+const routeTree = rootRoute.addChildren([
+	framedTree,
+	setupRoute,
+	watchRoute,
+	readRoute,
+	readBookRoute,
+	authTree
+])
 
 export const router = createRouter({
 	routeTree,

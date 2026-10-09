@@ -633,6 +633,9 @@ export const en = {
 		chapters: {
 			title: 'Chapters · {{count}}'
 		},
+		books: {
+			title: 'Files in your library'
+		},
 		library: {
 			notInLibrary: 'Not in your library',
 			episodesNotInLibrary: 'The following episodes are not in your library:',
@@ -822,7 +825,24 @@ export const en = {
 		nextChapter: 'Next chapter',
 		pageOf: '{{current}} / {{total}}',
 		end: 'End of the chapter',
-		chapterNumber: 'Chapter {{number}}'
+		chapterNumber: 'Chapter {{number}}',
+		book: {
+			read: 'Read',
+			loadFailed: 'Could not open this book.',
+			unreadable: 'This book could not be laid out. The file may be damaged or protected.',
+			contents: 'Contents',
+			smaller: 'Smaller text',
+			larger: 'Larger text',
+			theme: {
+				dark: 'Dark pages',
+				sepia: 'Sepia pages',
+				light: 'White pages'
+			},
+			previousPage: 'Previous page',
+			nextPage: 'Next page',
+			position: 'Position in the book',
+			percent: '{{percent}}%'
+		}
 	},
 	playback: {
 		episode: 'Episode {{number}}',

@@ -3,12 +3,19 @@ import { createEvent, createStore, sample } from 'effector'
 
 import { atom } from '@shared/factory'
 
-import { fetchChapterFx, reportReaderPageFx } from '../api/api'
+import { fetchBookStateFx, fetchChapterFx, reportReaderPageFx, saveBookPositionFx } from '../api/api'
 import type { ReportPageParams } from '../api/api'
 
 export const chapterQuery = createQuery({ effect: fetchChapterFx, name: 'readerChapter' })
 
 export const reportPageMutation = createMutation({ effect: reportReaderPageFx, name: 'reportReaderPage' })
+
+export const bookStateQuery = createQuery({ effect: fetchBookStateFx, name: 'readerBookState' })
+
+export const saveBookPositionMutation = createMutation({
+	effect: saveBookPositionFx,
+	name: 'saveReaderBookPosition'
+})
 
 export const readerModel = atom(() => {
 	const pageTurned = createEvent<ReportPageParams>()
