@@ -11,17 +11,31 @@
 		height: calc(var(--banner-height) + var(--page-inset-top));
 		overflow: hidden;
 		background: var(--bg);
+		// While the page slides in, the picture and the fade over it land on
+		// different sub-pixels and a sliver of the picture's last row shows below
+		// the fade. Fading the banner itself out at the edge leaves nothing there:
+		// the page under it is the same --bg the fade ends on.
+		mask-image: linear-gradient(to top, transparent, #000 2rem);
 
 		img {
 			width: 100%;
 			height: 100%;
 			object-fit: cover;
 			object-position: center;
+			animation: settle 0.9s ease both;
 
+			// Blurred at a quarter of the size and scaled up to the same 120%: it
+			// looks the same, with a sixteenth of the pixels to blur. A blur this
+			// wide over the whole banner otherwise costs every frame the page moves.
 			&.blurred {
-				transform: scale(1.2);
-				filter: blur(28px);
+				width: 25%;
+				height: 25%;
+				transform-origin: 0 0;
+				transform: translate(-40%, -40%) scale(4.8);
+				filter: blur(7px);
 				opacity: 0.6;
+				will-change: transform;
+				animation: fade-in 0.6s ease both;
 			}
 		}
 
@@ -319,6 +333,61 @@
 
 .best {
 	color: var(--info-text);
+}
+
+@keyframes settle {
+	from {
+		opacity: 0;
+		transform: scale(1.04);
+	}
+
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+@keyframes fade-in {
+	from {
+		opacity: 0;
+	}
+}
+
+@keyframes cover-in {
+	from {
+		opacity: 0;
+		transform: scale(0.92);
+	}
+}
+
+@keyframes line-in {
+	from {
+		opacity: 0;
+		transform: translateX(12px);
+	}
+}
+
+// CSS rather than motion, so the entrance runs on the compositor and stays smooth
+// while the rest of the page is still mounting underneath it.
+.line {
+	animation: line-in 0.45s cubic-bezier(0.2, 0, 0, 1) backwards;
+	animation-delay: calc(0.12s + var(--line, 0) * 0.05s);
+}
+
+.coverIn {
+	animation: cover-in 0.5s cubic-bezier(0.2, 0, 0, 1) backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.hero .backdrop img,
+	.hero .backdrop img.blurred {
+		animation: none;
+	}
+
+	.coverIn,
+	.line {
+		animation: fade-in 0.2s ease backwards;
+	}
 }
 
 @media (max-width: 1100px) {

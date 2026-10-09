@@ -1,8 +1,23 @@
+// Rises in after the hero's own lines, so the page reads top to bottom.
 .sections {
 	display: flex;
 	flex-direction: column;
 	gap: 2.5rem;
 	margin-top: 3rem;
+	animation: sections-in 0.5s cubic-bezier(0.2, 0, 0, 1) 0.3s backwards;
+}
+
+@keyframes sections-in {
+	from {
+		opacity: 0;
+		transform: translateY(16px);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.sections {
+		animation: none;
+	}
 }
 .nextAiring {
 	display: flex;

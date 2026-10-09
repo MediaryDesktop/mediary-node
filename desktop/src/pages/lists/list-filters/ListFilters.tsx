@@ -1,3 +1,5 @@
+import { IoIosRefresh } from 'react-icons/io'
+
 import { useTranslation } from '@shared/i18n'
 import { Button, Icon, Input, SelectDropdown } from '@shared/ui'
 
@@ -92,7 +94,7 @@ export function ListFilters({ filters, formats, genres, mediaType, onChange }: L
 				onClick={() => onChange(INITIAL_ENTRY_FILTERS)}
 				className={styles.reset}
 			>
-				<Icon name='common/reset' size={16} />
+				<IoIosRefresh size={16} />
 			</Button>
 		</div>
 	)

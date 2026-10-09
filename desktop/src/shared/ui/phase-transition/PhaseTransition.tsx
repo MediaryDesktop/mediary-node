@@ -1,8 +1,12 @@
+import clsx from 'clsx'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import type { ReactNode } from 'react'
 
-// The spring Seanime moves its own sections with.
-const PHASE_SPRING = { type: 'spring', damping: 28, stiffness: 260, mass: 0.7 } as const
+import styles from './PhaseTransition.module.scss'
+
+// The new content waits for the old to leave, so leaving is kept short. A whole
+// `transform` rather than `y` lets motion hand it to the compositor.
+const EXIT = { duration: 0.12, ease: [0.4, 0, 1, 1] } as const
 
 export interface PhaseTransitionProps {
 	// Whatever the content is showing right now — loading, failed, empty, loaded.
@@ -19,11 +23,13 @@ export function PhaseTransition({ phase, children, className }: PhaseTransitionP
 		<AnimatePresence mode='wait'>
 			<motion.div
 				key={phase}
-				className={className}
-				initial={reduced ? { opacity: 0 } : { opacity: 0, y: 16 }}
-				animate={{ opacity: 1, y: 0 }}
-				exit={reduced ? { opacity: 0 } : { opacity: 0, y: -8 }}
-				transition={reduced ? { duration: 0.2 } : PHASE_SPRING}
+				className={clsx(styles.enter, className)}
+				initial={false}
+				exit={
+					reduced
+						? { opacity: 0, transition: EXIT }
+						: { opacity: 0, transform: 'translateY(-8px)', transition: EXIT }
+				}
 			>
 				{children}
 			</motion.div>

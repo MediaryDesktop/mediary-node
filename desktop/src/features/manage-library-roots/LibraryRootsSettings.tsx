@@ -1,5 +1,6 @@
 import { useUnit } from 'effector-react'
 import { useEffect } from 'react'
+import { IoIosRefresh } from 'react-icons/io'
 
 import { useTranslation } from '@shared/i18n'
 import { Button, DropdownMenu, Icon, ListTile, toast } from '@shared/ui'
@@ -105,7 +106,7 @@ export function LibraryRootsSettings() {
 										{
 											id: 'rescan',
 											label: t('library.root.rescan'),
-											icon: 'common/reset',
+											icon: <IoIosRefresh size={20} />,
 											onSelect: () => scanRequested(root.id)
 										},
 										...CONTENTS.map(content => ({

@@ -1,6 +1,7 @@
 import { useRouter } from '@tanstack/react-router'
-import { useUnit } from 'effector-react'
+import { useStoreMap, useUnit } from 'effector-react'
 import { useEffect } from 'react'
+import { IoIosRefresh } from 'react-icons/io'
 
 import { useTranslation } from '@shared/i18n'
 import { Button, EmptyState, Icon, PageTransition, PhaseTransition } from '@shared/ui'
@@ -8,7 +9,7 @@ import { Button, EmptyState, Icon, PageTransition, PhaseTransition } from '@shar
 import { $nodeReady } from '@infra/node'
 
 import { aniListAccountModel } from '@entities/anilist-account'
-import { mediaDetailsModel } from '@entities/media'
+import { mediaDetailsModel, mediaPreviewModel } from '@entities/media'
 import { useTrackedEntry } from '@entities/tracker'
 
 import { MediaHeroSkeleton } from './media-hero/MediaHeroSkeleton'
@@ -44,7 +45,15 @@ export function MediaPage({ mediaRef }: MediaPageProps) {
 		}
 	}, [mediaRef, requestDetails, nodeReady])
 
-	const details = data?.media.media_ref === mediaRef ? data : null
+	// The card's hover preview has usually fetched the title already: open with
+	// that and let the request below only confirm it.
+	const preview = useStoreMap({
+		store: mediaPreviewModel.$previews,
+		keys: [mediaRef],
+		fn: (previews, [ref]) => previews[ref] ?? null
+	})
+	const details =
+		data?.media.media_ref === mediaRef ? data : preview ? { media: preview, sources: null } : null
 	const failed = !details && failedMediaRef === mediaRef
 	const phase = details ? 'details' : !failed ? 'loading' : entry ? 'offline' : 'failed'
 
@@ -85,7 +94,7 @@ export function MediaPage({ mediaRef }: MediaPageProps) {
 						action={
 							<Button
 								size='small'
-								startIcon={<Icon name='common/reset' size={16} />}
+								startIcon={<IoIosRefresh size={16} />}
 								onClick={() => requestDetails(mediaRef)}
 							>
 								{t('media.retry')}

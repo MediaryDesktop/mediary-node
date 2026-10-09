@@ -1,6 +1,7 @@
 import clsx from 'clsx'
 import { useUnit } from 'effector-react'
 import { useEffect } from 'react'
+import { IoIosRefresh } from 'react-icons/io'
 
 import { useTranslation } from '@shared/i18n'
 import { Button, Icon, ProgressBar, toast } from '@shared/ui'
@@ -129,7 +130,7 @@ function DownloadRow({ item, onCancel, onRetry, onForget }: DownloadRowProps) {
 					</Button>
 				)}
 				{(item.state === 'failed' || item.state === 'cancelled') && (
-					<Button size='small' startIcon={<Icon name='common/reset' size={14} />} onClick={onRetry}>
+					<Button size='small' startIcon={<IoIosRefresh size={14} />} onClick={onRetry}>
 						{t('mangaSources.downloads.retry')}
 					</Button>
 				)}

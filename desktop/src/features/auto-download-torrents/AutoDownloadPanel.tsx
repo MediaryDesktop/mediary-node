@@ -2,6 +2,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
 import type { TFunction } from 'i18next'
 import { useEffect, useState } from 'react'
+import { IoIosRefresh } from 'react-icons/io'
 
 import { useTranslation } from '@shared/i18n'
 import { formatRelativeTime } from '@shared/lib'
@@ -79,7 +80,7 @@ export function AutoDownloadPanel({ mediaRef, title }: AutoDownloadPanelProps) {
 		<section className={styles.root}>
 			<div className={styles.head}>
 				<span className={styles.icon}>
-					<Icon name='common/reset' size={18} />
+					<IoIosRefresh size={18} />
 				</span>
 				<div className={styles.text}>
 					<h3 className={styles.title}>{t('torrents.auto.panelTitle')}</h3>

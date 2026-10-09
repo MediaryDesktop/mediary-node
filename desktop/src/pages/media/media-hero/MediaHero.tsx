@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import type { CSSProperties } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { formatCompact } from '@shared/lib'
@@ -12,6 +13,11 @@ import type { TrackerEntry } from '@entities/tracker'
 import type { MediaBase } from '../lib/media-view'
 
 import styles from './MediaHero.module.scss'
+
+// Each line of text beside the cover comes in a beat after the one above it.
+function lineStyle(index: number) {
+	return { '--line': index } as CSSProperties
+}
 
 export interface MediaHeroProps {
 	base: MediaBase
@@ -35,6 +41,7 @@ export function MediaHero({
 	onOpenDescription
 }: MediaHeroProps) {
 	const { t } = useTranslation()
+	let line = 0
 
 	const title = mediaTitle(base.title)
 	const alternatives = alternativeTitles(base.title)
@@ -65,20 +72,29 @@ export function MediaHero({
 
 			<div className={styles.details}>
 				<div className={styles.entry}>
-					<div className={styles.cover} style={{ backgroundColor: base.cover_color ?? undefined }}>
+					<div
+						className={clsx(styles.cover, styles.coverIn)}
+						style={{ backgroundColor: base.cover_color ?? undefined }}
+					>
 						{cover && <img src={cover} alt='' draggable={false} />}
 					</div>
 
 					<div className={styles.info}>
-						<h1 className={styles.title}>{title}</h1>
+						<h1 className={clsx(styles.title, styles.line)} style={lineStyle(line++)}>
+							{title}
+						</h1>
 
 						{alternatives.map(name => (
-							<p key={name} className={styles.alternative}>
+							<p
+								key={name}
+								className={clsx(styles.alternative, styles.line)}
+								style={lineStyle(line++)}
+							>
 								{name}
 							</p>
 						))}
 
-						<div className={styles.metaRow}>
+						<div className={clsx(styles.metaRow, styles.line)} style={lineStyle(line++)}>
 							{entry && entry.score > 0 && (
 								<span className={clsx(styles.userScore, styles[scoreTone(entry.score)])}>
 									<Icon name='common/star' size={16} />
@@ -118,7 +134,7 @@ export function MediaHero({
 							)}
 						</div>
 
-						<div className={styles.tagRow}>
+						<div className={clsx(styles.tagRow, styles.line)} style={lineStyle(line++)}>
 							{media?.mean_score != null && (
 								<span
 									className={clsx(
@@ -155,12 +171,17 @@ export function MediaHero({
 						</div>
 
 						{media && (
-							<button type='button' className={styles.description} onClick={onOpenDescription}>
+							<button
+								type='button'
+								className={clsx(styles.description, styles.line)}
+								style={lineStyle(line++)}
+								onClick={onOpenDescription}
+							>
 								{description || t('media.noDescription')}
 							</button>
 						)}
 
-						<div className={styles.links}>
+						<div className={clsx(styles.links, styles.line)} style={lineStyle(line++)}>
 							<a
 								className={styles.iconLink}
 								href={base.site_url}

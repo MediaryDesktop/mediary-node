@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { useUnit } from 'effector-react'
+import { useStoreMap, useUnit } from 'effector-react'
 import type { ReactNode } from 'react'
 import { useEffect, useRef, useState } from 'react'
 
@@ -105,20 +105,27 @@ export interface MediaPreviewProps {
 }
 
 export function MediaPreview({ mediaRef, title, active, tracking, extra }: MediaPreviewProps) {
-	const [previews, trailerHost, requestPreview] = useUnit([
-		mediaPreviewModel.$previews,
+	const [trailerHost, requestPreview] = useUnit([
 		mediaPreviewModel.$trailerHost,
 		mediaPreviewModel.previewRequested
 	])
 
-	const details = previews[mediaRef] ?? null
+	// Only this card's own entry: every card on a page is mounted with a preview,
+	// and a fetch for one title should not re-render all of them.
+	const details = useStoreMap({
+		store: mediaPreviewModel.$previews,
+		keys: [mediaRef],
+		fn: (previews, [ref]) => previews[ref] ?? null
+	})
 	const trailerId = details?.trailer?.site === 'youtube' ? details.trailer.id : null
 
+	// A tracked card shows only what the list knows, but the details are still
+	// fetched: by the time the card is clicked the title page has them to open with.
 	useEffect(() => {
-		if (active && !tracking) {
+		if (active) {
 			requestPreview(mediaRef)
 		}
-	}, [active, mediaRef, requestPreview, tracking])
+	}, [active, mediaRef, requestPreview])
 
 	if (tracking) {
 		const genres = (tracking.genres ?? []).slice(0, MAX_GENRES)

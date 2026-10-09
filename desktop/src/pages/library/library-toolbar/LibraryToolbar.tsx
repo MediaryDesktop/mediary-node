@@ -1,5 +1,6 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
+import { IoIosRefresh } from 'react-icons/io'
 import { IoLibraryOutline } from 'react-icons/io5'
 
 import { useTranslation } from '@shared/i18n'
@@ -37,7 +38,7 @@ export function LibraryToolbar({ hasEntries, hasRoots, unmatched }: LibraryToolb
 		menuItems.push({
 			id: 'scan',
 			label: hasEntries ? t('library.toolbar.refresh') : t('library.scan.start'),
-			icon: 'common/reset',
+			icon: <IoIosRefresh size={20} />,
 			onSelect: () => scanRequested()
 		})
 	}
