@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/googlebooks"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/openlibrary"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/tmdb"
 )
@@ -19,7 +20,8 @@ type titleRef struct {
 	kind     tmdb.Kind
 	id       int
 
-	// work is an Open Library work identifier, OL893414W.
+	// work is a book's identifier at its source: an Open Library work, OL893414W,
+	// or a Google Books volume, JXRKDwAAQBAJ.
 	work string
 }
 
@@ -59,6 +61,13 @@ func parseRef(mediaRef string) (titleRef, error) {
 		}
 
 		return titleRef{provider: ProviderOpenLibrary, work: rest}, nil
+
+	case ProviderGoogleBooks:
+		if !googlebooks.ValidVolumeID(rest) {
+			return titleRef{}, malformed
+		}
+
+		return titleRef{provider: ProviderGoogleBooks, work: rest}, nil
 
 	default:
 		return titleRef{}, apperr.Invalid("media_ref", "no source for media reference %q", mediaRef)

@@ -39,7 +39,7 @@ type EpisodesOutput struct {
 
 type SearchInput struct {
 	Query    string   `query:"q" maxLength:"100" doc:"Free text to match against every title the source knows. Empty browses by the filters alone."`
-	Type     string   `query:"type" enum:"anime,manga,movie,series,dorama,book" default:"anime" doc:"Which catalog to search. Every source owns one kind of media, so this also picks the source: AniList for anime and manga, TMDB for movies and shows, Open Library for books. A dorama is a live-action show from East Asia, and every dorama is a series too."`
+	Type     string   `query:"type" enum:"anime,manga,movie,series,dorama,book" default:"anime" doc:"Which catalog to search. Every source owns one kind of media, so this also picks the source: AniList for anime and manga, TMDB for movies and shows, Open Library for books — and Google Books for a text search Open Library finds nothing for. A dorama is a live-action show from East Asia, and every dorama is a series too."`
 	Sort     string   `query:"sort" enum:"SEARCH_MATCH,POPULARITY_DESC,TRENDING_DESC,SCORE_DESC,FAVOURITES_DESC,START_DATE_DESC,TITLE_ROMAJI" doc:"Order of the results. Left out it means relevance while searching and popularity while browsing. TMDB orders a text search by relevance only."`
 	Genres   []string `query:"genres" doc:"Genres a title must all have, as listed by getMediaFilterOptions. TMDB applies them while browsing only."`
 	Tags     []string `query:"tags" doc:"Tags a title must all have, as listed by getMediaFilterOptions. AniList only."`
@@ -71,6 +71,16 @@ type TMDBSettingsOutput struct {
 type TMDBKeyInput struct {
 	Body struct {
 		APIKey string `json:"api_key" maxLength:"1024" doc:"The user's own TMDB API key (v3) or read access token (v4). TMDB is asked to accept it before it is stored. Empty forgets it and goes back to the key this build ships with."`
+	}
+}
+
+type GoogleBooksSettingsOutput struct {
+	Body *service.GoogleBooksSettings
+}
+
+type GoogleBooksKeyInput struct {
+	Body struct {
+		APIKey string `json:"api_key" maxLength:"1024" doc:"The user's own Google API key with the Books API enabled. Google is asked to accept it before it is stored. Empty forgets it and goes back to the key this build ships with."`
 	}
 }
 
@@ -112,6 +122,9 @@ func (h *Handler) Register(api huma.API) {
 		out := &SearchOutput{}
 		out.Body.Results = results
 		out.Body.Sources = []httpapi.Source{sourceOfType(in.Type)}
+		if len(results.Sources) > 0 {
+			out.Body.Sources = sourcesOf(results.Sources)
+		}
 
 		return out, nil
 	})
@@ -153,6 +166,38 @@ func (h *Handler) Register(api huma.API) {
 	})
 
 	huma.Register(api, huma.Operation{
+		OperationID: "getGoogleBooksSettings",
+		Method:      http.MethodGet,
+		Path:        "/v1/google-books/settings",
+		Summary:     "Google Books connection",
+		Description: "Whether books Open Library does not know can be looked up on Google Books, and with whose key. The key itself is never returned.",
+		Tags:        []string{"media"},
+	}, func(_ context.Context, _ *struct{}) (*GoogleBooksSettingsOutput, error) {
+		settings, err := h.svc.GoogleBooksSettings()
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return &GoogleBooksSettingsOutput{Body: settings}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "setGoogleBooksKey",
+		Method:      http.MethodPut,
+		Path:        "/v1/google-books/settings",
+		Summary:     "Use your own Google Books key",
+		Description: "Checks the key with Google, then keeps it in a file only the user can read, never in the database or a backup. A key Google refuses is not stored and answers 428.",
+		Tags:        []string{"media"},
+	}, func(ctx context.Context, in *GoogleBooksKeyInput) (*GoogleBooksSettingsOutput, error) {
+		settings, err := h.svc.SetGoogleBooksKey(ctx, in.Body.APIKey)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return &GoogleBooksSettingsOutput{Body: settings}, nil
+	})
+
+	huma.Register(api, huma.Operation{
 		OperationID: "setTMDBKey",
 		Method:      http.MethodPut,
 		Path:        "/v1/tmdb/settings",
@@ -173,7 +218,7 @@ func (h *Handler) Register(api huma.API) {
 		Method:      http.MethodGet,
 		Path:        "/v1/media/{media_ref}",
 		Summary:     "Title details",
-		Description: "Fetched from the source on demand and kept for at most a day, as the source's terms allow. Past that the node asks again; while the source is unreachable the request fails, and clients fall back to what the user's own list already knows about the title. A reference is anilist:<id>, tmdb:movie:<id> or tmdb:tv:<id>.",
+		Description: "Fetched from the source on demand and kept for at most a day, as the source's terms allow. Past that the node asks again; while the source is unreachable the request fails, and clients fall back to what the user's own list already knows about the title. A reference is anilist:<id>, tmdb:movie:<id>, tmdb:tv:<id>, openlibrary:<work id> or googlebooks:<volume id>.",
 		Tags:        []string{"media"},
 	}, func(ctx context.Context, in *DetailsInput) (*DetailsOutput, error) {
 		details, err := h.svc.Details(ctx, in.MediaRef)
@@ -220,6 +265,10 @@ func sourcesOf(ids []string) []httpapi.Source {
 			sources = append(sources, httpapi.AniZipSource)
 		case service.ProviderTMDB:
 			sources = append(sources, httpapi.TMDBSource)
+		case service.ProviderOpenLibrary:
+			sources = append(sources, httpapi.OpenLibrarySource)
+		case service.ProviderGoogleBooks:
+			sources = append(sources, httpapi.GoogleBooksSource)
 		}
 	}
 
@@ -244,6 +293,10 @@ func sourceOfRef(mediaRef string) httpapi.Source {
 
 	if strings.HasPrefix(mediaRef, service.ProviderOpenLibrary+":") {
 		return httpapi.OpenLibrarySource
+	}
+
+	if strings.HasPrefix(mediaRef, service.ProviderGoogleBooks+":") {
+		return httpapi.GoogleBooksSource
 	}
 
 	return httpapi.AniListSource

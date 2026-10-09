@@ -13,6 +13,7 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anizip"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/googlebooks"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/openlibrary"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/tmdb"
 )
@@ -41,6 +42,10 @@ type Options struct {
 
 	// OpenLibrary is nil when the node turned it off; books then have no source.
 	OpenLibrary *openlibrary.Client
+
+	// GoogleBooks is nil when the node turned it off; books Open Library does not
+	// know then cannot be found.
+	GoogleBooks *googlebooks.Client
 
 	Now func() time.Time
 }
@@ -80,6 +85,10 @@ func (s *Service) Details(ctx context.Context, mediaRef string) (*MediaDetails, 
 
 	if ref.provider == ProviderOpenLibrary {
 		return s.bookDetails(ctx, ref.work)
+	}
+
+	if ref.provider == ProviderGoogleBooks {
+		return s.googleBookDetails(ctx, ref.work)
 	}
 
 	if ref.provider == ProviderTMDB {
@@ -161,8 +170,13 @@ func (s *Service) CachedDetails(ctx context.Context, mediaRef string) (*MediaDet
 		return nil, err
 	}
 
-	if ref.provider == ProviderOpenLibrary {
-		cached, readErr := s.store.Get(ctx, ProviderOpenLibrary, "work:"+ref.work)
+	if ref.provider == ProviderOpenLibrary || ref.provider == ProviderGoogleBooks {
+		key := "work:" + ref.work
+		if ref.provider == ProviderGoogleBooks {
+			key = "volume:" + ref.work
+		}
+
+		cached, readErr := s.store.Get(ctx, ref.provider, key)
 		if readErr != nil {
 			return nil, apperr.Wrap(readErr, apperr.KindInternal, "read media cache")
 		}

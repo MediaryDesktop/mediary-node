@@ -125,6 +125,10 @@ type SearchPage struct {
 	PerPage     int            `json:"per_page"`
 	Total       int            `json:"total"`
 	HasNextPage bool           `json:"has_next_page"`
+
+	// Sources names who answered when it is not the one the media type implies:
+	// a book search Open Library had nothing for is answered by Google Books.
+	Sources []string `json:"-"`
 }
 
 type FilterTag struct {

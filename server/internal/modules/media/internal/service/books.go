@@ -164,6 +164,18 @@ func (s *Service) searchBooks(ctx context.Context, params SearchParams) (*Search
 	}
 
 	result, err := client.Search(ctx, openlibrary.SearchParams{Query: query, Sort: sort, Page: page, Limit: bookPerPage})
+
+	// Google Books stands in for a text search Open Library has nothing for, or
+	// cannot answer. Only for a plain one: its filters are not Open Library's.
+	if s.opts.GoogleBooks != nil && plainTextSearch(params) && (err != nil || result.NumFound == 0) {
+		found, googleErr := s.searchGoogleBooks(ctx, strings.TrimSpace(params.Query), page)
+		if googleErr == nil && len(found.Items) > 0 {
+			return found, nil
+		}
+
+		s.logger.Debug().Err(googleErr).Msg("google books search failed")
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -180,6 +192,10 @@ func (s *Service) searchBooks(ctx context.Context, params SearchParams) (*Search
 		Total:       result.NumFound,
 		HasNextPage: page*bookPerPage < result.NumFound && page < bookMaxPage,
 	}, nil
+}
+
+func plainTextSearch(params SearchParams) bool {
+	return strings.TrimSpace(params.Query) != "" && len(params.Genres) == 0 && params.Year == 0 && params.MinScore == 0
 }
 
 // bookQuery builds Open Library's query: the text, then every filter as a field

@@ -22,6 +22,7 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/platform/secrets"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anizip"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/googlebooks"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/openlibrary"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/tmdb"
 	"github.com/mediaryorg/mediary-node/server/internal/wsapi"
@@ -117,6 +118,17 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 		})
 	}
 
+	var googleBooks *googlebooks.Client
+	if cfg.GoogleBooks.Endpoint != "" {
+		googleBooks = googlebooks.New(googlebooks.Options{
+			Endpoint:  cfg.GoogleBooks.Endpoint,
+			Timeout:   cfg.GoogleBooks.Timeout,
+			UserAgent: "mediary-node/" + build.Version,
+			Keys: googlebooks.NewKeys(
+				secrets.New(filepath.Join(cfg.DataDir, "googlebooks-secrets.json")), cfg.GoogleBooks.APIKey),
+		})
+	}
+
 	router, api := httpapi.New(httpapi.Options{
 		Version:        build.Version,
 		Token:          token,
@@ -136,6 +148,7 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 		AniZip:              aniZip,
 		TMDB:                tmdbClient,
 		OpenLibrary:         openLibrary,
+		GoogleBooks:         googleBooks,
 		MangaDex:            cfg.MangaDex,
 		AniListClientID:     cfg.AniList.ClientID,
 		AniListAuthorizeURL: cfg.AniList.AuthorizeURL,

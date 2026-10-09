@@ -56,7 +56,7 @@ func (s *Service) Episodes(ctx context.Context, mediaRef string) (*EpisodeList, 
 		return s.tmdbEpisodes(ctx, ref)
 	}
 
-	if ref.provider == ProviderOpenLibrary {
+	if ref.provider == ProviderOpenLibrary || ref.provider == ProviderGoogleBooks {
 		return nil, apperr.Invalid("media_ref", "a book has no episodes")
 	}
 

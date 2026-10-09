@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 	"testing"
@@ -16,6 +17,8 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/modules/media/internal/store"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/db"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/secrets"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/googlebooks"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/openlibrary"
 )
 
@@ -36,6 +39,16 @@ const bookSearchFixture = `{"numFound":45,"docs":[
   {"key":"/works/OL893414W","title":"Dune","author_name":["Frank Herbert"],"first_publish_year":1965,"cover_i":11481354,"number_of_pages_median":608,"ratings_average":4.3,"ratings_count":448,"subject":["Science fiction"]},
   {"key":"/works/OL1W","title":"Unrated","author_name":["Someone"],"ratings_count":0}
 ]}`
+
+const googleVolumeFixture = `{"id":"JXRKDwAAQBAJ","volumeInfo":{"title":"Тіні забутих предків",
+  "authors":["Михайло Коцюбинський"],"publishedDate":"2018-02-05","pageCount":92,"categories":["Fiction / Classics"],
+  "description":"<p>Повість про <b>кохання</b>.</p><p>Гуцульщина.</p>","language":"uk",
+  "canonicalVolumeLink":"https://books.google.com/books/about/?id=JXRKDwAAQBAJ",
+  "imageLinks":{"thumbnail":"http://books.google.com/books/content?id=JXRKDwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl"}}}`
+
+const googleSearchFixture = `{"totalItems":198,"items":[` + googleVolumeFixture + `,
+  {"id":"GOJ3EAAAQBAJ","volumeInfo":{"title":"Тіні забутих предків","authors":["Михайло Коцюбинський"]}},
+  {"id":"L4WfAQAACAAJ","volumeInfo":{"title":"Tini zabutyh predkiv","authors":["Myhajlo Kocjubynskyj"]}}]}`
 
 type bookHarness struct {
 	svc *Service
@@ -71,6 +84,12 @@ func newBookHarness(t *testing.T) *bookHarness {
 		switch {
 		case r.URL.Path == "/works/OL893414W.json":
 			_, _ = w.Write([]byte(duneWorkFixture))
+		case r.URL.Path == "/search.json" && strings.Contains(r.URL.Query().Get("q"), "Тіні"):
+			_, _ = w.Write([]byte(`{"numFound":0,"docs":[]}`))
+		case r.URL.Path == "/volumes":
+			_, _ = w.Write([]byte(googleSearchFixture))
+		case r.URL.Path == "/volumes/JXRKDwAAQBAJ":
+			_, _ = w.Write([]byte(googleVolumeFixture))
 		case r.URL.Path == "/search.json" && r.URL.Query().Get("q") == "key:/works/OL893414W":
 			_, _ = w.Write([]byte(duneDocFixture))
 		case r.URL.Path == "/search.json":
@@ -82,8 +101,17 @@ func newBookHarness(t *testing.T) *bookHarness {
 	t.Cleanup(server.Close)
 
 	client := openlibrary.New(openlibrary.Options{Endpoint: server.URL, MinInterval: time.Millisecond})
+	google := googlebooks.New(googlebooks.Options{
+		Endpoint:    server.URL,
+		Keys:        googlebooks.NewKeys(secrets.New(filepath.Join(dir, "googlebooks-secrets.json")), "key"),
+		MinInterval: time.Millisecond,
+	})
 
-	h.svc = New(store.New(database), zerolog.Nop(), Options{OpenLibrary: client, Now: func() time.Time { return h.now }})
+	h.svc = New(store.New(database), zerolog.Nop(), Options{
+		OpenLibrary: client,
+		GoogleBooks: google,
+		Now:         func() time.Time { return h.now },
+	})
 
 	return h
 }
@@ -268,5 +296,48 @@ func TestFilterOptionsForBooks(t *testing.T) {
 
 	if len(options.Genres) != len(bookGenres) || options.Genres[0] != "Fantasy" || len(options.Tags) != 0 || h.count() != 0 {
 		t.Fatalf("options %+v after %d requests: the vocabulary is the node's own", options, h.count())
+	}
+}
+
+func TestGoogleBooksAnswersWhatOpenLibraryDoesNotKnow(t *testing.T) {
+	h := newBookHarness(t)
+	ctx := context.Background()
+
+	page, err := h.svc.Search(ctx, SearchParams{MediaType: MediaTypeBook, Query: "Тіні забутих предків"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Two editions of one book are one result.
+	if len(page.Items) != 2 || page.Items[0].MediaRef != "googlebooks:JXRKDwAAQBAJ" || page.Sources[0] != ProviderGoogleBooks {
+		t.Fatalf("page %+v", page)
+	}
+
+	details, err := h.svc.Details(ctx, "googlebooks:JXRKDwAAQBAJ")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if details.Description != "Повість про кохання.\n\nГуцульщина." || *details.Pages != 92 || *details.SeasonYear != 2018 ||
+		details.Authors[0] != "Михайло Коцюбинський" || !slices.Contains(details.Genres, "Classics") {
+		t.Fatalf("details %+v", details)
+	}
+
+	cached, err := h.svc.CachedDetails(ctx, "googlebooks:JXRKDwAAQBAJ")
+	if err != nil || cached == nil || cached.MediaRef != details.MediaRef {
+		t.Fatalf("cached %+v %v", cached, err)
+	}
+}
+
+func TestGoogleBooksStaysOutOfWhatOpenLibraryAnswers(t *testing.T) {
+	h := newBookHarness(t)
+
+	page, err := h.svc.Search(context.Background(), SearchParams{MediaType: MediaTypeBook, Query: "dune"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if page.Items[0].MediaRef != "openlibrary:OL893414W" || len(page.Sources) != 0 {
+		t.Fatalf("page %+v", page)
 	}
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/modules/media/internal/store"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anizip"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/googlebooks"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/openlibrary"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/tmdb"
 )
@@ -24,6 +25,7 @@ type Deps struct {
 	TMDB    *tmdb.Client
 
 	OpenLibrary *openlibrary.Client
+	GoogleBooks *googlebooks.Client
 }
 
 // MediaDetails is the module's read-only port onto a title the node has already
@@ -34,7 +36,13 @@ type MediaDetails = service.MediaDetails
 type EpisodeList = service.EpisodeList
 
 func New(deps Deps) *Module {
-	svc := service.New(store.New(deps.DB), deps.Logger, service.Options{AniList: deps.AniList, AniZip: deps.AniZip, TMDB: deps.TMDB, OpenLibrary: deps.OpenLibrary})
+	svc := service.New(store.New(deps.DB), deps.Logger, service.Options{
+		AniList:     deps.AniList,
+		AniZip:      deps.AniZip,
+		TMDB:        deps.TMDB,
+		OpenLibrary: deps.OpenLibrary,
+		GoogleBooks: deps.GoogleBooks,
+	})
 
 	return &Module{handler: handler.New(svc), svc: svc}
 }

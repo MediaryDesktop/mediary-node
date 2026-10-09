@@ -24,6 +24,7 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anizip"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/googlebooks"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/openlibrary"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/tmdb"
 )
@@ -40,6 +41,7 @@ type Deps struct {
 	AniZip              *anizip.Client
 	TMDB                *tmdb.Client
 	OpenLibrary         *openlibrary.Client
+	GoogleBooks         *googlebooks.Client
 	MangaDex            config.MangaDex
 	AniListClientID     string
 	AniListAuthorizeURL string
@@ -73,6 +75,7 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 		TMDB:    deps.TMDB,
 
 		OpenLibrary: deps.OpenLibrary,
+		GoogleBooks: deps.GoogleBooks,
 	})
 	mediaModule.Register(api)
 
@@ -102,6 +105,7 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 			aniList:     deps.AniList,
 			tmdb:        deps.TMDB,
 			openLibrary: deps.OpenLibrary,
+			googleBooks: deps.GoogleBooks,
 		}
 	}
 

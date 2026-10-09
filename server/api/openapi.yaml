@@ -1093,6 +1093,47 @@ components:
         - month
         - day
       type: object
+    GoogleBooksKeyInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/GoogleBooksKeyInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        api_key:
+          description: The user's own Google API key with the Books API enabled. Google is asked to accept it before it is stored. Empty forgets it and goes back to the key this build ships with.
+          maxLength: 1024
+          type: string
+      required:
+        - api_key
+      type: object
+    GoogleBooksSettings:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/GoogleBooksSettings.json
+          format: uri
+          readOnly: true
+          type: string
+        enabled:
+          description: Whether this node reads Google Books at all. Off when the node was started with an empty Google Books endpoint.
+          type: boolean
+        key_source:
+          description: "Which key the node sends: the user's own, the one this build ships with, or none — then books Open Library does not know cannot be found."
+          enum:
+            - user
+            - build
+            - none
+          type: string
+      required:
+        - enabled
+        - key_source
+      type: object
     HealthOutputBody:
       additionalProperties: false
       properties:
@@ -4487,6 +4528,51 @@ paths:
       summary: Extension module status
       tags:
         - extension
+  /v1/google-books/settings:
+    get:
+      description: Whether books Open Library does not know can be looked up on Google Books, and with whose key. The key itself is never returned.
+      operationId: getGoogleBooksSettings
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GoogleBooksSettings"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Google Books connection
+      tags:
+        - media
+    put:
+      description: Checks the key with Google, then keeps it in a file only the user can read, never in the database or a backup. A key Google refuses is not stored and answers 428.
+      operationId: setGoogleBooksKey
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GoogleBooksKeyInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GoogleBooksSettings"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Use your own Google Books key
+      tags:
+        - media
   /v1/health:
     get:
       description: Reports liveness, the running build and whether a cloud account is paired.
@@ -5575,13 +5661,13 @@ paths:
             description: Free text to match against every title the source knows. Empty browses by the filters alone.
             maxLength: 100
             type: string
-        - description: "Which catalog to search. Every source owns one kind of media, so this also picks the source: AniList for anime and manga, TMDB for movies and shows, Open Library for books. A dorama is a live-action show from East Asia, and every dorama is a series too."
+        - description: "Which catalog to search. Every source owns one kind of media, so this also picks the source: AniList for anime and manga, TMDB for movies and shows, Open Library for books — and Google Books for a text search Open Library finds nothing for. A dorama is a live-action show from East Asia, and every dorama is a series too."
           explode: false
           in: query
           name: type
           schema:
             default: anime
-            description: "Which catalog to search. Every source owns one kind of media, so this also picks the source: AniList for anime and manga, TMDB for movies and shows, Open Library for books. A dorama is a live-action show from East Asia, and every dorama is a series too."
+            description: "Which catalog to search. Every source owns one kind of media, so this also picks the source: AniList for anime and manga, TMDB for movies and shows, Open Library for books — and Google Books for a text search Open Library finds nothing for. A dorama is a live-action show from East Asia, and every dorama is a series too."
             enum:
               - anime
               - manga
@@ -5744,7 +5830,7 @@ paths:
         - media
   /v1/media/{media_ref}:
     get:
-      description: Fetched from the source on demand and kept for at most a day, as the source's terms allow. Past that the node asks again; while the source is unreachable the request fails, and clients fall back to what the user's own list already knows about the title. A reference is anilist:<id>, tmdb:movie:<id> or tmdb:tv:<id>.
+      description: Fetched from the source on demand and kept for at most a day, as the source's terms allow. Past that the node asks again; while the source is unreachable the request fails, and clients fall back to what the user's own list already knows about the title. A reference is anilist:<id>, tmdb:movie:<id>, tmdb:tv:<id>, openlibrary:<work id> or googlebooks:<volume id>.
       operationId: getMediaDetails
       parameters:
         - description: The title's media reference.

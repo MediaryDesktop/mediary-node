@@ -31,6 +31,7 @@ type Config struct {
 	AniZip      AniZip
 	TMDB        TMDB
 	OpenLibrary OpenLibrary
+	GoogleBooks GoogleBooks
 	MangaDex    MangaDex
 	Log         Log
 }
@@ -84,6 +85,15 @@ type OpenLibrary struct {
 	Endpoint string        `env:"NODE_OPENLIBRARY_ENDPOINT" envDefault:"https://openlibrary.org"`
 	Contact  string        `env:"NODE_OPENLIBRARY_CONTACT"`
 	Timeout  time.Duration `env:"NODE_OPENLIBRARY_TIMEOUT"  envDefault:"20s"`
+}
+
+// GoogleBooks is the fallback source for books Open Library does not know. An
+// empty endpoint turns it off. Google refuses an anonymous caller, so without a
+// key — the build's or the user's own, saved in the app — it is asked nothing.
+type GoogleBooks struct {
+	Endpoint string        `env:"NODE_GOOGLE_BOOKS_ENDPOINT" envDefault:"https://www.googleapis.com/books/v1"`
+	APIKey   string        `env:"NODE_GOOGLE_BOOKS_API_KEY"`
+	Timeout  time.Duration `env:"NODE_GOOGLE_BOOKS_TIMEOUT"  envDefault:"20s"`
 }
 
 // MangaDex is the online manga source. An empty endpoint turns it off on this node;

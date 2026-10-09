@@ -29,12 +29,13 @@ func (t MediaType) local() bool {
 	return t == MediaTypeMovie || t == MediaTypeSeries || t == MediaTypeDorama || t == MediaTypeBook
 }
 
-var localRef = regexp.MustCompile(`^(tmdb:(movie|tv):[1-9]\d*|openlibrary:OL[1-9]\d*W)$`)
+var localRef = regexp.MustCompile(`^(tmdb:(movie|tv):[1-9]\d*|openlibrary:OL[1-9]\d*W|googlebooks:[A-Za-z0-9_-]{8,24})$`)
 
 // isLocalRef is a title from a source whose list the node keeps: TMDB's movies
-// and shows, Open Library's books.
+// and shows, Open Library's and Google's books.
 func isLocalRef(mediaRef string) bool {
-	return strings.HasPrefix(mediaRef, "tmdb:") || strings.HasPrefix(mediaRef, "openlibrary:")
+	return strings.HasPrefix(mediaRef, "tmdb:") || strings.HasPrefix(mediaRef, "openlibrary:") ||
+		strings.HasPrefix(mediaRef, "googlebooks:")
 }
 
 func validateLocalRef(mediaRef string) error {

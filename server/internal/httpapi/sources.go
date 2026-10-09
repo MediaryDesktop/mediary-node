@@ -12,6 +12,7 @@ var (
 	AniZipSource  = Source{ID: "anizip", Name: "ani.zip", URL: "https://ani.zip"}
 
 	OpenLibrarySource = Source{ID: "openlibrary", Name: "Open Library", URL: "https://openlibrary.org"}
+	GoogleBooksSource = Source{ID: "googlebooks", Name: "Google Books", URL: "https://books.google.com"}
 	TMDBSource        = Source{
 		ID:     "tmdb",
 		Name:   "TMDB",

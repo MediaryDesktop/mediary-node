@@ -11,6 +11,7 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/modules/media"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/tracker"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/googlebooks"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/openlibrary"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/tmdb"
 )
@@ -29,8 +30,10 @@ type titleSource struct {
 	// tmdb answers for folders of movies and shows; nil leaves them unmatched.
 	tmdb *tmdb.Client
 
-	// openLibrary answers for books; nil leaves them unmatched.
+	// openLibrary answers for books, googleBooks for what it does not know; with
+	// both nil books stay unmatched.
 	openLibrary *openlibrary.Client
+	googleBooks *googlebooks.Client
 }
 
 const searchCandidates = 15
@@ -196,7 +199,7 @@ func (s titleSource) Matched(ctx context.Context, mediaRefs []string) {
 	for _, ref := range mediaRefs {
 		switch {
 		case strings.HasPrefix(ref, "tmdb:"):
-		case strings.HasPrefix(ref, "openlibrary:") && books < warmedBooks:
+		case (strings.HasPrefix(ref, "openlibrary:") || strings.HasPrefix(ref, "googlebooks:")) && books < warmedBooks:
 			books++
 		default:
 			continue
