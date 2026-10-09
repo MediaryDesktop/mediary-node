@@ -79,18 +79,18 @@ func TestThePlaceIsKeptAndTheListMovesAlong(t *testing.T) {
 	svc := bookService(t, "Dune.epub", "openlibrary:OL893414W", progress)
 	ctx := context.Background()
 
-	if position, err := svc.Position(ctx, 7); err != nil || position != nil {
+	if book, position, err := svc.Position(ctx, 7); err != nil || position != nil || book.MediaRef != "openlibrary:OL893414W" {
 		t.Fatalf("a book never opened has a place: %+v %v", position, err)
 	}
 
-	if _, err := svc.SavePosition(ctx, 7, "epubcfi(/6/4!/4/2/1:0)", 0.25); err != nil {
+	if _, _, err := svc.SavePosition(ctx, 7, "epubcfi(/6/4!/4/2/1:0)", 0.25); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := svc.SavePosition(ctx, 7, "epubcfi(/6/8!/4/2/1:0)", 1.5); err != nil {
+	if _, _, err := svc.SavePosition(ctx, 7, "epubcfi(/6/8!/4/2/1:0)", 1.5); err != nil {
 		t.Fatal(err)
 	}
 
-	position, err := svc.Position(ctx, 7)
+	_, position, err := svc.Position(ctx, 7)
 	if err != nil || position.Locator != "epubcfi(/6/8!/4/2/1:0)" || position.Fraction != 1 {
 		t.Fatalf("position %+v %v", position, err)
 	}
@@ -103,13 +103,13 @@ func TestThePlaceIsKeptAndTheListMovesAlong(t *testing.T) {
 func TestAnUnreachableListDoesNotCostThePlace(t *testing.T) {
 	svc := bookService(t, "Dune.epub", "openlibrary:OL893414W", &fakeProgress{err: errors.New("offline")})
 
-	if _, err := svc.SavePosition(context.Background(), 7, "epubcfi(/6/4!/4/2/1:0)", 0.5); err != nil {
+	if _, _, err := svc.SavePosition(context.Background(), 7, "epubcfi(/6/4!/4/2/1:0)", 0.5); err != nil {
 		t.Fatalf("the place was lost with the list: %v", err)
 	}
 
 	// Unmatched, there is no list to move.
 	unmatched := bookService(t, "Dune.epub", "", &fakeProgress{err: errors.New("must not be asked")})
-	if _, err := unmatched.SavePosition(context.Background(), 7, "page:12", 0.5); err != nil {
+	if _, _, err := unmatched.SavePosition(context.Background(), 7, "page:12", 0.5); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -1017,6 +1017,50 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/v1/reader/files/{id}/book': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * The bytes of a book
+		 * @description A library book as it is on disk — EPUB, FB2, MOBI, AZW3 or PDF — with range support, for the renderer to lay out itself. Its type tells the renderer which viewer to open it in.
+		 */
+		get: operations['getReaderBook']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/reader/files/{id}/book/position': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * The book to open, and where it was left
+		 * @description What the reader needs before the bytes: the book's name and type, and the place to open it at — kept per file, since a locator from one file means nothing in another edition.
+		 */
+		get: operations['getReaderBookPosition']
+		/**
+		 * Keep the reader's place in a book
+		 * @description Stores the place and, for a matched book, moves the user's list to the share of the work's pages read; the last pages finish it. Progress is never lowered.
+		 */
+		put: operations['saveReaderBookPosition']
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/v1/reader/files/{id}/chapter': {
 		parameters: {
 			query?: never
@@ -1658,6 +1702,60 @@ export interface components {
 			language?: string
 			mime_codec?: string
 			title?: string
+		}
+		BookInfo: {
+			/** @description The type getReaderBook serves the bytes as, which picks the viewer. */
+			content_type: string
+			/**
+			 * Format: int64
+			 * @description Library file the book is.
+			 */
+			file_id: number
+			/** @description Title the book is matched to; absent while unmatched, and then reading moves no list. */
+			media_ref?: string
+			/** @description The book's name as the library knows it. */
+			title: string
+		}
+		BookPosition: {
+			/**
+			 * Format: double
+			 * @description How far through the book that is, from 0 to 1.
+			 */
+			fraction: number
+			/** @description Where the reader is, in the renderer's own terms: an EPUB CFI, or a PDF page. */
+			locator: string
+			/**
+			 * Format: date-time
+			 * @description When the reader was last there.
+			 */
+			updated_at: string
+		}
+		BookPositionInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/BookPositionInputBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * Format: double
+			 * @description How far through the book that is, from 0 to 1.
+			 */
+			fraction: number
+			/** @description Where the reader is, in the renderer's own terms. */
+			locator: string
+		}
+		BookPositionOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/BookPositionOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The book being read. */
+			book: components['schemas']['BookInfo']
+			/** @description Where the reader left the book; null for a book never opened. */
+			position: components['schemas']['BookPosition']
 		}
 		Chapter: {
 			/** Format: float */
@@ -4051,6 +4149,10 @@ export type SchemaAddRootInputBody = components['schemas']['AddRootInputBody']
 export type SchemaAddTorrentDownloadInputBody = components['schemas']['AddTorrentDownloadInputBody']
 export type SchemaAiringEpisode = components['schemas']['AiringEpisode']
 export type SchemaAudio = components['schemas']['Audio']
+export type SchemaBookInfo = components['schemas']['BookInfo']
+export type SchemaBookPosition = components['schemas']['BookPosition']
+export type SchemaBookPositionInputBody = components['schemas']['BookPositionInputBody']
+export type SchemaBookPositionOutputBody = components['schemas']['BookPositionOutputBody']
 export type SchemaChapter = components['schemas']['Chapter']
 export type SchemaChapterBody = components['schemas']['ChapterBody']
 export type SchemaChapterOutputBody = components['schemas']['ChapterOutputBody']
@@ -6265,6 +6367,104 @@ export interface operations {
 				}
 				content: {
 					'application/json': components['schemas']['ReadOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getReaderBook: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Library file, as listed by listLibraryFiles. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getReaderBookPosition: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Library file, as listed by listLibraryFiles. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['BookPositionOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	saveReaderBookPosition: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Library file being read. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['BookPositionInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['BookPositionOutputBody']
 				}
 			}
 			/** @description Error */

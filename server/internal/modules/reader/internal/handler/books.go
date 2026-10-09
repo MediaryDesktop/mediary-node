@@ -11,6 +11,7 @@ import (
 	"github.com/danielgtaylor/huma/v2/adapters/humachi"
 
 	"github.com/mediaryorg/mediary-node/server/internal/httpapi"
+	"github.com/mediaryorg/mediary-node/server/internal/modules/reader/internal/service"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/reader/internal/store"
 )
 
@@ -20,8 +21,16 @@ type BookPosition struct {
 	UpdatedAt time.Time `json:"updated_at" doc:"When the reader was last there."`
 }
 
+type BookInfo struct {
+	FileID      int64  `json:"file_id" doc:"Library file the book is."`
+	Title       string `json:"title" doc:"The book's name as the library knows it."`
+	MediaRef    string `json:"media_ref,omitempty" doc:"Title the book is matched to; absent while unmatched, and then reading moves no list."`
+	ContentType string `json:"content_type" doc:"The type getReaderBook serves the bytes as, which picks the viewer."`
+}
+
 type BookPositionOutput struct {
 	Body struct {
+		Book     BookInfo      `json:"book" doc:"The book being read."`
 		Position *BookPosition `json:"position" doc:"Where the reader left the book; null for a book never opened."`
 	}
 }
@@ -57,16 +66,16 @@ func (h *Handler) registerBooks(api huma.API) {
 		OperationID: "getReaderBookPosition",
 		Method:      http.MethodGet,
 		Path:        "/v1/reader/files/{id}/book/position",
-		Summary:     "Where the book was left",
-		Description: "The place to open a book at, kept per file: a locator from one file means nothing in another edition.",
+		Summary:     "The book to open, and where it was left",
+		Description: "What the reader needs before the bytes: the book's name and type, and the place to open it at — kept per file, since a locator from one file means nothing in another edition.",
 		Tags:        []string{"reader"},
 	}, func(ctx context.Context, in *FileInput) (*BookPositionOutput, error) {
-		position, err := h.svc.Position(ctx, in.ID)
+		book, position, err := h.svc.Position(ctx, in.ID)
 		if err != nil {
 			return nil, httpapi.ToHTTP(err)
 		}
 
-		return positionOutput(position), nil
+		return positionOutput(book, position), nil
 	})
 
 	huma.Register(api, huma.Operation{
@@ -77,17 +86,23 @@ func (h *Handler) registerBooks(api huma.API) {
 		Description: "Stores the place and, for a matched book, moves the user's list to the share of the work's pages read; the last pages finish it. Progress is never lowered.",
 		Tags:        []string{"reader"},
 	}, func(ctx context.Context, in *BookPositionInput) (*BookPositionOutput, error) {
-		position, err := h.svc.SavePosition(ctx, in.ID, in.Body.Locator, in.Body.Fraction)
+		book, position, err := h.svc.SavePosition(ctx, in.ID, in.Body.Locator, in.Body.Fraction)
 		if err != nil {
 			return nil, httpapi.ToHTTP(err)
 		}
 
-		return positionOutput(position), nil
+		return positionOutput(book, position), nil
 	})
 }
 
-func positionOutput(position *store.Position) *BookPositionOutput {
+func positionOutput(book *service.BookFile, position *store.Position) *BookPositionOutput {
 	out := &BookPositionOutput{}
+	out.Body.Book = BookInfo{
+		FileID:      book.FileID,
+		Title:       book.Title,
+		MediaRef:    book.MediaRef,
+		ContentType: book.ContentType,
+	}
 
 	if position != nil {
 		out.Body.Position = &BookPosition{

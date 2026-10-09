@@ -72,45 +72,48 @@ func bookExtension(path string) string {
 	return filepath.Ext(lower)
 }
 
-// Position is where the reader left the book: nil for a book never opened.
-func (s *Service) Position(ctx context.Context, fileID int64) (*store.Position, error) {
-	if _, err := s.Book(ctx, fileID); err != nil {
-		return nil, err
+// Position is the book and where the reader left it: nil for a book never opened.
+func (s *Service) Position(ctx context.Context, fileID int64) (*BookFile, *store.Position, error) {
+	book, err := s.Book(ctx, fileID)
+	if err != nil {
+		return nil, nil, err
 	}
 
 	if s.opts.Store == nil {
-		return nil, apperr.New(apperr.KindPrecondition, "this node keeps no reading positions")
+		return book, nil, nil
 	}
 
 	position, err := s.opts.Store.Position(ctx, fileID)
 	if err != nil {
-		return nil, apperr.Wrap(err, apperr.KindInternal, "read book position")
+		return nil, nil, apperr.Wrap(err, apperr.KindInternal, "read book position")
 	}
 
-	return position, nil
+	return book, position, nil
 }
 
 // SavePosition keeps the reader's place and moves the user's list along with it.
 // The list is the tracker's: it decides how far a fraction of the book is, and it
 // never lowers progress the user already has. A list that cannot be reached does
 // not cost the reader its place.
-func (s *Service) SavePosition(ctx context.Context, fileID int64, locator string, fraction float64) (*store.Position, error) {
+func (s *Service) SavePosition(
+	ctx context.Context, fileID int64, locator string, fraction float64,
+) (*BookFile, *store.Position, error) {
 	book, err := s.Book(ctx, fileID)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if s.opts.Store == nil {
-		return nil, apperr.New(apperr.KindPrecondition, "this node keeps no reading positions")
+		return nil, nil, apperr.New(apperr.KindPrecondition, "this node keeps no reading positions")
 	}
 
 	if strings.TrimSpace(locator) == "" {
-		return nil, apperr.Invalid("locator", "a position needs a locator")
+		return nil, nil, apperr.Invalid("locator", "a position needs a locator")
 	}
 
 	position := store.Position{Locator: locator, Fraction: min(max(fraction, 0), 1), UpdatedAt: s.now()}
 	if err := s.opts.Store.SetPosition(ctx, fileID, position); err != nil {
-		return nil, apperr.Wrap(err, apperr.KindInternal, "store book position")
+		return nil, nil, apperr.Wrap(err, apperr.KindInternal, "store book position")
 	}
 
 	if book.MediaRef != "" && s.opts.Progress != nil {
@@ -119,5 +122,5 @@ func (s *Service) SavePosition(ctx context.Context, fileID int64, locator string
 		}
 	}
 
-	return &position, nil
+	return book, &position, nil
 }
