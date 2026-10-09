@@ -49,6 +49,12 @@ function sourceLink({ mediaRef, mediaType, siteUrl }: EntryMenuMedia): SourceLin
 		return url ? { name: 'Open Library', url } : null
 	}
 
+	if (provider === 'googlebooks') {
+		const url = siteUrl ?? (first ? `https://books.google.com/books?id=${first}` : null)
+
+		return url ? { name: 'Google Books', url } : null
+	}
+
 	const url =
 		siteUrl ?? (provider === 'anilist' && first ? `https://anilist.co/${mediaType}/${first}` : null)
 

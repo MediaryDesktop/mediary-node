@@ -115,3 +115,18 @@ export const setTMDBKeyFx = createNodeRequestFx<string, TMDBSettings>(apiKey => 
 	body: { api_key: apiKey },
 	timeout: 20_000
 }))
+
+// Google Books answers for the books Open Library does not know, with the same
+// choice of keys as TMDB.
+export type GoogleBooksSettings = Omit<NodeSchemas['GoogleBooksSettings'], '$schema'>
+
+export const fetchGoogleBooksSettingsFx = createNodeRequestFx<void, GoogleBooksSettings>({
+	url: '/v1/google-books/settings'
+})
+
+export const setGoogleBooksKeyFx = createNodeRequestFx<string, GoogleBooksSettings>(apiKey => ({
+	url: '/v1/google-books/settings',
+	method: 'PUT',
+	body: { api_key: apiKey },
+	timeout: 20_000
+}))

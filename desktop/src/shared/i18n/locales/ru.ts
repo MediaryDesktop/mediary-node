@@ -1206,6 +1206,22 @@ export const ru: Translation = {
 		note: 'Ключ хранится в файле, который можете прочитать только вы на этом компьютере, — не в бэкапах. This product uses the TMDB API but is not endorsed or certified by TMDB.',
 		openSettings: 'Открыть настройки TMDB'
 	},
+	googleBooks: {
+		source: {
+			user: 'Используется ваш собственный ключ.',
+			build: 'Используется ключ, встроенный в приложение. Можно указать свой.',
+			none: 'Ключа ещё нет: книги, которых не знает Open Library, не найти, пока он не добавлен.'
+		},
+		keyPlaceholder: 'API key от Google',
+		save: 'Проверить и сохранить',
+		getKey: 'Включить Books API в Google Cloud',
+		useBuiltIn: 'Вернуть встроенный ключ',
+		saved: 'Google принял ключ',
+		cleared: 'Возвращён встроенный ключ',
+		saveFailed: 'Не удалось сохранить ключ',
+		disabled: 'Google Books выключен на этой ноде.',
+		note: 'Запрашивается только тогда, когда Open Library ничего не нашла: Google считает каждый запрос в дневную квоту. Ключ хранится в файле, который можете прочитать только вы на этом компьютере, — не в бэкапах.'
+	},
 	settings: {
 		sections: {
 			app: {
@@ -1240,6 +1256,10 @@ export const ru: Translation = {
 				title: 'TMDB',
 				subtitle: 'Фильмы, сериалы и дорамы'
 			},
+			googleBooks: {
+				title: 'Google Books',
+				subtitle: 'Книги, которых не знает Open Library'
+			},
 			mangaDex: {
 				title: 'MangaDex',
 				subtitle: 'Чтение глав онлайн'
@@ -1252,6 +1272,10 @@ export const ru: Translation = {
 		tmdb: {
 			name: 'Ключ TMDB',
 			hint: 'Откуда берутся фильмы, сериалы и дорамы'
+		},
+		googleBooks: {
+			name: 'Ключ Google Books',
+			hint: 'Где искать книги, которых не знает Open Library'
 		},
 		mangaDex: {
 			name: 'MangaDex',

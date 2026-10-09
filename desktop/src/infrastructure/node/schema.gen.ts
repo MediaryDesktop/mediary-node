@@ -49,6 +49,30 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/v1/google-books/settings': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Google Books connection
+		 * @description Whether books Open Library does not know can be looked up on Google Books, and with whose key. The key itself is never returned.
+		 */
+		get: operations['getGoogleBooksSettings']
+		/**
+		 * Use your own Google Books key
+		 * @description Checks the key with Google, then keeps it in a file only the user can read, never in the database or a backup. A key Google refuses is not stored and answers 428.
+		 */
+		put: operations['setGoogleBooksKey']
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/v1/health': {
 		parameters: {
 			query?: never
@@ -654,7 +678,7 @@ export interface paths {
 		}
 		/**
 		 * Title details
-		 * @description Fetched from the source on demand and kept for at most a day, as the source's terms allow. Past that the node asks again; while the source is unreachable the request fails, and clients fall back to what the user's own list already knows about the title. A reference is anilist:<id>, tmdb:movie:<id> or tmdb:tv:<id>.
+		 * @description Fetched from the source on demand and kept for at most a day, as the source's terms allow. Past that the node asks again; while the source is unreachable the request fails, and clients fall back to what the user's own list already knows about the title. A reference is anilist:<id>, tmdb:movie:<id>, tmdb:tv:<id>, openlibrary:<work id> or googlebooks:<volume id>.
 		 */
 		get: operations['getMediaDetails']
 		put?: never
@@ -2148,6 +2172,31 @@ export interface components {
 			month: number | null
 			/** Format: int64 */
 			year: number | null
+		}
+		GoogleBooksKeyInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/GoogleBooksKeyInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The user's own Google API key with the Books API enabled. Google is asked to accept it before it is stored. Empty forgets it and goes back to the key this build ships with. */
+			api_key: string
+		}
+		GoogleBooksSettings: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/GoogleBooksSettings.json
+			 */
+			readonly $schema?: string
+			/** @description Whether this node reads Google Books at all. Off when the node was started with an empty Google Books endpoint. */
+			enabled: boolean
+			/**
+			 * @description Which key the node sends: the user's own, the one this build ships with, or none — then books Open Library does not know cannot be found.
+			 * @enum {string}
+			 */
+			key_source: 'user' | 'build' | 'none'
 		}
 		HealthOutputBody: {
 			/**
@@ -4034,6 +4083,8 @@ export type SchemaFilterOptionsOutputBody = components['schemas']['FilterOptions
 export type SchemaFilterTag = components['schemas']['FilterTag']
 export type SchemaFont = components['schemas']['Font']
 export type SchemaFuzzyDate = components['schemas']['FuzzyDate']
+export type SchemaGoogleBooksKeyInputBody = components['schemas']['GoogleBooksKeyInputBody']
+export type SchemaGoogleBooksSettings = components['schemas']['GoogleBooksSettings']
 export type SchemaHealthOutputBody = components['schemas']['HealthOutputBody']
 export type SchemaLibraryCollection = components['schemas']['LibraryCollection']
 export type SchemaLibraryCollectionEntry = components['schemas']['LibraryCollectionEntry']
@@ -4248,6 +4299,68 @@ export interface operations {
 				}
 				content: {
 					'application/json': components['schemas']['StatusOutputBody2']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getGoogleBooksSettings: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['GoogleBooksSettings']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	setGoogleBooksKey: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['GoogleBooksKeyInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['GoogleBooksSettings']
 				}
 			}
 			/** @description Error */
@@ -5477,7 +5590,7 @@ export interface operations {
 			query?: {
 				/** @description Free text to match against every title the source knows. Empty browses by the filters alone. */
 				q?: string
-				/** @description Which catalog to search. Every source owns one kind of media, so this also picks the source: AniList for anime and manga, TMDB for movies and shows, Open Library for books. A dorama is a live-action show from East Asia, and every dorama is a series too. */
+				/** @description Which catalog to search. Every source owns one kind of media, so this also picks the source: AniList for anime and manga, TMDB for movies and shows, Open Library for books — and Google Books for a text search Open Library finds nothing for. A dorama is a live-action show from East Asia, and every dorama is a series too. */
 				type?: 'anime' | 'manga' | 'movie' | 'series' | 'dorama' | 'book'
 				/** @description Order of the results. Left out it means relevance while searching and popularity while browsing. TMDB orders a text search by relevance only. */
 				sort?:

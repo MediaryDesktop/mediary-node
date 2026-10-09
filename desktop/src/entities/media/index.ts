@@ -3,6 +3,7 @@ export {
 	enumLabel,
 	episodeTitle,
 	formatMediaDate,
+	googleBooksSettingsQuery,
 	mediaDetailsModel,
 	mediaDetailsQuery,
 	mediaEpisodesQuery,
@@ -11,6 +12,7 @@ export {
 	mediaSearchQuery,
 	mediaTitle,
 	scoreTone,
+	setGoogleBooksKeyMutation,
 	setTMDBKeyMutation,
 	tmdbSettingsQuery
 } from './model/model'
@@ -27,6 +29,7 @@ export {
 	searchMediaFx
 } from './api/api'
 export type {
+	GoogleBooksSettings,
 	MediaAiringEpisode,
 	MediaDate,
 	MediaDetails,

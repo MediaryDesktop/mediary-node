@@ -6,11 +6,13 @@ import { atom } from '@shared/factory'
 import { firstPresent } from '@shared/lib'
 
 import {
+	fetchGoogleBooksSettingsFx,
 	fetchMediaDetailsFx,
 	fetchMediaEpisodesFx,
 	fetchMediaFilterOptionsFx,
 	fetchTMDBSettingsFx,
 	searchMediaFx,
+	setGoogleBooksKeyFx,
 	setTMDBKeyFx
 } from '../api/api'
 import type { MediaDate, MediaDetails, MediaEpisode, MediaTitle } from '../api/api'
@@ -46,6 +48,18 @@ export const setTMDBKeyMutation = createMutation({
 })
 
 keepFresh(tmdbSettingsQuery, { triggers: [setTMDBKeyMutation.finished.success] })
+
+export const googleBooksSettingsQuery = createQuery({
+	effect: fetchGoogleBooksSettingsFx,
+	name: 'googleBooksSettings'
+})
+
+export const setGoogleBooksKeyMutation = createMutation({
+	effect: setGoogleBooksKeyFx,
+	name: 'setGoogleBooksKey'
+})
+
+keepFresh(googleBooksSettingsQuery, { triggers: [setGoogleBooksKeyMutation.finished.success] })
 
 export const mediaDetailsModel = atom(() => {
 	const $failedMediaRef = createStore<string | null>(null)

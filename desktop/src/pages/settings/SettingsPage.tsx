@@ -10,7 +10,7 @@ import { DownloadFolderSetting } from '@features/download-chapters'
 import { LibraryRootsSettings } from '@features/manage-library-roots'
 import { MangaDexSettings } from '@features/manage-mangadex'
 import { OPDSServersSettings } from '@features/manage-opds-servers'
-import { TMDBSettings } from '@features/manage-tmdb'
+import { GoogleBooksSettings, TMDBSettings } from '@features/manage-source-keys'
 import { TorrentClientSettings } from '@features/manage-torrent-client'
 import { ReleaseProfileSettings, TorznabSourcesSettings } from '@features/manage-torznab-sources'
 import { LanguageSwitcher } from '@features/switch-language'
@@ -113,6 +113,14 @@ function SectionContent({ section }: { section: SectionInfo }) {
 				<Card>
 					<Row name={t('settings.tmdb.name')} hint={t('settings.tmdb.hint')} block>
 						<TMDBSettings />
+					</Row>
+				</Card>
+			)
+		case 'google-books':
+			return (
+				<Card>
+					<Row name={t('settings.googleBooks.name')} hint={t('settings.googleBooks.hint')} block>
+						<GoogleBooksSettings />
 					</Row>
 				</Card>
 			)

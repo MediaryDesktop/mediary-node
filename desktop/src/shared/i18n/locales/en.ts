@@ -1205,6 +1205,22 @@ export const en = {
 		note: 'The key stays in a file only you can read on this computer — not in backups. This product uses the TMDB API but is not endorsed or certified by TMDB.',
 		openSettings: 'Open TMDB settings'
 	},
+	googleBooks: {
+		source: {
+			user: 'Using your own key.',
+			build: 'Using the key this build ships with. You can use your own instead.',
+			none: 'No key yet: books Open Library does not know cannot be found until you add one.'
+		},
+		keyPlaceholder: 'Google API key',
+		save: 'Check and save',
+		getKey: 'Turn on the Books API in Google Cloud',
+		useBuiltIn: 'Use the built-in key',
+		saved: 'Google accepted the key',
+		cleared: 'Back to the built-in key',
+		saveFailed: 'Could not save the key',
+		disabled: 'Google Books is turned off on this node.',
+		note: 'Asked only when Open Library finds nothing: Google counts every request against a daily quota. The key stays in a file only you can read on this computer — not in backups.'
+	},
 	settings: {
 		sections: {
 			app: {
@@ -1239,6 +1255,10 @@ export const en = {
 				title: 'TMDB',
 				subtitle: 'Movies, series and doramas'
 			},
+			googleBooks: {
+				title: 'Google Books',
+				subtitle: 'Books Open Library does not know'
+			},
 			mangaDex: {
 				title: 'MangaDex',
 				subtitle: 'Reading chapters online'
@@ -1251,6 +1271,10 @@ export const en = {
 		tmdb: {
 			name: 'TMDB key',
 			hint: 'Where movies, series and doramas are looked up'
+		},
+		googleBooks: {
+			name: 'Google Books key',
+			hint: 'Where books Open Library does not know are looked up'
 		},
 		mangaDex: {
 			name: 'MangaDex',
