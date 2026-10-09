@@ -13,6 +13,7 @@ import {
 	Input,
 	PageHeader,
 	PageTransition,
+	PhaseTransition,
 	ReelLoader,
 	SelectDropdown
 } from '@shared/ui'
@@ -117,97 +118,114 @@ export function ScanHistoryPage() {
 				]}
 			/>
 
-			{!historyPending && runs.length === 0 ? (
-				<EmptyState title={t('library.history.empty')} />
-			) : (
-				<>
-					<div className={styles.controls}>
-						<SelectDropdown
-							className={styles.select}
-							options={options}
-							value={selected}
-							onChange={value => setPicked(value)}
-						/>
+			<PhaseTransition
+				className={styles.body}
+				phase={historyPending || runs.length > 0 ? 'history' : 'empty'}
+			>
+				{!historyPending && runs.length === 0 ? (
+					<EmptyState title={t('library.history.empty')} />
+				) : (
+					<>
+						<div className={styles.controls}>
+							<SelectDropdown
+								className={styles.select}
+								options={options}
+								value={selected}
+								onChange={value => setPicked(value)}
+							/>
 
-						<Input
-							className={styles.search}
-							value={search}
-							onChange={event => setSearch(event.target.value)}
-							placeholder={t('library.history.search')}
-							startIcon={<Icon name='common/search' size={18} />}
-						/>
-					</div>
+							<Input
+								className={styles.search}
+								value={search}
+								onChange={event => setSearch(event.target.value)}
+								placeholder={t('library.history.search')}
+								startIcon={<Icon name='common/search' size={18} />}
+							/>
+						</div>
 
-					{!detail ? (
-						runPending && (
-							<div className={styles.loading}>
-								<ReelLoader spinning />
-							</div>
-						)
-					) : (
-						<section className={styles.card}>
-							<header className={styles.cardHeader}>
-								<p className={styles.muted}>
-									{t('library.history.scanned', { count: detail.groups?.length ?? 0 })}
-								</p>
-
-								{detail.status === 'partial' && (
-									<Badge tone='warning'>{t('library.history.partial')}</Badge>
-								)}
-							</header>
-
-							{(detail.unmatched_files?.length ?? 0) > 0 && (
-								<p className={styles.warning}>
-									<Icon name='common/info' size={16} />
-									{t('library.history.notMatched', {
-										count: detail.unmatched_files?.length ?? 0
-									})}
-								</p>
-							)}
-
-							{unmatched.length > 0 && (
-								<div className={styles.section}>
-									<h4 className={styles.heading}>{t('library.history.unmatchedTitle')}</h4>
-
-									<div className={styles.logs}>
-										{unmatched.map(log => (
-											<FileLogItem
-												key={log.rel_path}
-												log={log}
-												matched={false}
-												search={needle}
-											/>
-										))}
+						<PhaseTransition
+							phase={detail ? `run:${detail.id}` : runPending ? 'loading' : 'idle'}
+						>
+							{!detail ? (
+								runPending && (
+									<div className={styles.loading}>
+										<ReelLoader spinning />
 									</div>
-								</div>
-							)}
+								)
+							) : (
+								<section className={styles.card}>
+									<header className={styles.cardHeader}>
+										<p className={styles.muted}>
+											{t('library.history.scanned', {
+												count: detail.groups?.length ?? 0
+											})}
+										</p>
 
-							{groups.length > 0 && (
-								<div className={styles.section}>
-									<h4 className={styles.heading}>{t('library.history.matchedTitle')}</h4>
+										{detail.status === 'partial' && (
+											<Badge tone='warning'>{t('library.history.partial')}</Badge>
+										)}
+									</header>
 
-									<ul className={styles.groups}>
-										{groups.map(group => (
-											<ScannedGroup
-												key={group.media_ref}
-												group={group}
-												search={needle}
-												onExplore={() =>
-													openExplorer(folderOf(group.files?.[0]?.rel_path ?? ''))
-												}
-											/>
-										))}
-									</ul>
-								</div>
-							)}
+									{(detail.unmatched_files?.length ?? 0) > 0 && (
+										<p className={styles.warning}>
+											<Icon name='common/info' size={16} />
+											{t('library.history.notMatched', {
+												count: detail.unmatched_files?.length ?? 0
+											})}
+										</p>
+									)}
 
-							{unmatched.length === 0 && groups.length === 0 && (
-								<p className={styles.muted}>{t('library.history.nothingToShow')}</p>
+									{unmatched.length > 0 && (
+										<div className={styles.section}>
+											<h4 className={styles.heading}>
+												{t('library.history.unmatchedTitle')}
+											</h4>
+
+											<div className={styles.logs}>
+												{unmatched.map(log => (
+													<FileLogItem
+														key={log.rel_path}
+														log={log}
+														matched={false}
+														search={needle}
+													/>
+												))}
+											</div>
+										</div>
+									)}
+
+									{groups.length > 0 && (
+										<div className={styles.section}>
+											<h4 className={styles.heading}>
+												{t('library.history.matchedTitle')}
+											</h4>
+
+											<ul className={styles.groups}>
+												{groups.map(group => (
+													<ScannedGroup
+														key={group.media_ref}
+														group={group}
+														search={needle}
+														onExplore={() =>
+															openExplorer(
+																folderOf(group.files?.[0]?.rel_path ?? '')
+															)
+														}
+													/>
+												))}
+											</ul>
+										</div>
+									)}
+
+									{unmatched.length === 0 && groups.length === 0 && (
+										<p className={styles.muted}>{t('library.history.nothingToShow')}</p>
+									)}
+								</section>
 							)}
-						</section>
-					)}
-				</>
-			)}
+						</PhaseTransition>
+					</>
+				)}
+			</PhaseTransition>
 
 			<LibraryExplorer onMatchMany={files => matchRequestedMany(files)} />
 			<MatchFileDrawer />

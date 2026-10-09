@@ -77,6 +77,9 @@ export type { PageHeaderCrumb, PageHeaderProps } from './page-header/PageHeader'
 export { PageTransition } from './page-transition/PageTransition'
 export type { PageTransitionProps } from './page-transition/PageTransition'
 
+export { PhaseTransition } from './phase-transition/PhaseTransition'
+export type { PhaseTransitionProps } from './phase-transition/PhaseTransition'
+
 export { ProgressBar } from './progress-bar/ProgressBar'
 export type { ProgressBarProps } from './progress-bar/ProgressBar'
 

@@ -1,10 +1,9 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useEffect, useMemo } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, EmptyState, Icon, PageTransition, SegmentedControl } from '@shared/ui'
+import { Button, EmptyState, Icon, PageTransition, PhaseTransition, SegmentedControl } from '@shared/ui'
 import type { IconName } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
@@ -39,7 +38,6 @@ export interface DiscoverPageProps {
 export function DiscoverPage({ tab, onTabChange }: DiscoverPageProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
-	const reduced = useReducedMotion()
 
 	const [sections, request, retry, nodeReady] = useUnit([
 		discoverModel.$sections,
@@ -116,47 +114,35 @@ export function DiscoverPage({ tab, onTabChange }: DiscoverPageProps) {
 				tabs={tabs}
 			/>
 
-			<AnimatePresence mode='wait'>
-				<motion.div
-					key={tab}
-					initial={reduced ? { opacity: 0 } : { opacity: 0, y: 24 }}
-					animate={{ opacity: 1, y: 0 }}
-					exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.99 }}
-					transition={
-						reduced
-							? { duration: 0.2 }
-							: { type: 'spring', damping: 28, stiffness: 260, mass: 0.7 }
-					}
-				>
-					{setupNeeded ? (
-						<EmptyState
-							title={t('discover.tmdbNeeded')}
-							description={first?.setupNeeded || undefined}
-							action={
-								<Button
-									size='small'
-									onClick={() =>
-										void navigate({ to: '/settings', search: { section: 'tmdb' } })
-									}
-								>
-									{t('tmdb.openSettings')}
-								</Button>
-							}
-						/>
-					) : (
-						<div className={styles.rows}>
-							{rows.map(row => (
-								<DiscoverRow
-									key={row.key}
-									title={rowTitle(row)}
-									state={sections[row.key]}
-									onRetry={() => retry(row)}
-								/>
-							))}
-						</div>
-					)}
-				</motion.div>
-			</AnimatePresence>
+			<PhaseTransition phase={tab}>
+				{setupNeeded ? (
+					<EmptyState
+						title={t('discover.tmdbNeeded')}
+						description={first?.setupNeeded || undefined}
+						action={
+							<Button
+								size='small'
+								onClick={() =>
+									void navigate({ to: '/settings', search: { section: 'tmdb' } })
+								}
+							>
+								{t('tmdb.openSettings')}
+							</Button>
+						}
+					/>
+				) : (
+					<div className={styles.rows}>
+						{rows.map(row => (
+							<DiscoverRow
+								key={row.key}
+								title={rowTitle(row)}
+								state={sections[row.key]}
+								onRetry={() => retry(row)}
+							/>
+						))}
+					</div>
+				)}
+			</PhaseTransition>
 		</PageTransition>
 	)
 }

@@ -1,11 +1,10 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useMemo } from 'react'
 import type { ReactNode } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, Carousel, Skeleton } from '@shared/ui'
+import { Button, Carousel, PhaseTransition, Skeleton } from '@shared/ui'
 
 import { aniListAccountModel } from '@entities/anilist-account'
 import { MediaCard, mediaTitle } from '@entities/media'
@@ -28,15 +27,9 @@ export interface DiscoverRowProps {
 
 // One row of Discover: a source's list, as cards that open the title and offer
 // the list menu, like every other grid of titles in the app.
-// One section settles in with the same spring Seanime moves its own sections
-// with, whichever state it starts in — and crosses into that spring again
-// whenever loading gives way to a failure, or to the titles it was fetching.
-const SECTION_SPRING = { type: 'spring', damping: 28, stiffness: 260, mass: 0.7 } as const
-
 export function DiscoverRow({ title, state, onRetry }: DiscoverRowProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
-	const reduced = useReducedMotion()
 
 	const connected = useUnit(aniListAccountModel.$connected)
 	const tracked = useTrackedEntries(connected)
@@ -103,17 +96,5 @@ export function DiscoverRow({ title, state, onRetry }: DiscoverRowProps) {
 			</Carousel>
 		)
 
-	return (
-		<AnimatePresence mode='wait'>
-			<motion.div
-				key={phase}
-				initial={reduced ? { opacity: 0 } : { opacity: 0, y: 16 }}
-				animate={{ opacity: 1, y: 0 }}
-				exit={reduced ? { opacity: 0 } : { opacity: 0, y: -8 }}
-				transition={reduced ? { duration: 0.2 } : SECTION_SPRING}
-			>
-				{body}
-			</motion.div>
-		</AnimatePresence>
-	)
+	return <PhaseTransition phase={phase}>{body}</PhaseTransition>
 }

@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { LuFolderSync } from 'react-icons/lu'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, EmptyState, Icon, PageHeader, PageTransition } from '@shared/ui'
+import { Button, EmptyState, Icon, PageHeader, PageTransition, PhaseTransition } from '@shared/ui'
 
 import { libraryCollectionQuery, libraryRootsQuery, libraryScanQuery } from '@entities/library-item'
 
@@ -45,6 +45,15 @@ export function LibraryPage() {
 	const entries = collection?.entries ?? []
 	const roots = rootsData?.roots ?? []
 
+	const phase =
+		entries.length > 0
+			? 'collection'
+			: collectionPending
+				? 'loading'
+				: roots.length === 0
+					? 'noRoots'
+					: 'noFiles'
+
 	const summary = collection
 		? [
 				t('library.summary.titles', { count: entries.length }),
@@ -72,11 +81,10 @@ export function LibraryPage() {
 				}
 			/>
 
-			{entries.length > 0 && <LibraryCollection entries={entries} />}
+			<PhaseTransition phase={phase}>
+				{phase === 'collection' && <LibraryCollection entries={entries} />}
 
-			{entries.length === 0 &&
-				!collectionPending &&
-				(roots.length === 0 ? (
+				{phase === 'noRoots' && (
 					<EmptyState
 						size='page'
 						title={t('library.empty.title')}
@@ -87,7 +95,9 @@ export function LibraryPage() {
 							</Link>
 						}
 					/>
-				) : (
+				)}
+
+				{phase === 'noFiles' && (
 					<EmptyState
 						size='page'
 						title={t('library.noFiles')}
@@ -102,7 +112,8 @@ export function LibraryPage() {
 							</Button>
 						}
 					/>
-				))}
+				)}
+			</PhaseTransition>
 
 			<ScanModal />
 			<UnmatchedFilesDrawer />

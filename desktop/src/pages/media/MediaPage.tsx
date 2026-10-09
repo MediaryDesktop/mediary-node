@@ -3,7 +3,7 @@ import { useUnit } from 'effector-react'
 import { useEffect } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, EmptyState, Icon, PageTransition } from '@shared/ui'
+import { Button, EmptyState, Icon, PageTransition, PhaseTransition } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
 
@@ -46,6 +46,7 @@ export function MediaPage({ mediaRef }: MediaPageProps) {
 
 	const details = data?.media.media_ref === mediaRef ? data : null
 	const failed = !details && failedMediaRef === mediaRef
+	const phase = details ? 'details' : !failed ? 'loading' : entry ? 'offline' : 'failed'
 
 	return (
 		<PageTransition className={styles.root}>
@@ -57,40 +58,42 @@ export function MediaPage({ mediaRef }: MediaPageProps) {
 				onClick={() => router.history.back()}
 			/>
 
-			{details && (
-				<MediaView
-					mediaRef={mediaRef}
-					media={details.media}
-					sources={details.sources ?? []}
-					entry={entry}
-				/>
-			)}
+			<PhaseTransition phase={`${mediaRef}:${phase}`}>
+				{phase === 'details' && details && (
+					<MediaView
+						mediaRef={mediaRef}
+						media={details.media}
+						sources={details.sources ?? []}
+						entry={entry}
+					/>
+				)}
 
-			{!details && !failed && <MediaHeroSkeleton />}
+				{phase === 'loading' && <MediaHeroSkeleton />}
 
-			{failed && entry && (
-				<>
-					<p className={styles.offline}>{t('media.offline')}</p>
-					<MediaView mediaRef={mediaRef} media={null} sources={[]} entry={entry} />
-				</>
-			)}
+				{phase === 'offline' && (
+					<>
+						<p className={styles.offline}>{t('media.offline')}</p>
+						<MediaView mediaRef={mediaRef} media={null} sources={[]} entry={entry} />
+					</>
+				)}
 
-			{failed && !entry && (
-				<EmptyState
-					className={styles.failure}
-					title={t('media.failed')}
-					description={t('media.failedHint')}
-					action={
-						<Button
-							size='small'
-							startIcon={<Icon name='common/reset' size={16} />}
-							onClick={() => requestDetails(mediaRef)}
-						>
-							{t('media.retry')}
-						</Button>
-					}
-				/>
-			)}
+				{phase === 'failed' && (
+					<EmptyState
+						className={styles.failure}
+						title={t('media.failed')}
+						description={t('media.failedHint')}
+						action={
+							<Button
+								size='small'
+								startIcon={<Icon name='common/reset' size={16} />}
+								onClick={() => requestDetails(mediaRef)}
+							>
+								{t('media.retry')}
+							</Button>
+						}
+					/>
+				)}
+			</PhaseTransition>
 		</PageTransition>
 	)
 }

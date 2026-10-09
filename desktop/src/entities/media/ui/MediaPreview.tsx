@@ -161,9 +161,12 @@ export function MediaPreview({ mediaRef, title, active, tracking, extra }: Media
 
 	const thumbnail = details?.trailer?.thumbnail ?? null
 	const backdrop = thumbnail ?? details?.banner_image ?? null
+	// Books never have a trailer or a banner — with nothing to fill the frame,
+	// keep the poster readable underneath instead of covering it in flat gray.
+	const bare = !backdrop && !trailerId
 
 	return (
-		<div className={styles.preview} data-theme='dark'>
+		<div className={clsx(styles.preview, bare && styles.bare)} data-theme='dark'>
 			{active && backdrop && (
 				<img
 					className={clsx(styles.backdrop, thumbnail && styles.letterboxed)}

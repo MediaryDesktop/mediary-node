@@ -12,6 +12,7 @@ import {
 	Input,
 	PageHeader,
 	PageTransition,
+	PhaseTransition,
 	renderIcon,
 	SegmentedControl,
 	SelectDropdown,
@@ -106,6 +107,17 @@ export function ListsPage() {
 
 		return sortLists(matched, sort)
 	}, [allLists, filter, search, sort])
+
+	const phase =
+		visible.length > 0
+			? 'lists'
+			: listsPending && allLists.length === 0
+				? 'loading'
+				: listsError && allLists.length === 0
+					? 'failed'
+					: !listsPending && !listsError
+						? 'empty'
+						: 'idle'
 
 	const summary = [
 		t('lists.listCount', { count: allLists.length }),
@@ -202,37 +214,41 @@ export function ListsPage() {
 					</div>
 				</div>
 
-				{listsPending && allLists.length === 0 && (
-					<p className={styles.muted}>{t('lists.loading')}</p>
-				)}
+				<PhaseTransition phase={phase}>
+					{phase === 'loading' && <p className={styles.muted}>{t('lists.loading')}</p>}
 
-				{listsError && allLists.length === 0 && (
-					<EmptyState
-						title={t('lists.failed')}
-						action={
-							<Button size='small' onClick={() => startLists()}>
-								{t('lists.retry')}
-							</Button>
-						}
-					/>
-				)}
+					{phase === 'failed' && (
+						<EmptyState
+							title={t('lists.failed')}
+							action={
+								<Button size='small' onClick={() => startLists()}>
+									{t('lists.retry')}
+								</Button>
+							}
+						/>
+					)}
 
-				{visible.length > 0 && (
-					<div className={clsx(styles.grid, view === 'rows' && styles.rows)}>
-						{visible.map(list => (
-							<ListCard
-								key={list.id}
-								list={list}
-								view={view}
-								onOpen={() => navigate({ to: '/lists/$listId', params: { listId: list.id } })}
-							/>
-						))}
-					</div>
-				)}
+					{phase === 'lists' && (
+						<div className={clsx(styles.grid, view === 'rows' && styles.rows)}>
+							{visible.map(list => (
+								<ListCard
+									key={list.id}
+									list={list}
+									view={view}
+									onOpen={() =>
+										navigate({ to: '/lists/$listId', params: { listId: list.id } })
+									}
+								/>
+							))}
+						</div>
+					)}
 
-				{!listsPending && !listsError && visible.length === 0 && (
-					<EmptyState title={allLists.length === 0 ? t('lists.noLists') : t('lists.noMatches')} />
-				)}
+					{phase === 'empty' && (
+						<EmptyState
+							title={allLists.length === 0 ? t('lists.noLists') : t('lists.noMatches')}
+						/>
+					)}
+				</PhaseTransition>
 			</section>
 		</PageTransition>
 	)

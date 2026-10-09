@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 import type { ReactNode } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, EmptyState, Skeleton } from '@shared/ui'
+import { Button, EmptyState, PhaseTransition, Skeleton } from '@shared/ui'
 
 import { aniListAccountModel } from '@entities/anilist-account'
 import { MediaCard } from '@entities/media'
@@ -43,20 +43,33 @@ export function SearchResults({ renderMenu }: SearchResultsProps) {
 			searchMediaModel.retried
 		])
 
-	if (loading) {
-		return (
+	const phase = loading
+		? 'loading'
+		: failed && setupNeeded !== null
+			? 'setup'
+			: failed
+				? 'failed'
+				: items.length === 0
+					? 'empty'
+					: 'results'
+
+	const body = {
+		loading: (
 			<ul className={styles.grid}>
 				{Array.from({ length: SKELETON_COUNT }, (_, index) => (
 					<li key={index} className={styles.skeletonCard}>
-						<Skeleton width='100%' height='auto' radius='14px' className={styles.skeletonPoster} />
+						<Skeleton
+							width='100%'
+							height='auto'
+							radius='14px'
+							className={styles.skeletonPoster}
+						/>
 					</li>
 				))}
 			</ul>
-		)
-	}
+		),
 
-	if (failed && setupNeeded !== null) {
-		return (
+		setup: (
 			<EmptyState
 				title={setupNeeded || t('search.failed')}
 				action={
@@ -68,11 +81,9 @@ export function SearchResults({ renderMenu }: SearchResultsProps) {
 					</Button>
 				}
 			/>
-		)
-	}
+		),
 
-	if (failed) {
-		return (
+		failed: (
 			<EmptyState
 				title={t('search.failed')}
 				action={
@@ -81,52 +92,52 @@ export function SearchResults({ renderMenu }: SearchResultsProps) {
 					</Button>
 				}
 			/>
+		),
+
+		empty: <EmptyState title={t('search.empty')} />,
+
+		results: (
+			<div className={styles.results}>
+				<ul className={styles.grid}>
+					{items.map(media => {
+						const entry = trackedByRef.get(media.media_ref)
+
+						return (
+							<li key={media.media_ref}>
+								<MediaCard
+									media={media}
+									scoreBadge={media.average_score ?? undefined}
+									tracking={entry ? entryTracking(entry, t) : null}
+									menu={renderMenu?.(media, entry ?? null)}
+									previewRef={media.media_ref}
+									onOpen={() =>
+										navigate({
+											to: '/media/$mediaRef',
+											params: { mediaRef: media.media_ref }
+										})
+									}
+								/>
+							</li>
+						)
+					})}
+				</ul>
+
+				{loadMoreFailed && <p className={styles.muted}>{t('search.loadMoreFailed')}</p>}
+
+				{hasNextPage && (
+					<div className={styles.more}>
+						<Button
+							variant='secondary'
+							loading={loadingMore}
+							onClick={() => (loadMoreFailed ? retry() : loadMore())}
+						>
+							{t('search.loadMore')}
+						</Button>
+					</div>
+				)}
+			</div>
 		)
-	}
+	}[phase]
 
-	if (items.length === 0) {
-		return <EmptyState title={t('search.empty')} />
-	}
-
-	return (
-		<div className={styles.results}>
-			<ul className={styles.grid}>
-				{items.map(media => {
-					const entry = trackedByRef.get(media.media_ref)
-
-					return (
-						<li key={media.media_ref}>
-							<MediaCard
-								media={media}
-								scoreBadge={media.average_score ?? undefined}
-								tracking={entry ? entryTracking(entry, t) : null}
-								menu={renderMenu?.(media, entry ?? null)}
-								previewRef={media.media_ref}
-								onOpen={() =>
-									navigate({
-										to: '/media/$mediaRef',
-										params: { mediaRef: media.media_ref }
-									})
-								}
-							/>
-						</li>
-					)
-				})}
-			</ul>
-
-			{loadMoreFailed && <p className={styles.muted}>{t('search.loadMoreFailed')}</p>}
-
-			{hasNextPage && (
-				<div className={styles.more}>
-					<Button
-						variant='secondary'
-						loading={loadingMore}
-						onClick={() => (loadMoreFailed ? retry() : loadMore())}
-					>
-						{t('search.loadMore')}
-					</Button>
-				</div>
-			)}
-		</div>
-	)
+	return <PhaseTransition phase={phase}>{body}</PhaseTransition>
 }

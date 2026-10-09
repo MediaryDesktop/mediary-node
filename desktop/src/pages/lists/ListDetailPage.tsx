@@ -3,7 +3,7 @@ import { useUnit } from 'effector-react'
 import { useEffect, useMemo, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { EmptyState, PageHeader, PageTransition } from '@shared/ui'
+import { EmptyState, PageHeader, PageTransition, PhaseTransition } from '@shared/ui'
 
 import { aniListAccountModel } from '@entities/anilist-account'
 import { MediaCard } from '@entities/media'
@@ -137,42 +137,46 @@ export function ListDetailPage({ listId }: ListDetailPageProps) {
 					/>
 				)}
 
-				{visible.length === 0 ? (
-					<EmptyState
-						title={entries.length === 0 ? t('lists.empty') : t('lists.filters.noMatches')}
-					/>
-				) : (
-					<ul className={styles.grid}>
-						{visible.map(entry => (
-							<li key={entry.media_ref}>
-								<MediaCard
-									media={entry.media}
-									scoreBadge={entry.media.average_score ?? undefined}
-									tracking={entryTracking(entry, t)}
-									menu={
-										<EntryMenu
-											media={{
-												mediaRef: entry.media_ref,
-												mediaType: entry.media_type as TrackerMediaType,
-												title: preferredTitle(entry.media.title),
-												siteUrl: entry.media.site_url
-											}}
-											entry={entry}
-											listName={list?.provider === 'anilist' ? list.name : undefined}
-										/>
-									}
-									previewRef={entry.media_ref}
-									onOpen={() =>
-										navigate({
-											to: '/media/$mediaRef',
-											params: { mediaRef: entry.media_ref }
-										})
-									}
-								/>
-							</li>
-						))}
-					</ul>
-				)}
+				<PhaseTransition phase={visible.length === 0 ? 'empty' : 'entries'}>
+					{visible.length === 0 ? (
+						<EmptyState
+							title={entries.length === 0 ? t('lists.empty') : t('lists.filters.noMatches')}
+						/>
+					) : (
+						<ul className={styles.grid}>
+							{visible.map(entry => (
+								<li key={entry.media_ref}>
+									<MediaCard
+										media={entry.media}
+										scoreBadge={entry.media.average_score ?? undefined}
+										tracking={entryTracking(entry, t)}
+										menu={
+											<EntryMenu
+												media={{
+													mediaRef: entry.media_ref,
+													mediaType: entry.media_type as TrackerMediaType,
+													title: preferredTitle(entry.media.title),
+													siteUrl: entry.media.site_url
+												}}
+												entry={entry}
+												listName={
+													list?.provider === 'anilist' ? list.name : undefined
+												}
+											/>
+										}
+										previewRef={entry.media_ref}
+										onOpen={() =>
+											navigate({
+												to: '/media/$mediaRef',
+												params: { mediaRef: entry.media_ref }
+											})
+										}
+									/>
+								</li>
+							))}
+						</ul>
+					)}
+				</PhaseTransition>
 			</PageTransition>
 		</>
 	)
