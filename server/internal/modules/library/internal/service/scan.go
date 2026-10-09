@@ -310,17 +310,32 @@ func (s *Service) probeDurations(
 }
 
 func (s *Service) probe(rootPath, relPath, kind string) store.Probe {
-	probe := store.Probe{Version: prober.Version}
+	probe := store.Probe{Version: probeVersion(kind)}
+	path := filepath.Join(rootPath, filepath.FromSlash(relPath))
 
-	if kind != string(scanner.KindVideo) {
-		return probe
-	}
-
-	if duration, ok := prober.Duration(filepath.Join(rootPath, filepath.FromSlash(relPath))); ok {
-		probe.Duration = &duration
+	switch kind {
+	case string(scanner.KindVideo):
+		if duration, ok := prober.Duration(path); ok {
+			probe.Duration = &duration
+		}
+	case string(scanner.KindBook):
+		if info, ok := prober.Book(path); ok {
+			probe.Book = &store.BookMeta{Title: info.Title, Authors: info.Authors, ISBN: info.ISBN}
+		}
 	}
 
 	return probe
+}
+
+// probeVersion is the prober build a file of this kind was last read by: books
+// and videos are read by different code, and teaching one something new must
+// not reopen every file of the other.
+func probeVersion(kind string) int {
+	if kind == string(scanner.KindBook) {
+		return prober.BookVersion
+	}
+
+	return prober.Version
 }
 
 // staleProbes are the files on disk that this scan is not rewriting anyway and
@@ -342,7 +357,7 @@ func staleProbes(known []store.FileState, found []scanner.File, changes *store.S
 		_, present := onDisk[state.RelPath]
 		_, rewriting := rewritten[state.ID]
 
-		if present && !rewriting && state.ProbeVersion < prober.Version {
+		if present && !rewriting && state.ProbeVersion < probeVersion(state.Kind) {
 			stale = append(stale, state)
 		}
 	}

@@ -11,6 +11,7 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/modules/media"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/tracker"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/openlibrary"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/tmdb"
 )
 
@@ -27,6 +28,9 @@ type titleSource struct {
 
 	// tmdb answers for folders of movies and shows; nil leaves them unmatched.
 	tmdb *tmdb.Client
+
+	// openLibrary answers for books; nil leaves them unmatched.
+	openLibrary *openlibrary.Client
 }
 
 const searchCandidates = 15
@@ -48,6 +52,7 @@ func (s titleSource) Tracked(ctx context.Context, mediaType string) ([]library.T
 			CoverImage:   tracked[i].CoverImage,
 			CoverColor:   tracked[i].CoverColor,
 			SpansSeasons: strings.HasPrefix(tracked[i].MediaRef, "tmdb:tv:"),
+			Authors:      tracked[i].Authors,
 		})
 	}
 
@@ -60,6 +65,8 @@ func (s titleSource) Search(ctx context.Context, query, mediaType string) ([]lib
 		return s.searchTMDB(ctx, query, tmdb.KindMovie)
 	case "series":
 		return s.searchTMDB(ctx, query, tmdb.KindTV)
+	case "book":
+		return s.searchBooks(ctx, query)
 	}
 
 	sourceType := anilist.MediaTypeAnime
@@ -177,14 +184,21 @@ func tmdbCandidate(kind tmdb.Kind, found *tmdb.Result, name, original, date stri
 	return candidate
 }
 
-// Matched fetches the details of TMDB titles a scan matched files to, so the
-// library can name them and show their posters. The scan is the user's own
-// action, which is when the node may ask the source. AniList titles are left to
-// the title page: its request budget is far smaller, and a first scan of a large
-// anime library would spend it all.
+// Matched fetches the details of TMDB and Open Library titles a scan matched
+// files to, so the library can name them and show their posters. The scan is the
+// user's own action, which is when the node may ask the source. AniList titles
+// are left to the title page: its request budget is far smaller, and a first scan
+// of a large anime library would spend it all. Open Library answers one request a
+// second, so only the first few books of a scan are fetched here.
 func (s titleSource) Matched(ctx context.Context, mediaRefs []string) {
+	books := 0
+
 	for _, ref := range mediaRefs {
-		if !strings.HasPrefix(ref, "tmdb:") {
+		switch {
+		case strings.HasPrefix(ref, "tmdb:"):
+		case strings.HasPrefix(ref, "openlibrary:") && books < warmedBooks:
+			books++
+		default:
 			continue
 		}
 

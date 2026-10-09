@@ -55,8 +55,8 @@ WHERE root_id = ?;
 INSERT INTO library_file (root_id, rel_path, kind, size_bytes, mtime, scanned_at,
                           media_form, parsed_title, parsed_year, parsed_season,
                           parsed_episode, parsed_chapter, parsed_volume, parser_version,
-                          duration_seconds, probe_version)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                          duration_seconds, probe_version, book_title, book_authors, book_isbn)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 RETURNING id;
 
 -- name: UpdateLibraryFile :exec
@@ -75,7 +75,10 @@ SET kind           = ?,
     parsed_volume  = ?,
     parser_version = ?,
     duration_seconds = ?,
-    probe_version    = ?
+    probe_version    = ?,
+    book_title       = ?,
+    book_authors     = ?,
+    book_isbn        = ?
 WHERE id = ?;
 
 -- Only the parsed columns: the file itself did not change, a newer parser reads
@@ -96,7 +99,10 @@ WHERE id = ?;
 -- name: UpdateLibraryFileProbe :exec
 UPDATE library_file
 SET duration_seconds = ?,
-    probe_version    = ?
+    probe_version    = ?,
+    book_title       = ?,
+    book_authors     = ?,
+    book_isbn        = ?
 WHERE id = ?;
 
 -- name: ClearLibraryFileMissing :exec
@@ -157,7 +163,7 @@ WHERE (CAST(sqlc.arg(root_id) AS INTEGER) = 0 OR f.root_id = CAST(sqlc.arg(root_
   AND (CAST(sqlc.arg(media_form) AS TEXT) = '' OR f.media_form = CAST(sqlc.arg(media_form) AS TEXT));
 
 -- name: GetLibraryFile :one
-SELECT f.id, f.root_id, r.path AS root_path, r.content AS root_content, f.rel_path, f.kind, f.size_bytes,
+SELECT f.id, f.root_id, r.path AS root_path, r.content AS root_content, f.book_title, f.book_authors, f.book_isbn, f.rel_path, f.kind, f.size_bytes,
        f.mtime, f.scanned_at, f.missing_since, f.ignored_at,
        f.media_form, f.parsed_title, f.parsed_year, f.parsed_season,
        f.parsed_episode, f.parsed_chapter, f.parsed_volume, f.duration_seconds,
@@ -172,7 +178,8 @@ WHERE f.id = ?;
 -- instead of once per file.
 -- name: ListUnmatchedFiles :many
 SELECT f.id, f.rel_path, f.kind, r.content AS root_content, f.media_form, f.parsed_title, f.parsed_year,
-       f.parsed_season, f.parsed_episode, f.parsed_chapter, f.parsed_volume
+       f.parsed_season, f.parsed_episode, f.parsed_chapter, f.parsed_volume,
+       f.book_title, f.book_authors, f.book_isbn
 FROM library_file f
          JOIN library_root r ON r.id = f.root_id
          LEFT JOIN file_match m ON m.file_id = f.id

@@ -24,6 +24,7 @@ type (
 	RelatedCandidate = service.RelatedCandidate
 	TitleDescription = service.TitleDescription
 	TitleSource      = service.TitleSource
+	ISBNResolver     = service.ISBNResolver
 )
 
 // PlayableFile is the module's read-only port onto one scanned file, for the parts

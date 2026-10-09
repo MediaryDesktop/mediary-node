@@ -22,6 +22,9 @@ type fakeTitles struct {
 	described []TitleDescription
 	searches  []string
 
+	isbns       map[string]TitleCandidate
+	isbnLookups []string
+
 	// types is the media type each Tracked and Search call asked for, in order.
 	types []string
 
@@ -78,6 +81,19 @@ func (f *fakeTitles) Describe(_ context.Context, mediaRefs []string) ([]TitleDes
 	}
 
 	return described, nil
+}
+
+func (f *fakeTitles) ByISBN(_ context.Context, isbn string) (*TitleCandidate, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+
+	f.isbnLookups = append(f.isbnLookups, isbn)
+
+	if found, ok := f.isbns[isbn]; ok {
+		return &found, nil
+	}
+
+	return nil, nil
 }
 
 func (f *fakeTitles) searchCount() int {
@@ -307,17 +323,17 @@ func TestSuggestionsRefuseWhatItCannotAnswer(t *testing.T) {
 	h := newHarness(t)
 	root := t.TempDir()
 
-	writeEpisodes(t, root, "Dune.epub")
+	writeEpisodes(t, root, "[SubsPlease] Sousou no Frieren - NCOP01 (1080p).mkv")
 	h.addRoot(t, root)
 	h.scan(t, 0)
 
 	file := h.files(t)[0]
 
-	// Books have no source in the node yet, and saying so is better than an empty
-	// list that looks like "nothing matches".
+	// An opening belongs to no title's numbering, and saying so is better than an
+	// empty list that looks like "nothing matches".
 	_, err := h.svc.Suggestions(context.Background(), file.ID)
 	if apperr.KindOf(err) != apperr.KindPrecondition {
-		t.Errorf("suggestions for a book returned %v, want a precondition failure", err)
+		t.Errorf("suggestions for an extra returned %v, want a precondition failure", err)
 	}
 
 	if _, err := h.svc.Suggestions(context.Background(), 404); apperr.KindOf(err) != apperr.KindNotFound {

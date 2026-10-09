@@ -50,7 +50,8 @@ func (s *Service) Suggestions(ctx context.Context, fileID int64) ([]Suggestion, 
 		return nil, apperr.New(apperr.KindNotFound, "library file %d does not exist", fileID)
 	}
 
-	if strings.TrimSpace(file.Parsed.Title) == "" {
+	title, authors, isbn := describedBy(file.Parsed, file.Book)
+	if strings.TrimSpace(title) == "" {
 		return nil, apperr.New(apperr.KindPrecondition, "nothing in this file's name to search by")
 	}
 
@@ -61,11 +62,12 @@ func (s *Service) Suggestions(ctx context.Context, fileID int64) ([]Suggestion, 
 	}
 
 	target := matcher.File{
-		Title:   file.Parsed.Title,
+		Title:   title,
 		Form:    file.Parsed.Form,
 		Season:  file.Parsed.Season,
 		Year:    file.Parsed.Year,
 		Episode: episodeOrChapter(file.Parsed),
+		Authors: authors,
 	}
 
 	tracked, err := s.opts.Titles.Tracked(ctx, mediaType)
@@ -73,7 +75,7 @@ func (s *Service) Suggestions(ctx context.Context, fileID int64) ([]Suggestion, 
 		return nil, apperr.Wrap(err, apperr.KindUnavailable, "read tracked titles")
 	}
 
-	found, err := s.opts.Titles.Search(ctx, file.Parsed.Title, mediaType)
+	found, err := s.opts.Titles.Search(ctx, title, mediaType)
 	if err != nil {
 		// The list from the user's own collection is still worth offering while the
 		// source is unreachable.
@@ -81,6 +83,13 @@ func (s *Service) Suggestions(ctx context.Context, fileID int64) ([]Suggestion, 
 	}
 
 	ranked := matcher.Rank(target, append(candidates(tracked, true), candidates(found, false)...))
+
+	exact := s.byISBN(ctx, isbn)
+	if exact != nil {
+		found = append(found, *exact)
+		ranked = withExact(ranked, exactCandidate(exact, tracked))
+	}
+
 	posters := postersByRef(tracked, found)
 
 	suggestions := make([]Suggestion, 0, min(len(ranked), maxSuggestions))
@@ -262,11 +271,23 @@ func (s *Service) bestForGroup(
 		Season:  group.season,
 		Year:    group.year,
 		Episode: group.highestEpisode,
+		Authors: group.authors,
 	}
 
 	tracked, err := s.trackedCandidates(ctx, mediaType, trackedByType)
 	if err != nil {
 		s.logger.Warn().Err(err).Msg("read tracked titles")
+	}
+
+	if exact := s.byISBN(ctx, group.isbn); exact != nil {
+		scored := exactCandidate(exact, nil)
+		for i := range tracked {
+			if tracked[i].MediaRef == scored.Candidate.MediaRef {
+				scored.Candidate.Tracked = true
+			}
+		}
+
+		return &scored, true
 	}
 
 	best = firstScored(matcher.Rank(target, tracked))
@@ -328,6 +349,10 @@ type unmatchedGroup struct {
 	season  *int
 	year    *int
 
+	// What a book file's own metadata adds to its name.
+	authors []string
+	isbn    string
+
 	// The highest episode in the group: if that one fits inside the entry, the
 	// rest do too.
 	highestEpisode *int
@@ -343,16 +368,20 @@ func groupUnmatched(files []store.Unmatched) []unmatchedGroup {
 
 	for i := range files {
 		file := &files[i]
-		key := file.Content + "\x00" + file.Parsed.Form + "\x00" + strings.ToLower(file.Parsed.Title) + "\x00" + seasonKey(file.Parsed.Season)
+		title, authors, isbn := describedBy(file.Parsed, file.Book)
+		key := file.Content + "\x00" + file.Parsed.Form + "\x00" + strings.ToLower(title) + "\x00" +
+			seasonKey(file.Parsed.Season) + "\x00" + isbn
 
 		position, seen := index[key]
 		if !seen {
 			groups = append(groups, unmatchedGroup{
 				content: file.Content,
 				form:    file.Parsed.Form,
-				title:   file.Parsed.Title,
+				title:   title,
 				season:  file.Parsed.Season,
 				year:    file.Parsed.Year,
+				authors: authors,
+				isbn:    isbn,
 			})
 			position = len(groups) - 1
 			index[key] = position
@@ -421,4 +450,65 @@ func (s *Service) publishMatched(outcome matchOutcome) {
 		"reason":  "matched",
 		"matched": outcome.Matched,
 	})
+}
+
+// describedBy is what a file is matched by: its name, unless it is a book whose
+// own metadata names it — "Dune" from the package beats "herbert_dune_v2_fixed"
+// from the file system.
+func describedBy(parsed store.Parsed, book *store.BookMeta) (title string, authors []string, isbn string) {
+	if book == nil {
+		return parsed.Title, nil, ""
+	}
+
+	title = parsed.Title
+	if book.Title != "" {
+		title = book.Title
+	}
+
+	return title, book.Authors, book.ISBN
+}
+
+// byISBN asks the source which book an ISBN belongs to. Nil when there is no ISBN,
+// the source cannot resolve one, or it does not know this one.
+func (s *Service) byISBN(ctx context.Context, isbn string) *TitleCandidate {
+	resolver, ok := s.opts.Titles.(ISBNResolver)
+	if isbn == "" || !ok {
+		return nil
+	}
+
+	found, err := resolver.ByISBN(ctx, isbn)
+	if err != nil {
+		s.logger.Debug().Err(err).Str("isbn", isbn).Msg("look up isbn")
+
+		return nil
+	}
+
+	return found
+}
+
+// exactCandidate is a book named by its ISBN: there is nothing left to weigh.
+func exactCandidate(found *TitleCandidate, tracked []TitleCandidate) matcher.Scored {
+	converted := candidates([]TitleCandidate{*found}, false)[0]
+	for i := range tracked {
+		if tracked[i].MediaRef == converted.MediaRef {
+			converted.Tracked = true
+		}
+	}
+
+	return matcher.Scored{Candidate: converted, Confidence: 1}
+}
+
+// withExact puts the exact answer first and drops its other place in the
+// ranking, so it is not offered twice.
+func withExact(ranked []matcher.Scored, exact matcher.Scored) []matcher.Scored {
+	merged := make([]matcher.Scored, 0, len(ranked)+1)
+	merged = append(merged, exact)
+
+	for i := range ranked {
+		if ranked[i].Candidate.MediaRef != exact.Candidate.MediaRef {
+			merged = append(merged, ranked[i])
+		}
+	}
+
+	return merged
 }

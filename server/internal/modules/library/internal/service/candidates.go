@@ -27,6 +27,9 @@ type TitleCandidate struct {
 	// do; AniList keeps one entry per season instead.
 	SpansSeasons bool
 
+	// Authors are who wrote a book entry.
+	Authors []string
+
 	// Sequels this candidate's source knows about, one relation hop forward —
 	// see matcher.Candidate.Sequels for what the matcher does with them. Only a
 	// title that came from Search carries these; the user's own collection does
@@ -74,6 +77,12 @@ type TitleSource interface {
 	Describe(ctx context.Context, mediaRefs []string) ([]TitleDescription, error)
 }
 
+// ISBNResolver is a TitleSource that can name the book an ISBN belongs to. A
+// book file that carries one is matched by it outright, with nothing to guess.
+type ISBNResolver interface {
+	ByISBN(ctx context.Context, isbn string) (*TitleCandidate, error)
+}
+
 // MatchListener is told which titles a scan matched files to that the user's own
 // list did not hold — titles the node may know nothing about yet. A TitleSource
 // that implements it can fetch what the library will want to show for them.
@@ -83,12 +92,13 @@ type MatchListener interface {
 
 // mediaTypeForForm maps what the file's name said, and what its folder holds,
 // onto the media type whose source matches it. A comic is manga wherever it
-// lies. Books have no source in the node yet, and an extra belongs to no title at
-// all, so both are left alone.
+// lies, and so is a book. An extra belongs to no title at all and is left alone.
 func mediaTypeForForm(form, content string) (string, bool) {
 	switch form {
 	case "manga":
 		return "manga", true
+	case "book":
+		return "book", true
 	case "series", "movie", "special":
 	default:
 		return "", false
@@ -121,6 +131,7 @@ func candidates(source []TitleCandidate, tracked bool) []matcher.Candidate {
 			Sequels:  sequels(source[i].Sequels),
 
 			SpansSeasons: source[i].SpansSeasons,
+			Authors:      source[i].Authors,
 		})
 	}
 

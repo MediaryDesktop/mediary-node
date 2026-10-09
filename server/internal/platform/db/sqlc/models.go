@@ -71,6 +71,9 @@ type LibraryFile struct {
 	DurationSeconds sql.NullInt64  `json:"duration_seconds"`
 	ProbeVersion    int64          `json:"probe_version"`
 	IgnoredAt       sql.NullInt64  `json:"ignored_at"`
+	BookTitle       sql.NullString `json:"book_title"`
+	BookAuthors     sql.NullString `json:"book_authors"`
+	BookIsbn        sql.NullString `json:"book_isbn"`
 }
 
 type LibraryRoot struct {

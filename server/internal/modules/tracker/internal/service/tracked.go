@@ -18,6 +18,9 @@ type TrackedTitle struct {
 	// Episodes the entry has, or chapters for a comic.
 	Episodes *int
 
+	// Authors are who wrote a book.
+	Authors []string
+
 	// What it takes to show the title rather than only recognize it: the name the
 	// user reads everywhere else, the poster they already see in their lists, and
 	// the colour behind it while it loads.
@@ -109,6 +112,7 @@ func (s *Service) localTracked(ctx context.Context, types []MediaType) ([]Tracke
 				Format:     value(media.Format),
 				Year:       media.SeasonYear,
 				Episodes:   media.Episodes,
+				Authors:    media.Authors,
 				Display:    displayTitle(media.Title),
 				CoverImage: media.CoverImage,
 				CoverColor: media.CoverColor,

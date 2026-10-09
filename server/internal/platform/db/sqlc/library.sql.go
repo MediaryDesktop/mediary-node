@@ -174,7 +174,7 @@ func (q *Queries) DeleteLibraryRoot(ctx context.Context, id int64) (int64, error
 }
 
 const getLibraryFile = `-- name: GetLibraryFile :one
-SELECT f.id, f.root_id, r.path AS root_path, r.content AS root_content, f.rel_path, f.kind, f.size_bytes,
+SELECT f.id, f.root_id, r.path AS root_path, r.content AS root_content, f.book_title, f.book_authors, f.book_isbn, f.rel_path, f.kind, f.size_bytes,
        f.mtime, f.scanned_at, f.missing_since, f.ignored_at,
        f.media_form, f.parsed_title, f.parsed_year, f.parsed_season,
        f.parsed_episode, f.parsed_chapter, f.parsed_volume, f.duration_seconds,
@@ -190,6 +190,9 @@ type GetLibraryFileRow struct {
 	RootID          int64           `json:"root_id"`
 	RootPath        string          `json:"root_path"`
 	RootContent     string          `json:"root_content"`
+	BookTitle       sql.NullString  `json:"book_title"`
+	BookAuthors     sql.NullString  `json:"book_authors"`
+	BookIsbn        sql.NullString  `json:"book_isbn"`
 	RelPath         string          `json:"rel_path"`
 	Kind            string          `json:"kind"`
 	SizeBytes       int64           `json:"size_bytes"`
@@ -220,6 +223,9 @@ func (q *Queries) GetLibraryFile(ctx context.Context, id int64) (GetLibraryFileR
 		&i.RootID,
 		&i.RootPath,
 		&i.RootContent,
+		&i.BookTitle,
+		&i.BookAuthors,
+		&i.BookIsbn,
 		&i.RelPath,
 		&i.Kind,
 		&i.SizeBytes,
@@ -275,8 +281,8 @@ const insertLibraryFile = `-- name: InsertLibraryFile :one
 INSERT INTO library_file (root_id, rel_path, kind, size_bytes, mtime, scanned_at,
                           media_form, parsed_title, parsed_year, parsed_season,
                           parsed_episode, parsed_chapter, parsed_volume, parser_version,
-                          duration_seconds, probe_version)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                          duration_seconds, probe_version, book_title, book_authors, book_isbn)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 RETURNING id
 `
 
@@ -297,6 +303,9 @@ type InsertLibraryFileParams struct {
 	ParserVersion   int64          `json:"parser_version"`
 	DurationSeconds sql.NullInt64  `json:"duration_seconds"`
 	ProbeVersion    int64          `json:"probe_version"`
+	BookTitle       sql.NullString `json:"book_title"`
+	BookAuthors     sql.NullString `json:"book_authors"`
+	BookIsbn        sql.NullString `json:"book_isbn"`
 }
 
 func (q *Queries) InsertLibraryFile(ctx context.Context, arg InsertLibraryFileParams) (int64, error) {
@@ -317,6 +326,9 @@ func (q *Queries) InsertLibraryFile(ctx context.Context, arg InsertLibraryFilePa
 		arg.ParserVersion,
 		arg.DurationSeconds,
 		arg.ProbeVersion,
+		arg.BookTitle,
+		arg.BookAuthors,
+		arg.BookIsbn,
 	)
 	var id int64
 	err := row.Scan(&id)
@@ -708,7 +720,8 @@ func (q *Queries) ListLibraryRoots(ctx context.Context) ([]ListLibraryRootsRow, 
 
 const listUnmatchedFiles = `-- name: ListUnmatchedFiles :many
 SELECT f.id, f.rel_path, f.kind, r.content AS root_content, f.media_form, f.parsed_title, f.parsed_year,
-       f.parsed_season, f.parsed_episode, f.parsed_chapter, f.parsed_volume
+       f.parsed_season, f.parsed_episode, f.parsed_chapter, f.parsed_volume,
+       f.book_title, f.book_authors, f.book_isbn
 FROM library_file f
          JOIN library_root r ON r.id = f.root_id
          LEFT JOIN file_match m ON m.file_id = f.id
@@ -736,6 +749,9 @@ type ListUnmatchedFilesRow struct {
 	ParsedEpisode sql.NullInt64  `json:"parsed_episode"`
 	ParsedChapter sql.NullInt64  `json:"parsed_chapter"`
 	ParsedVolume  sql.NullInt64  `json:"parsed_volume"`
+	BookTitle     sql.NullString `json:"book_title"`
+	BookAuthors   sql.NullString `json:"book_authors"`
+	BookIsbn      sql.NullString `json:"book_isbn"`
 }
 
 // Files the matcher still has to work out, ordered so that every episode of one
@@ -762,6 +778,9 @@ func (q *Queries) ListUnmatchedFiles(ctx context.Context, limit int64) ([]ListUn
 			&i.ParsedEpisode,
 			&i.ParsedChapter,
 			&i.ParsedVolume,
+			&i.BookTitle,
+			&i.BookAuthors,
+			&i.BookIsbn,
 		); err != nil {
 			return nil, err
 		}
@@ -862,7 +881,10 @@ SET kind           = ?,
     parsed_volume  = ?,
     parser_version = ?,
     duration_seconds = ?,
-    probe_version    = ?
+    probe_version    = ?,
+    book_title       = ?,
+    book_authors     = ?,
+    book_isbn        = ?
 WHERE id = ?
 `
 
@@ -881,6 +903,9 @@ type UpdateLibraryFileParams struct {
 	ParserVersion   int64          `json:"parser_version"`
 	DurationSeconds sql.NullInt64  `json:"duration_seconds"`
 	ProbeVersion    int64          `json:"probe_version"`
+	BookTitle       sql.NullString `json:"book_title"`
+	BookAuthors     sql.NullString `json:"book_authors"`
+	BookIsbn        sql.NullString `json:"book_isbn"`
 	ID              int64          `json:"id"`
 }
 
@@ -900,6 +925,9 @@ func (q *Queries) UpdateLibraryFile(ctx context.Context, arg UpdateLibraryFilePa
 		arg.ParserVersion,
 		arg.DurationSeconds,
 		arg.ProbeVersion,
+		arg.BookTitle,
+		arg.BookAuthors,
+		arg.BookIsbn,
 		arg.ID,
 	)
 	return err
@@ -950,19 +978,32 @@ func (q *Queries) UpdateLibraryFileParse(ctx context.Context, arg UpdateLibraryF
 const updateLibraryFileProbe = `-- name: UpdateLibraryFileProbe :exec
 UPDATE library_file
 SET duration_seconds = ?,
-    probe_version    = ?
+    probe_version    = ?,
+    book_title       = ?,
+    book_authors     = ?,
+    book_isbn        = ?
 WHERE id = ?
 `
 
 type UpdateLibraryFileProbeParams struct {
-	DurationSeconds sql.NullInt64 `json:"duration_seconds"`
-	ProbeVersion    int64         `json:"probe_version"`
-	ID              int64         `json:"id"`
+	DurationSeconds sql.NullInt64  `json:"duration_seconds"`
+	ProbeVersion    int64          `json:"probe_version"`
+	BookTitle       sql.NullString `json:"book_title"`
+	BookAuthors     sql.NullString `json:"book_authors"`
+	BookIsbn        sql.NullString `json:"book_isbn"`
+	ID              int64          `json:"id"`
 }
 
 // The file itself did not change; a newer prober reads its container again.
 func (q *Queries) UpdateLibraryFileProbe(ctx context.Context, arg UpdateLibraryFileProbeParams) error {
-	_, err := q.db.ExecContext(ctx, updateLibraryFileProbe, arg.DurationSeconds, arg.ProbeVersion, arg.ID)
+	_, err := q.db.ExecContext(ctx, updateLibraryFileProbe,
+		arg.DurationSeconds,
+		arg.ProbeVersion,
+		arg.BookTitle,
+		arg.BookAuthors,
+		arg.BookIsbn,
+		arg.ID,
+	)
 	return err
 }
 

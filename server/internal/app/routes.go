@@ -96,7 +96,13 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 
 	var titles library.TitleSource
 	if deps.AniList != nil {
-		titles = titleSource{tracker: trackerModule, media: mediaModule, aniList: deps.AniList, tmdb: deps.TMDB}
+		titles = titleSource{
+			tracker:     trackerModule,
+			media:       mediaModule,
+			aniList:     deps.AniList,
+			tmdb:        deps.TMDB,
+			openLibrary: deps.OpenLibrary,
+		}
 	}
 
 	libraryModule := library.New(library.Deps{

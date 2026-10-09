@@ -143,7 +143,7 @@ func TestMediaTypeForForm(t *testing.T) {
 		{"movie", ContentMoviesAndShows, "movie", true},
 		{"manga", ContentMoviesAndShows, "manga", true},
 		{"extra", ContentMoviesAndShows, "", false},
-		{"book", ContentAnime, "", false},
+		{"book", ContentAnime, "book", true},
 	}
 
 	for _, c := range cases {

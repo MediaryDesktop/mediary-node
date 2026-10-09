@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/mediaryorg/mediary-node/server/internal/platform/db/sqlc"
@@ -60,6 +61,7 @@ type File struct {
 	RootID      int64
 	RootPath    string
 	RootContent string
+	Book        *BookMeta
 	RelPath     string
 	Kind        string
 	Size        int64
@@ -239,6 +241,16 @@ type Reparsed struct {
 type Probe struct {
 	Duration *time.Duration
 	Version  int
+
+	// Book is what a book file's own metadata says; nil when it says nothing or
+	// the file is not a book.
+	Book *BookMeta
+}
+
+type BookMeta struct {
+	Title   string
+	Authors []string
+	ISBN    string
 }
 
 // Probed is an untouched file a newer prober looked at again.
@@ -296,6 +308,10 @@ func (s *Store) ApplyScan(ctx context.Context, rootID int64, changes ScanChanges
 
 			DurationSeconds: probeSeconds(file.Probe),
 			ProbeVersion:    int64(file.Probe.Version),
+
+			BookTitle:   bookText(file.Probe.Book, bookTitle),
+			BookAuthors: bookText(file.Probe.Book, bookAuthors),
+			BookIsbn:    bookText(file.Probe.Book, bookISBN),
 		})
 		if err != nil {
 			return fmt.Errorf("record new file %s: %w", file.RelPath, err)
@@ -324,6 +340,10 @@ func (s *Store) ApplyScan(ctx context.Context, rootID int64, changes ScanChanges
 
 			DurationSeconds: probeSeconds(file.Probe),
 			ProbeVersion:    int64(file.Probe.Version),
+
+			BookTitle:   bookText(file.Probe.Book, bookTitle),
+			BookAuthors: bookText(file.Probe.Book, bookAuthors),
+			BookIsbn:    bookText(file.Probe.Book, bookISBN),
 		})
 		if err != nil {
 			return fmt.Errorf("update changed file %d: %w", file.ID, err)
@@ -344,6 +364,10 @@ func (s *Store) ApplyScan(ctx context.Context, rootID int64, changes ScanChanges
 			ID:              file.ID,
 			DurationSeconds: probeSeconds(file.Probe),
 			ProbeVersion:    int64(file.Probe.Version),
+
+			BookTitle:   bookText(file.Probe.Book, bookTitle),
+			BookAuthors: bookText(file.Probe.Book, bookAuthors),
+			BookIsbn:    bookText(file.Probe.Book, bookISBN),
 		})
 		if err != nil {
 			return fmt.Errorf("re-probe file %d: %w", file.ID, err)
@@ -474,6 +498,7 @@ func (s *Store) File(ctx context.Context, id int64) (*File, error) {
 		RootID:       row.RootID,
 		RootPath:     row.RootPath,
 		RootContent:  row.RootContent,
+		Book:         bookFrom(row.BookTitle, row.BookAuthors, row.BookIsbn),
 		RelPath:      row.RelPath,
 		Kind:         row.Kind,
 		Size:         row.SizeBytes,
@@ -500,6 +525,9 @@ type Unmatched struct {
 	// matched against.
 	Content string
 	Parsed  Parsed
+
+	// Book is what a book file's own metadata says, when it says anything.
+	Book *BookMeta
 }
 
 func (s *Store) UnmatchedFiles(ctx context.Context, limit int) ([]Unmatched, error) {
@@ -519,6 +547,7 @@ func (s *Store) UnmatchedFiles(ctx context.Context, limit int) ([]Unmatched, err
 			Content: row.RootContent,
 			Parsed: parsedFrom(row.MediaForm, row.ParsedTitle, row.ParsedYear,
 				row.ParsedSeason, row.ParsedEpisode, row.ParsedChapter, row.ParsedVolume),
+			Book: bookFrom(row.BookTitle, row.BookAuthors, row.BookIsbn),
 		})
 	}
 
@@ -753,6 +782,34 @@ func (s *Store) Counts(ctx context.Context, filter FileFilter) (Counts, error) {
 
 // Seconds, not milliseconds: a column the user reads as "23:57" does not need
 // more, and whole seconds survive a round trip through JSON unchanged.
+func bookTitle(book *BookMeta) string   { return book.Title }
+func bookAuthors(book *BookMeta) string { return strings.Join(book.Authors, "\n") }
+func bookISBN(book *BookMeta) string    { return book.ISBN }
+
+func bookText(book *BookMeta, field func(*BookMeta) string) sql.NullString {
+	if book == nil {
+		return sql.NullString{}
+	}
+
+	value := field(book)
+
+	return sql.NullString{String: value, Valid: value != ""}
+}
+
+// bookFrom reads the book columns back; nil when none of them is set.
+func bookFrom(title, authors, isbn sql.NullString) *BookMeta {
+	if !title.Valid && !authors.Valid && !isbn.Valid {
+		return nil
+	}
+
+	book := &BookMeta{Title: title.String, ISBN: isbn.String}
+	if authors.String != "" {
+		book.Authors = strings.Split(authors.String, "\n")
+	}
+
+	return book
+}
+
 func probeSeconds(probe Probe) sql.NullInt64 {
 	if probe.Duration == nil {
 		return sql.NullInt64{}

@@ -26,6 +26,9 @@ type File struct {
 	Season  *int
 	Year    *int
 	Episode *int
+
+	// Authors are who a book file's own metadata says wrote it.
+	Authors []string
 }
 
 type Candidate struct {
@@ -61,6 +64,9 @@ type Candidate struct {
 	// SpansSeasons marks an entry holding every season of a show, as TMDB's do:
 	// a season 3 file belongs to it as much as a season 1 file does.
 	SpansSeasons bool
+
+	// Authors are who wrote a book entry.
+	Authors []string
 }
 
 // RelatedCandidate is enough of a sequel entry to score a file against it: its
@@ -159,7 +165,9 @@ const (
 func score(file File, fileTitle Title, candidate *Candidate) float64 {
 	best := 0.0
 
-	for i, raw := range candidate.Titles {
+	titles := append(append([]string{}, candidate.Titles...), authorSpellings(candidate)...)
+
+	for i, raw := range titles {
 		candidateTitle := NormalizeTitle(raw)
 		if candidateTitle.Normalized == "" {
 			continue
@@ -168,8 +176,10 @@ func score(file File, fileTitle Title, candidate *Candidate) float64 {
 		similarity := titleSimilarity(fileTitle, candidateTitle)
 
 		// Romaji and english come first and are what a release group writes; a
-		// synonym matching is weaker evidence than a main title matching.
-		if i >= 2 {
+		// synonym matching is weaker evidence than a main title matching. A book's
+		// title written together with its author is not: it names the book and who
+		// wrote it, where "Ray Bradbury's Fahrenheit 451" is a study guide.
+		if i >= 2 && i < len(candidate.Titles) {
 			similarity *= synonymWeight
 		}
 
@@ -183,6 +193,8 @@ func score(file File, fileTitle Title, candidate *Candidate) float64 {
 	best += yearAdjustment(file.Year, candidate.Year)
 	best += formatAdjustment(file.Form, candidate.Format)
 	best += episodeAdjustment(file.Episode, candidate.Episodes)
+	best += authorAdjustment(file.Authors, candidate.Authors)
+	best += authorNamed(file, fileTitle, candidate.Authors)
 
 	if candidate.Tracked {
 		best += trackedBonus
@@ -351,7 +363,7 @@ var formatsByForm = map[string]map[string]struct{}{
 	"movie":   {"MOVIE": {}},
 	"special": {"SPECIAL": {}, "OVA": {}, "ONA": {}},
 	"manga":   {"MANGA": {}, "ONE_SHOT": {}},
-	"book":    {"NOVEL": {}},
+	"book":    {"NOVEL": {}, "BOOK": {}},
 }
 
 func formatAdjustment(form, format string) float64 {
