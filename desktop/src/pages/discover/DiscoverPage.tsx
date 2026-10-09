@@ -86,6 +86,24 @@ export function DiscoverPage({ tab, onTabChange }: DiscoverPageProps) {
 		)
 	}
 
+	const tabs = (
+		<SegmentedControl
+			className={styles.tabControl}
+			items={DISCOVER_TABS.map(value => ({
+				value,
+				label: (
+					<span className={styles.tabLabel}>
+						<Icon name={TAB_ICONS[value]} size={16} />
+						{t(`search.type.${value}`)}
+					</span>
+				)
+			}))}
+			value={tab}
+			onValueChange={onTabChange}
+			label={t('nav.discover')}
+		/>
+	)
+
 	return (
 		<PageTransition className={styles.page}>
 			<DiscoverHero
@@ -93,25 +111,8 @@ export function DiscoverPage({ tab, onTabChange }: DiscoverPageProps) {
 				items={setupNeeded ? [] : featured}
 				loading={!setupNeeded && first?.status !== 'failed'}
 				onOpen={open}
+				tabs={tabs}
 			/>
-
-			<div className={styles.tabs}>
-				<SegmentedControl
-					className={styles.tabControl}
-					items={DISCOVER_TABS.map(value => ({
-						value,
-						label: (
-							<span className={styles.tabLabel}>
-								<Icon name={TAB_ICONS[value]} size={16} />
-								{t(`search.type.${value}`)}
-							</span>
-						)
-					}))}
-					value={tab}
-					onValueChange={onTabChange}
-					label={t('nav.discover')}
-				/>
-			</div>
 
 			{setupNeeded ? (
 				<EmptyState

@@ -5,23 +5,16 @@
 	padding-bottom: 2rem;
 }
 
-// The tabs sit where the banner fades out, over the first row, as in Seanime.
-.tabs {
-	position: relative;
-	z-index: 5;
-	display: flex;
-	justify-content: center;
-	margin-top: -1rem;
+// The switcher itself is hosted and positioned by DiscoverHero, at the bottom of
+// the banner; these only style its contents.
+.tabControl {
+	--option-size: 2.5rem;
+}
 
-	.tabControl {
-		--option-size: 2.5rem;
-	}
-
-	.tabLabel {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.4375rem;
-	}
+.tabLabel {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4375rem;
 }
 
 .rows {
