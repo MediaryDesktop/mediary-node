@@ -3,7 +3,8 @@ import { useUnit } from 'effector-react'
 import { useEffect, useMemo } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, EmptyState, PageTransition, SegmentedControl } from '@shared/ui'
+import { Button, EmptyState, Icon, PageTransition, SegmentedControl } from '@shared/ui'
+import type { IconName } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
 
@@ -19,6 +20,15 @@ import { DiscoverRow } from './ui/DiscoverRow'
 
 // How many titles of the first row the banner goes through.
 const FEATURED = 8
+
+const TAB_ICONS: Record<DiscoverTab, IconName> = {
+	anime: 'categories/anime',
+	manga: 'categories/manga',
+	movie: 'categories/movie',
+	series: 'categories/series',
+	dorama: 'categories/doramas',
+	book: 'categories/book'
+}
 
 export interface DiscoverPageProps {
 	tab: DiscoverTab
@@ -87,7 +97,16 @@ export function DiscoverPage({ tab, onTabChange }: DiscoverPageProps) {
 
 			<div className={styles.tabs}>
 				<SegmentedControl
-					items={DISCOVER_TABS.map(value => ({ value, label: t(`search.type.${value}`) }))}
+					className={styles.tabControl}
+					items={DISCOVER_TABS.map(value => ({
+						value,
+						label: (
+							<span className={styles.tabLabel}>
+								<Icon name={TAB_ICONS[value]} size={16} />
+								{t(`search.type.${value}`)}
+							</span>
+						)
+					}))}
 					value={tab}
 					onValueChange={onTabChange}
 					label={t('nav.discover')}

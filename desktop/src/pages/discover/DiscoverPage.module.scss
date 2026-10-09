@@ -12,6 +12,16 @@
 	display: flex;
 	justify-content: center;
 	margin-top: -1rem;
+
+	.tabControl {
+		--option-size: 2.5rem;
+	}
+
+	.tabLabel {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4375rem;
+	}
 }
 
 .rows {

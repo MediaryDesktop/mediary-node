@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { useEffect, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, Icon, Skeleton } from '@shared/ui'
+import { Icon, Skeleton } from '@shared/ui'
 
 import { enumLabel, mediaTitle, scoreTone } from '@entities/media'
 import type { MediaSummary } from '@entities/media'
@@ -108,14 +108,10 @@ export function DiscoverHero({ items, loading, onOpen }: DiscoverHeroProps) {
 
 					{current.description && <p className={styles.description}>{current.description}</p>}
 
-					<div className={styles.actions}>
-						<Button
-							startIcon={<Icon name='common/info' size={16} />}
-							onClick={() => onOpen(current)}
-						>
-							{t('discover.open')}
-						</Button>
-					</div>
+					<button type='button' className={styles.detailsLink} onClick={() => onOpen(current)}>
+						<Icon name='common/info' size={15} />
+						{t('discover.open')}
+					</button>
 				</div>
 			</div>
 
