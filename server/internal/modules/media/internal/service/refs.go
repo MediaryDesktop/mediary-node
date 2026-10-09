@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/openlibrary"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/tmdb"
 )
 
@@ -17,6 +18,9 @@ type titleRef struct {
 	provider string
 	kind     tmdb.Kind
 	id       int
+
+	// work is an Open Library work identifier, OL893414W.
+	work string
 }
 
 func parseRef(mediaRef string) (titleRef, error) {
@@ -48,6 +52,13 @@ func parseRef(mediaRef string) (titleRef, error) {
 		}
 
 		return titleRef{provider: ProviderTMDB, kind: tmdb.Kind(kind), id: id}, nil
+
+	case ProviderOpenLibrary:
+		if !openlibrary.ValidWorkID(rest) {
+			return titleRef{}, malformed
+		}
+
+		return titleRef{provider: ProviderOpenLibrary, work: rest}, nil
 
 	default:
 		return titleRef{}, apperr.Invalid("media_ref", "no source for media reference %q", mediaRef)

@@ -52,6 +52,8 @@ func localTitle(details *media.MediaDetails) tracker.LocalTitle {
 			Format:       details.Format,
 			Status:       details.Status,
 			Episodes:     details.Episodes,
+			Pages:        details.Pages,
+			Authors:      details.Authors,
 			Chapters:     details.Chapters,
 			Volumes:      details.Volumes,
 			SeasonYear:   details.SeasonYear,

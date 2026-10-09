@@ -39,7 +39,7 @@ type EpisodesOutput struct {
 
 type SearchInput struct {
 	Query    string   `query:"q" maxLength:"100" doc:"Free text to match against every title the source knows. Empty browses by the filters alone."`
-	Type     string   `query:"type" enum:"anime,manga,movie,series,dorama" default:"anime" doc:"Which catalog to search. Every source owns one kind of media, so this also picks the source: AniList for anime and manga, TMDB for the rest. A dorama is a live-action show from East Asia, and every dorama is a series too."`
+	Type     string   `query:"type" enum:"anime,manga,movie,series,dorama,book" default:"anime" doc:"Which catalog to search. Every source owns one kind of media, so this also picks the source: AniList for anime and manga, TMDB for movies and shows, Open Library for books. A dorama is a live-action show from East Asia, and every dorama is a series too."`
 	Sort     string   `query:"sort" enum:"SEARCH_MATCH,POPULARITY_DESC,TRENDING_DESC,SCORE_DESC,FAVOURITES_DESC,START_DATE_DESC,TITLE_ROMAJI" doc:"Order of the results. Left out it means relevance while searching and popularity while browsing. TMDB orders a text search by relevance only."`
 	Genres   []string `query:"genres" doc:"Genres a title must all have, as listed by getMediaFilterOptions. TMDB applies them while browsing only."`
 	Tags     []string `query:"tags" doc:"Tags a title must all have, as listed by getMediaFilterOptions. AniList only."`
@@ -61,7 +61,7 @@ type SearchOutput struct {
 }
 
 type FilterOptionsInput struct {
-	Type string `query:"type" enum:"anime,manga,movie,series,dorama" default:"anime" doc:"Which catalog's vocabulary to list."`
+	Type string `query:"type" enum:"anime,manga,movie,series,dorama,book" default:"anime" doc:"Which catalog's vocabulary to list."`
 }
 
 type TMDBSettingsOutput struct {
@@ -230,6 +230,8 @@ func sourceOfType(mediaType string) httpapi.Source {
 	switch mediaType {
 	case service.MediaTypeMovie, service.MediaTypeSeries, service.MediaTypeDorama:
 		return httpapi.TMDBSource
+	case service.MediaTypeBook:
+		return httpapi.OpenLibrarySource
 	default:
 		return httpapi.AniListSource
 	}
@@ -238,6 +240,10 @@ func sourceOfType(mediaType string) httpapi.Source {
 func sourceOfRef(mediaRef string) httpapi.Source {
 	if strings.HasPrefix(mediaRef, service.ProviderTMDB+":") {
 		return httpapi.TMDBSource
+	}
+
+	if strings.HasPrefix(mediaRef, service.ProviderOpenLibrary+":") {
+		return httpapi.OpenLibrarySource
 	}
 
 	return httpapi.AniListSource

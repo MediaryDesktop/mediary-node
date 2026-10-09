@@ -81,6 +81,8 @@ type Media struct {
 	Episodes     *int     `json:"episodes"`
 	Chapters     *int     `json:"chapters"`
 	Volumes      *int     `json:"volumes"`
+	Pages        *int     `json:"pages,omitempty" doc:"Pages in a typical edition; a book only, whose progress counts them."`
+	Authors      []string `json:"authors,omitempty" doc:"Who wrote it; a book only."`
 	SeasonYear   *int     `json:"season_year"`
 	IsAdult      bool     `json:"is_adult"`
 	CoverImage   *string  `json:"cover_image"`

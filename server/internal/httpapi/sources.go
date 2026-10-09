@@ -10,7 +10,9 @@ type Source struct {
 var (
 	AniListSource = Source{ID: "anilist", Name: "AniList", URL: "https://anilist.co"}
 	AniZipSource  = Source{ID: "anizip", Name: "ani.zip", URL: "https://ani.zip"}
-	TMDBSource    = Source{
+
+	OpenLibrarySource = Source{ID: "openlibrary", Name: "Open Library", URL: "https://openlibrary.org"}
+	TMDBSource        = Source{
 		ID:     "tmdb",
 		Name:   "TMDB",
 		URL:    "https://www.themoviedb.org",

@@ -1601,6 +1601,13 @@ components:
     Media:
       additionalProperties: false
       properties:
+        authors:
+          description: Who wrote it; a book only.
+          items:
+            type: string
+          type:
+            - array
+            - "null"
         average_score:
           format: int64
           type:
@@ -1640,6 +1647,10 @@ components:
             - "null"
         is_adult:
           type: boolean
+        pages:
+          description: Pages in a typical edition; a book only, whose progress counts them.
+          format: int64
+          type: integer
         season_year:
           format: int64
           type:
@@ -1683,6 +1694,13 @@ components:
     MediaDetails:
       additionalProperties: false
       properties:
+        authors:
+          description: Who wrote it; a book only.
+          items:
+            type: string
+          type:
+            - array
+            - "null"
         average_score:
           format: int64
           type:
@@ -1754,6 +1772,12 @@ components:
           type: string
         next_airing_episode:
           $ref: "#/components/schemas/AiringEpisode"
+        pages:
+          description: Pages in a typical edition; a book only.
+          format: int64
+          type:
+            - integer
+            - "null"
         popularity:
           format: int64
           type:
@@ -1846,6 +1870,8 @@ components:
         - favourites
         - genres
         - studios
+        - authors
+        - pages
         - source
         - country_of_origin
         - is_adult
@@ -1929,6 +1955,13 @@ components:
     MediaSummary:
       additionalProperties: false
       properties:
+        authors:
+          description: Who wrote it; a book only.
+          items:
+            type: string
+          type:
+            - array
+            - "null"
         average_score:
           format: int64
           type:
@@ -1974,6 +2007,10 @@ components:
           type: string
         next_airing_episode:
           $ref: "#/components/schemas/AiringEpisode"
+        pages:
+          description: Pages in a typical edition; a book only.
+          format: int64
+          type: integer
         popularity:
           format: int64
           type:
@@ -5507,6 +5544,7 @@ paths:
               - movie
               - series
               - dorama
+              - book
             type: string
       responses:
         "200":
@@ -5537,19 +5575,20 @@ paths:
             description: Free text to match against every title the source knows. Empty browses by the filters alone.
             maxLength: 100
             type: string
-        - description: "Which catalog to search. Every source owns one kind of media, so this also picks the source: AniList for anime and manga, TMDB for the rest. A dorama is a live-action show from East Asia, and every dorama is a series too."
+        - description: "Which catalog to search. Every source owns one kind of media, so this also picks the source: AniList for anime and manga, TMDB for movies and shows, Open Library for books. A dorama is a live-action show from East Asia, and every dorama is a series too."
           explode: false
           in: query
           name: type
           schema:
             default: anime
-            description: "Which catalog to search. Every source owns one kind of media, so this also picks the source: AniList for anime and manga, TMDB for the rest. A dorama is a live-action show from East Asia, and every dorama is a series too."
+            description: "Which catalog to search. Every source owns one kind of media, so this also picks the source: AniList for anime and manga, TMDB for movies and shows, Open Library for books. A dorama is a live-action show from East Asia, and every dorama is a series too."
             enum:
               - anime
               - manga
               - movie
               - series
               - dorama
+              - book
             type: string
         - description: Order of the results. Left out it means relevance while searching and popularity while browsing. TMDB orders a text search by relevance only.
           explode: false
@@ -7074,19 +7113,20 @@ paths:
       description: "Served from the node's mirror, so it works offline. A stale mirror is returned immediately while a refresh runs; a `tracker` event announces the result. Movies, series and doramas are the node's own list: always current, no AniList account needed."
       operationId: listTrackerEntries
       parameters:
-        - description: Which collection to read. Anime and manga are the AniList account's; movies, series and doramas are this node's own list.
+        - description: Which collection to read. Anime and manga are the AniList account's; movies, series, doramas and books are this node's own list.
           explode: false
           in: query
           name: type
           required: true
           schema:
-            description: Which collection to read. Anime and manga are the AniList account's; movies, series and doramas are this node's own list.
+            description: Which collection to read. Anime and manga are the AniList account's; movies, series, doramas and books are this node's own list.
             enum:
               - anime
               - manga
               - movie
               - series
               - dorama
+              - book
             type: string
       responses:
         "200":
@@ -7274,19 +7314,20 @@ paths:
       description: Starts a background refresh; the result arrives as a `tracker` event.
       operationId: refreshTrackerEntries
       parameters:
-        - description: Which collection to read. Anime and manga are the AniList account's; movies, series and doramas are this node's own list.
+        - description: Which collection to read. Anime and manga are the AniList account's; movies, series, doramas and books are this node's own list.
           explode: false
           in: query
           name: type
           required: true
           schema:
-            description: Which collection to read. Anime and manga are the AniList account's; movies, series and doramas are this node's own list.
+            description: Which collection to read. Anime and manga are the AniList account's; movies, series, doramas and books are this node's own list.
             enum:
               - anime
               - manga
               - movie
               - series
               - dorama
+              - book
             type: string
       responses:
         "202":

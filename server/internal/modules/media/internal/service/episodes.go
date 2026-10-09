@@ -56,6 +56,10 @@ func (s *Service) Episodes(ctx context.Context, mediaRef string) (*EpisodeList, 
 		return s.tmdbEpisodes(ctx, ref)
 	}
 
+	if ref.provider == ProviderOpenLibrary {
+		return nil, apperr.Invalid("media_ref", "a book has no episodes")
+	}
+
 	mediaID := ref.id
 
 	entry, err := s.details(ctx, mediaRef)

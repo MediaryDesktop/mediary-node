@@ -267,3 +267,41 @@ func TestLocalEntryRejectsWhatItCannotSave(t *testing.T) {
 		}
 	}
 }
+
+func TestABookCountsPages(t *testing.T) {
+	h, titles := newLocalHarness(t)
+	ctx := context.Background()
+
+	name, pages := "Dune", 608
+	titles.source["openlibrary:OL893414W"] = LocalTitle{
+		MediaType: MediaTypeBook,
+		Media:     Media{Title: Title{UserPreferred: &name}, Pages: &pages},
+	}
+
+	hundred := 100
+	reading, err := h.svc.UpdateEntry(ctx, "openlibrary:OL893414W", EntryPatch{Progress: &hundred})
+	if err != nil {
+		t.Fatalf("progress: %v", err)
+	}
+	if reading.Status != "CURRENT" || reading.MediaType != MediaTypeBook {
+		t.Fatalf("page 100 starts the book, got %s %s", reading.Status, reading.MediaType)
+	}
+
+	if err := h.svc.MarkRead(ctx, "openlibrary:OL893414W", 608); err != nil {
+		t.Fatalf("last page: %v", err)
+	}
+
+	collection, err := h.svc.Entries(ctx, MediaTypeBook)
+	if err != nil {
+		t.Fatalf("entries: %v", err)
+	}
+
+	if len(collection.Entries) != 1 || collection.Entries[0].Status != "COMPLETED" || collection.Entries[0].Progress != 608 {
+		t.Fatalf("the last page completes the book, got %+v", collection.Entries)
+	}
+
+	planning := "PLANNING"
+	if _, err := h.svc.UpdateEntry(ctx, "openlibrary:OL1M", EntryPatch{Status: &planning}); apperr.KindOf(err) != apperr.KindInvalid {
+		t.Fatalf("an edition is not a work: %v", err)
+	}
+}

@@ -22,6 +22,7 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/platform/secrets"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anizip"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/openlibrary"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/tmdb"
 	"github.com/mediaryorg/mediary-node/server/internal/wsapi"
 )
@@ -106,6 +107,16 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 		})
 	}
 
+	var openLibrary *openlibrary.Client
+	if cfg.OpenLibrary.Endpoint != "" {
+		openLibrary = openlibrary.New(openlibrary.Options{
+			Endpoint:  cfg.OpenLibrary.Endpoint,
+			Timeout:   cfg.OpenLibrary.Timeout,
+			UserAgent: "mediary-node/" + build.Version,
+			Contact:   cfg.OpenLibrary.Contact,
+		})
+	}
+
 	router, api := httpapi.New(httpapi.Options{
 		Version:        build.Version,
 		Token:          token,
@@ -124,6 +135,7 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 		AniList:             aniList,
 		AniZip:              aniZip,
 		TMDB:                tmdbClient,
+		OpenLibrary:         openLibrary,
 		MangaDex:            cfg.MangaDex,
 		AniListClientID:     cfg.AniList.ClientID,
 		AniListAuthorizeURL: cfg.AniList.AuthorizeURL,

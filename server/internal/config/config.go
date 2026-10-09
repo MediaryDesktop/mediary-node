@@ -22,16 +22,17 @@ type Config struct {
 
 	DataDir string `env:"NODE_DATA_DIR"`
 
-	HTTP     HTTP
-	Library  Library
-	Torrent  Torrent
-	Playback Playback
-	Cloud    Cloud
-	AniList  AniList
-	AniZip   AniZip
-	TMDB     TMDB
-	MangaDex MangaDex
-	Log      Log
+	HTTP        HTTP
+	Library     Library
+	Torrent     Torrent
+	Playback    Playback
+	Cloud       Cloud
+	AniList     AniList
+	AniZip      AniZip
+	TMDB        TMDB
+	OpenLibrary OpenLibrary
+	MangaDex    MangaDex
+	Log         Log
 }
 
 type AniList struct {
@@ -74,6 +75,15 @@ type TMDB struct {
 	Endpoint string        `env:"NODE_TMDB_ENDPOINT" envDefault:"https://api.themoviedb.org/3"`
 	APIKey   string        `env:"NODE_TMDB_API_KEY"`
 	Timeout  time.Duration `env:"NODE_TMDB_TIMEOUT"  envDefault:"20s"`
+}
+
+// OpenLibrary is the source for books. An empty endpoint turns it off. A contact,
+// an e-mail address or a site, goes into the User-Agent and lets the node ask
+// three times a second instead of once, as Open Library's terms allow.
+type OpenLibrary struct {
+	Endpoint string        `env:"NODE_OPENLIBRARY_ENDPOINT" envDefault:"https://openlibrary.org"`
+	Contact  string        `env:"NODE_OPENLIBRARY_CONTACT"`
+	Timeout  time.Duration `env:"NODE_OPENLIBRARY_TIMEOUT"  envDefault:"20s"`
 }
 
 // MangaDex is the online manga source. An empty endpoint turns it off on this node;

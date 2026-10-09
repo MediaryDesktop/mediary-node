@@ -38,7 +38,7 @@ type AccountOutput struct {
 }
 
 type MediaTypeQuery struct {
-	Type service.MediaType `query:"type" enum:"anime,manga,movie,series,dorama" required:"true" doc:"Which collection to read. Anime and manga are the AniList account's; movies, series and doramas are this node's own list."`
+	Type service.MediaType `query:"type" enum:"anime,manga,movie,series,dorama,book" required:"true" doc:"Which collection to read. Anime and manga are the AniList account's; movies, series, doramas and books are this node's own list."`
 }
 
 type EntryRefInput struct {
@@ -185,7 +185,11 @@ func (h *Handler) Register(api huma.API) {
 		out.Body.FetchedAt = collection.FetchedAt
 		out.Body.Stale = collection.Stale
 		out.Body.Sources = []httpapi.Source{httpapi.AniListSource}
-		if in.Type != service.MediaTypeAnime && in.Type != service.MediaTypeManga {
+		switch in.Type {
+		case service.MediaTypeAnime, service.MediaTypeManga:
+		case service.MediaTypeBook:
+			out.Body.Sources = []httpapi.Source{httpapi.OpenLibrarySource}
+		default:
 			out.Body.Sources = []httpapi.Source{httpapi.TMDBSource}
 		}
 

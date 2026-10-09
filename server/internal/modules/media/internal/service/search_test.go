@@ -216,7 +216,7 @@ func TestSearchRejectsUnknownTypeAndUnreachablePages(t *testing.T) {
 	h := newSearchHarness(t)
 	ctx := context.Background()
 
-	if _, err := h.svc.Search(ctx, SearchParams{MediaType: "book"}); apperr.KindOf(err) != apperr.KindInvalid {
+	if _, err := h.svc.Search(ctx, SearchParams{MediaType: "podcast"}); apperr.KindOf(err) != apperr.KindInvalid {
 		t.Fatalf("a type no source owns must be rejected, got %v", err)
 	}
 

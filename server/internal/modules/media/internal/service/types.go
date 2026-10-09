@@ -64,6 +64,8 @@ type MediaDetails struct {
 	Favourites        *int           `json:"favourites"`
 	Genres            []string       `json:"genres"`
 	Studios           []string       `json:"studios"`
+	Authors           []string       `json:"authors" doc:"Who wrote it; a book only."`
+	Pages             *int           `json:"pages" doc:"Pages in a typical edition; a book only."`
 	Source            *string        `json:"source"`
 	CountryOfOrigin   *string        `json:"country_of_origin"`
 	IsAdult           bool           `json:"is_adult"`
@@ -94,6 +96,8 @@ type MediaSummary struct {
 	AverageScore      *int           `json:"average_score"`
 	Popularity        *int           `json:"popularity"`
 	Genres            []string       `json:"genres"`
+	Authors           []string       `json:"authors,omitempty" doc:"Who wrote it; a book only."`
+	Pages             *int           `json:"pages,omitempty" doc:"Pages in a typical edition; a book only."`
 	IsAdult           bool           `json:"is_adult"`
 	SiteURL           string         `json:"site_url"`
 	NextAiringEpisode *AiringEpisode `json:"next_airing_episode"`

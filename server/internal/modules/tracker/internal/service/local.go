@@ -16,6 +16,7 @@ const (
 	MediaTypeMovie  MediaType = "movie"
 	MediaTypeSeries MediaType = "series"
 	MediaTypeDorama MediaType = "dorama"
+	MediaTypeBook   MediaType = "book"
 )
 
 const ProviderLocal = "local"
@@ -25,14 +26,15 @@ var localStatuses = []string{"CURRENT", "PLANNING", "COMPLETED", "PAUSED", "DROP
 
 // local reports whether the node itself keeps the list for this media type.
 func (t MediaType) local() bool {
-	return t == MediaTypeMovie || t == MediaTypeSeries || t == MediaTypeDorama
+	return t == MediaTypeMovie || t == MediaTypeSeries || t == MediaTypeDorama || t == MediaTypeBook
 }
 
-var localRef = regexp.MustCompile(`^tmdb:(movie|tv):[1-9]\d*$`)
+var localRef = regexp.MustCompile(`^(tmdb:(movie|tv):[1-9]\d*|openlibrary:OL[1-9]\d*W)$`)
 
-// isLocalRef is a title from a source whose list the node keeps — TMDB for now.
+// isLocalRef is a title from a source whose list the node keeps: TMDB's movies
+// and shows, Open Library's books.
 func isLocalRef(mediaRef string) bool {
-	return strings.HasPrefix(mediaRef, "tmdb:")
+	return strings.HasPrefix(mediaRef, "tmdb:") || strings.HasPrefix(mediaRef, "openlibrary:")
 }
 
 func validateLocalRef(mediaRef string) error {
@@ -195,7 +197,7 @@ func (s *Service) updateLocalEntry(ctx context.Context, mediaRef string, patch E
 		}
 	}
 
-	applyLocalPatch(entry, patch, title.Media.Episodes, now)
+	applyLocalPatch(entry, patch, title.Media.length(MediaType(entry.MediaType)), now)
 	entry.UpdatedAt = now
 
 	var listIDs []int64
@@ -252,9 +254,18 @@ func (s *Service) localTitle(ctx context.Context, mediaRef string, adding bool) 
 	return title, nil
 }
 
+// length is what progress counts up to: episodes, or pages for a book.
+func (m *Media) length(mediaType MediaType) *int {
+	if mediaType == MediaTypeBook {
+		return m.Pages
+	}
+
+	return m.Episodes
+}
+
 // applyLocalPatch applies the change and does what AniList's own site does around
-// progress: the first episode starts the title, the last one completes it, and
-// each sets its date when the user has not.
+// progress: the first episode — or page — starts the title, the last one
+// completes it, and each sets its date when the user has not.
 func applyLocalPatch(entry *store.LocalEntry, patch EntryPatch, episodes *int, now time.Time) {
 	if patch.Status != nil {
 		entry.Status = *patch.Status
@@ -395,7 +406,7 @@ func (s *Service) localListCovers(ctx context.Context) (map[int64][]string, erro
 		return covers, nil
 	}
 
-	for _, mediaType := range []MediaType{MediaTypeMovie, MediaTypeSeries, MediaTypeDorama} {
+	for _, mediaType := range []MediaType{MediaTypeMovie, MediaTypeSeries, MediaTypeDorama, MediaTypeBook} {
 		membership, err := s.store.ListMembership(ctx, string(mediaType))
 		if err != nil {
 			return nil, apperr.Wrap(err, apperr.KindInternal, "read %s lists", mediaType)

@@ -13,6 +13,7 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anizip"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/openlibrary"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/tmdb"
 )
 
@@ -37,6 +38,9 @@ type Options struct {
 
 	// TMDB is nil when the node turned it off; movies and shows then have no source.
 	TMDB *tmdb.Client
+
+	// OpenLibrary is nil when the node turned it off; books then have no source.
+	OpenLibrary *openlibrary.Client
 
 	Now func() time.Time
 }
@@ -72,6 +76,10 @@ func (s *Service) Details(ctx context.Context, mediaRef string) (*MediaDetails, 
 	ref, err := parseRef(mediaRef)
 	if err != nil {
 		return nil, err
+	}
+
+	if ref.provider == ProviderOpenLibrary {
+		return s.bookDetails(ctx, ref.work)
 	}
 
 	if ref.provider == ProviderTMDB {
@@ -153,6 +161,18 @@ func (s *Service) CachedDetails(ctx context.Context, mediaRef string) (*MediaDet
 		return nil, err
 	}
 
+	if ref.provider == ProviderOpenLibrary {
+		cached, readErr := s.store.Get(ctx, ProviderOpenLibrary, "work:"+ref.work)
+		if readErr != nil {
+			return nil, apperr.Wrap(readErr, apperr.KindInternal, "read media cache")
+		}
+		if cached == nil {
+			return nil, nil
+		}
+
+		return decodeCachedBook(cached.Payload), nil
+	}
+
 	if ref.provider == ProviderTMDB {
 		cached, readErr := s.store.Get(ctx, ProviderTMDB, ref.cacheKey())
 		if readErr != nil {
@@ -231,6 +251,10 @@ func (s *Service) Search(ctx context.Context, params SearchParams) (*SearchPage,
 		return s.searchTMDB(ctx, params)
 	}
 
+	if params.MediaType == MediaTypeBook {
+		return s.searchBooks(ctx, params)
+	}
+
 	mediaType, err := aniListMediaType(params.MediaType)
 	if err != nil {
 		return nil, err
@@ -298,6 +322,10 @@ func (s *Service) Search(ctx context.Context, params SearchParams) (*SearchPage,
 func (s *Service) FilterOptions(ctx context.Context, mediaType string) (*FilterOptions, error) {
 	if isTMDBType(mediaType) {
 		return s.tmdbFilterOptions(ctx, mediaType)
+	}
+
+	if mediaType == MediaTypeBook {
+		return s.bookFilterOptions(), nil
 	}
 
 	now := s.opts.Now()
