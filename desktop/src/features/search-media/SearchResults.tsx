@@ -48,7 +48,7 @@ export function SearchResults({ renderMenu }: SearchResultsProps) {
 			<ul className={styles.grid}>
 				{Array.from({ length: SKELETON_COUNT }, (_, index) => (
 					<li key={index} className={styles.skeletonCard}>
-						<Skeleton height='100%' radius='14px' className={styles.skeletonPoster} />
+						<Skeleton width='100%' height='auto' radius='14px' className={styles.skeletonPoster} />
 					</li>
 				))}
 			</ul>
