@@ -3,7 +3,8 @@ import { useCallback, useEffect, useLayoutEffect, useState } from 'react'
 
 const GAP = 4
 const VIEWPORT_MARGIN = 8
-const MAX_HEIGHT = 240
+// Tall enough for every search type at once; a list past it scrolls.
+const MAX_HEIGHT = 400
 const MIN_HEIGHT = 96
 
 export interface PanelPosition {
