@@ -318,6 +318,7 @@ func (s *Service) Search(ctx context.Context, params SearchParams) (*SearchPage,
 		SeasonYear: params.Year,
 		MinScore:   params.MinScore,
 		Adult:      adult,
+		Country:    params.Country,
 	})
 	if err != nil {
 		return nil, err

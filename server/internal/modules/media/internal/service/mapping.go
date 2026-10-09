@@ -173,6 +173,7 @@ func summaryFromAniList(source *anilist.MediaSummary) MediaSummary {
 		Genres:       nonNilStrings(source.Genres),
 		IsAdult:      source.IsAdult,
 		SiteURL:      source.SiteURL,
+		Description:  plainDescription(source.Description),
 	}
 
 	if source.NextAiringEpisode != nil {

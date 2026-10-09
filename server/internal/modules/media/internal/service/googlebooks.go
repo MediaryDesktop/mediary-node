@@ -187,6 +187,7 @@ func detailsFromGoogleBooks(volume *googlebooks.Volume, fetchedAt time.Time) Med
 func summaryFromGoogleBooks(volume *googlebooks.Volume) MediaSummary {
 	info := &volume.VolumeInfo
 	format := "BOOK"
+	description := paragraphEnd.ReplaceAllString(info.Description, "\n\n")
 
 	return MediaSummary{
 		MediaRef:     googleBookMediaRef(volume.ID),
@@ -201,6 +202,7 @@ func summaryFromGoogleBooks(volume *googlebooks.Volume) MediaSummary {
 		Authors:      uniqueStrings(info.Authors),
 		Pages:        positive(info.PageCount),
 		SiteURL:      firstNonBlank(info.CanonicalVolumeLink, info.InfoLink),
+		Description:  plainDescription(&description),
 	}
 }
 

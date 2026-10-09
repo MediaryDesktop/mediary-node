@@ -48,6 +48,7 @@ type SearchInput struct {
 	Season   string   `query:"season" enum:"WINTER,SPRING,SUMMER,FALL" doc:"Season the title started in. AniList only."`
 	Year     int      `query:"year" minimum:"1940" maximum:"2100" doc:"Year the title started in."`
 	MinScore int      `query:"min_score" minimum:"0" maximum:"100" doc:"Keep titles scored above this, on a 0-100 scale."`
+	Country  string   `query:"country" enum:"JP,KR,CN,TW" doc:"Where the title comes from: JP for manga, KR for manhwa, CN and TW for manhua. AniList only."`
 	Adult    bool     `query:"adult" doc:"Include adult titles. They are left out unless this is set, and the source hides them entirely from a node with no account connected."`
 	Page     int      `query:"page" minimum:"1" default:"1" doc:"Which page of results to return."`
 	PerPage  int      `query:"per_page" minimum:"1" maximum:"50" default:"30" doc:"How many titles per page."`
@@ -112,6 +113,7 @@ func (h *Handler) Register(api huma.API) {
 			Year:      in.Year,
 			MinScore:  in.MinScore,
 			Adult:     in.Adult,
+			Country:   in.Country,
 			Page:      in.Page,
 			PerPage:   in.PerPage,
 		})

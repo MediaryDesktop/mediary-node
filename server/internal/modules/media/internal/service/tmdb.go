@@ -750,6 +750,7 @@ func summaryFromTMDB(kind tmdb.Kind, source *tmdb.Result, genreNames map[int]str
 		Genres:       genres,
 		IsAdult:      source.Adult,
 		SiteURL:      "https://www.themoviedb.org/" + string(kind) + "/" + strconv.Itoa(source.ID),
+		Description:  strings.TrimSpace(source.Overview),
 	}
 
 	if kind == tmdb.KindMovie {

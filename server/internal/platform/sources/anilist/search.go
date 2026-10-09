@@ -33,6 +33,9 @@ type SearchParams struct {
 	SeasonYear int
 	MinScore   int
 	Adult      *bool
+	// Country is where a title comes from, as an ISO code: JP for manga, KR for
+	// manhwa, CN for manhua.
+	Country string
 }
 
 type PageInfo struct {
@@ -61,6 +64,7 @@ type MediaSummary struct {
 	IsAdult      bool      `json:"isAdult"`
 	SiteURL      string    `json:"siteUrl"`
 	BannerImage  *string   `json:"bannerImage"`
+	Description  *string   `json:"description"`
 	StartDate    FuzzyDate `json:"startDate"`
 	Title        Titles    `json:"title"`
 	CoverImage   struct {
@@ -138,6 +142,9 @@ func (c *Client) Search(ctx context.Context, params SearchParams) (*SearchResult
 	}
 	if params.Adult != nil {
 		variables["isAdult"] = *params.Adult
+	}
+	if params.Country != "" {
+		variables["countryOfOrigin"] = params.Country
 	}
 
 	var data struct {

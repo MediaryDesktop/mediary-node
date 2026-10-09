@@ -101,6 +101,7 @@ type MediaSummary struct {
 	IsAdult           bool           `json:"is_adult"`
 	SiteURL           string         `json:"site_url"`
 	NextAiringEpisode *AiringEpisode `json:"next_airing_episode"`
+	Description       string         `json:"description,omitempty" doc:"Plain-text synopsis, when the source's search carries one. Open Library's does not."`
 }
 
 type SearchParams struct {
@@ -115,6 +116,7 @@ type SearchParams struct {
 	Year      int
 	MinScore  int
 	Adult     bool
+	Country   string
 	Page      int
 	PerPage   int
 }

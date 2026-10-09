@@ -2115,6 +2115,9 @@ components:
           type:
             - string
             - "null"
+        description:
+          description: Plain-text synopsis, when the source's search carries one. Open Library's does not.
+          type: string
         episodes:
           format: int64
           type:
@@ -5880,6 +5883,18 @@ paths:
             maximum: 100
             minimum: 0
             type: integer
+        - description: "Where the title comes from: JP for manga, KR for manhwa, CN and TW for manhua. AniList only."
+          explode: false
+          in: query
+          name: country
+          schema:
+            description: "Where the title comes from: JP for manga, KR for manhwa, CN and TW for manhua. AniList only."
+            enum:
+              - JP
+              - KR
+              - CN
+              - TW
+            type: string
         - description: Include adult titles. They are left out unless this is set, and the source hides them entirely from a node with no account connected.
           explode: false
           in: query
