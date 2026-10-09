@@ -24,9 +24,20 @@ func (f fakeLibrary) Playable(context.Context, int64) (*PlayableFile, error) {
 }
 
 type fakeProgress struct {
-	marked   []int
-	mediaRef string
-	err      error
+	marked    []int
+	fractions []float64
+	mediaRef  string
+	err       error
+}
+
+func (f *fakeProgress) MarkReadFraction(_ context.Context, mediaRef string, fraction float64) error {
+	if f.err != nil {
+		return f.err
+	}
+	f.mediaRef = mediaRef
+	f.fractions = append(f.fractions, fraction)
+
+	return nil
 }
 
 func (f *fakeProgress) MarkRead(_ context.Context, mediaRef string, chapter int) error {

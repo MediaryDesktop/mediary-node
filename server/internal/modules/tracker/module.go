@@ -71,6 +71,11 @@ func (m *Module) TrackedTitles(ctx context.Context, mediaType string) ([]Tracked
 	return m.svc.TrackedTitles(ctx, service.MediaType(mediaType))
 }
 
+// MarkReadFraction records how far through a book the reader is, for the reader.
+func (m *Module) MarkReadFraction(ctx context.Context, mediaRef string, fraction float64) error {
+	return m.svc.MarkReadFraction(ctx, mediaRef, fraction)
+}
+
 // MarkRead records a chapter as read, for the reader. Same path as MarkWatched.
 func (m *Module) MarkRead(ctx context.Context, mediaRef string, chapter int) error {
 	return m.svc.MarkRead(ctx, mediaRef, chapter)

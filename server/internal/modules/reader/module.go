@@ -1,6 +1,8 @@
 package reader
 
 import (
+	"database/sql"
+
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/rs/zerolog"
 
@@ -8,6 +10,7 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/modules/reader/internal/handler"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/reader/internal/ref"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/reader/internal/service"
+	"github.com/mediaryorg/mediary-node/server/internal/modules/reader/internal/store"
 )
 
 // The module's ports: the reader reads files the library owns and reports read
@@ -32,6 +35,8 @@ const (
 )
 
 type Deps struct {
+	// DB keeps where each book was left; nil leaves books without a place.
+	DB     *sql.DB
 	Logger zerolog.Logger
 
 	Library  Library
@@ -40,11 +45,17 @@ type Deps struct {
 }
 
 func New(deps Deps) *Module {
-	svc := service.New(service.Options{
+	opts := service.Options{
 		Library:  deps.Library,
 		Progress: deps.Progress,
 		Sources:  deps.Sources,
-	})
+		Logger:   deps.Logger,
+	}
+	if deps.DB != nil {
+		opts.Store = store.New(deps.DB)
+	}
+
+	svc := service.New(opts)
 
 	return &Module{handler: handler.New(svc)}
 }

@@ -305,3 +305,45 @@ func TestABookCountsPages(t *testing.T) {
 		t.Fatalf("an edition is not a work: %v", err)
 	}
 }
+
+func TestReadingAShareOfABookMovesItsPages(t *testing.T) {
+	h, titles := newLocalHarness(t)
+	ctx := context.Background()
+
+	name, pages := "Тіні забутих предків", 92
+	titles.source["googlebooks:JXRKDwAAQBAJ"] = LocalTitle{
+		MediaType: MediaTypeBook,
+		Media:     Media{Title: Title{UserPreferred: &name}, Pages: &pages},
+	}
+
+	progressOf := func() (int, string) {
+		t.Helper()
+
+		collection, err := h.svc.Entries(ctx, MediaTypeBook)
+		if err != nil || len(collection.Entries) != 1 {
+			t.Fatalf("entries %+v %v", collection, err)
+		}
+
+		return collection.Entries[0].Progress, collection.Entries[0].Status
+	}
+
+	for _, step := range []struct {
+		fraction float64
+		progress int
+		status   string
+	}{
+		{0.5, 46, "CURRENT"},
+		// Turning back is not unreading.
+		{0.1, 46, "CURRENT"},
+		// The notes at the end are not the book.
+		{0.985, 92, "COMPLETED"},
+	} {
+		if err := h.svc.MarkReadFraction(ctx, "googlebooks:JXRKDwAAQBAJ", step.fraction); err != nil {
+			t.Fatal(err)
+		}
+
+		if progress, status := progressOf(); progress != step.progress || status != step.status {
+			t.Errorf("at %.3f: %d %s, want %d %s", step.fraction, progress, status, step.progress, step.status)
+		}
+	}
+}

@@ -44,6 +44,10 @@ func (c readChapters) MarkRead(ctx context.Context, mediaRef string, chapter int
 	return c.tracker.MarkRead(ctx, mediaRef, chapter)
 }
 
+func (c readChapters) MarkReadFraction(ctx context.Context, mediaRef string, fraction float64) error {
+	return c.tracker.MarkReadFraction(ctx, mediaRef, fraction)
+}
+
 // opdsChapters lets the reader open chapters on the user's OPDS servers. The manga
 // module knows the servers; the reader knows reading. Neither imports the other.
 type opdsChapters struct {

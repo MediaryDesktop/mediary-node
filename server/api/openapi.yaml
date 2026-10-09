@@ -167,6 +167,68 @@ components:
         - is_forced
         - channels
       type: object
+    BookPosition:
+      additionalProperties: false
+      properties:
+        fraction:
+          description: How far through the book that is, from 0 to 1.
+          format: double
+          maximum: 1
+          minimum: 0
+          type: number
+        locator:
+          description: "Where the reader is, in the renderer's own terms: an EPUB CFI, or a PDF page."
+          type: string
+        updated_at:
+          description: When the reader was last there.
+          format: date-time
+          type: string
+      required:
+        - locator
+        - fraction
+        - updated_at
+      type: object
+    BookPositionInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/BookPositionInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        fraction:
+          description: How far through the book that is, from 0 to 1.
+          format: double
+          maximum: 1
+          minimum: 0
+          type: number
+        locator:
+          description: Where the reader is, in the renderer's own terms.
+          maxLength: 4096
+          minLength: 1
+          type: string
+      required:
+        - locator
+        - fraction
+      type: object
+    BookPositionOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/BookPositionOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        position:
+          $ref: "#/components/schemas/BookPosition"
+          description: Where the reader left the book; null for a book never opened.
+      required:
+        - position
+      type: object
     Chapter:
       additionalProperties: false
       properties:
@@ -6404,6 +6466,94 @@ paths:
                 $ref: "#/components/schemas/ErrorModel"
           description: Error
       summary: Report the page the reader is on
+      tags:
+        - reader
+  /v1/reader/files/{id}/book:
+    get:
+      description: A library book as it is on disk — EPUB, FB2, MOBI, AZW3 or PDF — with range support, for the renderer to lay out itself. Its type tells the renderer which viewer to open it in.
+      operationId: getReaderBook
+      parameters:
+        - description: Library file, as listed by listLibraryFiles.
+          in: path
+          name: id
+          required: true
+          schema:
+            description: Library file, as listed by listLibraryFiles.
+            format: int64
+            type: integer
+      responses:
+        "200":
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: The bytes of a book
+      tags:
+        - reader
+  /v1/reader/files/{id}/book/position:
+    get:
+      description: "The place to open a book at, kept per file: a locator from one file means nothing in another edition."
+      operationId: getReaderBookPosition
+      parameters:
+        - description: Library file, as listed by listLibraryFiles.
+          in: path
+          name: id
+          required: true
+          schema:
+            description: Library file, as listed by listLibraryFiles.
+            format: int64
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookPositionOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Where the book was left
+      tags:
+        - reader
+    put:
+      description: Stores the place and, for a matched book, moves the user's list to the share of the work's pages read; the last pages finish it. Progress is never lowered.
+      operationId: saveReaderBookPosition
+      parameters:
+        - description: Library file being read.
+          in: path
+          name: id
+          required: true
+          schema:
+            description: Library file being read.
+            format: int64
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BookPositionInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookPositionOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Keep the reader's place in a book
       tags:
         - reader
   /v1/reader/files/{id}/chapter:

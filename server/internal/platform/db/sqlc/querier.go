@@ -49,6 +49,7 @@ type Querier interface {
 	FinishTorrentDownload(ctx context.Context, arg FinishTorrentDownloadParams) error
 	GetAniListMirror(ctx context.Context, kind string) (AnilistMirror, error)
 	GetAniListOutboxEntry(ctx context.Context, arg GetAniListOutboxEntryParams) (AnilistOutbox, error)
+	GetBookPosition(ctx context.Context, fileID int64) (BookPosition, error)
 	GetCustomList(ctx context.Context, id int64) (CustomList, error)
 	GetLibraryFile(ctx context.Context, id int64) (GetLibraryFileRow, error)
 	GetLibraryRoot(ctx context.Context, id int64) (GetLibraryRootRow, error)
@@ -144,6 +145,7 @@ type Querier interface {
 	UpsertAniListOutboxEntry(ctx context.Context, arg UpsertAniListOutboxEntryParams) error
 	// A manual match is the user's decision, so an automatic one never replaces it.
 	UpsertAutoFileMatch(ctx context.Context, arg UpsertAutoFileMatchParams) error
+	UpsertBookPosition(ctx context.Context, arg UpsertBookPositionParams) error
 	UpsertMangaSourceLink(ctx context.Context, arg UpsertMangaSourceLinkParams) error
 	UpsertManualFileMatch(ctx context.Context, arg UpsertManualFileMatchParams) error
 	UpsertNodeMeta(ctx context.Context, arg UpsertNodeMetaParams) (NodeMetum, error)

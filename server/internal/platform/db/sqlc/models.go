@@ -26,6 +26,13 @@ type AnilistOutbox struct {
 	LastError     sql.NullString `json:"last_error"`
 }
 
+type BookPosition struct {
+	FileID    int64   `json:"file_id"`
+	Locator   string  `json:"locator"`
+	Fraction  float64 `json:"fraction"`
+	UpdatedAt string  `json:"updated_at"`
+}
+
 type CustomList struct {
 	ID        int64  `json:"id"`
 	MediaType string `json:"media_type"`

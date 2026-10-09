@@ -181,6 +181,7 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 	// The reader reads the library's files and, through the manga module, chapters
 	// on the user's OPDS servers. Every edge is a port joined here.
 	reader.New(reader.Deps{
+		DB:       deps.DB,
 		Logger:   moduleLogger(deps.Logger, "reader"),
 		Library:  readableFiles{library: libraryModule},
 		Progress: readChapters{tracker: trackerModule},

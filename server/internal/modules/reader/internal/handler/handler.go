@@ -109,6 +109,7 @@ func (h *Handler) Register(api huma.API) {
 
 	h.registerChapters(api)
 	h.registerFiles(api)
+	h.registerBooks(api)
 }
 
 // registerChapters is the reader's API for a chapter from any source.

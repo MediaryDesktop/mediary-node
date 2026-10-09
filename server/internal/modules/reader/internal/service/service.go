@@ -6,9 +6,13 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
+
+	"github.com/rs/zerolog"
 
 	"github.com/mediaryorg/mediary-node/server/internal/modules/reader/internal/archive"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/reader/internal/ref"
+	"github.com/mediaryorg/mediary-node/server/internal/modules/reader/internal/store"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
 )
 
@@ -32,11 +36,20 @@ type Library interface {
 // the user's list, including never lowering progress they already have.
 type Progress interface {
 	MarkRead(ctx context.Context, mediaRef string, chapter int) error
+
+	// MarkReadFraction records how far through a book the reader is.
+	MarkReadFraction(ctx context.Context, mediaRef string, fraction float64) error
 }
 
 type Options struct {
 	Library  Library
 	Progress Progress
+
+	// Store keeps where each book was left; nil leaves books without a place.
+	Store  *store.Store
+	Logger zerolog.Logger
+	Now    func() time.Time
+
 	// Sources are the other places chapters come from, by the prefix of their
 	// references. Local files are always read by the reader itself.
 	Sources map[string]Source
@@ -63,6 +76,14 @@ func New(opts Options) *Service {
 	}
 
 	return &Service{opts: opts, sources: sources, counted: map[string]bool{}}
+}
+
+func (s *Service) now() time.Time {
+	if s.opts.Now != nil {
+		return s.opts.Now()
+	}
+
+	return time.Now()
 }
 
 func (s *Service) Status(context.Context) (bool, error) {

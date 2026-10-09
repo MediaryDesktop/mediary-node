@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"math"
 
 	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
 )
@@ -137,6 +138,40 @@ func (s *Service) MarkRead(ctx context.Context, mediaRef string, chapter int) er
 	_, err := s.UpdateEntry(ctx, mediaRef, EntryPatch{Progress: &chapter})
 
 	return err
+}
+
+// bookFinished is how far through a book counts as having read it: the last
+// pages of an e-book are an index, notes and the publisher's list.
+const bookFinished = 0.98
+
+// MarkReadFraction records how far through a book the reader is. A book's
+// progress counts the work's pages, and only the tracker knows how many there
+// are; a book it knows no page count for is left as it is.
+func (s *Service) MarkReadFraction(ctx context.Context, mediaRef string, fraction float64) error {
+	if !isLocalRef(mediaRef) || fraction <= 0 {
+		return nil
+	}
+
+	title, err := s.localTitle(ctx, mediaRef, true)
+	if err != nil {
+		return err
+	}
+
+	if title.MediaType != MediaTypeBook || title.Media.Pages == nil || *title.Media.Pages <= 0 {
+		return nil
+	}
+
+	pages := *title.Media.Pages
+
+	page := int(math.Floor(fraction * float64(pages)))
+	if fraction >= bookFinished {
+		page = pages
+	}
+	if page <= 0 {
+		return nil
+	}
+
+	return s.raiseLocalProgress(ctx, mediaRef, page)
 }
 
 // MarkWatched records that an episode was watched. It is the same path a user's own
