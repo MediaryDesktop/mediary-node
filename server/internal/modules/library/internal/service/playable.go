@@ -48,6 +48,11 @@ func (s *Service) Playable(ctx context.Context, fileID int64) (*PlayableFile, er
 		Duration: row.Duration,
 	}
 
+	// A book names itself better than its file does.
+	if row.Book != nil && row.Book.Title != "" {
+		playable.Title = row.Book.Title
+	}
+
 	if playable.Title == "" {
 		playable.Title = row.RelPath
 	}
