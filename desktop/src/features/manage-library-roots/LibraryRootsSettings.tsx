@@ -63,6 +63,8 @@ export function LibraryRootsSettings() {
 
 	return (
 		<div className={styles.root}>
+			<p className={styles.note}>{t('library.root.note')}</p>
+
 			{roots.length === 0 ? (
 				<p className={styles.empty}>{t('library.root.none')}</p>
 			) : (

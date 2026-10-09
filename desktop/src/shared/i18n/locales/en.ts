@@ -321,6 +321,7 @@ export const en = {
 		},
 		root: {
 			add: 'Add folder',
+			note: 'Anime vs movies & series is not a genre, it picks the source: anime is matched against AniList, movies and series against TMDB. Manga and books are recognized by their file extension in any folder, and doramas are told apart automatically within movies & series.',
 			content: {
 				anime: 'Anime',
 				movies_and_shows: 'Movies & series'
