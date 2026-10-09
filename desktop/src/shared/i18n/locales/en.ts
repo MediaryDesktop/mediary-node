@@ -321,18 +321,27 @@ export const en = {
 		},
 		root: {
 			add: 'Add folder',
-			note: 'Anime vs movies & series is not a genre, it picks the source: anime is matched against AniList, movies and series against TMDB. Manga and books are recognized by their file extension in any folder, and doramas are told apart automatically within movies & series.',
+			note: 'A folder’s type tells the node what is inside. For videos it picks where names come from: anime from AniList, movies, series and doramas from TMDB. A video folder picks up comics and books too; a folder of manga or books keeps only those.',
 			content: {
 				anime: 'Anime',
-				movies_and_shows: 'Movies & series'
+				movies_and_shows: 'Movies & series',
+				doramas: 'Doramas',
+				manga: 'Manga',
+				books: 'Books'
 			},
 			addAs: {
 				anime: 'Folder of anime',
-				movies_and_shows: 'Folder of movies & series'
+				movies_and_shows: 'Folder of movies & series',
+				doramas: 'Folder of doramas',
+				manga: 'Folder of manga',
+				books: 'Folder of books'
 			},
 			switchTo: {
 				anime: 'It holds anime',
-				movies_and_shows: 'It holds movies & series'
+				movies_and_shows: 'It holds movies & series',
+				doramas: 'It holds doramas',
+				manga: 'It holds manga only',
+				books: 'It holds books only'
 			},
 			contentFailed: 'Could not change what the folder holds',
 			remove: 'Stop watching this folder',

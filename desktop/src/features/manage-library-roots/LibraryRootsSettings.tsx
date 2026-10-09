@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { Button, DropdownMenu, Icon, ListTile, toast } from '@shared/ui'
+import type { IconName } from '@shared/ui'
 
 import {
 	deleteLibraryRootMutation,
@@ -14,10 +15,20 @@ import type { LibraryContent } from '@entities/library-item'
 
 import styles from './LibraryRootsSettings.module.scss'
 
-const CONTENTS = ['anime', 'movies_and_shows'] as const satisfies readonly LibraryContent[]
+const CONTENTS = [
+	'anime',
+	'movies_and_shows',
+	'doramas',
+	'manga',
+	'books'
+] as const satisfies readonly LibraryContent[]
 
-function otherContent(content: LibraryContent): LibraryContent {
-	return content === 'anime' ? 'movies_and_shows' : 'anime'
+const CONTENT_ICONS: Record<LibraryContent, IconName> = {
+	anime: 'categories/anime',
+	movies_and_shows: 'categories/movie',
+	doramas: 'categories/doramas',
+	manga: 'categories/manga',
+	books: 'categories/book'
 }
 
 export function LibraryRootsSettings() {
@@ -73,7 +84,7 @@ export function LibraryRootsSettings() {
 						<ListTile
 							key={root.id}
 							as='li'
-							icon='common/folder'
+							icon={CONTENT_ICONS[root.content]}
 							title={root.path}
 							titleHint={root.path}
 							subtitle={[
@@ -97,14 +108,18 @@ export function LibraryRootsSettings() {
 											icon: 'common/reset',
 											onSelect: () => scanRequested(root.id)
 										},
-										{
-											id: 'content',
-											label: t(`library.root.switchTo.${otherContent(root.content)}`),
-											icon: 'common/player',
+										...CONTENTS.map(content => ({
+											id: `content-${content}`,
+											label: t(`library.root.switchTo.${content}`),
+											icon: CONTENT_ICONS[content],
+											checked: content === root.content,
 											disabled: updating,
-											onSelect: () =>
-												update({ id: root.id, content: otherContent(root.content) })
-										},
+											onSelect: () => {
+												if (content !== root.content) {
+													update({ id: root.id, content })
+												}
+											}
+										})),
 										{
 											id: 'remove',
 											label: t('library.root.remove'),
@@ -134,7 +149,7 @@ export function LibraryRootsSettings() {
 				items={CONTENTS.map(content => ({
 					id: content,
 					label: t(`library.root.addAs.${content}`),
-					icon: content === 'anime' ? 'categories/anime' : 'categories/movie',
+					icon: CONTENT_ICONS[content],
 					disabled: pickingFolder,
 					onSelect: () => folderRequested(content)
 				}))}

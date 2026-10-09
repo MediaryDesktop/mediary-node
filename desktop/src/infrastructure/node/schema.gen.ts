@@ -1648,10 +1648,10 @@ export interface components {
 			 */
 			readonly $schema?: string
 			/**
-			 * @description What the videos in the folder are. Left out means anime.
+			 * @description What the folder holds, as in listLibraryRoots. Left out means anime.
 			 * @enum {string}
 			 */
-			content?: 'anime' | 'movies_and_shows'
+			content?: 'anime' | 'movies_and_shows' | 'doramas' | 'manga' | 'books'
 			/**
 			 * @description Absolute path to an existing folder on this machine.
 			 * @example D:\Anime
@@ -3009,10 +3009,10 @@ export interface components {
 			 */
 			added_at: string
 			/**
-			 * @description What the videos in the folder are: anime, matched against AniList, or movies and shows, matched against TMDB. Comics and books are told apart by their extension either way.
+			 * @description What the folder holds. For videos it picks the source: anime is matched against AniList, movies and shows against TMDB, doramas against TMDB's East Asian shows; such a folder keeps comics and books as well. A folder of manga keeps only comics, a folder of books only books.
 			 * @enum {string}
 			 */
-			content: 'anime' | 'movies_and_shows'
+			content: 'anime' | 'movies_and_shows' | 'doramas' | 'manga' | 'books'
 			/**
 			 * Format: int64
 			 * @description Media files currently present under the root.
@@ -4115,10 +4115,10 @@ export interface components {
 			 */
 			readonly $schema?: string
 			/**
-			 * @description What the videos in the folder are.
+			 * @description What the folder holds, as in listLibraryRoots. A folder turned to manga or books drops the files of other kinds.
 			 * @enum {string}
 			 */
-			content: 'anime' | 'movies_and_shows'
+			content: 'anime' | 'movies_and_shows' | 'doramas' | 'manga' | 'books'
 		}
 		Video: {
 			/** Format: int32 */
