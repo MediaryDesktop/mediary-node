@@ -1,9 +1,53 @@
 .root {
 	--carousel-gap: 1rem;
-	--carousel-fade: 2.5rem;
 
-	position: relative;
 	min-width: 0;
+
+	.header {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
+		margin: 0 0 1rem;
+	}
+
+	.title {
+		margin: 0;
+		font-size: 1.375rem;
+		font-weight: 650;
+	}
+
+	.dots {
+		display: flex;
+		align-items: center;
+		gap: 0.3125rem;
+	}
+
+	.dot {
+		width: 1.125rem;
+		height: 0.3rem;
+		padding: 0;
+		border: none;
+		border-radius: 999px;
+		background: var(--border-strong);
+		cursor: pointer;
+		transition:
+			background-color 160ms,
+			height 160ms;
+
+		&:hover {
+			background: var(--text-muted);
+		}
+
+		&.isActive {
+			background: var(--accent);
+
+			&:hover {
+				background: var(--accent);
+			}
+		}
+	}
 
 	.viewport {
 		overflow: hidden;
@@ -21,40 +65,5 @@
 	.item {
 		flex: 0 0 var(--carousel-item);
 		min-width: 0;
-	}
-
-	// The edge that has more beyond it fades out, so a cut card reads as "more".
-	&.fadeStart .viewport,
-	&.fadeEnd .viewport {
-		mask-image: linear-gradient(
-			to right,
-			var(--fade-start, #000) 0,
-			#000 var(--carousel-fade),
-			#000 calc(100% - var(--carousel-fade)),
-			var(--fade-end, #000) 100%
-		);
-	}
-
-	&.fadeStart {
-		--fade-start: transparent;
-	}
-
-	&.fadeEnd {
-		--fade-end: transparent;
-	}
-
-	.arrow {
-		position: absolute;
-		top: 50%;
-		z-index: 1;
-		transform: translateY(-50%);
-	}
-
-	.previous {
-		left: 0.5rem;
-	}
-
-	.next {
-		right: 0.5rem;
 	}
 }

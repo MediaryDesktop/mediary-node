@@ -3,36 +3,37 @@ import useEmblaCarousel from 'embla-carousel-react'
 import { Children, useCallback, useEffect, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 
-import { useTranslation } from '../../i18n'
-import { Button } from '../button/Button'
-import { Icon } from '../icon/Icon'
-
 import styles from './Carousel.module.scss'
+
+// Past this many pages the dots would be too small to mean anything.
+const MAX_DOTS = 30
 
 export interface CarouselProps {
 	children: ReactNode
+	// Shown in a header row together with the page dots. A carousel with a title
+	// renders as its own <section>; without one, as a plain row of items.
+	title?: ReactNode
 	// Width of one item, as CSS; the row shows as many as fit.
 	itemWidth?: string
 	'aria-label'?: string
 	className?: string
 }
 
-// A row of items that scrolls sideways: dragged, wheeled, or stepped a page at a
-// time with the arrows, which appear only while there is somewhere to go.
-export function Carousel({ children, itemWidth = '12.5rem', className, ...rest }: CarouselProps) {
-	const { t } = useTranslation()
+// A row of items that scrolls sideways: dragged, wheeled, or jumped to with the
+// page dots, which appear only once there is more than one page to show.
+export function Carousel({ children, title, itemWidth = '12.5rem', className, ...rest }: CarouselProps) {
 	const [viewport, api] = useEmblaCarousel({ align: 'start', dragFree: true, containScroll: 'trimSnaps' })
 
-	const [canPrevious, setCanPrevious] = useState(false)
-	const [canNext, setCanNext] = useState(false)
+	const [snaps, setSnaps] = useState<number[]>([])
+	const [selected, setSelected] = useState(0)
 
 	const update = useCallback(() => {
 		if (!api) {
 			return
 		}
 
-		setCanPrevious(api.canScrollPrev())
-		setCanNext(api.canScrollNext())
+		setSnaps(api.scrollSnapList())
+		setSelected(api.selectedScrollSnap())
 	}, [api])
 
 	useEffect(() => {
@@ -42,70 +43,58 @@ export function Carousel({ children, itemWidth = '12.5rem', className, ...rest }
 
 		// The first reading waits a frame: the track has to be laid out to measure.
 		const frame = requestAnimationFrame(update)
-		api.on('select', update).on('reInit', update).on('scroll', update)
+		api.on('select', update).on('reInit', update)
 
 		return () => {
 			cancelAnimationFrame(frame)
-			api.off('select', update).off('reInit', update).off('scroll', update)
+			api.off('select', update).off('reInit', update)
 		}
 	}, [api, update])
 
-	// A page at a time: as many items as are in view.
-	const step = (direction: -1 | 1) => {
-		if (!api) {
-			return
-		}
+	const ariaLabel = rest['aria-label'] ?? (typeof title === 'string' ? title : undefined)
+	const showDots = snaps.length > 1 && snaps.length <= MAX_DOTS
 
-		const inView = Math.max(1, api.slidesInView().length)
-		const target = api.selectedScrollSnap() + direction * inView
-
-		api.scrollTo(Math.max(0, Math.min(target, api.scrollSnapList().length - 1)))
-	}
+	const Root = title != null ? 'section' : 'div'
 
 	return (
-		<div
-			className={clsx(
-				styles.root,
-				canPrevious && styles.fadeStart,
-				canNext && styles.fadeEnd,
-				className
-			)}
+		<Root
+			className={clsx(styles.root, className)}
 			style={{ '--carousel-item': itemWidth } as CSSProperties}
-			role='region'
-			aria-roledescription='carousel'
-			aria-label={rest['aria-label']}
 		>
-			<div ref={viewport} className={styles.viewport}>
+			{(title != null || showDots) && (
+				<div className={styles.header}>
+					{title != null && <h2 className={styles.title}>{title}</h2>}
+
+					{showDots && (
+						<div className={styles.dots} role='group' aria-label={ariaLabel}>
+							{snaps.map((_, index) => (
+								<button
+									key={index}
+									type='button'
+									aria-label={String(index + 1)}
+									aria-current={index === selected || undefined}
+									className={clsx(styles.dot, index === selected && styles.isActive)}
+									onClick={() => api?.scrollTo(index)}
+								/>
+							))}
+						</div>
+					)}
+				</div>
+			)}
+
+			<div
+				ref={viewport}
+				className={styles.viewport}
+				role='region'
+				aria-roledescription='carousel'
+				aria-label={ariaLabel}
+			>
 				<ul className={styles.track}>
 					{Children.map(children, child => (
 						<li className={styles.item}>{child}</li>
 					))}
 				</ul>
 			</div>
-
-			{canPrevious && (
-				<Button
-					variant='glass'
-					iconOnly
-					className={clsx(styles.arrow, styles.previous)}
-					aria-label={t('carousel.previous')}
-					onClick={() => step(-1)}
-				>
-					<Icon name='common/arrow-left' size={18} />
-				</Button>
-			)}
-
-			{canNext && (
-				<Button
-					variant='glass'
-					iconOnly
-					className={clsx(styles.arrow, styles.next)}
-					aria-label={t('carousel.next')}
-					onClick={() => step(1)}
-				>
-					<Icon name='common/arrow-right' size={18} />
-				</Button>
-			)}
-		</div>
+		</Root>
 	)
 }

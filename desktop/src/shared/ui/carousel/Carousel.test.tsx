@@ -18,7 +18,7 @@ describe('Carousel', () => {
 		expect(screen.getByText('Two')).toBeTruthy()
 	})
 
-	it('shows no arrows while there is nowhere to scroll', () => {
+	it('shows no page dots while there is nowhere to scroll', () => {
 		render(
 			<Carousel aria-label='Recommended'>
 				<span>Only</span>
@@ -26,5 +26,16 @@ describe('Carousel', () => {
 		)
 
 		expect(screen.queryAllByRole('button')).toHaveLength(0)
+	})
+
+	it('renders a given title as the region’s heading', () => {
+		render(
+			<Carousel title='Related titles'>
+				<span>One</span>
+			</Carousel>
+		)
+
+		expect(screen.getByRole('heading', { name: 'Related titles' })).toBeTruthy()
+		expect(screen.getByRole('region', { name: 'Related titles' })).toBeTruthy()
 	})
 })

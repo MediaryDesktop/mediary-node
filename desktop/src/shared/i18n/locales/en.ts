@@ -30,11 +30,6 @@ export const en = {
 		hidePassword: 'Hide password'
 	},
 
-	carousel: {
-		previous: 'Scroll back',
-		next: 'Scroll on'
-	},
-
 	datePicker: {
 		previousMonth: 'Previous month',
 		nextMonth: 'Next month',

@@ -28,11 +28,6 @@ export const uk: Translation = {
 		hidePassword: 'Сховати пароль'
 	},
 
-	carousel: {
-		previous: 'Гортати назад',
-		next: 'Гортати далі'
-	},
-
 	datePicker: {
 		previousMonth: 'Попередній місяць',
 		nextMonth: 'Наступний місяць',

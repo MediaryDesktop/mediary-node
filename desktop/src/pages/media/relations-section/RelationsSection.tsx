@@ -4,7 +4,6 @@ import { enumLabel } from '@entities/media'
 
 import { RelatedCards } from './RelatedCards'
 import type { RelatedTitle } from './RelatedCards'
-import styles from './RelationsSection.module.scss'
 
 export interface RelationsSectionProps {
 	relations: RelatedTitle[]
@@ -18,14 +17,10 @@ export function RelationsSection({ relations }: RelationsSectionProps) {
 	}
 
 	return (
-		<section className={styles.section}>
-			<h2 className={styles.sectionTitle}>{t('media.sections.relations')}</h2>
-
-			<RelatedCards
-				titles={relations}
-				aria-label={t('media.sections.relations')}
-				cornerLabel={relation => enumLabel(t, 'relation', relation.relation_type) ?? undefined}
-			/>
-		</section>
+		<RelatedCards
+			titles={relations}
+			title={t('media.sections.relations')}
+			cornerLabel={relation => enumLabel(t, 'relation', relation.relation_type) ?? undefined}
+		/>
 	)
 }

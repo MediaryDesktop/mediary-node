@@ -1,6 +1,7 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
 import { useMemo } from 'react'
+import type { ReactNode } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { Carousel } from '@shared/ui'
@@ -16,14 +17,15 @@ export type RelatedTitle = NonNullable<MediaDetails['relations']>[number]
 
 export interface RelatedCardsProps {
 	titles: RelatedTitle[]
+	title?: ReactNode
 	'aria-label'?: string
 	// What a card is to this title — "Sequel" — when there is something to say.
 	cornerLabel?: (title: RelatedTitle) => string | undefined
 }
 
-// A grid of titles another title points at, each opening its own page and
+// A carousel of titles another title points at, each opening its own page and
 // offering the list menu where the title can be tracked.
-export function RelatedCards({ titles, cornerLabel, ...rest }: RelatedCardsProps) {
+export function RelatedCards({ titles, title, cornerLabel, ...rest }: RelatedCardsProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
 
@@ -33,7 +35,7 @@ export function RelatedCards({ titles, cornerLabel, ...rest }: RelatedCardsProps
 	const trackedByRef = useMemo(() => new Map(tracked.map(entry => [entry.media_ref, entry])), [tracked])
 
 	return (
-		<Carousel aria-label={rest['aria-label']}>
+		<Carousel title={title} aria-label={rest['aria-label']}>
 			{titles.map(title => {
 				const entry = trackedByRef.get(title.media_ref)
 
