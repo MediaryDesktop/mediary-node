@@ -160,6 +160,23 @@ func (q *Queries) DeleteLibraryFile(ctx context.Context, id int64) (int64, error
 	return result.RowsAffected()
 }
 
+const deleteLibraryFilesNotOfKind = `-- name: DeleteLibraryFilesNotOfKind :exec
+DELETE FROM library_file
+WHERE root_id = ?
+  AND kind <> ?
+`
+
+type DeleteLibraryFilesNotOfKindParams struct {
+	RootID int64  `json:"root_id"`
+	Kind   string `json:"kind"`
+}
+
+// A folder turned to comics or books lets go of every other kind of file.
+func (q *Queries) DeleteLibraryFilesNotOfKind(ctx context.Context, arg DeleteLibraryFilesNotOfKindParams) error {
+	_, err := q.db.ExecContext(ctx, deleteLibraryFilesNotOfKind, arg.RootID, arg.Kind)
+	return err
+}
+
 const deleteLibraryRoot = `-- name: DeleteLibraryRoot :execrows
 DELETE FROM library_root
 WHERE id = ?

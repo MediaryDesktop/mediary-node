@@ -35,6 +35,9 @@ type MediaDetails = service.MediaDetails
 
 type EpisodeList = service.EpisodeList
 
+// DoramaCountries are where a live-action show has to come from to be a dorama.
+var DoramaCountries = service.DoramaCountries
+
 func New(deps Deps) *Module {
 	svc := service.New(store.New(deps.DB), deps.Logger, service.Options{
 		AniList:     deps.AniList,

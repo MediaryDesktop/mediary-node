@@ -32,6 +32,8 @@ type Querier interface {
 	// The match hangs off the file row and goes with it: the user deleted the file
 	// itself, not only what it was tied to.
 	DeleteLibraryFile(ctx context.Context, id int64) (int64, error)
+	// A folder turned to comics or books lets go of every other kind of file.
+	DeleteLibraryFilesNotOfKind(ctx context.Context, arg DeleteLibraryFilesNotOfKindParams) error
 	DeleteLibraryRoot(ctx context.Context, id int64) (int64, error)
 	DeleteListIcon(ctx context.Context, listID string) error
 	DeleteMangaDownload(ctx context.Context, id int64) (int64, error)

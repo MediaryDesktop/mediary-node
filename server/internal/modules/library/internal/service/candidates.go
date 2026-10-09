@@ -104,7 +104,7 @@ func mediaTypeForForm(form, content string) (string, bool) {
 		return "", false
 	}
 
-	if content != ContentMoviesAndShows {
+	if content != ContentMoviesAndShows && content != ContentDoramas {
 		return "anime", true
 	}
 
@@ -112,6 +112,10 @@ func mediaTypeForForm(form, content string) (string, bool) {
 	// separate entry for it.
 	if form == "movie" {
 		return "movie", true
+	}
+
+	if content == ContentDoramas {
+		return "dorama", true
 	}
 
 	return "series", true

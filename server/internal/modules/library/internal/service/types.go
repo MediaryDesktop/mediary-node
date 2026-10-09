@@ -2,21 +2,45 @@ package service
 
 import "time"
 
-// What the videos in a root are: anime is matched against AniList, movies and
-// shows against TMDB.
+// What a root holds, as the user said when adding it. For videos it picks the
+// source — anime is matched against AniList, movies and shows against TMDB, and
+// doramas against TMDB's East Asian shows — since a file's name cannot tell
+// them apart. A root of comics or books keeps only those.
 const (
 	ContentAnime          = "anime"
 	ContentMoviesAndShows = "movies_and_shows"
+	ContentDoramas        = "doramas"
+	ContentManga          = "manga"
+	ContentBooks          = "books"
 )
 
 func validContent(content string) bool {
-	return content == ContentAnime || content == ContentMoviesAndShows
+	switch content {
+	case ContentAnime, ContentMoviesAndShows, ContentDoramas, ContentManga, ContentBooks:
+		return true
+	default:
+		return false
+	}
+}
+
+// keptKind is the only kind of file a root of this content keeps, or "" for a
+// root of videos — which keeps comics and books too, as it always has, so a
+// folder that mixes them loses nothing.
+func keptKind(content string) string {
+	switch content {
+	case ContentManga:
+		return "manga"
+	case ContentBooks:
+		return "book"
+	default:
+		return ""
+	}
 }
 
 type Root struct {
 	ID      int64     `json:"id" doc:"Identifier of the root, stable across scans."`
 	Path    string    `json:"path" doc:"Absolute path on this machine."`
-	Content string    `json:"content" enum:"anime,movies_and_shows" doc:"What the videos in the folder are: anime, matched against AniList, or movies and shows, matched against TMDB. Comics and books are told apart by their extension either way."`
+	Content string    `json:"content" enum:"anime,movies_and_shows,doramas,manga,books" doc:"What the folder holds. For videos it picks the source: anime is matched against AniList, movies and shows against TMDB, doramas against TMDB's East Asian shows; such a folder keeps comics and books as well. A folder of manga keeps only comics, a folder of books only books."`
 	AddedAt time.Time `json:"added_at" doc:"When the user added the root."`
 
 	LastScanAt *time.Time `json:"last_scan_at,omitempty" doc:"When the root was last walked. Absent until the first scan."`

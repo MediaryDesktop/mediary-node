@@ -68,6 +68,8 @@ func (s titleSource) Search(ctx context.Context, query, mediaType string) ([]lib
 		return s.searchTMDB(ctx, query, tmdb.KindMovie)
 	case "series":
 		return s.searchTMDB(ctx, query, tmdb.KindTV)
+	case "dorama":
+		return s.searchDoramas(ctx, query)
 	case "book":
 		return s.searchBooks(ctx, query)
 	}
@@ -115,6 +117,14 @@ func (s titleSource) Search(ctx context.Context, query, mediaType string) ([]lib
 // Cyrillic is searched in Ukrainian and Russian too: the names that come back are
 // what the folder's name is compared with.
 func (s titleSource) searchTMDB(ctx context.Context, query string, kind tmdb.Kind) ([]library.TitleCandidate, error) {
+	return s.searchTMDBPreferring(ctx, query, kind, nil)
+}
+
+// searchTMDBPreferring is searchTMDB with the results prefer approves of moved
+// ahead of the rest, each group in TMDB's own order.
+func (s titleSource) searchTMDBPreferring(
+	ctx context.Context, query string, kind tmdb.Kind, prefer func(*tmdb.Result) bool,
+) ([]library.TitleCandidate, error) {
 	if s.tmdb == nil {
 		return nil, nil
 	}
@@ -126,6 +136,7 @@ func (s titleSource) searchTMDB(ctx context.Context, query string, kind tmdb.Kin
 
 	var candidates []library.TitleCandidate
 	at := map[int]int{}
+	preferred := map[int]bool{}
 
 	for _, language := range languages {
 		page, err := s.tmdb.Search(ctx, kind, tmdb.SearchParams{Query: query, Page: 1, Language: language})
@@ -153,11 +164,40 @@ func (s titleSource) searchTMDB(ctx context.Context, query string, kind tmdb.Kin
 			}
 
 			at[found.ID] = len(candidates)
+			preferred[len(candidates)] = prefer != nil && prefer(found)
 			candidates = append(candidates, tmdbCandidate(kind, found, name, original, date))
 		}
 	}
 
-	return candidates, nil
+	if prefer == nil {
+		return candidates, nil
+	}
+
+	ordered := make([]library.TitleCandidate, 0, len(candidates))
+	for _, first := range []bool{true, false} {
+		for i := range candidates {
+			if preferred[i] == first {
+				ordered = append(ordered, candidates[i])
+			}
+		}
+	}
+
+	return ordered, nil
+}
+
+// searchDoramas finds what a folder of doramas could hold: TMDB's shows, those
+// from East Asia first. The matcher keeps the source's order between equal
+// scores, so a dorama wins a tie with a remake of the same name; a show from
+// elsewhere is still offered — the folder's type is the user's word, not a
+// guarantee.
+func (s titleSource) searchDoramas(ctx context.Context, query string) ([]library.TitleCandidate, error) {
+	return s.searchTMDBPreferring(ctx, query, tmdb.KindTV, isDorama)
+}
+
+func isDorama(found *tmdb.Result) bool {
+	return slices.ContainsFunc(found.OriginCountry, func(country string) bool {
+		return slices.Contains(media.DoramaCountries, country)
+	})
 }
 
 func tmdbCandidate(kind tmdb.Kind, found *tmdb.Result, name, original, date string) library.TitleCandidate {

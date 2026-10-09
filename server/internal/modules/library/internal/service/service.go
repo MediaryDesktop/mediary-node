@@ -137,7 +137,7 @@ func (s *Service) SetRootContent(ctx context.Context, id int64, content string) 
 	}
 
 	if current.Content != content {
-		if _, err = s.store.SetRootContent(ctx, id, content); err != nil {
+		if _, err = s.store.SetRootContent(ctx, id, content, keptKind(content)); err != nil {
 			return nil, apperr.Wrap(err, apperr.KindInternal, "change library root")
 		}
 

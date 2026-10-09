@@ -106,7 +106,7 @@ func TestChangingWhatAFolderHoldsRedoesItsAutomaticMatches(t *testing.T) {
 		}
 	}
 
-	if _, err := h.svc.SetRootContent(ctx, root.ID, "books"); apperr.KindOf(err) != apperr.KindInvalid {
+	if _, err := h.svc.SetRootContent(ctx, root.ID, "podcasts"); apperr.KindOf(err) != apperr.KindInvalid {
 		t.Fatalf("unknown content: %v", err)
 	}
 	if _, err := h.svc.SetRootContent(ctx, 999, ContentAnime); apperr.KindOf(err) != apperr.KindNotFound {
@@ -144,6 +144,11 @@ func TestMediaTypeForForm(t *testing.T) {
 		{"manga", ContentMoviesAndShows, "manga", true},
 		{"extra", ContentMoviesAndShows, "", false},
 		{"book", ContentAnime, "book", true},
+		{"series", ContentDoramas, "dorama", true},
+		{"special", ContentDoramas, "dorama", true},
+		{"movie", ContentDoramas, "movie", true},
+		{"book", ContentBooks, "book", true},
+		{"manga", ContentManga, "manga", true},
 	}
 
 	for _, c := range cases {
@@ -185,4 +190,61 @@ func TestAScanAnnouncesTheTitlesItFoundBySearching(t *testing.T) {
 	if strings.Join(listener.matched, ",") != breakingBad.MediaRef {
 		t.Fatalf("announced %v: only what a search found, once — the user's own list is already described", listener.matched)
 	}
+}
+
+func TestAFolderOfBooksKeepsOnlyBooks(t *testing.T) {
+	h := newHarness(t)
+	ctx := context.Background()
+	dir := t.TempDir()
+
+	writeEpisodes(t, dir,
+		"[SubsPlease] Sousou no Frieren - 01 (1080p).mkv",
+		"Berserk v01.cbz",
+		"Frank Herbert - Dune.pdf",
+	)
+
+	root := h.addRoot(t, dir)
+	h.scan(t, 0)
+
+	if kinds := fileKinds(h.files(t)); kinds != "book,manga,video" {
+		t.Fatalf("a folder of anime keeps every kind, got %s", kinds)
+	}
+
+	stream, unsubscribe := h.hub.Subscribe(events.TopicLibraryScan)
+	defer unsubscribe()
+
+	if _, err := h.svc.SetRootContent(ctx, root.ID, ContentBooks); err != nil {
+		t.Fatalf("set content: %v", err)
+	}
+	waitForScan(t, stream)
+
+	// The others leave the library rather than linger as missing.
+	files := h.files(t)
+	if kinds := fileKinds(files); kinds != "book" || files[0].Missing {
+		t.Fatalf("a folder of books keeps %s, missing %v", kinds, files[0].Missing)
+	}
+
+	if _, err := h.svc.SetRootContent(ctx, root.ID, ContentManga); err != nil {
+		t.Fatalf("set content: %v", err)
+	}
+	waitForScan(t, stream)
+
+	if kinds := fileKinds(h.files(t)); kinds != "manga" {
+		t.Fatalf("a folder of manga keeps %s", kinds)
+	}
+}
+
+func fileKinds(files []File) string {
+	kinds := map[string]bool{}
+	for _, file := range files {
+		kinds[file.Kind] = true
+	}
+
+	sorted := make([]string, 0, len(kinds))
+	for kind := range kinds {
+		sorted = append(sorted, kind)
+	}
+	slices.Sort(sorted)
+
+	return strings.Join(sorted, ",")
 }

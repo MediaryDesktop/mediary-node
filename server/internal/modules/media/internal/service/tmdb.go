@@ -51,7 +51,7 @@ const (
 
 // A show from these countries that is not animation is a dorama. Japanese
 // animation is AniList's, so it is never one.
-var doramaCountries = []string{"KR", "CN", "TW", "HK", "JP", "TH"}
+var DoramaCountries = []string{"KR", "CN", "TW", "HK", "JP", "TH"}
 
 type cachedTMDB struct {
 	Version int          `json:"version"`
@@ -291,7 +291,7 @@ func (s *Service) discoverParams(ctx context.Context, kind tmdb.Kind, params Sea
 	}
 
 	if params.MediaType == MediaTypeDorama {
-		discover.OriginCountries = doramaCountries
+		discover.OriginCountries = DoramaCountries
 		discover.WithoutGenres = append(discover.WithoutGenres, tmdb.GenreAnimation)
 	}
 
@@ -535,7 +535,7 @@ func classifyTMDB(kind tmdb.Kind, genreIDs []int, countries []string) string {
 	}
 
 	for _, country := range countries {
-		if slices.Contains(doramaCountries, country) {
+		if slices.Contains(DoramaCountries, country) {
 			return MediaTypeDorama
 		}
 	}

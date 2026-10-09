@@ -28,6 +28,12 @@ UPDATE library_root
 SET content = ?
 WHERE id = ?;
 
+-- A folder turned to comics or books lets go of every other kind of file.
+-- name: DeleteLibraryFilesNotOfKind :exec
+DELETE FROM library_file
+WHERE root_id = ?
+  AND kind <> ?;
+
 -- Videos matched under the old content type point at the wrong source. The
 -- user's own choices stay: a manual match is never undone by a setting.
 -- name: DeleteAutoVideoMatchesForRoot :exec

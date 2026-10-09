@@ -215,6 +215,10 @@ func (s *Service) scanRoot(ctx context.Context, root store.Root, index, total in
 		return result
 	}
 
+	if kind := keptKind(root.Content); kind != "" {
+		found = slices.DeleteFunc(found, func(file scanner.File) bool { return string(file.Kind) != kind })
+	}
+
 	changes := diffFiles(known, found)
 
 	result.Probed = s.probeDurations(ctx, root.Path, known, found, &changes, index, total)

@@ -146,7 +146,9 @@ func (s *Store) AddRoot(ctx context.Context, path, content string, now time.Time
 
 // SetRootContent changes what a root holds and drops the automatic matches of its
 // videos, which point at the other source; the next match pass redoes them.
-func (s *Store) SetRootContent(ctx context.Context, id int64, content string) (bool, error) {
+// SetRootContent changes what a root holds. keep, when set, is the only kind of
+// file the root keeps from now on; the rest leave the library with it.
+func (s *Store) SetRootContent(ctx context.Context, id int64, content, keep string) (bool, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return false, fmt.Errorf("begin root update: %w", err)
@@ -165,6 +167,12 @@ func (s *Store) SetRootContent(ctx context.Context, id int64, content string) (b
 
 	if err = queries.DeleteAutoVideoMatchesForRoot(ctx, id); err != nil {
 		return false, fmt.Errorf("drop matches of root %d: %w", id, err)
+	}
+
+	if keep != "" {
+		if err = queries.DeleteLibraryFilesNotOfKind(ctx, sqlc.DeleteLibraryFilesNotOfKindParams{RootID: id, Kind: keep}); err != nil {
+			return false, fmt.Errorf("drop other files of root %d: %w", id, err)
+		}
 	}
 
 	if err = tx.Commit(); err != nil {
