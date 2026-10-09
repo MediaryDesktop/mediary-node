@@ -137,9 +137,10 @@
 		.genre {
 			padding: 0.125rem 0.625rem;
 			border-radius: 999px;
-			background: color-mix(in srgb, var(--surface) 70%, transparent);
-			color: var(--text);
+			background: var(--accent-muted);
+			color: var(--accent-text);
 			font-size: 0.8125rem;
+			font-weight: 600;
 		}
 	}
 
