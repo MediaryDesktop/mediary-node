@@ -21,12 +21,32 @@
 			object-fit: cover;
 			object-position: center 25%;
 			animation: settle 0.9s ease both;
+			transition: transform 1s ease;
 
 			&.blurred {
 				transform: scale(1.2);
 				filter: blur(28px);
 				opacity: 0.55;
 				animation: none;
+			}
+
+			// A held breath while the next title swaps in behind the scrim: a
+			// slight push forward, so the reveal lands on a picture already moving.
+			&.transitioning {
+				transform: scale(1.015) translateX(-0.4%);
+			}
+		}
+
+		.scrim {
+			position: absolute;
+			inset: 0;
+			z-index: 2;
+			background: var(--bg);
+			opacity: 0;
+			transition: opacity 1s ease;
+
+			&.visible {
+				opacity: 0.7;
 			}
 		}
 
@@ -59,10 +79,12 @@
 		display: flex;
 		flex-direction: column;
 		gap: 1.25rem;
-		animation: rise 0.5s ease both;
 
+		// The real content's own entrance is played by motion, staggered piece by
+		// piece; only the plain skeleton standing in for it needs a CSS one.
 		&.loadingContent {
 			gap: 0.75rem;
+			animation: rise 0.5s ease both;
 		}
 	}
 
@@ -70,6 +92,13 @@
 		display: flex;
 		align-items: flex-start;
 		gap: 1.75rem;
+	}
+
+	.heading,
+	.detailsGroup {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
 	}
 
 	.cover {
