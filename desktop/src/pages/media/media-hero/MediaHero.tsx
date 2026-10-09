@@ -178,13 +178,15 @@ export function MediaHero({
 								/>
 							</a>
 
-							<Tooltip content={t('media.comingSoon')}>
-								<span className={styles.iconActionWrap}>
-									<button type='button' disabled className={styles.textLink}>
-										{t('media.trailer')}
-									</button>
-								</span>
-							</Tooltip>
+							{mediaType !== 'manga' && mediaType !== 'book' && (
+								<Tooltip content={t('media.comingSoon')}>
+									<span className={styles.iconActionWrap}>
+										<button type='button' disabled className={styles.textLink}>
+											{t('media.trailer')}
+										</button>
+									</span>
+								</Tooltip>
+							)}
 						</div>
 					</div>
 				</div>
