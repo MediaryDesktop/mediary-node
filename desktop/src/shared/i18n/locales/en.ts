@@ -864,8 +864,30 @@ export const en = {
 		failed: 'Could not start the player'
 	},
 
+	discover: {
+		open: 'Details',
+		featured: 'Featured titles',
+		rowFailed: 'This row could not be loaded.',
+		tmdbNeeded: 'Movies, series and doramas need a TMDB key',
+		sections: {
+			trending: 'Trending now',
+			thisSeason: 'Top of the season',
+			lastSeason: 'Best of last season',
+			upcoming: 'Coming soon',
+			movies: 'Trending movies',
+			manga: 'Trending manga',
+			manhwa: 'Trending manhwa',
+			manhua: 'Trending manhua',
+			popular: 'Popular',
+			newest: 'New releases',
+			topRated: 'Top rated',
+			fantasy: 'Fantasy',
+			scienceFiction: 'Science fiction',
+			mystery: 'Mystery'
+		}
+	},
+
 	placeholder: {
-		discover: 'Recommendations and fresh releases will live here once the cloud catalog is connected',
 		downloads: 'Torrent providers and the download queue handled by the node'
 	},
 

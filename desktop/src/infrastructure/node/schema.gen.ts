@@ -2687,6 +2687,8 @@ export interface components {
 			chapters: number | null
 			cover_color: string | null
 			cover_image: string | null
+			/** @description Plain-text synopsis, when the source's search carries one. Open Library's does not. */
+			description?: string
 			/** Format: int64 */
 			episodes: number | null
 			format: string | null
@@ -5730,6 +5732,8 @@ export interface operations {
 				year?: number
 				/** @description Keep titles scored above this, on a 0-100 scale. */
 				min_score?: number
+				/** @description Where the title comes from: JP for manga, KR for manhwa, CN and TW for manhua. AniList only. */
+				country?: 'JP' | 'KR' | 'CN' | 'TW'
 				/** @description Include adult titles. They are left out unless this is set, and the source hides them entirely from a node with no account connected. */
 				adult?: boolean
 				/** @description Which page of results to return. */

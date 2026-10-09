@@ -1,6 +1,7 @@
 import { createRoute, Outlet } from '@tanstack/react-router'
 
-import { DiscoverPage } from '@pages/discover'
+import { DiscoverPage, isDiscoverTab } from '@pages/discover'
+import type { DiscoverTab } from '@pages/discover'
 import { DownloadsPage } from '@pages/downloads'
 import { HomePage } from '@pages/home'
 import { LibraryPage, ScanHistoryPage } from '@pages/library'
@@ -30,10 +31,23 @@ const homeRoute = createRoute({
 	component: HomePage
 })
 
+// The tab lives in the address, so going back to Discover lands on the same one.
 const discoverRoute = createRoute({
 	getParentRoute: () => framedRoute,
 	path: '/discover',
-	component: DiscoverPage
+	validateSearch: (search: Record<string, unknown>): { type?: DiscoverTab } =>
+		isDiscoverTab(search.type) ? { type: search.type } : {},
+	component: function DiscoverScreen() {
+		const { type } = discoverRoute.useSearch()
+		const navigate = discoverRoute.useNavigate()
+
+		return (
+			<DiscoverPage
+				tab={type ?? 'anime'}
+				onTabChange={tab => void navigate({ search: { type: tab }, replace: true })}
+			/>
+		)
+	}
 })
 
 const searchRoute = createRoute({

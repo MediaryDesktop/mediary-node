@@ -1,0 +1,88 @@
+import { createEffect, createEvent, createStore, sample } from 'effector'
+
+import { atom } from '@shared/factory'
+
+import { searchMediaFx } from '@entities/media'
+import type { MediaSummary } from '@entities/media'
+
+import type { DiscoverSection } from '../lib/sections'
+
+// Discover is browsed back and forth between tabs; a row fetched a moment ago is
+// shown again rather than asked for again. The sources' lists move by the day.
+const FRESH_FOR = 30 * 60 * 1000
+
+export interface SectionState {
+	status: 'loading' | 'done' | 'failed'
+	items: MediaSummary[]
+	// Set on a failure the user can fix: TMDB without a key answers 428.
+	setupNeeded: string | null
+	fetchedAt: number
+}
+
+export const discoverModel = atom(() => {
+	const sectionsRequested = createEvent<DiscoverSection[]>()
+	const sectionRetried = createEvent<DiscoverSection>()
+
+	const loadSectionFx = createEffect(async (section: DiscoverSection) => {
+		const response = await searchMediaFx(section.query)
+
+		return response.results.items as MediaSummary[]
+	})
+
+	const loadManyFx = createEffect((sections: DiscoverSection[]) => {
+		for (const section of sections) {
+			void loadSectionFx(section)
+		}
+	})
+
+	const $sections = createStore<Record<string, SectionState>>({})
+		.on(loadSectionFx, (state, section) => ({
+			...state,
+			[section.key]: {
+				status: 'loading',
+				items: state[section.key]?.items ?? [],
+				setupNeeded: null,
+				fetchedAt: state[section.key]?.fetchedAt ?? 0
+			}
+		}))
+		.on(loadSectionFx.done, (state, { params, result }) => ({
+			...state,
+			[params.key]: { status: 'done', items: result, setupNeeded: null, fetchedAt: Date.now() }
+		}))
+		.on(loadSectionFx.fail, (state, { params, error }) => {
+			const failure = error as { status?: number; body?: { detail?: string } }
+
+			return {
+				...state,
+				[params.key]: {
+					status: 'failed',
+					items: state[params.key]?.items ?? [],
+					setupNeeded: failure.status === 428 ? (failure.body?.detail ?? '') : null,
+					fetchedAt: 0
+				}
+			}
+		})
+
+	const staleFound = sample({
+		clock: sectionsRequested,
+		source: $sections,
+		fn: (state, sections) =>
+			sections.filter(section => {
+				const current = state[section.key]
+				if (!current) {
+					return true
+				}
+
+				return (
+					current.status !== 'loading' &&
+					(current.status === 'failed' || Date.now() - current.fetchedAt > FRESH_FOR)
+				)
+			})
+	})
+
+	sample({ clock: staleFound, filter: stale => stale.length > 0, target: loadManyFx })
+
+	sample({ clock: sectionRetried, target: loadSectionFx })
+
+	return { $sections, sectionsRequested, sectionRetried }
+})

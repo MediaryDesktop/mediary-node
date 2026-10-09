@@ -1,0 +1,28 @@
+.page {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+	padding-bottom: 2rem;
+}
+
+// The tabs sit where the banner fades out, over the first row, as in Seanime.
+.tabs {
+	position: relative;
+	z-index: 5;
+	display: flex;
+	justify-content: center;
+	margin-top: -1rem;
+}
+
+.rows {
+	display: flex;
+	flex-direction: column;
+	gap: 2.25rem;
+}
+
+.season {
+	margin-left: 0.625rem;
+	color: var(--text-muted);
+	font-size: 0.9375rem;
+	font-weight: 500;
+}
