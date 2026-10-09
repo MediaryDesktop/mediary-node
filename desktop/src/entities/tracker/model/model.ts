@@ -102,7 +102,8 @@ export const trackerQueries = {
 	manga: createTrackerQuery('manga'),
 	movie: createTrackerQuery('movie'),
 	series: createTrackerQuery('series'),
-	dorama: createTrackerQuery('dorama')
+	dorama: createTrackerQuery('dorama'),
+	book: createTrackerQuery('book')
 } as const satisfies Record<TrackerMediaType, ReturnType<typeof createTrackerQuery>>
 
 export const trackerModel = atom(() => {
@@ -149,14 +150,15 @@ export const TRACKER_MEDIA_TYPES = [
 	'manga',
 	'movie',
 	'series',
-	'dorama'
+	'dorama',
+	'book'
 ] as const satisfies readonly TrackerMediaType[]
 
 export function isTrackerMediaType(value: string): value is TrackerMediaType {
 	return (TRACKER_MEDIA_TYPES as readonly string[]).includes(value)
 }
 
-// Movies and shows are the node's own list: no AniList account, works offline.
+// Movies, shows and books are the node's own list: no AniList account, works offline.
 export function isLocalTrackerType(mediaType: TrackerMediaType): boolean {
 	return mediaType !== 'anime' && mediaType !== 'manga'
 }

@@ -154,6 +154,7 @@ describe('canTrack', () => {
 		expect(canTrack('manga', true)).toBe(true)
 		expect(canTrack('movie', false)).toBe(true)
 		expect(canTrack('dorama', false)).toBe(true)
-		expect(canTrack('book', true)).toBe(false)
+		expect(canTrack('book', false)).toBe(true)
+		expect(canTrack('podcast', true)).toBe(false)
 	})
 })

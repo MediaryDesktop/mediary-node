@@ -1,7 +1,7 @@
 import { createNodeRequestFx } from '@infra/node'
 import type { NodeSchemas } from '@infra/node'
 
-export type TrackerMediaType = 'anime' | 'manga' | 'movie' | 'series' | 'dorama'
+export type TrackerMediaType = 'anime' | 'manga' | 'movie' | 'series' | 'dorama' | 'book'
 export type TrackerCollection = NodeSchemas['EntriesOutputBody']
 export type TrackerEntry = NodeSchemas['Entry']
 export type TrackerList = NodeSchemas['List']

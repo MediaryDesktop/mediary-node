@@ -11,11 +11,12 @@ export const SEARCH_TYPES = [
 	'manga',
 	'movie',
 	'series',
-	'dorama'
+	'dorama',
+	'book'
 ] as const satisfies readonly MediaSearchType[]
 
-// AniList's catalog has tags, formats, seasons and statuses to filter by; TMDB,
-// which serves the rest, has genres, year and score only.
+// AniList's catalog has tags, formats, seasons and statuses to filter by; TMDB
+// and Open Library, which serve the rest, have genres, year and score only.
 export function isAniListType(type: MediaSearchType): boolean {
 	return type === 'anime' || type === 'manga'
 }
@@ -36,7 +37,8 @@ export const SEARCH_FORMATS = {
 	manga: ['MANGA', 'NOVEL', 'ONE_SHOT'],
 	movie: [],
 	series: [],
-	dorama: []
+	dorama: [],
+	book: []
 } as const satisfies Record<MediaSearchType, readonly MediaSearchFormat[]>
 
 export const SEARCH_STATUSES = [

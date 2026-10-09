@@ -195,7 +195,8 @@ export const ru: Translation = {
 				manga: 'Начало чтения',
 				movie: 'Начало просмотра',
 				series: 'Начало просмотра',
-				dorama: 'Начало просмотра'
+				dorama: 'Начало просмотра',
+				book: 'Начало чтения'
 			},
 			dateHint: 'Необязательно — оставьте пустым, если не помните',
 			completed: {
@@ -203,7 +204,8 @@ export const ru: Translation = {
 				manga: 'Завершение чтения',
 				movie: 'Завершение просмотра',
 				series: 'Завершение просмотра',
-				dorama: 'Завершение просмотра'
+				dorama: 'Завершение просмотра',
+				book: 'Завершение чтения'
 			},
 			completedLocked: 'Доступно, когда тайтл завершён, брошен или пересматривается',
 			notes: 'Заметки',
@@ -236,6 +238,7 @@ export const ru: Translation = {
 			episodes: 'Эпизоды',
 			chapters: 'Главы',
 			volumes: 'Тома',
+			pages: 'Страницы',
 			repeat: 'Повторы'
 		},
 		status: {
@@ -278,6 +281,14 @@ export const ru: Translation = {
 				DROPPED: 'Брошено',
 				PAUSED: 'На паузе',
 				REPEATING: 'Пересматриваю'
+			},
+			book: {
+				CURRENT: 'Читаю',
+				PLANNING: 'В планах',
+				COMPLETED: 'Прочитано',
+				DROPPED: 'Брошено',
+				PAUSED: 'На паузе',
+				REPEATING: 'Перечитываю'
 			}
 		}
 	},
@@ -672,6 +683,8 @@ export const ru: Translation = {
 			start: 'Начало',
 			end: 'Окончание',
 			studios: 'Студии',
+			authors: 'Авторы',
+			pages: 'Страницы',
 			source: 'Первоисточник',
 			country: 'Страна',
 			synonyms: 'Также известен как'
@@ -687,7 +700,8 @@ export const ru: Translation = {
 			MUSIC: 'Клип',
 			MANGA: 'Манга',
 			NOVEL: 'Ранобэ',
-			ONE_SHOT: 'Ваншот'
+			ONE_SHOT: 'Ваншот',
+			BOOK: 'Книга'
 		},
 		status: {
 			FINISHED: 'Завершён',
@@ -754,7 +768,8 @@ export const ru: Translation = {
 			manga: 'Манга',
 			movie: 'Фильмы',
 			series: 'Сериалы',
-			dorama: 'Дорамы'
+			dorama: 'Дорамы',
+			book: 'Книги'
 		},
 		sort: {
 			POPULARITY_DESC: 'Самые популярные',

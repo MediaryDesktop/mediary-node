@@ -6,14 +6,15 @@ import { isLocalTrackerType, TRACKER_MEDIA_TYPES, trackerQueries } from '../mode
 
 // `enabled` is whether the AniList account is connected, passed in rather than
 // read: entities do not import each other, so the page that knows about the
-// connection owns it. Movies and shows are the node's own and always load.
+// connection owns it. Movies, shows and books are the node's own and always load.
 export function useTrackedEntries(enabled: boolean): TrackerEntry[] {
 	const data = useUnit({
 		anime: trackerQueries.anime.$data,
 		manga: trackerQueries.manga.$data,
 		movie: trackerQueries.movie.$data,
 		series: trackerQueries.series.$data,
-		dorama: trackerQueries.dorama.$data
+		dorama: trackerQueries.dorama.$data,
+		book: trackerQueries.book.$data
 	})
 
 	const status = useUnit({
@@ -21,7 +22,8 @@ export function useTrackedEntries(enabled: boolean): TrackerEntry[] {
 		manga: trackerQueries.manga.$status,
 		movie: trackerQueries.movie.$status,
 		series: trackerQueries.series.$status,
-		dorama: trackerQueries.dorama.$status
+		dorama: trackerQueries.dorama.$status,
+		book: trackerQueries.book.$status
 	})
 
 	const start = useUnit({
@@ -29,7 +31,8 @@ export function useTrackedEntries(enabled: boolean): TrackerEntry[] {
 		manga: trackerQueries.manga.start,
 		movie: trackerQueries.movie.start,
 		series: trackerQueries.series.start,
-		dorama: trackerQueries.dorama.start
+		dorama: trackerQueries.dorama.start,
+		book: trackerQueries.book.start
 	})
 
 	useEffect(() => {

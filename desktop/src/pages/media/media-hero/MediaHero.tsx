@@ -132,7 +132,13 @@ export function MediaHero({
 								</span>
 							)}
 
-							{media?.studios?.[0] && <span className={styles.studio}>{media.studios[0]}</span>}
+							{mediaType === 'book'
+								? media?.authors?.[0] && (
+										<span className={styles.studio}>{media.authors.join(', ')}</span>
+									)
+								: media?.studios?.[0] && (
+										<span className={styles.studio}>{media.studios[0]}</span>
+									)}
 
 							{media?.genres?.map(genre => (
 								<span key={genre} className={styles.genre}>
@@ -164,7 +170,9 @@ export function MediaHero({
 							>
 								<Icon
 									name={
-										sources[0]?.id === 'tmdb' ? 'common/external-link' : 'social/anilist'
+										sources[0]?.id === 'anilist'
+											? 'social/anilist'
+											: 'common/external-link'
 									}
 									size={18}
 								/>

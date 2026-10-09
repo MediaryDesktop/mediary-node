@@ -2419,6 +2419,8 @@ export interface components {
 			title: string
 		}
 		Media: {
+			/** @description Who wrote it; a book only. */
+			authors?: string[] | null
 			/** Format: int64 */
 			average_score: number | null
 			banner_image: string | null
@@ -2431,6 +2433,11 @@ export interface components {
 			format: string | null
 			genres: string[] | null
 			is_adult: boolean
+			/**
+			 * Format: int64
+			 * @description Pages in a typical edition; a book only, whose progress counts them.
+			 */
+			pages?: number
 			/** Format: int64 */
 			season_year: number | null
 			site_url: string
@@ -2441,6 +2448,8 @@ export interface components {
 			volumes: number | null
 		}
 		MediaDetails: {
+			/** @description Who wrote it; a book only. */
+			authors: string[] | null
 			/** Format: int64 */
 			average_score: number | null
 			banner_image: string | null
@@ -2467,6 +2476,11 @@ export interface components {
 			media_ref: string
 			media_type: string
 			next_airing_episode: components['schemas']['AiringEpisode']
+			/**
+			 * Format: int64
+			 * @description Pages in a typical edition; a book only.
+			 */
+			pages: number | null
 			/** Format: int64 */
 			popularity: number | null
 			/** @description Titles suggested to people who liked this one: AniList users' recommendations, or TMDB's own picks. */
@@ -2517,6 +2531,8 @@ export interface components {
 			videos: components['schemas']['Video'][] | null
 		}
 		MediaSummary: {
+			/** @description Who wrote it; a book only. */
+			authors?: string[] | null
 			/** Format: int64 */
 			average_score: number | null
 			banner_image: string | null
@@ -2532,6 +2548,11 @@ export interface components {
 			media_ref: string
 			media_type: string
 			next_airing_episode: components['schemas']['AiringEpisode']
+			/**
+			 * Format: int64
+			 * @description Pages in a typical edition; a book only.
+			 */
+			pages?: number
 			/** Format: int64 */
 			popularity: number | null
 			season: string | null
@@ -5423,7 +5444,7 @@ export interface operations {
 		parameters: {
 			query?: {
 				/** @description Which catalog's vocabulary to list. */
-				type?: 'anime' | 'manga' | 'movie' | 'series' | 'dorama'
+				type?: 'anime' | 'manga' | 'movie' | 'series' | 'dorama' | 'book'
 			}
 			header?: never
 			path?: never
@@ -5456,8 +5477,8 @@ export interface operations {
 			query?: {
 				/** @description Free text to match against every title the source knows. Empty browses by the filters alone. */
 				q?: string
-				/** @description Which catalog to search. Every source owns one kind of media, so this also picks the source: AniList for anime and manga, TMDB for the rest. A dorama is a live-action show from East Asia, and every dorama is a series too. */
-				type?: 'anime' | 'manga' | 'movie' | 'series' | 'dorama'
+				/** @description Which catalog to search. Every source owns one kind of media, so this also picks the source: AniList for anime and manga, TMDB for movies and shows, Open Library for books. A dorama is a live-action show from East Asia, and every dorama is a series too. */
+				type?: 'anime' | 'manga' | 'movie' | 'series' | 'dorama' | 'book'
 				/** @description Order of the results. Left out it means relevance while searching and popularity while browsing. TMDB orders a text search by relevance only. */
 				sort?:
 					| 'SEARCH_MATCH'
@@ -7095,8 +7116,8 @@ export interface operations {
 	listTrackerEntries: {
 		parameters: {
 			query: {
-				/** @description Which collection to read. Anime and manga are the AniList account's; movies, series and doramas are this node's own list. */
-				type: 'anime' | 'manga' | 'movie' | 'series' | 'dorama'
+				/** @description Which collection to read. Anime and manga are the AniList account's; movies, series, doramas and books are this node's own list. */
+				type: 'anime' | 'manga' | 'movie' | 'series' | 'dorama' | 'book'
 			}
 			header?: never
 			path?: never
@@ -7321,8 +7342,8 @@ export interface operations {
 	refreshTrackerEntries: {
 		parameters: {
 			query: {
-				/** @description Which collection to read. Anime and manga are the AniList account's; movies, series and doramas are this node's own list. */
-				type: 'anime' | 'manga' | 'movie' | 'series' | 'dorama'
+				/** @description Which collection to read. Anime and manga are the AniList account's; movies, series, doramas and books are this node's own list. */
+				type: 'anime' | 'manga' | 'movie' | 'series' | 'dorama' | 'book'
 			}
 			header?: never
 			path?: never

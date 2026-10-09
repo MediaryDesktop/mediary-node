@@ -194,7 +194,8 @@ export const uk: Translation = {
 				manga: 'Початок читання',
 				movie: 'Початок перегляду',
 				series: 'Початок перегляду',
-				dorama: 'Початок перегляду'
+				dorama: 'Початок перегляду',
+				book: 'Початок читання'
 			},
 			dateHint: 'Необовʼязково — лишіть порожнім, якщо не памʼятаєте',
 			completed: {
@@ -202,7 +203,8 @@ export const uk: Translation = {
 				manga: 'Завершення читання',
 				movie: 'Завершення перегляду',
 				series: 'Завершення перегляду',
-				dorama: 'Завершення перегляду'
+				dorama: 'Завершення перегляду',
+				book: 'Завершення читання'
 			},
 			completedLocked: 'Доступно, коли тайтл завершено, покинуто або переглядається повторно',
 			notes: 'Нотатки',
@@ -234,6 +236,7 @@ export const uk: Translation = {
 			episodes: 'Епізоди',
 			chapters: 'Розділи',
 			volumes: 'Томи',
+			pages: 'Сторінки',
 			repeat: 'Повтори'
 		},
 		status: {
@@ -276,6 +279,14 @@ export const uk: Translation = {
 				DROPPED: 'Кинуто',
 				PAUSED: 'На паузі',
 				REPEATING: 'Передивляюсь'
+			},
+			book: {
+				CURRENT: 'Читаю',
+				PLANNING: 'Заплановано',
+				COMPLETED: 'Прочитано',
+				DROPPED: 'Кинуто',
+				PAUSED: 'На паузі',
+				REPEATING: 'Перечитую'
 			}
 		}
 	},
@@ -670,6 +681,8 @@ export const uk: Translation = {
 			start: 'Початок',
 			end: 'Завершення',
 			studios: 'Студії',
+			authors: 'Автори',
+			pages: 'Сторінки',
 			source: 'Першоджерело',
 			country: 'Країна',
 			synonyms: 'Також відомий як'
@@ -685,7 +698,8 @@ export const uk: Translation = {
 			MUSIC: 'Кліп',
 			MANGA: 'Манга',
 			NOVEL: 'Ранобе',
-			ONE_SHOT: 'Ваншот'
+			ONE_SHOT: 'Ваншот',
+			BOOK: 'Книга'
 		},
 		status: {
 			FINISHED: 'Завершено',
@@ -752,7 +766,8 @@ export const uk: Translation = {
 			manga: 'Манга',
 			movie: 'Фільми',
 			series: 'Серіали',
-			dorama: 'Дорами'
+			dorama: 'Дорами',
+			book: 'Книги'
 		},
 		sort: {
 			POPULARITY_DESC: 'Найпопулярніші',

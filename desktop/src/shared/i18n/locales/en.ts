@@ -196,7 +196,8 @@ export const en = {
 				manga: 'Started reading',
 				movie: 'Started watching',
 				series: 'Started watching',
-				dorama: 'Started watching'
+				dorama: 'Started watching',
+				book: 'Started reading'
 			},
 			dateHint: 'Optional — leave it blank if you are not sure',
 			completed: {
@@ -204,7 +205,8 @@ export const en = {
 				manga: 'Finished reading',
 				movie: 'Finished watching',
 				series: 'Finished watching',
-				dorama: 'Finished watching'
+				dorama: 'Finished watching',
+				book: 'Finished reading'
 			},
 			completedLocked: 'Available once the title is completed, dropped or repeating',
 			notes: 'Notes',
@@ -236,6 +238,7 @@ export const en = {
 			episodes: 'Episodes',
 			chapters: 'Chapters',
 			volumes: 'Volumes',
+			pages: 'Pages',
 			repeat: 'Repeat'
 		},
 		status: {
@@ -278,6 +281,14 @@ export const en = {
 				DROPPED: 'Dropped',
 				PAUSED: 'Paused',
 				REPEATING: 'Rewatching'
+			},
+			book: {
+				CURRENT: 'Reading',
+				PLANNING: 'Plan to read',
+				COMPLETED: 'Completed',
+				DROPPED: 'Dropped',
+				PAUSED: 'Paused',
+				REPEATING: 'Rereading'
 			}
 		}
 	},
@@ -672,6 +683,8 @@ export const en = {
 			start: 'Start',
 			end: 'End',
 			studios: 'Studios',
+			authors: 'Authors',
+			pages: 'Pages',
 			source: 'Source',
 			country: 'Country',
 			synonyms: 'Also known as'
@@ -687,7 +700,8 @@ export const en = {
 			MUSIC: 'Music',
 			MANGA: 'Manga',
 			NOVEL: 'Light novel',
-			ONE_SHOT: 'One-shot'
+			ONE_SHOT: 'One-shot',
+			BOOK: 'Book'
 		},
 		status: {
 			FINISHED: 'Finished',
@@ -754,7 +768,8 @@ export const en = {
 			manga: 'Manga',
 			movie: 'Movies',
 			series: 'Series',
-			dorama: 'Doramas'
+			dorama: 'Doramas',
+			book: 'Books'
 		},
 		sort: {
 			POPULARITY_DESC: 'Most popular',

@@ -52,7 +52,8 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 	const title = mediaTitle(base.title)
 	const description = media?.description ?? ''
 	const airing = media?.next_airing_episode
-	const torrents = mediaType !== 'manga'
+	// Manga is read and books too: neither is downloaded as video.
+	const torrents = mediaType !== 'manga' && mediaType !== 'book'
 
 	return (
 		<>

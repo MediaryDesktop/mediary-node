@@ -32,7 +32,8 @@ const TYPE_ICONS = {
 	manga: 'categories/manga',
 	movie: 'categories/movie',
 	series: 'categories/series',
-	dorama: 'categories/doramas'
+	dorama: 'categories/doramas',
+	book: 'categories/book'
 } as const satisfies Record<MediaSearchType, IconName>
 
 function yearOptions(): SelectDropdownOption[] {

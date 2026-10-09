@@ -43,6 +43,12 @@ function sourceLink({ mediaRef, mediaType, siteUrl }: EntryMenuMedia): SourceLin
 		return url ? { name: 'TMDB', url } : null
 	}
 
+	if (provider === 'openlibrary') {
+		const url = siteUrl ?? (first ? `https://openlibrary.org/works/${first}` : null)
+
+		return url ? { name: 'Open Library', url } : null
+	}
+
 	const url =
 		siteUrl ?? (provider === 'anilist' && first ? `https://anilist.co/${mediaType}/${first}` : null)
 

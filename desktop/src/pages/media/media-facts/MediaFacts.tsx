@@ -30,6 +30,9 @@ export function MediaFacts({ media, mediaType, locale }: MediaFactsProps) {
 	if (mediaType === 'manga') {
 		addFact(t('media.fields.chapters'), media.chapters)
 		addFact(t('media.fields.volumes'), media.volumes)
+	} else if (mediaType === 'book') {
+		addFact(t('media.fields.authors'), media.authors?.join(', '))
+		addFact(t('media.fields.pages'), media.pages)
 	} else {
 		addFact(t('media.fields.episodes'), media.episodes)
 		addFact(

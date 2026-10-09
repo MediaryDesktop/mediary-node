@@ -32,10 +32,14 @@ export function activeGroups(filters: SearchFilters): number {
 }
 
 // Which genre list a type draws from: AniList shares one between anime and manga,
-// TMDB keeps one for movies and another for shows.
+// TMDB keeps one for movies and another for shows, books have their own.
 function genreVocabulary(type: MediaSearchType): string {
 	if (isAniListType(type)) {
 		return 'anilist'
+	}
+
+	if (type === 'book') {
+		return 'books'
 	}
 
 	return type === 'movie' ? 'tmdb-movie' : 'tmdb-tv'

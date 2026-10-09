@@ -27,6 +27,6 @@ export function resolveSubject(
 	return {
 		base,
 		mediaType,
-		total: mediaType === 'manga' ? base.chapters : base.episodes
+		total: mediaType === 'manga' ? base.chapters : mediaType === 'book' ? base.pages : base.episodes
 	}
 }
