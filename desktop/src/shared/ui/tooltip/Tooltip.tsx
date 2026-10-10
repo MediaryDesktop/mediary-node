@@ -8,9 +8,13 @@ export interface TooltipProps {
 	children: ReactNode
 	side?: 'top' | 'right' | 'bottom' | 'left'
 	delay?: number
+	// Keeps the tooltip open through a click on its trigger, e.g. one that updates
+	// the value the tooltip is showing. Radix otherwise treats that click as an
+	// outside interaction and dismisses it.
+	keepOpenOnClick?: boolean
 }
 
-export function Tooltip({ content, children, side = 'top', delay = 300 }: TooltipProps) {
+export function Tooltip({ content, children, side = 'top', delay = 300, keepOpenOnClick = false }: TooltipProps) {
 	return (
 		<Primitive.Provider delayDuration={delay} skipDelayDuration={200}>
 			<Primitive.Root>
@@ -22,6 +26,9 @@ export function Tooltip({ content, children, side = 'top', delay = 300 }: Toolti
 						sideOffset={6}
 						collisionPadding={12}
 						className={styles.content}
+						onPointerDownOutside={
+							keepOpenOnClick ? event => event.preventDefault() : undefined
+						}
 					>
 						{content}
 					</Primitive.Content>

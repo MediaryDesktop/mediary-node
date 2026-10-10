@@ -11,6 +11,13 @@ export const $playerFileId = createStore<number | null>(null)
 	.on(playerOpened, (_, fileId) => fileId)
 	.reset(playerClosed)
 
+// When the player slid up to open. The loading panel and then the player take turns
+// showing it, and each one continues this one slide rather than starting its own;
+// another file opened while it is already up keeps it.
+export const $playerOpenedAt = createStore<number | null>(null)
+	.on(playerOpened, openedAt => openedAt ?? performance.now())
+	.reset(playerClosed)
+
 // Whether the player fills the window or sits in the corner.
 export const $playerExpanded = createStore(false)
 	.on(playerOpened, () => true)

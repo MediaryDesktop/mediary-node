@@ -1,12 +1,14 @@
 import clsx from 'clsx'
 import type { FoliateTocItem } from 'foliate-js/view.js'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { CSSProperties } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, Icon, WindowControls } from '@shared/ui'
+import { Button, Drawer, Icon, ProgressBar, RippleButton, Tooltip, WindowControls } from '@shared/ui'
 
 import type { ReaderBook } from '../../api/api'
 import { isPdf } from '../../lib/book'
+import { indexToc } from '../../lib/toc'
 
 import {
 	BOOK_THEMES,
@@ -42,6 +44,8 @@ export function BookReaderView({ book, file, locator, onClose, onRelocate }: Boo
 	const [tocOpen, setTocOpen] = useState(false)
 	const [ready, setReady] = useState(false)
 	const [failed, setFailed] = useState(false)
+
+	const tocIndex = useMemo(() => indexToc(toc, location?.chapter ?? null), [toc, location?.chapter])
 
 	const changeAppearance = (next: BookAppearance) => {
 		setAppearance(next)
@@ -104,6 +108,9 @@ export function BookReaderView({ book, file, locator, onClose, onRelocate }: Boo
 			? t('reader.pageOf', { current: location.current, total: location.total })
 			: null
 
+	const smallerFontSize = clampFontSize(appearance.fontSize - FONT_SIZES.step)
+	const largerFontSize = clampFontSize(appearance.fontSize + FONT_SIZES.step)
+
 	return (
 		<div
 			className={clsx(styles.root, appearance.theme !== 'dark' && styles.lightChrome)}
@@ -122,60 +129,6 @@ export function BookReaderView({ book, file, locator, onClose, onRelocate }: Boo
 					<span className={styles.title}>{book.title}</span>
 					{location?.chapter && <span className={styles.subtitle}>{location.chapter}</span>}
 				</div>
-
-				{!pdf && (
-					<div className={styles.tools}>
-						<Button
-							variant='ghost'
-							size='small'
-							aria-label={t('reader.book.contents')}
-							title={t('reader.book.contents')}
-							disabled={toc.length === 0}
-							startIcon={<Icon name='common/list' size={18} />}
-							onClick={() => setTocOpen(open => !open)}
-						/>
-						<Button
-							variant='ghost'
-							size='small'
-							aria-label={t('reader.book.smaller')}
-							title={t('reader.book.smaller')}
-							disabled={appearance.fontSize <= FONT_SIZES.min}
-							onClick={() =>
-								changeAppearance({
-									...appearance,
-									fontSize: clampFontSize(appearance.fontSize - FONT_SIZES.step)
-								})
-							}
-						>
-							A−
-						</Button>
-						<Button
-							variant='ghost'
-							size='small'
-							aria-label={t('reader.book.larger')}
-							title={t('reader.book.larger')}
-							disabled={appearance.fontSize >= FONT_SIZES.max}
-							onClick={() =>
-								changeAppearance({
-									...appearance,
-									fontSize: clampFontSize(appearance.fontSize + FONT_SIZES.step)
-								})
-							}
-						>
-							A+
-						</Button>
-						<Button
-							variant='ghost'
-							size='small'
-							aria-label={t(`reader.book.theme.${nextTheme}`)}
-							title={t(`reader.book.theme.${nextTheme}`)}
-							startIcon={
-								<Icon name={nextTheme === 'dark' ? 'common/moon' : 'common/sun'} size={18} />
-							}
-							onClick={() => changeAppearance({ ...appearance, theme: nextTheme })}
-						/>
-					</div>
-				)}
 
 				<WindowControls className={styles.window} />
 			</header>
@@ -228,19 +181,6 @@ export function BookReaderView({ book, file, locator, onClose, onRelocate }: Boo
 						</button>
 					</>
 				)}
-
-				{tocOpen && (
-					<nav className={styles.contents} aria-label={t('reader.book.contents')}>
-						<TocList
-							items={toc}
-							current={location?.chapter ?? null}
-							onOpen={href => {
-								viewRef.current?.goTo(href)
-								setTocOpen(false)
-							}}
-						/>
-					</nav>
-				)}
 			</main>
 
 			<footer className={styles.bottom}>
@@ -252,40 +192,149 @@ export function BookReaderView({ book, file, locator, onClose, onRelocate }: Boo
 					value={Math.round((location?.fraction ?? 0) * 1000)}
 					disabled={!ready || failed}
 					aria-label={t('reader.book.position')}
+					style={{ '--progress': `${percent}%` } as CSSProperties}
 					onChange={event => viewRef.current?.goToFraction(Number(event.target.value) / 1000)}
 				/>
 				<span className={styles.count}>
 					{t('reader.book.percent', { percent })}
 					{pages && <> · {pages}</>}
 				</span>
+
+				{!pdf && (
+					<div className={styles.tools}>
+						<Button
+							variant='ghost'
+							size='small'
+							aria-label={t('reader.book.contents')}
+							title={t('reader.book.contents')}
+							disabled={toc.length === 0}
+							startIcon={<Icon name='common/list' size={18} />}
+							onClick={() => setTocOpen(open => !open)}
+						/>
+						<Tooltip
+							content={t('reader.book.percent', { percent: appearance.fontSize })}
+							keepOpenOnClick
+						>
+							<Button
+								variant='ghost'
+								size='small'
+								aria-label={t('reader.book.smaller')}
+								disabled={appearance.fontSize <= FONT_SIZES.min}
+								// Radix closes the tooltip on its own pointerdown/click; marking both
+								// prevented keeps it open so the percent stays visible after clicking.
+								onPointerDown={event => event.preventDefault()}
+								onClick={event => {
+									event.preventDefault()
+									changeAppearance({ ...appearance, fontSize: smallerFontSize })
+								}}
+							>
+								A−
+							</Button>
+						</Tooltip>
+						<Tooltip
+							content={t('reader.book.percent', { percent: appearance.fontSize })}
+							keepOpenOnClick
+						>
+							<Button
+								variant='ghost'
+								size='small'
+								aria-label={t('reader.book.larger')}
+								disabled={appearance.fontSize >= FONT_SIZES.max}
+								onPointerDown={event => event.preventDefault()}
+								onClick={event => {
+									event.preventDefault()
+									changeAppearance({ ...appearance, fontSize: largerFontSize })
+								}}
+							>
+								A+
+							</Button>
+						</Tooltip>
+						<Button
+							variant='ghost'
+							size='small'
+							aria-label={t(`reader.book.theme.${nextTheme}`)}
+							title={t(`reader.book.theme.${nextTheme}`)}
+							startIcon={
+								<Icon name={nextTheme === 'dark' ? 'common/moon' : 'common/sun'} size={18} />
+							}
+							onClick={() => changeAppearance({ ...appearance, theme: nextTheme })}
+						/>
+					</div>
+				)}
 			</footer>
+
+			<Drawer
+				open={tocOpen}
+				onOpenChange={setTocOpen}
+				title={t('reader.book.contents')}
+				closable={false}
+				side='right'
+				size='sm'
+			>
+				<div className={styles.tocPanel}>
+					{toc.length > 0 && <span className={styles.tocLabel}>{t('reader.book.chapters')}</span>}
+
+					<div className={styles.tocScroll}>
+						<TocList
+							items={toc}
+							numbers={tocIndex.numbers}
+							current={location?.chapter ?? null}
+							onOpen={href => {
+								viewRef.current?.goTo(href)
+								setTocOpen(false)
+							}}
+						/>
+					</div>
+
+					{tocIndex.total > 0 && (
+						<div className={styles.tocFooter}>
+							<span>
+								{tocIndex.current != null
+									? t('reader.book.contentsProgress', {
+											current: tocIndex.current,
+											count: tocIndex.total
+										})
+									: t('reader.book.contentsTotal', { count: tocIndex.total })}
+							</span>
+							<ProgressBar value={tocIndex.current ?? 0} max={tocIndex.total} />
+						</div>
+					)}
+				</div>
+			</Drawer>
 		</div>
 	)
 }
 
 interface TocListProps {
 	items: FoliateTocItem[]
+	numbers: WeakMap<FoliateTocItem, number>
 	current: string | null
 	onOpen: (href: string) => void
 }
 
-function TocList({ items, current, onOpen }: TocListProps) {
+function TocList({ items, numbers, current, onOpen }: TocListProps) {
 	return (
 		<ul className={styles.tocList}>
-			{items.map(item => (
-				<li key={`${item.href}-${item.label}`}>
-					<button
-						type='button'
-						className={clsx(styles.tocItem, item.label.trim() === current && styles.active)}
-						onClick={() => onOpen(item.href)}
-					>
-						{item.label.trim()}
-					</button>
-					{item.subitems && item.subitems.length > 0 && (
-						<TocList items={item.subitems} current={current} onOpen={onOpen} />
-					)}
-				</li>
-			))}
+			{items.map(item => {
+				const active = item.label.trim() === current
+				const number = numbers.get(item)
+
+				return (
+					<li key={`${item.href}-${item.label}`}>
+						<RippleButton
+							className={clsx(styles.tocItem, active && styles.active)}
+							onClick={() => onOpen(item.href)}
+						>
+							{number != null && <span className={styles.tocNumber}>{number}.</span>}
+							<span className={styles.tocLabelText}>{item.label.trim()}</span>
+							<Icon name='common/chevron-down' size={14} className={styles.tocChevron} />
+						</RippleButton>
+						{item.subitems && item.subitems.length > 0 && (
+							<TocList items={item.subitems} numbers={numbers} current={current} onOpen={onOpen} />
+						)}
+					</li>
+				)
+			})}
 		</ul>
 	)
 }

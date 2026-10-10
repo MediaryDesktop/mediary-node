@@ -1,3 +1,4 @@
+import clsx from 'clsx'
 import { useUnit } from 'effector-react'
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
@@ -17,6 +18,7 @@ import {
 	playerClosed,
 	playerExpanded,
 	playerMinimized,
+	usePlayerEntrance,
 	VideoPlayer
 } from '@entities/playback'
 import type { VideoSource } from '@entities/playback'
@@ -166,8 +168,11 @@ interface PanelProps {
 function Panel({ onClose, leaving, onLeft, children }: PanelProps) {
 	const { t } = useTranslation()
 
-	// Its own slide-in and slide-out, the same as the player's, so loading never shows
-	// a static screen before the player arrives.
+	// The same slide-in and slide-out as the player's, so loading never shows a static
+	// screen before the player arrives. The player then carries on this one slide
+	// from wherever it has got to, rather than sliding up over it a second time.
+	const entrance = usePlayerEntrance()
+
 	const onLeftRef = useRef(onLeft)
 	useEffect(() => {
 		onLeftRef.current = onLeft
@@ -184,7 +189,10 @@ function Panel({ onClose, leaving, onLeft, children }: PanelProps) {
 	}, [leaving])
 
 	return (
-		<div className={`${styles.root} ${styles.enter} ${leaving ? styles.leave : ''}`}>
+		<div
+			className={clsx(styles.root, entrance.entering && styles.enter, leaving && styles.leave)}
+			style={entrance.entering && !leaving ? entrance.style : undefined}
+		>
 			<header className={styles.top}>
 				<Button
 					variant='chrome'

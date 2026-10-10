@@ -18,6 +18,11 @@
 		--chrome-hover: rgb(0 0 0 / 6%);
 	}
 
+	// Overrides the ghost button's own color, for both the header and the footer.
+	button {
+		color: var(--chrome-text);
+	}
+
 	.top {
 		display: flex;
 		flex: none;
@@ -30,10 +35,6 @@
 		button,
 		.window {
 			-webkit-app-region: no-drag;
-		}
-
-		button {
-			color: var(--chrome-text);
 		}
 
 		.heading {
@@ -58,18 +59,8 @@
 			}
 		}
 
-		.tools {
-			display: flex;
-			align-items: center;
-			gap: 0.125rem;
-			margin-left: auto;
-		}
-
 		.window {
 			align-self: flex-start;
-		}
-
-		.heading + .window {
 			margin-left: auto;
 		}
 	}
@@ -120,52 +111,6 @@
 				right: 0.5rem;
 			}
 		}
-
-		.contents {
-			position: absolute;
-			top: 0;
-			bottom: 0;
-			left: 0;
-			z-index: 3;
-			width: min(22rem, 85vw);
-			padding: 0.75rem 0.5rem;
-			overflow-y: auto;
-			background: var(--surface);
-			box-shadow: 0.5rem 0 2rem rgb(0 0 0 / 35%);
-			color: var(--text);
-		}
-
-		.tocList {
-			margin: 0;
-			padding: 0;
-			list-style: none;
-
-			.tocList {
-				padding-left: 0.875rem;
-			}
-		}
-
-		.tocItem {
-			display: block;
-			width: 100%;
-			padding: 0.5rem 0.75rem;
-			border: 0;
-			border-radius: 0.5rem;
-			background: transparent;
-			color: inherit;
-			font-size: 0.875rem;
-			text-align: left;
-			cursor: pointer;
-
-			&:hover {
-				background: var(--surface-hover);
-			}
-
-			&.active {
-				color: var(--accent-text);
-				font-weight: 600;
-			}
-		}
 	}
 
 	.bottom {
@@ -175,17 +120,174 @@
 		gap: 1rem;
 		padding: 0.5rem 1.25rem 0.875rem;
 
+		.tools {
+			display: flex;
+			flex: none;
+			align-items: center;
+			gap: 0.125rem;
+		}
+
 		.seek {
 			flex: 1;
+			height: 0.25rem;
 			margin: 0;
+			border-radius: 999px;
+			background: linear-gradient(to right, var(--accent) var(--progress), var(--chrome-muted) var(--progress));
 			cursor: pointer;
+			appearance: none;
+
+			&::-webkit-slider-thumb {
+				width: 0.75rem;
+				height: 0.75rem;
+				border-radius: 50%;
+				background: var(--accent);
+				appearance: none;
+			}
+
+			&:focus-visible {
+				outline: none;
+				box-shadow: var(--focus-shadow);
+			}
+
+			&:disabled {
+				cursor: default;
+				opacity: 0.5;
+			}
 		}
 
 		.count {
+			flex: none;
 			color: var(--chrome-muted);
 			font-size: 0.8125rem;
 			font-variant-numeric: tabular-nums;
 			white-space: nowrap;
+		}
+	}
+}
+
+// Rendered inside the contents drawer, outside .root: the drawer already sets
+// --text and --surface for its own theme, so this needs none of its own.
+.tocPanel {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	min-height: 0;
+	gap: 0.625rem;
+}
+
+.tocLabel {
+	flex: none;
+	color: var(--text-secondary);
+	font-size: 0.75rem;
+	font-weight: 650;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+.tocScroll {
+	flex: 1;
+	min-height: 0;
+	margin: 0 -0.5rem;
+	padding: 0 0.5rem;
+	overflow-y: auto;
+	scrollbar-width: none;
+
+	&::-webkit-scrollbar {
+		display: none;
+	}
+}
+
+.tocFooter {
+	display: flex;
+	flex: none;
+	flex-direction: column;
+	gap: 0.5rem;
+	padding-top: 0.75rem;
+	border-top: 1px solid var(--border);
+	color: var(--text-secondary);
+	font-size: 0.8125rem;
+	font-variant-numeric: tabular-nums;
+}
+
+.tocList {
+	display: flex;
+	flex-direction: column;
+	gap: 0.125rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+
+	.tocList {
+		margin-top: 0.125rem;
+		padding-left: 1.125rem;
+	}
+}
+
+.tocItem {
+	display: flex;
+	align-items: center;
+	gap: 0.625rem;
+	width: 100%;
+	padding: 0.5625rem 0.625rem;
+	border: 0;
+	border-radius: 0.625rem;
+	background: transparent;
+	color: var(--text);
+	font-size: 0.875rem;
+	text-align: left;
+	cursor: pointer;
+	transition: background 0.15s ease;
+
+	&:hover {
+		background: var(--surface-hover);
+
+		.tocChevron {
+			opacity: 1;
+		}
+	}
+
+	.tocNumber {
+		display: inline-flex;
+		flex: none;
+		align-items: center;
+		justify-content: center;
+		width: 1.375rem;
+		height: 1.375rem;
+		border-radius: 6px;
+		color: var(--text-secondary);
+		font-size: 0.75rem;
+		font-weight: 650;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.tocLabelText {
+		flex: 1;
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.tocChevron {
+		flex: none;
+		color: var(--text-muted);
+		opacity: 0;
+		transform: rotate(-90deg);
+		transition: opacity 0.15s ease;
+	}
+
+	&.active {
+		background: var(--accent-muted);
+		color: var(--accent-text);
+		font-weight: 650;
+
+		.tocNumber {
+			color: var(--accent);
+		}
+
+		.tocChevron {
+			color: var(--accent-text);
+			opacity: 1;
 		}
 	}
 }

@@ -24,6 +24,7 @@ export { thumbnailUrl } from './lib/urls'
 
 export { NowPlayingBar } from './ui/NowPlayingBar'
 export { VideoPlayer } from './ui/VideoPlayer'
+export { usePlayerEntrance } from './ui/usePlayerEntrance'
 export type { VideoPlayerProps, VideoSource } from './ui/VideoPlayer'
 
 export { fetchPlaybackStreamFx } from './api/api'

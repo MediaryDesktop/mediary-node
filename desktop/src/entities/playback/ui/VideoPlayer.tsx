@@ -15,6 +15,7 @@ import { initialAudio, initialSubtitle, trackLabel } from '../lib/tracks'
 import { directUrl, fontUrl, mediaUrl, subtitleUrl } from '../lib/urls'
 import { formatTimecode, playbackModel } from '../model/model'
 
+import { usePlayerEntrance } from './usePlayerEntrance'
 import styles from './VideoPlayer.module.scss'
 
 const SEEK_STEP = 5
@@ -24,7 +25,6 @@ const VOLUME_STEP = 0.05
 const CONTROLS_HIDE_DELAY = 10_000
 const PROGRESS_INTERVAL = 10_000
 // Matches the keyframes in the stylesheet; the host waits this long before unmounting.
-const ENTER_MS = 340
 const LEAVE_MS = 240
 
 // Chromium exposes audioTracks only behind a Blink feature, which the shell
@@ -109,19 +109,10 @@ export function VideoPlayer({
 	const [activity, setActivity] = useState(0)
 	const [failed, setFailed] = useState(false)
 
-	// A full player that opens slides up from the bottom, like a drawer; the class is
-	// only there for the first moments, so later changes of mode do not replay it.
-	const [entering, setEntering] = useState(mode === 'full')
-
-	useEffect(() => {
-		if (!entering) {
-			return
-		}
-
-		const timer = window.setTimeout(() => setEntering(false), ENTER_MS)
-
-		return () => window.clearTimeout(timer)
-	}, [entering])
+	// A full player that opens slides up from the bottom, like a drawer — carrying on
+	// the slide the loading panel before it started, not starting one of its own.
+	const entrance = usePlayerEntrance()
+	const entering = entrance.entering && !mini
 
 	const onLeftRef = useRef(onLeft)
 	useEffect(() => {
@@ -428,6 +419,7 @@ export function VideoPlayer({
 				leaving && styles.leave,
 				!shown && styles.idle
 			)}
+			style={entering && !leaving ? entrance.style : undefined}
 			onMouseMove={wake}
 		>
 			<div className={styles.stage}>
