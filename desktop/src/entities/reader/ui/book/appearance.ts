@@ -20,6 +20,9 @@ export function bookStyles({ theme, fontSize }: BookAppearance): string {
 	return `
 		html {
 			color-scheme: ${theme === 'dark' ? 'dark' : 'light'};
+			/* Read by the paginator's own column-gap background, which otherwise
+			   keeps painting the colour the section first loaded with. */
+			--theme-bg-color: ${colors.background};
 		}
 		html, body {
 			background: ${colors.background} !important;

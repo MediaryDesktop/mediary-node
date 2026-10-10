@@ -113,8 +113,13 @@ export function BookReaderView({ book, file, locator, onClose, onRelocate }: Boo
 
 	return (
 		<div
-			className={clsx(styles.root, appearance.theme !== 'dark' && styles.lightChrome)}
-			style={{ background: pdf ? undefined : colors.background }}
+			className={styles.root}
+			style={
+				{
+					'--chrome-bg': pdf ? '#000' : colors.background,
+					'--chrome-text': pdf ? '#fff' : colors.text
+				} as CSSProperties
+			}
 		>
 			<header className={styles.top}>
 				<Button

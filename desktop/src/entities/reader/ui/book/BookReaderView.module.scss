@@ -1,26 +1,24 @@
 .root {
+	// Set inline, from the page's own theme colours, so the whole reader — bars
+	// included — reads as one surface instead of a page floating over a bezel.
+	--chrome-bg: #000;
 	--chrome-text: #fff;
-	--chrome-muted: rgb(255 255 255 / 65%);
-	--chrome-hover: rgb(255 255 255 / 8%);
+	--chrome-muted: color-mix(in srgb, var(--chrome-text) 65%, transparent);
+	--chrome-hover: color-mix(in srgb, var(--chrome-text) 12%, transparent);
 
 	position: fixed;
 	inset: 0;
 	display: flex;
 	flex-direction: column;
-	background: #000;
+	background: var(--chrome-bg);
 	color: var(--chrome-text);
 	overflow: hidden;
 
-	// Sepia and white pages want dark controls around them.
-	&.lightChrome {
-		--chrome-text: #1f1a14;
-		--chrome-muted: rgb(31 26 20 / 60%);
-		--chrome-hover: rgb(0 0 0 / 6%);
-	}
-
 	// Overrides the ghost button's own color, for both the header and the footer.
+	// !important because .button.ghost's own two-class rule otherwise outranks
+	// this, leaving these on the app's own (unthemed) text colour.
 	button {
-		color: var(--chrome-text);
+		color: var(--chrome-text) !important;
 	}
 
 	.top {
