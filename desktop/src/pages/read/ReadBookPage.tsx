@@ -35,6 +35,9 @@ export function ReadBookPage({ fileId }: ReadBookPageProps) {
 	const [file, setFile] = useState<File | null>(null)
 	const [fileFailed, setFileFailed] = useState(false)
 	const [attempt, setAttempt] = useState(0)
+	// When the page first asked to open this book; the loading panel and the reader
+	// that replaces it both continue this one opening slide.
+	const [openedAt] = useState(() => performance.now())
 
 	useEffect(() => {
 		if (nodeReady) {
@@ -94,7 +97,7 @@ export function ReadBookPage({ fileId }: ReadBookPageProps) {
 	if (!book || !file) {
 		if ((stateError && !statePending) || fileFailed) {
 			return (
-				<Panel onClose={close}>
+				<Panel onClose={close} openedAt={openedAt}>
 					<p>{stateError?.body?.detail ?? t('reader.book.loadFailed')}</p>
 					<Button
 						onClick={() => {
@@ -110,7 +113,7 @@ export function ReadBookPage({ fileId }: ReadBookPageProps) {
 		}
 
 		return (
-			<Panel onClose={close}>
+			<Panel onClose={close} openedAt={openedAt}>
 				<ReelLoader spinning />
 			</Panel>
 		)
@@ -122,6 +125,7 @@ export function ReadBookPage({ fileId }: ReadBookPageProps) {
 			file={file}
 			// Read when the book opens; the views do not follow it afterwards.
 			locator={state?.position?.locator ?? null}
+			openedAt={openedAt}
 			onClose={close}
 			onRelocate={onRelocate}
 		/>

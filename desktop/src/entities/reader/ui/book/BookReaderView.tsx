@@ -22,17 +22,25 @@ import styles from './BookReaderView.module.scss'
 import { FoliateView } from './FoliateView'
 import { PdfView } from './PdfView'
 import type { BookAppearance, BookLocation, BookViewHandle } from './types'
+import { useBookEntrance } from './useBookEntrance'
+
+// Matches the video player's own slide, so every full-screen surface in the
+// app opens and closes the same way.
+const LEAVE_MS = 240
 
 export interface BookReaderViewProps {
 	book: ReaderBook
 	file: File
 	// Where to open the book; null starts it from its first page of text.
 	locator: string | null
+	// When the page first asked to open this book — continues the loading panel's
+	// own opening slide instead of starting a new one.
+	openedAt: number
 	onClose: () => void
 	onRelocate: (location: BookLocation) => void
 }
 
-export function BookReaderView({ book, file, locator, onClose, onRelocate }: BookReaderViewProps) {
+export function BookReaderView({ book, file, locator, openedAt, onClose, onRelocate }: BookReaderViewProps) {
 	const { t } = useTranslation()
 	const viewRef = useRef<BookViewHandle>(null)
 
@@ -44,6 +52,25 @@ export function BookReaderView({ book, file, locator, onClose, onRelocate }: Boo
 	const [tocOpen, setTocOpen] = useState(false)
 	const [ready, setReady] = useState(false)
 	const [failed, setFailed] = useState(false)
+	const [leaving, setLeaving] = useState(false)
+	const entrance = useBookEntrance(openedAt)
+
+	const onCloseRef = useRef(onClose)
+	useEffect(() => {
+		onCloseRef.current = onClose
+	})
+
+	const requestClose = useCallback(() => setLeaving(true), [])
+
+	useEffect(() => {
+		if (!leaving) {
+			return
+		}
+
+		const timer = window.setTimeout(() => onCloseRef.current(), LEAVE_MS)
+
+		return () => window.clearTimeout(timer)
+	}, [leaving])
 
 	const tocIndex = useMemo(() => indexToc(toc, location?.chapter ?? null), [toc, location?.chapter])
 
@@ -80,7 +107,7 @@ export function BookReaderView({ book, file, locator, onClose, onRelocate }: Boo
 					if (tocOpen) {
 						setTocOpen(false)
 					} else {
-						onClose()
+						requestClose()
 					}
 					break
 				default:
@@ -89,7 +116,7 @@ export function BookReaderView({ book, file, locator, onClose, onRelocate }: Boo
 
 			event.preventDefault()
 		},
-		[onClose, tocOpen]
+		[requestClose, tocOpen]
 	)
 
 	useEffect(() => {
@@ -113,9 +140,10 @@ export function BookReaderView({ book, file, locator, onClose, onRelocate }: Boo
 
 	return (
 		<div
-			className={styles.root}
+			className={clsx(styles.root, entrance.entering && styles.enter, leaving && styles.leave)}
 			style={
 				{
+					...(entrance.entering && !leaving ? entrance.style : undefined),
 					'--chrome-bg': pdf ? '#000' : colors.background,
 					'--chrome-text': pdf ? '#fff' : colors.text
 				} as CSSProperties
@@ -127,7 +155,7 @@ export function BookReaderView({ book, file, locator, onClose, onRelocate }: Boo
 					size='small'
 					aria-label={t('reader.close')}
 					startIcon={<Icon name='common/arrow-left' size={18} />}
-					onClick={onClose}
+					onClick={requestClose}
 				/>
 
 				<div className={styles.heading}>

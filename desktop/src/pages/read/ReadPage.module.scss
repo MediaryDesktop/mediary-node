@@ -6,6 +6,12 @@
 	background: #000;
 	color: #fff;
 
+	// Matches the book reader's own open slide, so handing off from this loading
+	// panel to it continues one slide instead of jumping.
+	&.enter {
+		animation: panel-in 340ms cubic-bezier(0.32, 0.72, 0, 1) both;
+	}
+
 	.top {
 		display: flex;
 		align-items: center;
@@ -38,5 +44,17 @@
 			margin: 0;
 			color: rgb(255 255 255 / 80%);
 		}
+	}
+}
+
+@keyframes panel-in {
+	from {
+		transform: translateY(100%);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.root.enter {
+		animation-duration: 1ms;
 	}
 }
