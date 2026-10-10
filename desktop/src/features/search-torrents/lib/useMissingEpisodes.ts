@@ -10,7 +10,14 @@ import { missingEpisodes } from './episodes'
 
 // The title's episodes out so far that the library lacks and no download brings.
 // Null when the title's episode count is not known.
-export function useMissingEpisodes(mediaRef: string, released: number | null): number[] | null {
+export function useMissingEpisodes(
+	mediaRef: string,
+	released: number | null,
+	// False for a title with no episodes to miss (a book, say): skips the request
+	// entirely, rather than firing one whose video files the caller never reads —
+	// it would only race the same title's own file query for its own kind.
+	enabled = true
+): number[] | null {
 	const [files, loadFiles, downloads, nodeReady] = useUnit([
 		titleFilesQuery.$data,
 		titleFilesQuery.start,
@@ -19,10 +26,10 @@ export function useMissingEpisodes(mediaRef: string, released: number | null): n
 	])
 
 	useEffect(() => {
-		if (nodeReady) {
+		if (nodeReady && enabled) {
 			loadFiles({ mediaRef, kind: 'video' })
 		}
-	}, [loadFiles, mediaRef, nodeReady])
+	}, [loadFiles, mediaRef, nodeReady, enabled])
 
 	return useMemo(() => {
 		const have: number[] = []

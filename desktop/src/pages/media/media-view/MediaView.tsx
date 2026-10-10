@@ -38,10 +38,18 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 	const openSearch = useUnit(searchOpened)
 
 	const subject = resolveSubject(media, entry)
+	// Manga is read and books too: neither is downloaded as video, nor tracks missing
+	// episodes — asking for them would only race the library section's own file query
+	// for the same title, over the one kind the library section actually reads.
+	const torrents = subject ? subject.mediaType !== 'manga' && subject.mediaType !== 'book' : false
 	// Files of a show numbered by season cannot be compared with its whole count,
 	// so it offers no "download what is missing" until downloads know seasons.
 	const seasonal = mediaRef.startsWith('tmdb:tv:')
-	const missing = useMissingEpisodes(mediaRef, seasonal ? null : releasedEpisodes(media, subject?.total))
+	const missing = useMissingEpisodes(
+		mediaRef,
+		seasonal ? null : releasedEpisodes(media, subject?.total),
+		torrents
+	)
 
 	if (!subject) {
 		return null
@@ -52,8 +60,6 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 	const title = mediaTitle(base.title)
 	const description = media?.description ?? ''
 	const airing = media?.next_airing_episode
-	// Manga is read and books too: neither is downloaded as video.
-	const torrents = mediaType !== 'manga' && mediaType !== 'book'
 
 	return (
 		<>

@@ -1,4 +1,4 @@
-import { createMutation, createQuery, keepFresh } from '@farfetched/core'
+import { concurrency, createMutation, createQuery, keepFresh } from '@farfetched/core'
 import { createEffect, createEvent, createStore, sample } from 'effector'
 
 import { atom } from '@shared/factory'
@@ -56,6 +56,12 @@ export const libraryCollectionQuery = createQuery({
 export const libraryTreeQuery = createQuery({ effect: fetchLibraryTreeFx, name: 'libraryTree' })
 
 export const titleFilesQuery = createQuery({ effect: fetchTitleFilesFx, name: 'titleFiles' })
+
+// Several pages and drawers share this one for their own title's files; without
+// this, one of their requests landing after a newer one would overwrite $data
+// with a different title's files, and the one still filtering for its own
+// media_ref would come up empty until something else happened to refetch it.
+concurrency(titleFilesQuery, { strategy: 'TAKE_LATEST' })
 
 export const libraryScanQuery = createQuery({ effect: fetchLibraryScanFx, name: 'libraryScan' })
 
