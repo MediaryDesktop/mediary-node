@@ -1,7 +1,9 @@
 import { useUnit } from 'effector-react'
 import { useEffect } from 'react'
 
+import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
+import { useUnitWatch } from '@shared/lib'
 import { SelectDropdown, Switch, toast } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
@@ -47,14 +49,10 @@ export function MangaDexSettings() {
 		}
 	}, [load, nodeReady])
 
-	useEffect(
-		() =>
-			putMangaDexSettingsMutation.finished.failure.watch(({ error }) =>
-				toast.error(error.body?.detail ?? t('mangaSources.mangadex.saveFailed'), {
-					id: 'mangadex-settings'
-				})
-			),
-		[t]
+	useUnitWatch(putMangaDexSettingsMutation.finished.failure, ({ error }) =>
+		toast.error(problemDetail(error, t('mangaSources.mangadex.saveFailed')), {
+			id: 'mangadex-settings'
+		})
 	)
 
 	if (!settings) {

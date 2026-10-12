@@ -3,7 +3,10 @@ import { useUnit } from 'effector-react'
 import { useEffect } from 'react'
 import { IoIosRefresh } from 'react-icons/io'
 
+import { problemDetail } from '@shared/api'
+import type { RequestFailure } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
+import { useUnitWatch } from '@shared/lib'
 import { Button, Icon, ProgressBar, toast } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
@@ -43,20 +46,14 @@ export function MangaDownloadList({ hideTitle }: MangaDownloadListProps = {}) {
 		}
 	}, [load, nodeReady])
 
-	useEffect(() => {
-		const failed = ({ error }: { error: { body?: { detail?: string } | null } }) =>
-			toast.error(error.body?.detail ?? t('mangaSources.downloads.failedToQueue'), {
-				id: 'manga-download-action'
-			})
+	const failed = ({ error }: RequestFailure) =>
+		toast.error(problemDetail(error, t('mangaSources.downloads.failedToQueue')), {
+			id: 'manga-download-action'
+		})
 
-		const stop = [
-			cancelMangaDownloadMutation.finished.failure.watch(failed),
-			retryMangaDownloadMutation.finished.failure.watch(failed),
-			forgetMangaDownloadMutation.finished.failure.watch(failed)
-		]
-
-		return () => stop.forEach(unwatch => unwatch())
-	}, [t])
+	useUnitWatch(cancelMangaDownloadMutation.finished.failure, failed)
+	useUnitWatch(retryMangaDownloadMutation.finished.failure, failed)
+	useUnitWatch(forgetMangaDownloadMutation.finished.failure, failed)
 
 	const downloads = data?.downloads ?? []
 

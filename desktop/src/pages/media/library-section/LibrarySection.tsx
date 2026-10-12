@@ -4,7 +4,9 @@ import { useEffect, useMemo, useRef } from 'react'
 import type { ReactNode } from 'react'
 import { IoLibraryOutline } from 'react-icons/io5'
 
+import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
+import { useUnitWatch } from '@shared/lib'
 import { Badge, Button, Icon, Skeleton, toast, Tooltip } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
@@ -171,12 +173,8 @@ function EpisodeLibrary({ mediaRef, cover, coverColor, banner, total, progress }
 		}
 	}, [mediaRef, load, nodeReady])
 
-	useEffect(
-		() =>
-			playbackModel.playFailed.watch(({ error }) =>
-				toast.error(error.body?.detail ?? t('playback.failed'), { id: 'playback-failed' })
-			),
-		[t]
+	useUnitWatch(playbackModel.playFailed, ({ error }) =>
+		toast.error(problemDetail(error, t('playback.failed')), { id: 'playback-failed' })
 	)
 
 	// The query is shared across title pages, so what it holds may still be the

@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from 'react'
 import type { CSSProperties } from 'react'
 
 import { useTranslation } from '@shared/i18n'
+import { readStored, writeStored } from '@shared/lib'
 import { Badge, Button, DropdownMenu, Icon, RippleButton, SegmentedControl } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
@@ -34,22 +35,6 @@ export interface ChapterListProps {
 const ALL = 'all'
 const FILTER_KEY = 'mediary.chapterSource'
 
-function readFilter(): string {
-	try {
-		return window.localStorage.getItem(FILTER_KEY) ?? ALL
-	} catch {
-		return ALL
-	}
-}
-
-function writeFilter(value: string) {
-	try {
-		window.localStorage.setItem(FILTER_KEY, value)
-	} catch {
-		// A per-viewer convenience: without storage the filter just resets.
-	}
-}
-
 // Every chapter of the title, from the library and from the user's servers, as one
 // list. A chapter held in several places is one row that opens the nearest copy.
 export function ChapterList({ mediaRef, title, progress, coverColor }: ChapterListProps) {
@@ -73,7 +58,7 @@ export function ChapterList({ mediaRef, title, progress, coverColor }: ChapterLi
 
 	const { rows, sources, links, problems, loadingOnline } = useTitleChapters(mediaRef)
 
-	const [filter, setFilter] = useState(readFilter)
+	const [filter, setFilter] = useState(() => readStored(FILTER_KEY) ?? ALL)
 
 	// undefined: closed; otherwise the source to start the search on.
 	const [linking, setLinking] = useState<string | null | undefined>(undefined)
@@ -97,7 +82,7 @@ export function ChapterList({ mediaRef, title, progress, coverColor }: ChapterLi
 
 	const changeFilter = (value: string) => {
 		setFilter(value)
-		writeFilter(value)
+		writeStored(FILTER_KEY, value)
 	}
 
 	// The newest download of each chapter, by the copy it was saved from.

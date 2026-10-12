@@ -1,8 +1,11 @@
 import { useUnit } from 'effector-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
+import { problemDetail } from '@shared/api'
+import type { RequestFailure } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
-import { Button, Drawer, DrawerForm, DrawerSection, Icon, Input, toast } from '@shared/ui'
+import { useUnitWatch } from '@shared/lib'
+import { ConnectionCheck, Drawer, DrawerForm, DrawerSection, Input, toast } from '@shared/ui'
 
 import {
 	checkTorrentSourceMutation,
@@ -10,8 +13,6 @@ import {
 	updateTorrentSourceMutation
 } from '@entities/torrent'
 import type { TorrentSource } from '@entities/torrent'
-
-import styles from './TorznabSources.module.scss'
 
 export interface TorznabSourceDrawerProps {
 	open: boolean
@@ -63,25 +64,19 @@ function SourceForm({ source, onDone }: { source: TorrentSource | null; onDone: 
 	const keyValue = source && apiKey === '' ? undefined : apiKey
 
 	// Only one form is open at a time, so whatever these mutations report is this form's.
-	useEffect(() => {
-		const failed = ({ error }: { error: { body?: { detail?: string } | null } }) =>
-			toast.error(error.body?.detail ?? t('torrents.sources.saveFailed'), { id: 'torznab-save-failed' })
+	const failed = ({ error }: RequestFailure) =>
+		toast.error(problemDetail(error, t('torrents.sources.saveFailed')), { id: 'torznab-save-failed' })
 
-		const stop = [
-			createTorrentSourceMutation.finished.success.watch(() => onDone()),
-			updateTorrentSourceMutation.finished.success.watch(() => onDone()),
-			createTorrentSourceMutation.finished.failure.watch(failed),
-			updateTorrentSourceMutation.finished.failure.watch(failed),
-			checkTorrentSourceMutation.finished.success.watch(({ result }) =>
-				setResult({ ok: true, title: result.title, search: result.search })
-			),
-			checkTorrentSourceMutation.finished.failure.watch(({ error }) =>
-				setResult({ ok: false, problem: error.body?.detail ?? t('torrents.sources.unreachable') })
-			)
-		]
-
-		return () => stop.forEach(unwatch => unwatch())
-	}, [onDone, t])
+	useUnitWatch(createTorrentSourceMutation.finished.success, onDone)
+	useUnitWatch(updateTorrentSourceMutation.finished.success, onDone)
+	useUnitWatch(createTorrentSourceMutation.finished.failure, failed)
+	useUnitWatch(updateTorrentSourceMutation.finished.failure, failed)
+	useUnitWatch(checkTorrentSourceMutation.finished.success, ({ result }) =>
+		setResult({ ok: true, title: result.title, search: result.search })
+	)
+	useUnitWatch(checkTorrentSourceMutation.finished.failure, ({ error }) =>
+		setResult({ ok: false, problem: problemDetail(error, t('torrents.sources.unreachable')) })
+	)
 
 	const runCheck = () => {
 		setResult(null)
@@ -156,26 +151,13 @@ function SourceForm({ source, onDone }: { source: TorrentSource | null; onDone: 
 			</DrawerSection>
 
 			<DrawerSection>
-				<div className={styles.check}>
-					<Button
-						size='small'
-						startIcon={<Icon name='common/signal' size={16} />}
-						loading={checking}
-						disabled={url.trim() === '' || submitting}
-						onClick={runCheck}
-					>
-						{t('torrents.sources.check')}
-					</Button>
-
-					{result && (
-						<span
-							className={result.ok && result.search ? styles.ok : styles.problem}
-							role='status'
-						>
-							{checkMessage(result)}
-						</span>
-					)}
-				</div>
+				<ConnectionCheck
+					label={t('torrents.sources.check')}
+					checking={checking}
+					disabled={url.trim() === '' || submitting}
+					onCheck={runCheck}
+					status={result && { ok: result.ok && result.search, message: checkMessage(result) }}
+				/>
 			</DrawerSection>
 		</DrawerForm>
 	)

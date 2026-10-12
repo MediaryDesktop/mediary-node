@@ -1,7 +1,9 @@
 import { useUnit } from 'effector-react'
 import { useEffect, useState } from 'react'
 
+import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
+import { useUnitWatch } from '@shared/lib'
 import {
 	Badge,
 	Button,
@@ -84,16 +86,10 @@ function LinkForm({ mediaRef, title, sources, initialSource, onDone }: LinkFormP
 		}
 	}, [reset, search, source, title, mediaRef])
 
-	useEffect(() => {
-		const stop = [
-			putMangaLinkMutation.finished.success.watch(() => onDone()),
-			putMangaLinkMutation.finished.failure.watch(({ error }) =>
-				toast.error(error.body?.detail ?? t('mangaSources.link.failed'), { id: 'manga-link-failed' })
-			)
-		]
-
-		return () => stop.forEach(unwatch => unwatch())
-	}, [onDone, t])
+	useUnitWatch(putMangaLinkMutation.finished.success, () => onDone())
+	useUnitWatch(putMangaLinkMutation.finished.failure, ({ error }) =>
+		toast.error(problemDetail(error, t('mangaSources.link.failed')), { id: 'manga-link-failed' })
+	)
 
 	const submitSearch = () => {
 		if (source && query.trim()) {
@@ -142,7 +138,7 @@ function LinkForm({ mediaRef, title, sources, initialSource, onDone }: LinkFormP
 					<ReelLoader spinning />
 				</div>
 			) : error ? (
-				<p className={styles.status}>{error.body?.detail ?? t('mangaSources.link.failed')}</p>
+				<p className={styles.status}>{problemDetail(error, t('mangaSources.link.failed'))}</p>
 			) : data && results.length === 0 ? (
 				<p className={styles.status}>{t('mangaSources.link.noResults')}</p>
 			) : (

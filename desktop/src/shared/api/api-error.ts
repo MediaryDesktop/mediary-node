@@ -95,3 +95,15 @@ export function getApiProblems(error: unknown): ApiProblem[] {
 
 	return problems
 }
+
+// What a failed request hands its watchers: farfetched's failure payload, narrowed
+// to the part that carries the server's explanation.
+export interface RequestFailure {
+	error: { body?: { detail?: string } | null }
+}
+
+// The server's own explanation of a failed request, or the caller's text when it
+// gave none (or never answered).
+export function problemDetail(error: RequestFailure['error'], fallback: string): string {
+	return error.body?.detail ?? fallback
+}

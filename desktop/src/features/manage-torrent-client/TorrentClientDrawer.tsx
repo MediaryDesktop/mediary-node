@@ -1,13 +1,14 @@
 import { useUnit } from 'effector-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
+import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
+import { useUnitWatch } from '@shared/lib'
 import {
-	Button,
+	ConnectionCheck,
 	Drawer,
 	DrawerForm,
 	DrawerSection,
-	Icon,
 	Input,
 	SelectDropdown,
 	SelectionGroup,
@@ -84,24 +85,18 @@ function ClientForm({ settings, onDone }: { settings: TorrentSettings; onDone: (
 	const missingUrl = qbittorrent && url.trim() === ''
 
 	// Only one form is open at a time, so whatever these mutations report is this form's.
-	useEffect(() => {
-		const stop = [
-			putTorrentSettingsMutation.finished.success.watch(() => onDone()),
-			putTorrentSettingsMutation.finished.failure.watch(({ error }) =>
-				toast.error(error.body?.detail ?? t('torrents.settings.saveFailed'), {
-					id: 'torrent-settings'
-				})
-			),
-			checkTorrentClientMutation.finished.success.watch(({ result }) =>
-				setResult({ ok: true, version: result.version })
-			),
-			checkTorrentClientMutation.finished.failure.watch(({ error }) =>
-				setResult({ ok: false, problem: error.body?.detail ?? t('torrents.client.notConfigured') })
-			)
-		]
-
-		return () => stop.forEach(unwatch => unwatch())
-	}, [onDone, t])
+	useUnitWatch(putTorrentSettingsMutation.finished.success, () => onDone())
+	useUnitWatch(putTorrentSettingsMutation.finished.failure, ({ error }) =>
+		toast.error(problemDetail(error, t('torrents.settings.saveFailed')), {
+			id: 'torrent-settings'
+		})
+	)
+	useUnitWatch(checkTorrentClientMutation.finished.success, ({ result }) =>
+		setResult({ ok: true, version: result.version })
+	)
+	useUnitWatch(checkTorrentClientMutation.finished.failure, ({ error }) =>
+		setResult({ ok: false, problem: problemDetail(error, t('torrents.client.notConfigured')) })
+	)
 
 	const submit = () =>
 		save({
@@ -203,25 +198,20 @@ function ClientForm({ settings, onDone }: { settings: TorrentSettings; onDone: (
 
 			{client !== NONE && (
 				<DrawerSection>
-					<div className={styles.check}>
-						<Button
-							size='small'
-							startIcon={<Icon name='common/signal' size={16} />}
-							loading={checking}
-							disabled={missingUrl || saving}
-							onClick={runCheck}
-						>
-							{t('torrents.settings.check')}
-						</Button>
-
-						{result && (
-							<span className={result.ok ? styles.ok : styles.problem} role='status'>
-								{result.ok
+					<ConnectionCheck
+						label={t('torrents.settings.check')}
+						checking={checking}
+						disabled={missingUrl || saving}
+						onCheck={runCheck}
+						status={
+							result && {
+								ok: result.ok,
+								message: result.ok
 									? t('torrents.settings.ok', { version: result.version })
-									: result.problem}
-							</span>
-						)}
-					</div>
+									: result.problem
+							}
+						}
+					/>
 				</DrawerSection>
 			)}
 

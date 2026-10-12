@@ -1,3 +1,5 @@
+import { readStored, writeStored } from '@shared/lib'
+
 import type { BookAppearance, BookTheme } from './types'
 
 export const BOOK_THEMES: readonly BookTheme[] = ['dark', 'sepia', 'light']
@@ -50,8 +52,9 @@ const STORAGE_KEY = 'mediary.reader.book-appearance'
 
 // How the user likes to read is theirs on this computer, kept beside the window.
 export function loadAppearance(): BookAppearance {
+	const raw = readStored(STORAGE_KEY)
+
 	try {
-		const raw = window.localStorage.getItem(STORAGE_KEY)
 		const parsed = raw ? (JSON.parse(raw) as Partial<BookAppearance>) : {}
 
 		return {
@@ -64,11 +67,7 @@ export function loadAppearance(): BookAppearance {
 }
 
 export function saveAppearance(appearance: BookAppearance): void {
-	try {
-		window.localStorage.setItem(STORAGE_KEY, JSON.stringify(appearance))
-	} catch {
-		// A window that keeps nothing still reads; the choice lasts the session.
-	}
+	writeStored(STORAGE_KEY, JSON.stringify(appearance))
 }
 
 export function clampFontSize(size: number): number {

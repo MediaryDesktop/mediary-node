@@ -3,6 +3,7 @@ import { useUnit } from 'effector-react'
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 
+import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
 import { Button, Icon, ReelLoader, WindowControls } from '@shared/ui'
 
@@ -99,7 +100,7 @@ export function PlayerHost() {
 		if (error && !pending) {
 			return (
 				<Panel onClose={requestClose} leaving={leaving} onLeft={finish}>
-					<p>{error.body?.detail ?? t('player.loadFailed')}</p>
+					<p>{problemDetail(error, t('player.loadFailed'))}</p>
 					<Button onClick={() => load(fileId)}>{t('media.retry')}</Button>
 				</Panel>
 			)

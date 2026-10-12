@@ -1,7 +1,9 @@
 import { useUnit } from 'effector-react'
 import { useEffect, useMemo } from 'react'
 
+import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
+import { useUnitWatch } from '@shared/lib'
 import { toast } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
@@ -117,12 +119,8 @@ export function usePlayFile(): { play: (fileId: number) => void; starting: boole
 		playerOpened
 	])
 
-	useEffect(
-		() =>
-			playbackModel.playFailed.watch(({ error }) =>
-				toast.error(error.body?.detail ?? t('playback.failed'), { id: 'playback-failed' })
-			),
-		[t]
+	useUnitWatch(playbackModel.playFailed, ({ error }) =>
+		toast.error(problemDetail(error, t('playback.failed')), { id: 'playback-failed' })
 	)
 
 	return {

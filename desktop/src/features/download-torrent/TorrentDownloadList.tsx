@@ -4,9 +4,11 @@ import { useUnit } from 'effector-react'
 import { useEffect } from 'react'
 import { IoLibraryOutline } from 'react-icons/io5'
 
+import { problemDetail } from '@shared/api'
+import type { RequestFailure } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
-import { formatBytes, formatDuration } from '@shared/lib'
-import { Badge, Button, DropdownMenu, EmptyState, Icon, PosterFade, ProgressBar, toast } from '@shared/ui'
+import { formatBytes, formatDuration, useUnitWatch } from '@shared/lib'
+import { Badge, Button, EmptyState, Icon, MoreMenu, PosterFade, ProgressBar, toast } from '@shared/ui'
 import type { BadgeTone } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
@@ -88,18 +90,12 @@ export function TorrentDownloadList({ mediaRef, poster }: TorrentDownloadListPro
 		}
 	}, [load, nodeReady])
 
-	useEffect(() => {
-		const failed = ({ error }: { error: { body?: { detail?: string } | null } }) =>
-			toast.error(error.body?.detail ?? t('torrents.actionFailed'), { id: 'torrent-action' })
+	const failed = ({ error }: RequestFailure) =>
+		toast.error(problemDetail(error, t('torrents.actionFailed')), { id: 'torrent-action' })
 
-		const stop = [
-			pauseTorrentMutation.finished.failure.watch(failed),
-			resumeTorrentMutation.finished.failure.watch(failed),
-			removeTorrentMutation.finished.failure.watch(failed)
-		]
-
-		return () => stop.forEach(unwatch => unwatch())
-	}, [t])
+	useUnitWatch(pauseTorrentMutation.finished.failure, failed)
+	useUnitWatch(resumeTorrentMutation.finished.failure, failed)
+	useUnitWatch(removeTorrentMutation.finished.failure, failed)
 
 	const downloads = (data?.downloads ?? []).filter(item => !mediaRef || item.media_ref === mediaRef)
 
@@ -295,7 +291,8 @@ function DownloadRow({
 					/>
 				)}
 
-				<DropdownMenu
+				<MoreMenu
+					label={t('torrents.menu')}
 					items={[
 						...(downloading
 							? [
@@ -321,15 +318,6 @@ function DownloadRow({
 							onSelect: () => onRemove(true)
 						}
 					]}
-					trigger={
-						<Button
-							size='small'
-							variant='ghost'
-							iconOnly
-							aria-label={t('torrents.menu')}
-							startIcon={<Icon name='common/more-vertical' size={16} />}
-						/>
-					}
 				/>
 			</div>
 		</li>

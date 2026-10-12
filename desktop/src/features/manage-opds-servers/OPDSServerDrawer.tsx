@@ -1,8 +1,11 @@
 import { useUnit } from 'effector-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
+import { problemDetail } from '@shared/api'
+import type { RequestFailure } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
-import { Button, Drawer, DrawerForm, DrawerSection, Icon, Input, toast } from '@shared/ui'
+import { useUnitWatch } from '@shared/lib'
+import { ConnectionCheck, Drawer, DrawerForm, DrawerSection, Input, toast } from '@shared/ui'
 
 import {
 	checkOPDSServerMutation,
@@ -10,8 +13,6 @@ import {
 	updateOPDSServerMutation
 } from '@entities/manga-source'
 import type { OPDSCheckResult, OPDSServer } from '@entities/manga-source'
-
-import styles from './OPDSServers.module.scss'
 
 export interface OPDSServerDrawerProps {
 	open: boolean
@@ -62,23 +63,17 @@ function ServerForm({ server, onDone }: { server: OPDSServer | null; onDone: () 
 	const passwordValue = server && password === '' ? undefined : password
 
 	// Only one form is open at a time, so whatever these mutations report is this form's.
-	useEffect(() => {
-		const failed = ({ error }: { error: { body?: { detail?: string } | null } }) =>
-			toast.error(error.body?.detail ?? t('mangaSources.saveFailed'), { id: 'opds-save-failed' })
+	const failed = ({ error }: RequestFailure) =>
+		toast.error(problemDetail(error, t('mangaSources.saveFailed')), { id: 'opds-save-failed' })
 
-		const stop = [
-			createOPDSServerMutation.finished.success.watch(() => onDone()),
-			updateOPDSServerMutation.finished.success.watch(() => onDone()),
-			createOPDSServerMutation.finished.failure.watch(failed),
-			updateOPDSServerMutation.finished.failure.watch(failed),
-			checkOPDSServerMutation.finished.success.watch(({ result }) => setResult(result)),
-			checkOPDSServerMutation.finished.failure.watch(() =>
-				setResult({ ok: false, problem: 'unreachable' })
-			)
-		]
-
-		return () => stop.forEach(unwatch => unwatch())
-	}, [onDone, t])
+	useUnitWatch(createOPDSServerMutation.finished.success, onDone)
+	useUnitWatch(updateOPDSServerMutation.finished.success, onDone)
+	useUnitWatch(createOPDSServerMutation.finished.failure, failed)
+	useUnitWatch(updateOPDSServerMutation.finished.failure, failed)
+	useUnitWatch(checkOPDSServerMutation.finished.success, ({ result }) => setResult(result))
+	useUnitWatch(checkOPDSServerMutation.finished.failure, () =>
+		setResult({ ok: false, problem: 'unreachable' })
+	)
 
 	const runCheck = () => {
 		setResult(null)
@@ -155,25 +150,20 @@ function ServerForm({ server, onDone }: { server: OPDSServer | null; onDone: () 
 			</DrawerSection>
 
 			<DrawerSection>
-				<div className={styles.check}>
-					<Button
-						size='small'
-						startIcon={<Icon name='common/signal' size={16} />}
-						loading={checking}
-						disabled={url.trim() === '' || submitting}
-						onClick={runCheck}
-					>
-						{t('mangaSources.drawer.check')}
-					</Button>
-
-					{result && (
-						<span className={result.ok ? styles.ok : styles.problem} role='status'>
-							{result.ok
+				<ConnectionCheck
+					label={t('mangaSources.drawer.check')}
+					checking={checking}
+					disabled={url.trim() === '' || submitting}
+					onCheck={runCheck}
+					status={
+						result && {
+							ok: result.ok,
+							message: result.ok
 								? t('mangaSources.drawer.ok')
-								: t(`mangaSources.drawer.problems.${result.problem ?? 'unreachable'}`)}
-						</span>
-					)}
-				</div>
+								: t(`mangaSources.drawer.problems.${result.problem ?? 'unreachable'}`)
+						}
+					}
+				/>
 			</DrawerSection>
 		</DrawerForm>
 	)

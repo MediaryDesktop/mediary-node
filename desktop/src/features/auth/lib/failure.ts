@@ -1,4 +1,4 @@
-import { getApiProblems, HttpRequestError } from '@shared/api'
+import { getApiProblems, HttpRequestError, problemDetail } from '@shared/api'
 import { translate } from '@shared/i18n'
 
 import {
@@ -47,5 +47,5 @@ export function toAuthMessages(error: unknown): string[] {
 		)
 	}
 
-	return [failure.body?.detail ?? translate('auth.error.requestFailed')]
+	return [problemDetail(failure, translate('auth.error.requestFailed'))]
 }

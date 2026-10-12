@@ -1,7 +1,9 @@
 import { useUnit } from 'effector-react'
 import { useEffect } from 'react'
 
+import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
+import { useUnitWatch } from '@shared/lib'
 import { Button, Icon, Modal, toast } from '@shared/ui'
 
 import { libraryRootsQuery } from '@entities/library-item'
@@ -30,22 +32,16 @@ export function DownloadFolderPrompt() {
 		}
 	}, [open, loadRoots])
 
-	useEffect(() => {
-		const stop = [
-			enqueueMangaDownloadsMutation.finished.success.watch(({ result }) =>
-				toast.success(t('mangaSources.downloads.queued', { count: result.downloads?.length ?? 0 }), {
-					id: 'manga-download-queued'
-				})
-			),
-			enqueueMangaDownloadsMutation.finished.failure.watch(({ error }) =>
-				toast.error(error.body?.detail ?? t('mangaSources.downloads.failedToQueue'), {
-					id: 'manga-download-failed'
-				})
-			)
-		]
-
-		return () => stop.forEach(unwatch => unwatch())
-	}, [t])
+	useUnitWatch(enqueueMangaDownloadsMutation.finished.success, ({ result }) =>
+		toast.success(t('mangaSources.downloads.queued', { count: result.downloads?.length ?? 0 }), {
+			id: 'manga-download-queued'
+		})
+	)
+	useUnitWatch(enqueueMangaDownloadsMutation.finished.failure, ({ error }) =>
+		toast.error(problemDetail(error, t('mangaSources.downloads.failedToQueue')), {
+			id: 'manga-download-failed'
+		})
+	)
 
 	const folders = roots?.roots ?? []
 

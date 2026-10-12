@@ -56,6 +56,9 @@ export type { DrawerSectionProps } from './drawer/DrawerSection'
 export { DropdownMenu } from './dropdown-menu/DropdownMenu'
 export type { DropdownMenuItem, DropdownMenuProps } from './dropdown-menu/DropdownMenu'
 
+export { MoreMenu } from './dropdown-menu/MoreMenu'
+export type { MoreMenuProps } from './dropdown-menu/MoreMenu'
+
 export { HoverCard } from './hover-card/HoverCard'
 export type { HoverCardProps } from './hover-card/HoverCard'
 
@@ -115,3 +118,9 @@ export type { NoticeProps, NoticeTone } from './notice/Notice'
 
 export { ListTile } from './list-tile/ListTile'
 export type { ListTileProps } from './list-tile/ListTile'
+
+export { ManagedList } from './managed-list/ManagedList'
+export type { ManagedListProps } from './managed-list/ManagedList'
+
+export { ConnectionCheck } from './connection-check/ConnectionCheck'
+export type { ConnectionCheckProps, ConnectionCheckStatus } from './connection-check/ConnectionCheck'

@@ -2,8 +2,9 @@ import clsx from 'clsx'
 import { useUnit } from 'effector-react'
 import { useEffect, useMemo, useState } from 'react'
 
+import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
-import { formatBytes } from '@shared/lib'
+import { formatBytes, useUnitWatch } from '@shared/lib'
 import { Button, Checkbox, Drawer, DrawerForm, DrawerSection, toast } from '@shared/ui'
 
 import { titleFilesQuery } from '@entities/library-item'
@@ -76,16 +77,10 @@ function FilesForm({ download, onDone }: { download: TorrentDownload; onDone: ()
 		loadLibrary({ mediaRef: download.media_ref, kind: 'video' })
 	}, [download.media_ref, loadLibrary])
 
-	useEffect(() => {
-		const stop = [
-			selectTorrentFilesMutation.finished.success.watch(() => onDone()),
-			selectTorrentFilesMutation.finished.failure.watch(({ error }) =>
-				toast.error(error.body?.detail ?? t('torrents.files.failed'), { id: 'torrent-files' })
-			)
-		]
-
-		return () => stop.forEach(unwatch => unwatch())
-	}, [onDone, t])
+	useUnitWatch(selectTorrentFilesMutation.finished.success, () => onDone())
+	useUnitWatch(selectTorrentFilesMutation.finished.failure, ({ error }) =>
+		toast.error(problemDetail(error, t('torrents.files.failed')), { id: 'torrent-files' })
+	)
 
 	const files = useMemo(() => sortFiles(data?.files ?? []), [data])
 

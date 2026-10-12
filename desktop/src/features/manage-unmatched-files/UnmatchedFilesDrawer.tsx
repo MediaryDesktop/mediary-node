@@ -6,12 +6,13 @@ import { useTranslation } from '@shared/i18n'
 import { Button, Drawer, EmptyState, Icon, Input, useRipple } from '@shared/ui'
 
 import {
+	fileName,
 	libraryCandidatesQuery,
 	libraryTreeQuery,
 	setLibraryFilesIgnoredMutation,
 	setLibraryMatchesMutation
 } from '@entities/library-item'
-import type { LibraryFile, LibrarySuggestion } from '@entities/library-item'
+import type { LibrarySuggestion } from '@entities/library-item'
 
 import { CheckRow } from './CheckRow'
 import { unmatchedGroups } from './lib/groups'
@@ -20,12 +21,6 @@ import { unmatchedFilesModel } from './model'
 import styles from './UnmatchedFilesDrawer.module.scss'
 
 const SOURCE = 'anilist'
-
-function fileName(file: LibraryFile): string {
-	const parts = file.rel_path.split('/')
-
-	return parts[parts.length - 1] || file.rel_path
-}
 
 // The design works through unmatched files a folder at a time: a page per
 // folder, every file on it picked by default, one title applied to the pick.

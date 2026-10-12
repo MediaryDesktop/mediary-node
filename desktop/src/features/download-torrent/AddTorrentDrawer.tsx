@@ -1,7 +1,9 @@
 import { useUnit } from 'effector-react'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 
+import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
+import { useUnitWatch } from '@shared/lib'
 import {
 	Button,
 	Checkbox,
@@ -75,16 +77,10 @@ function AddForm({ mediaRef, title, onDone }: { mediaRef: string; title: string;
 	const [chooseFiles, setChooseFiles] = useState(true)
 	const picker = useRef<HTMLInputElement>(null)
 
-	useEffect(() => {
-		const stop = [
-			addTorrentMutation.finished.success.watch(() => onDone()),
-			addTorrentMutation.finished.failure.watch(({ error }) =>
-				toast.error(error.body?.detail ?? t('torrents.drawer.failed'), { id: 'torrent-add' })
-			)
-		]
-
-		return () => stop.forEach(unwatch => unwatch())
-	}, [onDone, t])
+	useUnitWatch(addTorrentMutation.finished.success, () => onDone())
+	useUnitWatch(addTorrentMutation.finished.failure, ({ error }) =>
+		toast.error(problemDetail(error, t('torrents.drawer.failed')), { id: 'torrent-add' })
+	)
 
 	const pick = async (chosen: File | undefined) => {
 		if (!chosen) {

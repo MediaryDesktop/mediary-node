@@ -1,7 +1,9 @@
 import { useUnit } from 'effector-react'
 import { useEffect, useState } from 'react'
 
+import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
+import { useUnitWatch } from '@shared/lib'
 import { Button, Input, SelectDropdown, toast } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
@@ -58,12 +60,8 @@ function ProfileForm({ profile }: { profile: TorrentProfile }) {
 	const [excluded, setExcluded] = useState((profile.excluded ?? []).join(', '))
 	const [minSeeders, setMinSeeders] = useState(String(profile.min_seeders))
 
-	useEffect(
-		() =>
-			putTorrentProfileMutation.finished.failure.watch(({ error }) =>
-				toast.error(error.body?.detail ?? t('torrents.profile.saveFailed'), { id: 'torrent-profile' })
-			),
-		[t]
+	useUnitWatch(putTorrentProfileMutation.finished.failure, ({ error }) =>
+		toast.error(problemDetail(error, t('torrents.profile.saveFailed')), { id: 'torrent-profile' })
 	)
 
 	const submit = () =>

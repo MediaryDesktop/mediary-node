@@ -3,9 +3,10 @@ import clsx from 'clsx'
 import { useUnit } from 'effector-react'
 import { useEffect, useState } from 'react'
 
+import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
-import { formatRelativeTime } from '@shared/lib'
-import { Button, DropdownMenu, EmptyState, Icon, PosterFade, Switch, toast } from '@shared/ui'
+import { formatRelativeTime, useUnitWatch } from '@shared/lib'
+import { Button, EmptyState, Icon, MoreMenu, PosterFade, Switch, toast } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
 
@@ -43,25 +44,19 @@ export function AutoDownloadRules() {
 		}
 	}, [load, nodeReady])
 
-	useEffect(() => {
-		const stop = [
-			checkTorrentRuleMutation.finished.success.watch(({ result }) =>
-				toast.success(
-					result.added > 0
-						? t('torrents.auto.addedToast', { count: result.added })
-						: t('torrents.auto.nothing'),
-					{ id: 'torrent-rule-check' }
-				)
-			),
-			checkTorrentRuleMutation.finished.failure.watch(({ error }) =>
-				toast.error(error.body?.detail ?? t('torrents.auto.checkFailed'), {
-					id: 'torrent-rule-check'
-				})
-			)
-		]
-
-		return () => stop.forEach(unwatch => unwatch())
-	}, [t])
+	useUnitWatch(checkTorrentRuleMutation.finished.success, ({ result }) =>
+		toast.success(
+			result.added > 0
+				? t('torrents.auto.addedToast', { count: result.added })
+				: t('torrents.auto.nothing'),
+			{ id: 'torrent-rule-check' }
+		)
+	)
+	useUnitWatch(checkTorrentRuleMutation.finished.failure, ({ error }) =>
+		toast.error(problemDetail(error, t('torrents.auto.checkFailed')), {
+			id: 'torrent-rule-check'
+		})
+	)
 
 	const rules = data?.rules ?? []
 
@@ -133,7 +128,7 @@ function RuleRow({
 
 	// Several rows share the check mutation; only this row's button spins.
 	const [mine, setMine] = useState(false)
-	useEffect(() => checkTorrentRuleMutation.finished.finally.watch(() => setMine(false)), [])
+	useUnitWatch(checkTorrentRuleMutation.finished.finally, () => setMine(false))
 
 	return (
 		<li className={clsx(styles.row, !rule.enabled && styles.off)}>
@@ -192,7 +187,8 @@ function RuleRow({
 					label={rule.enabled ? t('torrents.auto.on') : t('torrents.auto.off')}
 				/>
 
-				<DropdownMenu
+				<MoreMenu
+					label={t('torrents.menu')}
 					items={[
 						{
 							id: 'remove',
@@ -202,15 +198,6 @@ function RuleRow({
 							onSelect: () => remove(rule.media_ref)
 						}
 					]}
-					trigger={
-						<Button
-							size='small'
-							variant='ghost'
-							iconOnly
-							aria-label={t('torrents.menu')}
-							startIcon={<Icon name='common/more-vertical' size={16} />}
-						/>
-					}
 				/>
 			</div>
 		</li>

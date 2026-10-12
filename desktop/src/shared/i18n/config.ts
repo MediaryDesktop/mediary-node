@@ -1,3 +1,5 @@
+import { readStored, writeStored } from '../lib/storage'
+
 export const LANGUAGES = ['en', 'uk', 'ru'] as const
 
 export type Language = (typeof LANGUAGES)[number]
@@ -11,17 +13,11 @@ export function isLanguage(value: unknown): value is Language {
 }
 
 export function readStoredLanguage(): Language | null {
-	try {
-		const stored = window.localStorage.getItem(STORAGE_KEY)
+	const stored = readStored(STORAGE_KEY)
 
-		return isLanguage(stored) ? stored : null
-	} catch {
-		return null
-	}
+	return isLanguage(stored) ? stored : null
 }
 
 export function storeLanguage(language: Language): void {
-	try {
-		window.localStorage.setItem(STORAGE_KEY, language)
-	} catch {}
+	writeStored(STORAGE_KEY, language)
 }

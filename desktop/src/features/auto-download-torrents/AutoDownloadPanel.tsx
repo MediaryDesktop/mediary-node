@@ -4,8 +4,10 @@ import type { TFunction } from 'i18next'
 import { useEffect, useState } from 'react'
 import { IoIosRefresh } from 'react-icons/io'
 
+import { problemDetail } from '@shared/api'
+import type { RequestFailure } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
-import { formatRelativeTime } from '@shared/lib'
+import { formatRelativeTime, useUnitWatch } from '@shared/lib'
 import { Button, Disclosure, Icon, Input, Switch, toast } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
@@ -28,8 +30,6 @@ export interface AutoDownloadPanelProps {
 	title: string
 }
 
-type Failure = { error: { body?: { detail?: string } | null } }
-
 // A title's new episodes, downloaded by the node on its own: the switch makes
 // the rule, the rest tunes it. The node looks every 30 minutes.
 export function AutoDownloadPanel({ mediaRef, title }: AutoDownloadPanelProps) {
@@ -49,17 +49,11 @@ export function AutoDownloadPanel({ mediaRef, title }: AutoDownloadPanelProps) {
 		}
 	}, [load, mediaRef, nodeReady])
 
-	useEffect(() => {
-		const failed = ({ error }: Failure) =>
-			toast.error(error.body?.detail ?? t('torrents.auto.saveFailed'), { id: 'torrent-rule' })
+	const failed = ({ error }: RequestFailure) =>
+		toast.error(problemDetail(error, t('torrents.auto.saveFailed')), { id: 'torrent-rule' })
 
-		const stop = [
-			putTorrentRuleMutation.finished.failure.watch(failed),
-			deleteTorrentRuleMutation.finished.failure.watch(failed)
-		]
-
-		return () => stop.forEach(unwatch => unwatch())
-	}, [t])
+	useUnitWatch(putTorrentRuleMutation.finished.failure, failed)
+	useUnitWatch(deleteTorrentRuleMutation.finished.failure, failed)
 
 	// The query is shared by every title page; an answer for another title is not
 	// this one's.
@@ -117,20 +111,14 @@ function RuleDetails({ rule }: { rule: TorrentRule }) {
 	const [result, setResult] = useState<{ check: TorrentRuleCheck; preview: boolean } | null>(null)
 	const [lastPreview, setLastPreview] = useState(false)
 
-	useEffect(() => {
-		const stop = [
-			checkTorrentRuleMutation.finished.success.watch(({ params, result: check }) =>
-				setResult({ check, preview: params.preview })
-			),
-			checkTorrentRuleMutation.finished.failure.watch(({ error }) =>
-				toast.error(error.body?.detail ?? t('torrents.auto.checkFailed'), {
-					id: 'torrent-rule-check'
-				})
-			)
-		]
-
-		return () => stop.forEach(unwatch => unwatch())
-	}, [t])
+	useUnitWatch(checkTorrentRuleMutation.finished.success, ({ params, result: check }) =>
+		setResult({ check, preview: params.preview })
+	)
+	useUnitWatch(checkTorrentRuleMutation.finished.failure, ({ error }) =>
+		toast.error(problemDetail(error, t('torrents.auto.checkFailed')), {
+			id: 'torrent-rule-check'
+		})
+	)
 
 	const dirty = from !== String(rule.from_episode) || query.trim() !== rule.query
 

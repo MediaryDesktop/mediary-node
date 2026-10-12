@@ -3,7 +3,9 @@ import { useUnit } from 'effector-react'
 import { useEffect, useState } from 'react'
 
 import type { HttpRequestError } from '@shared/api'
+import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
+import { useUnitWatch } from '@shared/lib'
 import { Button, Icon, Input, toast } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
@@ -46,19 +48,13 @@ function SourceKeySettings({ settingsQuery, saveMutation, texts, keysPage }: Sou
 		}
 	}, [load, nodeReady])
 
-	useEffect(() => {
-		const stop = [
-			saveMutation.finished.failure.watch(({ error }) =>
-				toast.error(error.body?.detail ?? t(`${texts}.saveFailed`), { id: `${texts}-settings` })
-			),
-			saveMutation.finished.success.watch(({ params }) => {
-				setKey('')
-				toast.success(t(params ? `${texts}.saved` : `${texts}.cleared`), { id: `${texts}-settings` })
-			})
-		]
-
-		return () => stop.forEach(unwatch => unwatch())
-	}, [saveMutation, t, texts])
+	useUnitWatch(saveMutation.finished.failure, ({ error }) =>
+		toast.error(problemDetail(error, t(`${texts}.saveFailed`)), { id: `${texts}-settings` })
+	)
+	useUnitWatch(saveMutation.finished.success, ({ params }) => {
+		setKey('')
+		toast.success(t(params ? `${texts}.saved` : `${texts}.cleared`), { id: `${texts}-settings` })
+	})
 
 	if (!settings) {
 		return null

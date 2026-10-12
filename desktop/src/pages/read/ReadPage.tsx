@@ -2,6 +2,7 @@ import { useRouter } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
 import { useEffect, useMemo, useState } from 'react'
 
+import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
 import { Button, ReelLoader } from '@shared/ui'
 
@@ -52,7 +53,7 @@ export function ReadPage({ chapterRef, onOpenChapter }: ReadPageProps) {
 		if (chapterError && !chapterPending) {
 			return (
 				<Panel onClose={close}>
-					<p>{chapterError.body?.detail ?? t('reader.loadFailed')}</p>
+					<p>{problemDetail(chapterError, t('reader.loadFailed'))}</p>
 					<Button onClick={() => loadChapter(chapterRef)}>{t('media.retry')}</Button>
 				</Panel>
 			)

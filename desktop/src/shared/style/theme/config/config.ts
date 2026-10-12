@@ -1,3 +1,5 @@
+import { readStored, writeStored } from '../../../lib/storage'
+
 export const THEMES = ['dark', 'light'] as const
 
 export type Theme = (typeof THEMES)[number]
@@ -11,17 +13,11 @@ export function isTheme(value: unknown): value is Theme {
 }
 
 export function readStoredTheme(): Theme | null {
-	try {
-		const stored = window.localStorage.getItem(STORAGE_KEY)
+	const stored = readStored(STORAGE_KEY)
 
-		return isTheme(stored) ? stored : null
-	} catch {
-		return null
-	}
+	return isTheme(stored) ? stored : null
 }
 
 export function storeTheme(theme: Theme): void {
-	try {
-		window.localStorage.setItem(STORAGE_KEY, theme)
-	} catch {}
+	writeStored(STORAGE_KEY, theme)
 }
