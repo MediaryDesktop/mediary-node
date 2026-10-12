@@ -110,7 +110,7 @@ export function DatePicker({ value, onChange, disabled, placeholder, className }
 		<div className={clsx(styles.field, className)}>
 			<ReactDatePicker
 				selected={parseValue(value)}
-				onChange={date => onChange(formatValue(date))}
+				onChange={(date: Date | null) => onChange(formatValue(date))}
 				disabled={disabled}
 				locale={i18n.language}
 				dateFormat='dd.MM.yyyy'
