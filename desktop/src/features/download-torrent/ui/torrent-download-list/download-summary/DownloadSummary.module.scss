@@ -1,0 +1,30 @@
+.summary {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 1rem;
+	color: var(--text-muted);
+	font-size: 0.875rem;
+
+	.client {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		margin-left: auto;
+	}
+
+	.dot {
+		width: 0.5rem;
+		height: 0.5rem;
+		border-radius: 999px;
+		background: var(--text-disabled);
+
+		&.up {
+			background: var(--success);
+		}
+
+		&.down {
+			background: var(--danger);
+		}
+	}
+}

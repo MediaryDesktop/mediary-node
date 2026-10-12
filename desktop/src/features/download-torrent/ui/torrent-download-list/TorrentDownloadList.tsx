@@ -1,15 +1,12 @@
-import { Link, useNavigate } from '@tanstack/react-router'
-import clsx from 'clsx'
+import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
 import { useEffect } from 'react'
-import { IoLibraryOutline } from 'react-icons/io5'
 
 import { problemDetail } from '@shared/api'
 import type { RequestFailure } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
-import { formatBytes, formatDuration, useUnitWatch } from '@shared/lib'
-import { Badge, Button, EmptyState, Icon, MoreMenu, PosterFade, ProgressBar, toast } from '@shared/ui'
-import type { BadgeTone } from '@shared/ui'
+import { useUnitWatch } from '@shared/lib'
+import { EmptyState, toast } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
 
@@ -22,12 +19,12 @@ import {
 	TorrentSetupNotice,
 	useTorrentSetup
 } from '@entities/torrent'
-import type { TorrentDownload } from '@entities/torrent'
 
 import { displayState } from '../../lib/display-state'
-import type { TorrentDisplayState } from '../../lib/display-state'
 import { $filesFor, filesDismissed, filesRequested } from '../../model/model'
 
+import { DownloadRow } from './download-row/DownloadRow'
+import { DownloadSummary } from './download-summary/DownloadSummary'
 import { TorrentFilesDrawer } from './files-drawer/TorrentFilesDrawer'
 import styles from './TorrentDownloadList.module.scss'
 
@@ -35,21 +32,6 @@ export interface TorrentDownloadListProps {
 	// Only this title's downloads; all of them, with a summary, when left out.
 	mediaRef?: string
 	poster?: string | null
-}
-
-const STATE_TONE: Record<TorrentDisplayState, BadgeTone> = {
-	choosing: 'warning',
-	downloading: 'success',
-	paused: 'neutral',
-	stalled: 'neutral',
-	queued: 'neutral',
-	checking: 'info',
-	metadata: 'info',
-	error: 'danger',
-	importing: 'info',
-	done: 'accent',
-	failed: 'danger',
-	unknown: 'neutral'
 }
 
 // Torrents the node added to its client, newest first. The node polls the client
@@ -131,25 +113,7 @@ export function TorrentDownloadList({ mediaRef, poster }: TorrentDownloadListPro
 			/>
 
 			{!mediaRef && downloads.length > 0 && (
-				<div className={styles.summary}>
-					<span>{t('torrents.list.active', { count: active })}</span>
-					<span>{t('torrents.list.inLibrary', { count: inLibrary })}</span>
-					{setup.clientConfigured && (
-						<span className={styles.client}>
-							<span
-								className={clsx(
-									styles.dot,
-									setup.clientReachable === false
-										? styles.down
-										: setup.clientReachable && styles.up
-								)}
-							/>
-							{setup.clientKind === 'embedded'
-								? t('torrents.settings.embedded')
-								: 'qBittorrent'}
-						</span>
-					)}
-				</div>
+				<DownloadSummary active={active} inLibrary={inLibrary} setup={setup} />
 			)}
 
 			{downloads.length === 0 ? (
@@ -178,149 +142,5 @@ export function TorrentDownloadList({ mediaRef, poster }: TorrentDownloadListPro
 
 			<TorrentFilesDrawer download={choosing} onClose={dismissFiles} />
 		</section>
-	)
-}
-
-interface DownloadRowProps {
-	item: TorrentDownload
-	showTitle: boolean
-	poster?: string | null
-	onPause: () => void
-	onResume: () => void
-	onRemove: (withFiles: boolean) => void
-	onChooseFiles: () => void
-}
-
-function DownloadRow({
-	item,
-	showTitle,
-	poster,
-	onPause,
-	onResume,
-	onRemove,
-	onChooseFiles
-}: DownloadRowProps) {
-	const { t } = useTranslation()
-
-	const state = displayState(item)
-	const live = item.live
-	const downloading = item.state === 'downloading'
-	const moving = downloading && live && !live.paused && !item.choosing
-
-	return (
-		<li className={clsx(styles.row, styles[state])}>
-			{poster && <PosterFade src={poster} className={styles.poster} />}
-
-			<div className={styles.body}>
-				<p className={styles.name} title={item.name || item.title}>
-					{item.name || item.title}
-				</p>
-
-				{showTitle && (
-					<Link
-						to='/media/$mediaRef'
-						params={{ mediaRef: item.media_ref }}
-						className={styles.title}
-					>
-						{item.title}
-					</Link>
-				)}
-
-				<div className={styles.stats}>
-					<Badge
-						tone={STATE_TONE[state]}
-						icon={state === 'done' ? <IoLibraryOutline size={14} /> : undefined}
-					>
-						{t(`torrents.states.${state}`)}
-					</Badge>
-
-					{downloading && live && live.size > 0 && (
-						<span className={styles.progress}>
-							{Math.floor(live.progress * 100)}% · {formatBytes(live.size * live.progress)} /{' '}
-							{formatBytes(live.size)}
-						</span>
-					)}
-
-					{moving && (
-						<>
-							<span className={styles.stat} title={t('torrents.meta.down')}>
-								<Icon name='common/download' size={13} />
-								{t('torrents.meta.speed', { speed: formatBytes(live.dl_speed) })}
-							</span>
-							<span className={styles.stat}>
-								{t('torrents.meta.seeds', { seeds: live.seeds, peers: live.peers })}
-							</span>
-							{live.eta ? (
-								<span className={styles.stat}>
-									<Icon name='common/clock' size={13} />
-									{formatDuration(live.eta)}
-								</span>
-							) : null}
-						</>
-					)}
-
-					{item.state === 'done' && (
-						<span className={styles.stat}>
-							{t('torrents.meta.imported', { count: item.imported })}
-						</span>
-					)}
-				</div>
-
-				{item.state === 'failed' && item.error && <p className={styles.error}>{item.error}</p>}
-
-				{downloading && live && (
-					<ProgressBar value={live.progress * 100} max={100} className={styles.bar} />
-				)}
-			</div>
-
-			<div className={styles.actions}>
-				{item.choosing && (
-					<Button size='small' onClick={onChooseFiles}>
-						{t('torrents.files.choose')}
-					</Button>
-				)}
-
-				{downloading && live && !item.choosing && (
-					<Button
-						size='small'
-						variant='ghost'
-						iconOnly
-						aria-label={live.paused ? t('torrents.resume') : t('torrents.pause')}
-						title={live.paused ? t('torrents.resume') : t('torrents.pause')}
-						startIcon={<Icon name={live.paused ? 'common/play' : 'common/pause'} size={14} />}
-						onClick={live.paused ? onResume : onPause}
-					/>
-				)}
-
-				<MoreMenu
-					label={t('torrents.menu')}
-					items={[
-						...(downloading
-							? [
-									{
-										id: 'files',
-										label: t('torrents.files.choose'),
-										icon: 'common/list-checks' as const,
-										onSelect: onChooseFiles
-									}
-								]
-							: []),
-						{
-							id: 'remove',
-							label: t('torrents.remove'),
-							icon: 'common/close',
-							onSelect: () => onRemove(false)
-						},
-						{
-							id: 'remove-files',
-							label: t('torrents.removeWithFiles'),
-							icon: 'common/trash',
-							danger: true,
-							onSelect: () => onRemove(true)
-						}
-					]}
-				/>
-			</div>
-		</li>
 	)
 }
