@@ -127,14 +127,24 @@
 заради цього не вводимо) і `Drawer.onOpenChange={next => !next && onClose()}`
 (однорядковий, читається без обгортки).
 
-### Етап 2 — структура фіч
+### Етап 2 — структура фіч ✅
 
 Кожна фіча — до правила вище: `model/`, `lib/`, `config/`, `ui/<part>/`.
-Порядок: від простих до складних — `manage-opds-servers`,
-`manage-torrent-client`, `manage-torznab-sources`, `auto-download-torrents`,
-`scan-library`, `match-library-file`, `download-chapters`, `download-torrent`,
-`manage-unmatched-files`, `library-explorer`, `search-torrents`,
-`search-media`, `manage-lists`, `continue-watching`, `track-media`.
+Зроблено для `manage-opds-servers`, `manage-torrent-client`,
+`manage-torznab-sources`, `auto-download-torrents`, `download-chapters`,
+`download-torrent`, `library-explorer`, `manage-unmatched-files`,
+`match-library-file`, `scan-library`, `manage-lists`, `search-media`,
+`search-torrents`, `track-media`, `continue-watching`, `title-chapters`.
+
+- Частина, яку використовує лише один компонент, лежить усередині його теки:
+  `torrent-download-list/files-drawer`, `list-drawer/icon-picker`,
+  `manage-entry-drawer/list-picker`, `torznab-sources/source-drawer`.
+- Спільний `TorrentClient.module.scss` розділено між налаштуваннями й drawer'ом.
+- `search-media`: `config.ts` → `config/config.ts`, `types.ts` →
+  `model/types.ts` (це типи стану моделі).
+- Фічі з одним компонентом (`choose-player`, `connect-anilist`,
+  `link-manga-source`, `manage-library-roots`, `manage-mangadex`,
+  `manage-source-keys`, `switch-*`) уже відповідали правилу.
 
 ### Етап 3 — структура сторінок і каркаса
 
