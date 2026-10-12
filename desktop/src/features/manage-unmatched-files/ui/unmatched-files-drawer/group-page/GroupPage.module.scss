@@ -1,0 +1,100 @@
+.folder {
+	display: flex;
+	align-items: center;
+	gap: 0.625rem;
+	padding: 0.7rem 1rem;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-md);
+	color: var(--text-secondary);
+	font-size: 0.875rem;
+	letter-spacing: 0.02em;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+
+	span {
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+}
+
+.idRow {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+
+	.idLabel {
+		flex: none;
+		margin: 0 0.5rem 0 0;
+		color: var(--text);
+		font-size: 1.0625rem;
+		font-weight: 600;
+	}
+
+	.idInput {
+		flex: 1;
+	}
+}
+
+.files {
+	display: flex;
+	flex-direction: column;
+	max-height: 50vh;
+	padding: 0.25rem;
+	overflow-y: auto;
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	background: var(--bg-subtle);
+
+	> * + * {
+		border-top: 1px solid var(--border);
+	}
+}
+
+.actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.25rem;
+
+	.spacer {
+		flex: 1;
+	}
+
+	.ignore {
+		border-color: var(--warning-muted);
+		border-radius: 999px;
+		background: var(--warning-muted);
+		color: var(--warning-text);
+	}
+}
+
+.muted {
+	margin: 0;
+	color: var(--text-muted);
+	font-size: 0.875rem;
+}
+
+.suggestions {
+	display: flex;
+	flex-direction: column;
+	gap: 0.625rem;
+
+	.heading {
+		margin: 0;
+		color: var(--text);
+		font-size: 1rem;
+		font-weight: 600;
+	}
+}
+
+.grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 0.5rem;
+
+	@media (max-width: 900px) {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
