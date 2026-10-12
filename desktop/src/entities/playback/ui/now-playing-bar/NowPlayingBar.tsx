@@ -3,7 +3,7 @@ import { useUnit } from 'effector-react'
 import { useTranslation } from '@shared/i18n'
 import { Badge, Icon, ProgressBar, Tooltip } from '@shared/ui'
 
-import { formatTimecode, playbackModel } from '../model/model'
+import { formatTimecode, playbackModel } from '../../model/model'
 
 import styles from './NowPlayingBar.module.scss'
 

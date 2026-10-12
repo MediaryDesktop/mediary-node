@@ -2,7 +2,7 @@ import { useUnit } from 'effector-react'
 import { useEffect, useState } from 'react'
 import type { CSSProperties } from 'react'
 
-import { $playerOpenedAt } from '../model/player-session'
+import { $playerOpenedAt } from '../../../model/player-session'
 
 export const PLAYER_ENTER_MS = 340
 

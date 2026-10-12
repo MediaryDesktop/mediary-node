@@ -1,0 +1,56 @@
+@use "../overlay-bar" as *;
+
+.top {
+	@include overlay-bar(-10px);
+
+	top: 0;
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	height: calc(var(--titlebar-height) + 2.5rem);
+	padding: 0 0 0 1rem;
+	background: linear-gradient(to bottom, rgb(0 0 0 / 75%), transparent);
+	-webkit-app-region: drag;
+
+	.heading {
+		display: flex;
+		flex-direction: column;
+		min-width: 0;
+
+		.title {
+			overflow: hidden;
+			font-size: 1.0625rem;
+			font-weight: 650;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		.subtitle {
+			color: rgb(255 255 255 / 70%);
+			font-size: 0.8125rem;
+		}
+	}
+
+	.window {
+		align-self: flex-start;
+		margin-left: auto;
+	}
+
+	.controlEnd {
+		margin-left: auto;
+	}
+
+	button,
+	.window {
+		-webkit-app-region: no-drag;
+	}
+
+	&.mini {
+		justify-content: space-between;
+		height: auto;
+		padding: 6px;
+		background: linear-gradient(to bottom, rgb(0 0 0 / 70%), transparent);
+		// Over the page, a drag region here would move the whole app window.
+		-webkit-app-region: no-drag;
+	}
+}

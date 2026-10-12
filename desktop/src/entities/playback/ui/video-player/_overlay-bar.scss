@@ -1,0 +1,20 @@
+// The header and the controls lie over the picture and slide in from their own edge
+// while they fade, and out again.
+@mixin overlay-bar($hidden-offset) {
+	position: absolute;
+	right: 0;
+	left: 0;
+	z-index: 2;
+	opacity: 0;
+	pointer-events: none;
+	transform: translateY($hidden-offset);
+	transition:
+		opacity 0.35s var(--ease),
+		transform 0.35s var(--ease);
+
+	&.visible {
+		opacity: 1;
+		pointer-events: auto;
+		transform: none;
+	}
+}
