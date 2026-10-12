@@ -10,6 +10,20 @@
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
+
+		.iconAction {
+			background: var(--surface);
+			color: var(--text-secondary);
+
+			&:hover:not(:disabled) {
+				background: var(--surface-hover);
+				color: var(--text);
+			}
+
+			&:disabled {
+				color: var(--text-disabled);
+			}
+		}
 	}
 
 	.viewTabs {
@@ -32,20 +46,6 @@
 			&:disabled {
 				color: var(--text-disabled);
 			}
-		}
-	}
-
-	.iconAction {
-		background: var(--surface);
-		color: var(--text-secondary);
-
-		&:hover:not(:disabled) {
-			background: var(--surface-hover);
-			color: var(--text);
-		}
-
-		&:disabled {
-			color: var(--text-disabled);
 		}
 	}
 

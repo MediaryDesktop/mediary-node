@@ -3,27 +3,29 @@
 	--featured-height: 22rem;
 }
 
+// Rendered by FeaturedBanner's own corner slot, several elements below anything
+// of ours — kept unscoped rather than nested under a distant ancestor.
 .progress {
 	display: flex;
 	flex-direction: column;
 	gap: 0.375rem;
 	width: 16rem;
-}
 
-.progressLabel {
-	display: flex;
-	justify-content: space-between;
-	gap: 1rem;
-	color: var(--text-secondary);
-	font-size: 0.875rem;
+	.progressLabel {
+		display: flex;
+		justify-content: space-between;
+		gap: 1rem;
+		color: var(--text-secondary);
+		font-size: 0.875rem;
 
-	strong {
-		color: var(--text);
-		font-weight: 650;
-		font-variant-numeric: tabular-nums;
+		strong {
+			color: var(--text);
+			font-weight: 650;
+			font-variant-numeric: tabular-nums;
+		}
 	}
-}
 
-.progressBar {
-	width: 100%;
+	.progressBar {
+		width: 100%;
+	}
 }

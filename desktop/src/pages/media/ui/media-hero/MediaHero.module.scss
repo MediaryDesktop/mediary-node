@@ -289,33 +289,33 @@
 						}
 					}
 
-					.textLink {
-						padding: 0;
-						border: 0;
-						background: transparent;
-						color: var(--text-secondary);
-						font: inherit;
-						font-size: 0.9375rem;
-						cursor: pointer;
-						transition: color 160ms;
+					.iconActionWrap {
+						display: inline-flex;
 
-						&:hover:not(:disabled) {
-							color: var(--text);
-						}
+						.textLink {
+							padding: 0;
+							border: 0;
+							background: transparent;
+							color: var(--text-secondary);
+							font: inherit;
+							font-size: 0.9375rem;
+							cursor: pointer;
+							transition: color 160ms;
 
-						&:disabled {
-							color: var(--text-disabled);
-							cursor: default;
+							&:hover:not(:disabled) {
+								color: var(--text);
+							}
+
+							&:disabled {
+								color: var(--text-disabled);
+								cursor: default;
+							}
 						}
 					}
 				}
 			}
 		}
 	}
-}
-
-.iconActionWrap {
-	display: inline-flex;
 }
 
 .low {

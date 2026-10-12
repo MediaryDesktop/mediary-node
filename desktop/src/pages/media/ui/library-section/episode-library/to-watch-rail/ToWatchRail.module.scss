@@ -8,121 +8,123 @@
 		gap: 0.5rem;
 		margin: 0 0 0.75rem;
 	}
-}
 
-.toWatch {
-	display: grid;
-	grid-auto-columns: max(18rem, calc((100% - 2.5rem) / 3));
-	grid-auto-flow: column;
-	gap: 1.25rem;
-	margin: 0;
-	padding: 0 0 0.25rem;
-	overflow-x: auto;
-	list-style: none;
-	scroll-snap-type: x mandatory;
-	scrollbar-width: none;
+	.toWatch {
+		display: grid;
+		grid-auto-columns: max(18rem, calc((100% - 2.5rem) / 3));
+		grid-auto-flow: column;
+		gap: 1.25rem;
+		margin: 0;
+		padding: 0 0 0.25rem;
+		overflow-x: auto;
+		list-style: none;
+		scroll-snap-type: x mandatory;
+		scrollbar-width: none;
 
-	li {
-		scroll-snap-align: start;
-	}
-
-	.card {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-		width: 100%;
-		padding: 0;
-		border: none;
-		background: none;
-		color: var(--text);
-		text-align: left;
-		cursor: pointer;
-
-		.cardImage {
-			position: relative;
-			display: block;
-			width: 100%;
-			aspect-ratio: 2 / 1;
-			overflow: hidden;
-			border-radius: var(--radius-lg);
-			background: var(--surface);
-
-			img {
-				width: 100%;
-				height: 100%;
-				object-fit: cover;
-				transition: transform 0.3s ease;
-			}
+		li {
+			scroll-snap-align: start;
 		}
 
-		.cardPlay {
-			position: absolute;
-			inset: 0;
-			display: grid;
-			place-items: center;
-			background: rgb(0 0 0 / 35%);
-			color: #fff;
-			opacity: 0;
-			transition: opacity 0.2s ease;
-		}
-
-		.cardText {
+		// Rendered by the sibling ToWatchCard component, which reuses this
+		// stylesheet.
+		.card {
 			display: flex;
 			flex-direction: column;
-			gap: 0.125rem;
-			min-width: 0;
-		}
+			gap: 0.75rem;
+			width: 100%;
+			padding: 0;
+			border: none;
+			background: none;
+			color: var(--text);
+			text-align: left;
+			cursor: pointer;
 
-		.cardName {
-			overflow: hidden;
-			font-size: 1.0625rem;
-			font-weight: 650;
-			text-overflow: ellipsis;
-			white-space: nowrap;
-		}
+			.cardImage {
+				position: relative;
+				display: block;
+				width: 100%;
+				aspect-ratio: 2 / 1;
+				overflow: hidden;
+				border-radius: var(--radius-lg);
+				background: var(--surface);
 
-		.cardRow {
-			display: flex;
-			align-items: baseline;
-			justify-content: space-between;
-			gap: 1rem;
-		}
-
-		.cardTitle {
-			font-size: 1.375rem;
-			font-weight: 600;
-		}
-
-		.cardOf {
-			color: var(--text-muted);
-		}
-
-		.cardMeta {
-			flex: none;
-			color: var(--text-secondary);
-			font-size: 1rem;
-		}
-
-		&:hover:not(:disabled) {
-			img {
-				transform: scale(1.04);
+				img {
+					width: 100%;
+					height: 100%;
+					object-fit: cover;
+					transition: transform 0.3s ease;
+				}
 			}
 
 			.cardPlay {
-				opacity: 1;
+				position: absolute;
+				inset: 0;
+				display: grid;
+				place-items: center;
+				background: rgb(0 0 0 / 35%);
+				color: #fff;
+				opacity: 0;
+				transition: opacity 0.2s ease;
 			}
-		}
 
-		&:focus-visible {
-			outline: none;
+			.cardText {
+				display: flex;
+				flex-direction: column;
+				gap: 0.125rem;
+				min-width: 0;
 
-			.cardImage {
-				box-shadow: var(--focus-shadow);
+				.cardName {
+					overflow: hidden;
+					font-size: 1.0625rem;
+					font-weight: 650;
+					text-overflow: ellipsis;
+					white-space: nowrap;
+				}
+
+				.cardRow {
+					display: flex;
+					align-items: baseline;
+					justify-content: space-between;
+					gap: 1rem;
+
+					.cardTitle {
+						font-size: 1.375rem;
+						font-weight: 600;
+
+						.cardOf {
+							color: var(--text-muted);
+						}
+					}
+
+					.cardMeta {
+						flex: none;
+						color: var(--text-secondary);
+						font-size: 1rem;
+					}
+				}
 			}
-		}
 
-		&:disabled {
-			cursor: progress;
+			&:hover:not(:disabled) {
+				img {
+					transform: scale(1.04);
+				}
+
+				.cardPlay {
+					opacity: 1;
+				}
+			}
+
+			&:focus-visible {
+				outline: none;
+
+				.cardImage {
+					box-shadow: var(--focus-shadow);
+				}
+			}
+
+			&:disabled {
+				cursor: progress;
+			}
 		}
 	}
 }

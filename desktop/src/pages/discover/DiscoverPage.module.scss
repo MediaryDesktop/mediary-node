@@ -3,6 +3,12 @@
 	flex-direction: column;
 	gap: 1.5rem;
 	padding-bottom: 2rem;
+
+	.rows {
+		display: flex;
+		flex-direction: column;
+		gap: 2.25rem;
+	}
 }
 
 // The switcher itself is hosted and positioned by FeaturedBanner, at the bottom of
@@ -15,12 +21,6 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 0.4375rem;
-}
-
-.rows {
-	display: flex;
-	flex-direction: column;
-	gap: 2.25rem;
 }
 
 .season {

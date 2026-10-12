@@ -30,43 +30,43 @@
 			border-radius: var(--radius);
 			background: var(--surface);
 			list-style: none;
-		}
 
-		.item {
-			display: flex;
-			align-items: center;
-			gap: 0.75rem;
-			width: 100%;
-			padding: 0.625rem 0.75rem;
-			border: 1px solid transparent;
-			border-radius: var(--radius-md);
-			background: none;
-			color: var(--text-secondary);
-			font: inherit;
-			font-size: 0.95rem;
-			text-align: left;
-			cursor: pointer;
-			transition:
-				background-color 120ms ease,
-				color 120ms ease;
-
-			&:hover {
-				background: var(--surface-hover);
-				color: var(--text);
-			}
-
-			&:focus-visible {
-				outline: 2px solid var(--accent);
-				outline-offset: 1px;
-			}
-
-			&.active {
-				background: var(--accent-muted);
-				color: var(--accent-text);
-				font-weight: 600;
+			.item {
+				display: flex;
+				align-items: center;
+				gap: 0.75rem;
+				width: 100%;
+				padding: 0.625rem 0.75rem;
+				border: 1px solid transparent;
+				border-radius: var(--radius-md);
+				background: none;
+				color: var(--text-secondary);
+				font: inherit;
+				font-size: 0.95rem;
+				text-align: left;
+				cursor: pointer;
+				transition:
+					background-color 120ms ease,
+					color 120ms ease;
 
 				&:hover {
-					background: var(--accent-muted-hover);
+					background: var(--surface-hover);
+					color: var(--text);
+				}
+
+				&:focus-visible {
+					outline: 2px solid var(--accent);
+					outline-offset: 1px;
+				}
+
+				&.active {
+					background: var(--accent-muted);
+					color: var(--accent-text);
+					font-weight: 600;
+
+					&:hover {
+						background: var(--accent-muted-hover);
+					}
 				}
 			}
 		}
@@ -77,93 +77,98 @@
 		flex-direction: column;
 		gap: 1.5rem;
 		min-width: 0;
-	}
 
-	.header {
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-
-		.headerIcon {
-			display: inline-flex;
-			flex: none;
-			align-items: center;
-			justify-content: center;
-			width: 3rem;
-			height: 3rem;
-			border: 1px solid var(--accent-border);
-			border-radius: var(--radius);
-			background: var(--accent-muted);
-			color: var(--accent-text);
-		}
-
-		.headerTitle {
-			margin: 0;
-			font-size: 1.5rem;
-			font-weight: 700;
-		}
-
-		.headerSubtitle {
-			margin: 0.125rem 0 0;
-			color: var(--text-secondary);
-			font-size: 0.95rem;
-		}
-	}
-
-	.card {
-		overflow: hidden;
-		border: 1px solid var(--border);
-		border-radius: var(--radius);
-		background: var(--surface);
-	}
-
-	.row {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 1.5rem;
-		padding: 1.125rem 1.25rem;
-
-		& + .row {
-			border-top: 1px solid var(--border);
-		}
-
-		&.block {
-			flex-direction: column;
-			align-items: stretch;
-			gap: 1rem;
-		}
-
-		.label {
+		.header {
 			display: flex;
-			flex-direction: column;
-			gap: 0.25rem;
-			min-width: 0;
+			align-items: center;
+			gap: 1rem;
 
-			.name {
-				font-weight: 600;
+			.headerIcon {
+				display: inline-flex;
+				flex: none;
+				align-items: center;
+				justify-content: center;
+				width: 3rem;
+				height: 3rem;
+				border: 1px solid var(--accent-border);
+				border-radius: var(--radius);
+				background: var(--accent-muted);
+				color: var(--accent-text);
 			}
 
+			.headerTitle {
+				margin: 0;
+				font-size: 1.5rem;
+				font-weight: 700;
+			}
+
+			.headerSubtitle {
+				margin: 0.125rem 0 0;
+				color: var(--text-secondary);
+				font-size: 0.95rem;
+			}
+		}
+
+		// SectionContent() returns a .card of .row's — a local component called
+		// from here, kept at this level so one set of rules reaches it.
+		.card {
+			overflow: hidden;
+			border: 1px solid var(--border);
+			border-radius: var(--radius);
+			background: var(--surface);
+		}
+
+		.row {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 1.5rem;
+			padding: 1.125rem 1.25rem;
+
+			& + .row {
+				border-top: 1px solid var(--border);
+			}
+
+			&.block {
+				flex-direction: column;
+				align-items: stretch;
+				gap: 1rem;
+			}
+
+			// The label's own hint text, next to its name — and, for the node
+			// version row, NodeVersion()'s whole answer, which lands in .control
+			// instead: kept at the row level so one rule reaches both.
 			.hint {
 				color: var(--text-secondary);
 				font-size: 0.8125rem;
 				line-height: 1.4;
 			}
-		}
 
-		.control {
-			min-width: 0;
-		}
-	}
+			.label {
+				display: flex;
+				flex-direction: column;
+				gap: 0.25rem;
+				min-width: 0;
 
-	.link {
-		color: var(--accent-text);
-		font-size: 0.9375rem;
-		text-decoration: none;
-		white-space: nowrap;
+				.name {
+					font-weight: 600;
+				}
+			}
 
-		&:hover {
-			text-decoration: underline;
+			.control {
+				min-width: 0;
+
+				.link {
+					color: var(--accent-text);
+					font-size: 0.9375rem;
+					text-decoration: none;
+					white-space: nowrap;
+
+					&:hover {
+						text-decoration: underline;
+					}
+				}
+			}
 		}
 	}
 }
