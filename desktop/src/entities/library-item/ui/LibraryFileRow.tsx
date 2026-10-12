@@ -5,7 +5,7 @@ import { Badge, DropdownMenu, Icon, RippleButton } from '@shared/ui'
 import type { DropdownMenuItem, IconName } from '@shared/ui'
 
 import type { LibraryFile, LibraryMediaForm } from '../api/api'
-import { fileDuration, fileName, fileNumber, fileSeason } from '../model/model'
+import { fileDuration, fileName, fileNumber, fileSeason } from '../lib/file'
 
 import styles from './LibraryFileRow.module.scss'
 

@@ -6,7 +6,8 @@ import { nodeEventReceived } from '@infra/node'
 import { addLibraryRootFx, deleteLibraryRootFx, fetchLibraryRootsFx, startLibraryScanFx } from '../api/api'
 import type { LibraryRoot } from '../api/api'
 
-import { deleteLibraryRootMutation, libraryModel } from './model'
+import { libraryModel } from './model'
+import { deleteLibraryRootMutation } from './queries'
 
 const ROOT: LibraryRoot = {
 	id: 1,
