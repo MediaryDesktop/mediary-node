@@ -1,0 +1,177 @@
+# Рефакторинг renderer'а — план
+
+Стосується лише `desktop/src`. Нода (`server/`) і `electron/` не чіпаються.
+
+## Висновок аудиту в одному абзаці
+
+Каркас уже правильний: FSD-шари, публічні `index.ts`, лінтер забороняє імпорти
+вбік і вглиб, циклів між слайсами немає, `TODO`/`FIXME` у коді нуль. Тобто
+переписувати архітектуру не треба. Борг лежить у трьох місцях: **(1)** один і
+той самий код повторюється в 10–25 файлах фіч (підписка на мутації, текст
+помилки сервера, `localStorage`, кнопка перевірки з'єднання); **(2)** частина
+слайсів досі «пласка» — кілька компонентів, модель і утиліти лежать в одній
+теці, всупереч §6 [architecture.md](architecture.md); **(3)** десяток файлів
+переріс 300 рядків і тримає кілька тем одночасно (§12). План прибирає це
+порядком «спершу спільні інструменти, потім структура, потім великі файли» —
+кожен наступний етап коротшає завдяки попередньому.
+
+## Правило структури слайса
+
+Те, до чого приводиться кожен слайс (`pages`, `features`, `entities`):
+
+```
+<slice>/
+├── index.ts              публічний API
+├── <Main>.tsx            один головний компонент, що все компонує (якщо він є)
+├── <Main>.module.scss
+├── ui/                   решта компонентів — кожен у власній kebab-case теці
+│   └── <part>/<Part>.tsx (+ .module.scss, вкладені частини — глибше)
+├── model/                Effector: стор, події, ефекти, atom-моделі
+├── api/                  запити (лише entities)
+├── lib/                  чисті функції та хуки без розмітки
+├── config/               константи, які читають двоє й більше
+└── types/ або types.ts   типи, які читають двоє й більше
+```
+
+- У корені слайса не лежить нічого, крім `index.ts` і головного компонента.
+  Якщо головного немає (слайс експортує кілька рівноправних віджетів) — усі
+  вони в `ui/`.
+- Модель завжди в `model/`, навіть одним файлом: тоді `model/` ↔ «тут стан»
+  читається однаково в усіх слайсах.
+- Константа чи тип, що належить одному компоненту, лишається в ньому (§6).
+- Не ділимо там, де розбиття протягує десяток пропсів (§12, «Коли не ділити»).
+
+## Що знайдено
+
+### Дублювання
+
+| Повтор | Скільки | Куди |
+|---|---|---|
+| `useEffect(() => { const stop = [m.finished.success.watch(…), …]; return () => stop.forEach(…) })` | 14 файлів | `shared/lib/useUnitWatch` |
+| `error.body?.detail ?? t('…')` + тип `{ error: { body?: { detail?: string } \| null } }` | ~25 місць, тип — 6 копій | `shared/api/problemDetail` |
+| `try { localStorage.getItem… } catch {}` пара read/write | 6 файлів | `shared/lib/storage` |
+| Кнопка «Перевірити з'єднання» + статус ok/problem і їхні стилі | 3 drawer'и | `shared/ui/connection-check` |
+| `fileName(file)` у `manage-unmatched-files` — копія з `entities/library-item` | 1 | імпорт із сутності |
+
+### Пласкі слайси (кілька компонентів у корені)
+
+`app/layout` (5 компонентів + wiring), `pages/auth` (5), `features/manage-lists`
+(4 + модель + утиліта), `pages/read`, `features/search-media`,
+`manage-unmatched-files`, `manage-torznab-sources`, `library-explorer`,
+`download-torrent`, `download-chapters` (по 3), `pages/settings`, `pages/lists`,
+`pages/fallback`, `scan-library`, `manage-torrent-client`, `manage-opds-servers`,
+`auto-download-torrents` (по 2). Плюс 8 фіч тримають `model.ts` у корені.
+
+`pages/media` і `pages/library` уже поділені на теки-частини, але без `ui/` —
+приводяться до того ж вигляду, що `pages/home` після останнього рефакторингу.
+
+### Файли, що переросли ~300 рядків
+
+| Файл | Рядків | Що в ньому змішано |
+|---|---|---|
+| `entities/playback/ui/VideoPlayer.tsx` | 635 | клавіатура, автоприховування контролів, звітування прогресу, аудіодоріжки, анімація виходу, розмітка |
+| `pages/media/library-section/LibrarySection.tsx` | 587 | 8 компонентів, 2 хуки, групування за сезонами |
+| `features/search-torrents/TorrentSearchDrawer.tsx` | 403 | форма пошуку, фільтри, список результатів |
+| `features/library-explorer/LibraryExplorer.tsx` | 399 | стан дерева, виділення, клавіатура, розмітка |
+| `entities/reader/ui/book/BookReaderView.tsx` | 373 | рідер, панель змісту, налаштування вигляду |
+| `pages/media/library-section/ChapterList.tsx` | 367 | фільтр джерел з `localStorage`, злиття завантажень, рядок розділу |
+| `entities/library-item/model/model.ts` | 355 | запити/мутації, події сканування, модель, чисті хелпери файлу |
+| `features/track-media/model/model.ts` | 345 | дві моделі + тост синхронізації |
+| `features/download-torrent/TorrentDownloadList.tsx` | 337 | список + рядок + тони стану |
+| `pages/library/scan-history/ScanHistoryPage.tsx` | 306 | пошук, групування, сторінка, група |
+| `features/manage-unmatched-files/UnmatchedFilesDrawer.tsx` | 305 | drawer, сторінка групи, картка пропозиції |
+| `features/auto-download-torrents/AutoDownloadPanel.tsx` | 303 | панель, деталі правила, підпис епізодів |
+
+`shared/ui/select-dropdown` (352) і `shared/ui/rating-stars` (304) свідомо
+лишаються цілими — §12.
+
+### Стан перевірок до початку
+
+- `arch:check` ✔, `test` ✔ (49 файлів, 267 тестів).
+- `typecheck` ✘ — тільки `shared/ui/icon/sprite.gen.ts`: генератор пише
+  `viewBox` рядком туди, де тип чекає число (з коміту `49550e5`).
+- `format:check` ✘ — 16 файлів не відформатовані.
+
+## Етапи
+
+Кожен етап — окремий коміт (або кілька), після кожного зелені `arch:check`,
+`typecheck`, `test`, `format:check`. Поведінка не змінюється ніде.
+
+### Етап 0 — зелена базова лінія ✅
+
+1. `prettier --write` для 16 файлів.
+2. `sprite.gen.ts`: `@neodx/svg` пропускає висоту, коли вона дорівнює ширині,
+   але `viewBox` пише — і виходить `[64, '0 0 24 24']`. Виправлено в самих SVG
+   (`check`, `file-tree`, `list`, `node`, `reset`, `search`, `sparkles`):
+   розміри збігаються з `viewBox`, зсунутий `viewBox` перенесено в
+   `<g transform>`. `Icon` читає лише `viewBox`, тож вигляд не змінився.
+3. `DatePicker`: явний тип параметра `onChange`.
+
+### Етап 1 — спільні інструменти (DRY) ✅
+
+1. `shared/lib/useUnitWatch(unit, handler)` — підписка на Effector-юніт на час
+   життя компонента; завжди кличе свіжий handler, тож без списку залежностей.
+   Замінив 19 `useEffect`-блоків із ручним `watch`/`unwatch`.
+2. `shared/api/problemDetail(error, fallback)` і тип `RequestFailure` — замість
+   ~25 `error.body?.detail ?? t(…)` і 6 інлайн-копій типу помилки.
+3. `shared/lib/storage` — `readStored`/`writeStored`; 7 пар `try/catch` навколо
+   `localStorage` зникли (мова, тема, плеєр, рідер, провайдер входу, фільтр
+   розділів).
+4. `shared/ui`: `ConnectionCheck` (3 drawer'и), `MoreMenu` (5 меню «⋮»),
+   `ManagedList` (списки OPDS, Torznab, тек бібліотеки). Три однакові
+   `.module.scss` видалено.
+5. `manage-unmatched-files` бере `fileName` із `@entities/library-item`.
+
+Свідомо лишено: тост `playback.failed` у `LibrarySection` і
+`useContinueWatching` (3 рядки; сутності тостів не показують, нового винятку
+заради цього не вводимо) і `Drawer.onOpenChange={next => !next && onClose()}`
+(однорядковий, читається без обгортки).
+
+### Етап 2 — структура фіч
+
+Кожна фіча — до правила вище: `model/`, `lib/`, `config/`, `ui/<part>/`.
+Порядок: від простих до складних — `manage-opds-servers`,
+`manage-torrent-client`, `manage-torznab-sources`, `auto-download-torrents`,
+`scan-library`, `match-library-file`, `download-chapters`, `download-torrent`,
+`manage-unmatched-files`, `library-explorer`, `search-torrents`,
+`search-media`, `manage-lists`, `continue-watching`, `track-media`.
+
+### Етап 3 — структура сторінок і каркаса
+
+`pages/media`, `pages/library`, `pages/lists`, `pages/read`, `pages/auth`,
+`pages/settings`, `pages/fallback`, `pages/discover`; `app/layout` →
+`sidebar/`, `window-chrome/`, `player-host/` і `lib/list-wiring`.
+
+### Етап 4 — великі файли
+
+За таблицею вище, від найбільшого. Типовий поділ:
+
+- компонент → підкомпоненти в `ui/<part>/` + хуки поведінки в `lib/`
+  (у `VideoPlayer`: `usePlayerKeyboard`, `useAutoHideControls`,
+  `useProgressReporter`);
+- модель → `model/` (стан) + `lib/` (чисті функції) + `config/` (константи);
+  у `entities/library-item` хелпери файлу (`fileTitle`, `fileName`,
+  `fileNumber`…) переходять у `lib/file.ts`, події сканування — у
+  `model/scan.ts`.
+
+### Етап 5 — сутності
+
+`entities/media/ui`, `entities/playback/ui`, `entities/reader/ui`,
+`entities/tracker/ui` — компоненти в теки-частини; `entities/reader/lib` (11
+файлів) лишається пласким — це рівноправні чисті модулі з тестами.
+
+### Етап 6 — закріпити
+
+1. Розділ «Правило структури слайса» — у §6 `architecture.md`.
+2. `scripts/check-architecture.mjs` — перевірка «у корені слайса лише
+   `index.ts` і не більше одного компонента», щоб правило тримав тулінг, а не
+   рев'ю (§14).
+
+## Чого план свідомо не робить
+
+- Не вводить нових слайсів і не рухає межі між ними (§12).
+- Не тягне патерни заради патернів: єдині «патерни» тут — Observer
+  (`useUnitWatch` поверх Effector `watch`) і Facade (`storage`,
+  `problemDetail`) — обидва прибирають повтор, а не додають шар.
+- Не чіпає `*.gen.ts` вручну, локалі (`en/uk/ru.ts` великі, бо це словник) і
+  `shared/ui/icon/assets`.
