@@ -2,11 +2,10 @@ import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis } from 'rechar
 
 import { useTranslation } from '@shared/i18n'
 
-import type { ScoreBucket } from '../lib/stats'
-
-import { useChartTheme } from './chart-theme'
-import { ChartTooltip, Panel, PanelEmpty } from './Panel'
-import styles from './Stats.module.scss'
+import { useChartTheme } from '../../../config/chart-theme'
+import type { ScoreBucket } from '../../../lib/stats'
+import { ChartTooltip, Panel, PanelEmpty } from '../panel/Panel'
+import styles from '../Stats.module.scss'
 
 export interface ScoresChartProps {
 	scores: ScoreBucket[]

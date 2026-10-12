@@ -1,0 +1,59 @@
+.typeRows {
+	display: flex;
+	flex-direction: column;
+	gap: 0.875rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+
+	.typeRow {
+		display: flex;
+		flex-direction: column;
+		gap: 0.375rem;
+
+		.typeHead {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			color: var(--text-secondary);
+			font-size: 0.875rem;
+
+			.typeTotal {
+				margin-left: auto;
+				color: var(--text);
+				font-weight: 600;
+				font-variant-numeric: tabular-nums;
+			}
+		}
+
+		.stack {
+			display: flex;
+			gap: 2px;
+			height: 0.75rem;
+
+			.segment {
+				flex-basis: 0;
+				min-width: 4px;
+				height: 100%;
+
+				&:first-child {
+					border-radius: 4px 0 0 4px;
+				}
+
+				&:last-child {
+					border-radius: 0 4px 4px 0;
+				}
+
+				&:only-child {
+					border-radius: 4px;
+				}
+
+				&:hover,
+				&:focus-visible {
+					outline: 2px solid var(--text);
+					outline-offset: 1px;
+				}
+			}
+		}
+	}
+}

@@ -3,11 +3,12 @@ import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 
 import { useTranslation } from '@shared/i18n'
 
-import type { GenreCount } from '../lib/stats'
+import { useChartTheme } from '../../../config/chart-theme'
+import type { GenreCount } from '../../../lib/stats'
+import { ChartTooltip, Panel, PanelEmpty } from '../panel/Panel'
+import stats from '../Stats.module.scss'
 
-import { useChartTheme } from './chart-theme'
-import { ChartTooltip, Panel, PanelEmpty } from './Panel'
-import styles from './Stats.module.scss'
+import styles from './GenresDonut.module.scss'
 
 // Six named slices and "other": past that, slices get too thin to tell apart
 // and the palette would have to repeat a colour.
@@ -106,7 +107,7 @@ export function GenresDonut({ genres, total, className }: GenresDonutProps) {
 						{slices.map(slice => (
 							<li key={slice.name}>
 								<span
-									className={styles.swatch}
+									className={stats.swatch}
 									style={{ background: slice.color }}
 									aria-hidden
 								/>

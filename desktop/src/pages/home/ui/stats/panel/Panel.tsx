@@ -4,7 +4,9 @@ import type { CSSProperties, ReactNode } from 'react'
 import { Icon } from '@shared/ui'
 import type { IconName } from '@shared/ui'
 
-import styles from './Stats.module.scss'
+import stats from '../Stats.module.scss'
+
+import styles from './Panel.module.scss'
 
 // A muted badge in the given colour, the same 16% wash as --accent-muted but in
 // whichever hue the card was handed — undefined lets the CSS default (the accent)
@@ -62,7 +64,7 @@ export function ChartTooltip({ title, rows }: { title?: string; rows: TooltipRow
 			{title && <span className={styles.tooltipTitle}>{title}</span>}
 			{rows.map(row => (
 				<span key={row.label} className={styles.tooltipRow}>
-					{row.color && <span className={styles.swatch} style={{ background: row.color }} />}
+					{row.color && <span className={stats.swatch} style={{ background: row.color }} />}
 					<span className={styles.tooltipLabel}>{row.label}</span>
 					<span className={styles.tooltipValue}>{row.value}</span>
 				</span>

@@ -1,0 +1,62 @@
+.donut {
+	display: flex;
+	align-items: center;
+	gap: 1.25rem;
+
+	.donutChart {
+		position: relative;
+		flex: 0 0 11.875rem;
+		height: 190px;
+
+		.donutCenter {
+			position: absolute;
+			inset: 0;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			color: var(--text-muted);
+			font-size: 0.75rem;
+			pointer-events: none;
+
+			strong {
+				color: var(--text);
+				font-size: 1.75rem;
+				font-weight: 700;
+				line-height: 1.1;
+			}
+		}
+	}
+
+	.donutLegend {
+		display: flex;
+		flex: 1;
+		flex-direction: column;
+		gap: 0.5rem;
+		min-width: 0;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+
+		li {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			font-size: 0.8125rem;
+		}
+
+		.donutName {
+			flex: 1;
+			overflow: hidden;
+			color: var(--text-secondary);
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		.donutShare {
+			color: var(--text);
+			font-weight: 600;
+			font-variant-numeric: tabular-nums;
+		}
+	}
+}

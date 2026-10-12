@@ -6,12 +6,11 @@ import { SegmentedControl } from '@shared/ui'
 
 import type { TrackerEntry } from '@entities/tracker'
 
-import { activity } from '../lib/stats'
-import type { ActivityRange } from '../lib/stats'
-
-import { useChartTheme } from './chart-theme'
-import { ChartTooltip, Panel, PanelEmpty } from './Panel'
-import styles from './Stats.module.scss'
+import { useChartTheme } from '../../../config/chart-theme'
+import { activity } from '../../../lib/stats'
+import type { ActivityRange } from '../../../lib/stats'
+import { ChartTooltip, Panel, PanelEmpty } from '../panel/Panel'
+import styles from '../Stats.module.scss'
 
 const RANGES: readonly ActivityRange[] = ['6m', '1y', 'all']
 
@@ -65,7 +64,7 @@ export function ActivityChart({ entries, className }: ActivityChartProps) {
 			key: 'completed' as const,
 			color: completed,
 			label: t('home.stats.activity.completed'),
-			total: totals.completed	
+			total: totals.completed
 		}
 	]
 

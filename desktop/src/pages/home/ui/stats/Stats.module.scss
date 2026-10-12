@@ -1,0 +1,40 @@
+// Shared across the tiles row and every chart panel below it.
+
+.swatch {
+	flex: none;
+	width: 0.625rem;
+	height: 0.625rem;
+	border-radius: 3px;
+}
+
+.legend {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem 1rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.legendItem {
+	display: flex;
+	align-items: center;
+	gap: 0.375rem;
+	color: var(--text-secondary);
+	font-size: 0.8125rem;
+}
+
+.legendCount {
+	color: var(--text-muted);
+	font-variant-numeric: tabular-nums;
+}
+
+.chartArea {
+	min-width: 0;
+
+	// Recharts focuses its wrapper on click; the outline would frame the chart.
+	:global(.recharts-wrapper),
+	:global(.recharts-surface) {
+		outline: none;
+	}
+}

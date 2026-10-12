@@ -12,11 +12,11 @@ import type { TrackerEntry, TrackerStatus } from '@entities/tracker'
 import { ConnectAniList } from '@features/connect-anilist'
 import { ContinueWatching, useContinueWatching } from '@features/continue-watching'
 
-import { HomeBanner } from './home-banner/HomeBanner'
 import styles from './HomePage.module.scss'
 import { trackerStats } from './lib/stats'
-import { TrackerRow } from './tracker-row/TrackerRow'
-import { TrackerStats } from './tracker-stats/TrackerStats'
+import { HomeBanner } from './ui/banner/HomeBanner'
+import { TrackerStats } from './ui/stats/tracker-stats/TrackerStats'
+import { TrackerRow } from './ui/tracker-row/TrackerRow'
 
 const ROWS: { status: TrackerStatus; key: 'current' | 'planning' | 'completed' }[] = [
 	{ status: 'CURRENT', key: 'current' },

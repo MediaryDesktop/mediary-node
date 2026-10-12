@@ -1,18 +1,17 @@
-import { useUnit } from 'effector-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { Button, Icon, ProgressBar } from '@shared/ui'
 
-import { $nodeReady } from '@infra/node'
-
-import { FeaturedBanner, fetchMediaDetailsFx } from '@entities/media'
-import type { FeaturedMedia, MediaDate } from '@entities/media'
+import { FeaturedBanner } from '@entities/media'
+import type { FeaturedMedia } from '@entities/media'
 import { formatProgress } from '@entities/tracker'
 import type { TrackerEntry } from '@entities/tracker'
 
 import { usePlayFile, useUpNextLabel } from '@features/continue-watching'
 import type { ContinueWatchingState } from '@features/continue-watching'
+
+import { useSynopses } from '../../lib/useSynopses'
 
 import styles from './HomeBanner.module.scss'
 
@@ -21,11 +20,6 @@ const MAX_SLIDES = 8
 
 interface Slide extends FeaturedMedia {
 	entry: TrackerEntry
-}
-
-interface Details {
-	description?: string
-	start_date?: MediaDate
 }
 
 export interface HomeBannerProps {
@@ -116,46 +110,4 @@ export function HomeBanner({ entries, watching, onOpen }: HomeBannerProps) {
 			)}
 		/>
 	)
-}
-
-// The synopsis is not part of a list entry; the title's details have it, and the
-// node keeps them cached, so the banner asks once per title while the page is open.
-function useSynopses(refs: string[]): Record<string, Details> {
-	const nodeReady = useUnit($nodeReady)
-	const [details, setDetails] = useState<Record<string, Details>>({})
-	const key = refs.join('|')
-
-	useEffect(() => {
-		if (!nodeReady) {
-			return
-		}
-
-		let cancelled = false
-		const missing = key.split('|').filter(ref => ref && !(ref in details))
-
-		for (const ref of missing) {
-			fetchMediaDetailsFx(ref)
-				.then(({ media }) => {
-					if (!cancelled) {
-						setDetails(state => ({
-							...state,
-							[ref]: { description: media.description, start_date: media.start_date }
-						}))
-					}
-				})
-				.catch(() => {
-					if (!cancelled) {
-						setDetails(state => ({ ...state, [ref]: {} }))
-					}
-				})
-		}
-
-		return () => {
-			cancelled = true
-		}
-		// Only a change of titles asks again; answers landing must not re-run it.
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [key, nodeReady])
-
-	return details
 }

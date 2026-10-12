@@ -5,23 +5,11 @@ import type { Theme } from '@shared/style/theme'
 
 import type { TrackerStatus } from '@entities/tracker'
 
-// Categorical slots in a fixed order, validated for colour-blind separation and
-// contrast against --surface in each theme. The light steps that sit below 3:1
-// are why every chart here carries labelled legends and tooltips. Arbitrary
-// identity only (genres, tile accents) — never a status, which has its own
-// meaning readers expect (see STATUS_COLOR below).
 const SERIES: Record<Theme, readonly string[]> = {
 	light: ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300', '#4a3aa7'],
 	dark: ['#4197ff', '#ff7640', '#3bffba', '#ffbf3e', '#ff4b8d', '#44ff44', '#7968ff']
 }
 
-// Fixed by role, independent of SERIES: a status carries meaning (done, stalled,
-// dropped), so its colour can't shift with genre order. Completed reads as
-// "good" (green), dropped as "critical" (red), paused as "stalled" (amber);
-// current is an active state, not an outcome, so it gets a neutral accent
-// instead of borrowing good/warning/critical. Planning and repeating are both
-// violet (not started vs. going again) but kept apart in hue from each other
-// and from current's blue — checked with the palette validator.
 const STATUS_COLOR: Record<Theme, Record<TrackerStatus, string>> = {
 	light: {
 		COMPLETED: '#0ca30c',
@@ -44,15 +32,12 @@ const STATUS_COLOR: Record<Theme, Record<TrackerStatus, string>> = {
 export interface ChartTheme {
 	series: readonly string[]
 	statusColor: Record<TrackerStatus, string>
-	// "Other" and every mark that is not the point of the chart.
 	neutral: string
 	grid: string
 	axis: string
 	surface: string
 }
 
-// Recharts draws SVG attributes, which do not read CSS variables, so the app's
-// own tokens are read once per theme and handed over as colours.
 export function useChartTheme(): ChartTheme {
 	const theme = useSurfaceTheme()
 

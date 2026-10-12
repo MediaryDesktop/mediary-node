@@ -4,11 +4,12 @@ import { Tooltip } from '@shared/ui'
 import { MediaTypeIcon, TRACKER_STATUSES } from '@entities/tracker'
 import type { TrackerStatus } from '@entities/tracker'
 
-import type { StatusCounts, TypeBreakdown } from '../lib/stats'
+import { useChartTheme } from '../../../config/chart-theme'
+import type { StatusCounts, TypeBreakdown } from '../../../lib/stats'
+import { Panel, PanelEmpty } from '../panel/Panel'
+import stats from '../Stats.module.scss'
 
-import { useChartTheme } from './chart-theme'
-import { Panel, PanelEmpty } from './Panel'
-import styles from './Stats.module.scss'
+import styles from './StatusByType.module.scss'
 
 export interface StatusByTypeProps {
 	byType: TypeBreakdown[]
@@ -37,16 +38,16 @@ export function StatusByType({ byType, byStatus, className }: StatusByTypeProps)
 				<PanelEmpty>{t('home.empty')}</PanelEmpty>
 			) : (
 				<>
-					<ul className={styles.legend}>
+					<ul className={stats.legend}>
 						{TRACKER_STATUSES.filter(status => byStatus[status] > 0).map(status => (
-							<li key={status} className={styles.legendItem}>
+							<li key={status} className={stats.legendItem}>
 								<span
-									className={styles.swatch}
+									className={stats.swatch}
 									style={{ background: colorOf(status) }}
 									aria-hidden
 								/>
 								{t(`home.stats.status.${status}`)}
-								<span className={styles.legendCount}>{byStatus[status]}</span>
+								<span className={stats.legendCount}>{byStatus[status]}</span>
 							</li>
 						))}
 					</ul>

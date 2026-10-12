@@ -6,9 +6,10 @@ import { Icon } from '@shared/ui'
 import { preferredTitle } from '@entities/tracker'
 import type { TrackerEntry } from '@entities/tracker'
 
-import { useChartTheme } from './chart-theme'
-import { Panel, PanelEmpty } from './Panel'
-import styles from './Stats.module.scss'
+import { useChartTheme } from '../../../config/chart-theme'
+import { Panel, PanelEmpty } from '../panel/Panel'
+
+import styles from './TopRated.module.scss'
 
 export interface TopRatedProps {
 	entries: TrackerEntry[]

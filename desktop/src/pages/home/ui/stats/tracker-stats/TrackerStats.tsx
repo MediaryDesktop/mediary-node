@@ -6,16 +6,16 @@ import type { IconName } from '@shared/ui'
 
 import type { TrackerEntry } from '@entities/tracker'
 
-import type { TrackerStats as Stats } from '../lib/stats'
+import { useChartTheme } from '../../../config/chart-theme'
+import type { TrackerStats as Stats } from '../../../lib/stats'
+import { ActivityChart } from '../activity-chart/ActivityChart'
+import { GenresDonut } from '../genres-donut/GenresDonut'
+import { iconStyle } from '../panel/Panel'
+import { ScoresChart } from '../scores-chart/ScoresChart'
+import { StatusByType } from '../status-by-type/StatusByType'
+import { TopRated } from '../top-rated/TopRated'
 
-import { ActivityChart } from './ActivityChart'
-import { useChartTheme } from './chart-theme'
-import { GenresDonut } from './GenresDonut'
-import { iconStyle } from './Panel'
-import { ScoresChart } from './ScoresChart'
-import styles from './Stats.module.scss'
-import { StatusByType } from './StatusByType'
-import { TopRated } from './TopRated'
+import styles from './TrackerStats.module.scss'
 
 export interface TrackerStatsProps {
 	stats: Stats
