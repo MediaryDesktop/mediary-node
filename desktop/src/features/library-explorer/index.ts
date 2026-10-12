@@ -1,3 +1,3 @@
 export { LibraryExplorer } from './LibraryExplorer'
 export type { LibraryExplorerProps } from './LibraryExplorer'
-export { libraryExplorerModel } from './model'
+export { libraryExplorerModel } from './model/model'

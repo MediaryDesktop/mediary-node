@@ -6,7 +6,7 @@ import { ProgressBar, ReelLoader } from '@shared/ui'
 import { libraryModel, libraryScanQuery } from '@entities/library-item'
 import type { ScanActivity } from '@entities/library-item'
 
-import { PHASE_LABELS, progressOf } from './lib/progress'
+import { PHASE_LABELS, progressOf } from '../../lib/progress'
 import styles from './ScanProgress.module.scss'
 
 // Drawn over whatever page is open, so a scan started from the library keeps

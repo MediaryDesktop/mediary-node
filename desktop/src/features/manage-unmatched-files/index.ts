@@ -1,3 +1,3 @@
-export { IgnoredFilesDrawer } from './IgnoredFilesDrawer'
-export { unmatchedFilesModel } from './model'
-export { UnmatchedFilesDrawer } from './UnmatchedFilesDrawer'
+export { IgnoredFilesDrawer } from './ui/ignored-files-drawer/IgnoredFilesDrawer'
+export { unmatchedFilesModel } from './model/model'
+export { UnmatchedFilesDrawer } from './ui/unmatched-files-drawer/UnmatchedFilesDrawer'

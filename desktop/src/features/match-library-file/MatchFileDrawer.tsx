@@ -7,7 +7,7 @@ import { fileTitle, libraryCandidatesQuery } from '@entities/library-item'
 import type { LibrarySuggestion } from '@entities/library-item'
 
 import styles from './MatchFileDrawer.module.scss'
-import { matchFileModel } from './model'
+import { matchFileModel } from './model/model'
 
 function confidenceTone(confidence: number): 'success' | 'warning' | 'neutral' {
 	if (confidence >= 0.8) {

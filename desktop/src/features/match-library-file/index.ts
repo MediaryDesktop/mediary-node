@@ -1,2 +1,2 @@
 export { MatchFileDrawer } from './MatchFileDrawer'
-export { matchFileModel } from './model'
+export { matchFileModel } from './model/model'

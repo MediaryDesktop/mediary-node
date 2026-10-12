@@ -14,10 +14,10 @@ import {
 } from '@entities/library-item'
 import type { LibrarySuggestion } from '@entities/library-item'
 
-import { CheckRow } from './CheckRow'
-import { unmatchedGroups } from './lib/groups'
-import type { UnmatchedGroup } from './lib/groups'
-import { unmatchedFilesModel } from './model'
+import { CheckRow } from '../check-row/CheckRow'
+import { unmatchedGroups } from '../../lib/groups'
+import type { UnmatchedGroup } from '../../lib/groups'
+import { unmatchedFilesModel } from '../../model/model'
 import styles from './UnmatchedFilesDrawer.module.scss'
 
 const SOURCE = 'anilist'

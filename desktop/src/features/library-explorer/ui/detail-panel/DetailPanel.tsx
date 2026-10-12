@@ -9,7 +9,7 @@ import { fileDuration, fileNumber, fileSeason, isMatched } from '@entities/libra
 import type { LibraryTitle } from '@entities/library-item'
 
 import styles from './DetailPanel.module.scss'
-import type { TreeNode } from './lib/build-tree'
+import type { TreeNode } from '../../lib/build-tree'
 
 export interface DetailPanelProps {
 	node: TreeNode | null
