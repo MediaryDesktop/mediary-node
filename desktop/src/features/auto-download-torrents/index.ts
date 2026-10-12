@@ -1,4 +1,4 @@
-export { AutoDownloadPanel } from './AutoDownloadPanel'
-export type { AutoDownloadPanelProps } from './AutoDownloadPanel'
+export { AutoDownloadPanel } from './ui/auto-download-panel/AutoDownloadPanel'
+export type { AutoDownloadPanelProps } from './ui/auto-download-panel/AutoDownloadPanel'
 
-export { AutoDownloadRules } from './AutoDownloadRules'
+export { AutoDownloadRules } from './ui/auto-download-rules/AutoDownloadRules'

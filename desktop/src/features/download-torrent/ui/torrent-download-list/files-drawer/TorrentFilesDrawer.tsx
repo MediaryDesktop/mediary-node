@@ -16,7 +16,7 @@ import {
 } from '@entities/torrent'
 import type { TorrentDownload } from '@entities/torrent'
 
-import { initialSelection, OwnedEpisodes, sortFiles } from './lib/file-selection'
+import { initialSelection, OwnedEpisodes, sortFiles } from '../../../lib/file-selection'
 import styles from './TorrentFilesDrawer.module.scss'
 
 export interface TorrentFilesDrawerProps {
