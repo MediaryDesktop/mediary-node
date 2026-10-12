@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import { useState } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
-import { resolveKeyAction, stepIndex } from './logic'
+import { resolveKeyAction, stepIndex } from './lib/logic'
 import { SelectDropdown } from './SelectDropdown'
 import type { SelectDropdownOption } from './SelectDropdown'
 

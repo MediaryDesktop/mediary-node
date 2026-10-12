@@ -1,4 +1,4 @@
-import { readStored, writeStored } from '../lib/storage'
+import { readStored, writeStored } from '../lib/storage/storage'
 
 export const LANGUAGES = ['en', 'uk', 'ru'] as const
 

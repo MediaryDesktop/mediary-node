@@ -1,10 +1,9 @@
 import clsx from 'clsx'
 
-import { Icon } from '../icon/Icon'
-import { useRipple } from '../ripple/useRipple'
-
-import type { SelectDropdownOption } from './logic'
-import styles from './SelectDropdown.module.scss'
+import { Icon } from '../../icon/Icon'
+import { useRipple } from '../../ripple/lib/useRipple'
+import type { SelectDropdownOption } from '../lib/logic'
+import styles from '../SelectDropdown.module.scss'
 
 export interface OptionProps {
 	id: string

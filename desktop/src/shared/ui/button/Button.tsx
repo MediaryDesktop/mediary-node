@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { forwardRef } from 'react'
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 
-import { mergeRefs } from '../ripple/merge-refs'
-import { useRipple } from '../ripple/useRipple'
+import { mergeRefs } from '../ripple/lib/merge-refs'
+import { useRipple } from '../ripple/lib/useRipple'
 
 import styles from './Button.module.scss'
 

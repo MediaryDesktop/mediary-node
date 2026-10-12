@@ -1,8 +1,10 @@
-export { formatBytes, formatCompact, formatDateTime, formatDuration, formatWeekday } from './format'
-export { formatRelativeTime } from './relative-time'
-export type { RelativeTimeOptions } from './relative-time'
-export { firstPresent } from './text'
-export { useGoBack } from './useGoBack'
-export { useUnitWatch } from './useUnitWatch'
-export { readStored, writeStored } from './storage'
-export { useAfterDelay } from './useAfterDelay'
+export { formatBytes, formatCompact, formatDateTime, formatDuration, formatWeekday } from './format/format'
+export { formatRelativeTime } from './format/relative-time'
+export type { RelativeTimeOptions } from './format/relative-time'
+export { firstPresent } from './format/text'
+
+export { useAfterDelay } from './hooks/useAfterDelay'
+export { useGoBack } from './hooks/useGoBack'
+export { useUnitWatch } from './hooks/useUnitWatch'
+
+export { readStored, writeStored } from './storage/storage'

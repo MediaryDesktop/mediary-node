@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Ref } from 'react'
 
+import { RIPPLE_HOST_CLASS } from '../types'
+import type { RippleOptions } from '../types'
+
 import { hideRipple, showRipple } from './ripple-dom'
-import { RIPPLE_HOST_CLASS } from './types'
-import type { RippleOptions } from './types'
 
 const DELAY_RIPPLE = 80
 

@@ -1,8 +1,8 @@
 import { forwardRef } from 'react'
 import type { ButtonHTMLAttributes } from 'react'
 
-import { mergeRefs } from './merge-refs'
-import { useRipple } from './useRipple'
+import { mergeRefs } from './lib/merge-refs'
+import { useRipple } from './lib/useRipple'
 
 export interface RippleButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 	disableRipple?: boolean

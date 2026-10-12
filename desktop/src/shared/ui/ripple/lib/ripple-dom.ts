@@ -1,4 +1,4 @@
-import type { RippleOptions } from './types'
+import type { RippleOptions } from '../types'
 
 // Grow and fade are read back from the DOM when hiding, so a ripple that was
 // released early still completes its spread before it fades.

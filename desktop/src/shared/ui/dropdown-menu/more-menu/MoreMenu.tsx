@@ -1,8 +1,7 @@
-import { Button } from '../button/Button'
-import { Icon } from '../icon/Icon'
-
-import { DropdownMenu } from './DropdownMenu'
-import type { DropdownMenuItem } from './DropdownMenu'
+import { Button } from '../../button/Button'
+import { Icon } from '../../icon/Icon'
+import { DropdownMenu } from '../DropdownMenu'
+import type { DropdownMenuItem } from '../DropdownMenu'
 
 export interface MoreMenuProps {
 	items: DropdownMenuItem[]

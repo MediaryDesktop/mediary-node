@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 
 import { Icon } from '../icon/Icon'
 import type { IconLike } from '../icon/Icon'
-import { useRipple } from '../ripple/useRipple'
+import { useRipple } from '../ripple/lib/useRipple'
 
 import styles from './DropdownMenu.module.scss'
 

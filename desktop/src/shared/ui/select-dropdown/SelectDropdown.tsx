@@ -13,13 +13,13 @@ import {
 	resolveKeyAction,
 	selectedOptionsOf,
 	stepIndex
-} from './logic'
-import type { SelectDropdownOption } from './logic'
-import { Option } from './Option'
+} from './lib/logic'
+import type { SelectDropdownOption } from './lib/logic'
+import { useFloatingPanel } from './lib/useFloatingPanel'
+import { Option } from './option/Option'
 import styles from './SelectDropdown.module.scss'
-import { useFloatingPanel } from './useFloatingPanel'
 
-export type { SelectDropdownOption } from './logic'
+export type { SelectDropdownOption } from './lib/logic'
 
 interface SelectDropdownBaseProps {
 	options: SelectDropdownOption[]

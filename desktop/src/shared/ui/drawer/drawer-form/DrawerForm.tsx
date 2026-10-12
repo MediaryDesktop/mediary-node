@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import type { FormEvent, ReactNode } from 'react'
 
-import { useTranslation } from '../../i18n'
-import { Button } from '../button/Button'
+import { useTranslation } from '../../../i18n'
+import { Button } from '../../button/Button'
 
 import styles from './DrawerForm.module.scss'
 

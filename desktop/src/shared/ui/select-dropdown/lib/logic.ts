@@ -1,4 +1,4 @@
-import type { IconName } from '../icon/Icon'
+import type { IconName } from '../../icon/Icon'
 
 export interface SelectDropdownOption {
 	value: string

@@ -9,7 +9,7 @@ export { ScrollProgress } from './scroll-progress/ScrollProgress'
 export { WindowControls } from './window-controls/WindowControls'
 export { Logo } from './logo/Logo'
 
-export { useRipple } from './ripple/useRipple'
+export { useRipple } from './ripple/lib/useRipple'
 export { RIPPLE_HOST_CLASS } from './ripple/types'
 export type { RippleOptions } from './ripple/types'
 
@@ -47,17 +47,17 @@ export type { DisclosureProps } from './disclosure/Disclosure'
 export { Drawer } from './drawer/Drawer'
 export type { DrawerProps } from './drawer/Drawer'
 
-export { DrawerForm } from './drawer/DrawerForm'
-export type { DrawerFormProps } from './drawer/DrawerForm'
+export { DrawerForm } from './drawer/drawer-form/DrawerForm'
+export type { DrawerFormProps } from './drawer/drawer-form/DrawerForm'
 
-export { DrawerSection } from './drawer/DrawerSection'
-export type { DrawerSectionProps } from './drawer/DrawerSection'
+export { DrawerSection } from './drawer/drawer-section/DrawerSection'
+export type { DrawerSectionProps } from './drawer/drawer-section/DrawerSection'
 
 export { DropdownMenu } from './dropdown-menu/DropdownMenu'
 export type { DropdownMenuItem, DropdownMenuProps } from './dropdown-menu/DropdownMenu'
 
-export { MoreMenu } from './dropdown-menu/MoreMenu'
-export type { MoreMenuProps } from './dropdown-menu/MoreMenu'
+export { MoreMenu } from './dropdown-menu/more-menu/MoreMenu'
+export type { MoreMenuProps } from './dropdown-menu/more-menu/MoreMenu'
 
 export { HoverCard } from './hover-card/HoverCard'
 export type { HoverCardProps } from './hover-card/HoverCard'
