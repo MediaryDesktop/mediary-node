@@ -88,12 +88,12 @@ $card-padding: 2rem;
 		overflow: hidden;
 		padding: $card-padding;
 		@include glass;
-	}
 
-	.content {
-		display: flex;
-		flex-direction: column;
-		min-height: 0;
+		.content {
+			display: flex;
+			flex-direction: column;
+			min-height: 0;
+		}
 	}
 
 	.back {

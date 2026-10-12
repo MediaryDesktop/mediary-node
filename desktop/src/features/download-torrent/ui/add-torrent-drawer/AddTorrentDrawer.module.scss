@@ -13,10 +13,10 @@
 	&:hover {
 		background: var(--surface-hover);
 	}
-}
 
-.checkLabel {
-	min-width: 0;
-	color: var(--text);
-	font-size: 0.875rem;
+	.checkLabel {
+		min-width: 0;
+		color: var(--text);
+		font-size: 0.875rem;
+	}
 }

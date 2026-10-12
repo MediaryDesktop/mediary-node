@@ -81,101 +81,101 @@
 		background: var(--field);
 		box-shadow: var(--shadow-md);
 		animation: open 140ms ease-out;
-	}
 
-	.search {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		padding: 0 12px;
-		border-bottom: 1px solid var(--border-strong);
+		.search {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			padding: 0 12px;
+			border-bottom: 1px solid var(--border-strong);
 
-		.searchIcon {
-			flex-shrink: 0;
-			color: var(--text-secondary);
-		}
-
-		.searchInput {
-			flex: 1;
-			min-width: 0;
-			height: 40px;
-			border: none;
-			background: none;
-			color: var(--text);
-			font: inherit;
-			font-size: 14px;
-			outline: none;
-
-			&::placeholder {
-				color: var(--text-muted);
+			.searchIcon {
+				flex-shrink: 0;
+				color: var(--text-secondary);
 			}
-		}
 
-		.count {
-			flex-shrink: 0;
-			color: var(--text-muted);
-			font-size: 12px;
-			font-variant-numeric: tabular-nums;
-		}
-	}
-
-	.grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
-		gap: 4px;
-		max-height: 300px;
-		padding: 6px;
-		overflow-y: auto;
-		overscroll-behavior: contain;
-
-		.cell {
-			display: grid;
-			place-items: center;
-			height: 40px;
-			padding: 0;
-			border: 1px solid transparent;
-			border-radius: calc(var(--radius) - 2px);
-			background: none;
-			color: var(--text-secondary);
-			cursor: pointer;
-			transition:
-				background-color 120ms,
-				color 120ms;
-
-			// A long grid stays cheap: rows off screen are not laid out or painted.
-			content-visibility: auto;
-			contain-intrinsic-size: 40px 40px;
-
-			&:hover,
-			&:focus-visible {
-				background: var(--surface-muted);
+			.searchInput {
+				flex: 1;
+				min-width: 0;
+				height: 40px;
+				border: none;
+				background: none;
 				color: var(--text);
+				font: inherit;
+				font-size: 14px;
 				outline: none;
+
+				&::placeholder {
+					color: var(--text-muted);
+				}
 			}
 
-			&:focus-visible {
-				box-shadow: var(--focus-shadow);
-			}
-
-			// The default is marked apart, so it does not read as one more icon.
-			&.default {
-				border: 1px dashed var(--border-strong);
-			}
-
-			&.selected {
-				border: 1px solid var(--accent-border);
-				background: var(--accent-muted);
-				color: var(--accent-text);
+			.count {
+				flex-shrink: 0;
+				color: var(--text-muted);
+				font-size: 12px;
+				font-variant-numeric: tabular-nums;
 			}
 		}
-	}
 
-	.empty {
-		margin: 0;
-		padding: 20px 12px;
-		color: var(--text-secondary);
-		font-size: 13px;
-		text-align: center;
+		.grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+			gap: 4px;
+			max-height: 300px;
+			padding: 6px;
+			overflow-y: auto;
+			overscroll-behavior: contain;
+
+			.cell {
+				display: grid;
+				place-items: center;
+				height: 40px;
+				padding: 0;
+				border: 1px solid transparent;
+				border-radius: calc(var(--radius) - 2px);
+				background: none;
+				color: var(--text-secondary);
+				cursor: pointer;
+				transition:
+					background-color 120ms,
+					color 120ms;
+
+				// A long grid stays cheap: rows off screen are not laid out or painted.
+				content-visibility: auto;
+				contain-intrinsic-size: 40px 40px;
+
+				&:hover,
+				&:focus-visible {
+					background: var(--surface-muted);
+					color: var(--text);
+					outline: none;
+				}
+
+				&:focus-visible {
+					box-shadow: var(--focus-shadow);
+				}
+
+				// The default is marked apart, so it does not read as one more icon.
+				&.default {
+					border: 1px dashed var(--border-strong);
+				}
+
+				&.selected {
+					border: 1px solid var(--accent-border);
+					background: var(--accent-muted);
+					color: var(--accent-text);
+				}
+			}
+		}
+
+		.empty {
+			margin: 0;
+			padding: 20px 12px;
+			color: var(--text-secondary);
+			font-size: 13px;
+			text-align: center;
+		}
 	}
 }
 

@@ -1,8 +1,21 @@
 .results {
 	display: flex;
 	flex-direction: column;
+
+	.muted {
+		margin: 0;
+		color: var(--text-secondary);
+	}
+
+	.more {
+		display: flex;
+		justify-content: center;
+		margin-top: 1.75rem;
+	}
 }
 
+// Shown either as the loading skeleton (no .results wrapper) or inside .results —
+// kept unscoped so one rule reaches both.
 .grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
@@ -10,26 +23,15 @@
 	margin: 0;
 	padding: 0;
 	list-style: none;
-}
 
-.skeletonCard {
-	padding: 12px;
-	border-radius: 14px;
-	background: var(--surface);
+	.skeletonCard {
+		padding: 12px;
+		border-radius: 14px;
+		background: var(--surface);
 
-	.skeletonPoster {
-		width: 100%;
-		aspect-ratio: 2.2 / 3;
+		.skeletonPoster {
+			width: 100%;
+			aspect-ratio: 2.2 / 3;
+		}
 	}
-}
-
-.muted {
-	margin: 0;
-	color: var(--text-secondary);
-}
-
-.more {
-	display: flex;
-	justify-content: center;
-	margin-top: 1.75rem;
 }

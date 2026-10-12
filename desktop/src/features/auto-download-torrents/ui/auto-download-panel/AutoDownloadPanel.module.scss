@@ -30,19 +30,19 @@
 			flex-direction: column;
 			gap: 0.125rem;
 			min-width: 0;
-		}
 
-		.title {
-			margin: 0;
-			color: var(--text);
-			font-size: 1rem;
-			font-weight: 650;
-		}
+			.title {
+				margin: 0;
+				color: var(--text);
+				font-size: 1rem;
+				font-weight: 650;
+			}
 
-		.hint {
-			margin: 0;
-			color: var(--text-muted);
-			font-size: 0.8125rem;
+			.hint {
+				margin: 0;
+				color: var(--text-muted);
+				font-size: 0.8125rem;
+			}
 		}
 	}
 }

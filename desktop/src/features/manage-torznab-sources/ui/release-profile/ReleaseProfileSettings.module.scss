@@ -4,15 +4,17 @@
 	align-items: flex-start;
 	gap: 0.75rem;
 	width: 100%;
+
+	.row {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+		gap: 0.75rem;
+		width: 100%;
+	}
 }
 
-.row {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
-	gap: 0.75rem;
-	width: 100%;
-}
-
+// Used both directly inside .root and inside .root .row — kept unscoped so one
+// rule reaches both.
 .field {
 	display: grid;
 	gap: 0.25rem;

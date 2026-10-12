@@ -28,32 +28,32 @@
 		margin: 0;
 		padding: 0;
 		list-style: none;
-	}
 
-	.result {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 1rem;
-		padding: 0.625rem 0.75rem;
-		border: 1px solid var(--border);
-		border-radius: var(--radius-md);
-		background: var(--bg-subtle);
+		.result {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 1rem;
+			padding: 0.625rem 0.75rem;
+			border: 1px solid var(--border);
+			border-radius: var(--radius-md);
+			background: var(--bg-subtle);
 
-		.name {
-			min-width: 0;
-			overflow: hidden;
-			font-size: 0.9375rem;
-			text-overflow: ellipsis;
-			white-space: nowrap;
-		}
+			.name {
+				min-width: 0;
+				overflow: hidden;
+				font-size: 0.9375rem;
+				text-overflow: ellipsis;
+				white-space: nowrap;
 
-		.detail {
-			color: var(--text-muted);
-		}
+				.detail {
+					color: var(--text-muted);
+				}
 
-		.matched {
-			margin-left: 0.5rem;
+				.matched {
+					margin-left: 0.5rem;
+				}
+			}
 		}
 	}
 }
