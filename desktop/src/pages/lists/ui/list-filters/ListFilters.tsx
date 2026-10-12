@@ -7,8 +7,8 @@ import { enumLabel } from '@entities/media'
 import { isTrackerStatus, TRACKER_STATUSES } from '@entities/tracker'
 import type { TrackerMediaType } from '@entities/tracker'
 
-import { ANY, ENTRY_SORTS, hasActiveFilters, INITIAL_ENTRY_FILTERS } from '../lib/entry-filters'
-import type { EntryFilters, EntrySort } from '../lib/entry-filters'
+import { ANY, ENTRY_SORTS, hasActiveFilters, INITIAL_ENTRY_FILTERS } from '../../lib/entry-filters'
+import type { EntryFilters, EntrySort } from '../../lib/entry-filters'
 
 import styles from './ListFilters.module.scss'
 

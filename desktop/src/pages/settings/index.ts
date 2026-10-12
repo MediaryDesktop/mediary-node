@@ -1,3 +1,3 @@
 export { SettingsPage } from './SettingsPage'
-export { isSettingsSection } from './sections'
-export type { SettingsSection } from './sections'
+export { isSettingsSection } from './config/sections'
+export type { SettingsSection } from './config/sections'

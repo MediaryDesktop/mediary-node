@@ -21,8 +21,8 @@ import { ListOptionsMenu, manageListsModel } from '@features/manage-lists'
 import { EntryMenu } from '@features/track-media'
 
 import { applyEntryFilters, formatsOf, genresOf, INITIAL_ENTRY_FILTERS } from './lib/entry-filters'
-import { ListFilters } from './list-filters/ListFilters'
 import styles from './ListDetailPage.module.scss'
+import { ListFilters } from './ui/list-filters/ListFilters'
 
 const STATUS_PREFIX = 'status:'
 

@@ -15,7 +15,7 @@ import styles from './DiscoverPage.module.scss'
 import { DISCOVER_TABS, discoverSections } from './lib/sections'
 import type { DiscoverSection, DiscoverTab } from './lib/sections'
 import { discoverModel } from './model/model'
-import { DiscoverRow } from './ui/DiscoverRow'
+import { DiscoverRow } from './ui/discover-row/DiscoverRow'
 
 // How many titles of the first row the banner goes through.
 const FEATURED = 8

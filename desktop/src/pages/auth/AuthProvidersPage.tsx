@@ -6,7 +6,7 @@ import { useGoBack } from '@shared/lib'
 
 import { AuthFormWrapper, AuthProvidersPanel, useAuthBack } from '@features/auth'
 
-import { AUTH_MODES, type AuthMode } from './modes'
+import { AUTH_MODES, type AuthMode } from './config/modes'
 
 export interface AuthProvidersPageProps {
 	mode: AuthMode

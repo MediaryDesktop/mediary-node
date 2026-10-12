@@ -27,8 +27,8 @@ import type { ListMediaType, TrackerCustomList } from '@entities/tracker'
 import { ConnectAniList } from '@features/connect-anilist'
 import { manageListsModel } from '@features/manage-lists'
 
-import { ListCard } from './list-card/ListCard'
 import styles from './ListsPage.module.scss'
+import { ListCard } from './ui/list-card/ListCard'
 
 type Filter = ListMediaType | 'all'
 type SortKey = 'recent' | 'name' | 'size'

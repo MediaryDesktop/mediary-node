@@ -6,7 +6,7 @@ import { Disclosure, Icon } from '@shared/ui'
 import type { LibraryScanRunFileLog } from '@entities/library-item'
 
 import styles from './FileLogItem.module.scss'
-import { Highlighted } from './Highlighted'
+import { Highlighted } from './highlighted/Highlighted'
 
 export interface FileLogItemProps {
 	log: LibraryScanRunFileLog

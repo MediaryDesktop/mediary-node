@@ -13,9 +13,9 @@ import { IgnoredFilesDrawer, UnmatchedFilesDrawer } from '@features/manage-unmat
 import { MatchFileDrawer, matchFileModel } from '@features/match-library-file'
 import { scanLibraryModel, ScanModal } from '@features/scan-library'
 
-import { LibraryCollection } from './library-collection/LibraryCollection'
-import { LibraryToolbar } from './library-toolbar/LibraryToolbar'
 import styles from './LibraryPage.module.scss'
+import { LibraryCollection } from './ui/library-collection/LibraryCollection'
+import { LibraryToolbar } from './ui/library-toolbar/LibraryToolbar'
 
 export function LibraryPage() {
 	const { t } = useTranslation()

@@ -10,7 +10,7 @@ import { $nodeReady } from '@infra/node'
 import { BookReaderView, bookStateQuery, loadBookFile, saveBookPositionMutation } from '@entities/reader'
 import type { BookLocation } from '@entities/reader'
 
-import { Panel } from './Panel'
+import { Panel } from './ui/panel/Panel'
 
 // Page turns come in bursts; the node hears where the reader settled.
 const SAVE_DELAY = 1500

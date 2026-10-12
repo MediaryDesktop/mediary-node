@@ -10,7 +10,7 @@ import type { MediaDetails, MediaSource } from '@entities/media'
 import { isTrackerMediaType } from '@entities/tracker'
 import type { TrackerEntry } from '@entities/tracker'
 
-import type { MediaBase } from '../lib/media-view'
+import type { MediaBase } from '../../lib/media-view'
 
 import styles from './MediaHero.module.scss'
 

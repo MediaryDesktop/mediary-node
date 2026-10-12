@@ -11,7 +11,7 @@ import type { TrackerEntry } from '@entities/tracker'
 
 import { searchOpened, TorrentSearchDrawer, useMissingEpisodes } from '@features/search-torrents'
 
-import { resolveSubject } from '../lib/media-view'
+import { resolveSubject } from '../../lib/media-view'
 import { LibrarySection } from '../library-section/LibrarySection'
 import { MediaActions } from '../media-actions/MediaActions'
 import type { MediaView as MediaViewKind } from '../media-actions/MediaActions'

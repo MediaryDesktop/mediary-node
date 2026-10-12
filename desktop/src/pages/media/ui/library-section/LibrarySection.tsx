@@ -29,8 +29,8 @@ import {
 } from '@features/continue-watching'
 import type { EpisodeIndex } from '@features/continue-watching'
 
-import { BookFiles } from './BookFiles'
-import { ChapterList } from './ChapterList'
+import { BookFiles } from './book-files/BookFiles'
+import { ChapterList } from './chapter-list/ChapterList'
 import styles from './LibrarySection.module.scss'
 
 const MAX_EPISODE_PLACEHOLDERS = 28

@@ -1,2 +1,2 @@
 export { LibraryPage } from './LibraryPage'
-export { ScanHistoryPage } from './scan-history/ScanHistoryPage'
+export { ScanHistoryPage } from './ScanHistoryPage'

@@ -12,7 +12,7 @@ import { chapterQuery, neighbourChapters, ReaderView } from '@entities/reader'
 
 import { useTitleChapters } from '@features/title-chapters'
 
-import { Panel } from './Panel'
+import { Panel } from './ui/panel/Panel'
 
 export interface ReadPageProps {
 	chapterRef: string

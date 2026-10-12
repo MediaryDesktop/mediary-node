@@ -28,8 +28,8 @@ import {
 import { LibraryExplorer, libraryExplorerModel } from '@features/library-explorer'
 import { MatchFileDrawer, matchFileModel } from '@features/match-library-file'
 
-import { FileLogItem } from './FileLogItem'
 import styles from './ScanHistoryPage.module.scss'
+import { FileLogItem } from './ui/file-log-item/FileLogItem'
 
 const HISTORY_LIMIT = 50
 

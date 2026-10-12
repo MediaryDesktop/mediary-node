@@ -13,7 +13,7 @@ import { canTrack, entryTracking, useTrackedEntries } from '@entities/tracker'
 
 import { EntryMenu } from '@features/track-media'
 
-import type { SectionState } from '../model/model'
+import type { SectionState } from '../../model/model'
 
 import styles from './DiscoverRow.module.scss'
 

@@ -12,9 +12,9 @@ import { aniListAccountModel } from '@entities/anilist-account'
 import { mediaDetailsModel, mediaPreviewModel } from '@entities/media'
 import { useTrackedEntry } from '@entities/tracker'
 
-import { MediaHeroSkeleton } from './media-hero/MediaHeroSkeleton'
-import { MediaView } from './media-view/MediaView'
 import styles from './MediaPage.module.scss'
+import { MediaHeroSkeleton } from './ui/media-hero/MediaHeroSkeleton'
+import { MediaView } from './ui/media-view/MediaView'
 
 export interface MediaPageProps {
 	mediaRef: string

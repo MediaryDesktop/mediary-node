@@ -19,8 +19,8 @@ import { ReleaseProfileSettings, TorznabSourcesSettings } from '@features/manage
 import { LanguageSwitcher } from '@features/switch-language'
 import { ThemeSwitcher } from '@features/switch-theme'
 
-import { SECTION_GROUPS } from './sections'
-import type { SectionInfo, SettingsSection } from './sections'
+import { SECTION_GROUPS } from './config/sections'
+import type { SectionInfo, SettingsSection } from './config/sections'
 import styles from './SettingsPage.module.scss'
 
 export interface SettingsPageProps {

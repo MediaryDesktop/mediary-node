@@ -7,7 +7,7 @@ import { Button, Icon, WindowControls } from '@shared/ui'
 
 import { useBookEntrance } from '@entities/reader'
 
-import styles from './ReadPage.module.scss'
+import styles from './Panel.module.scss'
 
 export interface PanelProps {
 	onClose: () => void
