@@ -1,10 +1,10 @@
-export { ReaderView } from './ui/ReaderView'
-export type { ReaderViewProps } from './ui/ReaderView'
+export { ReaderView } from './ui/reader-view/ReaderView'
+export type { ReaderViewProps } from './ui/reader-view/ReaderView'
 
-export { BookReaderView } from './ui/book/BookReaderView'
-export type { BookReaderViewProps } from './ui/book/BookReaderView'
-export type { BookLocation } from './ui/book/types'
-export { useBookEntrance } from './ui/book/useBookEntrance'
+export { BookReaderView } from './ui/book-reader/BookReaderView'
+export type { BookReaderViewProps } from './ui/book-reader/BookReaderView'
+export type { BookLocation } from './ui/book-reader/types'
+export { useBookEntrance } from './ui/book-reader/lib/useBookEntrance'
 export { bookFileName, isPdf, loadBookFile } from './lib/book'
 
 export {

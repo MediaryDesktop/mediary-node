@@ -1,0 +1,43 @@
+// Rendered inside the contents drawer, outside .root: the drawer already sets
+// --text and --surface for its own theme, so this needs none of its own.
+.tocPanel {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	min-height: 0;
+	gap: 0.625rem;
+}
+
+.tocLabel {
+	flex: none;
+	color: var(--text-secondary);
+	font-size: 0.75rem;
+	font-weight: 650;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+.tocScroll {
+	flex: 1;
+	min-height: 0;
+	margin: 0 -0.5rem;
+	padding: 0 0.5rem;
+	overflow-y: auto;
+	scrollbar-width: none;
+
+	&::-webkit-scrollbar {
+		display: none;
+	}
+}
+
+.tocFooter {
+	display: flex;
+	flex: none;
+	flex-direction: column;
+	gap: 0.5rem;
+	padding-top: 0.75rem;
+	border-top: 1px solid var(--border);
+	color: var(--text-secondary);
+	font-size: 0.8125rem;
+	font-variant-numeric: tabular-nums;
+}

@@ -3,10 +3,10 @@ import type { PDFDocumentProxy, RenderTask } from 'pdfjs-dist'
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 
-import { pdfFraction, pdfLocator, pdfPage } from '../../lib/book'
+import { pdfFraction, pdfLocator, pdfPage } from '../../../lib/book'
+import type { BookLocation, BookViewHandle } from '../types'
 
 import styles from './BookViews.module.scss'
-import type { BookLocation, BookViewHandle } from './types'
 
 GlobalWorkerOptions.workerSrc = workerUrl
 

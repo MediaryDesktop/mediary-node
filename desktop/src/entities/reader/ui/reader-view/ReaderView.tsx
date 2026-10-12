@@ -6,10 +6,10 @@ import type { MouseEvent } from 'react'
 import { useTranslation } from '@shared/i18n'
 import { Button, Icon, WindowControls } from '@shared/ui'
 
-import type { ReaderChapter } from '../api/api'
-import { clampPage, isLastPage, prefetchIndexes } from '../lib/pages'
-import { pageUrl } from '../lib/urls'
-import { readerModel } from '../model/model'
+import type { ReaderChapter } from '../../api/api'
+import { clampPage, isLastPage, prefetchIndexes } from '../../lib/pages'
+import { pageUrl } from '../../lib/urls'
+import { readerModel } from '../../model/model'
 
 import styles from './ReaderView.module.scss'
 

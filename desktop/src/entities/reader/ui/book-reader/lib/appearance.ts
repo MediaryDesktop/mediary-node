@@ -1,6 +1,6 @@
 import { readStored, writeStored } from '@shared/lib'
 
-import type { BookAppearance, BookTheme } from './types'
+import type { BookAppearance, BookTheme } from '../types'
 
 export const BOOK_THEMES: readonly BookTheme[] = ['dark', 'sepia', 'light']
 

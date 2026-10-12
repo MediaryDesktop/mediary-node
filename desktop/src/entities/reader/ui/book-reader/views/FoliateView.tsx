@@ -1,9 +1,10 @@
 import type { FoliateView as FoliateElement, FoliateLocation, FoliateTocItem } from 'foliate-js/view.js'
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react'
 
-import { bookStyles } from './appearance'
+import { bookStyles } from '../lib/appearance'
+import type { BookAppearance, BookLocation, BookViewHandle } from '../types'
+
 import styles from './BookViews.module.scss'
-import type { BookAppearance, BookLocation, BookViewHandle } from './types'
 
 export interface FoliateViewProps {
 	file: File
