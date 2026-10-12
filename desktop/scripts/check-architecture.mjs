@@ -149,12 +149,64 @@ for (const file of files) {
 	}
 }
 
+// The root of a slice holds its public index and the one component that composes
+// it; everything else sits in ui/, model/, lib/, config/ and the like. A page slice
+// serves routes, so each of its *Page components is a main one.
+const ROOT_LAYERS = ['entities', 'features', 'pages']
+
+function rootProblems() {
+	const problems = []
+
+	for (const layer of ROOT_LAYERS) {
+		for (const slice of readdirSync(join(SRC, layer))) {
+			const dir = join(SRC, layer, slice)
+
+			if (!statSync(dir).isDirectory()) {
+				continue
+			}
+
+			const files = readdirSync(dir).filter(entry => statSync(join(dir, entry)).isFile())
+			const components = files.filter(file => file.endsWith('.tsx') && !file.startsWith('index.'))
+
+			for (const file of files) {
+				const allowed =
+					file === 'index.ts' ||
+					file === 'index.tsx' ||
+					file.endsWith('.module.scss') ||
+					(file.endsWith('.tsx') &&
+						(layer === 'pages' ? file.endsWith('Page.tsx') : components.length === 1))
+
+				if (!allowed) {
+					problems.push(`${layer}/${slice}/${file}`)
+				}
+			}
+		}
+	}
+
+	return problems
+}
+
+const misplaced = rootProblems()
+
+if (misplaced.length === 0) {
+	console.log('✔ Slice roots hold only their index and main component.')
+} else {
+	console.error(`✖ ${misplaced.length} file(s) at a slice root that belong in ui/, model/, lib/ or config/:
+`)
+
+	for (const file of misplaced) {
+		console.error(`   ${file}`)
+	}
+
+	console.error('')
+}
+
 const cycles = findCycles(edges)
 const nodeCount = [...edges.keys()].filter(node => edges.get(node).size > 0 || node !== 'root').length
 
 if (cycles.length === 0) {
 	console.log(`✔ No slice cycles (${files.length} files, ${nodeCount} nodes).`)
-	process.exit(0)
+	process.exit(misplaced.length === 0 ? 0 : 1)
 }
 
 console.error(`✖ Found ${cycles.length} slice cycle(s) across ${files.length} files:\n`)
