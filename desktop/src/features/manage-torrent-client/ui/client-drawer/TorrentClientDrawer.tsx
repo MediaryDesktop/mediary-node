@@ -19,7 +19,7 @@ import { libraryRootsQuery } from '@entities/library-item'
 import { checkTorrentClientMutation, putTorrentSettingsMutation } from '@entities/torrent'
 import type { TorrentSettings } from '@entities/torrent'
 
-import styles from './TorrentClient.module.scss'
+import styles from './TorrentClientDrawer.module.scss'
 
 export interface TorrentClientDrawerProps {
 	open: boolean

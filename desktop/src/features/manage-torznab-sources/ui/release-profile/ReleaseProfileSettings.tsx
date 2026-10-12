@@ -11,7 +11,7 @@ import { $nodeReady } from '@infra/node'
 import { putTorrentProfileMutation, torrentProfileQuery } from '@entities/torrent'
 import type { TorrentProfile } from '@entities/torrent'
 
-import styles from './ReleaseProfile.module.scss'
+import styles from './ReleaseProfileSettings.module.scss'
 
 const RESOLUTIONS = ['2160p', '1080p', '720p', '480p'] as const
 const CODECS = ['HEVC', 'AVC', 'AV1'] as const

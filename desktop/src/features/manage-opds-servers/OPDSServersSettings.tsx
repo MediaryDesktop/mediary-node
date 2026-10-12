@@ -10,7 +10,7 @@ import { $nodeReady } from '@infra/node'
 import { deleteOPDSServerMutation, opdsServersQuery } from '@entities/manga-source'
 import type { OPDSServer } from '@entities/manga-source'
 
-import { OPDSServerDrawer } from './OPDSServerDrawer'
+import { OPDSServerDrawer } from './ui/server-drawer/OPDSServerDrawer'
 
 export function OPDSServersSettings() {
 	const { t } = useTranslation()

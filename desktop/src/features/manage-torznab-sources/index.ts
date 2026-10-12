@@ -1,2 +1,2 @@
-export { ReleaseProfileSettings } from './ReleaseProfileSettings'
-export { TorznabSourcesSettings } from './TorznabSourcesSettings'
+export { ReleaseProfileSettings } from './ui/release-profile/ReleaseProfileSettings'
+export { TorznabSourcesSettings } from './ui/torznab-sources/TorznabSourcesSettings'

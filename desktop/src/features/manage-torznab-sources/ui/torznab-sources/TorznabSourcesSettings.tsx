@@ -10,7 +10,7 @@ import { $nodeReady } from '@infra/node'
 import { deleteTorrentSourceMutation, torrentSourcesQuery } from '@entities/torrent'
 import type { TorrentSource } from '@entities/torrent'
 
-import { TorznabSourceDrawer } from './TorznabSourceDrawer'
+import { TorznabSourceDrawer } from './source-drawer/TorznabSourceDrawer'
 
 // The user's Jackett or Prowlarr endpoints the node searches for releases.
 export function TorznabSourcesSettings() {

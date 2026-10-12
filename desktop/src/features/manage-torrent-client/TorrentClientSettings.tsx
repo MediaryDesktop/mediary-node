@@ -9,8 +9,8 @@ import { $nodeReady } from '@infra/node'
 import { libraryRootsQuery } from '@entities/library-item'
 import { torrentSettingsQuery } from '@entities/torrent'
 
-import styles from './TorrentClient.module.scss'
-import { TorrentClientDrawer } from './TorrentClientDrawer'
+import styles from './TorrentClientSettings.module.scss'
+import { TorrentClientDrawer } from './ui/client-drawer/TorrentClientDrawer'
 
 // The qBittorrent the node adds torrents to, and the library folder they go into.
 export function TorrentClientSettings() {
