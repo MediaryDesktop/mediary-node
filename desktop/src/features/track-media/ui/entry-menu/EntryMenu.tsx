@@ -8,7 +8,8 @@ import type { DropdownMenuItem } from '@shared/ui'
 import { isLocalTrackerType, trackerModel } from '@entities/tracker'
 import type { TrackerEntry, TrackerMediaType } from '@entities/tracker'
 
-import { manageEntryModel, rateEntryModel } from '../../model/model'
+import { manageEntryModel } from '../../model/manage-entry'
+import { rateEntryModel } from '../../model/rate-entry'
 
 import styles from './EntryMenu.module.scss'
 

@@ -6,7 +6,7 @@ import { Button, Drawer, DrawerForm, DrawerSection, Icon, SelectionGroup } from 
 
 import { isLocalTrackerType, TRACKER_STATUSES, trackerListsQuery } from '@entities/tracker'
 
-import { manageEntryModel } from '../../model/model'
+import { manageEntryModel } from '../../model/manage-entry'
 
 import { EntryListPicker } from './list-picker/EntryListPicker'
 
