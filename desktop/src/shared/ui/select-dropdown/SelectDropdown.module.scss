@@ -50,15 +50,6 @@
 			}
 		}
 
-		.main {
-			display: flex;
-			flex: 1;
-			align-items: stretch;
-			min-width: 0;
-			border-radius: calc(var(--radius) - 2px);
-			transition: background-color 160ms;
-		}
-
 		.leading + .main {
 			border-top-left-radius: 0;
 			border-bottom-left-radius: 0;
@@ -69,66 +60,105 @@
 			background: var(--field-hover);
 		}
 
-		.body {
+		.main {
 			display: flex;
 			flex: 1;
-			flex-wrap: wrap;
-			align-items: center;
-			gap: 6px;
+			align-items: stretch;
 			min-width: 0;
-			padding: 0 12px;
-		}
+			border-radius: calc(var(--radius) - 2px);
+			transition: background-color 160ms;
 
-		.input {
-			flex: 1;
-			min-width: 4rem;
-			height: calc(var(--control-height) - 4px);
-			border: none;
-			background: none;
-			color: var(--text);
-			font-family: inherit;
-			font-size: 14px;
-			font-weight: 500;
-			text-overflow: ellipsis;
-			outline: none;
-			cursor: inherit;
-
-			&::placeholder {
-				color: var(--text-muted);
-			}
-
-			&:disabled {
-				cursor: not-allowed;
-			}
-		}
-
-		.tags + .input {
-			min-width: 2rem;
-			height: 28px;
-		}
-
-		.tags {
-			display: flex;
-			flex-wrap: wrap;
-			align-items: center;
-			gap: 6px;
-			padding: 6px 0;
-
-			.tag {
-				display: inline-flex;
+			.body {
+				display: flex;
+				flex: 1;
+				flex-wrap: wrap;
 				align-items: center;
 				gap: 6px;
-				padding: 4px 4px 4px 8px;
-				border-radius: var(--radius-sm);
-				background: var(--surface-muted);
-				color: var(--text);
-				font-size: 12px;
+				min-width: 0;
+				padding: 0 12px;
 
-				.tagLabel {
-					white-space: nowrap;
+				.tags + .input {
+					min-width: 2rem;
+					height: 28px;
 				}
 
-				.tagRemove {
+				.tags {
+					display: flex;
+					flex-wrap: wrap;
+					align-items: center;
+					gap: 6px;
+					padding: 6px 0;
+
+					.tag {
+						display: inline-flex;
+						align-items: center;
+						gap: 6px;
+						padding: 4px 4px 4px 8px;
+						border-radius: var(--radius-sm);
+						background: var(--surface-muted);
+						color: var(--text);
+						font-size: 12px;
+
+						.tagLabel {
+							white-space: nowrap;
+						}
+
+						.tagRemove {
+							display: inline-flex;
+							align-items: center;
+							justify-content: center;
+							width: 20px;
+							height: 20px;
+							padding: 0;
+							border: none;
+							border-radius: var(--radius-xs);
+							background: none;
+							color: var(--text);
+							cursor: pointer;
+							transition:
+								background-color 160ms,
+								color 160ms;
+
+							&:hover {
+								background: var(--surface-muted-hover);
+								color: var(--text);
+							}
+						}
+					}
+				}
+
+				.input {
+					flex: 1;
+					min-width: 4rem;
+					height: calc(var(--control-height) - 4px);
+					border: none;
+					background: none;
+					color: var(--text);
+					font-family: inherit;
+					font-size: 14px;
+					font-weight: 500;
+					text-overflow: ellipsis;
+					outline: none;
+					cursor: inherit;
+
+					&::placeholder {
+						color: var(--text-muted);
+					}
+
+					&:disabled {
+						cursor: not-allowed;
+					}
+				}
+			}
+
+			.actions {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				flex-shrink: 0;
+				padding-right: 12px;
+
+				.action {
 					display: inline-flex;
 					align-items: center;
 					justify-content: center;
@@ -138,7 +168,7 @@
 					border: none;
 					border-radius: var(--radius-xs);
 					background: none;
-					color: var(--text);
+					color: var(--text-secondary);
 					cursor: pointer;
 					transition:
 						background-color 160ms,
@@ -149,45 +179,15 @@
 						color: var(--text);
 					}
 				}
-			}
-		}
 
-		.actions {
-			display: flex;
-			align-items: center;
-			gap: 8px;
-			flex-shrink: 0;
-			padding-right: 12px;
+				.chevron {
+					color: var(--text-secondary);
+					pointer-events: none;
+					transition: transform 200ms ease;
 
-			.action {
-				display: inline-flex;
-				align-items: center;
-				justify-content: center;
-				width: 20px;
-				height: 20px;
-				padding: 0;
-				border: none;
-				border-radius: var(--radius-xs);
-				background: none;
-				color: var(--text-secondary);
-				cursor: pointer;
-				transition:
-					background-color 160ms,
-					color 160ms;
-
-				&:hover {
-					background: var(--surface-muted-hover);
-					color: var(--text);
-				}
-			}
-
-			.chevron {
-				color: var(--text-secondary);
-				pointer-events: none;
-				transition: transform 200ms ease;
-
-				&.chevronUp {
-					transform: rotate(180deg);
+					&.chevronUp {
+						transform: rotate(180deg);
+					}
 				}
 			}
 		}
@@ -200,6 +200,8 @@
 	}
 }
 
+// Rendered through a portal into <body>, so it is never actually a descendant of
+// .field — nesting it there would produce a selector that never matches.
 .panel {
 	position: fixed;
 	z-index: 900;
