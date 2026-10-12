@@ -10,8 +10,8 @@ import { ScanProgress } from '@features/scan-library'
 import { ManageEntryDrawer, RateEntryDrawer } from '@features/track-media'
 
 import styles from './AppLayout.module.scss'
-import './list-wiring'
-import { Sidebar } from './Sidebar'
+import './lib/list-wiring'
+import { Sidebar } from './sidebar/Sidebar'
 
 export function AppLayout({ children }: { children: ReactNode }) {
 	const startPlayback = useUnit(playbackQuery.start)

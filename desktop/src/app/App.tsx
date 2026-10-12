@@ -7,8 +7,8 @@ import { nodeBridgeMounted, subscribeToNodeState } from '@infra/node'
 
 import { sessionModel } from '@entities/session'
 
-import { WindowChrome } from './layout/WindowChrome'
-import { WindowDragStrip } from './layout/WindowDragStrip'
+import { WindowChrome } from './layout/window-chrome/WindowChrome'
+import { WindowDragStrip } from './layout/window-drag-strip/WindowDragStrip'
 import { AppProviders } from './providers'
 import { router } from './router'
 

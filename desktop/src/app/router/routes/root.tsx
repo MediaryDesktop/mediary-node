@@ -1,6 +1,6 @@
 import { createRootRoute, Outlet } from '@tanstack/react-router'
 
-import { PlayerHost } from '../../layout/PlayerHost'
+import { PlayerHost } from '../../layout/player-host/PlayerHost'
 
 function RootLayout() {
 	return (
