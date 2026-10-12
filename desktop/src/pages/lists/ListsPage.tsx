@@ -21,13 +21,7 @@ import {
 import type { IconLike } from '@shared/ui'
 
 import { aniListAccountModel } from '@entities/anilist-account'
-import {
-	LIST_MEDIA_TYPES,
-	listTitleCount,
-	MediaTypeIcon,
-	trackerListsQuery,
-	useTrackedEntries
-} from '@entities/tracker'
+import { LIST_MEDIA_TYPES, listTitleCount, MediaTypeIcon, trackerListsQuery } from '@entities/tracker'
 import type { ListMediaType, TrackerCustomList } from '@entities/tracker'
 
 import { ConnectAniList } from '@features/connect-anilist'
@@ -35,7 +29,6 @@ import { manageListsModel } from '@features/manage-lists'
 
 import { ListCard } from './list-card/ListCard'
 import styles from './ListsPage.module.scss'
-import { PinnedShelf } from './pinned-shelf/PinnedShelf'
 
 type Filter = ListMediaType | 'all'
 type SortKey = 'recent' | 'name' | 'size'
@@ -91,8 +84,6 @@ export function ListsPage() {
 		startLists()
 	}, [startLists])
 
-	const entries = useTrackedEntries(connected)
-
 	const allLists = useMemo(() => lists?.lists ?? [], [lists])
 
 	const visible = useMemo(() => {
@@ -133,8 +124,6 @@ export function ListsPage() {
 		}))
 	]
 
-	const openMedia = (mediaRef: string) => navigate({ to: '/media/$mediaRef', params: { mediaRef } })
-
 	return (
 		<PageTransition className={styles.root}>
 			<PageHeader
@@ -157,16 +146,6 @@ export function ListsPage() {
 					<p className={styles.connectText}>{t('lists.connect')}</p>
 					<ConnectAniList />
 				</section>
-			)}
-
-			{entries.length > 0 && (
-				<PinnedShelf
-					entries={entries}
-					onOpen={openMedia}
-					onOpenStatus={status =>
-						navigate({ to: '/lists/$listId', params: { listId: `status:${status}` } })
-					}
-				/>
 			)}
 
 			<section className={styles.section}>

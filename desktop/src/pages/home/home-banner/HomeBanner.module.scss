@@ -1,0 +1,29 @@
+// Without Discover's tabs under it, the banner needs less of the page.
+.banner {
+	--featured-height: 22rem;
+}
+
+.progress {
+	display: flex;
+	flex-direction: column;
+	gap: 0.375rem;
+	width: 16rem;
+}
+
+.progressLabel {
+	display: flex;
+	justify-content: space-between;
+	gap: 1rem;
+	color: var(--text-secondary);
+	font-size: 0.875rem;
+
+	strong {
+		color: var(--text);
+		font-weight: 650;
+		font-variant-numeric: tabular-nums;
+	}
+}
+
+.progressBar {
+	width: 100%;
+}

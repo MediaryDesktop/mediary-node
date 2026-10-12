@@ -1,6 +1,6 @@
 .hero {
 	position: relative;
-	--banner-height: 27rem;
+	--banner-height: var(--featured-height, 27rem);
 
 	min-height: var(--banner-height);
 
@@ -239,6 +239,13 @@
 		left: 50%;
 		z-index: 5;
 		transform: translateX(-50%);
+	}
+
+	.cornerSlot {
+		position: absolute;
+		right: 2rem;
+		bottom: 1.75rem;
+		z-index: 4;
 	}
 }
 

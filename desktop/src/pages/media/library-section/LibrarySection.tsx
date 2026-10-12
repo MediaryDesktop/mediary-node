@@ -17,18 +17,18 @@ import { $playerMode, playbackModel, playerOpened, thumbnailUrl } from '@entitie
 
 import {
 	episodeFor,
+	EpisodeImage,
 	episodeNumber,
 	episodeOrder,
 	episodeSeason,
 	groupTitleFiles,
 	indexEpisodes,
 	isWatched
-} from '../lib/episodes'
-import type { EpisodeIndex } from '../lib/episodes'
+} from '@features/continue-watching'
+import type { EpisodeIndex } from '@features/continue-watching'
 
 import { BookFiles } from './BookFiles'
 import { ChapterList } from './ChapterList'
-import { EpisodeImage } from './EpisodeImage'
 import styles from './LibrarySection.module.scss'
 
 const MAX_EPISODE_PLACEHOLDERS = 28

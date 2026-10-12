@@ -1,78 +1,90 @@
-import { Link } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
+import { useMemo } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button } from '@shared/ui'
+import { EmptyState, PageTransition } from '@shared/ui'
 
-import { $nodeReady, nodeHealthQuery } from '@infra/node'
+import { aniListAccountModel } from '@entities/anilist-account'
+import { useTrackedEntries } from '@entities/tracker'
+import type { TrackerEntry, TrackerStatus } from '@entities/tracker'
 
-import { sessionModel } from '@entities/session'
+import { ConnectAniList } from '@features/connect-anilist'
+import { ContinueWatching, useContinueWatching } from '@features/continue-watching'
 
+import { HomeBanner } from './home-banner/HomeBanner'
 import styles from './HomePage.module.scss'
+import { trackerStats } from './lib/stats'
+import { TrackerRow } from './tracker-row/TrackerRow'
+import { TrackerStats } from './tracker-stats/TrackerStats'
 
+const ROWS: { status: TrackerStatus; key: 'current' | 'planning' | 'completed' }[] = [
+	{ status: 'CURRENT', key: 'current' },
+	{ status: 'PLANNING', key: 'planning' },
+	{ status: 'COMPLETED', key: 'completed' }
+]
+
+// What the user is in the middle of, first: the anime they are watching, the next
+// episode the library holds, then the lists and how it all adds up. Discovering
+// something new is Discover's job, not this page's.
 export function HomePage() {
 	const { t } = useTranslation()
-	const [ready, data, pending, error, account, signOut] = useUnit([
-		$nodeReady,
-		nodeHealthQuery.$data,
-		nodeHealthQuery.$pending,
-		nodeHealthQuery.$error,
-		sessionModel.$account,
-		sessionModel.signOutRequested
-	])
+	const navigate = useNavigate()
+
+	const [connected, sessionLoaded] = useUnit([aniListAccountModel.$connected, aniListAccountModel.$loaded])
+
+	const entries = useTrackedEntries(connected)
+	const watching = useContinueWatching(entries)
+	const stats = useMemo(() => trackerStats(entries), [entries])
+
+	// One title, one card: a dorama the node also lists as a series is shown once.
+	const byStatus = useMemo(() => {
+		const unique = [...new Map(entries.map(entry => [entry.media_ref, entry])).values()].sort(
+			(a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at)
+		)
+		const rows = new Map<string, TrackerEntry[]>()
+
+		for (const entry of unique) {
+			rows.set(entry.status, [...(rows.get(entry.status) ?? []), entry])
+		}
+
+		return rows
+	}, [entries])
+
+	const openMedia = (mediaRef: string) => navigate({ to: '/media/$mediaRef', params: { mediaRef } })
 
 	return (
-		<div className={styles.root}>
-			<h1 className={styles.title}>Mediary</h1>
-			<p className={styles.subtitle}>{t('home.subtitle')}</p>
+		<PageTransition className={styles.root}>
+			<HomeBanner entries={entries} watching={watching} onOpen={openMedia} />
 
-			<section className={styles.panel}>
-				<h2 className={styles.panelTitle}>{t('home.account.title')}</h2>
+			{sessionLoaded && !connected && (
+				<section className={styles.connect}>
+					<p className={styles.connectText}>{t('home.connect')}</p>
+					<ConnectAniList />
+				</section>
+			)}
 
-				{account ? (
-					<div className={styles.accountRow}>
-						<div>
-							<p className={styles.accountName}>{account.display_name}</p>
-							<p className={styles.muted}>{account.email}</p>
-						</div>
+			<ContinueWatching state={watching} />
 
-						<Button size='small' onClick={() => signOut()}>
-							{t('home.account.signOut')}
-						</Button>
-					</div>
-				) : (
-					<div className={styles.accountRow}>
-						<p className={styles.muted}>{t('home.account.anonymous')}</p>
+			{entries.length === 0 ? (
+				<EmptyState title={t('home.empty')} />
+			) : (
+				<>
+					{ROWS.map(row => (
+						<TrackerRow
+							key={row.status}
+							title={t(`home.rows.${row.key}`)}
+							status={row.status}
+							entries={byStatus.get(row.status) ?? []}
+						/>
+					))}
 
-						<Link to='/sign-in' className={styles.signIn}>
-							{t('home.account.signIn')}
-						</Link>
-					</div>
-				)}
-			</section>
-
-			<section className={styles.panel}>
-				<h2 className={styles.panelTitle}>{t('home.node.title')}</h2>
-
-				{!ready && <p className={styles.muted}>{t('home.node.waiting')}</p>}
-
-				{ready && pending && <p className={styles.muted}>{t('home.node.pending')}</p>}
-
-				{error && <p className={styles.error}>{t('home.node.failed', { error: String(error) })}</p>}
-
-				{data && (
-					<dl className={styles.facts}>
-						<dt>{t('home.node.version')}</dt>
-						<dd>{data.version}</dd>
-
-						<dt>{t('home.node.build')}</dt>
-						<dd>{data.commit}</dd>
-
-						<dt>{t('home.node.linkedLabel')}</dt>
-						<dd>{data.linked ? t('home.node.linked') : t('home.node.notLinked')}</dd>
-					</dl>
-				)}
-			</section>
-		</div>
+					<section className={styles.section}>
+						<h2 className={styles.sectionTitle}>{t('home.stats.title')}</h2>
+						<TrackerStats stats={stats} entries={entries} />
+					</section>
+				</>
+			)}
+		</PageTransition>
 	)
 }

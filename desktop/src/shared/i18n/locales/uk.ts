@@ -83,7 +83,6 @@ export const uk: Translation = {
 		titleCount_few: '{{count}} тайтли',
 		titleCount_many: '{{count}} тайтлів',
 		titleCount_other: '{{count}} тайтла',
-		pinned: 'Закріплені',
 		yours: 'Ваші списки',
 		search: 'Пошук списків',
 		filterAll: 'Усі',
@@ -132,7 +131,7 @@ export const uk: Translation = {
 			watchlistHint: 'Тайтли, які ви плануєте подивитись або прочитати',
 			completed: 'Завершене',
 			completedHint: 'Усе, що ви пройшли до кінця',
-			current: 'Зараз дивлюсь'
+			current: 'В процесі'
 		},
 		manage: {
 			new: 'Новий список',
@@ -1386,6 +1385,10 @@ export const uk: Translation = {
 			name: 'Майстер налаштування',
 			hint: 'Пройти первинне налаштування ще раз: теки, плеєр, завантаження',
 			action: 'Відкрити майстер'
+		},
+		node: {
+			name: 'Нода',
+			hint: 'Версія та збірка локальної ноди'
 		}
 	},
 	select: {
@@ -1615,23 +1618,96 @@ export const uk: Translation = {
 		}
 	},
 	home: {
-		subtitle: 'Скелет фази 0. Каталогу ще немає — тут лише перевірка, що оболонка бачить ноду',
-		account: {
-			title: 'Хмарний акаунт',
-			anonymous: 'Не увійдено — каталог і синхронізація недоступні',
-			signIn: 'Увійти',
-			signOut: 'Вийти'
+		connect: 'Підключіть AniList, щоб бачити тут свої аніме й мангу',
+		empty: 'У ваших списках поки порожньо. Знайдіть щось в Огляді чи Пошуку й додайте',
+		banner: {
+			label: 'Аніме в процесі',
+			open: 'Детальніше',
+			progress: 'Переглянуто',
+			continue: 'Продовжити · {{episode}}'
 		},
-		node: {
-			title: 'Локальна нода',
-			waiting: 'Очікування на запуск ноди…',
-			pending: 'Запит стану…',
-			failed: 'Не вдалося опитати ноду: {{error}}',
-			version: 'Версія',
-			build: 'Збірка',
-			linkedLabel: 'Хмарний акаунт',
-			linked: 'привʼязано',
-			notLinked: 'не привʼязано'
+		continue: {
+			title: 'Продовжити перегляд'
+		},
+		rows: {
+			current: 'В процесі',
+			planning: 'Заплановане',
+			completed: 'Нещодавно завершене'
+		},
+		stats: {
+			title: 'Статистика',
+			titles: 'Тайтлів у списках',
+			episodes: 'Серій переглянуто',
+			chapters: 'Розділів прочитано',
+			meanScore: 'Середня оцінка',
+			topGenres: 'Улюблені жанри',
+			topGenresNote: 'Найчастіші у ваших списках',
+			completedThisMonth_one: '+{{count}} завершено цього місяця',
+			completedThisMonth_few: '+{{count}} завершено цього місяця',
+			completedThisMonth_many: '+{{count}} завершено цього місяця',
+			completedThisMonth_other: '+{{count}} завершено цього місяця',
+			typesNote_one: '{{count}} тип медіа',
+			typesNote_few: '{{count}} типи медіа',
+			typesNote_many: '{{count}} типів медіа',
+			typesNote_other: '{{count}} типу медіа',
+			acrossNote_one: 'у {{count}} тайтлі',
+			acrossNote_few: 'у {{count}} тайтлах',
+			acrossNote_many: 'у {{count}} тайтлах',
+			acrossNote_other: 'у {{count}} тайтла',
+			scoredNote_one: 'з {{count}} оціненого тайтлу',
+			scoredNote_few: 'з {{count}} оцінених тайтлів',
+			scoredNote_many: 'з {{count}} оцінених тайтлів',
+			scoredNote_other: 'з {{count}} оціненого тайтлу',
+			activity: {
+				title: 'Динаміка',
+				subtitle: 'Розпочаті й завершені тайтли',
+				started: 'Розпочато',
+				completed: 'Завершено',
+				empty: 'У ваших списках ще немає дат початку чи завершення',
+				range: {
+					'6m': '6 міс',
+					'1y': 'Рік',
+					all: 'Весь час'
+				}
+			},
+			genres: {
+				title: 'Жанри',
+				subtitle: 'Що ви дивитесь і читаєте',
+				other: 'Інші',
+				empty: 'Почніть щось дивитися — і тут зʼявляться жанри',
+				center_one: 'жанр',
+				center_few: 'жанри',
+				center_many: 'жанрів',
+				center_other: 'жанру'
+			},
+			scores: {
+				title: 'Ваші оцінки',
+				subtitle_one: '{{count}} оцінений тайтл',
+				subtitle_few: '{{count}} оцінені тайтли',
+				subtitle_many: '{{count}} оцінених тайтлів',
+				subtitle_other: '{{count}} оціненого тайтлу',
+				mean: 'у середньому',
+				bucket: 'Оцінка {{score}}',
+				titles: 'Тайтлів',
+				empty: 'Оцініть тайтл — і тут зʼявиться розподіл'
+			},
+			topRated: {
+				title: 'Ваш топ-5',
+				subtitle: 'За вашими оцінками',
+				empty: 'Ще нічого не оцінено'
+			},
+			byType: {
+				title: 'За типами медіа',
+				subtitle: 'Як кожен тип розподіляється за статусами'
+			},
+			status: {
+				CURRENT: 'В процесі',
+				PLANNING: 'Заплановано',
+				COMPLETED: 'Завершено',
+				PAUSED: 'Відкладено',
+				DROPPED: 'Кинуто',
+				REPEATING: 'Повторно'
+			}
 		}
 	}
 }

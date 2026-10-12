@@ -8,14 +8,13 @@ import type { IconName } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
 
-import { enumLabel } from '@entities/media'
+import { enumLabel, FeaturedBanner } from '@entities/media'
 import type { MediaSummary } from '@entities/media'
 
 import styles from './DiscoverPage.module.scss'
 import { DISCOVER_TABS, discoverSections } from './lib/sections'
 import type { DiscoverSection, DiscoverTab } from './lib/sections'
 import { discoverModel } from './model/model'
-import { DiscoverHero } from './ui/DiscoverHero'
 import { DiscoverRow } from './ui/DiscoverRow'
 
 // How many titles of the first row the banner goes through.
@@ -106,12 +105,14 @@ export function DiscoverPage({ tab, onTabChange }: DiscoverPageProps) {
 
 	return (
 		<PageTransition className={styles.page}>
-			<DiscoverHero
+			<FeaturedBanner
 				key={tab}
 				items={setupNeeded ? [] : featured}
 				loading={!setupNeeded && first?.status !== 'failed'}
 				onOpen={open}
-				tabs={tabs}
+				label={t('discover.featured')}
+				openLabel={t('discover.open')}
+				bottom={tabs}
 			/>
 
 			<PhaseTransition phase={tab}>

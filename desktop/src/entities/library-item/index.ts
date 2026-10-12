@@ -32,6 +32,8 @@ export {
 
 export type { BulkOutcome, ScanActivity, ScanPhase } from './model/model'
 
+export { fetchTitleFilesFx } from './api/api'
+
 export { LibraryFileRow } from './ui/LibraryFileRow'
 export type { LibraryFileRowProps } from './ui/LibraryFileRow'
 

@@ -1,9 +1,12 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 import clsx from 'clsx'
+import { useUnit } from 'effector-react'
 import type { ReactNode } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { PageTransition, renderIcon, RippleButton } from '@shared/ui'
+
+import { nodeHealthQuery } from '@infra/node'
 
 import { PlayerModeSwitcher } from '@features/choose-player'
 import { DownloadFolderSetting } from '@features/download-chapters'
@@ -89,6 +92,9 @@ function SectionContent({ section }: { section: SectionInfo }) {
 						<Link to='/setup' className={styles.link}>
 							{t('settings.wizard.action')}
 						</Link>
+					</Row>
+					<Row name={t('settings.node.name')} hint={t('settings.node.hint')}>
+						<NodeVersion />
 					</Row>
 				</Card>
 			)
@@ -181,6 +187,12 @@ function SectionContent({ section }: { section: SectionInfo }) {
 				</Card>
 			)
 	}
+}
+
+function NodeVersion() {
+	const health = useUnit(nodeHealthQuery.$data)
+
+	return <span className={styles.hint}>{health ? `${health.version} · ${health.commit}` : '—'}</span>
 }
 
 function Card({ children }: { children: ReactNode }) {

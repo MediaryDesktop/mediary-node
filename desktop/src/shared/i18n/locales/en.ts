@@ -85,7 +85,6 @@ export const en = {
 		titleCount_few: '{{count}} titles',
 		titleCount_many: '{{count}} titles',
 		titleCount_other: '{{count}} titles',
-		pinned: 'Pinned',
 		yours: 'Your lists',
 		search: 'Search lists',
 		filterAll: 'All',
@@ -134,7 +133,7 @@ export const en = {
 			watchlistHint: 'Titles you plan to watch or read',
 			completed: 'Completed',
 			completedHint: 'Everything you finished',
-			current: 'Currently watching'
+			current: 'In progress'
 		},
 		manage: {
 			new: 'New list',
@@ -1386,6 +1385,10 @@ export const en = {
 			name: 'Setup wizard',
 			hint: 'Re-run first-time setup: folders, player, downloads',
 			action: 'Open wizard'
+		},
+		node: {
+			name: 'Node',
+			hint: 'Version and build of the local node'
 		}
 	},
 	select: {
@@ -1616,23 +1619,96 @@ export const en = {
 		}
 	},
 	home: {
-		subtitle: 'Phase 0 skeleton. No catalog yet — this only proves the shell can see the node',
-		account: {
-			title: 'Cloud account',
-			anonymous: 'Not signed in — catalog and sync are unavailable',
-			signIn: 'Sign in',
-			signOut: 'Sign out'
+		connect: 'Connect AniList to see your anime and manga here',
+		empty: 'Nothing on your lists yet. Find something in Discover or Search and add it',
+		banner: {
+			label: 'Anime in progress',
+			open: 'Details',
+			progress: 'Watched',
+			continue: 'Continue · {{episode}}'
 		},
-		node: {
-			title: 'Local node',
-			waiting: 'Waiting for the node to start…',
-			pending: 'Requesting status…',
-			failed: 'Could not query the node: {{error}}',
-			version: 'Version',
-			build: 'Build',
-			linkedLabel: 'Cloud account',
-			linked: 'linked',
-			notLinked: 'not linked'
+		continue: {
+			title: 'Continue watching'
+		},
+		rows: {
+			current: 'In progress',
+			planning: 'Planning',
+			completed: 'Recently completed'
+		},
+		stats: {
+			title: 'Statistics',
+			titles: 'Titles on lists',
+			episodes: 'Episodes watched',
+			chapters: 'Chapters read',
+			meanScore: 'Average score',
+			topGenres: 'Favourite genres',
+			topGenresNote: 'Most common on your lists',
+			completedThisMonth_one: '+{{count}} completed this month',
+			completedThisMonth_few: '+{{count}} completed this month',
+			completedThisMonth_many: '+{{count}} completed this month',
+			completedThisMonth_other: '+{{count}} completed this month',
+			typesNote_one: 'in {{count}} media type',
+			typesNote_few: 'across {{count}} media types',
+			typesNote_many: 'across {{count}} media types',
+			typesNote_other: 'across {{count}} media types',
+			acrossNote_one: 'in {{count}} title',
+			acrossNote_few: 'across {{count}} titles',
+			acrossNote_many: 'across {{count}} titles',
+			acrossNote_other: 'across {{count}} titles',
+			scoredNote_one: 'from {{count}} scored title',
+			scoredNote_few: 'from {{count}} scored titles',
+			scoredNote_many: 'from {{count}} scored titles',
+			scoredNote_other: 'from {{count}} scored titles',
+			activity: {
+				title: 'Activity',
+				subtitle: 'Titles started and completed',
+				started: 'Started',
+				completed: 'Completed',
+				empty: 'No start or finish dates on your lists yet',
+				range: {
+					'6m': '6 months',
+					'1y': 'Year',
+					all: 'All time'
+				}
+			},
+			genres: {
+				title: 'Genres',
+				subtitle: 'What you watch and read',
+				other: 'Other',
+				empty: 'Start something and its genres will show here',
+				center_one: 'genre',
+				center_few: 'genres',
+				center_many: 'genres',
+				center_other: 'genres'
+			},
+			scores: {
+				title: 'Your scores',
+				subtitle_one: '{{count}} scored title',
+				subtitle_few: '{{count}} scored titles',
+				subtitle_many: '{{count}} scored titles',
+				subtitle_other: '{{count}} scored titles',
+				mean: 'average',
+				bucket: 'Score {{score}}',
+				titles: 'Titles',
+				empty: 'Score a title and the spread will show here'
+			},
+			topRated: {
+				title: 'Your top 5',
+				subtitle: 'By your own scores',
+				empty: 'Nothing scored yet'
+			},
+			byType: {
+				title: 'By media type',
+				subtitle: 'How each kind splits by status'
+			},
+			status: {
+				CURRENT: 'In progress',
+				PLANNING: 'Planning',
+				COMPLETED: 'Completed',
+				PAUSED: 'Paused',
+				DROPPED: 'Dropped',
+				REPEATING: 'Repeating'
+			}
 		}
 	}
 } as const

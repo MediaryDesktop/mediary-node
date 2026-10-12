@@ -83,7 +83,6 @@ export const ru: Translation = {
 		titleCount_few: '{{count}} тайтла',
 		titleCount_many: '{{count}} тайтлов',
 		titleCount_other: '{{count}} тайтла',
-		pinned: 'Закреплённые',
 		yours: 'Ваши списки',
 		search: 'Поиск списков',
 		filterAll: 'Все',
@@ -132,7 +131,7 @@ export const ru: Translation = {
 			watchlistHint: 'Тайтлы, которые вы планируете посмотреть или прочитать',
 			completed: 'Завершённое',
 			completedHint: 'Всё, что вы прошли до конца',
-			current: 'Сейчас смотрю'
+			current: 'В процессе'
 		},
 		manage: {
 			new: 'Новый список',
@@ -1387,6 +1386,10 @@ export const ru: Translation = {
 			name: 'Мастер настройки',
 			hint: 'Пройти первичную настройку заново: папки, плеер, загрузки',
 			action: 'Открыть мастер'
+		},
+		node: {
+			name: 'Нода',
+			hint: 'Версия и сборка локальной ноды'
 		}
 	},
 	select: {
@@ -1617,23 +1620,96 @@ export const ru: Translation = {
 		}
 	},
 	home: {
-		subtitle: 'Скелет фазы 0. Каталога ещё нет — это лишь проверка, что оболочка видит ноду',
-		account: {
-			title: 'Облачный аккаунт',
-			anonymous: 'Вход не выполнен — каталог и синхронизация недоступны',
-			signIn: 'Войти',
-			signOut: 'Выйти'
+		connect: 'Подключите AniList, чтобы видеть здесь свои аниме и мангу',
+		empty: 'В ваших списках пока пусто. Найдите что-нибудь в Обзоре или Поиске и добавьте',
+		banner: {
+			label: 'Аниме в процессе',
+			open: 'Подробнее',
+			progress: 'Просмотрено',
+			continue: 'Продолжить · {{episode}}'
 		},
-		node: {
-			title: 'Локальная нода',
-			waiting: 'Ожидание запуска ноды…',
-			pending: 'Запрос состояния…',
-			failed: 'Не удалось опросить ноду: {{error}}',
-			version: 'Версия',
-			build: 'Сборка',
-			linkedLabel: 'Облачный аккаунт',
-			linked: 'привязан',
-			notLinked: 'не привязан'
+		continue: {
+			title: 'Продолжить просмотр'
+		},
+		rows: {
+			current: 'В процессе',
+			planning: 'Запланированное',
+			completed: 'Недавно завершённое'
+		},
+		stats: {
+			title: 'Статистика',
+			titles: 'Тайтлов в списках',
+			episodes: 'Серий просмотрено',
+			chapters: 'Глав прочитано',
+			meanScore: 'Средняя оценка',
+			topGenres: 'Любимые жанры',
+			topGenresNote: 'Самые частые в ваших списках',
+			completedThisMonth_one: '+{{count}} завершено в этом месяце',
+			completedThisMonth_few: '+{{count}} завершено в этом месяце',
+			completedThisMonth_many: '+{{count}} завершено в этом месяце',
+			completedThisMonth_other: '+{{count}} завершено в этом месяце',
+			typesNote_one: '{{count}} тип медиа',
+			typesNote_few: '{{count}} типа медиа',
+			typesNote_many: '{{count}} типов медиа',
+			typesNote_other: '{{count}} типа медиа',
+			acrossNote_one: 'в {{count}} тайтле',
+			acrossNote_few: 'в {{count}} тайтлах',
+			acrossNote_many: 'в {{count}} тайтлах',
+			acrossNote_other: 'в {{count}} тайтла',
+			scoredNote_one: 'из {{count}} оценённого тайтла',
+			scoredNote_few: 'из {{count}} оценённых тайтлов',
+			scoredNote_many: 'из {{count}} оценённых тайтлов',
+			scoredNote_other: 'из {{count}} оценённого тайтла',
+			activity: {
+				title: 'Динамика',
+				subtitle: 'Начатые и завершённые тайтлы',
+				started: 'Начато',
+				completed: 'Завершено',
+				empty: 'В ваших списках ещё нет дат начала или завершения',
+				range: {
+					'6m': '6 мес',
+					'1y': 'Год',
+					all: 'Всё время'
+				}
+			},
+			genres: {
+				title: 'Жанры',
+				subtitle: 'Что вы смотрите и читаете',
+				other: 'Другие',
+				empty: 'Начните что-нибудь смотреть — и здесь появятся жанры',
+				center_one: 'жанр',
+				center_few: 'жанра',
+				center_many: 'жанров',
+				center_other: 'жанра'
+			},
+			scores: {
+				title: 'Ваши оценки',
+				subtitle_one: '{{count}} оценённый тайтл',
+				subtitle_few: '{{count}} оценённых тайтла',
+				subtitle_many: '{{count}} оценённых тайтлов',
+				subtitle_other: '{{count}} оценённого тайтла',
+				mean: 'в среднем',
+				bucket: 'Оценка {{score}}',
+				titles: 'Тайтлов',
+				empty: 'Оцените тайтл — и здесь появится распределение'
+			},
+			topRated: {
+				title: 'Ваш топ-5',
+				subtitle: 'По вашим оценкам',
+				empty: 'Пока ничего не оценено'
+			},
+			byType: {
+				title: 'По типам медиа',
+				subtitle: 'Как каждый тип распределяется по статусам'
+			},
+			status: {
+				CURRENT: 'В процессе',
+				PLANNING: 'Запланировано',
+				COMPLETED: 'Завершено',
+				PAUSED: 'Отложено',
+				DROPPED: 'Брошено',
+				REPEATING: 'Повторно'
+			}
 		}
 	}
 }
