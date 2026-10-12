@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { LibraryFile, LibraryRoot } from '@entities/library-item'
 
-import { buildTree, flattenTree, matchesFilter } from './build-tree'
+import { allFolderKeys, buildTree, checkState, fileIdsUnder, flattenTree, matchesFilter } from './build-tree'
 import type { TreeFolder, TreeNode } from './build-tree'
 
 let nextId = 1
@@ -127,5 +127,29 @@ describe('matchesFilter', () => {
 		expect(matchesFilter(ignored, 'unmatched')).toBe(false)
 		expect(matchesFilter(ignored, 'ignored')).toBe(true)
 		expect(matchesFilter(ignored, null)).toBe(true)
+	})
+})
+
+describe('folder helpers', () => {
+	const tree = buildTree(
+		[file('Frieren/Season 1/ep 01.mkv'), file('Frieren/Season 1/ep 02.mkv'), file('Frieren/extra.mkv')],
+		[root]
+	)
+	const show = folderAt(tree, 'D:\\Anime', 'Frieren')
+	const season = folderAt(tree, 'D:\\Anime', 'Frieren', 'Season 1')
+	const ids = fileIdsUnder(show)
+
+	it('collects every file under a folder', () => {
+		expect(ids).toHaveLength(3)
+	})
+
+	it('lists the key of every folder', () => {
+		expect(allFolderKeys(tree)).toEqual(new Set([folderAt(tree, 'D:\\Anime').key, show.key, season.key]))
+	})
+
+	it('ticks a folder fully, partly or not at all', () => {
+		expect(checkState(show, new Set())).toBe(false)
+		expect(checkState(show, new Set(ids.slice(0, 1)))).toBe('mixed')
+		expect(checkState(show, new Set(ids))).toBe(true)
 	})
 })

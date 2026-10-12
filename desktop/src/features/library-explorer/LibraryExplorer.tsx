@@ -1,29 +1,23 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
 import { useEffect, useMemo, useState } from 'react'
-import { FaFilter } from 'react-icons/fa6'
-import { LuFolderSync } from 'react-icons/lu'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, Drawer, DropdownMenu, EmptyState, Icon, Input, Modal } from '@shared/ui'
-import type { CheckboxState } from '@shared/ui'
+import { Drawer, EmptyState, Icon, Input } from '@shared/ui'
 
-import {
-	deleteLibraryFilesMutation,
-	deleteLibraryMatchesMutation,
-	isMatched,
-	libraryRootsQuery,
-	libraryTreeQuery,
-	setLibraryFilesIgnoredMutation
-} from '@entities/library-item'
+import { libraryRootsQuery, libraryTreeQuery } from '@entities/library-item'
 import type { LibraryFile } from '@entities/library-item'
 
-import { buildTree, EXPLORER_FILTERS, flattenTree, matchesFilter, matchesSearch } from './lib/build-tree'
-import type { ExplorerFilter, FlatNode, TreeFolder, TreeNode } from './lib/build-tree'
+import { allFolderKeys, buildTree, flattenTree, matchesFilter, matchesSearch } from './lib/build-tree'
+import type { ExplorerFilter, TreeNode } from './lib/build-tree'
+import { useTreeSelection } from './lib/useTreeSelection'
 import styles from './LibraryExplorer.module.scss'
 import { libraryExplorerModel } from './model/model'
+import { DeleteFilesModal } from './ui/delete-files-modal/DeleteFilesModal'
 import { DetailPanel } from './ui/detail-panel/DetailPanel'
 import { ExplorerRow } from './ui/explorer-row/ExplorerRow'
+import { ExplorerToolbar } from './ui/explorer-toolbar/ExplorerToolbar'
+import { SelectionActions } from './ui/explorer-toolbar/selection-actions/SelectionActions'
 
 export interface LibraryExplorerProps {
 	// Matching lives in its own slice; the page that mounts the explorer hands
@@ -31,6 +25,8 @@ export interface LibraryExplorerProps {
 	onMatchMany: (files: LibraryFile[]) => void
 }
 
+// The library as the folders on disk: search and filter it, open a file's details,
+// tick files to match, ignore or delete them together.
 export function LibraryExplorer({ onMatchMany }: LibraryExplorerProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
@@ -50,19 +46,12 @@ export function LibraryExplorer({ onMatchMany }: LibraryExplorerProps) {
 
 	const [rootsData, startRoots] = useUnit([libraryRootsQuery.$data, libraryRootsQuery.start])
 
-	const [unmatchFiles, ignoreFiles, deleteFiles, deleting] = useUnit([
-		deleteLibraryMatchesMutation.start,
-		setLibraryFilesIgnoredMutation.start,
-		deleteLibraryFilesMutation.start,
-		deleteLibraryFilesMutation.$pending
-	])
-
 	const [filter, setFilter] = useState<ExplorerFilter | null>(null)
 	const [expanded, setExpanded] = useState<Set<string>>(new Set())
 	const [focused, setFocused] = useState<TreeNode | null>(null)
 	const [selecting, setSelecting] = useState(false)
-	const [selected, setSelected] = useState<Set<number>>(new Set())
 	const [confirmingDelete, setConfirmingDelete] = useState(false)
+	const selection = useTreeSelection()
 
 	useEffect(() => {
 		if (open) {
@@ -100,12 +89,10 @@ export function LibraryExplorer({ onMatchMany }: LibraryExplorerProps) {
 
 	const titleByRef = useMemo(() => new Map(titles.map(title => [title.media_ref, title.title])), [titles])
 
-	const chosen = useMemo(() => files.filter(file => selected.has(file.id)), [files, selected])
-
-	const allMatched = chosen.length > 0 && chosen.every(isMatched)
-	const allIgnored = chosen.length > 0 && chosen.every(file => file.ignored)
-
-	const clearSelection = () => setSelected(new Set())
+	const chosen = useMemo(
+		() => files.filter(file => selection.selected.has(file.id)),
+		[files, selection.selected]
+	)
 
 	const toggleFolder = (key: string) =>
 		setExpanded(current => {
@@ -118,33 +105,6 @@ export function LibraryExplorer({ onMatchMany }: LibraryExplorerProps) {
 			return next
 		})
 
-	const check = (row: FlatNode, checked: boolean) =>
-		setSelected(current => {
-			const next = new Set(current)
-			const ids = row.node.kind === 'file' ? [row.node.file.id] : fileIdsUnder(row.node)
-
-			for (const id of ids) {
-				if (checked) {
-					next.add(id)
-				} else {
-					next.delete(id)
-				}
-			}
-
-			return next
-		})
-
-	const checkedOf = (node: TreeNode): CheckboxState => {
-		if (node.kind === 'file') {
-			return selected.has(node.file.id)
-		}
-
-		const ids = fileIdsUnder(node)
-		const picked = ids.filter(id => selected.has(id)).length
-
-		return picked === 0 ? false : picked === ids.length ? true : 'mixed'
-	}
-
 	return (
 		<>
 			<Drawer
@@ -155,128 +115,29 @@ export function LibraryExplorer({ onMatchMany }: LibraryExplorerProps) {
 				size='sheet'
 				closable={false}
 				headerAction={
-					<div className={styles.toolbar}>
-						{unmatchedCount > 0 && (
-							<button
-								type='button'
-								className={styles.pill}
-								onClick={() => setFilter('unmatched')}
-							>
-								<Icon name='common/info' size={14} />
-								{t('library.explorer.unmatchedPill', { count: unmatchedCount })}
-							</button>
-						)}
-
-						<span className={styles.spacer} />
-
-						{selecting && chosen.length > 0 && (
-							<>
-								<Button
-									variant='ghost'
-									size='small'
-									startIcon={<Icon name='common/link' size={16} />}
-									className={allMatched ? styles.warning : styles.success}
-									onClick={() => {
-										if (allMatched) {
-											unmatchFiles(chosen.map(file => file.id))
-										} else {
-											onMatchMany(chosen)
-										}
-
-										clearSelection()
-									}}
-								>
-									{allMatched
-										? t('library.explorer.unmatchFiles', { count: chosen.length })
-										: t('library.explorer.matchFiles', { count: chosen.length })}
-								</Button>
-
-								<Button
-									variant='ghost'
-									size='small'
-									startIcon={
-										<Icon name={allIgnored ? 'common/eye' : 'common/eye-off'} size={16} />
-									}
-									onClick={() => {
-										ignoreFiles(
-											chosen.map(file => ({ fileId: file.id, ignored: !allIgnored }))
-										)
-										clearSelection()
-									}}
-								>
-									{allIgnored
-										? t('library.explorer.unignoreFiles', { count: chosen.length })
-										: t('library.explorer.ignoreFiles', { count: chosen.length })}
-								</Button>
-
-								<Button
-									variant='secondary'
-									size='small'
-									startIcon={<Icon name='common/trash' size={16} />}
-									className={styles.danger}
-									onClick={() => setConfirmingDelete(true)}
-								>
-									{t('library.explorer.deleteFiles', { count: chosen.length })}
-								</Button>
-							</>
-						)}
-
-						{filter === null ? (
-							<DropdownMenu
-								align='end'
-								items={EXPLORER_FILTERS.map(preset => ({
-									id: preset,
-									label: t(`library.explorer.filter.${preset}`),
-									onSelect: () => setFilter(preset)
-								}))}
-								trigger={
-									<Button
-										variant='secondary'
-										size='small'
-										startIcon={<FaFilter size={16} />}
-									>
-										{t('library.explorer.filterAction')}
-									</Button>
-								}
-							/>
-						) : (
-							<Button
-								variant='primary'
-								size='small'
-								startIcon={<Icon name='common/close' size={16} />}
-								className={styles.pulse}
-								onClick={() => setFilter(null)}
-							>
-								{t('library.explorer.filterActive', {
-									filter: t(`library.explorer.filter.${filter}`)
-								})}
-							</Button>
-						)}
-
-						<Button
-							variant={selecting ? 'primary' : 'secondary'}
-							size='small'
-							startIcon={<Icon name='common/list-checks' size={16} />}
-							className={selecting ? styles.pulse : undefined}
-							onClick={() => {
-								setSelecting(current => !current)
-								clearSelection()
-							}}
-						>
-							{selecting ? t('library.explorer.selecting') : t('library.explorer.select')}
-						</Button>
-
-						<Button
-							variant='secondary'
-							size='small'
-							iconOnly
-							loading={treePending}
-							aria-label={t('library.explorer.refresh')}
-							onClick={() => startTree()}
-						>
-							<LuFolderSync size={16} />
-						</Button>
-					</div>
+					<ExplorerToolbar
+						unmatchedCount={unmatchedCount}
+						filter={filter}
+						onFilter={setFilter}
+						selecting={selecting}
+						onToggleSelecting={() => {
+							setSelecting(current => !current)
+							selection.clear()
+						}}
+						refreshing={treePending}
+						onRefresh={() => startTree()}
+						selectionActions={
+							selecting &&
+							chosen.length > 0 && (
+								<SelectionActions
+									chosen={chosen}
+									onMatchMany={onMatchMany}
+									onDelete={() => setConfirmingDelete(true)}
+									onDone={selection.clear}
+								/>
+							)
+						}
+					/>
 				}
 			>
 				<div className={styles.body}>
@@ -297,7 +158,7 @@ export function LibraryExplorer({ onMatchMany }: LibraryExplorerProps) {
 											expanded={narrowed || expanded.has(row.node.key)}
 											focused={focused?.key === row.node.key}
 											selecting={selecting}
-											checked={selecting ? checkedOf(row.node) : false}
+											checked={selecting ? selection.stateOf(row.node) : false}
 											title={
 												row.node.kind === 'file' && row.node.file.match
 													? titleByRef.get(row.node.file.match.media_ref)
@@ -305,7 +166,7 @@ export function LibraryExplorer({ onMatchMany }: LibraryExplorerProps) {
 											}
 											onToggle={toggleFolder}
 											onFocus={next => setFocused(next.node)}
-											onCheck={check}
+											onCheck={(next, checked) => selection.check(next.node, checked)}
 										/>
 									))
 								: !treePending && (
@@ -324,76 +185,12 @@ export function LibraryExplorer({ onMatchMany }: LibraryExplorerProps) {
 				</div>
 			</Drawer>
 
-			<Modal
+			<DeleteFilesModal
 				open={confirmingDelete}
-				onOpenChange={next => !next && setConfirmingDelete(false)}
-				title={t('library.explorer.deleteTitle', { count: chosen.length })}
-				description={t('library.file.deleteFileWarning')}
-				size='sm'
-				footer={
-					<>
-						<Button
-							variant='secondary'
-							disabled={deleting}
-							onClick={() => setConfirmingDelete(false)}
-						>
-							{t('common.cancel')}
-						</Button>
-
-						<Button
-							variant='primary'
-							loading={deleting}
-							onClick={() => {
-								deleteFiles(chosen.map(file => file.id))
-								setConfirmingDelete(false)
-								clearSelection()
-							}}
-						>
-							{t('library.explorer.deleteFiles', { count: chosen.length })}
-						</Button>
-					</>
-				}
-			>
-				<ul className={styles.deleteList}>
-					{chosen.slice(0, 8).map(file => (
-						<li key={file.id}>{file.rel_path}</li>
-					))}
-					{chosen.length > 8 && (
-						<li>{t('library.explorer.andMore', { count: chosen.length - 8 })}</li>
-					)}
-				</ul>
-			</Modal>
+				files={chosen}
+				onClose={() => setConfirmingDelete(false)}
+				onDeleted={selection.clear}
+			/>
 		</>
 	)
-}
-
-function fileIdsUnder(folder: TreeFolder): number[] {
-	const ids: number[] = []
-
-	for (const child of folder.children) {
-		if (child.kind === 'file') {
-			ids.push(child.file.id)
-		} else {
-			ids.push(...fileIdsUnder(child))
-		}
-	}
-
-	return ids
-}
-
-function allFolderKeys(nodes: TreeNode[]): Set<string> {
-	const keys = new Set<string>()
-
-	const walk = (list: TreeNode[]) => {
-		for (const node of list) {
-			if (node.kind === 'folder') {
-				keys.add(node.key)
-				walk(node.children)
-			}
-		}
-	}
-
-	walk(nodes)
-
-	return keys
 }

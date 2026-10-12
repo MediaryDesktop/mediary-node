@@ -1,0 +1,19 @@
+// No box of its own: the buttons stay items of the toolbar's row. Nesting under it
+// also keeps these colours above the button's own variant.
+.actions {
+	display: contents;
+
+	.success {
+		color: var(--success-text);
+	}
+
+	.warning {
+		color: var(--warning-text);
+	}
+
+	.danger {
+		border-color: var(--danger-muted);
+		background: var(--danger-muted);
+		color: var(--danger-text);
+	}
+}

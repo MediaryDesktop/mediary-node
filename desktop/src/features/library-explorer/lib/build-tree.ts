@@ -167,3 +167,47 @@ function emptyFolder(key: string, name: string): TreeFolder {
 function rootNameOf(file: LibraryFile): string {
 	return file.path.slice(0, Math.max(file.path.length - file.rel_path.length - 1, 0))
 }
+
+// Every file in a folder, however deep.
+export function fileIdsUnder(folder: TreeFolder): number[] {
+	const ids: number[] = []
+
+	for (const child of folder.children) {
+		if (child.kind === 'file') {
+			ids.push(child.file.id)
+		} else {
+			ids.push(...fileIdsUnder(child))
+		}
+	}
+
+	return ids
+}
+
+export function allFolderKeys(nodes: TreeNode[]): Set<string> {
+	const keys = new Set<string>()
+
+	const walk = (list: TreeNode[]) => {
+		for (const node of list) {
+			if (node.kind === 'folder') {
+				keys.add(node.key)
+				walk(node.children)
+			}
+		}
+	}
+
+	walk(nodes)
+
+	return keys
+}
+
+// A folder's tick: none, all, or some of the files under it.
+export function checkState(node: TreeNode, selected: ReadonlySet<number>): boolean | 'mixed' {
+	if (node.kind === 'file') {
+		return selected.has(node.file.id)
+	}
+
+	const ids = fileIdsUnder(node)
+	const picked = ids.filter(id => selected.has(id)).length
+
+	return picked === 0 ? false : picked === ids.length ? true : 'mixed'
+}
