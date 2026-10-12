@@ -1,6 +1,5 @@
 import clsx from 'clsx'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 
 import { useTranslation } from '@shared/i18n'
@@ -10,11 +9,8 @@ import type { MediaSummary } from '../../api/api'
 import { enumLabel, mediaTitle, scoreTone } from '../../model/model'
 
 import styles from './FeaturedBanner.module.scss'
-
-// Long enough to read the synopsis, short enough that the banner feels alive.
-const ROTATE_EVERY = 12000
-// How long the banner stays veiled while the next title swaps in behind it.
-const TRANSITION_HOLD = 900
+import { useBannerRotation } from './lib/useBannerRotation'
+import { usePreloadImages } from './lib/usePreloadImages'
 
 // What the banner needs of a title: a search result has all of it, a list entry
 // everything but the synopsis and the dates.
@@ -66,60 +62,11 @@ export function FeaturedBanner<T extends FeaturedMedia>({
 	const { t } = useTranslation()
 	const reduced = useReducedMotion()
 
-	const [index, setIndex] = useState(0)
-	const [paused, setPaused] = useState(false)
-	// True for the TRANSITION_HOLD stretch between asking for the next title and
-	// it actually taking over: the backdrop darkens and holds still, hiding the
-	// swap underneath, then lifts again once it has already happened.
-	const [transitioning, setTransitioning] = useState(false)
-	const swapTimer = useRef<number | undefined>(undefined)
-
 	const count = items.length
+	const { index, transitioning, goTo, setPaused } = useBannerRotation(count)
 	const current = count > 0 ? items[index % count] : undefined
 
-	// Jumps straight to a title the TRANSITION_HOLD stretch later, veiled the
-	// whole way; a jump already in flight is replaced rather than queued.
-	const goTo = useCallback((next: number | ((value: number) => number)) => {
-		window.clearTimeout(swapTimer.current)
-		setTransitioning(true)
-
-		swapTimer.current = window.setTimeout(() => {
-			setIndex(next)
-			setTransitioning(false)
-		}, TRANSITION_HOLD)
-	}, [])
-
-	useEffect(() => () => window.clearTimeout(swapTimer.current), [])
-
-	useEffect(() => {
-		if (paused || count < 2) {
-			return
-		}
-
-		const timer = window.setInterval(() => goTo(value => (value + 1) % count), ROTATE_EVERY)
-
-		return () => window.clearInterval(timer)
-	}, [paused, count, goTo])
-
-	// Warms the browser's cache for every title the banner will show, so a swap
-	// reveals a picture that is already there instead of one still loading in.
-	useEffect(() => {
-		const preloaded = items.map(item => {
-			const src = item.banner_image ?? item.cover_image
-			const image = new Image()
-			if (src) {
-				image.src = src
-			}
-
-			return image
-		})
-
-		return () => {
-			for (const image of preloaded) {
-				image.src = ''
-			}
-		}
-	}, [items])
+	usePreloadImages(items.map(item => item.banner_image ?? item.cover_image))
 
 	const backdrop = current && (current.banner_image ?? current.cover_image)
 	const year = current && (current.season_year ?? current.start_date?.year)
