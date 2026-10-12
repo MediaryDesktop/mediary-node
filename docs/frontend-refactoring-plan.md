@@ -146,11 +146,24 @@
   `link-manga-source`, `manage-library-roots`, `manage-mangadex`,
   `manage-source-keys`, `switch-*`) уже відповідали правилу.
 
-### Етап 3 — структура сторінок і каркаса
+### Етап 3 — структура сторінок і каркаса ✅
 
-`pages/media`, `pages/library`, `pages/lists`, `pages/read`, `pages/auth`,
-`pages/settings`, `pages/fallback`, `pages/discover`; `app/layout` →
-`sidebar/`, `window-chrome/`, `player-host/` і `lib/list-wiring`.
+У слайсі `pages` «головний компонент» — це компонент маршруту: якщо слайс
+обслуговує кілька маршрутів (`auth`, `lists`, `read`, `fallback`,
+`library` + `ScanHistoryPage`), у корені лежать усі `*Page.tsx`, а все інше —
+у `ui/`, `config/`, `lib/`, `model/`.
+
+- `pages/media`: усі частини → `ui/`; `BookFiles` і `ChapterList` — усередині
+  `ui/library-section/`, бо їх використовує лише `LibrarySection`.
+- `pages/library`: `ScanHistoryPage` — маршрут, тож у корені; `FileLogItem` →
+  `ui/file-log-item/` з `highlighted/` усередині.
+- `pages/lists`, `pages/discover` → `ui/<part>/`.
+- `pages/read`: `Panel` і його стилі (файл звався `ReadPage.module.scss`, хоча
+  стилізував лише панель) → `ui/panel/Panel.*`.
+- `auth/modes.ts` → `config/modes.ts`, `settings/sections.tsx` →
+  `config/sections.tsx`.
+- `app/layout`: `AppLayout` у корені; `sidebar/`, `player-host/`,
+  `window-chrome/`, `window-drag-strip/`, `lib/list-wiring`.
 
 ### Етап 4 — великі файли
 
