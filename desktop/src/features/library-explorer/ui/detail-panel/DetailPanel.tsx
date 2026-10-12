@@ -8,8 +8,9 @@ import { Badge, Button, Icon } from '@shared/ui'
 import { fileDuration, fileNumber, fileSeason, isMatched } from '@entities/library-item'
 import type { LibraryTitle } from '@entities/library-item'
 
-import styles from './DetailPanel.module.scss'
 import type { TreeNode } from '../../lib/build-tree'
+
+import styles from './DetailPanel.module.scss'
 
 export interface DetailPanelProps {
 	node: TreeNode | null

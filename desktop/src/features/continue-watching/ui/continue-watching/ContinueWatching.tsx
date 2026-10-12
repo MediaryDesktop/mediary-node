@@ -7,9 +7,9 @@ import { preferredTitle } from '@entities/tracker'
 
 import { usePlayFile, useUpNextLabel } from '../../lib/useContinueWatching'
 import type { ContinueWatchingState, UpNextEntry } from '../../lib/useContinueWatching'
+import { EpisodeImage } from '../episode-image/EpisodeImage'
 
 import styles from './ContinueWatching.module.scss'
-import { EpisodeImage } from '../episode-image/EpisodeImage'
 
 const ITEM_WIDTH = '20rem'
 

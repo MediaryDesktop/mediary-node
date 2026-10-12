@@ -6,8 +6,9 @@ import type { DropdownMenuItem } from '@shared/ui'
 
 import type { TrackerCustomList } from '@entities/tracker'
 
-import style from './ListOptionsMenu.module.scss'
 import { manageListsModel } from '../../model/model'
+
+import style from './ListOptionsMenu.module.scss'
 
 export interface ListOptionsMenuProps {
 	list: TrackerCustomList

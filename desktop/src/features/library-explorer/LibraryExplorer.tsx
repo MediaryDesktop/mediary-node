@@ -18,12 +18,12 @@ import {
 } from '@entities/library-item'
 import type { LibraryFile } from '@entities/library-item'
 
-import { DetailPanel } from './ui/detail-panel/DetailPanel'
-import { ExplorerRow } from './ui/explorer-row/ExplorerRow'
 import { buildTree, EXPLORER_FILTERS, flattenTree, matchesFilter, matchesSearch } from './lib/build-tree'
 import type { ExplorerFilter, FlatNode, TreeFolder, TreeNode } from './lib/build-tree'
 import styles from './LibraryExplorer.module.scss'
 import { libraryExplorerModel } from './model/model'
+import { DetailPanel } from './ui/detail-panel/DetailPanel'
+import { ExplorerRow } from './ui/explorer-row/ExplorerRow'
 
 export interface LibraryExplorerProps {
 	// Matching lives in its own slice; the page that mounts the explorer hands

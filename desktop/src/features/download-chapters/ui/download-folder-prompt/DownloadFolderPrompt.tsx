@@ -9,8 +9,9 @@ import { Button, Icon, Modal, toast } from '@shared/ui'
 import { libraryRootsQuery } from '@entities/library-item'
 import { enqueueMangaDownloadsMutation, putMangaDownloadSettingsMutation } from '@entities/manga-source'
 
-import styles from './DownloadFolderPrompt.module.scss'
 import { $promptOpen, folderChosen, promptClosed } from '../../model/model'
+
+import styles from './DownloadFolderPrompt.module.scss'
 
 // Asks once where chapters go, the first time the user saves one. It also reports
 // a download the node would not queue, wherever it was started from.

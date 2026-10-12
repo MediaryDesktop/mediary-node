@@ -27,8 +27,9 @@ import type { TorrentDownload } from '@entities/torrent'
 import { displayState } from '../../lib/display-state'
 import type { TorrentDisplayState } from '../../lib/display-state'
 import { $filesFor, filesDismissed, filesRequested } from '../../model/model'
-import styles from './TorrentDownloadList.module.scss'
+
 import { TorrentFilesDrawer } from './files-drawer/TorrentFilesDrawer'
+import styles from './TorrentDownloadList.module.scss'
 
 export interface TorrentDownloadListProps {
 	// Only this title's downloads; all of them, with a summary, when left out.

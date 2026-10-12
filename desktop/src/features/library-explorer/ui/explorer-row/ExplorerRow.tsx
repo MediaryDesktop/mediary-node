@@ -6,8 +6,9 @@ import type { CheckboxState } from '@shared/ui'
 
 import { isMatched } from '@entities/library-item'
 
-import styles from './ExplorerRow.module.scss'
 import type { FlatNode } from '../../lib/build-tree'
+
+import styles from './ExplorerRow.module.scss'
 
 export interface ExplorerRowProps {
 	row: FlatNode

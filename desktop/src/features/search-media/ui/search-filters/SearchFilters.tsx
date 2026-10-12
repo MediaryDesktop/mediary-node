@@ -25,6 +25,7 @@ import {
 	SEARCH_TYPES
 } from '../../config/config'
 import { searchMediaModel } from '../../model/model'
+
 import styles from './SearchFilters.module.scss'
 
 const TYPE_ICONS = {

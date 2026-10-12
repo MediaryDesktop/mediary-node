@@ -6,9 +6,10 @@ import { Button, Drawer, EmptyState, Icon } from '@shared/ui'
 
 import { libraryTreeQuery, setLibraryFilesIgnoredMutation } from '@entities/library-item'
 
-import { CheckRow } from '../check-row/CheckRow'
-import styles from './IgnoredFilesDrawer.module.scss'
 import { unmatchedFilesModel } from '../../model/model'
+import { CheckRow } from '../check-row/CheckRow'
+
+import styles from './IgnoredFilesDrawer.module.scss'
 
 export function IgnoredFilesDrawer() {
 	const { t } = useTranslation()

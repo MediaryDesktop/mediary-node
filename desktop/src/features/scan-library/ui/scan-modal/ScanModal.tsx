@@ -8,6 +8,7 @@ import { Button, Modal, SelectDropdown } from '@shared/ui'
 import { libraryModel, libraryRootsQuery } from '@entities/library-item'
 
 import { scanLibraryModel } from '../../model/model'
+
 import styles from './ScanModal.module.scss'
 
 const ALL_FOLDERS = 'all'

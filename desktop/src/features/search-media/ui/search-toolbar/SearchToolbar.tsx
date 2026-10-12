@@ -5,6 +5,7 @@ import { useTranslation } from '@shared/i18n'
 import { Button, Icon, Input } from '@shared/ui'
 
 import { searchMediaModel } from '../../model/model'
+
 import styles from './SearchToolbar.module.scss'
 
 export function SearchToolbar() {

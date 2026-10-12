@@ -15,6 +15,7 @@ import {
 	requestOf,
 	sameCriteria
 } from '../lib/filters'
+
 import type { SearchFilters } from './types'
 
 export const searchMediaModel = atom(() => {
