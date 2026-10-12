@@ -1,7 +1,7 @@
 import { useTranslation } from '@shared/i18n'
 import { Button, Notice } from '@shared/ui'
 
-import type { TorrentSetup } from '../lib/useTorrentSetup'
+import type { TorrentSetup } from '../../lib/useTorrentSetup'
 
 export interface TorrentSetupNoticeProps {
 	setup: TorrentSetup

@@ -18,11 +18,11 @@ export {
 } from './model/model'
 export type { MediaEnumGroup, ScoreTone } from './model/model'
 
-export { FeaturedBanner } from './ui/FeaturedBanner'
-export type { FeaturedBannerProps, FeaturedMedia } from './ui/FeaturedBanner'
-export { MediaCard } from './ui/MediaCard'
-export type { MediaCardMedia, MediaCardProps } from './ui/MediaCard'
-export type { MediaTracking } from './ui/MediaPreview'
+export { FeaturedBanner } from './ui/featured-banner/FeaturedBanner'
+export type { FeaturedBannerProps, FeaturedMedia } from './ui/featured-banner/FeaturedBanner'
+export { MediaCard } from './ui/media-card/MediaCard'
+export type { MediaCardMedia, MediaCardProps } from './ui/media-card/MediaCard'
+export type { MediaTracking } from './ui/media-preview/MediaPreview'
 
 export {
 	fetchMediaDetailsFx,

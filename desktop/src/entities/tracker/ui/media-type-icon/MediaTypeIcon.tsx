@@ -1,7 +1,7 @@
 import { Icon } from '@shared/ui'
 import type { IconName } from '@shared/ui'
 
-import type { ListMediaType } from '../api/api'
+import type { ListMediaType } from '../../api/api'
 
 const MEDIA_TYPE_ICONS: Record<ListMediaType, IconName> = {
 	movie: 'categories/movie',

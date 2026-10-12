@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from '@shared/i18n'
 import { Icon } from '@shared/ui'
 
-import { mediaPreviewModel, scoreTone } from '../model/model'
+import { mediaPreviewModel, scoreTone } from '../../model/model'
 
 import styles from './MediaPreview.module.scss'
 

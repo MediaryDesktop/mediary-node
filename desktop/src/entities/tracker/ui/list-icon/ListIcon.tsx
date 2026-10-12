@@ -3,9 +3,8 @@ import type { IconType } from 'react-icons'
 import * as lucide from 'react-icons/lu'
 import { LuList } from 'react-icons/lu'
 
-import type { ListMediaType } from '../api/api'
-
-import { MediaTypeIcon } from './MediaTypeIcon'
+import type { ListMediaType } from '../../api/api'
+import { MediaTypeIcon } from '../media-type-icon/MediaTypeIcon'
 
 // "LuGamepad2" is "gamepad-2": the name Lucide itself uses, and a plain name the
 // node can store and check.

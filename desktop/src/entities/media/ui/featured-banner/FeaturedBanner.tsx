@@ -6,8 +6,8 @@ import type { ReactNode } from 'react'
 import { useTranslation } from '@shared/i18n'
 import { Icon, Skeleton } from '@shared/ui'
 
-import type { MediaSummary } from '../api/api'
-import { enumLabel, mediaTitle, scoreTone } from '../model/model'
+import type { MediaSummary } from '../../api/api'
+import { enumLabel, mediaTitle, scoreTone } from '../../model/model'
 
 import styles from './FeaturedBanner.module.scss'
 

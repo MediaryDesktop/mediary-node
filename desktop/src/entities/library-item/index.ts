@@ -38,8 +38,8 @@ export {
 
 export { fetchTitleFilesFx } from './api/api'
 
-export { LibraryFileRow } from './ui/LibraryFileRow'
-export type { LibraryFileRowProps } from './ui/LibraryFileRow'
+export { LibraryFileRow } from './ui/library-file-row/LibraryFileRow'
+export type { LibraryFileRowProps } from './ui/library-file-row/LibraryFileRow'
 
 export type {
 	LibraryCollection,

@@ -13,19 +13,19 @@ export {
 	updateTrackerEntryMutation
 } from './model/model'
 
-export { isListIcon, LIST_ICONS, ListIcon } from './ui/ListIcon'
-export type { ListIconProps } from './ui/ListIcon'
+export { isListIcon, LIST_ICONS, ListIcon } from './ui/list-icon/ListIcon'
+export type { ListIconProps } from './ui/list-icon/ListIcon'
 
-export { MediaTypeIcon } from './ui/MediaTypeIcon'
-export type { MediaTypeIconProps } from './ui/MediaTypeIcon'
+export { MediaTypeIcon } from './ui/media-type-icon/MediaTypeIcon'
+export type { MediaTypeIconProps } from './ui/media-type-icon/MediaTypeIcon'
 
 export { useTrackedEntries, useTrackedEntry } from './lib/useTrackedEntries'
 
 export { entryTracking } from './lib/tracking'
 export type { EntryTracking } from './lib/tracking'
 
-export { formatScoreValue, nextScore } from './model/score-format'
-export type { ScoreFormat } from './model/score-format'
+export { formatScoreValue, nextScore } from './lib/score-format'
+export type { ScoreFormat } from './lib/score-format'
 
 export {
 	createTrackerListMutation,

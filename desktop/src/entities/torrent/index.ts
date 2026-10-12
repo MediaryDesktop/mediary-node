@@ -30,8 +30,8 @@ export {
 export { addTorrentFx } from './api/api'
 
 export { useTorrentSetup } from './lib/useTorrentSetup'
-export { TorrentSetupNotice } from './ui/TorrentSetupNotice'
-export type { TorrentSetupNoticeProps } from './ui/TorrentSetupNotice'
+export { TorrentSetupNotice } from './ui/torrent-setup-notice/TorrentSetupNotice'
+export type { TorrentSetupNoticeProps } from './ui/torrent-setup-notice/TorrentSetupNotice'
 export type { TorrentSetup } from './lib/useTorrentSetup'
 
 export type {

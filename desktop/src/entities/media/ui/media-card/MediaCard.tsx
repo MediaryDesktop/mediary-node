@@ -4,12 +4,12 @@ import { useEffect, useId, useRef, useState } from 'react'
 
 import { Icon } from '@shared/ui'
 
-import type { MediaTitle } from '../api/api'
-import { mediaTitle, scoreTone } from '../model/model'
+import type { MediaTitle } from '../../api/api'
+import { mediaTitle, scoreTone } from '../../model/model'
+import { MediaPreview } from '../media-preview/MediaPreview'
+import type { MediaTracking } from '../media-preview/MediaPreview'
 
 import styles from './MediaCard.module.scss'
-import { MediaPreview } from './MediaPreview'
-import type { MediaTracking } from './MediaPreview'
 
 function keyboardFocus(target: EventTarget | null) {
 	if (!(target instanceof Element)) return false
