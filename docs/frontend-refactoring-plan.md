@@ -195,18 +195,22 @@
   `fileNumber`…) переходять у `lib/file.ts`, події сканування — у
   `model/scan.ts`.
 
-### Етап 5 — сутності
+### Етап 5 — сутності та shared ✅
 
-`entities/media/ui`, `entities/playback/ui`, `entities/reader/ui`,
-`entities/tracker/ui` — компоненти в теки-частини; `entities/reader/lib` (11
-файлів) лишається пласким — це рівноправні чисті модулі з тестами.
+- Компоненти `entities/media`, `tracker`, `library-item`, `torrent` — у
+  власних теках `ui/<part>/`; `tracker/model/score-format` (чисті функції) →
+  `lib/`. `playback` і `reader` розкладено ще на етапі 4.
+- `FeaturedBanner`: ротація й попереднє завантаження картинок → хуки
+  `ui/featured-banner/lib/` (ротація з тестом).
+- `shared/lib` → `format/`, `hooks/`, `storage/`; `shared/ui`: частини
+  `drawer`, `dropdown-menu`, `ripple`, `select-dropdown` — у підтеках.
+- `entities/reader/lib` лишився пласким — це рівноправні чисті модулі з тестами.
 
-### Етап 6 — закріпити
+### Етап 6 — закріпити ✅
 
-1. Розділ «Правило структури слайса» — у §6 `architecture.md`.
-2. `scripts/check-architecture.mjs` — перевірка «у корені слайса лише
-   `index.ts` і не більше одного компонента», щоб правило тримав тулінг, а не
-   рев'ю (§14).
+1. Правило кореня слайса записане в §6 `architecture.md`, пункт — у §14.
+2. `scripts/check-architecture.mjs` перевіряє корені слайсів `entities`,
+   `features`, `pages`: зайвий файл у корені — помилка `arch:check`.
 
 ## Чого план свідомо не робить
 

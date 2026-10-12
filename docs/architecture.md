@@ -353,21 +353,44 @@ capitalized-тега; camelCase узгоджує ім'я файлу з тим, �
 
 ```
 pages/media/
+├── index.ts
 ├── MediaPage.tsx              маршрут: стани завантаження, помилки, офлайну
 ├── MediaPage.module.scss
 ├── lib/media-view.ts          чисті функції сторінки
-├── media-view/                композиція: що в якому порядку
-│   ├── MediaView.tsx
-│   └── MediaView.module.scss
-├── media-hero/
-│   ├── MediaHero.tsx
-│   ├── MediaHeroSkeleton.tsx  ділить MediaHero.module.scss
-│   └── MediaHero.module.scss
-├── media-actions/
-├── library-section/
-├── relations-section/
-└── media-facts/
+└── ui/
+    ├── media-view/            композиція: що в якому порядку
+    │   ├── MediaView.tsx
+    │   └── MediaView.module.scss
+    ├── media-hero/
+    │   ├── MediaHero.tsx
+    │   ├── MediaHeroSkeleton.tsx  ділить MediaHero.module.scss
+    │   └── MediaHero.module.scss
+    ├── library-section/
+    │   ├── LibrarySection.tsx
+    │   ├── lib/               хуки й чисті функції лише цієї частини
+    │   ├── chapter-list/      частина частини — всередині неї
+    │   └── episode-library/
+    ├── media-actions/
+    ├── relations-section/
+    └── media-facts/
 ```
+
+**У корені слайса — лише публічний вхід і головний компонент.** `index.ts`,
+один компонент, що компонує слайс (зі своїми стилями), і нічого більше; решта
+розкладена за тим, що вона є:
+
+| Тека | Що в ній |
+|---|---|
+| `ui/<part>/` | інші компоненти, кожен у своїй теці; частина, яку використовує лише одна інша, лежить усередині неї |
+| `model/` | Effector: сторе, події, ефекти, atom-моделі — навіть одним файлом |
+| `api/` | запити (лише `entities`) |
+| `lib/` | хуки без розмітки й чисті функції — з тестами поруч |
+| `config/` | константи, які читають двоє й більше |
+
+Слайс без одного головного компонента (кілька рівноправних віджетів, як
+`features/download-chapters`) тримає їх усі в `ui/`. У `pages` головний —
+компонент маршруту, тож слайс на кілька маршрутів (`pages/auth`) тримає в корені
+всі свої `*Page.tsx`. Правило перевіряє `npm run arch:check` (§10).
 
 Тека — kebab-case, файли всередині — PascalCase за §6. Стилі розходяться разом
 із розміткою: кожен `.module.scss` описує рівно ту розмітку, що лежить поруч.
@@ -644,6 +667,7 @@ consent-URL, який видала хмара. Одна адреса, один �
 |---|---|---|
 | ESLint `no-restricted-imports` | один файл | **напрямок** імпортів, імпорти вбік, обхід публічного API слайса |
 | `scripts/check-architecture.mjs` | увесь граф (Tarjan SCC) | **цикли** між слайсами |
+| `scripts/check-architecture.mjs` | корені слайсів | файли, що лежать **поза своєю текою** (§6) |
 
 Цикл `media ↔ library-item` не порушує жодного правила в окремо взятому файлі:
 `entities/media/lib/*` імпортує типи, `entities/library-item/ui/*` імпортує
@@ -761,5 +785,7 @@ npm run build          # ловить регресії збірки
 - Чи не з'явився коментар у `.tsx` або `.scss` — і чи не ховає він те, що мало
   стати зрозумілішим кодом?
 - Чи повторює `.scss` компонента структуру його `.tsx`?
+- Чи лежить новий файл у теці за тим, що він є (`ui/`, `model/`, `lib/`,
+  `config/`), а не в корені слайса?
 - Чи не лишився користувацький текст у коді замість `en.ts` і двох перекладів?
 - Чи ловить порушення тулінг, а не тільки рев'ю?
