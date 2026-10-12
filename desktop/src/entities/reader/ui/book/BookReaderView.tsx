@@ -363,7 +363,12 @@ function TocList({ items, numbers, current, onOpen }: TocListProps) {
 							<Icon name='common/chevron-down' size={14} className={styles.tocChevron} />
 						</RippleButton>
 						{item.subitems && item.subitems.length > 0 && (
-							<TocList items={item.subitems} numbers={numbers} current={current} onOpen={onOpen} />
+							<TocList
+								items={item.subitems}
+								numbers={numbers}
+								current={current}
+								onOpen={onOpen}
+							/>
 						)}
 					</li>
 				)

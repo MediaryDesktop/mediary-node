@@ -1,11 +1,11 @@
 import clsx from 'clsx'
 import type { ReactNode } from 'react'
-import { TiPlus, TiMinus } from "react-icons/ti";
+import { TiMinus, TiPlus } from 'react-icons/ti'
 
 import { useTranslation } from '../../i18n'
+import { Button } from '../button/Button'
 
 import styles from './Stepper.module.scss'
-import { Button } from '../button/Button'
 
 export interface StepperProps {
 	value: ReactNode
@@ -39,9 +39,8 @@ export function Stepper({
 				disabled={disabled || decrementDisabled}
 				aria-label={decrementLabel ?? t('lists.decrement')}
 				onClick={onDecrement}
-				startIcon={<TiMinus size={14} ></TiMinus>}
-			>
-			</Button>
+				startIcon={<TiMinus size={14}></TiMinus>}
+			></Button>
 
 			<span className={styles.value}>{value}</span>
 
@@ -51,8 +50,7 @@ export function Stepper({
 				aria-label={incrementLabel ?? t('lists.increment')}
 				onClick={onIncrement}
 				startIcon={<TiPlus size={14}></TiPlus>}
-			>
-			</Button>
+			></Button>
 		</div>
 	)
 }

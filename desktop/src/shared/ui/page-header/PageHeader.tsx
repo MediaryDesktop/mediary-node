@@ -44,7 +44,11 @@ export function PageHeader({
 					{trail.map((crumb, index) => (
 						<span key={index} className={styles.crumbGroup}>
 							{index > 0 && (
-								<Icon name='common/chevron-down' size={14} className={styles.crumbSeparator} />
+								<Icon
+									name='common/chevron-down'
+									size={14}
+									className={styles.crumbSeparator}
+								/>
 							)}
 
 							{crumb.onSelect ? (
@@ -68,9 +72,7 @@ export function PageHeader({
 			</div>
 
 			{(subtitle || children) && (
-				<div
-					className={clsx(styles.content, icon && styles.withIcon)}
-				>
+				<div className={clsx(styles.content, icon && styles.withIcon)}>
 					{subtitle && <p className={styles.subtitle}>{subtitle}</p>}
 					{children}
 				</div>

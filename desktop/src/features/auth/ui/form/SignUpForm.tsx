@@ -71,13 +71,7 @@ export function SignUpForm() {
 				onChange={event => signUpForm.fields.confirmation.changed(event.target.value)}
 			/>
 
-			<Button
-				type='submit'
-				variant='primary'
-				fullWidth
-				loading={pending}
-				className={styles.submit}
-			>
+			<Button type='submit' variant='primary' fullWidth loading={pending} className={styles.submit}>
 				{t('auth.signUp.submit')}
 			</Button>
 		</form>

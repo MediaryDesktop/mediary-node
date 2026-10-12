@@ -55,13 +55,7 @@ export function SignInForm({ onForgotPassword }: SignInFormProps) {
 				<AuthLink onClick={onForgotPassword}>{t('auth.signIn.forgotPassword')}</AuthLink>
 			</div>
 
-			<Button
-				type='submit'
-				variant='primary'
-				fullWidth
-				loading={pending}
-				className={styles.submit}
-			>
+			<Button type='submit' variant='primary' fullWidth loading={pending} className={styles.submit}>
 				{t('auth.signIn.submit')}
 			</Button>
 		</form>

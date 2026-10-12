@@ -76,10 +76,9 @@
 				&:focus {
 					background: var(--glass-border);
 				}
-
 			}
 
-			&[type='number'] {
+			&[type="number"] {
 				appearance: textfield;
 				-moz-appearance: textfield;
 

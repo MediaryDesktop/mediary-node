@@ -54,13 +54,7 @@ export function NewPasswordForm({ email }: NewPasswordFormProps) {
 				onChange={event => newPasswordForm.fields.password.changed(event.target.value)}
 			/>
 
-			<Button
-				type='submit'
-				variant='primary'
-				fullWidth
-				loading={pending}
-				className={styles.submit}
-			>
+			<Button type='submit' variant='primary' fullWidth loading={pending} className={styles.submit}>
 				{t('auth.newPassword.submit')}
 			</Button>
 

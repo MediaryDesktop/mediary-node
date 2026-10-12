@@ -5,6 +5,7 @@ import { HttpRequestError } from '@shared/api'
 
 import { connectAniListFx, fetchAniListSessionFx } from '../api/api'
 import type { AniListAccount, AniListSession } from '../api/api'
+
 import { aniListAccountModel, aniListSessionQuery } from './model'
 
 const ACCOUNT: AniListAccount = {

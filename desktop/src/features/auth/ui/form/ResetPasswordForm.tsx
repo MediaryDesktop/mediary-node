@@ -30,13 +30,7 @@ export function ResetPasswordForm() {
 				onChange={event => resetPasswordForm.fields.email.changed(event.target.value)}
 			/>
 
-			<Button
-				type='submit'
-				variant='primary'
-				fullWidth
-				loading={pending}
-				className={styles.submit}
-			>
+			<Button type='submit' variant='primary' fullWidth loading={pending} className={styles.submit}>
 				{t('auth.reset.submit')}
 			</Button>
 		</form>

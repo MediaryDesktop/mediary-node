@@ -14,7 +14,13 @@ export interface TooltipProps {
 	keepOpenOnClick?: boolean
 }
 
-export function Tooltip({ content, children, side = 'top', delay = 300, keepOpenOnClick = false }: TooltipProps) {
+export function Tooltip({
+	content,
+	children,
+	side = 'top',
+	delay = 300,
+	keepOpenOnClick = false
+}: TooltipProps) {
 	return (
 		<Primitive.Provider delayDuration={delay} skipDelayDuration={200}>
 			<Primitive.Root>
@@ -26,9 +32,7 @@ export function Tooltip({ content, children, side = 'top', delay = 300, keepOpen
 						sideOffset={6}
 						collisionPadding={12}
 						className={styles.content}
-						onPointerDownOutside={
-							keepOpenOnClick ? event => event.preventDefault() : undefined
-						}
+						onPointerDownOutside={keepOpenOnClick ? event => event.preventDefault() : undefined}
 					>
 						{content}
 					</Primitive.Content>

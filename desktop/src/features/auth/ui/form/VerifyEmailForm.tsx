@@ -43,13 +43,7 @@ export function VerifyEmailForm() {
 				onChange={verifyEmailForm.fields.code.changed}
 			/>
 
-			<Button
-				type='submit'
-				variant='primary'
-				fullWidth
-				loading={pending}
-				className={styles.submit}
-			>
+			<Button type='submit' variant='primary' fullWidth loading={pending} className={styles.submit}>
 				{t('auth.verify.submit')}
 			</Button>
 
