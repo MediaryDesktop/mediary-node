@@ -3,7 +3,7 @@ import { useUnit } from 'effector-react'
 import { useTranslation } from '@shared/i18n'
 import { Button, Modal } from '@shared/ui'
 
-import { manageListsModel } from './model'
+import { manageListsModel } from '../../model/model'
 
 export function DeleteListDialog() {
 	const { t } = useTranslation()

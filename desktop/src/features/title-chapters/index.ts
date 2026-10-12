@@ -1,2 +1,2 @@
-export { useTitleChapters } from './useTitleChapters'
-export type { TitleChapters } from './useTitleChapters'
+export { useTitleChapters } from './lib/useTitleChapters'
+export type { TitleChapters } from './lib/useTitleChapters'

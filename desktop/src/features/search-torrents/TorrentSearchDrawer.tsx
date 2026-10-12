@@ -25,7 +25,7 @@ import { torrentSearchQuery, TorrentSetupNotice, useTorrentSetup } from '@entiti
 import type { AddTorrentParams, TorrentRelease } from '@entities/torrent'
 
 import { coveredEpisodes, summarizeEpisodes } from './lib/episodes'
-import { $searchOpen, downloadReleasesFx, searchClosed } from './model'
+import { $searchOpen, downloadReleasesFx, searchClosed } from './model/model'
 import styles from './TorrentSearchDrawer.module.scss'
 
 export interface TorrentSearchDrawerProps {

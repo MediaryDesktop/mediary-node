@@ -6,7 +6,7 @@ import { atom } from '@shared/factory'
 import { mediaFilterOptionsQuery, mediaSearchQuery } from '@entities/media'
 import type { MediaSearchType, MediaSummary } from '@entities/media'
 
-import { BROWSE_SORT, CHANGE_PAUSE_MS, RELEVANCE_SORT } from './config'
+import { BROWSE_SORT, CHANGE_PAUSE_MS, RELEVANCE_SORT } from '../config/config'
 import {
 	activeGroups,
 	applyPatch,
@@ -14,7 +14,7 @@ import {
 	INITIAL_FILTERS,
 	requestOf,
 	sameCriteria
-} from './lib/filters'
+} from '../lib/filters'
 import type { SearchFilters } from './types'
 
 export const searchMediaModel = atom(() => {

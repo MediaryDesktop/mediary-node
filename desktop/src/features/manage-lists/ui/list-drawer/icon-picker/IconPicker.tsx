@@ -8,7 +8,7 @@ import { Icon } from '@shared/ui'
 import { LIST_ICONS, ListIcon } from '@entities/tracker'
 import type { ListMediaType } from '@entities/tracker'
 
-import { filterIcons, iconLabel } from './icon-search'
+import { filterIcons, iconLabel } from '../../../lib/icon-search'
 import styles from './IconPicker.module.scss'
 
 export interface IconPickerProps {

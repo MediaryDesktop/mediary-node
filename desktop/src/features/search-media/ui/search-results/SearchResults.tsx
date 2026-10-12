@@ -12,7 +12,7 @@ import type { MediaSummary } from '@entities/media'
 import { entryTracking, useTrackedEntries } from '@entities/tracker'
 import type { TrackerEntry } from '@entities/tracker'
 
-import { searchMediaModel } from './model'
+import { searchMediaModel } from '../../model/model'
 import styles from './SearchResults.module.scss'
 
 const SKELETON_COUNT = 12

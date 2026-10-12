@@ -12,8 +12,8 @@ import { fileTitle, libraryCollectionQuery } from '@entities/library-item'
 import { $playerMode, playbackModel, playerOpened } from '@entities/playback'
 import type { TrackerEntry } from '@entities/tracker'
 
-import { $items, $loading, candidatesChanged } from '../model'
-import type { Candidate, UpNextItem } from '../model'
+import { $items, $loading, candidatesChanged } from '../model/model'
+import type { Candidate, UpNextItem } from '../model/model'
 
 import { episodeNumber, episodeSeason } from './episodes'
 

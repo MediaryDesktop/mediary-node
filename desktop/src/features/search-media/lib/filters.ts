@@ -1,7 +1,7 @@
 import type { MediaSearchQuery, MediaSearchType } from '@entities/media'
 
-import { BROWSE_SORT, isAniListType, PER_PAGE } from '../config'
-import type { SearchCriteria, SearchFilters } from '../types'
+import { BROWSE_SORT, isAniListType, PER_PAGE } from '../config/config'
+import type { SearchCriteria, SearchFilters } from '../model/types'
 
 export const INITIAL_FILTERS: SearchFilters = {
 	type: 'series',

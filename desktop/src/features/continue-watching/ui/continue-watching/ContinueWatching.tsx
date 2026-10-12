@@ -5,11 +5,11 @@ import { episodeTitle } from '@entities/media'
 import { thumbnailUrl } from '@entities/playback'
 import { preferredTitle } from '@entities/tracker'
 
-import { usePlayFile, useUpNextLabel } from '../lib/useContinueWatching'
-import type { ContinueWatchingState, UpNextEntry } from '../lib/useContinueWatching'
+import { usePlayFile, useUpNextLabel } from '../../lib/useContinueWatching'
+import type { ContinueWatchingState, UpNextEntry } from '../../lib/useContinueWatching'
 
 import styles from './ContinueWatching.module.scss'
-import { EpisodeImage } from './EpisodeImage'
+import { EpisodeImage } from '../episode-image/EpisodeImage'
 
 const ITEM_WIDTH = '20rem'
 

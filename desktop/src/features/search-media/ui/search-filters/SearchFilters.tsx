@@ -23,8 +23,8 @@ import {
 	SEARCH_SORTS,
 	SEARCH_STATUSES,
 	SEARCH_TYPES
-} from './config'
-import { searchMediaModel } from './model'
+} from '../../config/config'
+import { searchMediaModel } from '../../model/model'
 import styles from './SearchFilters.module.scss'
 
 const TYPE_ICONS = {

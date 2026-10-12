@@ -6,8 +6,8 @@ import { Drawer, DrawerForm, DrawerSection, Input, SelectionGroup } from '@share
 
 import { LIST_MEDIA_TYPES, MediaTypeIcon } from '@entities/tracker'
 
-import { IconPicker } from './IconPicker'
-import { manageListsModel } from './model'
+import { IconPicker } from './icon-picker/IconPicker'
+import { manageListsModel } from '../../model/model'
 
 export function ListDrawer() {
 	const { t } = useTranslation()

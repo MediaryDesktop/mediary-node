@@ -5,8 +5,8 @@ import type { LibraryFile } from '@entities/library-item'
 import { fetchMediaEpisodesFx } from '@entities/media'
 import type { MediaEpisode } from '@entities/media'
 
-import { upNext } from './lib/up-next'
-import type { UpNext } from './lib/up-next'
+import { upNext } from '../lib/up-next'
+import type { UpNext } from '../lib/up-next'
 
 export interface Candidate {
 	mediaRef: string

@@ -5,7 +5,7 @@ import { DatePicker, Drawer, DrawerForm, DrawerSection, RatingStars, Stepper, Te
 
 import { formatProgress, preferredTitle } from '@entities/tracker'
 
-import { rateEntryModel } from '../model/model'
+import { rateEntryModel } from '../../model/model'
 
 const FINISHED_STATUSES = ['COMPLETED', 'DROPPED', 'REPEATING']
 const RAW_PER_STAR_POINT = 10
