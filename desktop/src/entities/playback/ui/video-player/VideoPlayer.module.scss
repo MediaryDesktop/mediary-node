@@ -88,20 +88,20 @@
 			margin: 0;
 			font-size: 1rem;
 		}
-	}
 
-	.action {
-		padding: 0.625rem 1.25rem;
-		border: none;
-		border-radius: var(--radius);
-		background: var(--accent);
-		color: var(--text-on-accent);
-		font: inherit;
-		font-weight: 600;
-		cursor: pointer;
+		.action {
+			padding: 0.625rem 1.25rem;
+			border: none;
+			border-radius: var(--radius);
+			background: var(--accent);
+			color: var(--text-on-accent);
+			font: inherit;
+			font-weight: 600;
+			cursor: pointer;
 
-		&:hover {
-			background: var(--accent-hover);
+			&:hover {
+				background: var(--accent-hover);
+			}
 		}
 	}
 }

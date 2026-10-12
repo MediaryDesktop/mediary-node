@@ -112,19 +112,19 @@
 			display: flex;
 			align-items: center;
 			gap: 0.5rem;
-		}
 
-		.count {
-			font-size: 0.875rem;
-			font-variant-numeric: tabular-nums;
-		}
+			.count {
+				font-size: 0.875rem;
+				font-variant-numeric: tabular-nums;
 
-		.end {
-			color: var(--success-text);
-		}
+				.end {
+					color: var(--success-text);
+				}
+			}
 
-		.spacer {
-			flex: 1;
+			.spacer {
+				flex: 1;
+			}
 		}
 	}
 }

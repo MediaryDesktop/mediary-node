@@ -10,24 +10,8 @@
 	padding: 2.5rem 1.25rem 1rem;
 	background: linear-gradient(to top, rgb(0 0 0 / 80%), transparent);
 
-	.bar {
-		display: flex;
-		align-items: center;
-		gap: 0.375rem;
-	}
-
-	.time {
-		margin-left: 0.5rem;
-		font-size: 0.875rem;
-		font-variant-numeric: tabular-nums;
-	}
-
-	.spacer {
-		flex: 1;
-	}
-
 	.seek,
-	.volume {
+	.bar .volume {
 		height: 0.3rem;
 		margin: 0;
 		border-radius: 999px;
@@ -57,7 +41,23 @@
 		width: 100%;
 	}
 
-	.volume {
-		width: 6rem;
+	.bar {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+
+		.volume {
+			width: 6rem;
+		}
+
+		.time {
+			margin-left: 0.5rem;
+			font-size: 0.875rem;
+			font-variant-numeric: tabular-nums;
+		}
+
+		.spacer {
+			flex: 1;
+		}
 	}
 }
