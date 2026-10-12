@@ -1,0 +1,89 @@
+.details {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	padding-top: 0.875rem;
+	border-top: 1px solid var(--border);
+
+	.status {
+		margin: 0;
+		color: var(--text-secondary);
+		font-size: 0.8125rem;
+	}
+
+	.problem {
+		margin: 0;
+		color: var(--danger-text);
+		font-size: 0.8125rem;
+	}
+
+	.actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5rem;
+
+		.remove {
+			margin-left: auto;
+			color: var(--danger-text);
+		}
+	}
+
+	.result {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		padding: 0.75rem 0.875rem;
+		border-radius: var(--radius-sm);
+		background: var(--bg-subtle);
+	}
+
+	.planned {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		font-size: 0.8125rem;
+
+		li {
+			display: flex;
+			gap: 0.5rem;
+			min-width: 0;
+		}
+
+		.episode {
+			flex: none;
+			color: var(--text-secondary);
+			font-weight: 600;
+		}
+
+		.release {
+			overflow: hidden;
+			color: var(--text-muted);
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+	}
+
+	.settings {
+		.fields {
+			display: grid;
+			grid-template-columns: 8rem 1fr;
+			gap: 0.75rem;
+			padding-top: 0.75rem;
+		}
+
+		.field {
+			display: grid;
+			gap: 0.25rem;
+			color: var(--text-muted);
+			font-size: 0.75rem;
+		}
+
+		.save {
+			margin-top: 0.75rem;
+		}
+	}
+}
