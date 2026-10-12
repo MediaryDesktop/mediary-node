@@ -1,0 +1,30 @@
+.section {
+	display: flex;
+	flex-direction: column;
+
+	.libraryTitle {
+		display: flex;
+		align-items: center;
+		gap: 0.625rem;
+		margin: 0 0 1rem;
+		font-size: 1.375rem;
+		font-weight: 650;
+	}
+
+	.libraryText {
+		margin: 0 0 0.5rem;
+		font-size: 0.9375rem;
+	}
+
+	.libraryNotice {
+		margin: 0 0 1.25rem;
+		color: var(--text-secondary);
+		font-size: 0.8125rem;
+	}
+
+	.groupTitle {
+		margin: 2rem 0 0.5rem;
+		font-size: 1.25rem;
+		font-weight: 650;
+	}
+}
