@@ -1,0 +1,97 @@
+.card {
+	position: relative;
+	isolation: isolate;
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	overflow: hidden;
+	padding: 0.875rem 1rem;
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	background: var(--surface);
+	cursor: pointer;
+	transition:
+		border-color 120ms ease,
+		background-color 120ms ease;
+
+	&:hover {
+		background: var(--surface-hover);
+	}
+
+	&.checked {
+		border-color: var(--accent-border);
+		background: var(--accent-muted);
+	}
+
+	&.ineligible .body {
+		opacity: 0.6;
+	}
+
+	.check {
+		flex: none;
+	}
+
+	.body {
+		display: flex;
+		flex: 1;
+		flex-direction: column;
+		gap: 0.25rem;
+		min-width: 0;
+	}
+
+	.episodeLabel {
+		color: var(--text);
+		font-size: 1rem;
+		font-weight: 650;
+	}
+
+	.name {
+		margin: 0;
+		overflow: hidden;
+		color: var(--text-muted);
+		font-size: 0.8125rem;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem;
+		color: var(--text-secondary);
+		font-size: 0.8125rem;
+
+		.seeds {
+			color: var(--success-text);
+		}
+	}
+
+	.badges {
+		display: flex;
+		flex: none;
+		flex-wrap: wrap;
+		justify-content: flex-end;
+		gap: 0.25rem;
+		max-width: 40%;
+	}
+
+	.page {
+		display: inline-flex;
+		flex: none;
+		align-items: center;
+		justify-content: center;
+		width: 2rem;
+		height: 2rem;
+		padding: 0;
+		border: 0;
+		border-radius: var(--radius-sm);
+		background: none;
+		color: var(--text-muted);
+		cursor: pointer;
+
+		&:hover {
+			background: var(--surface-active);
+			color: var(--text);
+		}
+	}
+}
