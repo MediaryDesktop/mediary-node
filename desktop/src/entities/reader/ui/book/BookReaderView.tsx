@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 
 import { useTranslation } from '@shared/i18n'
+import { useAfterDelay } from '@shared/lib'
 import { Button, Drawer, Icon, ProgressBar, RippleButton, Tooltip, WindowControls } from '@shared/ui'
 
 import type { ReaderBook } from '../../api/api'
@@ -55,22 +56,9 @@ export function BookReaderView({ book, file, locator, openedAt, onClose, onReloc
 	const [leaving, setLeaving] = useState(false)
 	const entrance = useBookEntrance(openedAt)
 
-	const onCloseRef = useRef(onClose)
-	useEffect(() => {
-		onCloseRef.current = onClose
-	})
-
 	const requestClose = useCallback(() => setLeaving(true), [])
 
-	useEffect(() => {
-		if (!leaving) {
-			return
-		}
-
-		const timer = window.setTimeout(() => onCloseRef.current(), LEAVE_MS)
-
-		return () => window.clearTimeout(timer)
-	}, [leaving])
+	useAfterDelay(leaving, LEAVE_MS, onClose)
 
 	const tocIndex = useMemo(() => indexToc(toc, location?.chapter ?? null), [toc, location?.chapter])
 
