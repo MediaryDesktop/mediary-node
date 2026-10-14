@@ -1,9 +1,10 @@
 import { useTranslation } from '@shared/i18n'
 
-import { TRACKER_STATUSES } from '@entities/tracker'
+import { TRACKER_MEDIA_TYPES, TRACKER_STATUSES } from '@entities/tracker'
 import type { TrackerStatus } from '@entities/tracker'
 
 import { useChartTheme } from '../../../config/chart-theme'
+import { emptyCounts } from '../../../lib/stats'
 import type { StatusCounts, TypeBreakdown } from '../../../lib/stats'
 import { Panel, PanelEmpty, iconStyle } from '../panel/Panel'
 
@@ -21,6 +22,12 @@ export function StatusByType({ byType, byStatus, className }: StatusByTypeProps)
 	const colorOf = (status: TrackerStatus) => theme.statusColor[status]
 	const grandTotal = TRACKER_STATUSES.reduce((sum, status) => sum + byStatus[status], 0)
 
+	// Every kind gets a row, even one the user has never tracked — it reads as "0
+	// of these" instead of silently dropping off the table.
+	const rows = TRACKER_MEDIA_TYPES.map(
+		type => byType.find(row => row.type === type) ?? { type, total: 0, counts: emptyCounts() }
+	)
+
 	return (
 		<Panel
 			className={className}
@@ -29,7 +36,7 @@ export function StatusByType({ byType, byStatus, className }: StatusByTypeProps)
 			title={t('home.stats.byType.title')}
 			subtitle={t('home.stats.byType.subtitle')}
 		>
-			{byType.length === 0 ? (
+			{grandTotal === 0 ? (
 				<PanelEmpty>{t('home.empty')}</PanelEmpty>
 			) : (
 				<div className={styles.scroll}>
@@ -49,7 +56,7 @@ export function StatusByType({ byType, byStatus, className }: StatusByTypeProps)
 							<span className={styles.totalHead}>{t('home.stats.byType.total')}</span>
 						</div>
 
-						{byType.map(row => (
+						{rows.map(row => (
 							<div key={row.type} className={styles.row}>
 								<span className={styles.typeLabel}>{t(`lists.mediaType.${row.type}`)}</span>
 								{TRACKER_STATUSES.map(status => {
@@ -68,7 +75,7 @@ export function StatusByType({ byType, byStatus, className }: StatusByTypeProps)
 										</span>
 									)
 								})}
-								<span className={styles.rowTotal}>{row.total}</span>
+								<span className={styles.rowTotal}>{row.total > 0 ? row.total : '—'}</span>
 							</div>
 						))}
 

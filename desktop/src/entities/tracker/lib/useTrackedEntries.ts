@@ -1,6 +1,8 @@
 import { useUnit } from 'effector-react'
 import { useEffect, useMemo } from 'react'
 
+import { $nodeReady } from '@infra/node'
+
 import type { TrackerEntry } from '../api/api'
 import { isLocalTrackerType, TRACKER_MEDIA_TYPES, trackerQueries } from '../model/model'
 
@@ -35,13 +37,22 @@ export function useTrackedEntries(enabled: boolean): TrackerEntry[] {
 		book: trackerQueries.book.start
 	})
 
+	const nodeReady = useUnit($nodeReady)
+
+	// Started before the node is up, a query fails on the missing connection and,
+	// no longer `initial`, is never asked again — the node's own types would stay
+	// empty all session.
 	useEffect(() => {
+		if (!nodeReady) {
+			return
+		}
+
 		for (const mediaType of TRACKER_MEDIA_TYPES) {
 			if (status[mediaType] === 'initial' && (enabled || isLocalTrackerType(mediaType))) {
 				start[mediaType]()
 			}
 		}
-	}, [enabled, status, start])
+	}, [nodeReady, enabled, status, start])
 
 	return useMemo(() => TRACKER_MEDIA_TYPES.flatMap(mediaType => data[mediaType]?.entries ?? []), [data])
 }

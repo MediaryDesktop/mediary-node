@@ -127,21 +127,22 @@
 		grid-template-columns: repeat(12, minmax(0, 1fr));
 		gap: 1rem;
 
+		// Activity and the type table share the top row evenly.
 		.wide {
-			grid-column: span 8;
+			grid-column: span 6;
 		}
 
-		.side {
-			grid-column: span 4;
+		.byType {
+			grid-column: span 6;
 		}
 
-		// Genres, By media type and Your scores share a row but not its width evenly —
-		// the type table needs more room for its six status columns than the donut does.
+		// Genres, Your top 5 and Your scores share the row below but not its width
+		// evenly — Your top 5 keeps the wider slot the type table used to sit in.
 		.genres {
 			grid-column: span 3;
 		}
 
-		.byType {
+		.side {
 			grid-column: span 5;
 		}
 
@@ -151,12 +152,12 @@
 
 		@media (max-width: 1280px) {
 			.wide,
-			.side {
+			.byType {
 				grid-column: span 12;
 			}
 
 			.genres,
-			.byType,
+			.side,
 			.scores {
 				grid-column: span 6;
 			}
@@ -164,7 +165,7 @@
 
 		@media (max-width: 900px) {
 			.genres,
-			.byType,
+			.side,
 			.scores {
 				grid-column: span 12;
 			}

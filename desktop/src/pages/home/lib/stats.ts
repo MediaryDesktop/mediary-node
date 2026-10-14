@@ -45,7 +45,7 @@ const WATCHED_TYPES = new Set<string>(['anime', 'movie', 'series', 'dorama'])
 
 const TOP_RATED = 5
 
-function emptyCounts(): StatusCounts {
+export function emptyCounts(): StatusCounts {
 	return Object.fromEntries(TRACKER_STATUSES.map(status => [status, 0])) as StatusCounts
 }
 

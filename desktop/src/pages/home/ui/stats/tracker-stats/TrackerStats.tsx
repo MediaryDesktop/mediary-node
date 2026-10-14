@@ -151,9 +151,9 @@ export function TrackerStats({ stats, entries }: TrackerStatsProps) {
 
 			<div className={styles.grid}>
 				<ActivityChart entries={entries} className={styles.wide} />
-				<TopRated entries={stats.topRated} className={styles.side} />
-				<GenresDonut genres={stats.genres} total={stats.genreTags} className={styles.genres} />
 				<StatusByType byType={stats.byType} byStatus={stats.byStatus} className={styles.byType} />
+				<GenresDonut genres={stats.genres} total={stats.genreTags} className={styles.genres} />
+				<TopRated entries={stats.topRated} className={styles.side} />
 				<ScoresChart
 					scores={stats.scores}
 					mean={stats.meanScore}
