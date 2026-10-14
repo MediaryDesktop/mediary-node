@@ -1314,9 +1314,7 @@ export const en = {
 		banner: {
 			outdated:
 				'This version of Mediary can no longer back up — everything else works. Update to turn backups back on.',
-			update: 'Update',
-			offer: 'Turn on backups to move your tracker and lists to another computer. Optional: everything works without it.',
-			notNow: 'Not now'
+			update: 'Update'
 		}
 	},
 	devices: {

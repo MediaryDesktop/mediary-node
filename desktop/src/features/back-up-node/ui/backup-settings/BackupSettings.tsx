@@ -17,6 +17,7 @@ import {
 	$updateUrl,
 	backUpNowMutation,
 	backupsQuery,
+	clientGateMounted,
 	deleteBackupMutation,
 	pairMutation,
 	restoreMutation,
@@ -57,6 +58,12 @@ export function BackupSettings() {
 		backUpNowMutation.start,
 		backUpNowMutation.$pending
 	])
+
+	const mounted = useUnit(clientGateMounted)
+
+	useEffect(() => {
+		mounted()
+	}, [mounted])
 
 	useEffect(() => {
 		if (nodeReady) {

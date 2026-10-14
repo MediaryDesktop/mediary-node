@@ -1,0 +1,540 @@
+{
+  "skipped": [
+    {
+      "scss": "D:\\Web\\DESKTOP\\Mediary\\mediary-node\\desktop\\src\\entities\\reader\\ui\\book-reader\\views\\BookViews.module.scss",
+      "reason": "shared by multiple components, none of them its own",
+      "importers": [
+        "D:\\Web\\DESKTOP\\Mediary\\mediary-node\\desktop\\src\\entities\\reader\\ui\\book-reader\\views\\FoliateView.tsx",
+        "D:\\Web\\DESKTOP\\Mediary\\mediary-node\\desktop\\src\\entities\\reader\\ui\\book-reader\\views\\PdfView.tsx"
+      ]
+    },
+    {
+      "scss": "D:\\Web\\DESKTOP\\Mediary\\mediary-node\\desktop\\src\\features\\auth\\ui\\flow\\AuthPanel.module.scss",
+      "reason": "shared by multiple components, none of them its own",
+      "importers": [
+        "D:\\Web\\DESKTOP\\Mediary\\mediary-node\\desktop\\src\\features\\auth\\ui\\flow\\AuthEmailPanel.tsx",
+        "D:\\Web\\DESKTOP\\Mediary\\mediary-node\\desktop\\src\\features\\auth\\ui\\flow\\AuthNewPasswordPanel.tsx",
+        "D:\\Web\\DESKTOP\\Mediary\\mediary-node\\desktop\\src\\features\\auth\\ui\\flow\\AuthProvidersPanel.tsx",
+        "D:\\Web\\DESKTOP\\Mediary\\mediary-node\\desktop\\src\\features\\auth\\ui\\flow\\AuthResetPasswordPanel.tsx",
+        "D:\\Web\\DESKTOP\\Mediary\\mediary-node\\desktop\\src\\features\\auth\\ui\\flow\\AuthVerifyEmailPanel.tsx"
+      ]
+    },
+    {
+      "scss": "D:\\Web\\DESKTOP\\Mediary\\mediary-node\\desktop\\src\\features\\auth\\ui\\form\\AuthForm.module.scss",
+      "reason": "shared by multiple components, none of them its own",
+      "importers": [
+        "D:\\Web\\DESKTOP\\Mediary\\mediary-node\\desktop\\src\\features\\auth\\ui\\form\\NewPasswordForm.tsx",
+        "D:\\Web\\DESKTOP\\Mediary\\mediary-node\\desktop\\src\\features\\auth\\ui\\form\\ResetPasswordForm.tsx",
+        "D:\\Web\\DESKTOP\\Mediary\\mediary-node\\desktop\\src\\features\\auth\\ui\\form\\SignInForm.tsx",
+        "D:\\Web\\DESKTOP\\Mediary\\mediary-node\\desktop\\src\\features\\auth\\ui\\form\\SignUpForm.tsx",
+        "D:\\Web\\DESKTOP\\Mediary\\mediary-node\\desktop\\src\\features\\auth\\ui\\form\\VerifyEmailForm.tsx"
+      ]
+    },
+    {
+      "scss": "D:\\Web\\DESKTOP\\Mediary\\mediary-node\\desktop\\src\\pages\\fallback\\Fallback.module.scss",
+      "reason": "shared by multiple components, none of them its own",
+      "importers": [
+        "D:\\Web\\DESKTOP\\Mediary\\mediary-node\\desktop\\src\\pages\\fallback\\NotFoundPage.tsx",
+        "D:\\Web\\DESKTOP\\Mediary\\mediary-node\\desktop\\src\\pages\\fallback\\RouteErrorPage.tsx"
+      ]
+    },
+    {
+      "scss": "D:\\Web\\DESKTOP\\Mediary\\mediary-node\\desktop\\src\\pages\\home\\ui\\stats\\Stats.module.scss",
+      "reason": "shared by multiple components, none of them its own",
+      "importers": [
+        "D:\\Web\\DESKTOP\\Mediary\\mediary-node\\desktop\\src\\pages\\home\\ui\\stats\\activity-chart\\ActivityChart.tsx",
+        "D:\\Web\\DESKTOP\\Mediary\\mediary-node\\desktop\\src\\pages\\home\\ui\\stats\\genres-donut\\GenresDonut.tsx",
+        "D:\\Web\\DESKTOP\\Mediary\\mediary-node\\desktop\\src\\pages\\home\\ui\\stats\\panel\\Panel.tsx",
+        "D:\\Web\\DESKTOP\\Mediary\\mediary-node\\desktop\\src\\pages\\home\\ui\\stats\\scores-chart\\ScoresChart.tsx",
+        "D:\\Web\\DESKTOP\\Mediary\\mediary-node\\desktop\\src\\pages\\home\\ui\\stats\\status-by-type\\StatusByType.tsx"
+      ]
+    },
+    {
+      "scss": "D:\\Web\\DESKTOP\\Mediary\\mediary-node\\desktop\\src\\pages\\media\\ui\\library-section\\episode-row\\EpisodeRow.module.scss",
+      "reason": "shared by multiple components, none of them its own",
+      "importers": [
+        "D:\\Web\\DESKTOP\\Mediary\\mediary-node\\desktop\\src\\pages\\media\\ui\\library-section\\episode-library\\EpisodeLibrary.tsx",
+        "D:\\Web\\DESKTOP\\Mediary\\mediary-node\\desktop\\src\\pages\\media\\ui\\library-section\\episode-row\\EpisodeAside.tsx",
+        "D:\\Web\\DESKTOP\\Mediary\\mediary-node\\desktop\\src\\pages\\media\\ui\\library-section\\episode-row\\EpisodeItem.tsx",
+        "D:\\Web\\DESKTOP\\Mediary\\mediary-node\\desktop\\src\\pages\\media\\ui\\library-section\\episode-row\\EpisodeText.tsx",
+        "D:\\Web\\DESKTOP\\Mediary\\mediary-node\\desktop\\src\\pages\\media\\ui\\library-section\\not-in-library\\NotInLibrary.tsx"
+      ]
+    },
+    {
+      "scss": "D:\\Web\\DESKTOP\\Mediary\\mediary-node\\desktop\\src\\pages\\media\\ui\\library-section\\EpisodeSection.module.scss",
+      "reason": "shared by multiple components, none of them its own",
+      "importers": [
+        "D:\\Web\\DESKTOP\\Mediary\\mediary-node\\desktop\\src\\pages\\media\\ui\\library-section\\episode-library\\EpisodeLibrary.tsx",
+        "D:\\Web\\DESKTOP\\Mediary\\mediary-node\\desktop\\src\\pages\\media\\ui\\library-section\\not-in-library\\NotInLibrary.tsx"
+      ]
+    }
+  ],
+  "mismatches": [
+    {
+      "scss": "app\\layout\\player-host\\PlayerHost.module.scss",
+      "tsx": "app\\layout\\player-host\\PlayerHost.tsx",
+      "dynamic": false,
+      "mismatches": [
+        {
+          "class": "heading",
+          "jsxParent": "(top level)",
+          "scssParent": "body"
+        }
+      ]
+    },
+    {
+      "scss": "app\\layout\\sidebar\\Sidebar.module.scss",
+      "tsx": "app\\layout\\sidebar\\Sidebar.tsx",
+      "dynamic": true,
+      "mismatches": [],
+      "ambiguous": [
+        {
+          "class": "item",
+          "jsxRelations": [
+            "utilities",
+            "sections"
+          ]
+        }
+      ]
+    },
+    {
+      "scss": "entities\\media\\ui\\media-card\\MediaCard.module.scss",
+      "tsx": "entities\\media\\ui\\media-card\\MediaCard.tsx",
+      "dynamic": true,
+      "mismatches": [
+        {
+          "class": "clipDefs",
+          "jsxParent": "(top level)",
+          "scssParent": "open"
+        },
+        {
+          "class": "cover",
+          "jsxParent": "(top level)",
+          "scssParent": "open / card"
+        }
+      ]
+    },
+    {
+      "scss": "entities\\reader\\ui\\reader-view\\ReaderView.module.scss",
+      "tsx": "entities\\reader\\ui\\reader-view\\ReaderView.tsx",
+      "dynamic": false,
+      "mismatches": [],
+      "ambiguous": [
+        {
+          "class": "visible",
+          "jsxRelations": [
+            "&(modifier of top)",
+            "&(modifier of bottom)"
+          ]
+        }
+      ]
+    },
+    {
+      "scss": "features\\download-chapters\\ui\\manga-download-list\\MangaDownloadList.module.scss",
+      "tsx": "features\\download-chapters\\ui\\manga-download-list\\MangaDownloadList.tsx",
+      "dynamic": true,
+      "mismatches": [
+        {
+          "class": "state",
+          "jsxParent": "meta",
+          "scssParent": "row"
+        }
+      ]
+    },
+    {
+      "scss": "features\\library-explorer\\ui\\detail-panel\\DetailPanel.module.scss",
+      "tsx": "features\\library-explorer\\ui\\detail-panel\\DetailPanel.tsx",
+      "dynamic": false,
+      "mismatches": [
+        {
+          "class": "path",
+          "jsxParent": "card",
+          "scssParent": "field"
+        },
+        {
+          "class": "badges",
+          "jsxParent": "card",
+          "scssParent": "field"
+        },
+        {
+          "class": "form",
+          "jsxParent": "card",
+          "scssParent": "field"
+        }
+      ],
+      "ambiguous": [
+        {
+          "class": "field",
+          "jsxRelations": [
+            "card",
+            "grid"
+          ]
+        }
+      ]
+    },
+    {
+      "scss": "features\\library-explorer\\ui\\explorer-row\\ExplorerRow.module.scss",
+      "tsx": "features\\library-explorer\\ui\\explorer-row\\ExplorerRow.tsx",
+      "dynamic": false,
+      "mismatches": [],
+      "ambiguous": [
+        {
+          "class": "dim",
+          "jsxRelations": [
+            "&(modifier of icon)",
+            "&(modifier of name)"
+          ]
+        }
+      ]
+    },
+    {
+      "scss": "features\\manage-mangadex\\MangaDexSettings.module.scss",
+      "tsx": "features\\manage-mangadex\\MangaDexSettings.tsx",
+      "dynamic": false,
+      "mismatches": [],
+      "ambiguous": [
+        {
+          "class": "note",
+          "jsxRelations": [
+            "(top level)",
+            "root"
+          ]
+        }
+      ]
+    },
+    {
+      "scss": "features\\manage-source-keys\\SourceKeySettings.module.scss",
+      "tsx": "features\\manage-source-keys\\SourceKeySettings.tsx",
+      "dynamic": false,
+      "mismatches": [],
+      "ambiguous": [
+        {
+          "class": "note",
+          "jsxRelations": [
+            "(top level)",
+            "root"
+          ]
+        }
+      ]
+    },
+    {
+      "scss": "features\\manage-torznab-sources\\ui\\release-profile\\ReleaseProfileSettings.module.scss",
+      "tsx": "features\\manage-torznab-sources\\ui\\release-profile\\ReleaseProfileSettings.tsx",
+      "dynamic": false,
+      "mismatches": [],
+      "ambiguous": [
+        {
+          "class": "field",
+          "jsxRelations": [
+            "row",
+            "root"
+          ]
+        }
+      ]
+    },
+    {
+      "scss": "features\\search-media\\ui\\search-results\\SearchResults.module.scss",
+      "tsx": "features\\search-media\\ui\\search-results\\SearchResults.tsx",
+      "dynamic": false,
+      "mismatches": [],
+      "ambiguous": [
+        {
+          "class": "grid",
+          "jsxRelations": [
+            "(top level)",
+            "results"
+          ]
+        }
+      ]
+    },
+    {
+      "scss": "features\\setup-wizard\\ui\\step\\SetupDownloadingStep.module.scss",
+      "tsx": "features\\setup-wizard\\ui\\step\\SetupDownloadingStep.tsx",
+      "dynamic": false,
+      "mismatches": [],
+      "ambiguous": [
+        {
+          "class": "field",
+          "jsxRelations": [
+            "(top level)",
+            "grid3",
+            "grid2"
+          ]
+        }
+      ]
+    },
+    {
+      "scss": "pages\\library\\ui\\library-collection\\LibraryCollection.module.scss",
+      "tsx": "pages\\library\\ui\\library-collection\\LibraryCollection.tsx",
+      "dynamic": false,
+      "mismatches": [
+        {
+          "class": "episodesMeta",
+          "jsxParent": "grid",
+          "scssParent": "(top level)"
+        }
+      ]
+    },
+    {
+      "scss": "pages\\library\\ui\\scan-run\\ScanRun.module.scss",
+      "tsx": "pages\\library\\ui\\scan-run\\ScanRun.tsx",
+      "dynamic": false,
+      "reusedBy": [
+        "pages\\library\\ui\\scan-run\\scanned-group\\ScannedGroup.tsx"
+      ],
+      "mismatches": [
+        {
+          "class": "logs",
+          "jsxParent": "section",
+          "scssParent": "(top level)"
+        }
+      ],
+      "ambiguous": [
+        {
+          "class": "muted",
+          "jsxRelations": [
+            "cardHeader",
+            "card"
+          ]
+        }
+      ]
+    },
+    {
+      "scss": "pages\\media\\ui\\media-hero\\MediaHero.module.scss",
+      "tsx": "pages\\media\\ui\\media-hero\\MediaHero.tsx",
+      "dynamic": true,
+      "reusedBy": [
+        "pages\\media\\ui\\media-hero\\MediaHeroSkeleton.tsx"
+      ],
+      "mismatches": [
+        {
+          "class": "coverIn",
+          "jsxParent": "&(modifier of cover)",
+          "scssParent": "(top level)"
+        }
+      ],
+      "ambiguous": [
+        {
+          "class": "line",
+          "jsxRelations": [
+            "&(modifier of title)",
+            "&(modifier of alternative)",
+            "&(modifier of metaRow)",
+            "&(modifier of tagRow)",
+            "&(modifier of description)",
+            "&(modifier of links)"
+          ]
+        }
+      ]
+    },
+    {
+      "scss": "pages\\settings\\SettingsPage.module.scss",
+      "tsx": "pages\\settings\\SettingsPage.tsx",
+      "dynamic": false,
+      "mismatches": [
+        {
+          "class": "link",
+          "jsxParent": "panel",
+          "scssParent": "control"
+        }
+      ],
+      "ambiguous": [
+        {
+          "class": "hint",
+          "jsxRelations": [
+            "panel",
+            "label"
+          ]
+        }
+      ]
+    },
+    {
+      "scss": "shared\\ui\\date-picker\\DatePicker.module.scss",
+      "tsx": "shared\\ui\\date-picker\\DatePicker.tsx",
+      "dynamic": false,
+      "mismatches": [
+        {
+          "class": "header",
+          "jsxParent": "field",
+          "scssParent": "calendar"
+        }
+      ]
+    },
+    {
+      "scss": "shared\\ui\\drawer\\drawer-section\\DrawerSection.module.scss",
+      "tsx": "shared\\ui\\drawer\\drawer-section\\DrawerSection.tsx",
+      "dynamic": false,
+      "mismatches": [
+        {
+          "class": "title",
+          "jsxParent": "(top level)",
+          "scssParent": "section / headerText"
+        },
+        {
+          "class": "description",
+          "jsxParent": "(top level)",
+          "scssParent": "section"
+        }
+      ]
+    },
+    {
+      "scss": "shared\\ui\\rating-stars\\RatingStars.module.scss",
+      "tsx": "shared\\ui\\rating-stars\\RatingStars.tsx",
+      "dynamic": false,
+      "mismatches": [
+        {
+          "class": "value",
+          "jsxParent": "(top level)",
+          "scssParent": "root"
+        }
+      ]
+    },
+    {
+      "scss": "shared\\ui\\select-dropdown\\SelectDropdown.module.scss",
+      "tsx": "shared\\ui\\select-dropdown\\SelectDropdown.tsx",
+      "dynamic": false,
+      "reusedBy": [
+        "shared\\ui\\select-dropdown\\option\\Option.tsx"
+      ],
+      "mismatches": [
+        {
+          "class": "panel",
+          "jsxParent": "field",
+          "scssParent": "(top level)"
+        }
+      ]
+    }
+  ],
+  "clean": [
+    "app\\layout\\AppLayout.module.scss",
+    "app\\layout\\window-chrome\\WindowChrome.module.scss",
+    "app\\layout\\window-drag-strip\\WindowDragStrip.module.scss",
+    "entities\\library-item\\ui\\library-file-row\\LibraryFileRow.module.scss",
+    "entities\\media\\ui\\featured-banner\\FeaturedBanner.module.scss",
+    "entities\\media\\ui\\media-preview\\MediaPreview.module.scss",
+    "entities\\playback\\ui\\now-playing-bar\\NowPlayingBar.module.scss",
+    "entities\\playback\\ui\\video-player\\player-controls\\PlayerControls.module.scss",
+    "entities\\playback\\ui\\video-player\\player-header\\PlayerHeader.module.scss",
+    "entities\\playback\\ui\\video-player\\VideoPlayer.module.scss",
+    "entities\\reader\\ui\\book-reader\\book-footer\\appearance-tools\\AppearanceTools.module.scss",
+    "entities\\reader\\ui\\book-reader\\book-footer\\BookFooter.module.scss",
+    "entities\\reader\\ui\\book-reader\\BookReaderView.module.scss",
+    "entities\\reader\\ui\\book-reader\\toc-drawer\\toc-list\\TocList.module.scss",
+    "entities\\reader\\ui\\book-reader\\toc-drawer\\TocDrawer.module.scss",
+    "features\\auth\\ui\\common\\auth-form-wrapper\\AuthFormWrapper.module.scss",
+    "features\\auth\\ui\\common\\auth-layout\\AuthLayout.module.scss",
+    "features\\auth\\ui\\common\\auth-link\\AuthLink.module.scss",
+    "features\\auth\\ui\\common\\otp-countdown-timer\\OtpCountdownTimer.module.scss",
+    "features\\auth\\ui\\flow\\AuthProvidersPanel.module.scss",
+    "features\\auto-download-torrents\\ui\\auto-download-panel\\AutoDownloadPanel.module.scss",
+    "features\\auto-download-torrents\\ui\\auto-download-panel\\rule-details\\RuleDetails.module.scss",
+    "features\\auto-download-torrents\\ui\\auto-download-rules\\AutoDownloadRules.module.scss",
+    "features\\connect-anilist\\ConnectAniList.module.scss",
+    "features\\continue-watching\\ui\\continue-watching\\ContinueWatching.module.scss",
+    "features\\download-chapters\\ui\\download-folder-prompt\\DownloadFolderPrompt.module.scss",
+    "features\\download-torrent\\ui\\add-torrent-drawer\\AddTorrentDrawer.module.scss",
+    "features\\download-torrent\\ui\\torrent-download-list\\download-row\\DownloadRow.module.scss",
+    "features\\download-torrent\\ui\\torrent-download-list\\download-summary\\DownloadSummary.module.scss",
+    "features\\download-torrent\\ui\\torrent-download-list\\files-drawer\\TorrentFilesDrawer.module.scss",
+    "features\\download-torrent\\ui\\torrent-download-list\\TorrentDownloadList.module.scss",
+    "features\\library-explorer\\LibraryExplorer.module.scss",
+    "features\\library-explorer\\ui\\delete-files-modal\\DeleteFilesModal.module.scss",
+    "features\\library-explorer\\ui\\explorer-toolbar\\ExplorerToolbar.module.scss",
+    "features\\library-explorer\\ui\\explorer-toolbar\\selection-actions\\SelectionActions.module.scss",
+    "features\\link-manga-source\\LinkSourceDrawer.module.scss",
+    "features\\manage-lists\\ui\\list-drawer\\icon-picker\\IconPicker.module.scss",
+    "features\\manage-lists\\ui\\list-options-menu\\ListOptionsMenu.module.scss",
+    "features\\manage-torrent-client\\TorrentClientSettings.module.scss",
+    "features\\manage-torrent-client\\ui\\client-drawer\\TorrentClientDrawer.module.scss",
+    "features\\manage-unmatched-files\\ui\\check-row\\CheckRow.module.scss",
+    "features\\manage-unmatched-files\\ui\\ignored-files-drawer\\IgnoredFilesDrawer.module.scss",
+    "features\\manage-unmatched-files\\ui\\unmatched-files-drawer\\group-page\\GroupPage.module.scss",
+    "features\\manage-unmatched-files\\ui\\unmatched-files-drawer\\group-page\\suggestion-card\\SuggestionCard.module.scss",
+    "features\\manage-unmatched-files\\ui\\unmatched-files-drawer\\UnmatchedFilesDrawer.module.scss",
+    "features\\match-library-file\\MatchFileDrawer.module.scss",
+    "features\\scan-library\\ui\\scan-modal\\ScanModal.module.scss",
+    "features\\scan-library\\ui\\scan-progress\\ScanProgress.module.scss",
+    "features\\search-media\\ui\\search-filters\\SearchFilters.module.scss",
+    "features\\search-media\\ui\\search-toolbar\\SearchToolbar.module.scss",
+    "features\\search-torrents\\TorrentSearchDrawer.module.scss",
+    "features\\search-torrents\\ui\\search-form\\release-card\\ReleaseCard.module.scss",
+    "features\\search-torrents\\ui\\search-form\\search-bar\\SearchBar.module.scss",
+    "features\\search-torrents\\ui\\search-form\\search-filters\\SearchFilters.module.scss",
+    "features\\search-torrents\\ui\\search-form\\SearchForm.module.scss",
+    "features\\setup-wizard\\ui\\layout\\SetupCard.module.scss",
+    "features\\setup-wizard\\ui\\layout\\SetupLayout.module.scss",
+    "features\\setup-wizard\\ui\\step\\SetupAccountStep.module.scss",
+    "features\\setup-wizard\\ui\\step\\SetupDebridStep.module.scss",
+    "features\\setup-wizard\\ui\\step\\SetupLibraryStep.module.scss",
+    "features\\setup-wizard\\ui\\step\\SetupPlayerStep.module.scss",
+    "features\\track-media\\ui\\entry-menu\\EntryMenu.module.scss",
+    "features\\track-media\\ui\\manage-entry-drawer\\list-picker\\EntryListPicker.module.scss",
+    "pages\\discover\\DiscoverPage.module.scss",
+    "pages\\discover\\ui\\discover-row\\DiscoverRow.module.scss",
+    "pages\\downloads\\DownloadsPage.module.scss",
+    "pages\\home\\HomePage.module.scss",
+    "pages\\home\\ui\\banner\\HomeBanner.module.scss",
+    "pages\\home\\ui\\stats\\genres-donut\\GenresDonut.module.scss",
+    "pages\\home\\ui\\stats\\panel\\Panel.module.scss",
+    "pages\\home\\ui\\stats\\status-by-type\\StatusByType.module.scss",
+    "pages\\home\\ui\\stats\\top-rated\\TopRated.module.scss",
+    "pages\\home\\ui\\stats\\tracker-stats\\TrackerStats.module.scss",
+    "pages\\home\\ui\\tracker-row\\TrackerRow.module.scss",
+    "pages\\library\\LibraryPage.module.scss",
+    "pages\\library\\ScanHistoryPage.module.scss",
+    "pages\\library\\ui\\file-log-item\\FileLogItem.module.scss",
+    "pages\\library\\ui\\library-toolbar\\LibraryToolbar.module.scss",
+    "pages\\lists\\ListDetailPage.module.scss",
+    "pages\\lists\\ListsPage.module.scss",
+    "pages\\lists\\ui\\list-card\\ListCard.module.scss",
+    "pages\\lists\\ui\\list-filters\\ListFilters.module.scss",
+    "pages\\media\\MediaPage.module.scss",
+    "pages\\media\\ui\\library-section\\book-files\\BookFiles.module.scss",
+    "pages\\media\\ui\\library-section\\chapter-list\\chapter-row\\ChapterRow.module.scss",
+    "pages\\media\\ui\\library-section\\chapter-list\\chapter-toolbar\\ChapterToolbar.module.scss",
+    "pages\\media\\ui\\library-section\\chapter-list\\ChapterList.module.scss",
+    "pages\\media\\ui\\library-section\\episode-library\\to-watch-rail\\ToWatchRail.module.scss",
+    "pages\\media\\ui\\media-actions\\MediaActions.module.scss",
+    "pages\\media\\ui\\media-facts\\MediaFacts.module.scss",
+    "pages\\media\\ui\\media-view\\MediaView.module.scss",
+    "pages\\media\\ui\\torrent-section\\TorrentSection.module.scss",
+    "pages\\read\\ui\\panel\\Panel.module.scss",
+    "pages\\search\\SearchPage.module.scss",
+    "pages\\setup\\SetupPage.module.scss",
+    "shared\\ui\\badge\\Badge.module.scss",
+    "shared\\ui\\button\\Button.module.scss",
+    "shared\\ui\\carousel\\Carousel.module.scss",
+    "shared\\ui\\checkbox\\Checkbox.module.scss",
+    "shared\\ui\\connection-check\\ConnectionCheck.module.scss",
+    "shared\\ui\\disclosure\\Disclosure.module.scss",
+    "shared\\ui\\drawer\\drawer-form\\DrawerForm.module.scss",
+    "shared\\ui\\drawer\\Drawer.module.scss",
+    "shared\\ui\\dropdown-menu\\DropdownMenu.module.scss",
+    "shared\\ui\\empty-state\\EmptyState.module.scss",
+    "shared\\ui\\hover-card\\HoverCard.module.scss",
+    "shared\\ui\\input\\Input.module.scss",
+    "shared\\ui\\list-tile\\ListTile.module.scss",
+    "shared\\ui\\logo\\Logo.module.scss",
+    "shared\\ui\\managed-list\\ManagedList.module.scss",
+    "shared\\ui\\modal\\Modal.module.scss",
+    "shared\\ui\\notice\\Notice.module.scss",
+    "shared\\ui\\otp-input\\OtpInput.module.scss",
+    "shared\\ui\\page-header\\PageHeader.module.scss",
+    "shared\\ui\\page-transition\\PageTransition.module.scss",
+    "shared\\ui\\phase-transition\\PhaseTransition.module.scss",
+    "shared\\ui\\poster-fade\\PosterFade.module.scss",
+    "shared\\ui\\progress-bar\\ProgressBar.module.scss",
+    "shared\\ui\\reel-loader\\ReelLoader.module.scss",
+    "shared\\ui\\scroll-progress\\ScrollProgress.module.scss",
+    "shared\\ui\\segmented-control\\SegmentedControl.module.scss",
+    "shared\\ui\\selection-group\\SelectionGroup.module.scss",
+    "shared\\ui\\skeleton\\Skeleton.module.scss",
+    "shared\\ui\\stepper\\Stepper.module.scss",
+    "shared\\ui\\switch\\Switch.module.scss",
+    "shared\\ui\\tabs\\Tabs.module.scss",
+    "shared\\ui\\textarea\\Textarea.module.scss",
+    "shared\\ui\\toast\\toast.module.scss",
+    "shared\\ui\\tooltip\\Tooltip.module.scss",
+    "shared\\ui\\window-controls\\WindowControls.module.scss"
+  ]
+}
