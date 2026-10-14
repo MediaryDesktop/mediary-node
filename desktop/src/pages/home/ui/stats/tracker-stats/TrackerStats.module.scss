@@ -135,7 +135,17 @@
 			grid-column: span 4;
 		}
 
-		.third {
+		// Genres, By media type and Your scores share a row but not its width evenly —
+		// the type table needs more room for its six status columns than the donut does.
+		.genres {
+			grid-column: span 3;
+		}
+
+		.byType {
+			grid-column: span 5;
+		}
+
+		.scores {
 			grid-column: span 4;
 		}
 
@@ -145,13 +155,17 @@
 				grid-column: span 12;
 			}
 
-			.third {
+			.genres,
+			.byType,
+			.scores {
 				grid-column: span 6;
 			}
 		}
 
 		@media (max-width: 900px) {
-			.third {
+			.genres,
+			.byType,
+			.scores {
 				grid-column: span 12;
 			}
 		}

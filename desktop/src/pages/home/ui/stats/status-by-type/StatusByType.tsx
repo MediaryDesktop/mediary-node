@@ -1,13 +1,11 @@
 import { useTranslation } from '@shared/i18n'
-import { Tooltip } from '@shared/ui'
 
-import { MediaTypeIcon, TRACKER_STATUSES } from '@entities/tracker'
+import { TRACKER_STATUSES } from '@entities/tracker'
 import type { TrackerStatus } from '@entities/tracker'
 
 import { useChartTheme } from '../../../config/chart-theme'
 import type { StatusCounts, TypeBreakdown } from '../../../lib/stats'
-import { Panel, PanelEmpty } from '../panel/Panel'
-import stats from '../Stats.module.scss'
+import { Panel, PanelEmpty, iconStyle } from '../panel/Panel'
 
 import styles from './StatusByType.module.scss'
 
@@ -21,10 +19,7 @@ export function StatusByType({ byType, byStatus, className }: StatusByTypeProps)
 	const { t } = useTranslation()
 	const theme = useChartTheme()
 	const colorOf = (status: TrackerStatus) => theme.statusColor[status]
-
-	// Every bar is drawn against the longest one, so a type's length is how many
-	// titles it has and its segments are how they split.
-	const longest = Math.max(1, ...byType.map(row => row.total))
+	const grandTotal = TRACKER_STATUSES.reduce((sum, status) => sum + byStatus[status], 0)
 
 	return (
 		<Panel
@@ -37,63 +32,61 @@ export function StatusByType({ byType, byStatus, className }: StatusByTypeProps)
 			{byType.length === 0 ? (
 				<PanelEmpty>{t('home.empty')}</PanelEmpty>
 			) : (
-				<>
-					<ul className={stats.legend}>
-						{TRACKER_STATUSES.filter(status => byStatus[status] > 0).map(status => (
-							<li key={status} className={stats.legendItem}>
-								<span
-									className={stats.swatch}
-									style={{ background: colorOf(status) }}
-									aria-hidden
-								/>
-								{t(`home.stats.status.${status}`)}
-								<span className={stats.legendCount}>{byStatus[status]}</span>
-							</li>
-						))}
-					</ul>
-
-					<ul className={styles.typeRows}>
-						{byType.map(row => {
-							const typeLabel = t(`lists.mediaType.${row.type}`)
-
-							return (
-								<li key={row.type} className={styles.typeRow}>
-									<span className={styles.typeHead}>
-										<MediaTypeIcon type={row.type} size={16} />
-										{typeLabel}
-										<span className={styles.typeTotal}>{row.total}</span>
-									</span>
-
+				<div className={styles.scroll}>
+					<div className={styles.table}>
+						<div className={styles.row}>
+							<span />
+							{TRACKER_STATUSES.map(status => (
+								<span key={status} className={styles.statusHead}>
 									<span
-										className={styles.stack}
-										style={{ width: `${(row.total / longest) * 100}%` }}
-									>
-										{TRACKER_STATUSES.filter(status => row.counts[status] > 0).map(
-											status => {
-												const label = `${typeLabel} · ${t(`lists.status.${row.type}.${status}`)}: ${row.counts[status]}`
+										className={styles.dot}
+										style={{ background: colorOf(status) }}
+										aria-hidden
+									/>
+									{t(`home.stats.status.${status}`)}
+								</span>
+							))}
+							<span className={styles.totalHead}>{t('home.stats.byType.total')}</span>
+						</div>
 
-												return (
-													<Tooltip key={status} content={label} delay={0}>
-														<span
-															role='img'
-															aria-label={label}
-															tabIndex={0}
-															className={styles.segment}
-															style={{
-																background: colorOf(status),
-																flexGrow: row.counts[status]
-															}}
-														/>
-													</Tooltip>
-												)
-											}
-										)}
-									</span>
-								</li>
-							)
-						})}
-					</ul>
-				</>
+						{byType.map(row => (
+							<div key={row.type} className={styles.row}>
+								<span className={styles.typeLabel}>{t(`lists.mediaType.${row.type}`)}</span>
+								{TRACKER_STATUSES.map(status => {
+									const count = row.counts[status]
+									return count > 0 ? (
+										<span
+											key={status}
+											className={styles.cell}
+											style={iconStyle(colorOf(status))}
+										>
+											{count}
+										</span>
+									) : (
+										<span key={status} className={styles.cellEmpty} aria-hidden>
+											—
+										</span>
+									)
+								})}
+								<span className={styles.rowTotal}>{row.total}</span>
+							</div>
+						))}
+
+						<div className={styles.footerRow}>
+							<span className={styles.allLabel}>{t('home.stats.byType.all')}</span>
+							{TRACKER_STATUSES.map(status => (
+								<span
+									key={status}
+									className={styles.footerCell}
+									style={{ color: colorOf(status) }}
+								>
+									{byStatus[status] > 0 ? byStatus[status] : '—'}
+								</span>
+							))}
+							<span className={styles.grandTotal}>{grandTotal}</span>
+						</div>
+					</div>
+				</div>
 			)}
 		</Panel>
 	)

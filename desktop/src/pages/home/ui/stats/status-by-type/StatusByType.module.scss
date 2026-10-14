@@ -1,59 +1,103 @@
-.typeRows {
-	display: flex;
-	flex-direction: column;
-	gap: 0.875rem;
-	margin: 0;
-	padding: 0;
-	list-style: none;
+.scroll {
+	overflow-x: auto;
+}
 
-	.typeRow {
+.table {
+	display: grid;
+	grid-template-columns: minmax(3.75rem, auto) repeat(6, minmax(2.125rem, 1fr)) minmax(1.75rem, auto);
+	min-width: 20rem;
+	column-gap: 0.375rem;
+	row-gap: 0.5rem;
+	align-items: center;
+
+	.row {
+		display: contents;
+	}
+
+	.statusHead {
 		display: flex;
 		flex-direction: column;
-		gap: 0.375rem;
+		align-items: center;
+		gap: 0.25rem;
+		color: var(--text-muted);
+		font-size: 0.625rem;
+		line-height: 1.15;
+		text-align: center;
+	}
 
-		.typeHead {
-			display: flex;
-			align-items: center;
-			gap: 0.5rem;
-			color: var(--text-secondary);
-			font-size: 0.875rem;
+	.dot {
+		width: 0.5rem;
+		height: 0.5rem;
+		border-radius: 2px;
+	}
 
-			.typeTotal {
-				margin-left: auto;
-				color: var(--text);
-				font-weight: 600;
-				font-variant-numeric: tabular-nums;
-			}
+	.totalHead {
+		color: var(--text-muted);
+		font-size: 0.625rem;
+		text-align: right;
+		padding-right: 0.125rem;
+	}
+
+	.typeLabel {
+		color: var(--text);
+		font-weight: 650;
+		font-size: 0.8125rem;
+	}
+
+	.cell,
+	.cellEmpty {
+		display: grid;
+		place-items: center;
+		height: 1.875rem;
+		border-radius: 0.4375rem;
+		font-size: 0.8125rem;
+		font-weight: 700;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.cellEmpty {
+		background: var(--surface-hover);
+		color: var(--text-muted);
+		font-weight: 500;
+	}
+
+	.rowTotal {
+		color: var(--text);
+		font-weight: 700;
+		font-size: 0.8125rem;
+		text-align: right;
+		padding-right: 0.125rem;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.footerRow {
+		display: contents;
+
+		> * {
+			margin-top: 0.25rem;
+			padding-top: 0.5rem;
+			border-top: 1px solid var(--border);
 		}
+	}
 
-		.stack {
-			display: flex;
-			gap: 2px;
-			height: 0.75rem;
+	.allLabel {
+		color: var(--text-muted);
+		font-size: 0.8125rem;
+	}
 
-			.segment {
-				flex-basis: 0;
-				min-width: 4px;
-				height: 100%;
+	.footerCell {
+		text-align: center;
+		font-size: 0.8125rem;
+		font-weight: 700;
+		font-variant-numeric: tabular-nums;
+	}
 
-				&:first-child {
-					border-radius: 4px 0 0 4px;
-				}
-
-				&:last-child {
-					border-radius: 0 4px 4px 0;
-				}
-
-				&:only-child {
-					border-radius: 4px;
-				}
-
-				&:hover,
-				&:focus-visible {
-					outline: 2px solid var(--text);
-					outline-offset: 1px;
-				}
-			}
-		}
+	.grandTotal {
+		color: var(--tile-accent, var(--accent));
+		font-weight: 800;
+		font-size: 0.8125rem;
+		text-align: right;
+		padding-right: 0.125rem;
+		font-variant-numeric: tabular-nums;
 	}
 }

@@ -1,27 +1,35 @@
 .donut {
 	display: flex;
 	align-items: center;
-	gap: 1.25rem;
+	gap: 1rem;
 
 	.donutChart {
 		position: relative;
-		flex: 0 0 11.875rem;
-		height: 190px;
+		flex: 0 0 9.25rem;
+		height: 148px;
+
+		// The tooltip renders inside the chart's own wrapper, earlier in the DOM than
+		// the centre label below — without a z-index the label's stacking order wins
+		// and sits on top of it.
+		:global(.recharts-tooltip-wrapper) {
+			z-index: 1;
+		}
 
 		.donutCenter {
 			position: absolute;
+			z-index: 0;
 			inset: 0;
 			display: flex;
 			flex-direction: column;
 			align-items: center;
 			justify-content: center;
 			color: var(--text-muted);
-			font-size: 0.75rem;
+			font-size: 0.6875rem;
 			pointer-events: none;
 
 			strong {
 				color: var(--text);
-				font-size: 1.75rem;
+				font-size: 1.375rem;
 				font-weight: 700;
 				line-height: 1.1;
 			}

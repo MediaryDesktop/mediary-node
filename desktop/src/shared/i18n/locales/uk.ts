@@ -1759,7 +1759,9 @@ export const uk: Translation = {
 			},
 			byType: {
 				title: 'За типами медіа',
-				subtitle: 'Як кожен тип розподіляється за статусами'
+				subtitle: 'Як кожен тип розподіляється за статусами',
+				total: 'Разом',
+				all: 'Усі'
 			},
 			status: {
 				CURRENT: 'В процесі',

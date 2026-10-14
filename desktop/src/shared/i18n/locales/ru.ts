@@ -1761,7 +1761,9 @@ export const ru: Translation = {
 			},
 			byType: {
 				title: 'По типам медиа',
-				subtitle: 'Как каждый тип распределяется по статусам'
+				subtitle: 'Как каждый тип распределяется по статусам',
+				total: 'Всего',
+				all: 'Все'
 			},
 			status: {
 				CURRENT: 'В процессе',

@@ -55,7 +55,7 @@ export function GenresDonut({ genres, total, className }: GenresDonutProps) {
 			) : (
 				<div className={styles.donut}>
 					<div className={styles.donutChart}>
-						<ResponsiveContainer width='100%' height={190}>
+						<ResponsiveContainer width='100%' height={148}>
 							<PieChart>
 								<Pie
 									data={slices}

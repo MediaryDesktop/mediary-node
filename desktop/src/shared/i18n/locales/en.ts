@@ -1760,7 +1760,9 @@ export const en = {
 			},
 			byType: {
 				title: 'By media type',
-				subtitle: 'How each kind splits by status'
+				subtitle: 'How each kind splits by status',
+				total: 'Total',
+				all: 'All'
 			},
 			status: {
 				CURRENT: 'In progress',
