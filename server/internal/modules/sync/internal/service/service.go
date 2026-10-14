@@ -30,6 +30,10 @@ import (
 const (
 	DeviceTokenSecret = "device_token"
 
+	// Not a secret, but it belongs with the token: both name this pairing, and
+	// both go when it ends.
+	deviceIDSecret = "device_id"
+
 	// An upload waits this long after the last change, so a burst of edits
 	// becomes one snapshot rather than one per click.
 	quietPeriod = 15 * time.Minute
@@ -75,6 +79,7 @@ type Service struct {
 // State is what the desktop shows about backups on this node.
 type State struct {
 	Linked         bool
+	DeviceID       string
 	LastBackupAt   time.Time
 	LastBackupHash string
 	LastError      string
@@ -137,6 +142,12 @@ func (s *Service) Status() State {
 	state := s.state
 	state.Linked = s.cloud != nil && s.cloud.Linked()
 
+	if state.Linked && s.secrets != nil {
+		// A token from NODE_CLOUD_DEVICE_TOKEN has no id here; the list then
+		// simply marks no device as this one.
+		state.DeviceID, _ = s.secrets.Get(deviceIDSecret)
+	}
+
 	return state
 }
 
@@ -159,6 +170,10 @@ func (s *Service) Pair(ctx context.Context, code string) (*Paired, error) {
 		return nil, apperr.Wrap(err, apperr.KindInternal, "save device token")
 	}
 
+	if err := s.secrets.Set(deviceIDSecret, resp.JSON201.Device.Id.String()); err != nil {
+		return nil, apperr.Wrap(err, apperr.KindInternal, "save device id")
+	}
+
 	s.cloud.SetDeviceToken(token)
 
 	s.mu.Lock()
@@ -177,8 +192,10 @@ func (s *Service) Pair(ctx context.Context, code string) (*Paired, error) {
 // Unpair forgets the token here. Revoking it in the cloud is the account's
 // business and goes through the desktop's session, not through this node.
 func (s *Service) Unpair() error {
-	if err := s.secrets.Set(DeviceTokenSecret, ""); err != nil {
-		return apperr.Wrap(err, apperr.KindInternal, "forget device token")
+	for _, key := range []string{DeviceTokenSecret, deviceIDSecret} {
+		if err := s.secrets.Set(key, ""); err != nil {
+			return apperr.Wrap(err, apperr.KindInternal, "forget device token")
+		}
 	}
 
 	s.cloud.SetDeviceToken("")

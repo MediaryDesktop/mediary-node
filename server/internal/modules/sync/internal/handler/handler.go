@@ -23,30 +23,31 @@ func New(svc *service.Service) *Handler {
 	return &Handler{svc: svc}
 }
 
-type StatusOutput struct {
+type SyncStatusOutput struct {
 	Body struct {
 		Ready         bool       `json:"ready" doc:"True when the module's dependencies are wired."`
 		Linked        bool       `json:"linked" doc:"True when this node is paired with a Mediary account and may back up."`
+		DeviceID      string     `json:"device_id,omitempty" doc:"This node's id in the account's device list, when it was paired from the app."`
 		LastBackupAt  *time.Time `json:"last_backup_at,omitempty" doc:"When the cloud last confirmed this node's state, whether or not it had changed."`
 		LastAttemptAt *time.Time `json:"last_attempt_at,omitempty" doc:"When this node last tried to back up."`
 		LastError     string     `json:"last_error,omitempty" doc:"Why the last attempt failed; empty when it succeeded."`
 	}
 }
 
-type PairInput struct {
+type SyncPairInput struct {
 	Body struct {
 		Code string `json:"code" minLength:"8" maxLength:"16" doc:"The pairing code the desktop got from the cloud."`
 	}
 }
 
-type PairOutput struct {
+type SyncPairOutput struct {
 	Body struct {
 		DeviceID string `json:"device_id" doc:"This node's identifier in the account."`
 		Label    string `json:"label" doc:"How this node appears in the account's device list."`
 	}
 }
 
-type BackupBody struct {
+type SyncBackupBody struct {
 	ID            string    `json:"id" doc:"Snapshot identifier."`
 	DeviceID      string    `json:"device_id" doc:"The device that uploaded it."`
 	DeviceLabel   string    `json:"device_label" doc:"That device's name."`
@@ -55,20 +56,20 @@ type BackupBody struct {
 	FormatVersion int       `json:"format_version" doc:"Snapshot format version."`
 }
 
-type BackupNowOutput struct {
+type SyncBackupNowOutput struct {
 	Body struct {
-		Backup  BackupBody `json:"backup" doc:"The snapshot the cloud now holds for this node."`
-		Created bool       `json:"created" doc:"False when the state had not changed since the last backup and nothing new was stored."`
+		Backup  SyncBackupBody `json:"backup" doc:"The snapshot the cloud now holds for this node."`
+		Created bool           `json:"created" doc:"False when the state had not changed since the last backup and nothing new was stored."`
 	}
 }
 
-type ListOutput struct {
+type SyncBackupListOutput struct {
 	Body struct {
-		Backups []BackupBody `json:"backups" doc:"The account's snapshots from every device, newest first."`
+		Backups []SyncBackupBody `json:"backups" doc:"The account's snapshots from every device, newest first."`
 	}
 }
 
-type RestoreInput struct {
+type SyncRestoreInput struct {
 	ID string `path:"id" format:"uuid" doc:"Snapshot to restore."`
 }
 
@@ -141,12 +142,13 @@ func (h *Handler) Register(api huma.API) {
 	}, h.restore)
 }
 
-func (h *Handler) status(context.Context, *struct{}) (*StatusOutput, error) {
+func (h *Handler) status(context.Context, *struct{}) (*SyncStatusOutput, error) {
 	state := h.svc.Status()
 
-	out := &StatusOutput{}
+	out := &SyncStatusOutput{}
 	out.Body.Ready = h.svc.Ready()
 	out.Body.Linked = state.Linked
+	out.Body.DeviceID = state.DeviceID
 	out.Body.LastBackupAt = timePtr(state.LastBackupAt)
 	out.Body.LastAttemptAt = timePtr(state.LastAttemptAt)
 	out.Body.LastError = state.LastError
@@ -154,13 +156,13 @@ func (h *Handler) status(context.Context, *struct{}) (*StatusOutput, error) {
 	return out, nil
 }
 
-func (h *Handler) pair(ctx context.Context, in *PairInput) (*PairOutput, error) {
+func (h *Handler) pair(ctx context.Context, in *SyncPairInput) (*SyncPairOutput, error) {
 	paired, err := h.svc.Pair(ctx, in.Body.Code)
 	if err != nil {
 		return nil, httpapi.ToHTTP(err)
 	}
 
-	out := &PairOutput{}
+	out := &SyncPairOutput{}
 	out.Body.DeviceID = paired.DeviceID
 	out.Body.Label = paired.Label
 
@@ -175,27 +177,27 @@ func (h *Handler) unpair(context.Context, *struct{}) (*struct{}, error) {
 	return nil, nil
 }
 
-func (h *Handler) backUpNow(ctx context.Context, _ *struct{}) (*BackupNowOutput, error) {
+func (h *Handler) backUpNow(ctx context.Context, _ *struct{}) (*SyncBackupNowOutput, error) {
 	uploaded, err := h.svc.BackupNow(ctx)
 	if err != nil {
 		return nil, httpapi.ToHTTP(err)
 	}
 
-	out := &BackupNowOutput{}
+	out := &SyncBackupNowOutput{}
 	out.Body.Backup = toBody(&uploaded.Backup)
 	out.Body.Created = uploaded.Created
 
 	return out, nil
 }
 
-func (h *Handler) list(ctx context.Context, _ *struct{}) (*ListOutput, error) {
+func (h *Handler) list(ctx context.Context, _ *struct{}) (*SyncBackupListOutput, error) {
 	backups, err := h.svc.List(ctx)
 	if err != nil {
 		return nil, httpapi.ToHTTP(err)
 	}
 
-	out := &ListOutput{}
-	out.Body.Backups = make([]BackupBody, 0, len(backups))
+	out := &SyncBackupListOutput{}
+	out.Body.Backups = make([]SyncBackupBody, 0, len(backups))
 
 	for i := range backups {
 		out.Body.Backups = append(out.Body.Backups, toBody(&backups[i]))
@@ -204,7 +206,7 @@ func (h *Handler) list(ctx context.Context, _ *struct{}) (*ListOutput, error) {
 	return out, nil
 }
 
-func (h *Handler) restore(ctx context.Context, in *RestoreInput) (*struct{}, error) {
+func (h *Handler) restore(ctx context.Context, in *SyncRestoreInput) (*struct{}, error) {
 	id, err := uuid.Parse(in.ID)
 	if err != nil {
 		return nil, httpapi.ToHTTP(apperr.New(apperr.KindNotFound, "backup not found"))
@@ -217,8 +219,8 @@ func (h *Handler) restore(ctx context.Context, in *RestoreInput) (*struct{}, err
 	return nil, nil
 }
 
-func toBody(b *contracts.BackupBody) BackupBody {
-	return BackupBody{
+func toBody(b *contracts.BackupBody) SyncBackupBody {
+	return SyncBackupBody{
 		ID:            b.Id.String(),
 		DeviceID:      b.DeviceId.String(),
 		DeviceLabel:   b.DeviceLabel,

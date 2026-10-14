@@ -288,7 +288,7 @@ func TestPairBackUpAndRestoreOnAnotherNode(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if paired.Label != "test-node" || !home.svc.Status().Linked {
+	if paired.Label != "test-node" || !home.svc.Status().Linked || home.svc.Status().DeviceID != paired.DeviceID {
 		t.Fatalf("pairing did not take effect: %+v, %+v", paired, home.svc.Status())
 	}
 
