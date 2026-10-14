@@ -8,6 +8,7 @@ import { PageTransition, renderIcon, RippleButton } from '@shared/ui'
 
 import { nodeHealthQuery } from '@infra/node'
 
+import { BackupSettings, DevicesSettings } from '@features/back-up-node'
 import { PlayerModeSwitcher } from '@features/choose-player'
 import { DownloadFolderSetting } from '@features/download-chapters'
 import { LibraryRootsSettings } from '@features/manage-library-roots'
@@ -95,6 +96,22 @@ function SectionContent({ section }: { section: SectionInfo }) {
 					</Row>
 					<Row name={t('settings.node.name')} hint={t('settings.node.hint')}>
 						<NodeVersion />
+					</Row>
+				</Card>
+			)
+		case 'backup':
+			return (
+				<Card>
+					<Row name={t('settings.backup.name')} hint={t('settings.backup.hint')} block>
+						<BackupSettings />
+					</Row>
+				</Card>
+			)
+		case 'devices':
+			return (
+				<Card>
+					<Row name={t('settings.devices.name')} hint={t('settings.devices.hint')} block>
+						<DevicesSettings />
 					</Row>
 				</Card>
 			)

@@ -1141,6 +1141,74 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/v1/sync/backups': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Backups in the account
+		 * @description The account's snapshots, read from the cloud with this node's token.
+		 */
+		get: operations['listSyncBackups']
+		put?: never
+		/**
+		 * Back up now
+		 * @description Uploads the current state at once. An unchanged state is not stored twice.
+		 */
+		post: operations['backUpNow']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/sync/backups/{id}/restore': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Restore a backup
+		 * @description Replaces the local tracker and lists with the snapshot's, as a whole and without merging. A copy of the current state is kept in the data folder first, so a mistaken restore can be undone by hand.
+		 */
+		post: operations['restoreSyncBackup']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/sync/pairing': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Pair with an account
+		 * @description Trades a pairing code from the cloud for this node's device token and keeps it in a file only the user can read. Takes effect at once; the first backup follows within minutes.
+		 */
+		post: operations['pairNode']
+		/**
+		 * Forget the pairing
+		 * @description Deletes this node's device token. It does not revoke it in the cloud — that is done from the account's device list.
+		 */
+		delete: operations['unpairNode']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/v1/sync/status': {
 		parameters: {
 			query?: never
@@ -1149,8 +1217,8 @@ export interface paths {
 			cookie?: never
 		}
 		/**
-		 * Sync module status
-		 * @description Reports whether the sync module is wired. Placeholder for phase 0.
+		 * Backup status
+		 * @description Whether this node is paired with a Mediary account, and how its last backup went.
 		 */
 		get: operations['getSyncStatus']
 		put?: never
@@ -3571,21 +3639,6 @@ export interface components {
 			readonly $schema?: string
 			/**
 			 * @description Module name.
-			 * @example sync
-			 */
-			module: string
-			/** @description True when the module's dependencies are wired. */
-			ready: boolean
-		}
-		StatusOutputBody2: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/StatusOutputBody2.json
-			 */
-			readonly $schema?: string
-			/**
-			 * @description Module name.
 			 * @example extension
 			 */
 			module: string
@@ -3669,6 +3722,99 @@ export interface components {
 			sources: components['schemas']['Source'][] | null
 			/** @description Candidate titles, best first. */
 			suggestions: components['schemas']['Suggestion'][] | null
+		}
+		SyncBackupBody: {
+			/**
+			 * Format: date-time
+			 * @description When it was uploaded.
+			 */
+			created_at: string
+			/** @description The device that uploaded it. */
+			device_id: string
+			/** @description That device's name. */
+			device_label: string
+			/**
+			 * Format: int64
+			 * @description Snapshot format version.
+			 */
+			format_version: number
+			/** @description Snapshot identifier. */
+			id: string
+			/**
+			 * Format: int64
+			 * @description Compressed size.
+			 */
+			size_bytes: number
+		}
+		SyncBackupListOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/SyncBackupListOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The account's snapshots from every device, newest first. */
+			backups: components['schemas']['SyncBackupBody'][] | null
+		}
+		SyncBackupNowOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/SyncBackupNowOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The snapshot the cloud now holds for this node. */
+			backup: components['schemas']['SyncBackupBody']
+			/** @description False when the state had not changed since the last backup and nothing new was stored. */
+			created: boolean
+		}
+		SyncPairInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/SyncPairInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The pairing code the desktop got from the cloud. */
+			code: string
+		}
+		SyncPairOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/SyncPairOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description This node's identifier in the account. */
+			device_id: string
+			/** @description How this node appears in the account's device list. */
+			label: string
+		}
+		SyncStatusOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/SyncStatusOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description This node's id in the account's device list, when it was paired from the app. */
+			device_id?: string
+			/**
+			 * Format: date-time
+			 * @description When this node last tried to back up.
+			 */
+			last_attempt_at?: string
+			/**
+			 * Format: date-time
+			 * @description When the cloud last confirmed this node's state, whether or not it had changed.
+			 */
+			last_backup_at?: string
+			/** @description Why the last attempt failed; empty when it succeeded. */
+			last_error?: string
+			/** @description True when this node is paired with a Mediary account and may back up. */
+			linked: boolean
+			/** @description True when the module's dependencies are wired. */
+			ready: boolean
 		}
 		TMDBKeyInputBody: {
 			/**
@@ -4260,12 +4406,17 @@ export type SchemaSource = components['schemas']['Source']
 export type SchemaStartInputBody = components['schemas']['StartInputBody']
 export type SchemaStatusOutputBody = components['schemas']['StatusOutputBody']
 export type SchemaStatusOutputBody1 = components['schemas']['StatusOutputBody1']
-export type SchemaStatusOutputBody2 = components['schemas']['StatusOutputBody2']
 export type SchemaStream = components['schemas']['Stream']
 export type SchemaStreamOutputBody = components['schemas']['StreamOutputBody']
 export type SchemaSubtitle = components['schemas']['Subtitle']
 export type SchemaSuggestion = components['schemas']['Suggestion']
 export type SchemaSuggestionsOutputBody = components['schemas']['SuggestionsOutputBody']
+export type SchemaSyncBackupBody = components['schemas']['SyncBackupBody']
+export type SchemaSyncBackupListOutputBody = components['schemas']['SyncBackupListOutputBody']
+export type SchemaSyncBackupNowOutputBody = components['schemas']['SyncBackupNowOutputBody']
+export type SchemaSyncPairInputBody = components['schemas']['SyncPairInputBody']
+export type SchemaSyncPairOutputBody = components['schemas']['SyncPairOutputBody']
+export type SchemaSyncStatusOutputBody = components['schemas']['SyncStatusOutputBody']
 export type SchemaTmdbKeyInputBody = components['schemas']['TMDBKeyInputBody']
 export type SchemaTmdbSettings = components['schemas']['TMDBSettings']
 export type SchemaTitle = components['schemas']['Title']
@@ -4402,7 +4553,7 @@ export interface operations {
 					[name: string]: unknown
 				}
 				content: {
-					'application/json': components['schemas']['StatusOutputBody2']
+					'application/json': components['schemas']['StatusOutputBody1']
 				}
 			}
 			/** @description Error */
@@ -6611,6 +6762,298 @@ export interface operations {
 			}
 		}
 	}
+	listSyncBackups: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['SyncBackupListOutputBody']
+				}
+			}
+			/** @description Unauthorized */
+			401: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Precondition Required */
+			428: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Bad Gateway */
+			502: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	backUpNow: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['SyncBackupNowOutputBody']
+				}
+			}
+			/** @description Unauthorized */
+			401: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Precondition Required */
+			428: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Bad Gateway */
+			502: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Service Unavailable */
+			503: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	restoreSyncBackup: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Snapshot to restore. */
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Unauthorized */
+			401: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Not Found */
+			404: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Unprocessable Entity */
+			422: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Precondition Required */
+			428: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Bad Gateway */
+			502: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	pairNode: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['SyncPairInputBody']
+			}
+		}
+		responses: {
+			/** @description Created */
+			201: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['SyncPairOutputBody']
+				}
+			}
+			/** @description Unauthorized */
+			401: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Unprocessable Entity */
+			422: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Bad Gateway */
+			502: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Service Unavailable */
+			503: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	unpairNode: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
 	getSyncStatus: {
 		parameters: {
 			query?: never
@@ -6626,7 +7069,7 @@ export interface operations {
 					[name: string]: unknown
 				}
 				content: {
-					'application/json': components['schemas']['StatusOutputBody1']
+					'application/json': components['schemas']['SyncStatusOutputBody']
 				}
 			}
 			/** @description Error */

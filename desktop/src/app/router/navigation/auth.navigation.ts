@@ -1,7 +1,8 @@
 import type { NavigateOptions } from '@tanstack/react-router'
 import { createEffect, sample } from 'effector'
 
-import { landingRoute, sessionModel } from '@entities/session'
+import { $returnAfterAuth, landingRoute, returnAfterAuthConsumed, sessionModel } from '@entities/session'
+import type { ReturnTarget } from '@entities/session'
 
 import { passwordResetCompleted, passwordResetSent } from '@features/auth'
 
@@ -11,17 +12,37 @@ const navigateFx = createEffect((options: NavigateOptions) => {
 	void router.navigate(options)
 })
 
+// An unconfirmed account still goes to confirm its address first; the return
+// waits until emailVerified.
 sample({
 	clock: sessionModel.authenticated,
-	fn: (account): NavigateOptions => ({ to: landingRoute(account) }),
+	source: $returnAfterAuth,
+	fn: (returnTo, account): NavigateOptions =>
+		account.email_verified && returnTo ? toOptions(returnTo) : { to: landingRoute(account) },
 	target: navigateFx
 })
 
 sample({
 	clock: sessionModel.emailVerified,
-	fn: (): NavigateOptions => ({ to: '/' }),
+	source: $returnAfterAuth,
+	fn: (returnTo): NavigateOptions => (returnTo ? toOptions(returnTo) : { to: '/' }),
 	target: navigateFx
 })
+
+sample({
+	clock: [sessionModel.emailVerified, sessionModel.signedOut],
+	target: returnAfterAuthConsumed
+})
+
+sample({
+	clock: sessionModel.authenticated,
+	filter: account => account.email_verified,
+	target: returnAfterAuthConsumed
+})
+
+function toOptions(target: ReturnTarget): NavigateOptions {
+	return { to: target.to, search: target.search } as NavigateOptions
+}
 
 sample({
 	clock: sessionModel.signedOut,

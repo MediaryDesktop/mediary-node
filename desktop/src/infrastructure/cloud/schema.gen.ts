@@ -4,6 +4,66 @@
  */
 
 export interface paths {
+	'/v1/account/devices': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Paired devices
+		 * @description Lists the account's live devices. Tokens are never part of the answer.
+		 */
+		get: operations['listDevices']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/account/devices/pairing-codes': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Start pairing a node
+		 * @description Issues a short one-time code the desktop hands to its node. The node trades it for a device token at /v1/devices/exchange. The code is single-use and short-lived; asking for another does not cancel the first.
+		 */
+		post: operations['createPairingCode']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/account/devices/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		post?: never
+		/**
+		 * Revoke a device
+		 * @description Ends a device's token at once. Its backups stay; the node has to be paired again to upload more.
+		 */
+		delete: operations['revokeDevice']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/v1/account/email/verification': {
 		parameters: {
 			query?: never
@@ -248,6 +308,74 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/v1/backups': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * List snapshots
+		 * @description The account's snapshots, newest first, from every device.
+		 */
+		get: operations['listBackups']
+		put?: never
+		/**
+		 * Upload a snapshot
+		 * @description Stores the body as an opaque blob. If it has the same hash as this device's newest snapshot, nothing is written and that snapshot is returned with 200, so a node may upload on a schedule at no cost. Otherwise one upload per device per interval; the account keeps its newest snapshots and the newest of every live device.
+		 */
+		post: operations['uploadBackup']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/backups/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Download a snapshot
+		 * @description Streams the body exactly as it was uploaded, with its hash and format version in the X-Backup-Sha256 and X-Backup-Format-Version headers.
+		 */
+		get: operations['downloadBackup']
+		put?: never
+		post?: never
+		/**
+		 * Delete a snapshot
+		 * @description Signed-in users only: a device may add history but not erase it.
+		 */
+		delete: operations['deleteBackup']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/devices/exchange': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Pair a node
+		 * @description Trades a pairing code for a device token. Unauthenticated by necessity — the node has no credential yet — so the code is the whole proof, and attempts are limited per address.
+		 */
+		post: operations['exchangePairingCode']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/v1/health': {
 		parameters: {
 			query?: never
@@ -286,6 +414,53 @@ export interface components {
 			expires_at: string
 			/** @description Human-readable confirmation that the request was accepted. */
 			message: string
+		}
+		BackupBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/BackupBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * Format: date-time
+			 * @description When the snapshot was uploaded.
+			 */
+			created_at: string
+			/**
+			 * Format: uuid
+			 * @description The device that uploaded it.
+			 */
+			device_id: string
+			/** @description That device's name, so a list can say where a snapshot came from. */
+			device_label: string
+			/**
+			 * Format: int64
+			 * @description The node's snapshot format version. The cloud stores it without interpreting it.
+			 */
+			format_version: number
+			/**
+			 * Format: uuid
+			 * @description Stable snapshot identifier.
+			 */
+			id: string
+			/** @description Hex SHA-256 of the body. */
+			sha256: string
+			/**
+			 * Format: int64
+			 * @description Size of the stored body, compressed as the node sent it.
+			 */
+			size_bytes: number
+		}
+		BackupListOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/BackupListOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The account's snapshots, newest first. */
+			backups: components['schemas']['BackupBody'][] | null
 		}
 		Body: {
 			/**
@@ -375,6 +550,40 @@ export interface components {
 			/** @description The 6-digit code from the confirmation email. */
 			code: string
 		}
+		DeviceBody: {
+			/**
+			 * Format: date-time
+			 * @description When the device was paired.
+			 */
+			created_at: string
+			/**
+			 * Format: date-time
+			 * @description When the token stops working and the node has to be paired again.
+			 */
+			expires_at: string
+			/**
+			 * Format: uuid
+			 * @description Stable device identifier.
+			 */
+			id: string
+			/** @description Name the node gave itself when paired, usually its hostname. */
+			label: string
+			/**
+			 * Format: date-time
+			 * @description Last time the device used its token, to about a minute.
+			 */
+			last_seen_at: string
+		}
+		DeviceListOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/DeviceListOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description Live devices, oldest first. Revoked ones are not listed. */
+			devices: components['schemas']['DeviceBody'][] | null
+		}
 		ErrorDetail: {
 			/** @description Where the error occurred, e.g. 'body.items[3].tags' or 'path.thing-id' */
 			location?: string
@@ -421,6 +630,30 @@ export interface components {
 			 * @example https://example.com/errors/example
 			 */
 			type: string
+		}
+		ExchangeInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ExchangeInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The pairing code shown in the desktop app. */
+			code: string
+			/** @description How the node names itself in the device list, usually its hostname. */
+			label: string
+		}
+		ExchangeOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ExchangeOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The new device. */
+			device: components['schemas']['DeviceBody']
+			/** @description Send as X-Mediary-Device-Token. Shown once and never again: only its hash is stored. */
+			device_token: string
 		}
 		HealthOutputBody: {
 			/**
@@ -512,6 +745,24 @@ export interface components {
 			/** @description Open this in a browser to begin the provider's consent flow. */
 			url: string
 		}
+		PairingCodeOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/PairingCodeOutputBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * @description One-time code for the node to exchange. Case and the dash do not matter.
+			 * @example K7QM-4XPA
+			 */
+			code: string
+			/**
+			 * Format: date-time
+			 * @description After this the code is refused.
+			 */
+			expires_at: string
+		}
 		RegisterInputBody: {
 			/**
 			 * Format: uri
@@ -580,25 +831,201 @@ export interface components {
 	pathItems: never
 }
 export type SchemaAcceptedOutputBody = components['schemas']['AcceptedOutputBody']
+export type SchemaBackupBody = components['schemas']['BackupBody']
+export type SchemaBackupListOutputBody = components['schemas']['BackupListOutputBody']
 export type SchemaBody = components['schemas']['Body']
 export type SchemaChangePasswordInputBody = components['schemas']['ChangePasswordInputBody']
 export type SchemaClientRequirements = components['schemas']['ClientRequirements']
 export type SchemaCompletePasswordResetInputBody = components['schemas']['CompletePasswordResetInputBody']
 export type SchemaConfirmEmailInputBody = components['schemas']['ConfirmEmailInputBody']
+export type SchemaDeviceBody = components['schemas']['DeviceBody']
+export type SchemaDeviceListOutputBody = components['schemas']['DeviceListOutputBody']
 export type SchemaErrorDetail = components['schemas']['ErrorDetail']
 export type SchemaErrorModel = components['schemas']['ErrorModel']
+export type SchemaExchangeInputBody = components['schemas']['ExchangeInputBody']
+export type SchemaExchangeOutputBody = components['schemas']['ExchangeOutputBody']
 export type SchemaHealthOutputBody = components['schemas']['HealthOutputBody']
 export type SchemaLoginInputBody = components['schemas']['LoginInputBody']
 export type SchemaOAuthCallbackInputBody = components['schemas']['OAuthCallbackInputBody']
 export type SchemaOAuthProvidersOutputBody = components['schemas']['OAuthProvidersOutputBody']
 export type SchemaOAuthStartInputBody = components['schemas']['OAuthStartInputBody']
 export type SchemaOAuthStartOutputBody = components['schemas']['OAuthStartOutputBody']
+export type SchemaPairingCodeOutputBody = components['schemas']['PairingCodeOutputBody']
 export type SchemaRegisterInputBody = components['schemas']['RegisterInputBody']
 export type SchemaRequestPasswordResetInputBody = components['schemas']['RequestPasswordResetInputBody']
 export type SchemaRevokedOutputBody = components['schemas']['RevokedOutputBody']
 export type SchemaSessionBody = components['schemas']['SessionBody']
 export type $defs = Record<string, never>
 export interface operations {
+	listDevices: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['DeviceListOutputBody']
+				}
+			}
+			/** @description Unauthorized */
+			401: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Forbidden */
+			403: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	createPairingCode: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description Created */
+			201: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['PairingCodeOutputBody']
+				}
+			}
+			/** @description Unauthorized */
+			401: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Forbidden */
+			403: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Too Many Requests */
+			429: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	revokeDevice: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Device to revoke. */
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Unauthorized */
+			401: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Forbidden */
+			403: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Not Found */
+			404: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Unprocessable Entity */
+			422: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
 	sendEmailVerification: {
 		parameters: {
 			query?: never
@@ -1287,6 +1714,352 @@ export interface operations {
 			}
 			/** @description Unauthorized */
 			401: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listBackups: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['BackupListOutputBody']
+				}
+			}
+			/** @description Unauthorized */
+			401: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Forbidden */
+			403: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	uploadBackup: {
+		parameters: {
+			query?: never
+			header: {
+				/** @description Lowercase hex SHA-256 of the body. A body that does not match is refused. */
+				'X-Backup-Sha256': string
+				/** @description The node's snapshot format version. */
+				'X-Backup-Format-Version': number
+			}
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/octet-stream': string
+			}
+		}
+		responses: {
+			/** @description Unchanged: the device's newest snapshot already has this hash. Nothing was written. */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['BackupBody']
+				}
+			}
+			/** @description Created */
+			201: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['BackupBody']
+				}
+			}
+			/** @description Unauthorized */
+			401: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Request Entity Too Large */
+			413: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Unprocessable Entity */
+			422: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Too Many Requests */
+			429: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Bad Gateway */
+			502: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	downloadBackup: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Snapshot identifier. */
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description The snapshot body. */
+			200: {
+				headers: {
+					/** @description The node's snapshot format version. */
+					'X-Backup-Format-Version'?: number
+					/** @description Hex SHA-256 of the body. */
+					'X-Backup-Sha256'?: string
+					[name: string]: unknown
+				}
+				content: {
+					'application/octet-stream': string
+				}
+			}
+			/** @description Unauthorized */
+			401: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Forbidden */
+			403: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Not Found */
+			404: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Unprocessable Entity */
+			422: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Bad Gateway */
+			502: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	deleteBackup: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Snapshot identifier. */
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Unauthorized */
+			401: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Forbidden */
+			403: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Not Found */
+			404: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Unprocessable Entity */
+			422: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	exchangePairingCode: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['ExchangeInputBody']
+			}
+		}
+		responses: {
+			/** @description Created */
+			201: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ExchangeOutputBody']
+				}
+			}
+			/** @description Unauthorized */
+			401: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Unprocessable Entity */
+			422: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Too Many Requests */
+			429: {
 				headers: {
 					[name: string]: unknown
 				}

@@ -1282,11 +1282,59 @@ export const en = {
 		disabled: 'Google Books is turned off on this node.',
 		note: 'Asked only when Open Library finds nothing: Google counts every request against a daily quota. The key stays in a file only you can read on this computer — not in backups.'
 	},
+	backup: {
+		signedOut:
+			'Backups go to your Mediary account. Sign in to turn them on — everything else works without an account.',
+		signIn: 'Sign in',
+		unverified: 'Confirm your email address to turn backups on.',
+		verify: 'Confirm email',
+		off: 'Signed in as {{name}}. Backups are off on this computer.',
+		turnOn: 'Turn on backups',
+		paired: 'Backups are on for this computer',
+		pairFailed: 'Could not turn backups on',
+		lastBackup: 'Last backup {{when}}',
+		noBackupYet: 'No backup yet: the first one goes out within a few minutes.',
+		backUpNow: 'Back up now',
+		backedUp: 'Backed up',
+		unchanged: 'Nothing has changed since the last backup',
+		backUpFailed: 'Could not back up',
+		turnOff: 'Turn off on this computer',
+		empty: 'No backups in your account yet.',
+		listFailed: 'Could not load the backups.',
+		thisDevice: '{{name}} (this computer)',
+		restore: 'Restore',
+		delete: 'Delete backup',
+		deleteFailed: 'Could not delete the backup',
+		restoreTitle: 'Restore this backup?',
+		restoreHint:
+			'Your local tracker and lists will be replaced by the backup from {{device}}, made {{when}}. A copy of the current state is kept in the data folder.',
+		restored: 'Backup restored',
+		restoreFailed: 'Could not restore the backup',
+		note: 'A backup holds your movie, series and book tracker and your own lists — no titles or posters, and nothing from AniList: anime and manga live in your AniList account.'
+	},
+	devices: {
+		signedOut: 'Sign in to your Mediary account to see the computers paired with it.',
+		listFailed: 'Could not load the devices.',
+		empty: 'No computers are paired with your account yet.',
+		thisDevice: '{{name}} (this computer)',
+		lastSeen: 'Active {{when}}',
+		revoke: 'Revoke',
+		revokeFailed: 'Could not revoke the device',
+		note: 'A revoked computer stops backing up at once. Its backups stay in your account.'
+	},
 	settings: {
 		sections: {
 			app: {
 				title: 'App',
 				subtitle: 'Appearance, language and first-time setup'
+			},
+			backup: {
+				title: 'Backup',
+				subtitle: 'Your lists in your Mediary account'
+			},
+			devices: {
+				title: 'Devices',
+				subtitle: 'Computers paired with your account'
 			},
 			library: {
 				title: 'Local library',
@@ -1360,6 +1408,14 @@ export const en = {
 		mangaSources: {
 			name: 'Manga sources',
 			hint: 'Your own OPDS catalogues — Komga, Kavita, Calibre-Web — to read chapters from'
+		},
+		backup: {
+			name: 'Backups',
+			hint: 'Move your tracker and lists to another computer'
+		},
+		devices: {
+			name: 'Paired computers',
+			hint: 'Nodes allowed to back up to your account'
 		},
 		appearance: {
 			name: 'Appearance',
@@ -1552,9 +1608,9 @@ export const en = {
 		},
 		account: {
 			blurb: 'A Mediary account is optional: it only backs up your lists and settings so you can move to another device',
-			google: 'Continue with Google',
+			signIn: 'Sign in',
 			or: 'or',
-			email: 'Continue with email'
+			signUp: 'Create an account'
 		},
 		library: {
 			placeholder: 'No folder selected',
