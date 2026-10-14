@@ -465,6 +465,10 @@ func cloudError(status int, body []byte, action string) error {
 		return apperr.New(apperr.KindUnauthorized, "%s: %s", action, detail)
 	case http.StatusNotFound:
 		return apperr.New(apperr.KindNotFound, "%s: %s", action, detail)
+	case http.StatusUpgradeRequired:
+		// A precondition, not a failure: the automatic loop stays quiet about
+		// it, and the desktop already shows the update banner.
+		return apperr.New(apperr.KindPrecondition, "%s: %s", action, detail)
 	case http.StatusTooManyRequests:
 		return apperr.New(apperr.KindUnavailable, "%s: %s", action, detail)
 	case http.StatusUnprocessableEntity, http.StatusRequestEntityTooLarge:

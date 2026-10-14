@@ -1783,6 +1783,8 @@ export interface operations {
 		parameters: {
 			query?: never
 			header: {
+				/** @description mediary-node/<version>. Checked against the deployment's minimum client version. */
+				'User-Agent'?: string
 				/** @description Lowercase hex SHA-256 of the body. A body that does not match is refused. */
 				'X-Backup-Sha256': string
 				/** @description The node's snapshot format version. */
@@ -1835,6 +1837,15 @@ export interface operations {
 			}
 			/** @description Unprocessable Entity */
 			422: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Upgrade Required */
+			426: {
 				headers: {
 					[name: string]: unknown
 				}
