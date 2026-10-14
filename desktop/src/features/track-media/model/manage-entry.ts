@@ -4,7 +4,7 @@ import { atom } from '@shared/factory'
 import { translate } from '@shared/i18n'
 import { toast } from '@shared/ui'
 
-import { preferredTitle, trackerListsQuery, updateTrackerEntryMutation } from '@entities/tracker'
+import { isLocalTrackerType, preferredTitle, trackerListsQuery, updateTrackerEntryMutation } from '@entities/tracker'
 import type { TrackerEntry, TrackerMediaType, TrackerStatus } from '@entities/tracker'
 
 import { today } from '../lib/entry-dates'
@@ -83,7 +83,8 @@ export const manageEntryModel = atom(() => {
 
 	added.watch(target => {
 		if (target) {
-			toast.success(translate('lists.addEntry.done', { title: target.title }))
+			const key = isLocalTrackerType(target.mediaType) ? 'lists.addEntry.doneLocal' : 'lists.addEntry.done'
+			toast.success(translate(key, { title: target.title }))
 		}
 	})
 

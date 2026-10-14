@@ -170,7 +170,8 @@ export const ru: Translation = {
 			action: 'Добавить в список',
 			title: 'Добавить в список',
 			save: 'Добавить',
-			done: '{{title}} добавлено в ваш список AniList'
+			done: '{{title}} добавлено в ваш список AniList',
+			doneLocal: '{{title}} добавлено в ваш список'
 		},
 		manageEntry: {
 			action: 'Управлять списками',

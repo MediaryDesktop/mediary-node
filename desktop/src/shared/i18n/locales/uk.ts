@@ -169,7 +169,8 @@ export const uk: Translation = {
 			action: 'Додати до списку',
 			title: 'Додати до списку',
 			save: 'Додати',
-			done: '{{title}} додано до вашого списку AniList'
+			done: '{{title}} додано до вашого списку AniList',
+			doneLocal: '{{title}} додано до вашого списку'
 		},
 		manageEntry: {
 			action: 'Керувати списками',

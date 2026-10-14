@@ -171,7 +171,8 @@ export const en = {
 			action: 'Add to list',
 			title: 'Add to list',
 			save: 'Add',
-			done: 'Added {{title}} to your AniList list'
+			done: 'Added {{title}} to your AniList list',
+			doneLocal: 'Added {{title}} to your list'
 		},
 		manageEntry: {
 			action: 'Manage lists',
