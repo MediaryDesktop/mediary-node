@@ -13,6 +13,8 @@ import { returnAfterAuthRequested, sessionModel } from '@entities/session'
 
 import type { SyncBackup } from '../../api/api'
 import {
+	$updateRequired,
+	$updateUrl,
 	backUpNowMutation,
 	backupsQuery,
 	deleteBackupMutation,
@@ -45,6 +47,8 @@ export function BackupSettings() {
 		navigate({ to })
 	}
 
+	const [updateRequired, updateUrl] = useUnit([$updateRequired, $updateUrl])
+
 	const [pair, pairing, unpair, unpairing, backUp, backingUp] = useUnit([
 		pairMutation.start,
 		pairMutation.$pending,
@@ -70,6 +74,21 @@ export function BackupSettings() {
 	useUnitWatch(backUpNowMutation.finished.success, ({ result }) =>
 		toast.success(t(result.created ? 'backup.backedUp' : 'backup.unchanged'), { id: TOAST_ID })
 	)
+
+	if (updateRequired) {
+		return (
+			<div className={styles.root}>
+				<p className={styles.error}>{t('backup.banner.outdated')}</p>
+				{updateUrl && (
+					<div className={styles.actions}>
+						<Button onClick={() => window.open(updateUrl, '_blank', 'noreferrer')}>
+							{t('backup.banner.update')}
+						</Button>
+					</div>
+				)}
+			</div>
+		)
+	}
 
 	if (!account) {
 		return (

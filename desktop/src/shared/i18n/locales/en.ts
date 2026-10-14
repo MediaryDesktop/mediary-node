@@ -1310,7 +1310,14 @@ export const en = {
 			'Your local tracker and lists will be replaced by the backup from {{device}}, made {{when}}. A copy of the current state is kept in the data folder.',
 		restored: 'Backup restored',
 		restoreFailed: 'Could not restore the backup',
-		note: 'A backup holds your movie, series and book tracker and your own lists — no titles or posters, and nothing from AniList: anime and manga live in your AniList account.'
+		note: 'A backup holds your movie, series and book tracker and your own lists — no titles or posters, and nothing from AniList: anime and manga live in your AniList account.',
+		banner: {
+			outdated:
+				'This version of Mediary can no longer back up — everything else works. Update to turn backups back on.',
+			update: 'Update',
+			offer: 'Turn on backups to move your tracker and lists to another computer. Optional: everything works without it.',
+			notNow: 'Not now'
+		}
 	},
 	devices: {
 		signedOut: 'Sign in to your Mediary account to see the computers paired with it.',

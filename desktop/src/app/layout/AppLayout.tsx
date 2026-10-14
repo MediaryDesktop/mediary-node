@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 
 import { NowPlayingBar, playbackQuery } from '@entities/playback'
 
+import { BackupBanner } from '@features/back-up-node'
 import { DownloadFolderPrompt } from '@features/download-chapters'
 import { DeleteListDialog, ListDrawer } from '@features/manage-lists'
 import { ScanProgress } from '@features/scan-library'
@@ -24,7 +25,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
 		<div className={styles.root}>
 			<Sidebar />
 
-			<main className={styles.main}>{children}</main>
+			<main className={styles.main}>
+				<BackupBanner />
+				{children}
+			</main>
 
 			<NowPlayingBar />
 

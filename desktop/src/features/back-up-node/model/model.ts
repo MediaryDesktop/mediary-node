@@ -1,11 +1,14 @@
 import { createMutation, createQuery, keepFresh } from '@farfetched/core'
+import { combine, createEvent, createStore, sample } from 'effector'
 
 import { nodeTopic } from '@infra/node'
 
 import {
 	backUpNowFx,
 	deleteBackupFx,
+	fetchAppVersionFx,
 	fetchBackupsFx,
+	fetchCloudHealthFx,
 	fetchDevicesFx,
 	fetchSyncStatusFx,
 	pairThisNodeFx,
@@ -13,6 +16,7 @@ import {
 	revokeDeviceFx,
 	unpairNodeFx
 } from '../api/api'
+import { isOlderThan } from '../lib/version'
 
 export const syncStatusQuery = createQuery({ effect: fetchSyncStatusFx, name: 'syncStatus' })
 
@@ -45,3 +49,21 @@ keepFresh(backupsQuery, {
 keepFresh(devicesQuery, {
 	triggers: [pairMutation.finished.success, revokeDeviceMutation.finished.success]
 })
+
+export const cloudHealthQuery = createQuery({ effect: fetchCloudHealthFx, name: 'cloudHealth' })
+
+export const clientGateMounted = createEvent()
+
+const $appVersion = createStore<string | null>(null).on(fetchAppVersionFx.doneData, (_, version) => version)
+
+sample({ clock: clientGateMounted, target: [cloudHealthQuery.start, fetchAppVersionFx] })
+
+// Only backups depend on the cloud, so only backups stop for a build the cloud
+// no longer serves; the player, the library and the tracker never ask it.
+export const $updateRequired = combine(cloudHealthQuery.$data, $appVersion, (health, version) => {
+	const minimum = health?.client.min_supported
+
+	return Boolean(minimum && version && isOlderThan(version, minimum))
+})
+
+export const $updateUrl = cloudHealthQuery.$data.map(health => health?.client.update_url ?? null)
