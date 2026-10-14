@@ -35,7 +35,8 @@ type Deps struct {
 	Events *events.Hub
 	Cloud  *cloud.Client
 	Build  httpapi.BuildInfo
-	Linked bool
+
+	SyncInterval time.Duration
 
 	AniList             *anilist.Client
 	AniZip              *anizip.Client
@@ -65,7 +66,9 @@ type Deps struct {
 
 // Register mounts every module and returns what has to run on shutdown.
 func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
-	httpapi.RegisterHealth(api, deps.Build, deps.Linked)
+	httpapi.RegisterHealth(api, deps.Build, func() bool {
+		return deps.Cloud != nil && deps.Cloud.Linked()
+	})
 
 	mediaModule := media.New(media.Deps{
 		DB:      deps.DB,
@@ -191,12 +194,20 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 		},
 	}).Register(api)
 
-	sync.New(sync.Deps{
-		DB:     deps.DB,
-		Logger: moduleLogger(deps.Logger, "sync"),
-		Events: deps.Events,
-		Cloud:  deps.Cloud,
-	}).Register(api)
+	syncModule := sync.New(sync.Deps{
+		DB:      deps.DB,
+		Logger:  moduleLogger(deps.Logger, "sync"),
+		Events:  deps.Events,
+		Cloud:   deps.Cloud,
+		DataDir: deps.DataDir,
+	})
+	syncModule.Register(api)
+
+	if deps.DB != nil {
+		if err := syncModule.Start(queueCtx, deps.SyncInterval); err != nil {
+			deps.Logger.Error().Err(err).Msg("automatic backups are off")
+		}
+	}
 
 	extension.New(extension.Deps{
 		DB:     deps.DB,

@@ -142,7 +142,8 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 		Events: hub,
 		Cloud:  cloudClient,
 		Build:  build,
-		Linked: cfg.Cloud.Linked(),
+
+		SyncInterval: cfg.Cloud.SyncInterval,
 
 		AniList:             aniList,
 		AniZip:              aniZip,

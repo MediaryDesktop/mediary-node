@@ -23,7 +23,9 @@ type HealthOutput struct {
 	}
 }
 
-func RegisterHealth(api huma.API, info BuildInfo, linked bool) {
+// linked is asked on every request: pairing and unpairing happen while the
+// node runs.
+func RegisterHealth(api huma.API, info BuildInfo, linked func() bool) {
 	huma.Register(api, huma.Operation{
 		OperationID: "getNodeHealth",
 		Method:      http.MethodGet,
@@ -37,7 +39,7 @@ func RegisterHealth(api huma.API, info BuildInfo, linked bool) {
 		out.Body.Version = info.Version
 		out.Body.Commit = info.Commit
 		out.Body.Built = info.Built
-		out.Body.Linked = linked
+		out.Body.Linked = linked()
 		return out, nil
 	})
 }

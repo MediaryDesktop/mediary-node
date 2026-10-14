@@ -10,8 +10,12 @@ import (
 )
 
 type Querier interface {
+	ClearCustomListItems(ctx context.Context) error
+	ClearCustomLists(ctx context.Context) error
 	ClearLibraryFileIgnored(ctx context.Context, id int64) (int64, error)
 	ClearLibraryFileMissing(ctx context.Context, arg ClearLibraryFileMissingParams) error
+	ClearListIcons(ctx context.Context) error
+	ClearTrackerEntries(ctx context.Context) error
 	// What the filter tabs above the list show. One query rather than three: the
 	// three numbers have to agree with each other, and they only do if they are read
 	// from the same snapshot.
@@ -123,6 +127,11 @@ type Querier interface {
 	RecordAniListOutboxFailure(ctx context.Context, arg RecordAniListOutboxFailureParams) error
 	RenameCustomList(ctx context.Context, arg RenameCustomListParams) (int64, error)
 	RequeueRunningMangaDownloads(ctx context.Context, updatedAt string) ([]MangaDownload, error)
+	// The id is kept: items refer to it.
+	RestoreCustomList(ctx context.Context, arg RestoreCustomListParams) error
+	RestoreCustomListItem(ctx context.Context, arg RestoreCustomListItemParams) error
+	RestoreListIcon(ctx context.Context, arg RestoreListIconParams) error
+	RestoreTrackerEntry(ctx context.Context, arg RestoreTrackerEntryParams) error
 	RetryMangaDownload(ctx context.Context, arg RetryMangaDownloadParams) (int64, error)
 	SetLibraryFileIgnored(ctx context.Context, arg SetLibraryFileIgnoredParams) (int64, error)
 	SetLibraryRootContent(ctx context.Context, arg SetLibraryRootContentParams) (int64, error)
@@ -134,6 +143,13 @@ type Querier interface {
 	SetTorrentDownloadName(ctx context.Context, arg SetTorrentDownloadNameParams) error
 	SetTorrentDownloadState(ctx context.Context, arg SetTorrentDownloadStateParams) error
 	SetTorrentRuleChecked(ctx context.Context, arg SetTorrentRuleCheckedParams) error
+	SnapshotCustomListItems(ctx context.Context) ([]CustomListItem, error)
+	SnapshotCustomLists(ctx context.Context) ([]CustomList, error)
+	SnapshotListIcons(ctx context.Context) ([]ListIcon, error)
+	// Queries owned by the sync module: reading the user's own data into a backup
+	// snapshot and writing a snapshot back. Ordered everywhere, so an unchanged
+	// state always encodes to the same bytes and the cloud can tell it is unchanged.
+	SnapshotTrackerEntries(ctx context.Context) ([]TrackerEntry, error)
 	TouchLibraryRoot(ctx context.Context, arg TouchLibraryRootParams) error
 	UpdateLibraryFile(ctx context.Context, arg UpdateLibraryFileParams) error
 	// Only the parsed columns: the file itself did not change, a newer parser reads

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"sync"
 	"time"
 
 	contracts "github.com/mediaryorg/mediary-contracts/go/cloudclient"
@@ -24,8 +25,10 @@ type Options struct {
 }
 
 type Client struct {
-	api    *contracts.ClientWithResponses
-	linked bool
+	api *contracts.ClientWithResponses
+
+	mu          sync.RWMutex
+	deviceToken string
 }
 
 func New(opts Options) (*Client, error) {
@@ -39,15 +42,15 @@ func New(opts Options) (*Client, error) {
 		userAgent = "mediary-node"
 	}
 
-	httpClient := &http.Client{Timeout: timeout}
+	client := &Client{deviceToken: opts.DeviceToken}
 
 	api, err := contracts.NewClientWithResponses(
 		opts.BaseURL,
-		contracts.WithHTTPClient(httpClient),
+		contracts.WithHTTPClient(&http.Client{Timeout: timeout}),
 		contracts.WithRequestEditorFn(func(_ context.Context, req *http.Request) error {
 			req.Header.Set("User-Agent", userAgent)
-			if opts.DeviceToken != "" {
-				req.Header.Set(DeviceTokenHeader, opts.DeviceToken)
+			if token := client.DeviceToken(); token != "" {
+				req.Header.Set(DeviceTokenHeader, token)
 			}
 			return nil
 		}),
@@ -56,11 +59,29 @@ func New(opts Options) (*Client, error) {
 		return nil, fmt.Errorf("build cloud client: %w", err)
 	}
 
-	return &Client{api: api, linked: opts.DeviceToken != ""}, nil
+	client.api = api
+
+	return client, nil
 }
 
 func (c *Client) Linked() bool {
-	return c.linked
+	return c.DeviceToken() != ""
+}
+
+func (c *Client) DeviceToken() string {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	return c.deviceToken
+}
+
+// SetDeviceToken switches the token every later request carries, so pairing
+// and unpairing take effect without restarting the node.
+func (c *Client) SetDeviceToken(token string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	c.deviceToken = token
 }
 
 func (c *Client) API() *contracts.ClientWithResponses {
