@@ -34,6 +34,12 @@ type fakeProvider struct {
 	server  *httptest.Server
 	// ranges records the Range header of every file request.
 	ranges []string
+
+	// Modes of services other than TorBox: a listing without hashes
+	// (Premiumize), without files (Real-Debrid, AllDebrid), and torrents that
+	// wait for Start (Real-Debrid).
+	hideHash, partial, waiting bool
+	starts, details            int
 }
 
 func newFake(t *testing.T) *fakeProvider {
@@ -60,12 +66,42 @@ func (f *fakeProvider) serveFile(w http.ResponseWriter, r *http.Request) {
 
 func (f *fakeProvider) Account(context.Context) (string, error) { return "Fake · Free plan", nil }
 
-func (f *fakeProvider) Add(_ context.Context, _ string, _ []byte, name string) error {
+func (f *fakeProvider) Add(_ context.Context, _ string, _ []byte, name string) (string, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 
 	f.added++
-	f.remotes[hash] = &Remote{ID: "1", Hash: strings.ToUpper(hash), Name: name}
+	f.remotes[hash] = &Remote{ID: "1", Hash: strings.ToUpper(hash), Name: name, Waiting: f.waiting}
+
+	return "1", nil
+}
+
+func (f *fakeProvider) Detail(_ context.Context, remote Remote) (Remote, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+
+	f.details++
+	for _, r := range f.remotes {
+		if r.ID == remote.ID {
+			full := *r
+			full.Partial = false
+			return full, nil
+		}
+	}
+
+	return remote, nil
+}
+
+func (f *fakeProvider) Start(_ context.Context, remote Remote) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+
+	f.starts++
+	for _, r := range f.remotes {
+		if r.ID == remote.ID {
+			r.Waiting = false
+		}
+	}
 
 	return nil
 }
@@ -76,7 +112,23 @@ func (f *fakeProvider) Remotes(context.Context) ([]Remote, error) {
 
 	var out []Remote
 	for _, r := range f.remotes {
-		out = append(out, *r)
+		listed := *r
+		if f.hideHash {
+			listed.Hash = ""
+		}
+		if f.partial {
+			listed.Files, listed.Partial = nil, true
+		}
+		out = append(out, listed)
+	}
+
+	return out, nil
+}
+
+func (f *fakeProvider) Cached(_ context.Context, hashes []string) (map[string]bool, error) {
+	out := map[string]bool{}
+	for _, h := range hashes {
+		out[h] = h == hash
 	}
 
 	return out, nil
@@ -378,9 +430,130 @@ func TestQueuedTorrentStaysQueued(t *testing.T) {
 	fake.remotes[hash].Queued = true
 	fake.mu.Unlock()
 
-	if got := torrentOf(t, client); got.State != "queuedDL" {
+	if got := torrentOf(t, client); got.State != "queuedDL" || got.Remote == nil || !got.Remote.Queued || got.Remote.Service != "Fake" {
 		t.Errorf("queued: %+v", got)
 	}
+}
+
+func TestServiceProgressIsReportedApartFromTheNodes(t *testing.T) {
+	fake := newFake(t)
+	client := newClient(t, fake)
+
+	if err := client.Add(context.Background(), qbittorrent.AddRequest{Magnet: magnet, SavePath: t.TempDir()}); err != nil {
+		t.Fatal(err)
+	}
+
+	fake.mu.Lock()
+	fake.remotes[hash].Progress = 0.4
+	fake.remotes[hash].Speed = 5 << 20
+	fake.mu.Unlock()
+
+	got := torrentOf(t, client)
+	if got.Progress != 0 || got.Remote == nil || got.Remote.Progress != 0.4 || got.Remote.Speed != 5<<20 || got.Remote.Queued {
+		t.Fatalf("while the service downloads: %+v remote %+v", got, got.Remote)
+	}
+
+	fake.finish(map[int]string{0: "Show/01.mkv"}, map[int][]byte{0: []byte("x")})
+
+	if got := torrentOf(t, client); got.Remote != nil {
+		t.Errorf("remote still reported once the service has the files: %+v", got.Remote)
+	}
+}
+
+func TestServiceWithoutHashesOrFilesInItsListing(t *testing.T) {
+	fake := newFake(t)
+	fake.hideHash, fake.partial = true, true
+	client := newClient(t, fake)
+	save := t.TempDir()
+
+	if err := client.Add(context.Background(), qbittorrent.AddRequest{Magnet: magnet, SavePath: save}); err != nil {
+		t.Fatal(err)
+	}
+	fake.finish(map[int]string{0: "Show/01.mkv"}, map[int][]byte{0: []byte("data")})
+
+	waitFor(t, "the file", func() bool { return torrentOf(t, client).Progress == 1 })
+
+	if _, err := os.Stat(filepath.Join(save, "Show", "01.mkv")); err != nil {
+		t.Fatalf("file missing: %v", err)
+	}
+
+	// Once ready, the files are asked for once, not on every poll.
+	fake.mu.Lock()
+	before := fake.details
+	fake.mu.Unlock()
+	for range 3 {
+		torrentOf(t, client)
+	}
+	fake.mu.Lock()
+	after := fake.details
+	fake.mu.Unlock()
+	if after != before {
+		t.Errorf("details asked %d more times for a ready torrent", after-before)
+	}
+
+	if err := client.Delete(context.Background(), hash, false); err != nil {
+		t.Fatal(err)
+	}
+	if len(fake.deleted) != 1 || fake.deleted[0] != "1" {
+		t.Errorf("deleted = %v, want the transfer found by its ID", fake.deleted)
+	}
+}
+
+func TestWaitingTorrentIsStartedOnce(t *testing.T) {
+	fake := newFake(t)
+	fake.waiting = true
+	client := newClient(t, fake)
+
+	if err := client.Add(context.Background(), qbittorrent.AddRequest{Magnet: magnet, SavePath: t.TempDir()}); err != nil {
+		t.Fatal(err)
+	}
+
+	torrentOf(t, client)
+
+	// Still waiting as far as the service says: not started again so soon.
+	fake.mu.Lock()
+	fake.remotes[hash].Waiting = true
+	fake.mu.Unlock()
+	torrentOf(t, client)
+
+	fake.mu.Lock()
+	defer fake.mu.Unlock()
+	if fake.starts != 1 {
+		t.Errorf("started %d times, want once", fake.starts)
+	}
+}
+
+func TestServiceGivingUpIsAnError(t *testing.T) {
+	fake := newFake(t)
+	client := newClient(t, fake)
+
+	if err := client.Add(context.Background(), qbittorrent.AddRequest{Magnet: magnet, SavePath: t.TempDir()}); err != nil {
+		t.Fatal(err)
+	}
+
+	fake.mu.Lock()
+	fake.remotes[hash].Failed = "Fake: no seeds"
+	fake.mu.Unlock()
+
+	got := torrentOf(t, client)
+	if got.State != "error" || got.Remote == nil || got.Remote.Error != "Fake: no seeds" {
+		t.Errorf("failed: %+v remote %+v", got, got.Remote)
+	}
+}
+
+func TestNoCacheCheckMeansNoAnswer(t *testing.T) {
+	client := newClient(t, noCache{newFake(t)})
+
+	cached, err := client.Cached(context.Background(), []string{hash})
+	if err != nil || cached != nil {
+		t.Errorf("cached = %v, %v; want nothing and no error", cached, err)
+	}
+}
+
+type noCache struct{ *fakeProvider }
+
+func (noCache) Cached(context.Context, []string) (map[string]bool, error) {
+	return nil, ErrNoCacheCheck
 }
 
 func ExampleRemote() {

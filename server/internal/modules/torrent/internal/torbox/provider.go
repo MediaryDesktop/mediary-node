@@ -3,6 +3,7 @@ package torbox
 import (
 	"context"
 	"strconv"
+	"strings"
 
 	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/debrid"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
@@ -32,9 +33,28 @@ func (p *Provider) Account(ctx context.Context) (string, error) {
 	return "TorBox", nil
 }
 
-func (p *Provider) Add(ctx context.Context, magnet string, torrent []byte, name string) error {
-	_, err := p.client.Create(ctx, magnet, torrent, name)
-	return err
+// Add returns the torrent's ID, or "" for one put in the queue: its queued ID
+// is not the ID it gets once it starts, and TorBox lists the hash anyway.
+func (p *Provider) Add(ctx context.Context, magnet string, torrent []byte, name string) (string, error) {
+	created, err := p.client.Create(ctx, magnet, torrent, name)
+	if err != nil {
+		return "", err
+	}
+	if created.TorrentID == 0 {
+		return "", nil
+	}
+
+	return strconv.FormatInt(created.TorrentID, 10), nil
+}
+
+// Detail and Start have nothing to do: TorBox lists the files and starts every
+// torrent it is given.
+func (p *Provider) Detail(_ context.Context, remote debrid.Remote) (debrid.Remote, error) {
+	return remote, nil
+}
+
+func (p *Provider) Start(context.Context, debrid.Remote) error {
+	return nil
 }
 
 // Remotes lists the account's torrents and its queue. A queue that cannot be
@@ -60,6 +80,8 @@ func (p *Provider) Remotes(ctx context.Context) ([]debrid.Remote, error) {
 			Name:     t.Name,
 			Ready:    t.Present,
 			Progress: t.Progress,
+			Speed:    int64(t.DownloadSpeed),
+			Failed:   failure(t.DownloadState),
 			Files:    files,
 		})
 	}
@@ -74,6 +96,10 @@ func (p *Provider) Remotes(ctx context.Context) ([]debrid.Remote, error) {
 	}
 
 	return remotes, nil
+}
+
+func (p *Provider) Cached(ctx context.Context, hashes []string) (map[string]bool, error) {
+	return p.client.Cached(ctx, hashes)
 }
 
 func (p *Provider) Link(ctx context.Context, remote debrid.Remote, fileID int) (string, error) {
@@ -92,6 +118,16 @@ func (p *Provider) Delete(ctx context.Context, remote debrid.Remote) error {
 	}
 
 	return p.client.Delete(ctx, id, remote.Queued)
+}
+
+// failure is the download state when it says TorBox gave up, "" otherwise.
+func failure(state string) string {
+	lower := strings.ToLower(state)
+	if strings.Contains(lower, "error") || strings.Contains(lower, "failed") {
+		return state
+	}
+
+	return ""
 }
 
 func remoteID(remote debrid.Remote) (int64, error) {

@@ -44,6 +44,17 @@ type TorrentLive struct {
 	Seeds    int     `json:"seeds"`
 	Peers    int     `json:"peers"`
 	ETA      *int64  `json:"eta,omitempty" doc:"Seconds left; absent when the client cannot tell."`
+
+	Remote *TorrentRemote `json:"remote,omitempty" doc:"Present while a debrid service is still getting the torrent itself; the fields above are the node's own download, which starts once the service has the files."`
+}
+
+// TorrentRemote is how far a debrid service is with a torrent.
+type TorrentRemote struct {
+	Service  string  `json:"service" example:"TorBox"`
+	Progress float64 `json:"progress" minimum:"0" maximum:"1"`
+	Speed    int64   `json:"speed" doc:"The service's download speed, bytes per second."`
+	Queued   bool    `json:"queued" doc:"Waiting for a free slot on the account."`
+	Error    string  `json:"error,omitempty" doc:"Why the service gave up on the torrent, in its own words."`
 }
 
 type TorrentDownload struct {
@@ -66,7 +77,7 @@ type TorrentDownload struct {
 // TorrentClientStatus says whether the downloads' live fields can be trusted.
 type TorrentClientStatus struct {
 	Configured bool   `json:"configured"`
-	Kind       string `json:"kind" enum:",qbittorrent,embedded,torbox"`
+	Kind       string `json:"kind" enum:",qbittorrent,embedded,torbox,realdebrid,alldebrid,premiumize"`
 	Reachable  bool   `json:"reachable"`
 	Error      string `json:"error,omitempty"`
 }
@@ -208,7 +219,7 @@ func (s *Service) List(ctx context.Context) ([]TorrentDownload, TorrentClientSta
 	s.mu.Lock()
 	configured := conn.Kind == ClientEmbedded ||
 		(conn.Kind == ClientQBittorrent && conn.URL != "") ||
-		(conn.Kind == ClientTorBox && conn.APIKey != "")
+		(IsDebrid(conn.Kind) && conn.APIKey != "")
 	status := TorrentClientStatus{
 		Configured: configured,
 		Kind:       conn.Kind,
@@ -266,6 +277,16 @@ func liveOf(t qbittorrent.Torrent) *TorrentLive {
 	if t.ETA > 0 && t.ETA < unknownETA {
 		eta := t.ETA
 		live.ETA = &eta
+	}
+
+	if t.Remote != nil {
+		live.Remote = &TorrentRemote{
+			Service:  t.Remote.Service,
+			Progress: t.Remote.Progress,
+			Speed:    t.Remote.Speed,
+			Queued:   t.Remote.Queued,
+			Error:    t.Remote.Error,
+		}
 	}
 
 	return live

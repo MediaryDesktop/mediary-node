@@ -17,7 +17,6 @@ const (
 	keyMapClient  = "torrent.path_map.client"
 	keyMapNode    = "torrent.path_map.node"
 	secretKey     = "qbittorrent"
-	torboxKey     = "torbox"
 	torrentTag    = "mediary"
 	torrentFolder = "mediary"
 )
@@ -31,11 +30,12 @@ type TorrentPathMap struct {
 }
 
 type TorrentSettings struct {
-	Client      string         `json:"client" enum:",qbittorrent,embedded,torbox" doc:"The user's qBittorrent, the node's own client, the user's TorBox account, or none."`
+	Client      string         `json:"client" enum:",qbittorrent,embedded,torbox,realdebrid,alldebrid,premiumize" doc:"The user's qBittorrent, the node's own client, the user's account on a debrid service, or none."`
 	URL         string         `json:"url"`
 	Username    string         `json:"username"`
 	HasPassword bool           `json:"has_password"`
-	HasAPIKey   bool           `json:"has_api_key" doc:"Whether a TorBox API key is saved; the key itself is never returned."`
+	HasAPIKey   bool           `json:"has_api_key" doc:"Whether the chosen debrid service has a key saved; keys are never returned."`
+	DebridKeys  []string       `json:"debrid_keys" doc:"The debrid services that have a key saved, chosen or not."`
 	RootID      int64          `json:"root_id"`
 	PathMap     TorrentPathMap `json:"path_map"`
 }
@@ -46,10 +46,18 @@ type TorrentSettingsUpdate struct {
 	Username string
 	// Nil keeps the saved password; "" removes it.
 	Password *string
-	// Nil keeps the saved TorBox key; "" removes it.
+	// The chosen debrid service's key. Nil keeps the saved one; "" removes it.
 	APIKey  *string
 	RootID  int64
 	PathMap TorrentPathMap
+}
+
+// debridNames name the services in messages.
+var debridNames = map[string]string{
+	ClientTorBox:     "TorBox",
+	ClientRealDebrid: "Real-Debrid",
+	ClientAllDebrid:  "AllDebrid",
+	ClientPremiumize: "Premiumize",
 }
 
 func (s *Service) Settings(ctx context.Context) (*TorrentSettings, error) {
@@ -64,6 +72,17 @@ func (s *Service) Settings(ctx context.Context) (*TorrentSettings, error) {
 		Username:    conn.Username,
 		HasPassword: conn.Password != "",
 		HasAPIKey:   conn.APIKey != "",
+		DebridKeys:  []string{},
+	}
+
+	for _, kind := range debridKinds {
+		key, err := s.secrets.Get(kind)
+		if err != nil {
+			return nil, apperr.Wrap(err, apperr.KindInternal, "read the %s key", debridNames[kind])
+		}
+		if key != "" {
+			settings.DebridKeys = append(settings.DebridKeys, kind)
+		}
 	}
 
 	if raw, _, err := s.store.Meta(ctx, keyRoot); err != nil {
@@ -97,26 +116,15 @@ func (s *Service) UpdateSettings(ctx context.Context, update TorrentSettingsUpda
 		update.APIKey = &trimmed
 	}
 
-	switch update.Client {
-	case ClientNone, ClientEmbedded:
-	case ClientQBittorrent:
+	switch {
+	case update.Client == ClientNone, update.Client == ClientEmbedded:
+	case update.Client == ClientQBittorrent:
 		if update.URL == "" {
 			return nil, apperr.Invalid("url", "the qBittorrent address is empty")
 		}
-	case ClientTorBox:
-		if s.opts.TorBox == nil {
-			return nil, apperr.Invalid("client", "this node cannot use TorBox")
-		}
-		if update.APIKey == nil {
-			saved, err := s.secrets.Get(torboxKey)
-			if err != nil {
-				return nil, apperr.Wrap(err, apperr.KindInternal, "read the TorBox API key")
-			}
-			if saved == "" {
-				return nil, apperr.Invalid("api_key", "the TorBox API key is empty")
-			}
-		} else if *update.APIKey == "" {
-			return nil, apperr.Invalid("api_key", "the TorBox API key is empty")
+	case IsDebrid(update.Client):
+		if err := s.requireDebridKey(update.Client, update.APIKey); err != nil {
+			return nil, err
 		}
 	default:
 		return nil, apperr.Invalid("client", "unknown torrent client %q", update.Client)
@@ -167,9 +175,9 @@ func (s *Service) UpdateSettings(ctx context.Context, update TorrentSettingsUpda
 			return nil, apperr.Wrap(err, apperr.KindInternal, "save the qBittorrent password")
 		}
 	}
-	if update.APIKey != nil {
-		if err := s.secrets.Set(torboxKey, *update.APIKey); err != nil {
-			return nil, apperr.Wrap(err, apperr.KindInternal, "save the TorBox API key")
+	if update.APIKey != nil && IsDebrid(update.Client) {
+		if err := s.secrets.Set(update.Client, *update.APIKey); err != nil {
+			return nil, apperr.Wrap(err, apperr.KindInternal, "save the %s key", debridNames[update.Client])
 		}
 	}
 
@@ -179,14 +187,39 @@ func (s *Service) UpdateSettings(ctx context.Context, update TorrentSettingsUpda
 	return s.Settings(ctx)
 }
 
+// requireDebridKey refuses a debrid service this node lacks, or one left
+// without a key: a new key given, or one saved before.
+func (s *Service) requireDebridKey(kind string, given *string) error {
+	if _, ok := s.opts.Debrid[kind]; !ok {
+		return apperr.Invalid("client", "this node cannot use %s", debridNames[kind])
+	}
+
+	if given != nil {
+		if *given == "" {
+			return apperr.Invalid("api_key", "the %s key is empty", debridNames[kind])
+		}
+		return nil
+	}
+
+	saved, err := s.secrets.Get(kind)
+	if err != nil {
+		return apperr.Wrap(err, apperr.KindInternal, "read the %s key", debridNames[kind])
+	}
+	if saved == "" {
+		return apperr.Invalid("api_key", "the %s key is empty", debridNames[kind])
+	}
+
+	return nil
+}
+
 // TorrentCheckResult is what the client said when the node tried it.
 type TorrentCheckResult struct {
 	Version string `json:"version"`
 }
 
-// Check tries a connection before or after it is saved. An empty password with
-// the saved URL means the saved password, so the user need not type it again.
-func (s *Service) Check(ctx context.Context, conn Connection, keepPassword bool) (*TorrentCheckResult, error) {
+// Check tries a connection before or after it is saved. An empty password or
+// key means the saved one, so the user need not type it again.
+func (s *Service) Check(ctx context.Context, conn Connection, keepSecret bool) (*TorrentCheckResult, error) {
 	if conn.Kind == ClientEmbedded {
 		if s.opts.Embedded == nil {
 			return nil, apperr.New(apperr.KindUnavailable, "this node has no built-in torrent client")
@@ -200,8 +233,8 @@ func (s *Service) Check(ctx context.Context, conn Connection, keepPassword bool)
 		return &TorrentCheckResult{Version: version}, nil
 	}
 
-	if conn.Kind == ClientTorBox {
-		return s.checkTorBox(ctx, conn.APIKey, keepPassword)
+	if IsDebrid(conn.Kind) {
+		return s.checkDebrid(ctx, conn.Kind, conn.APIKey, keepSecret)
 	}
 
 	conn.URL = strings.TrimSpace(conn.URL)
@@ -209,7 +242,7 @@ func (s *Service) Check(ctx context.Context, conn Connection, keepPassword bool)
 		return nil, apperr.Invalid("url", "the qBittorrent address is empty")
 	}
 
-	if keepPassword {
+	if keepSecret {
 		saved, err := s.secrets.Get(secretKey)
 		if err != nil {
 			return nil, apperr.Wrap(err, apperr.KindInternal, "read the qBittorrent password")
@@ -230,27 +263,28 @@ func (s *Service) Check(ctx context.Context, conn Connection, keepPassword bool)
 	return &TorrentCheckResult{Version: version}, nil
 }
 
-// checkTorBox tries a TorBox key, or the saved one when keepKey, and names the
-// account's plan.
-func (s *Service) checkTorBox(ctx context.Context, key string, keepKey bool) (*TorrentCheckResult, error) {
-	if s.opts.CheckTorBox == nil {
-		return nil, apperr.New(apperr.KindUnavailable, "this node cannot use TorBox")
+// checkDebrid tries a debrid service's key, or the saved one when keepKey, and
+// names the account.
+func (s *Service) checkDebrid(ctx context.Context, kind, key string, keepKey bool) (*TorrentCheckResult, error) {
+	service, ok := s.opts.Debrid[kind]
+	if !ok || service.Check == nil {
+		return nil, apperr.New(apperr.KindUnavailable, "this node cannot use %s", debridNames[kind])
 	}
 
 	if keepKey {
-		saved, err := s.secrets.Get(torboxKey)
+		saved, err := s.secrets.Get(kind)
 		if err != nil {
-			return nil, apperr.Wrap(err, apperr.KindInternal, "read the TorBox API key")
+			return nil, apperr.Wrap(err, apperr.KindInternal, "read the %s key", debridNames[kind])
 		}
 		key = saved
 	}
 
 	key = strings.TrimSpace(key)
 	if key == "" {
-		return nil, apperr.Invalid("api_key", "the TorBox API key is empty")
+		return nil, apperr.Invalid("api_key", "the %s key is empty", debridNames[kind])
 	}
 
-	version, err := s.opts.CheckTorBox(ctx, key)
+	version, err := service.Check(ctx, key)
 	if err != nil {
 		return nil, err
 	}
@@ -288,12 +322,15 @@ func (s *Service) connection(ctx context.Context) (Connection, error) {
 		return Connection{}, apperr.Wrap(err, apperr.KindInternal, "read the qBittorrent password")
 	}
 
-	apiKey, err := s.secrets.Get(torboxKey)
-	if err != nil {
-		return Connection{}, apperr.Wrap(err, apperr.KindInternal, "read the TorBox API key")
+	conn := Connection{Kind: kind, URL: url, Username: username, Password: password}
+
+	if IsDebrid(kind) {
+		if conn.APIKey, err = s.secrets.Get(kind); err != nil {
+			return Connection{}, apperr.Wrap(err, apperr.KindInternal, "read the %s key", debridNames[kind])
+		}
 	}
 
-	return Connection{Kind: kind, URL: url, Username: username, Password: password, APIKey: apiKey}, nil
+	return conn, nil
 }
 
 // currentClient is the client for the saved connection, or nil when there is
@@ -304,21 +341,22 @@ func (s *Service) currentClient(ctx context.Context) (Client, error) {
 		return nil, err
 	}
 
-	switch conn.Kind {
-	case ClientEmbedded:
+	switch {
+	case conn.Kind == ClientEmbedded:
 		if s.opts.Embedded == nil {
 			return nil, apperr.New(apperr.KindUnavailable, "this node has no built-in torrent client")
 		}
 		return s.opts.Embedded, nil
-	case ClientTorBox:
-		if s.opts.TorBox == nil {
-			return nil, apperr.New(apperr.KindUnavailable, "this node cannot use TorBox")
+	case IsDebrid(conn.Kind):
+		service, ok := s.opts.Debrid[conn.Kind]
+		if !ok {
+			return nil, apperr.New(apperr.KindUnavailable, "this node cannot use %s", debridNames[conn.Kind])
 		}
 		if conn.APIKey == "" {
 			return nil, nil
 		}
-		return s.opts.TorBox, nil
-	case ClientQBittorrent:
+		return service.Client, nil
+	case conn.Kind == ClientQBittorrent:
 		if conn.URL == "" {
 			return nil, nil
 		}

@@ -31,26 +31,48 @@ type Provider interface {
 	// Account checks the key and names the account for the settings, e.g.
 	// "TorBox · Free plan".
 	Account(ctx context.Context) (string, error)
-	Add(ctx context.Context, magnet string, torrent []byte, name string) error
+	// Add gives the service a torrent and returns the ID it is known by.
+	Add(ctx context.Context, magnet string, torrent []byte, name string) (string, error)
 	// Remotes lists the account's torrents, the queued ones included.
 	Remotes(ctx context.Context) ([]Remote, error)
+	// Detail fills in the files of a remote listed as Partial.
+	Detail(ctx context.Context, remote Remote) (Remote, error)
+	// Start lets a remote listed as Waiting download; every file, since a
+	// service like Real-Debrid downloads a cached torrent again for a subset.
+	Start(ctx context.Context, remote Remote) error
+	// Cached reports which of the hashes, lower-case hex, the service already
+	// holds; ErrNoCacheCheck when it cannot tell.
+	Cached(ctx context.Context, hashes []string) (map[string]bool, error)
 	// Link is a short-lived address to download one file from.
 	Link(ctx context.Context, remote Remote, fileID int) (string, error)
 	Delete(ctx context.Context, remote Remote) error
 }
 
+// ErrNoCacheCheck is a service's answer to Cached when it has no way to say
+// what it holds; Real-Debrid and AllDebrid took theirs away.
+var ErrNoCacheCheck = errors.New("the service cannot say what it holds")
+
 // Remote is a torrent as the service reports it.
 type Remote struct {
 	ID string
-	// Hash is the v1 info hash in lower-case hex.
+	// Hash is the v1 info hash in lower-case hex; empty from a service that does
+	// not say it, and then the adapter matches the ID it was added under.
 	Hash string
 	Name string
 	// Queued waits for a free slot on the account.
 	Queued bool
+	// Waiting waits for Start.
+	Waiting bool
 	// Ready means the service holds the files and links can be asked for.
 	Ready    bool
 	Progress float64
-	Files    []RemoteFile
+	// Speed is the service's own download speed, bytes per second.
+	Speed int64
+	// Failed says why the service gave up on the torrent; "" while it has not.
+	Failed string
+	// Partial means the listing left the files out; Detail fills them in.
+	Partial bool
+	Files   []RemoteFile
 }
 
 type RemoteFile struct {
@@ -71,6 +93,8 @@ const (
 	addGrace = 2 * time.Minute
 	// After a failed fetch the file is tried again after this long.
 	retryAfter = 30 * time.Second
+	// A torrent still waiting after Start is started again after this long.
+	startEvery = 30 * time.Second
 	// With nothing to fetch, the service is asked again this often anyway: a
 	// torrent it was downloading may have become ready.
 	idleWake = 15 * time.Second
@@ -97,8 +121,11 @@ type entry struct {
 	Skipped []int `json:"skipped,omitempty"`
 	// Written are the files the adapter fetched into SavePath, so a removal with
 	// files deletes exactly those.
-	Written []string  `json:"written,omitempty"`
-	AddedAt time.Time `json:"added_at"`
+	Written []string `json:"written,omitempty"`
+	// RemoteID is the ID the service gave the torrent, for a service whose
+	// listing does not say the hash.
+	RemoteID string    `json:"remote_id,omitempty"`
+	AddedAt  time.Time `json:"added_at"`
 }
 
 type sample struct {
@@ -122,8 +149,12 @@ type Client struct {
 	cancel     context.CancelFunc
 	// When a torrent's last fetch failed, so it is not tried again at once.
 	failedAt map[string]time.Time
-	samples  map[string]sample
-	speeds   map[string]int64
+	// When a waiting torrent was last started, and the files of ready torrents
+	// from a service whose listing leaves them out.
+	startedAt map[string]time.Time
+	details   map[string]Remote
+	samples   map[string]sample
+	speeds    map[string]int64
 
 	wake    chan struct{}
 	started bool
@@ -146,16 +177,18 @@ func New(opts Options) *Client {
 	runCtx, stop := context.WithCancel(context.Background())
 
 	return &Client{
-		opts:     opts,
-		entries:  map[string]*entry{},
-		remotes:  map[string]Remote{},
-		failedAt: map[string]time.Time{},
-		samples:  map[string]sample{},
-		speeds:   map[string]int64{},
-		wake:     make(chan struct{}, 1),
-		runCtx:   runCtx,
-		stop:     stop,
-		stopped:  make(chan struct{}),
+		opts:      opts,
+		entries:   map[string]*entry{},
+		remotes:   map[string]Remote{},
+		failedAt:  map[string]time.Time{},
+		startedAt: map[string]time.Time{},
+		details:   map[string]Remote{},
+		samples:   map[string]sample{},
+		speeds:    map[string]int64{},
+		wake:      make(chan struct{}, 1),
+		runCtx:    runCtx,
+		stop:      stop,
+		stopped:   make(chan struct{}),
 	}
 }
 
@@ -207,6 +240,26 @@ func (c *Client) Version(ctx context.Context) (string, error) {
 	return c.opts.Provider.Account(ctx)
 }
 
+// Service names the debrid service, for marks like "cached in TorBox".
+func (c *Client) Service() string {
+	return c.opts.Name
+}
+
+// Cached reports which of the hashes the service already holds; nil, with no
+// error, from a service that cannot tell, so nothing is marked either way.
+func (c *Client) Cached(ctx context.Context, hashes []string) (map[string]bool, error) {
+	if len(hashes) == 0 {
+		return map[string]bool{}, nil
+	}
+
+	cached, err := c.opts.Provider.Cached(ctx, hashes)
+	if errors.Is(err, ErrNoCacheCheck) {
+		return nil, nil
+	}
+
+	return cached, err
+}
+
 func (c *Client) Add(ctx context.Context, req qbittorrent.AddRequest) error {
 	if err := c.start(); err != nil {
 		return err
@@ -224,17 +277,24 @@ func (c *Client) Add(ctx context.Context, req qbittorrent.AddRequest) error {
 
 	// The account may hold it already — added on the service's site, or by a
 	// node that lost its list. Adding it again would only fail.
-	if _, ok := remotes[hash]; !ok {
-		if err := c.opts.Provider.Add(ctx, req.Magnet, req.Torrent, name); err != nil {
-			return err
-		}
+	var remoteID string
+	if existing, ok := remotes[hash]; ok {
+		remoteID = existing.ID
+	} else if remoteID, err = c.opts.Provider.Add(ctx, req.Magnet, req.Torrent, name); err != nil {
+		return err
 	}
 
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
 	if _, ok := c.entries[hash]; !ok {
-		c.entries[hash] = &entry{SavePath: req.SavePath, Name: name, Stopped: req.Hold, AddedAt: time.Now().UTC()}
+		c.entries[hash] = &entry{
+			SavePath: req.SavePath,
+			Name:     name,
+			Stopped:  req.Hold,
+			RemoteID: remoteID,
+			AddedAt:  time.Now().UTC(),
+		}
 	}
 	c.listedAt = time.Time{}
 
@@ -294,7 +354,20 @@ func (c *Client) status(hash string, saved *entry, remote Remote, now time.Time)
 		status.Name = saved.Name
 	}
 
+	if !remote.Ready || remote.Failed != "" {
+		status.Remote = &qbittorrent.Remote{
+			Service:  c.opts.Name,
+			Progress: min(max(remote.Progress, 0), 1),
+			Speed:    max(remote.Speed, 0),
+			Queued:   remote.Queued,
+			Error:    remote.Failed,
+		}
+	}
+
 	switch {
+	case remote.Failed != "":
+		status.State = "error"
+		return status
 	case remote.Queued:
 		status.State = "queuedDL"
 		return status
@@ -490,6 +563,8 @@ func (c *Client) Delete(ctx context.Context, hash string, withFiles bool) error 
 	delete(c.samples, hash)
 	delete(c.speeds, hash)
 	delete(c.failedAt, hash)
+	delete(c.startedAt, hash)
+	delete(c.details, hash)
 	err = c.saveLocked()
 	c.mu.Unlock()
 
@@ -514,26 +589,96 @@ func (c *Client) listing(ctx context.Context, fresh bool) (map[string]Remote, er
 	c.mu.Unlock()
 
 	list, err := c.opts.Provider.Remotes(ctx)
-
-	c.mu.Lock()
-	defer c.mu.Unlock()
-
-	c.listedAt, c.listErr = time.Now(), err
 	if err != nil {
+		c.mu.Lock()
+		c.listedAt, c.listErr = time.Now(), err
+		c.mu.Unlock()
 		return nil, err
 	}
+
+	c.mu.Lock()
+	hashOfID := make(map[string]string, len(c.entries))
+	for hash, saved := range c.entries {
+		if saved.RemoteID != "" {
+			hashOfID[saved.RemoteID] = hash
+		}
+	}
+	c.mu.Unlock()
 
 	remotes := make(map[string]Remote, len(list))
 	for _, remote := range list {
 		remote.Hash = strings.ToLower(remote.Hash)
+		if remote.Hash == "" {
+			remote.Hash = hashOfID[remote.ID]
+		}
+		if remote.Hash == "" {
+			continue
+		}
 		if existing, ok := remotes[remote.Hash]; ok && !existing.Queued {
 			continue
 		}
 		remotes[remote.Hash] = remote
 	}
+
+	c.prepare(ctx, remotes)
+
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	c.listedAt, c.listErr = time.Now(), nil
 	c.remotes = remotes
 
 	return remotes, nil
+}
+
+// prepare does what the service needs before the adapter's own torrents can be
+// followed: starts the ones waiting for it, and fills in the files a listing left
+// out. A ready torrent's files do not change, so they are asked once.
+func (c *Client) prepare(ctx context.Context, remotes map[string]Remote) {
+	for hash, remote := range remotes {
+		c.mu.Lock()
+		_, ours := c.entries[hash]
+		known, detailed := c.details[hash]
+		startedAt := c.startedAt[hash]
+		c.mu.Unlock()
+
+		if !ours {
+			continue
+		}
+
+		if remote.Waiting && time.Since(startedAt) >= startEvery {
+			if err := c.opts.Provider.Start(ctx, remote); err != nil {
+				c.opts.Logger.Warn().Err(err).Str("hash", hash).Msg("start a torrent on the debrid service")
+			}
+			c.mu.Lock()
+			c.startedAt[hash] = time.Now()
+			c.mu.Unlock()
+		}
+
+		if !remote.Partial {
+			continue
+		}
+
+		if detailed && remote.Ready && known.ID == remote.ID {
+			remote.Files = known.Files
+			remotes[hash] = remote
+			continue
+		}
+
+		full, err := c.opts.Provider.Detail(ctx, remote)
+		if err != nil {
+			c.opts.Logger.Debug().Err(err).Str("hash", hash).Msg("read a torrent's files on the debrid service")
+			continue
+		}
+		full.Hash, full.Partial = hash, false
+		remotes[hash] = full
+
+		if full.Ready {
+			c.mu.Lock()
+			c.details[hash] = full
+			c.mu.Unlock()
+		}
+	}
 }
 
 // wanted are the torrent's files to fetch: every usable one but the skipped.

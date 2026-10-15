@@ -11,13 +11,54 @@ import (
 func withTorBox(h *harness) *[]string {
 	var checked []string
 
-	h.svc.opts.TorBox = h.client
-	h.svc.opts.CheckTorBox = func(_ context.Context, key string) (string, error) {
-		checked = append(checked, key)
-		return "TorBox · Free plan", nil
+	h.svc.opts.Debrid = map[string]DebridService{
+		ClientTorBox: {
+			Client: h.client,
+			Check: func(_ context.Context, key string) (string, error) {
+				checked = append(checked, key)
+				return "TorBox · Free plan", nil
+			},
+		},
+		ClientRealDebrid: {Client: h.client, Check: func(context.Context, string) (string, error) { return "Real-Debrid", nil }},
 	}
 
 	return &checked
+}
+
+func TestEachDebridServiceKeepsItsOwnKey(t *testing.T) {
+	h := newHarness(t)
+	withTorBox(h)
+	ctx := context.Background()
+
+	torboxKey, rdKey := "tb-key", "rd-key"
+	if _, err := h.svc.UpdateSettings(ctx, TorrentSettingsUpdate{Client: ClientTorBox, APIKey: &torboxKey, RootID: 1}); err != nil {
+		t.Fatal(err)
+	}
+	settings, err := h.svc.UpdateSettings(ctx, TorrentSettingsUpdate{Client: ClientRealDebrid, APIKey: &rdKey, RootID: 1})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if settings.Client != ClientRealDebrid || !settings.HasAPIKey || len(settings.DebridKeys) != 2 {
+		t.Errorf("settings = %+v", settings)
+	}
+
+	for kind, want := range map[string]string{ClientTorBox: "tb-key", ClientRealDebrid: "rd-key"} {
+		if got, _ := h.svc.secrets.Get(kind); got != want {
+			t.Errorf("%s key = %q, want %q", kind, got, want)
+		}
+	}
+
+	// Going back to TorBox needs no key typed again.
+	if _, err := h.svc.UpdateSettings(ctx, TorrentSettingsUpdate{Client: ClientTorBox, RootID: 1}); err != nil {
+		t.Errorf("back to TorBox: %v", err)
+	}
+
+	// A service this node was not built with cannot be chosen.
+	allKey := "x"
+	if _, err := h.svc.UpdateSettings(ctx, TorrentSettingsUpdate{Client: ClientAllDebrid, APIKey: &allKey, RootID: 1}); apperr.KindOf(err) != apperr.KindInvalid {
+		t.Errorf("unavailable service: err = %v", err)
+	}
 }
 
 func TestTorBoxNeedsAKey(t *testing.T) {
@@ -49,7 +90,7 @@ func TestTorBoxKeyIsSavedAsASecretAndUsedForDownloads(t *testing.T) {
 		t.Errorf("settings = %+v", settings)
 	}
 
-	saved, _ := h.svc.secrets.Get(torboxKey)
+	saved, _ := h.svc.secrets.Get(ClientTorBox)
 	if saved != "the-key" {
 		t.Errorf("saved key = %q", saved)
 	}

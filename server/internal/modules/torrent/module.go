@@ -3,14 +3,18 @@ package torrent
 import (
 	"context"
 	"database/sql"
+	"path/filepath"
 	"time"
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/rs/zerolog"
 
+	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/alldebrid"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/debrid"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/embedded"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/handler"
+	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/premiumize"
+	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/realdebrid"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/service"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/store"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/torbox"
@@ -40,9 +44,9 @@ type Deps struct {
 	ListenPort  int
 	EnableUPnP  bool
 
-	// TorBoxDir keeps the list of torrents fetched from the user's TorBox
-	// account, so a restarted node resumes their files.
-	TorBoxDir string
+	// DebridDir keeps, in a folder per service, the list of torrents fetched
+	// from the user's debrid account, so a restarted node resumes their files.
+	DebridDir string
 
 	// Titles names a title for a release search.
 	Titles    Titles
@@ -68,16 +72,28 @@ func New(deps Deps) *Module {
 
 	secretFile := secrets.New(deps.SecretsPath)
 
-	torboxAPI := torbox.New(torbox.Options{
-		Key:       func() (string, error) { return secretFile.Get(torboxSecret) },
-		UserAgent: deps.UserAgent,
-	})
-	torboxClient := debrid.New(debrid.Options{
-		Name:     "TorBox",
-		Provider: torbox.NewProvider(torboxAPI),
-		StateDir: deps.TorBoxDir,
-		Logger:   deps.Logger,
-	})
+	services := map[string]service.DebridService{}
+	var debridClients []*debrid.Client
+
+	for _, spec := range debridSpecs(deps.UserAgent) {
+		// The service saves each key in the secrets file under its kind.
+		saved := func() (string, error) { return secretFile.Get(spec.kind) }
+
+		client := debrid.New(debrid.Options{
+			Name:     spec.name,
+			Provider: spec.provider(saved),
+			StateDir: filepath.Join(deps.DebridDir, spec.kind),
+			Logger:   deps.Logger,
+		})
+		debridClients = append(debridClients, client)
+
+		services[spec.kind] = service.DebridService{
+			Client: client,
+			Check: func(ctx context.Context, apiKey string) (string, error) {
+				return spec.provider(func() (string, error) { return apiKey, nil }).Account(ctx)
+			},
+		}
+	}
 
 	svc := service.New(
 		store.New(deps.DB),
@@ -88,35 +104,52 @@ func New(deps Deps) *Module {
 		service.Options{
 			Defaults: deps.Client,
 			Embedded: builtin,
-			TorBox:   torboxClient,
-			CheckTorBox: func(ctx context.Context, apiKey string) (string, error) {
-				api := torbox.New(torbox.Options{Key: torbox.StaticKey(apiKey), UserAgent: deps.UserAgent})
-				return torbox.NewProvider(api).Account(ctx)
-			},
-			Titles:  deps.Titles,
-			Torznab: torznab.New(20*time.Second, deps.UserAgent),
+			Debrid:   services,
+			Titles:   deps.Titles,
+			Torznab:  torznab.New(20*time.Second, deps.UserAgent),
 		},
 	)
 
-	return &Module{handler: handler.New(svc), svc: svc, embedded: builtin, torbox: torboxClient}
+	return &Module{handler: handler.New(svc), svc: svc, embedded: builtin, debrid: debridClients}
 }
 
-// torboxSecret is the TorBox key's entry in the secrets file; the service saves
-// it under the same name.
-const torboxSecret = "torbox"
+type debridSpec struct {
+	kind     string
+	name     string
+	provider func(key func() (string, error)) debrid.Provider
+}
+
+func debridSpecs(userAgent string) []debridSpec {
+	return []debridSpec{
+		{service.ClientTorBox, "TorBox", func(key func() (string, error)) debrid.Provider {
+			return torbox.NewProvider(torbox.New(torbox.Options{Key: key, UserAgent: userAgent}))
+		}},
+		{service.ClientRealDebrid, "Real-Debrid", func(key func() (string, error)) debrid.Provider {
+			return realdebrid.New(realdebrid.Options{Key: key, UserAgent: userAgent})
+		}},
+		{service.ClientAllDebrid, "AllDebrid", func(key func() (string, error)) debrid.Provider {
+			return alldebrid.New(alldebrid.Options{Key: key, UserAgent: userAgent})
+		}},
+		{service.ClientPremiumize, "Premiumize", func(key func() (string, error)) debrid.Provider {
+			return premiumize.New(premiumize.Options{Key: key, UserAgent: userAgent})
+		}},
+	}
+}
 
 type Module struct {
 	handler  *handler.Handler
 	svc      *service.Service
 	embedded *embedded.Client
-	torbox   *debrid.Client
+	debrid   []*debrid.Client
 }
 
-// Close stops the node's own client and the TorBox fetches, if they ever
-// started; both resume on the next start.
+// Close stops the node's own client and the debrid fetches, if they ever
+// started; they resume on the next start.
 func (m *Module) Close() {
 	m.embedded.Close()
-	m.torbox.Close()
+	for _, client := range m.debrid {
+		client.Close()
+	}
 }
 
 // Start follows the downloads until ctx ends.

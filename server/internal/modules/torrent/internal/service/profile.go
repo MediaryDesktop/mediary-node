@@ -19,7 +19,14 @@ type TorrentProfile struct {
 	Preferred  []string `json:"preferred" maxItems:"20" doc:"Words a release name should have — groups, sites, \"multi-sub\" — best first."`
 	Excluded   []string `json:"excluded" maxItems:"20" doc:"Words that keep a release from being the best, e.g. a dub or a codec the TV cannot play."`
 	MinSeeders int      `json:"min_seeders" minimum:"0" doc:"Fewer seeders keeps a release from being the best."`
+	// PreferCached matters only with a debrid service as the client.
+	PreferCached bool `json:"prefer_cached" doc:"With a debrid service as the client, rank the releases it already holds higher: they arrive at once. Weighs about one step of resolution."`
 }
+
+// What a release the debrid service holds gains with PreferCached: more than a
+// codec, less than a resolution's worth, so a held release one step below the
+// preferred resolution wins and two steps below does not.
+const cachedPoints = 100
 
 var resolutionOrder = []string{"2160p", "1080p", "720p", "480p"}
 
@@ -100,6 +107,10 @@ func score(found *TorrentRelease, profile *TorrentProfile) (points int, eligible
 
 	if profile.Codec != "" && strings.EqualFold(profile.Codec, found.Codec) {
 		points += 60
+	}
+
+	if profile.PreferCached && found.Cached != nil && *found.Cached {
+		points += cachedPoints
 	}
 
 	for i, word := range profile.Preferred {

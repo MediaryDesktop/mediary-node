@@ -39,10 +39,10 @@ func folderName(title string) string {
 }
 
 // savePath is where the client should save a folder: the node's own client and
-// TorBox, whose files the node fetches itself, see the node's disk; qBittorrent
-// may see it under other names.
+// a debrid service, whose files the node fetches itself, see the node's disk;
+// qBittorrent may see it under other names.
 func savePath(nodePath string, settings *TorrentSettings) string {
-	if settings.Client == ClientEmbedded || settings.Client == ClientTorBox {
+	if settings.Client == ClientEmbedded || IsDebrid(settings.Client) {
 		return nodePath
 	}
 

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -146,6 +147,34 @@ func TestRemotesJoinTorrentsAndQueue(t *testing.T) {
 	}
 	if r := remotes[1]; r.ID != "7" || !r.Queued || r.Ready {
 		t.Errorf("queued = %+v", r)
+	}
+}
+
+func TestCachedAsksInBatchesAndReadsTheList(t *testing.T) {
+	var batches []string
+	client := serve(t, func(w http.ResponseWriter, r *http.Request) {
+		q := r.URL.Query()
+		if r.URL.Path != "/torrents/checkcached" || q.Get("format") != "list" {
+			t.Errorf("%s %s", r.URL.Path, r.URL.RawQuery)
+		}
+		batches = append(batches, q.Get("hash"))
+		reply(w, []map[string]any{{"hash": "H5", "name": "held"}})
+	})
+
+	hashes := make([]string, 150)
+	for i := range hashes {
+		hashes[i] = "h" + strconv.Itoa(i)
+	}
+
+	cached, err := client.Cached(context.Background(), hashes)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(batches) != 2 || strings.Count(batches[0], ",") != 99 || strings.Count(batches[1], ",") != 49 {
+		t.Errorf("batches = %d, want 100 then 50 hashes", len(batches))
+	}
+	if !cached["h5"] || cached["h6"] {
+		t.Errorf("cached = %v", cached)
 	}
 }
 

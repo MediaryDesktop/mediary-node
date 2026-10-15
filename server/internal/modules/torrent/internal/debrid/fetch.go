@@ -83,7 +83,7 @@ func (c *Client) next(ctx context.Context) (job, bool) {
 		}
 
 		remote, ok := remotes[hash]
-		if !ok || !remote.Ready || remote.Queued {
+		if !ok || !remote.Ready || remote.Queued || remote.Failed != "" {
 			continue
 		}
 

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"slices"
 	"sync"
 	"time"
 
@@ -28,6 +29,13 @@ type Client interface {
 	Delete(ctx context.Context, hash string, withFiles bool) error
 }
 
+// CacheChecker is a client that can tell which torrents it already holds: a
+// debrid service, for which a held torrent arrives at once.
+type CacheChecker interface {
+	Service() string
+	Cached(ctx context.Context, hashes []string) (map[string]bool, error)
+}
+
 // Library is the library module, through a port: where its folders are, and how a
 // downloaded file joins it.
 type Library interface {
@@ -42,23 +50,43 @@ type Library interface {
 	Episodes(ctx context.Context, mediaRef string) ([]int, error)
 }
 
-// Client kinds: the user's qBittorrent, the node's own client, the user's TorBox
-// account, or none.
+// Client kinds: the user's qBittorrent, the node's own client, the user's
+// account on a debrid service, or none.
 const (
 	ClientNone        = ""
 	ClientQBittorrent = "qbittorrent"
 	ClientEmbedded    = "embedded"
 	ClientTorBox      = "torbox"
+	ClientRealDebrid  = "realdebrid"
+	ClientAllDebrid   = "alldebrid"
+	ClientPremiumize  = "premiumize"
 )
 
-// Connection is which client to use and, for qBittorrent, how to reach it.
+// debridKinds are the client kinds that are debrid services; each keeps its key
+// in the secrets file under its own name.
+var debridKinds = []string{ClientTorBox, ClientRealDebrid, ClientAllDebrid, ClientPremiumize}
+
+// IsDebrid reports whether a client kind is a debrid service.
+func IsDebrid(kind string) bool {
+	return slices.Contains(debridKinds, kind)
+}
+
+// Connection is which client to use and how to reach it.
 type Connection struct {
 	Kind     string
 	URL      string
 	Username string
 	Password string
-	// APIKey is the TorBox key.
+	// APIKey is the debrid service's key, for a debrid kind.
 	APIKey string
+}
+
+// DebridService is one debrid service the node can use as its client.
+type DebridService struct {
+	// Client reads the service's saved key on every call.
+	Client Client
+	// Check tries a key that may not be saved yet and names the account.
+	Check func(ctx context.Context, apiKey string) (string, error)
 }
 
 type Options struct {
@@ -73,11 +101,9 @@ type Options struct {
 	// it is not available.
 	Embedded Client
 
-	// TorBox is the user's TorBox account as a client; it reads the saved key on
-	// every call. CheckTorBox tries a key that may not be saved yet. Both nil
-	// where TorBox is not available.
-	TorBox      Client
-	CheckTorBox func(ctx context.Context, apiKey string) (string, error)
+	// Debrid are the debrid services by client kind; a kind missing here is not
+	// available on this node.
+	Debrid map[string]DebridService
 
 	// Torznab searches the user's sources; Titles names the title searched for.
 	Torznab *torznab.Client

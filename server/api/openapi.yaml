@@ -388,16 +388,19 @@ components:
           readOnly: true
           type: string
         api_key:
-          description: A TorBox API key to try; left out uses the saved key.
+          description: A debrid service's key to try; left out uses the saved key.
           maxLength: 256
           type: string
         client:
-          description: embedded checks the node's own client, torbox the TorBox key; anything else, qBittorrent at url.
+          description: embedded checks the node's own client, a debrid service its key; anything else, qBittorrent at url.
           enum:
             - ""
             - qbittorrent
             - embedded
             - torbox
+            - realdebrid
+            - alldebrid
+            - premiumize
           type: string
         password:
           description: Left out uses the saved password.
@@ -2553,16 +2556,19 @@ components:
           readOnly: true
           type: string
         api_key:
-          description: The TorBox API key. Left out keeps the saved key; empty removes it.
+          description: The chosen debrid service's key. Left out keeps the saved key; empty removes it.
           maxLength: 256
           type: string
         client:
-          description: The user's qBittorrent, the node's own client, the user's TorBox account, or none.
+          description: The user's qBittorrent, the node's own client, the user's account on a debrid service, or none.
           enum:
             - ""
             - qbittorrent
             - embedded
             - torbox
+            - realdebrid
+            - alldebrid
+            - premiumize
           type: string
         password:
           description: Left out keeps the saved password; empty removes it.
@@ -3883,6 +3889,9 @@ components:
             - qbittorrent
             - embedded
             - torbox
+            - realdebrid
+            - alldebrid
+            - premiumize
           type: string
         reachable:
           type: boolean
@@ -4064,6 +4073,9 @@ components:
           maximum: 1
           minimum: 0
           type: number
+        remote:
+          $ref: "#/components/schemas/TorrentRemote"
+          description: Present while a debrid service is still getting the torrent itself; the fields above are the node's own download, which starts once the service has the files.
         seeds:
           format: int64
           type: integer
@@ -4146,6 +4158,9 @@ components:
           format: int64
           minimum: 0
           type: integer
+        prefer_cached:
+          description: "With a debrid service as the client, rank the releases it already holds higher: they arrive at once. Weighs about one step of resolution."
+          type: boolean
         preferred:
           description: Words a release name should have — groups, sites, "multi-sub" — best first.
           items:
@@ -4169,6 +4184,7 @@ components:
         - preferred
         - excluded
         - min_seeders
+        - prefer_cached
       type: object
     TorrentRelease:
       additionalProperties: false
@@ -4177,6 +4193,9 @@ components:
           type: boolean
         best:
           description: The one result the profile would pick.
+          type: boolean
+        cached:
+          description: With a debrid service as the client, whether it already holds the release, which then arrives at once. Absent with other clients, or when the service could not be asked.
           type: boolean
         codec:
           description: e.g. HEVC
@@ -4254,6 +4273,34 @@ components:
         - eligible
         - best
         - batch
+      type: object
+    TorrentRemote:
+      additionalProperties: false
+      properties:
+        error:
+          description: Why the service gave up on the torrent, in its own words.
+          type: string
+        progress:
+          format: double
+          maximum: 1
+          minimum: 0
+          type: number
+        queued:
+          description: Waiting for a free slot on the account.
+          type: boolean
+        service:
+          examples:
+            - TorBox
+          type: string
+        speed:
+          description: The service's download speed, bytes per second.
+          format: int64
+          type: integer
+      required:
+        - service
+        - progress
+        - speed
+        - queued
       type: object
     TorrentRule:
       additionalProperties: false
@@ -4359,6 +4406,11 @@ components:
           format: uri
           readOnly: true
           type: string
+        cache_service:
+          description: The debrid service the releases' cached marks are about; absent when there are none.
+          examples:
+            - TorBox
+          type: string
         queries:
           items:
             type: string
@@ -4393,15 +4445,25 @@ components:
           readOnly: true
           type: string
         client:
-          description: The user's qBittorrent, the node's own client, the user's TorBox account, or none.
+          description: The user's qBittorrent, the node's own client, the user's account on a debrid service, or none.
           enum:
             - ""
             - qbittorrent
             - embedded
             - torbox
+            - realdebrid
+            - alldebrid
+            - premiumize
           type: string
+        debrid_keys:
+          description: The debrid services that have a key saved, chosen or not.
+          items:
+            type: string
+          type:
+            - array
+            - "null"
         has_api_key:
-          description: Whether a TorBox API key is saved; the key itself is never returned.
+          description: Whether the chosen debrid service has a key saved; keys are never returned.
           type: boolean
         has_password:
           type: boolean
@@ -4420,6 +4482,7 @@ components:
         - username
         - has_password
         - has_api_key
+        - debrid_keys
         - root_id
         - path_map
       type: object
@@ -7129,7 +7192,7 @@ paths:
         - media
   /v1/torrent/check:
     post:
-      description: Signs in to qBittorrent with the given address and credentials, or to TorBox with the given key, saved or not, and reports the version or the plan.
+      description: Signs in to qBittorrent with the given address and credentials, or to a debrid service with the given key, saved or not, and reports the version or the account.
       operationId: checkTorrentClient
       requestBody:
         content:
@@ -7564,7 +7627,7 @@ paths:
         - torrent
   /v1/torrent/settings:
     get:
-      description: The password and the TorBox key are never returned; has_password and has_api_key say whether one is saved.
+      description: The password and debrid keys are never returned; has_password, has_api_key and debrid_keys say which are saved.
       operationId: getTorrentSettings
       responses:
         "200":

@@ -85,6 +85,23 @@ type Torrent struct {
 	Peers      int     `json:"num_leechs"`
 	ETA        int64   `json:"eta"`
 	SavePath   string  `json:"save_path"`
+
+	// Remote is set by a debrid client while the service is still getting the
+	// torrent itself; qBittorrent never sets it.
+	Remote *Remote `json:"-"`
+}
+
+// Remote is how far a debrid service is with a torrent before the node can fetch
+// its files.
+type Remote struct {
+	Service  string
+	Progress float64
+	// Speed is the service's own download speed, bytes per second.
+	Speed int64
+	// Queued waits for a free slot on the account.
+	Queued bool
+	// Error is why the service gave up on the torrent.
+	Error string
 }
 
 // File is one file inside a torrent; Name is relative to the save path and uses

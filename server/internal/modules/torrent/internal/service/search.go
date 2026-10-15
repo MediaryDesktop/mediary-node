@@ -5,12 +5,14 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/metainfo"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/release"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/store"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/torznab"
@@ -62,6 +64,7 @@ type TorrentRelease struct {
 	Grabs       int        `json:"grabs"`
 	PublishedAt *time.Time `json:"published_at,omitempty"`
 	InfoHash    string     `json:"info_hash,omitempty"`
+	Cached      *bool      `json:"cached,omitempty" doc:"With a debrid service as the client, whether it already holds the release, which then arrives at once. Absent with other clients, or when the service could not be asked."`
 
 	release.Info
 
@@ -88,6 +91,8 @@ type TorrentSearchResult struct {
 	Queries  []string               `json:"queries"`
 	Releases []TorrentRelease       `json:"releases"`
 	Sources  []TorrentSourceOutcome `json:"sources"`
+	// CacheService names the service the cached marks are about.
+	CacheService string `json:"cache_service,omitempty" example:"TorBox" doc:"The debrid service the releases' cached marks are about; absent when there are none."`
 }
 
 type searchCache struct {
@@ -209,16 +214,77 @@ func (s *Service) Search(ctx context.Context, req SearchRequest) (*TorrentSearch
 		return nil, err
 	}
 
+	cacheService := s.markCached(ctx, releases)
+
 	rank(releases, profile)
 	sortReleases(releases)
 	s.keep(releases)
 
-	result := &TorrentSearchResult{Queries: queries, Releases: releases}
+	result := &TorrentSearchResult{Queries: queries, Releases: releases, CacheService: cacheService}
 	for _, source := range sources {
 		result.Sources = append(result.Sources, *outcomes[source.ID])
 	}
 
 	return result, nil
+}
+
+// How long a search waits for the debrid service to say what it holds; past
+// this the results come without the marks rather than late.
+const cacheCheckTimeout = 10 * time.Second
+
+// markCached asks a debrid client which releases it already holds and marks
+// them, returning the service's name; "" when the client is not one or could not
+// be asked, and then no release is marked either way.
+func (s *Service) markCached(ctx context.Context, releases []TorrentRelease) string {
+	client, err := s.currentClient(ctx)
+	if err != nil || client == nil {
+		return ""
+	}
+
+	checker, ok := client.(CacheChecker)
+	if !ok {
+		return ""
+	}
+
+	byHash := map[string][]int{}
+	for i := range releases {
+		hash := strings.ToLower(releases[i].InfoHash)
+		if hash == "" && releases[i].magnet != "" {
+			if info, magnetErr := metainfo.FromMagnet(releases[i].magnet); magnetErr == nil {
+				hash = info.InfoHash
+			}
+		}
+		if hash != "" {
+			byHash[hash] = append(byHash[hash], i)
+		}
+	}
+	if len(byHash) == 0 {
+		return ""
+	}
+
+	hashes := make([]string, 0, len(byHash))
+	for hash := range byHash {
+		hashes = append(hashes, hash)
+	}
+	slices.Sort(hashes)
+
+	checkCtx, cancel := context.WithTimeout(ctx, cacheCheckTimeout)
+	defer cancel()
+
+	cached, err := checker.Cached(checkCtx, hashes)
+	if err != nil {
+		s.logger.Debug().Err(err).Msg("could not ask the debrid service what it holds")
+		return ""
+	}
+
+	for hash, indexes := range byHash {
+		held := cached[hash]
+		for _, i := range indexes {
+			releases[i].Cached = &held
+		}
+	}
+
+	return checker.Service()
 }
 
 func (s *Service) queries(ctx context.Context, req SearchRequest) ([]string, error) {

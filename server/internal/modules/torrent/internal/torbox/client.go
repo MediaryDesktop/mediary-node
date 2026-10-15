@@ -180,6 +180,33 @@ func (c *Client) Torrents(ctx context.Context) ([]Torrent, error) {
 	return torrents, nil
 }
 
+// The most hashes one cache check asks about; TorBox answers larger lists slowly.
+const cacheBatch = 100
+
+// Cached reports which of the hashes TorBox already holds, so adding them gives
+// the files at once.
+func (c *Client) Cached(ctx context.Context, hashes []string) (map[string]bool, error) {
+	cached := make(map[string]bool, len(hashes))
+
+	for start := 0; start < len(hashes); start += cacheBatch {
+		batch := hashes[start:min(start+cacheBatch, len(hashes))]
+
+		var items []struct {
+			Hash string `json:"hash"`
+		}
+		query := url.Values{"hash": {strings.Join(batch, ",")}, "format": {"list"}}
+		if err := c.call(ctx, http.MethodGet, "torrents/checkcached", query, nil, "", &items); err != nil {
+			return nil, err
+		}
+
+		for _, item := range items {
+			cached[strings.ToLower(item.Hash)] = true
+		}
+	}
+
+	return cached, nil
+}
+
 // Queue lists the torrents waiting for a free slot.
 func (c *Client) Queue(ctx context.Context) ([]Queued, error) {
 	var queued []Queued
