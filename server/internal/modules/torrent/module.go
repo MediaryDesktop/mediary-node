@@ -152,6 +152,15 @@ func (m *Module) Close() {
 	}
 }
 
+// StreamFile is a stream the player plays like a library file.
+type StreamFile = service.StreamFile
+
+// StreamFile resolves the negative file ID of a ready stream to a link the
+// player can open.
+func (m *Module) StreamFile(ctx context.Context, fileID int64) (*StreamFile, error) {
+	return m.svc.StreamFile(ctx, fileID)
+}
+
 // Start follows the downloads until ctx ends.
 func (m *Module) Start(ctx context.Context) {
 	m.svc.Start(ctx)

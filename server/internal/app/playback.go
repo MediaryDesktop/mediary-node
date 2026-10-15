@@ -7,18 +7,25 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/modules/library"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/media"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/playback"
+	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/tracker"
 )
 
 // playableFiles lets the player open a file without knowing how the library keeps
 // it — and, just as importantly, without taking a path from the client: the node
-// plays what it scanned.
+// plays what it scanned, or a stream it made from a debrid service, which takes
+// a negative ID so the player handles both alike.
 type playableFiles struct {
 	library *library.Module
 	media   *media.Module
+	streams *torrent.Module
 }
 
 func (p playableFiles) Playable(ctx context.Context, fileID int64) (*playback.PlayableFile, error) {
+	if fileID < 0 {
+		return p.stream(ctx, fileID)
+	}
+
 	file, err := p.library.Playable(ctx, fileID)
 	if err != nil || file == nil {
 		return nil, err
@@ -29,9 +36,30 @@ func (p playableFiles) Playable(ctx context.Context, fileID int64) (*playback.Pl
 		Path:     file.Path,
 		Title:    file.Title,
 		MediaRef: file.MediaRef,
-		Episode:  p.overallEpisode(ctx, file),
+		Episode:  p.overallEpisode(ctx, file.MediaRef, file.Season, file.Episode),
 		Duration: file.Duration,
 		Missing:  file.Missing,
+	}, nil
+}
+
+func (p playableFiles) stream(ctx context.Context, fileID int64) (*playback.PlayableFile, error) {
+	if p.streams == nil {
+		return nil, nil
+	}
+
+	file, err := p.streams.StreamFile(ctx, fileID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &playback.PlayableFile{
+		ID:       fileID,
+		Path:     file.URL,
+		Title:    file.Name,
+		MediaRef: file.MediaRef,
+		Episode:  p.overallEpisode(ctx, file.MediaRef, file.Season, file.Episode),
+		Remote:   true,
+		Key:      file.Key,
 	}, nil
 }
 
@@ -39,25 +67,25 @@ func (p playableFiles) Playable(ctx context.Context, fileID int64) (*playback.Pl
 // whose first season has ten is the fifteenth — because progress on a list is
 // one number, as on AniList. Without the episode list the file's own number
 // stands, which is still right for a first season.
-func (p playableFiles) overallEpisode(ctx context.Context, file *library.PlayableFile) *int {
-	if file.Episode == nil || file.Season == nil || !strings.HasPrefix(file.MediaRef, "tmdb:tv:") {
-		return file.Episode
+func (p playableFiles) overallEpisode(ctx context.Context, mediaRef string, season, episode *int) *int {
+	if episode == nil || season == nil || !strings.HasPrefix(mediaRef, "tmdb:tv:") {
+		return episode
 	}
 
-	list, err := p.media.Episodes(ctx, file.MediaRef)
+	list, err := p.media.Episodes(ctx, mediaRef)
 	if err != nil {
-		return file.Episode
+		return episode
 	}
 
 	for i := range list.Episodes {
-		episode := &list.Episodes[i]
-		if episode.Season != nil && *episode.Season == *file.Season && episode.Number == *file.Episode {
+		listed := &list.Episodes[i]
+		if listed.Season != nil && *listed.Season == *season && listed.Number == *episode {
 			overall := i + 1
 			return &overall
 		}
 	}
 
-	return file.Episode
+	return episode
 }
 
 // watchedEpisodes carries what the player saw to the tracker, which owns what it

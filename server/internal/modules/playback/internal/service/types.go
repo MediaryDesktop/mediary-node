@@ -26,6 +26,12 @@ type PlayableFile struct {
 	Duration *time.Duration
 
 	Missing bool
+
+	// Remote is a file a debrid service holds, played without downloading it:
+	// Path is then its HTTPS address, and Key names it for the caches, since
+	// there is nothing on disk to tell one version from another.
+	Remote bool
+	Key    string
 }
 
 // Library answers "what is this file". Implemented over the library module by the

@@ -142,6 +142,8 @@ type Service struct {
 	missing map[string]int
 
 	search searchCache
+
+	streams streamRegistry
 }
 
 func New(st *store.Store, secretFile *secrets.Store, library Library, hub *events.Hub, logger zerolog.Logger, opts Options) *Service {

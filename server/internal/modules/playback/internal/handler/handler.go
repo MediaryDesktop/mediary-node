@@ -244,16 +244,22 @@ func (h *Handler) Register(api huma.API) {
 		Method:      http.MethodGet,
 		Path:        "/v1/playback/files/{id}/direct",
 		Summary:     "Serve a file as it is",
-		Description: "The file's bytes with range support, for a video element to play directly. Accepts the node token as ?token=, because a video element cannot send headers.",
+		Description: "The file's bytes with range support, for a video element to play directly. For a stream (a negative ID) the node passes the request on to the debrid service, so the client never holds the service's link and the link can be renewed behind the same address. Accepts the node token as ?token=, because a video element cannot send headers.",
 		Tags:        []string{"playback"},
 	}, func(ctx context.Context, in *FileInput) (*huma.StreamResponse, error) {
-		path, err := h.svc.DirectPath(ctx, in.ID)
+		source, err := h.svc.DirectSource(ctx, in.ID)
 		if err != nil {
 			return nil, httpapi.ToHTTP(err)
 		}
 
+		contentType := videofile.ContainerMimeType(filepath.Ext(source.Name))
+
 		return &huma.StreamResponse{Body: func(hctx huma.Context) {
-			serveFile(hctx, path, videofile.ContainerMimeType(filepath.Ext(path)))
+			if source.Remote {
+				proxyRemote(hctx, source.Path, contentType)
+				return
+			}
+			serveFile(hctx, source.Path, contentType)
 		}}, nil
 	})
 

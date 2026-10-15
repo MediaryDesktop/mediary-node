@@ -65,7 +65,7 @@ func TestExtractorConvertsSubtitlesAndKeepsFontsInsideTheCache(t *testing.T) {
 	cache := filepath.Join(dir, "cache")
 	extractor := &Extractor{CacheDir: cache}
 
-	extracted, err := extractor.Extract(context.Background(), path, info)
+	extracted, err := extractor.Extract(context.Background(), path, "", info)
 	if err != nil {
 		t.Fatalf("extract: %v", err)
 	}
@@ -90,7 +90,7 @@ func TestExtractorConvertsSubtitlesAndKeepsFontsInsideTheCache(t *testing.T) {
 	}
 
 	// A second call is served from the finished directory.
-	if _, err := (&Extractor{FFmpegPath: filepath.Join(dir, "no-ffmpeg"), CacheDir: cache}).Extract(context.Background(), path, info); err != nil {
+	if _, err := (&Extractor{FFmpegPath: filepath.Join(dir, "no-ffmpeg"), CacheDir: cache}).Extract(context.Background(), path, "", info); err != nil {
 		t.Errorf("second extract ran ffmpeg again: %v", err)
 	}
 }

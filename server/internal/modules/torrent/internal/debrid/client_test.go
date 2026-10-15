@@ -541,6 +541,54 @@ func TestServiceGivingUpIsAnError(t *testing.T) {
 	}
 }
 
+func TestStreamIsReadiedButNeverFetched(t *testing.T) {
+	fake := newFake(t)
+	fake.waiting, fake.partial, fake.hideHash = true, true, true
+	client := newClient(t, fake)
+	ctx := context.Background()
+
+	got, err := client.Stream(ctx, magnet, nil)
+	if err != nil || got != hash {
+		t.Fatalf("stream = %q, %v", got, err)
+	}
+
+	// A torrent waiting for Start is started for a stream, as for a download.
+	if _, stateErr := client.StreamState(ctx, hash); stateErr != nil {
+		t.Fatal(stateErr)
+	}
+	fake.mu.Lock()
+	starts := fake.starts
+	fake.mu.Unlock()
+	if starts != 1 {
+		t.Errorf("started %d times", starts)
+	}
+
+	fake.finish(map[int]string{0: "Show/01.mkv", 1: "../evil.mkv"}, map[int][]byte{0: []byte("data"), 1: []byte("x")})
+	client.mu.Lock()
+	client.listedAt = time.Time{}
+	client.mu.Unlock()
+
+	remote, err := client.StreamState(ctx, hash)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !remote.Ready || len(remote.Files) != 1 || remote.Files[0].Path != "Show/01.mkv" {
+		t.Fatalf("remote = %+v, want the safe file only", remote)
+	}
+
+	link, err := client.StreamLink(ctx, hash, 0)
+	if err != nil || !strings.HasSuffix(link, "/file/0") {
+		t.Errorf("link = %q, %v", link, err)
+	}
+
+	// Nothing of a stream is fetched to disk, and it is not a download.
+	client.mu.Lock()
+	defer client.mu.Unlock()
+	if len(client.entries) != 0 || client.active != "" {
+		t.Errorf("entries = %v, active = %q", client.entries, client.active)
+	}
+}
+
 func TestNoCacheCheckMeansNoAnswer(t *testing.T) {
 	client := newClient(t, noCache{newFake(t)})
 

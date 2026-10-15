@@ -153,8 +153,12 @@ type Client struct {
 	// from a service whose listing leaves them out.
 	startedAt map[string]time.Time
 	details   map[string]Remote
-	samples   map[string]sample
-	speeds    map[string]int64
+	// Torrents given to the service to play from rather than download, by hash,
+	// with the ID the service gave them. Not kept across restarts: a stream is
+	// asked for again when it is played again.
+	streams map[string]string
+	samples map[string]sample
+	speeds  map[string]int64
 
 	wake    chan struct{}
 	started bool
@@ -183,6 +187,7 @@ func New(opts Options) *Client {
 		failedAt:  map[string]time.Time{},
 		startedAt: map[string]time.Time{},
 		details:   map[string]Remote{},
+		streams:   map[string]string{},
 		samples:   map[string]sample{},
 		speeds:    map[string]int64{},
 		wake:      make(chan struct{}, 1),
@@ -603,6 +608,11 @@ func (c *Client) listing(ctx context.Context, fresh bool) (map[string]Remote, er
 			hashOfID[saved.RemoteID] = hash
 		}
 	}
+	for hash, remoteID := range c.streams {
+		if remoteID != "" {
+			hashOfID[remoteID] = hash
+		}
+	}
 	c.mu.Unlock()
 
 	remotes := make(map[string]Remote, len(list))
@@ -637,7 +647,9 @@ func (c *Client) listing(ctx context.Context, fresh bool) (map[string]Remote, er
 func (c *Client) prepare(ctx context.Context, remotes map[string]Remote) {
 	for hash, remote := range remotes {
 		c.mu.Lock()
-		_, ours := c.entries[hash]
+		_, downloading := c.entries[hash]
+		_, streaming := c.streams[hash]
+		ours := downloading || streaming
 		known, detailed := c.details[hash]
 		startedAt := c.startedAt[hash]
 		c.mu.Unlock()

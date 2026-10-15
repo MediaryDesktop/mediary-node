@@ -9,6 +9,7 @@ import (
 	"github.com/rs/zerolog"
 
 	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/mpv"
+	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/videofile"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
 )
@@ -38,6 +39,12 @@ type Options struct {
 	Thumbnailer Thumbnailer
 	Transcoder  Transcoder
 
+	// LocalURL is the node's own address of a file's direct endpoint, token
+	// included. A stream goes to ffprobe, ffmpeg and mpv through it rather than
+	// as the service's link, which changes when it is renewed: the address stays
+	// the same for the whole session, and the proxy behind it renews the link.
+	LocalURL func(fileID int64) string
+
 	Now func() time.Time
 }
 
@@ -54,6 +61,9 @@ type Service struct {
 	// seconds past the threshold, and each would otherwise be another write to
 	// the user's list.
 	counted map[int64]bool
+
+	// What ffprobe found in each stream, by its key.
+	remoteInfo map[string]*videofile.MediaInfo
 }
 
 func New(logger zerolog.Logger, hub *events.Hub, opts Options) *Service {
@@ -86,14 +96,25 @@ func (s *Service) Start(ctx context.Context, fileID int64) (*PlaybackStatus, err
 
 	s.stop()
 
-	player, err := s.opts.Launcher.Start(ctx, file.Path, 0)
+	source, err := s.source(file)
 	if err != nil {
 		return nil, err
 	}
 
+	player, err := s.opts.Launcher.Start(ctx, source, 0)
+	if err != nil {
+		return nil, err
+	}
+
+	// A stream's link is the service's to give, not the client's to keep.
+	shownPath := file.Path
+	if file.Remote {
+		shownPath = file.Title
+	}
+
 	session := &PlaybackSession{
 		FileID:    file.ID,
-		Path:      file.Path,
+		Path:      shownPath,
 		Title:     file.Title,
 		MediaRef:  file.MediaRef,
 		Episode:   file.Episode,
@@ -115,6 +136,20 @@ func (s *Service) Start(ctx context.Context, fileID int64) (*PlaybackStatus, err
 	s.publish("started", session)
 
 	return &status, nil
+}
+
+// source is what the tools read a file from: its path, or for a stream the
+// node's own address of it.
+func (s *Service) source(file *PlayableFile) (string, error) {
+	if !file.Remote {
+		return file.Path, nil
+	}
+
+	if s.opts.LocalURL == nil {
+		return "", apperr.New(apperr.KindPrecondition, "streams are not configured on this node")
+	}
+
+	return s.opts.LocalURL(file.ID), nil
 }
 
 func (s *Service) observe(ctx context.Context, player Player) {

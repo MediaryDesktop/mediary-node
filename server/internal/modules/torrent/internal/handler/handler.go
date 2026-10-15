@@ -98,6 +98,7 @@ type TorrentCheckOutput struct {
 func (h *Handler) Register(api huma.API) {
 	h.registerSearch(api)
 	h.registerRules(api)
+	h.registerStreams(api)
 
 	huma.Register(api, huma.Operation{
 		OperationID: "listTorrentDownloads",

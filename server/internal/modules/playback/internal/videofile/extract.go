@@ -41,13 +41,17 @@ func (e Extracted) Font(font Font) string {
 	return filepath.Join(e.dir, "fonts", fontFileName(font))
 }
 
-func (x *Extractor) Extract(ctx context.Context, path string, info *MediaInfo) (Extracted, error) {
-	stat, err := os.Stat(path)
-	if err != nil {
-		return Extracted{}, err
+// Extract writes a file's tracks out once. key names the file for the cache;
+// empty, the file's version on disk does — a stream has none and passes its own.
+func (x *Extractor) Extract(ctx context.Context, path, key string, info *MediaInfo) (Extracted, error) {
+	if key == "" {
+		stat, err := os.Stat(path)
+		if err != nil {
+			return Extracted{}, err
+		}
+		key = cacheKey(path, stat)
 	}
 
-	key := cacheKey(path, stat)
 	out := Extracted{dir: filepath.Join(x.CacheDir, key)}
 	done := filepath.Join(out.dir, "done")
 

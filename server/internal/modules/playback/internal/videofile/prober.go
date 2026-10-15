@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -29,6 +30,20 @@ type Prober struct {
 }
 
 func (p Prober) Info(ctx context.Context, path string) (*MediaInfo, error) {
+	// An address has no version to key a cache by; ffprobe reads only its
+	// header, over range requests.
+	if IsURL(path) {
+		probeCtx, cancel := context.WithTimeout(ctx, probeTimeout)
+		defer cancel()
+
+		info, err := probe(probeCtx, p.FFprobePath, path)
+		if err != nil {
+			return nil, fmt.Errorf("probe the stream: %w", err)
+		}
+
+		return info, nil
+	}
+
 	stat, err := os.Stat(path)
 	if err != nil {
 		return nil, err
@@ -57,6 +72,11 @@ func (p Prober) Info(ctx context.Context, path string) (*MediaInfo, error) {
 	}
 
 	return info, nil
+}
+
+// IsURL reports whether a path is an HTTP(S) address rather than a file.
+func IsURL(path string) bool {
+	return strings.HasPrefix(path, "https://") || strings.HasPrefix(path, "http://")
 }
 
 // FileKey names one version of a file: it changes when the file is rewritten,

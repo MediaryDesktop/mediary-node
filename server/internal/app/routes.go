@@ -62,6 +62,10 @@ type Deps struct {
 	TorrentClient     torrent.Connection
 	TorrentListenPort int
 	TorrentEnableUPnP bool
+
+	// LocalURL is the node's own address of a file's direct endpoint, which the
+	// player's tools read streams through.
+	LocalURL func(fileID int64) string
 }
 
 // Register mounts every module and returns what has to run on shutdown.
@@ -121,8 +125,27 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 	})
 	libraryModule.Register(api)
 
-	// The player opens files the library scanned and reports what was watched to the
-	// tracker. Both edges are ports, joined here: playback knows neither module.
+	// Torrents are saved into a library folder and their videos join the library
+	// through it, like downloaded chapters.
+	torrentModule := torrent.New(torrent.Deps{
+		DB:          deps.DB,
+		Logger:      moduleLogger(deps.Logger, "torrent"),
+		Events:      deps.Events,
+		Library:     downloadFolders{library: libraryModule},
+		SecretsPath: filepath.Join(deps.DataDir, "torrent-secrets.json"),
+		Client:      deps.TorrentClient,
+		EmbeddedDir: filepath.Join(deps.DataDir, "torrent-client"),
+		DebridDir:   filepath.Join(deps.DataDir, "debrid"),
+		ListenPort:  deps.TorrentListenPort,
+		EnableUPnP:  deps.TorrentEnableUPnP,
+		Titles:      releaseTitles{media: mediaModule},
+		UserAgent:   "mediary-node/" + deps.Build.Version,
+	})
+	torrentModule.Register(api)
+
+	// The player opens files the library scanned, and streams the torrent module
+	// made from a debrid service, and reports what was watched to the tracker.
+	// Every edge is a port, joined here: playback knows none of these modules.
 	playbackModule := playback.New(playback.Deps{
 		Logger:      moduleLogger(deps.Logger, "playback"),
 		Events:      deps.Events,
@@ -130,8 +153,9 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 		FFmpegPath:  deps.FFmpegPath,
 		FFprobePath: deps.FFprobePath,
 		DataDir:     deps.DataDir,
-		Library:     playableFiles{library: libraryModule, media: mediaModule},
+		Library:     playableFiles{library: libraryModule, media: mediaModule, streams: torrentModule},
 		Progress:    watchedEpisodes{tracker: trackerModule},
+		LocalURL:    deps.LocalURL,
 
 		Transcode:        deps.Transcode,
 		TranscodeDir:     deps.TranscodeDir,
@@ -154,24 +178,6 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 		MangaDexTimeout:        deps.MangaDex.Timeout,
 	})
 	mangaModule.Register(api)
-
-	// Torrents are saved into a library folder and their videos join the library
-	// through it, like downloaded chapters.
-	torrentModule := torrent.New(torrent.Deps{
-		DB:          deps.DB,
-		Logger:      moduleLogger(deps.Logger, "torrent"),
-		Events:      deps.Events,
-		Library:     downloadFolders{library: libraryModule},
-		SecretsPath: filepath.Join(deps.DataDir, "torrent-secrets.json"),
-		Client:      deps.TorrentClient,
-		EmbeddedDir: filepath.Join(deps.DataDir, "torrent-client"),
-		DebridDir:   filepath.Join(deps.DataDir, "debrid"),
-		ListenPort:  deps.TorrentListenPort,
-		EnableUPnP:  deps.TorrentEnableUPnP,
-		Titles:      releaseTitles{media: mediaModule},
-		UserAgent:   "mediary-node/" + deps.Build.Version,
-	})
-	torrentModule.Register(api)
 
 	queueCtx, stopQueue := context.WithCancel(ctx)
 

@@ -3445,6 +3445,48 @@ components:
       required:
         - file_id
       type: object
+    StartTorrentStreamInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/StartTorrentStreamInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        episode:
+          description: Picks the file from a batch, and is what gets marked watched.
+          format: int64
+          minimum: 0
+          type: integer
+        magnet:
+          description: A magnet link with a BitTorrent v1 hash. Give this, torrent or release_id.
+          maxLength: 65536
+          type: string
+        media_ref:
+          description: The title the stream is for; the player marks its episode watched.
+          minLength: 1
+          type: string
+        release_id:
+          description: A search result to play.
+          maxLength: 100
+          type: string
+        season:
+          description: "For a show numbered by season: the episode counts within it."
+          format: int64
+          minimum: 0
+          type: integer
+        title:
+          maxLength: 500
+          type: string
+        torrent:
+          contentEncoding: base64
+          description: A .torrent file, base64-encoded.
+          type: string
+      required:
+        - media_ref
+      type: object
     StatusOutputBody:
       additionalProperties: false
       properties:
@@ -4597,6 +4639,63 @@ components:
             - "null"
       required:
         - sources
+      type: object
+    TorrentStream:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/TorrentStream.json
+          format: uri
+          readOnly: true
+          type: string
+        episode:
+          format: int64
+          type: integer
+        error:
+          type: string
+        file_id:
+          description: "Once ready: a negative ID the player takes like a library file's — /v1/playback/files/{id}/stream, /direct, /hls and POST /v1/playback all accept it."
+          format: int64
+          type: integer
+        id:
+          format: int64
+          type: integer
+        media_ref:
+          type: string
+        name:
+          description: The file that plays, once chosen.
+          type: string
+        progress:
+          description: How far the service is with the torrent, while preparing.
+          format: double
+          maximum: 1
+          minimum: 0
+          type: number
+        service:
+          examples:
+            - TorBox
+          type: string
+        speed:
+          description: The service's download speed, bytes per second, while preparing.
+          format: int64
+          type: integer
+        state:
+          description: ready once the service holds the file; failed when it gave up, or the torrent has no fitting video.
+          enum:
+            - preparing
+            - queued
+            - ready
+            - failed
+          type: string
+      required:
+        - id
+        - state
+        - service
+        - progress
+        - speed
+        - media_ref
       type: object
     Trailer:
       additionalProperties: false
@@ -6292,7 +6391,7 @@ paths:
         - playback
   /v1/playback/files/{id}/direct:
     get:
-      description: The file's bytes with range support, for a video element to play directly. Accepts the node token as ?token=, because a video element cannot send headers.
+      description: The file's bytes with range support, for a video element to play directly. For a stream (a negative ID) the node passes the request on to the debrid service, so the client never holds the service's link and the link can be renewed behind the same address. Accepts the node token as ?token=, because a video element cannot send headers.
       operationId: getPlaybackDirect
       parameters:
         - description: Library file, as listed by listLibraryFiles.
@@ -7793,6 +7892,60 @@ paths:
                 $ref: "#/components/schemas/ErrorModel"
           description: Error
       summary: Change a release search source
+      tags:
+        - torrent
+  /v1/torrent/streams:
+    post:
+      description: Needs a debrid service as the torrent client. Gives it the torrent, which is not added to the downloads, and reports how far the service is; ask GET .../streams/{id} until the state is ready, then play file_id like a library file. A torrent the service already holds is ready at once.
+      operationId: startTorrentStream
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StartTorrentStreamInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TorrentStream"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Play a torrent without downloading it
+      tags:
+        - torrent
+  /v1/torrent/streams/{id}:
+    get:
+      description: "Streams live in the node's memory: after a restart, start the stream again."
+      operationId: getTorrentStream
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            format: int64
+            minimum: 1
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TorrentStream"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: How far a stream is
       tags:
         - torrent
   /v1/tracker/entries:

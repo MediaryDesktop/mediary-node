@@ -169,6 +169,8 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 		TorrentClient:     torrentClient(cfg.Torrent),
 		TorrentListenPort: cfg.Torrent.ListenPort,
 		TorrentEnableUPnP: cfg.Torrent.EnableUPnP,
+
+		LocalURL: localDirectURL(cfg.HTTP, token),
 	})
 	defer shutdownModules()
 

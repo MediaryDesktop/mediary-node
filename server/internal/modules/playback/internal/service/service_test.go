@@ -85,12 +85,15 @@ func (f *fakePlayer) wasSet(property string) (any, bool) {
 type fakeLauncher struct {
 	mu      sync.Mutex
 	players []*fakePlayer
+	paths   []string
 	err     error
 }
 
-func (l *fakeLauncher) Start(context.Context, string, float64) (Player, error) {
+func (l *fakeLauncher) Start(_ context.Context, path string, _ float64) (Player, error) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
+
+	l.paths = append(l.paths, path)
 
 	if l.err != nil {
 		return nil, l.err

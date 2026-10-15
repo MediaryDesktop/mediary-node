@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"os/exec"
+	"path/filepath"
+	"strings"
 
 	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/videofile"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
@@ -16,9 +18,10 @@ type Prober interface {
 	Info(ctx context.Context, path string) (*videofile.MediaInfo, error)
 }
 
-// Extractor pulls subtitle tracks and fonts out of a file for the renderer.
+// Extractor pulls subtitle tracks and fonts out of a file for the renderer. key
+// names the file for the cache; empty means the file's own version on disk.
 type Extractor interface {
-	Extract(ctx context.Context, path string, info *videofile.MediaInfo) (videofile.Extracted, error)
+	Extract(ctx context.Context, path, key string, info *videofile.MediaInfo) (videofile.Extracted, error)
 }
 
 // Thumbnailer cuts a still out of a video file, for an episode no source has an
@@ -72,15 +75,29 @@ func (s *Service) hlsURL(fileID int64) string {
 	return fmt.Sprintf("/v1/playback/files/%d/hls/master.m3u8", fileID)
 }
 
-// DirectPath is the file to hand to a direct-play request. Only library files
-// can be served, by id, so the endpoint never reads a path a caller chose.
-func (s *Service) DirectPath(ctx context.Context, fileID int64) (string, error) {
+// DirectSource is what a direct-play request serves: a file on disk, or a
+// stream's link to pass the request on to.
+type DirectSource struct {
+	Path   string
+	Remote bool
+	// Name is the file's own name, whose extension says the container.
+	Name string
+}
+
+// DirectSource resolves a direct-play request. Only library files and streams
+// the node made can be served, by id, so the endpoint never reads a path or
+// fetches an address a caller chose.
+func (s *Service) DirectSource(ctx context.Context, fileID int64) (*DirectSource, error) {
 	file, err := s.playable(ctx, fileID)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return file.Path, nil
+	if file.Remote {
+		return &DirectSource{Path: file.Path, Remote: true, Name: file.Title}, nil
+	}
+
+	return &DirectSource{Path: file.Path, Name: file.Path}, nil
 }
 
 func (s *Service) playable(ctx context.Context, fileID int64) (*PlayableFile, error) {
@@ -108,14 +125,46 @@ func (s *Service) info(ctx context.Context, file *PlayableFile) (*videofile.Medi
 		return nil, apperr.New(apperr.KindPrecondition, "media probing is not configured on this node")
 	}
 
-	info, err := s.opts.Prober.Info(ctx, file.Path)
+	// A stream is probed over the network, so its answer is kept for the
+	// session: the player asks for it before every track and segment.
+	if file.Remote {
+		s.mu.Lock()
+		cached := s.remoteInfo[file.Key]
+		s.mu.Unlock()
+		if cached != nil {
+			return cached, nil
+		}
+	}
+
+	source, err := s.source(file)
+	if err != nil {
+		return nil, err
+	}
+
+	info, err := s.opts.Prober.Info(ctx, source)
 	if err != nil {
 		if errors.Is(err, exec.ErrNotFound) {
 			return nil, apperr.Wrap(err, apperr.KindPrecondition,
 				"ffprobe was not found on PATH: install FFmpeg or set NODE_FFPROBE_PATH")
 		}
 
+		if file.Remote {
+			return nil, apperr.Wrap(err, apperr.KindUpstream, "could not read the streams of %s from the service", file.Title)
+		}
+
 		return nil, apperr.Wrap(err, apperr.KindInternal, "could not read the streams of %s", file.Path)
+	}
+
+	if file.Remote {
+		// The probe saw the node's own address; the container is in the name.
+		info.Extension = strings.TrimPrefix(filepath.Ext(file.Title), ".")
+
+		s.mu.Lock()
+		if s.remoteInfo == nil {
+			s.remoteInfo = map[string]*videofile.MediaInfo{}
+		}
+		s.remoteInfo[file.Key] = info
+		s.mu.Unlock()
 	}
 
 	return info, nil
@@ -136,7 +185,14 @@ func (s *Service) extracted(ctx context.Context, fileID int64) (*videofile.Media
 		return nil, videofile.Extracted{}, apperr.New(apperr.KindPrecondition, "subtitle extraction is not configured on this node")
 	}
 
-	out, err := s.opts.Extractor.Extract(ctx, file.Path, info)
+	source, err := s.source(file)
+	if err != nil {
+		return nil, videofile.Extracted{}, err
+	}
+
+	// A stream's tracks are read through the whole file, over the network: it
+	// takes as long as fetching the file once.
+	out, err := s.opts.Extractor.Extract(ctx, source, file.Key, info)
 	if err != nil {
 		if errors.Is(err, exec.ErrNotFound) {
 			return nil, videofile.Extracted{}, apperr.Wrap(err, apperr.KindPrecondition,
@@ -191,6 +247,11 @@ func (s *Service) ThumbnailPath(ctx context.Context, fileID int64) (string, erro
 	file, err := s.playable(ctx, fileID)
 	if err != nil {
 		return "", err
+	}
+
+	// A still would mean reading into the middle of a file nobody downloaded.
+	if file.Remote {
+		return "", apperr.New(apperr.KindNotFound, "a stream has no still")
 	}
 
 	var duration float64

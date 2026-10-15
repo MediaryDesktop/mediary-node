@@ -53,12 +53,19 @@ func (s *Service) transcodeTarget(ctx context.Context, fileID int64) (*transcode
 		return nil, err
 	}
 
-	key, err := videofile.FileKey(file.Path)
+	source, err := s.source(file)
 	if err != nil {
-		return nil, apperr.Wrap(err, apperr.KindPrecondition, "cannot read %s", file.Path)
+		return nil, err
 	}
 
-	return &transcodeTarget{path: file.Path, key: key, info: info}, nil
+	key := file.Key
+	if !file.Remote {
+		if key, err = videofile.FileKey(file.Path); err != nil {
+			return nil, apperr.Wrap(err, apperr.KindPrecondition, "cannot read %s", file.Path)
+		}
+	}
+
+	return &transcodeTarget{path: source, key: key, info: info}, nil
 }
 
 func (s *Service) HLSMaster(ctx context.Context, fileID int64, token string) (string, error) {
@@ -135,7 +142,12 @@ func (s *Service) StopTranscode(ctx context.Context, fileID int64) error {
 		return err
 	}
 
-	s.opts.Transcoder.Stop(file.Path)
+	source, err := s.source(file)
+	if err != nil {
+		return err
+	}
+
+	s.opts.Transcoder.Stop(source)
 
 	return nil
 }

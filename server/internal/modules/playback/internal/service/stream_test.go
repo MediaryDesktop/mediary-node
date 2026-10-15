@@ -62,7 +62,7 @@ func TestStreamSaysWhatToInstallWhenFFprobeIsMissing(t *testing.T) {
 func TestDirectRefusesAFileTheScanLost(t *testing.T) {
 	file := &PlayableFile{ID: 7, Path: "/library/Show - 01.mkv", Missing: true}
 
-	_, err := newStreamService(file, nil).DirectPath(context.Background(), 7)
+	_, err := newStreamService(file, nil).DirectSource(context.Background(), 7)
 
 	if apperr.KindOf(err) != apperr.KindPrecondition {
 		t.Fatalf("error kind = %v, want precondition", apperr.KindOf(err))

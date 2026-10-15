@@ -46,6 +46,10 @@ type Deps struct {
 
 	Library  Library
 	Progress Progress
+
+	// LocalURL is the node's own address of a file's direct endpoint, token
+	// included; streams reach ffprobe, ffmpeg and mpv through it.
+	LocalURL func(fileID int64) string
 }
 
 func New(deps Deps) *Module {
@@ -83,6 +87,7 @@ func New(deps Deps) *Module {
 		},
 		Library:  deps.Library,
 		Progress: deps.Progress,
+		LocalURL: deps.LocalURL,
 		Prober: videofile.Prober{
 			FFprobePath: deps.FFprobePath,
 			CacheDir:    filepath.Join(deps.DataDir, "cache", "mediainfo"),
