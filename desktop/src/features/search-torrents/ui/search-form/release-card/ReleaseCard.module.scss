@@ -93,5 +93,25 @@
 			background: var(--surface-active);
 			color: var(--text);
 		}
+
+		&:disabled {
+			opacity: 0.4;
+			cursor: not-allowed;
+
+			&:hover {
+				background: none;
+				color: var(--text-muted);
+			}
+		}
+
+		&.busy {
+			color: var(--accent);
+		}
+	}
+
+	.watchStatus {
+		margin: 0.25rem 0 0;
+		color: var(--accent);
+		font-size: 0.8125rem;
 	}
 }

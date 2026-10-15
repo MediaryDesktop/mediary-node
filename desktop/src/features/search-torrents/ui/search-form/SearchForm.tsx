@@ -5,11 +5,13 @@ import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from '@shared/i18n'
 import { DrawerForm, EmptyState, Skeleton, toast } from '@shared/ui'
 
-import { torrentSearchQuery, TorrentSetupNotice, useTorrentSetup } from '@entities/torrent'
+import { isDebrid, torrentSearchQuery, TorrentSetupNotice, useTorrentSetup } from '@entities/torrent'
+import type { TorrentRelease, TorrentStream } from '@entities/torrent'
 
 import { coveredEpisodes } from '../../lib/episodes'
 import { downloadRequests, filterReleases } from '../../lib/releases'
 import type { ReleaseKind } from '../../lib/releases'
+import { streamEpisode, useWatchRelease } from '../../lib/useWatchRelease'
 import { downloadReleasesFx } from '../../model/model'
 
 import { ReleaseCard } from './release-card/ReleaseCard'
@@ -44,6 +46,32 @@ export function SearchForm({ mediaRef, title, missing, poster, onDone }: SearchF
 	const [kind, setKind] = useState<ReleaseKind>('all')
 	const [onlyMissing, setOnlyMissing] = useState(Boolean(missing?.length))
 	const [selected, setSelected] = useState<Set<string>>(new Set())
+
+	const watching = useWatchRelease({ mediaRef, title, onPlaying: onDone })
+	const canStream = isDebrid(setup.clientKind)
+
+	const streamStatus = (stream: TorrentStream | null): string =>
+		!stream
+			? t('torrents.stream.starting')
+			: stream.state === 'queued'
+				? t('torrents.stream.queued', { service: stream.service })
+				: t('torrents.stream.preparing', {
+						service: stream.service,
+						percent: Math.floor(stream.progress * 100)
+					})
+
+	const watchOf = (release: TorrentRelease) => {
+		const episode = streamEpisode(release, criteria)
+		const preparing = watching.releaseId === release.id
+
+		return {
+			possible: episode !== null && watching.releaseId === null,
+			preparing,
+			status: preparing ? streamStatus(watching.stream) : undefined,
+			onWatch: () => episode && watching.watch(release, episode),
+			onCancel: watching.cancel
+		}
+	}
 
 	const run = () => {
 		setSelected(new Set())
@@ -168,6 +196,7 @@ export function SearchForm({ mediaRef, title, missing, poster, onDone }: SearchF
 									covered={coveredEpisodes(found, missing)}
 									poster={poster}
 									cacheService={result?.cache_service}
+									watch={canStream ? watchOf(found) : undefined}
 									checked={selected.has(found.id)}
 									onCheckedChange={on => toggle(found.id, on)}
 								/>

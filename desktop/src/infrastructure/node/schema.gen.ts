@@ -766,7 +766,7 @@ export interface paths {
 		}
 		/**
 		 * Serve a file as it is
-		 * @description The file's bytes with range support, for a video element to play directly. Accepts the node token as ?token=, because a video element cannot send headers.
+		 * @description The file's bytes with range support, for a video element to play directly. For a stream (a negative ID) the node passes the request on to the debrid service, so the client never holds the service's link and the link can be renewed behind the same address. Accepts the node token as ?token=, because a video element cannot send headers.
 		 */
 		get: operations['getPlaybackDirect']
 		put?: never
@@ -1562,6 +1562,46 @@ export interface paths {
 		 * @description Forgets the source and its key.
 		 */
 		delete: operations['deleteTorrentSource']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/torrent/streams': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Play a torrent without downloading it
+		 * @description Needs a debrid service as the torrent client. Gives it the torrent, which is not added to the downloads, and reports how far the service is; ask GET .../streams/{id} until the state is ready, then play file_id like a library file. A torrent the service already holds is ready at once.
+		 */
+		post: operations['startTorrentStream']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/torrent/streams/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * How far a stream is
+		 * @description Streams live in the node's memory: after a restart, start the stream again.
+		 */
+		get: operations['getTorrentStream']
+		put?: never
+		post?: never
+		delete?: never
 		options?: never
 		head?: never
 		patch?: never
@@ -3619,6 +3659,33 @@ export interface components {
 			 */
 			file_id: number
 		}
+		StartTorrentStreamInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/StartTorrentStreamInputBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * Format: int64
+			 * @description Picks the file from a batch, and is what gets marked watched.
+			 */
+			episode?: number
+			/** @description A magnet link with a BitTorrent v1 hash. Give this, torrent or release_id. */
+			magnet?: string
+			/** @description The title the stream is for; the player marks its episode watched. */
+			media_ref: string
+			/** @description A search result to play. */
+			release_id?: string
+			/**
+			 * Format: int64
+			 * @description For a show numbered by season: the episode counts within it.
+			 */
+			season?: number
+			title?: string
+			/** @description A .torrent file, base64-encoded. */
+			torrent?: string
+		}
 		StatusOutputBody: {
 			/**
 			 * Format: uri
@@ -4240,6 +4307,44 @@ export interface components {
 			readonly $schema?: string
 			sources: components['schemas']['TorrentSource'][] | null
 		}
+		TorrentStream: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TorrentStream.json
+			 */
+			readonly $schema?: string
+			/** Format: int64 */
+			episode?: number
+			error?: string
+			/**
+			 * Format: int64
+			 * @description Once ready: a negative ID the player takes like a library file's — /v1/playback/files/{id}/stream, /direct, /hls and POST /v1/playback all accept it.
+			 */
+			file_id?: number
+			/** Format: int64 */
+			id: number
+			media_ref: string
+			/** @description The file that plays, once chosen. */
+			name?: string
+			/**
+			 * Format: double
+			 * @description How far the service is with the torrent, while preparing.
+			 */
+			progress: number
+			/** @example TorBox */
+			service: string
+			/**
+			 * Format: int64
+			 * @description The service's download speed, bytes per second, while preparing.
+			 */
+			speed: number
+			/**
+			 * @description ready once the service holds the file; failed when it gave up, or the torrent has no fitting video.
+			 * @enum {string}
+			 */
+			state: 'preparing' | 'queued' | 'ready' | 'failed'
+		}
 		Trailer: {
 			/** @description Video id on the hosting site. */
 			id: string
@@ -4438,6 +4543,7 @@ export type SchemaSetMatchInputBody = components['schemas']['SetMatchInputBody']
 export type SchemaSignInInputBody = components['schemas']['SignInInputBody']
 export type SchemaSource = components['schemas']['Source']
 export type SchemaStartInputBody = components['schemas']['StartInputBody']
+export type SchemaStartTorrentStreamInputBody = components['schemas']['StartTorrentStreamInputBody']
 export type SchemaStatusOutputBody = components['schemas']['StatusOutputBody']
 export type SchemaStatusOutputBody1 = components['schemas']['StatusOutputBody1']
 export type SchemaStream = components['schemas']['Stream']
@@ -4478,6 +4584,7 @@ export type SchemaTorrentSourceBody = components['schemas']['TorrentSourceBody']
 export type SchemaTorrentSourceCaps = components['schemas']['TorrentSourceCaps']
 export type SchemaTorrentSourceOutcome = components['schemas']['TorrentSourceOutcome']
 export type SchemaTorrentSourcesOutputBody = components['schemas']['TorrentSourcesOutputBody']
+export type SchemaTorrentStream = components['schemas']['TorrentStream']
 export type SchemaTrailer = components['schemas']['Trailer']
 export type SchemaUpdateEntryInputBody = components['schemas']['UpdateEntryInputBody']
 export type SchemaUpdateRootInputBody = components['schemas']['UpdateRootInputBody']
@@ -7896,6 +8003,70 @@ export interface operations {
 					[name: string]: unknown
 				}
 				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	startTorrentStream: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['StartTorrentStreamInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentStream']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getTorrentStream: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentStream']
+				}
 			}
 			/** @description Error */
 			default: {

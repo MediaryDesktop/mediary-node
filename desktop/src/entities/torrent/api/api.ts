@@ -71,6 +71,21 @@ export const addTorrentFx = createNodeRequestFx<AddTorrentParams, TorrentDownloa
 	timeout: 20_000
 }))
 
+export type TorrentStream = NodeSchemas['TorrentStream']
+export type StartTorrentStreamParams = Omit<NodeSchemas['StartTorrentStreamInputBody'], '$schema'>
+
+export const startTorrentStreamFx = createNodeRequestFx<StartTorrentStreamParams, TorrentStream>(body => ({
+	url: '/v1/torrent/streams',
+	method: 'POST',
+	body,
+	// The node adds the torrent to the debrid service and asks what it holds.
+	timeout: 30_000
+}))
+
+export const fetchTorrentStreamFx = createNodeRequestFx<number, TorrentStream>(id => ({
+	url: `/v1/torrent/streams/${id}`
+}))
+
 export const pauseTorrentFx = createNodeRequestFx<number, void>(id => ({
 	url: `/v1/torrent/downloads/${id}/pause`,
 	method: 'POST'

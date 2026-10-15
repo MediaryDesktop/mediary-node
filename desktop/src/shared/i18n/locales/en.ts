@@ -1209,6 +1209,15 @@ export const en = {
 		removeWithFiles: 'Remove with the files',
 		menu: 'Download actions',
 		actionFailed: 'Could not change the download',
+		stream: {
+			watch: 'Watch now, without downloading',
+			cancel: 'Stop getting it ready',
+			pickEpisode: 'A batch: type the episode in the search to watch it',
+			starting: 'Handing it to the service…',
+			preparing: '{{service}} is getting it · {{percent}}%',
+			queued: 'Waiting for a free {{service}} slot',
+			failed: 'Could not play it without downloading'
+		},
 		client: {
 			notConfigured: 'Choose a torrent client in the settings to download torrents',
 			unreachable: 'The torrent client is not answering: {{error}}',

@@ -29,6 +29,10 @@ export {
 // The add effect itself, for a model that adds several releases one after another.
 export { addTorrentFx } from './api/api'
 
+// Playing a torrent without downloading it: start, then ask until it is ready.
+export { fetchTorrentStreamFx, startTorrentStreamFx } from './api/api'
+export type { StartTorrentStreamParams, TorrentStream } from './api/api'
+
 export { useTorrentSetup } from './lib/useTorrentSetup'
 export { DEBRID_SERVICES, debridService, isDebrid } from './lib/clients'
 export type { DebridKind, DebridService, TorrentClientKind } from './lib/clients'

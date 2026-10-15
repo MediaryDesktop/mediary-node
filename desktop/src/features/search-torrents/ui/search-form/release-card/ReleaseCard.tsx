@@ -17,8 +17,20 @@ export interface ReleaseCardProps {
 	poster?: string | null
 	// The debrid service the cached mark is about, when the client is one.
 	cacheService?: string
+	// Playing without downloading, with a debrid service as the client.
+	watch?: ReleaseWatch
 	checked: boolean
 	onCheckedChange: (on: boolean) => void
+}
+
+export interface ReleaseWatch {
+	// False for a batch with no episode searched: there is nothing to pick by.
+	possible: boolean
+	// The service is readying this release, and how far it is.
+	preparing: boolean
+	status?: string
+	onWatch: () => void
+	onCancel: () => void
 }
 
 // One search result, ticked to download.
@@ -27,6 +39,7 @@ export function ReleaseCard({
 	covered,
 	poster,
 	cacheService,
+	watch,
 	checked,
 	onCheckedChange
 }: ReleaseCardProps) {
@@ -61,6 +74,7 @@ export function ReleaseCard({
 					)}
 					<span>{release.indexer || release.source_name}</span>
 				</div>
+				{watch?.preparing && watch.status && <p className={styles.watchStatus}>{watch.status}</p>}
 			</div>
 
 			<div className={styles.badges}>
@@ -81,6 +95,32 @@ export function ReleaseCard({
 				{release.codec && <Badge>{release.codec}</Badge>}
 				{release.group && <Badge tone='accent'>{release.group}</Badge>}
 			</div>
+
+			{watch && (
+				<button
+					type='button'
+					className={clsx(styles.page, watch.preparing && styles.busy)}
+					disabled={!watch.possible && !watch.preparing}
+					aria-label={watch.preparing ? t('torrents.stream.cancel') : t('torrents.stream.watch')}
+					title={
+						watch.preparing
+							? t('torrents.stream.cancel')
+							: watch.possible
+								? t('torrents.stream.watch')
+								: t('torrents.stream.pickEpisode')
+					}
+					onClick={event => {
+						event.preventDefault()
+						if (watch.preparing) {
+							watch.onCancel()
+						} else {
+							watch.onWatch()
+						}
+					}}
+				>
+					<Icon name={watch.preparing ? 'common/close' : 'common/play'} size={16} />
+				</button>
+			)}
 
 			{release.page_url && (
 				<button
