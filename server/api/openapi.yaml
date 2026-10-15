@@ -387,12 +387,17 @@ components:
           format: uri
           readOnly: true
           type: string
+        api_key:
+          description: A TorBox API key to try; left out uses the saved key.
+          maxLength: 256
+          type: string
         client:
-          description: embedded checks the node's own client; anything else, qBittorrent at url.
+          description: embedded checks the node's own client, torbox the TorBox key; anything else, qBittorrent at url.
           enum:
             - ""
             - qbittorrent
             - embedded
+            - torbox
           type: string
         password:
           description: Left out uses the saved password.
@@ -2547,12 +2552,17 @@ components:
           format: uri
           readOnly: true
           type: string
+        api_key:
+          description: The TorBox API key. Left out keeps the saved key; empty removes it.
+          maxLength: 256
+          type: string
         client:
-          description: The user's qBittorrent, the node's own client, or none.
+          description: The user's qBittorrent, the node's own client, the user's TorBox account, or none.
           enum:
             - ""
             - qbittorrent
             - embedded
+            - torbox
           type: string
         password:
           description: Left out keeps the saved password; empty removes it.
@@ -3872,6 +3882,7 @@ components:
             - ""
             - qbittorrent
             - embedded
+            - torbox
           type: string
         reachable:
           type: boolean
@@ -4382,12 +4393,16 @@ components:
           readOnly: true
           type: string
         client:
-          description: The user's qBittorrent, the node's own client, or none.
+          description: The user's qBittorrent, the node's own client, the user's TorBox account, or none.
           enum:
             - ""
             - qbittorrent
             - embedded
+            - torbox
           type: string
+        has_api_key:
+          description: Whether a TorBox API key is saved; the key itself is never returned.
+          type: boolean
         has_password:
           type: boolean
         path_map:
@@ -4404,6 +4419,7 @@ components:
         - url
         - username
         - has_password
+        - has_api_key
         - root_id
         - path_map
       type: object
@@ -7113,7 +7129,7 @@ paths:
         - media
   /v1/torrent/check:
     post:
-      description: Signs in to qBittorrent with the given address and credentials, saved or not, and reports its version.
+      description: Signs in to qBittorrent with the given address and credentials, or to TorBox with the given key, saved or not, and reports the version or the plan.
       operationId: checkTorrentClient
       requestBody:
         content:
@@ -7548,7 +7564,7 @@ paths:
         - torrent
   /v1/torrent/settings:
     get:
-      description: The password is never returned; has_password says whether one is saved.
+      description: The password and the TorBox key are never returned; has_password and has_api_key say whether one is saved.
       operationId: getTorrentSettings
       responses:
         "200":

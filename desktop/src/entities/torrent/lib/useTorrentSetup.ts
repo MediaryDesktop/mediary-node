@@ -8,7 +8,7 @@ import { torrentDownloadsQuery, torrentSourcesQuery } from '../model/model'
 export interface TorrentSetup {
 	// False until both answers are in, so nothing warns about a setup still loading.
 	loaded: boolean
-	clientKind: '' | 'qbittorrent' | 'embedded'
+	clientKind: '' | 'qbittorrent' | 'embedded' | 'torbox'
 	clientConfigured: boolean
 	// Null while the node has not asked the client yet.
 	clientReachable: boolean | null

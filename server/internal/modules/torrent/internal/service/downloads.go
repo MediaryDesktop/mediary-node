@@ -66,7 +66,7 @@ type TorrentDownload struct {
 // TorrentClientStatus says whether the downloads' live fields can be trusted.
 type TorrentClientStatus struct {
 	Configured bool   `json:"configured"`
-	Kind       string `json:"kind" enum:",qbittorrent,embedded"`
+	Kind       string `json:"kind" enum:",qbittorrent,embedded,torbox"`
 	Reachable  bool   `json:"reachable"`
 	Error      string `json:"error,omitempty"`
 }
@@ -206,7 +206,9 @@ func (s *Service) List(ctx context.Context) ([]TorrentDownload, TorrentClientSta
 	}
 
 	s.mu.Lock()
-	configured := conn.Kind == ClientEmbedded || (conn.Kind == ClientQBittorrent && conn.URL != "")
+	configured := conn.Kind == ClientEmbedded ||
+		(conn.Kind == ClientQBittorrent && conn.URL != "") ||
+		(conn.Kind == ClientTorBox && conn.APIKey != "")
 	status := TorrentClientStatus{
 		Configured: configured,
 		Kind:       conn.Kind,

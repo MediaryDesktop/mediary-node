@@ -1001,7 +1001,8 @@ export const uk: Translation = {
 		setup: {
 			openSettings: 'Відкрити налаштування',
 			noClient: 'Торент-клієнт не вибрано',
-			noClientHint: 'Виберіть вбудований клієнт або підключіть qBittorrent у налаштуваннях.',
+			noClientHint:
+				'Виберіть вбудований клієнт, підключіть qBittorrent або додайте ключ TorBox у налаштуваннях.',
 			unreachable: 'Торент-клієнт не відповідає',
 			noSources: 'Немає джерела пошуку',
 			noSourcesHint: 'Додайте Jackett або Prowlarr у налаштуваннях, щоб шукати роздачі.'
@@ -1179,14 +1180,14 @@ export const uk: Translation = {
 			downloading: 'Завантажується',
 			paused: 'На паузі',
 			stalled: 'Шукає пірів',
-			queued: 'У черзі qBittorrent',
+			queued: 'У черзі клієнта',
 			checking: 'Перевірка файлів',
 			metadata: 'Отримання метаданих торента',
-			error: 'qBittorrent повідомляє про помилку',
+			error: 'Клієнт повідомляє про помилку',
 			importing: 'Додається в бібліотеку',
 			done: 'У бібліотеці',
 			failed: 'Не вдалося',
-			unknown: 'Очікує на qBittorrent'
+			unknown: 'Очікує на клієнт'
 		},
 		meta: {
 			down: 'Швидкість завантаження',
@@ -1206,7 +1207,7 @@ export const uk: Translation = {
 		actionFailed: 'Не вдалося змінити завантаження',
 		client: {
 			notConfigured: 'Виберіть торент-клієнт у налаштуваннях, щоб завантажувати торенти',
-			unreachable: 'qBittorrent не відповідає: {{error}}',
+			unreachable: 'Торент-клієнт не відповідає: {{error}}',
 			openSettings: 'Відкрити налаштування'
 		},
 		settings: {
@@ -1217,6 +1218,8 @@ export const uk: Translation = {
 				'Mediary завантажує торенти сама, нічого більше встановлювати не треба. Чекає на пірів на порту 42069 і не відкриває його на роутері.',
 			qbittorrentHint:
 				'Ваш qBittorrent через його Web UI. Увімкніть Web UI в qBittorrent: Налаштування → Веб-інтерфейс.',
+			torboxHint:
+				'Ваш акаунт TorBox: TorBox качає торент на своїх серверах, а Mediary забирає файли по HTTPS. Безкоштовний план качає один торент за раз.',
 			noneHint: 'Торенти вимкнено.',
 			notConfigured: 'Не підключено',
 			configure: 'Підключити',
@@ -1228,8 +1231,13 @@ export const uk: Translation = {
 			passwordLabel: 'Пароль',
 			passwordKept: 'Лишіть порожнім, щоб зберегти поточний пароль',
 			passwordHint: 'Лишіть порожнім, якщо Web UI пускає цей комп’ютер без пароля',
+			apiKeyLabel: 'Ключ API',
+			apiKeyHint:
+				'На torbox.app: Settings → API key. Нода зберігає його в окремому файлі й більше ніколи не показує',
+			apiKeyKept: 'Лишіть порожнім, щоб зберегти поточний ключ',
 			check: 'Перевірити з’єднання',
 			ok: 'Підключено до qBittorrent {{version}}',
+			okAccount: 'Підключено: {{account}}',
 			folderLabel: 'Тека завантажень',
 			folderHint: 'Тека бібліотеки, куди зберігаються торенти, по підтеці на тайтл',
 			folderPlaceholder: 'Виберіть теку бібліотеки',

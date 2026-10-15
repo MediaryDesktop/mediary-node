@@ -42,11 +42,13 @@ type Library interface {
 	Episodes(ctx context.Context, mediaRef string) ([]int, error)
 }
 
-// Client kinds: the user's qBittorrent, the node's own client, or none.
+// Client kinds: the user's qBittorrent, the node's own client, the user's TorBox
+// account, or none.
 const (
 	ClientNone        = ""
 	ClientQBittorrent = "qbittorrent"
 	ClientEmbedded    = "embedded"
+	ClientTorBox      = "torbox"
 )
 
 // Connection is which client to use and, for qBittorrent, how to reach it.
@@ -55,6 +57,8 @@ type Connection struct {
 	URL      string
 	Username string
 	Password string
+	// APIKey is the TorBox key.
+	APIKey string
 }
 
 type Options struct {
@@ -68,6 +72,12 @@ type Options struct {
 	// Embedded is the node's own client, used when the user picks it; nil where
 	// it is not available.
 	Embedded Client
+
+	// TorBox is the user's TorBox account as a client; it reads the saved key on
+	// every call. CheckTorBox tries a key that may not be saved yet. Both nil
+	// where TorBox is not available.
+	TorBox      Client
+	CheckTorBox func(ctx context.Context, apiKey string) (string, error)
 
 	// Torznab searches the user's sources; Titles names the title searched for.
 	Torznab *torznab.Client

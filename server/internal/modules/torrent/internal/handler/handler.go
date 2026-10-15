@@ -71,10 +71,11 @@ type TorrentSettingsOutput struct {
 
 type PutTorrentSettingsInput struct {
 	Body struct {
-		Client   string                 `json:"client" enum:",qbittorrent,embedded" doc:"The user's qBittorrent, the node's own client, or none."`
+		Client   string                 `json:"client" enum:",qbittorrent,embedded,torbox" doc:"The user's qBittorrent, the node's own client, the user's TorBox account, or none."`
 		URL      string                 `json:"url" maxLength:"2048" doc:"qBittorrent WebUI address; empty disconnects."`
 		Username string                 `json:"username" maxLength:"256"`
 		Password *string                `json:"password,omitempty" maxLength:"1024" doc:"Left out keeps the saved password; empty removes it."`
+		APIKey   *string                `json:"api_key,omitempty" maxLength:"256" doc:"The TorBox API key. Left out keeps the saved key; empty removes it."`
 		RootID   int64                  `json:"root_id" minimum:"0" doc:"Library folder torrents are saved into; 0 while none is chosen."`
 		PathMap  service.TorrentPathMap `json:"path_map" doc:"How the client names the node's folders, when it runs in Docker or on another machine."`
 	}
@@ -82,10 +83,11 @@ type PutTorrentSettingsInput struct {
 
 type CheckTorrentClientInput struct {
 	Body struct {
-		Client   string  `json:"client,omitempty" enum:",qbittorrent,embedded" doc:"embedded checks the node's own client; anything else, qBittorrent at url."`
+		Client   string  `json:"client,omitempty" enum:",qbittorrent,embedded,torbox" doc:"embedded checks the node's own client, torbox the TorBox key; anything else, qBittorrent at url."`
 		URL      string  `json:"url,omitempty" maxLength:"2048"`
 		Username string  `json:"username" maxLength:"256"`
 		Password *string `json:"password,omitempty" maxLength:"1024" doc:"Left out uses the saved password."`
+		APIKey   *string `json:"api_key,omitempty" maxLength:"256" doc:"A TorBox API key to try; left out uses the saved key."`
 	}
 }
 
@@ -226,7 +228,7 @@ func (h *Handler) Register(api huma.API) {
 		Method:      http.MethodGet,
 		Path:        "/v1/torrent/settings",
 		Summary:     "Torrent client settings",
-		Description: "The password is never returned; has_password says whether one is saved.",
+		Description: "The password and the TorBox key are never returned; has_password and has_api_key say whether one is saved.",
 		Tags:        []string{"torrent"},
 	}, func(ctx context.Context, _ *struct{}) (*TorrentSettingsOutput, error) {
 		settings, err := h.svc.Settings(ctx)
@@ -250,6 +252,7 @@ func (h *Handler) Register(api huma.API) {
 			URL:      in.Body.URL,
 			Username: in.Body.Username,
 			Password: in.Body.Password,
+			APIKey:   in.Body.APIKey,
 			RootID:   in.Body.RootID,
 			PathMap:  in.Body.PathMap,
 		})
@@ -265,15 +268,22 @@ func (h *Handler) Register(api huma.API) {
 		Method:      http.MethodPost,
 		Path:        "/v1/torrent/check",
 		Summary:     "Try a torrent client connection",
-		Description: "Signs in to qBittorrent with the given address and credentials, saved or not, and reports its version.",
+		Description: "Signs in to qBittorrent with the given address and credentials, or to TorBox with the given key, saved or not, and reports the version or the plan.",
 		Tags:        []string{"torrent"},
 	}, func(ctx context.Context, in *CheckTorrentClientInput) (*TorrentCheckOutput, error) {
 		conn := service.Connection{Kind: in.Body.Client, URL: in.Body.URL, Username: in.Body.Username}
+		keepSaved := in.Body.Password == nil
 		if in.Body.Password != nil {
 			conn.Password = *in.Body.Password
 		}
+		if conn.Kind == service.ClientTorBox {
+			keepSaved = in.Body.APIKey == nil
+			if in.Body.APIKey != nil {
+				conn.APIKey = *in.Body.APIKey
+			}
+		}
 
-		result, err := h.svc.Check(ctx, conn, in.Body.Password == nil)
+		result, err := h.svc.Check(ctx, conn, keepSaved)
 		if err != nil {
 			return nil, httpapi.ToHTTP(err)
 		}

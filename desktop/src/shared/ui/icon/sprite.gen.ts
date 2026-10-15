@@ -262,10 +262,17 @@ export const sprites = defineSpriteMap([
 			[
 				defineSpriteSymbol(['arrow-left'], [24]),
 				defineSpriteSymbol(['arrow-right'], [24]),
+				defineSpriteSymbol(['book-open-text'], [24]),
 				defineSpriteSymbol(['book-open'], [24]),
+				defineSpriteSymbol(['brush'], [24]),
+				defineSpriteSymbol(['calendar-clock'], [24]),
+				defineSpriteSymbol(['calendar-plus'], [24]),
 				defineSpriteSymbol(['calendar'], [24]),
+				defineSpriteSymbol(['chart-no-axes-combined'], [24]),
+				defineSpriteSymbol(['check-circle-2'], [24]),
 				defineSpriteSymbol(['check'], [24]),
 				defineSpriteSymbol(['chevron-down'], [24]),
+				defineSpriteSymbol(['clapperboard'], [24]),
 				defineSpriteSymbol(['clock'], [24]),
 				defineSpriteSymbol(['close'], [24]),
 				defineSpriteSymbol(['cloud'], [24]),
@@ -277,6 +284,8 @@ export const sprites = defineSpriteMap([
 				defineSpriteSymbol(['eye'], [24]),
 				defineSpriteSymbol(['file-tree'], [24]),
 				defineSpriteSymbol(['filter'], [24]),
+				defineSpriteSymbol(['fingerprint'], [24]),
+				defineSpriteSymbol(['flame'], [24]),
 				defineSpriteSymbol(['folder-open'], [24]),
 				defineSpriteSymbol(['folder-tree'], [24]),
 				defineSpriteSymbol(['folder'], [24]),
@@ -284,8 +293,11 @@ export const sprites = defineSpriteMap([
 				defineSpriteSymbol(['fullscreen'], [24]),
 				defineSpriteSymbol(['headphones'], [24]),
 				defineSpriteSymbol(['heart'], [24]),
+				defineSpriteSymbol(['history'], [24]),
 				defineSpriteSymbol(['home'], [24]),
+				defineSpriteSymbol(['hourglass'], [24]),
 				defineSpriteSymbol(['info'], [24]),
+				defineSpriteSymbol(['leaf'], [24]),
 				defineSpriteSymbol(['link'], [24]),
 				defineSpriteSymbol(['list-checks'], [24]),
 				defineSpriteSymbol(['list'], [24]),
@@ -298,14 +310,17 @@ export const sprites = defineSpriteMap([
 				defineSpriteSymbol(['node'], [288]),
 				defineSpriteSymbol(['pause'], [24]),
 				defineSpriteSymbol(['pencil'], [24]),
+				defineSpriteSymbol(['play-circle'], [24]),
 				defineSpriteSymbol(['play'], [24]),
 				defineSpriteSymbol(['player'], [24]),
 				defineSpriteSymbol(['plus'], [24]),
 				defineSpriteSymbol(['reset'], [1920]),
 				defineSpriteSymbol(['restore'], [24]),
+				defineSpriteSymbol(['rocket'], [24]),
 				defineSpriteSymbol(['search'], [128]),
 				defineSpriteSymbol(['settings'], [24]),
 				defineSpriteSymbol(['signal'], [24]),
+				defineSpriteSymbol(['smartphone'], [24]),
 				defineSpriteSymbol(['sort'], [24]),
 				defineSpriteSymbol(['sparkles'], [512]),
 				defineSpriteSymbol(['star'], [12]),
@@ -313,10 +328,13 @@ export const sprites = defineSpriteMap([
 				defineSpriteSymbol(['sun'], [24]),
 				defineSpriteSymbol(['tag'], [24]),
 				defineSpriteSymbol(['trash'], [24]),
+				defineSpriteSymbol(['trending-up'], [24]),
+				defineSpriteSymbol(['trophy'], [24]),
 				defineSpriteSymbol(['user'], [24]),
 				defineSpriteSymbol(['users'], [24]),
 				defineSpriteSymbol(['volume-off'], [24]),
-				defineSpriteSymbol(['volume'], [24])
+				defineSpriteSymbol(['volume'], [24]),
+				defineSpriteSymbol(['wand-sparkles'], [24])
 			],
 			defineExternalAssetMeta('common.svg')
 		)
@@ -340,10 +358,17 @@ export type SpritesMeta = {
 	common:
 		| 'arrow-left'
 		| 'arrow-right'
+		| 'book-open-text'
 		| 'book-open'
+		| 'brush'
+		| 'calendar-clock'
+		| 'calendar-plus'
 		| 'calendar'
+		| 'chart-no-axes-combined'
+		| 'check-circle-2'
 		| 'check'
 		| 'chevron-down'
+		| 'clapperboard'
 		| 'clock'
 		| 'close'
 		| 'cloud'
@@ -355,6 +380,8 @@ export type SpritesMeta = {
 		| 'eye'
 		| 'file-tree'
 		| 'filter'
+		| 'fingerprint'
+		| 'flame'
 		| 'folder-open'
 		| 'folder-tree'
 		| 'folder'
@@ -362,8 +389,11 @@ export type SpritesMeta = {
 		| 'fullscreen'
 		| 'headphones'
 		| 'heart'
+		| 'history'
 		| 'home'
+		| 'hourglass'
 		| 'info'
+		| 'leaf'
 		| 'link'
 		| 'list-checks'
 		| 'list'
@@ -376,14 +406,17 @@ export type SpritesMeta = {
 		| 'node'
 		| 'pause'
 		| 'pencil'
+		| 'play-circle'
 		| 'play'
 		| 'player'
 		| 'plus'
 		| 'reset'
 		| 'restore'
+		| 'rocket'
 		| 'search'
 		| 'settings'
 		| 'signal'
+		| 'smartphone'
 		| 'sort'
 		| 'sparkles'
 		| 'star'
@@ -391,10 +424,13 @@ export type SpritesMeta = {
 		| 'sun'
 		| 'tag'
 		| 'trash'
+		| 'trending-up'
+		| 'trophy'
 		| 'user'
 		| 'users'
 		| 'volume-off'
 		| 'volume'
+		| 'wand-sparkles'
 	social: 'anilist' | 'apple' | 'facebook' | 'github' | 'google'
 }
 

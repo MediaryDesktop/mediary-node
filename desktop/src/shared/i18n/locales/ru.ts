@@ -1003,7 +1003,8 @@ export const ru: Translation = {
 		setup: {
 			openSettings: 'Открыть настройки',
 			noClient: 'Торрент-клиент не выбран',
-			noClientHint: 'Выберите встроенный клиент или подключите qBittorrent в настройках.',
+			noClientHint:
+				'Выберите встроенный клиент, подключите qBittorrent или добавьте ключ TorBox в настройках.',
 			unreachable: 'Торрент-клиент не отвечает',
 			noSources: 'Нет источника поиска',
 			noSourcesHint: 'Добавьте Jackett или Prowlarr в настройках, чтобы искать раздачи.'
@@ -1180,14 +1181,14 @@ export const ru: Translation = {
 			downloading: 'Загружается',
 			paused: 'На паузе',
 			stalled: 'Ищет пиров',
-			queued: 'В очереди qBittorrent',
+			queued: 'В очереди клиента',
 			checking: 'Проверка файлов',
 			metadata: 'Получение метаданных торрента',
-			error: 'qBittorrent сообщает об ошибке',
+			error: 'Клиент сообщает об ошибке',
 			importing: 'Добавляется в библиотеку',
 			done: 'В библиотеке',
 			failed: 'Не удалось',
-			unknown: 'Ожидает qBittorrent'
+			unknown: 'Ожидает клиент'
 		},
 		meta: {
 			down: 'Скорость загрузки',
@@ -1207,7 +1208,7 @@ export const ru: Translation = {
 		actionFailed: 'Не удалось изменить загрузку',
 		client: {
 			notConfigured: 'Выберите торрент-клиент в настройках, чтобы загружать торренты',
-			unreachable: 'qBittorrent не отвечает: {{error}}',
+			unreachable: 'Торрент-клиент не отвечает: {{error}}',
 			openSettings: 'Открыть настройки'
 		},
 		settings: {
@@ -1218,6 +1219,8 @@ export const ru: Translation = {
 				'Mediary загружает торренты сама, больше ничего устанавливать не нужно. Ждёт пиров на порту 42069 и не открывает его на роутере.',
 			qbittorrentHint:
 				'Ваш qBittorrent через его Web UI. Включите Web UI в qBittorrent: Настройки → Веб-интерфейс.',
+			torboxHint:
+				'Ваш аккаунт TorBox: TorBox качает торрент на своих серверах, а Mediary забирает файлы по HTTPS. Бесплатный план качает один торрент за раз.',
 			noneHint: 'Торренты выключены.',
 			notConfigured: 'Не подключено',
 			configure: 'Подключить',
@@ -1229,8 +1232,13 @@ export const ru: Translation = {
 			passwordLabel: 'Пароль',
 			passwordKept: 'Оставьте пустым, чтобы сохранить текущий пароль',
 			passwordHint: 'Оставьте пустым, если Web UI пускает этот компьютер без пароля',
+			apiKeyLabel: 'Ключ API',
+			apiKeyHint:
+				'На torbox.app: Settings → API key. Нода хранит его в отдельном файле и больше никогда не показывает',
+			apiKeyKept: 'Оставьте пустым, чтобы сохранить текущий ключ',
 			check: 'Проверить соединение',
 			ok: 'Подключено к qBittorrent {{version}}',
+			okAccount: 'Подключено: {{account}}',
 			folderLabel: 'Папка загрузок',
 			folderHint: 'Папка библиотеки, куда сохраняются торренты, по подпапке на тайтл',
 			folderPlaceholder: 'Выберите папку библиотеки',

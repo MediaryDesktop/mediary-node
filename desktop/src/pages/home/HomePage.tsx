@@ -3,7 +3,8 @@ import { useUnit } from 'effector-react'
 import { useMemo } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { EmptyState, PageTransition } from '@shared/ui'
+import { EmptyState, Icon, PageTransition } from '@shared/ui'
+import type { IconName } from '@shared/ui'
 
 import { aniListAccountModel } from '@entities/anilist-account'
 import { useTrackedEntries } from '@entities/tracker'
@@ -18,10 +19,10 @@ import { HomeBanner } from './ui/banner/HomeBanner'
 import { TrackerStats } from './ui/stats/tracker-stats/TrackerStats'
 import { TrackerRow } from './ui/tracker-row/TrackerRow'
 
-const ROWS: { status: TrackerStatus; key: 'current' | 'planning' | 'completed' }[] = [
-	{ status: 'CURRENT', key: 'current' },
-	{ status: 'PLANNING', key: 'planning' },
-	{ status: 'COMPLETED', key: 'completed' }
+const ROWS: { status: TrackerStatus; key: 'current' | 'planning' | 'completed'; icon: IconName }[] = [
+	{ status: 'CURRENT', key: 'current', icon: 'common/play-circle' },
+	{ status: 'PLANNING', key: 'planning', icon: 'common/calendar-clock' },
+	{ status: 'COMPLETED', key: 'completed', icon: 'common/check-circle-2' }
 ]
 
 // What the user is in the middle of, first: the anime they are watching, the next
@@ -74,13 +75,17 @@ export function HomePage() {
 						<TrackerRow
 							key={row.status}
 							title={t(`home.rows.${row.key}`)}
+							icon={row.icon}
 							status={row.status}
 							entries={byStatus.get(row.status) ?? []}
 						/>
 					))}
 
 					<section className={styles.section}>
-						<h2 className={styles.sectionTitle}>{t('home.stats.title')}</h2>
+						<h2 className={styles.sectionTitle}>
+							<Icon name='common/chart-no-axes-combined' size={20} />
+							{t('home.stats.title')}
+						</h2>
 						<TrackerStats stats={stats} entries={entries} />
 					</section>
 				</>

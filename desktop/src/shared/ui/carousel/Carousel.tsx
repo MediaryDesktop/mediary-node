@@ -3,6 +3,9 @@ import useEmblaCarousel from 'embla-carousel-react'
 import { Children, useCallback, useEffect, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 
+import { Icon } from '../icon/Icon'
+import type { IconName } from '../icon/Icon'
+
 import styles from './Carousel.module.scss'
 
 // Past this many pages the dots would be too small to mean anything.
@@ -13,6 +16,10 @@ export interface CarouselProps {
 	// Shown in a header row together with the page dots. A carousel with a title
 	// renders as its own <section>; without one, as a plain row of items.
 	title?: ReactNode
+	// Shown before the title, same row.
+	icon?: IconName
+	// A trailing arrow next to the title that jumps to the full list.
+	more?: { label: string; onClick: () => void }
 	// Width of one item, as CSS; the row shows as many as fit.
 	itemWidth?: string
 	'aria-label'?: string
@@ -21,7 +28,15 @@ export interface CarouselProps {
 
 // A row of items that scrolls sideways: dragged, wheeled, or jumped to with the
 // page dots, which appear only once there is more than one page to show.
-export function Carousel({ children, title, itemWidth = '12.5rem', className, ...rest }: CarouselProps) {
+export function Carousel({
+	children,
+	title,
+	icon,
+	more,
+	itemWidth = '12.5rem',
+	className,
+	...rest
+}: CarouselProps) {
 	const [viewport, api] = useEmblaCarousel({ align: 'start', dragFree: true, containScroll: 'trimSnaps' })
 
 	const [snaps, setSnaps] = useState<number[]>([])
@@ -63,7 +78,22 @@ export function Carousel({ children, title, itemWidth = '12.5rem', className, ..
 		>
 			{(title != null || showDots) && (
 				<div className={styles.header}>
-					{title != null && <h2 className={styles.title}>{title}</h2>}
+					{title != null && (
+						<h2 className={styles.title}>
+							{icon && <Icon name={icon} size={24} className={styles.titleIcon} />}
+							{title}
+							{more && (
+								<button
+									type='button'
+									className={styles.more}
+									aria-label={more.label}
+									onClick={more.onClick}
+								>
+									<Icon name='common/chevron-down' size={22} className={styles.chevron} />
+								</button>
+							)}
+						</h2>
+					)}
 
 					{showDots && (
 						<div className={styles.dots} role='group' aria-label={ariaLabel}>

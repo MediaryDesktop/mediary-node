@@ -17,6 +17,7 @@ const (
 	keyMapClient  = "torrent.path_map.client"
 	keyMapNode    = "torrent.path_map.node"
 	secretKey     = "qbittorrent"
+	torboxKey     = "torbox"
 	torrentTag    = "mediary"
 	torrentFolder = "mediary"
 )
@@ -30,10 +31,11 @@ type TorrentPathMap struct {
 }
 
 type TorrentSettings struct {
-	Client      string         `json:"client" enum:",qbittorrent,embedded" doc:"The user's qBittorrent, the node's own client, or none."`
+	Client      string         `json:"client" enum:",qbittorrent,embedded,torbox" doc:"The user's qBittorrent, the node's own client, the user's TorBox account, or none."`
 	URL         string         `json:"url"`
 	Username    string         `json:"username"`
 	HasPassword bool           `json:"has_password"`
+	HasAPIKey   bool           `json:"has_api_key" doc:"Whether a TorBox API key is saved; the key itself is never returned."`
 	RootID      int64          `json:"root_id"`
 	PathMap     TorrentPathMap `json:"path_map"`
 }
@@ -44,8 +46,10 @@ type TorrentSettingsUpdate struct {
 	Username string
 	// Nil keeps the saved password; "" removes it.
 	Password *string
-	RootID   int64
-	PathMap  TorrentPathMap
+	// Nil keeps the saved TorBox key; "" removes it.
+	APIKey  *string
+	RootID  int64
+	PathMap TorrentPathMap
 }
 
 func (s *Service) Settings(ctx context.Context) (*TorrentSettings, error) {
@@ -54,7 +58,13 @@ func (s *Service) Settings(ctx context.Context) (*TorrentSettings, error) {
 		return nil, err
 	}
 
-	settings := &TorrentSettings{Client: conn.Kind, URL: conn.URL, Username: conn.Username, HasPassword: conn.Password != ""}
+	settings := &TorrentSettings{
+		Client:      conn.Kind,
+		URL:         conn.URL,
+		Username:    conn.Username,
+		HasPassword: conn.Password != "",
+		HasAPIKey:   conn.APIKey != "",
+	}
 
 	if raw, _, err := s.store.Meta(ctx, keyRoot); err != nil {
 		return nil, apperr.Wrap(err, apperr.KindInternal, "read the download folder")
@@ -82,11 +92,31 @@ func (s *Service) UpdateSettings(ctx context.Context, update TorrentSettingsUpda
 		update.Client = ClientQBittorrent
 	}
 
+	if update.APIKey != nil {
+		trimmed := strings.TrimSpace(*update.APIKey)
+		update.APIKey = &trimmed
+	}
+
 	switch update.Client {
 	case ClientNone, ClientEmbedded:
 	case ClientQBittorrent:
 		if update.URL == "" {
 			return nil, apperr.Invalid("url", "the qBittorrent address is empty")
+		}
+	case ClientTorBox:
+		if s.opts.TorBox == nil {
+			return nil, apperr.Invalid("client", "this node cannot use TorBox")
+		}
+		if update.APIKey == nil {
+			saved, err := s.secrets.Get(torboxKey)
+			if err != nil {
+				return nil, apperr.Wrap(err, apperr.KindInternal, "read the TorBox API key")
+			}
+			if saved == "" {
+				return nil, apperr.Invalid("api_key", "the TorBox API key is empty")
+			}
+		} else if *update.APIKey == "" {
+			return nil, apperr.Invalid("api_key", "the TorBox API key is empty")
 		}
 	default:
 		return nil, apperr.Invalid("client", "unknown torrent client %q", update.Client)
@@ -137,6 +167,11 @@ func (s *Service) UpdateSettings(ctx context.Context, update TorrentSettingsUpda
 			return nil, apperr.Wrap(err, apperr.KindInternal, "save the qBittorrent password")
 		}
 	}
+	if update.APIKey != nil {
+		if err := s.secrets.Set(torboxKey, *update.APIKey); err != nil {
+			return nil, apperr.Wrap(err, apperr.KindInternal, "save the TorBox API key")
+		}
+	}
 
 	s.signal()
 	s.publish("settings", 0)
@@ -165,6 +200,10 @@ func (s *Service) Check(ctx context.Context, conn Connection, keepPassword bool)
 		return &TorrentCheckResult{Version: version}, nil
 	}
 
+	if conn.Kind == ClientTorBox {
+		return s.checkTorBox(ctx, conn.APIKey, keepPassword)
+	}
+
 	conn.URL = strings.TrimSpace(conn.URL)
 	if conn.URL == "" {
 		return nil, apperr.Invalid("url", "the qBittorrent address is empty")
@@ -184,6 +223,34 @@ func (s *Service) Check(ctx context.Context, conn Connection, keepPassword bool)
 	}
 
 	version, err := client.Version(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &TorrentCheckResult{Version: version}, nil
+}
+
+// checkTorBox tries a TorBox key, or the saved one when keepKey, and names the
+// account's plan.
+func (s *Service) checkTorBox(ctx context.Context, key string, keepKey bool) (*TorrentCheckResult, error) {
+	if s.opts.CheckTorBox == nil {
+		return nil, apperr.New(apperr.KindUnavailable, "this node cannot use TorBox")
+	}
+
+	if keepKey {
+		saved, err := s.secrets.Get(torboxKey)
+		if err != nil {
+			return nil, apperr.Wrap(err, apperr.KindInternal, "read the TorBox API key")
+		}
+		key = saved
+	}
+
+	key = strings.TrimSpace(key)
+	if key == "" {
+		return nil, apperr.Invalid("api_key", "the TorBox API key is empty")
+	}
+
+	version, err := s.opts.CheckTorBox(ctx, key)
 	if err != nil {
 		return nil, err
 	}
@@ -221,7 +288,12 @@ func (s *Service) connection(ctx context.Context) (Connection, error) {
 		return Connection{}, apperr.Wrap(err, apperr.KindInternal, "read the qBittorrent password")
 	}
 
-	return Connection{Kind: kind, URL: url, Username: username, Password: password}, nil
+	apiKey, err := s.secrets.Get(torboxKey)
+	if err != nil {
+		return Connection{}, apperr.Wrap(err, apperr.KindInternal, "read the TorBox API key")
+	}
+
+	return Connection{Kind: kind, URL: url, Username: username, Password: password, APIKey: apiKey}, nil
 }
 
 // currentClient is the client for the saved connection, or nil when there is
@@ -238,6 +310,14 @@ func (s *Service) currentClient(ctx context.Context) (Client, error) {
 			return nil, apperr.New(apperr.KindUnavailable, "this node has no built-in torrent client")
 		}
 		return s.opts.Embedded, nil
+	case ClientTorBox:
+		if s.opts.TorBox == nil {
+			return nil, apperr.New(apperr.KindUnavailable, "this node cannot use TorBox")
+		}
+		if conn.APIKey == "" {
+			return nil, nil
+		}
+		return s.opts.TorBox, nil
 	case ClientQBittorrent:
 		if conn.URL == "" {
 			return nil, nil

@@ -133,7 +133,7 @@ func (s *Service) follow(ctx context.Context, client Client, download store.Down
 		s.mu.Unlock()
 
 		if gone {
-			s.fail(ctx, download, "the torrent is no longer in qBittorrent")
+			s.fail(ctx, download, "the torrent is no longer in the torrent client")
 		}
 		return
 	}

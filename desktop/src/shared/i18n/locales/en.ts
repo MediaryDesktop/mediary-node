@@ -1002,7 +1002,8 @@ export const en = {
 		setup: {
 			openSettings: 'Open settings',
 			noClient: 'No torrent client',
-			noClientHint: 'Choose the built-in client or connect qBittorrent in the settings.',
+			noClientHint:
+				'Choose the built-in client, connect qBittorrent or add a TorBox key in the settings.',
 			unreachable: 'The torrent client does not answer',
 			noSources: 'No search source',
 			noSourcesHint: 'Add Jackett or Prowlarr in the settings to search for releases.'
@@ -1179,14 +1180,14 @@ export const en = {
 			downloading: 'Downloading',
 			paused: 'Paused',
 			stalled: 'Looking for peers',
-			queued: 'Queued in qBittorrent',
+			queued: 'Queued in the client',
 			checking: 'Checking files',
 			metadata: 'Fetching the torrent’s metadata',
-			error: 'qBittorrent reports an error',
+			error: 'The client reports an error',
 			importing: 'Adding to the library',
 			done: 'In Library',
 			failed: 'Failed',
-			unknown: 'Waiting for qBittorrent'
+			unknown: 'Waiting for the client'
 		},
 		meta: {
 			down: 'Download speed',
@@ -1206,7 +1207,7 @@ export const en = {
 		actionFailed: 'Could not change the download',
 		client: {
 			notConfigured: 'Choose a torrent client in the settings to download torrents',
-			unreachable: 'qBittorrent is not answering: {{error}}',
+			unreachable: 'The torrent client is not answering: {{error}}',
 			openSettings: 'Open settings'
 		},
 		settings: {
@@ -1217,6 +1218,8 @@ export const en = {
 				'Mediary downloads torrents itself; nothing else to install. It listens for peers on port 42069 and does not open it on the router.',
 			qbittorrentHint:
 				'Your own qBittorrent, through its Web UI. Turn the Web UI on in qBittorrent: Options → Web UI.',
+			torboxHint:
+				'Your TorBox account: TorBox downloads the torrent on its servers, then Mediary fetches the files over HTTPS. The free plan downloads one torrent at a time.',
 			noneHint: 'Torrents are off.',
 			notConfigured: 'Not connected',
 			configure: 'Connect',
@@ -1228,8 +1231,13 @@ export const en = {
 			passwordLabel: 'Password',
 			passwordKept: 'Leave empty to keep the saved password',
 			passwordHint: 'Leave empty if the Web UI lets this computer in without one',
+			apiKeyLabel: 'API key',
+			apiKeyHint:
+				'On torbox.app: Settings → API key. The node keeps it in a file of its own and never shows it again',
+			apiKeyKept: 'Leave empty to keep the saved key',
 			check: 'Check the connection',
 			ok: 'Connected to qBittorrent {{version}}',
+			okAccount: 'Connected: {{account}}',
 			folderLabel: 'Download folder',
 			folderHint: 'The library folder torrents are saved into, one subfolder per title',
 			folderPlaceholder: 'Choose a library folder',

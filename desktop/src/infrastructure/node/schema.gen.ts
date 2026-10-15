@@ -1264,7 +1264,7 @@ export interface paths {
 		put?: never
 		/**
 		 * Try a torrent client connection
-		 * @description Signs in to qBittorrent with the given address and credentials, saved or not, and reports its version.
+		 * @description Signs in to qBittorrent with the given address and credentials, or to TorBox with the given key, saved or not, and reports the version or the plan.
 		 */
 		post: operations['checkTorrentClient']
 		delete?: never
@@ -1487,7 +1487,7 @@ export interface paths {
 		}
 		/**
 		 * Torrent client settings
-		 * @description The password is never returned; has_password says whether one is saved.
+		 * @description The password and the TorBox key are never returned; has_password and has_api_key say whether one is saved.
 		 */
 		get: operations['getTorrentSettings']
 		/**
@@ -1900,11 +1900,13 @@ export interface components {
 			 * @example https://example.com/schemas/CheckTorrentClientInputBody.json
 			 */
 			readonly $schema?: string
+			/** @description A TorBox API key to try; left out uses the saved key. */
+			api_key?: string
 			/**
-			 * @description embedded checks the node's own client; anything else, qBittorrent at url.
+			 * @description embedded checks the node's own client, torbox the TorBox key; anything else, qBittorrent at url.
 			 * @enum {string}
 			 */
-			client?: '' | 'qbittorrent' | 'embedded'
+			client?: '' | 'qbittorrent' | 'embedded' | 'torbox'
 			/** @description Left out uses the saved password. */
 			password?: string
 			url?: string
@@ -3007,11 +3009,13 @@ export interface components {
 			 * @example https://example.com/schemas/PutTorrentSettingsInputBody.json
 			 */
 			readonly $schema?: string
+			/** @description The TorBox API key. Left out keeps the saved key; empty removes it. */
+			api_key?: string
 			/**
-			 * @description The user's qBittorrent, the node's own client, or none.
+			 * @description The user's qBittorrent, the node's own client, the user's TorBox account, or none.
 			 * @enum {string}
 			 */
-			client: '' | 'qbittorrent' | 'embedded'
+			client: '' | 'qbittorrent' | 'embedded' | 'torbox'
 			/** @description Left out keeps the saved password; empty removes it. */
 			password?: string
 			/** @description How the client names the node's folders, when it runs in Docker or on another machine. */
@@ -3866,7 +3870,7 @@ export interface components {
 			configured: boolean
 			error?: string
 			/** @enum {string} */
-			kind: '' | 'qbittorrent' | 'embedded'
+			kind: '' | 'qbittorrent' | 'embedded' | 'torbox'
 			reachable: boolean
 		}
 		TorrentDownload: {
@@ -4137,10 +4141,12 @@ export interface components {
 			 */
 			readonly $schema?: string
 			/**
-			 * @description The user's qBittorrent, the node's own client, or none.
+			 * @description The user's qBittorrent, the node's own client, the user's TorBox account, or none.
 			 * @enum {string}
 			 */
-			client: '' | 'qbittorrent' | 'embedded'
+			client: '' | 'qbittorrent' | 'embedded' | 'torbox'
+			/** @description Whether a TorBox API key is saved; the key itself is never returned. */
+			has_api_key: boolean
 			has_password: boolean
 			path_map: components['schemas']['TorrentPathMap']
 			/** Format: int64 */

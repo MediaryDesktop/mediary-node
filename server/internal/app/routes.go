@@ -165,6 +165,7 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 		SecretsPath: filepath.Join(deps.DataDir, "torrent-secrets.json"),
 		Client:      deps.TorrentClient,
 		EmbeddedDir: filepath.Join(deps.DataDir, "torrent-client"),
+		TorBoxDir:   filepath.Join(deps.DataDir, "torbox"),
 		ListenPort:  deps.TorrentListenPort,
 		EnableUPnP:  deps.TorrentEnableUPnP,
 		Titles:      releaseTitles{media: mediaModule},

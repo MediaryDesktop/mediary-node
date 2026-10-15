@@ -12,7 +12,7 @@ import { enumLabel, FeaturedBanner } from '@entities/media'
 import type { MediaSummary } from '@entities/media'
 
 import styles from './DiscoverPage.module.scss'
-import { DISCOVER_TABS, discoverSections } from './lib/sections'
+import { DISCOVER_TABS, discoverSections, SECTION_ICONS } from './lib/sections'
 import type { DiscoverSection, DiscoverTab } from './lib/sections'
 import { discoverModel } from './model/model'
 import { DiscoverRow } from './ui/discover-row/DiscoverRow'
@@ -137,6 +137,7 @@ export function DiscoverPage({ tab, onTabChange }: DiscoverPageProps) {
 							<DiscoverRow
 								key={row.key}
 								title={rowTitle(row)}
+								icon={SECTION_ICONS[row.id]}
 								state={sections[row.key]}
 								onRetry={() => retry(row)}
 							/>

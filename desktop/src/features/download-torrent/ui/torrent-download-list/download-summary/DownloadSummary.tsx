@@ -29,7 +29,11 @@ export function DownloadSummary({ active, inLibrary, setup }: DownloadSummaryPro
 							setup.clientReachable === false ? styles.down : setup.clientReachable && styles.up
 						)}
 					/>
-					{setup.clientKind === 'embedded' ? t('torrents.settings.embedded') : 'qBittorrent'}
+					{setup.clientKind === 'embedded'
+						? t('torrents.settings.embedded')
+						: setup.clientKind === 'torbox'
+							? 'TorBox'
+							: 'qBittorrent'}
 				</span>
 			)}
 		</div>

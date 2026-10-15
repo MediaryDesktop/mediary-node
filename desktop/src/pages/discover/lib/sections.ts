@@ -1,3 +1,5 @@
+import type { IconName } from '@shared/ui'
+
 import type { MediaSearchQuery, MediaSearchSeason, MediaSearchType } from '@entities/media'
 
 // One tab per kind of media, in the order the search offers them.
@@ -34,6 +36,25 @@ export type SectionId =
 	| 'fantasy'
 	| 'scienceFiction'
 	| 'mystery'
+
+// Keyed by section, not tab: "Popular" or "Top rated" wear the same icon wherever
+// they appear.
+export const SECTION_ICONS: Record<SectionId, IconName> = {
+	trending: 'common/flame',
+	thisSeason: 'common/leaf',
+	lastSeason: 'common/history',
+	upcoming: 'common/hourglass',
+	movies: 'common/clapperboard',
+	manga: 'common/book-open-text',
+	manhwa: 'common/smartphone',
+	manhua: 'common/brush',
+	popular: 'common/trending-up',
+	newest: 'common/calendar-plus',
+	topRated: 'common/trophy',
+	fantasy: 'common/wand-sparkles',
+	scienceFiction: 'common/rocket',
+	mystery: 'common/fingerprint'
+}
 
 export interface DiscoverSection {
 	// Unique across tabs and seasons: the row's results are kept by it.

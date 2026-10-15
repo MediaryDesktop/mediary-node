@@ -12,9 +12,40 @@
 		margin: 0 0 1rem;
 
 		.title {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.625rem;
 			margin: 0;
 			font-size: 1.375rem;
 			font-weight: 650;
+
+			.titleIcon {
+				flex: none;
+				margin-top: 2px;
+				color: var(--text);
+			}
+
+			.more {
+				display: inline-flex;
+				align-items: center;
+				border: none;
+				background: none;
+				margin-top: 6px;
+				padding: 0;
+				color: var(--text-muted);
+				cursor: pointer;
+				transition: color 160ms, transform 160ms;
+
+				&:hover,
+				&:focus-visible {
+					color: var(--text);
+					transform: scale(1.1)
+				}
+
+				.chevron {
+					transform: rotate(-90deg);
+				}
+			}
 		}
 
 		.dots {

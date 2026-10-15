@@ -1,7 +1,8 @@
-import { Link, useNavigate } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 
 import { useTranslation } from '@shared/i18n'
 import { Carousel } from '@shared/ui'
+import type { IconName } from '@shared/ui'
 
 import { MediaCard } from '@entities/media'
 import { entryTracking, preferredTitle } from '@entities/tracker'
@@ -9,20 +10,19 @@ import type { TrackerEntry, TrackerMediaType, TrackerStatus } from '@entities/tr
 
 import { EntryMenu } from '@features/track-media'
 
-import styles from './TrackerRow.module.scss'
-
 // A row is a glance, not the list: past this the "see all" link takes over.
 const MAX_CARDS = 20
 
 export interface TrackerRowProps {
 	title: string
+	icon: IconName
 	status: TrackerStatus
 	entries: TrackerEntry[]
 }
 
 // One of the user's status lists as a row of posters, with the same card, list
 // state and menu as the list page itself.
-export function TrackerRow({ title, status, entries }: TrackerRowProps) {
+export function TrackerRow({ title, icon, status, entries }: TrackerRowProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
 
@@ -33,19 +33,12 @@ export function TrackerRow({ title, status, entries }: TrackerRowProps) {
 	return (
 		<Carousel
 			aria-label={title}
-			title={
-				<span className={styles.heading}>
-					{title}
-					<span className={styles.count}>{entries.length}</span>
-					<Link
-						to='/lists/$listId'
-						params={{ listId: `status:${status}` }}
-						className={styles.seeAll}
-					>
-						{t('lists.seeAll')}
-					</Link>
-				</span>
-			}
+			title={title}
+			icon={icon}
+			more={{
+				label: t('lists.seeAll'),
+				onClick: () => navigate({ to: '/lists/$listId', params: { listId: `status:${status}` } })
+			}}
 		>
 			{entries.slice(0, MAX_CARDS).map(entry => (
 				<MediaCard

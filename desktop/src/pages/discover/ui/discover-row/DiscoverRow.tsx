@@ -4,7 +4,8 @@ import { useMemo } from 'react'
 import type { ReactNode } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, Carousel, PhaseTransition, Skeleton } from '@shared/ui'
+import { Button, Carousel, Icon, PhaseTransition, Skeleton } from '@shared/ui'
+import type { IconName } from '@shared/ui'
 
 import { aniListAccountModel } from '@entities/anilist-account'
 import { MediaCard, mediaTitle } from '@entities/media'
@@ -21,13 +22,14 @@ const SKELETONS = 8
 
 export interface DiscoverRowProps {
 	title: ReactNode
+	icon: IconName
 	state: SectionState | undefined
 	onRetry: () => void
 }
 
 // One row of Discover: a source's list, as cards that open the title and offer
 // the list menu, like every other grid of titles in the app.
-export function DiscoverRow({ title, state, onRetry }: DiscoverRowProps) {
+export function DiscoverRow({ title, icon, state, onRetry }: DiscoverRowProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
 
@@ -43,10 +45,17 @@ export function DiscoverRow({ title, state, onRetry }: DiscoverRowProps) {
 
 	const phase = items.length > 0 ? 'loaded' : state?.status === 'failed' ? 'failed' : 'loading'
 
+	const heading = (
+		<h2 className={styles.title}>
+			<Icon name={icon} size={24} className={styles.titleIcon} />
+			{title}
+		</h2>
+	)
+
 	const body =
 		phase === 'failed' ? (
 			<section className={styles.section}>
-				<h2 className={styles.title}>{title}</h2>
+				{heading}
 				<div className={styles.failed}>
 					<p>{t('discover.rowFailed')}</p>
 					<Button size='small' variant='secondary' onClick={onRetry}>
@@ -56,7 +65,7 @@ export function DiscoverRow({ title, state, onRetry }: DiscoverRowProps) {
 			</section>
 		) : phase === 'loading' ? (
 			<section className={styles.section}>
-				<h2 className={styles.title}>{title}</h2>
+				{heading}
 				<div className={styles.skeletons}>
 					{Array.from({ length: SKELETONS }, (_, index) => (
 						<Skeleton key={index} height='auto' className={styles.skeleton} radius='14px' />
@@ -64,7 +73,7 @@ export function DiscoverRow({ title, state, onRetry }: DiscoverRowProps) {
 				</div>
 			</section>
 		) : (
-			<Carousel title={title}>
+			<Carousel title={title} icon={icon}>
 				{items.map((media: MediaSummary) => {
 					const entry = trackedByRef.get(media.media_ref)
 

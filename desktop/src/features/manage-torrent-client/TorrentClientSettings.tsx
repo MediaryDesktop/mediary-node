@@ -12,7 +12,7 @@ import { torrentSettingsQuery } from '@entities/torrent'
 import styles from './TorrentClientSettings.module.scss'
 import { TorrentClientDrawer } from './ui/client-drawer/TorrentClientDrawer'
 
-// The qBittorrent the node adds torrents to, and the library folder they go into.
+// The client the node adds torrents to, and the library folder they go into.
 export function TorrentClientSettings() {
 	const { t } = useTranslation()
 
@@ -44,7 +44,9 @@ export function TorrentClientSettings() {
 			? t('torrents.settings.embedded')
 			: settings.client === 'qbittorrent'
 				? settings.url
-				: t('torrents.settings.notConfigured')
+				: settings.client === 'torbox'
+					? 'TorBox'
+					: t('torrents.settings.notConfigured')
 	const folder = (roots?.roots ?? []).find(root => root.id === settings.root_id)?.path
 
 	return (

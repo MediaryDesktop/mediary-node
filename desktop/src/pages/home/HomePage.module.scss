@@ -25,9 +25,16 @@
 		min-width: 0;
 
 		.sectionTitle {
+			display: flex;
+			align-items: center;
+			gap: 0.625rem;
 			margin: 0 0 1rem;
 			font-size: 1.375rem;
 			font-weight: 650;
+
+			svg {
+				color: var(--text-muted);
+			}
 		}
 	}
 }
