@@ -63,6 +63,13 @@ func (p playableFiles) stream(ctx context.Context, fileID int64) (*playback.Play
 	}, nil
 }
 
+// RenewLink drops a stream's link after the service's CDN refused it.
+func (p playableFiles) RenewLink(fileID int64) {
+	if fileID < 0 && p.streams != nil {
+		p.streams.RenewStreamLink(fileID)
+	}
+}
+
 // overallEpisode counts a show's episode across its seasons — S02E05 of a show
 // whose first season has ten is the fifteenth — because progress on a list is
 // one number, as on AniList. Without the episode list the file's own number

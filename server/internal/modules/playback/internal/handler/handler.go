@@ -256,7 +256,13 @@ func (h *Handler) Register(api huma.API) {
 
 		return &huma.StreamResponse{Body: func(hctx huma.Context) {
 			if source.Remote {
-				proxyRemote(hctx, source.Path, contentType)
+				proxyRemote(hctx, source.Path, contentType, func() (string, error) {
+					fresh, renewErr := h.svc.RenewDirectSource(ctx, in.ID)
+					if renewErr != nil {
+						return "", renewErr
+					}
+					return fresh.Path, nil
+				})
 				return
 			}
 			serveFile(hctx, source.Path, contentType)

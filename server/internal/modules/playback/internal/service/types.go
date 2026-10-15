@@ -40,6 +40,12 @@ type Library interface {
 	Playable(ctx context.Context, fileID int64) (*PlayableFile, error)
 }
 
+// LinkRenewer is a Library whose streams' links can go stale: the service's CDN
+// refuses a link after a while, and the next Playable should bring a fresh one.
+type LinkRenewer interface {
+	RenewLink(fileID int64)
+}
+
 // Progress records that an episode was watched. Implemented over the tracker,
 // which owns the rule that progress is never silently lowered.
 type Progress interface {

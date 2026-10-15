@@ -100,6 +100,19 @@ func (s *Service) DirectSource(ctx context.Context, fileID int64) (*DirectSource
 	return &DirectSource{Path: file.Path, Name: file.Path}, nil
 }
 
+// RenewDirectSource is DirectSource with a fresh link, after the service's CDN
+// refused the one it had.
+func (s *Service) RenewDirectSource(ctx context.Context, fileID int64) (*DirectSource, error) {
+	renewer, ok := s.opts.Library.(LinkRenewer)
+	if !ok {
+		return nil, apperr.New(apperr.KindUpstream, "the debrid service refused the stream")
+	}
+
+	renewer.RenewLink(fileID)
+
+	return s.DirectSource(ctx, fileID)
+}
+
 func (s *Service) playable(ctx context.Context, fileID int64) (*PlayableFile, error) {
 	if s.opts.Library == nil {
 		return nil, apperr.New(apperr.KindPrecondition, "playback is not configured on this node")

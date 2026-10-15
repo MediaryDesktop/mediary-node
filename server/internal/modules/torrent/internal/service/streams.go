@@ -191,6 +191,19 @@ func (s *Service) StreamFile(ctx context.Context, fileID int64) (*StreamFile, er
 	}, nil
 }
 
+// RenewStreamLink forgets a stream's link, so the next StreamFile asks the
+// service for a fresh one: the service's CDN refused the old one.
+func (s *Service) RenewStreamLink(fileID int64) {
+	entry := s.streamEntry(-fileID)
+	if entry == nil {
+		return
+	}
+
+	s.streams.mu.Lock()
+	entry.link = ""
+	s.streams.mu.Unlock()
+}
+
 func (s *Service) streamer(ctx context.Context) (Streamer, error) {
 	client, err := s.requireClient(ctx)
 	if err != nil {

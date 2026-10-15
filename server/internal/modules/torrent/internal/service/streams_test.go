@@ -136,6 +136,15 @@ func TestStreamIsReadiedThenPlaysTheEpisodesFile(t *testing.T) {
 		t.Errorf("link asked %d times, want once", client.links)
 	}
 
+	// A link the CDN refused is asked for again.
+	h.svc.RenewStreamLink(ready.FileID)
+	if _, fileErr := h.svc.StreamFile(ctx, ready.FileID); fileErr != nil {
+		t.Fatal(fileErr)
+	}
+	if client.links != 2 {
+		t.Errorf("link asked %d times after renewal, want twice", client.links)
+	}
+
 	// Asking again for the same episode gives the same stream.
 	again, err := h.svc.StartStream(ctx, StreamRequest{MediaRef: "anilist:154587", Magnet: frierenMagnet, Episode: &episode})
 	if err != nil {

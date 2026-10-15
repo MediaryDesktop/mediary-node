@@ -161,6 +161,11 @@ func (m *Module) StreamFile(ctx context.Context, fileID int64) (*StreamFile, err
 	return m.svc.StreamFile(ctx, fileID)
 }
 
+// RenewStreamLink makes the next StreamFile ask the service for a fresh link.
+func (m *Module) RenewStreamLink(fileID int64) {
+	m.svc.RenewStreamLink(fileID)
+}
+
 // Start follows the downloads until ctx ends.
 func (m *Module) Start(ctx context.Context) {
 	m.svc.Start(ctx)
