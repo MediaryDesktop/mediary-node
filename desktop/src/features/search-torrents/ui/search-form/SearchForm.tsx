@@ -167,6 +167,7 @@ export function SearchForm({ mediaRef, title, missing, poster, onDone }: SearchF
 									release={found}
 									covered={coveredEpisodes(found, missing)}
 									poster={poster}
+									cacheService={result?.cache_service}
 									checked={selected.has(found.id)}
 									onCheckedChange={on => toggle(found.id, on)}
 								/>

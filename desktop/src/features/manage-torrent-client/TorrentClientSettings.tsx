@@ -7,7 +7,7 @@ import { Button, ListTile } from '@shared/ui'
 import { $nodeReady } from '@infra/node'
 
 import { libraryRootsQuery } from '@entities/library-item'
-import { torrentSettingsQuery } from '@entities/torrent'
+import { debridService, torrentSettingsQuery } from '@entities/torrent'
 
 import styles from './TorrentClientSettings.module.scss'
 import { TorrentClientDrawer } from './ui/client-drawer/TorrentClientDrawer'
@@ -44,9 +44,7 @@ export function TorrentClientSettings() {
 			? t('torrents.settings.embedded')
 			: settings.client === 'qbittorrent'
 				? settings.url
-				: settings.client === 'torbox'
-					? 'TorBox'
-					: t('torrents.settings.notConfigured')
+				: (debridService(settings.client)?.name ?? t('torrents.settings.notConfigured'))
 	const folder = (roots?.roots ?? []).find(root => root.id === settings.root_id)?.path
 
 	return (

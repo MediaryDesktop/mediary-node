@@ -35,6 +35,22 @@ describe('torrent display state', () => {
 		expect(displayState({ ...live('stoppedDL', true), choosing: true })).toBe('choosing')
 	})
 
+	it('tells a debrid service downloading apart from the node downloading', () => {
+		const remote = (queued: boolean): TorrentDownload => {
+			const download = live('queuedDL')
+			return {
+				...download,
+				live: { ...download.live!, remote: { service: 'TorBox', progress: 0.4, speed: 0, queued } }
+			}
+		}
+
+		expect(displayState(remote(false))).toBe('remote')
+		expect(displayState(remote(true))).toBe('remoteQueued')
+		expect(displayState({ ...remote(false), live: { ...remote(false).live!, paused: true } })).toBe(
+			'paused'
+		)
+	})
+
 	it('waits for qBittorrent before it has said anything', () => {
 		expect(displayState(BASE)).toBe('unknown')
 	})

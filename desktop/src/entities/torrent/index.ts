@@ -30,6 +30,8 @@ export {
 export { addTorrentFx } from './api/api'
 
 export { useTorrentSetup } from './lib/useTorrentSetup'
+export { DEBRID_SERVICES, debridService, isDebrid } from './lib/clients'
+export type { DebridKind, DebridService, TorrentClientKind } from './lib/clients'
 export { TorrentSetupNotice } from './ui/torrent-setup-notice/TorrentSetupNotice'
 export type { TorrentSetupNoticeProps } from './ui/torrent-setup-notice/TorrentSetupNotice'
 export type { TorrentSetup } from './lib/useTorrentSetup'

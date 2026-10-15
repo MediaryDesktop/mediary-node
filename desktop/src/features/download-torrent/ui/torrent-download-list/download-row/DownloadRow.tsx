@@ -20,6 +20,8 @@ const STATE_TONE: Record<TorrentDisplayState, BadgeTone> = {
 	paused: 'neutral',
 	stalled: 'neutral',
 	queued: 'neutral',
+	remote: 'info',
+	remoteQueued: 'neutral',
 	checking: 'info',
 	metadata: 'info',
 	error: 'danger',
@@ -54,7 +56,8 @@ export function DownloadRow({
 	const state = displayState(item)
 	const live = item.live
 	const downloading = item.state === 'downloading'
-	const moving = downloading && live && !live.paused && !item.choosing
+	const remote = state === 'remote' || state === 'remoteQueued' ? live?.remote : undefined
+	const moving = downloading && live && !live.paused && !item.choosing && !remote
 
 	return (
 		<li className={clsx(styles.row, styles[state])}>
@@ -80,10 +83,22 @@ export function DownloadRow({
 						tone={STATE_TONE[state]}
 						icon={state === 'done' ? <IoLibraryOutline size={14} /> : undefined}
 					>
-						{t(`torrents.states.${state}`)}
+						{t(`torrents.states.${state}`, { service: live?.remote?.service ?? '' })}
 					</Badge>
 
-					{downloading && live && live.size > 0 && (
+					{remote && !remote.queued && (
+						<>
+							<span className={styles.progress}>{Math.floor(remote.progress * 100)}%</span>
+							{remote.speed > 0 && (
+								<span className={styles.stat} title={t('torrents.meta.down')}>
+									<Icon name='common/download' size={13} />
+									{t('torrents.meta.speed', { speed: formatBytes(remote.speed) })}
+								</span>
+							)}
+						</>
+					)}
+
+					{!remote && downloading && live && live.size > 0 && (
 						<span className={styles.progress}>
 							{Math.floor(live.progress * 100)}% · {formatBytes(live.size * live.progress)} /{' '}
 							{formatBytes(live.size)}
@@ -116,9 +131,14 @@ export function DownloadRow({
 				</div>
 
 				{item.state === 'failed' && item.error && <p className={styles.error}>{item.error}</p>}
+				{downloading && live?.remote?.error && <p className={styles.error}>{live.remote.error}</p>}
 
 				{downloading && live && (
-					<ProgressBar value={live.progress * 100} max={100} className={styles.bar} />
+					<ProgressBar
+						value={(remote ? remote.progress : live.progress) * 100}
+						max={100}
+						className={styles.bar}
+					/>
 				)}
 			</div>
 

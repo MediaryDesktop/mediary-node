@@ -1071,6 +1071,7 @@ export const ru: Translation = {
 			episode: 'Серия',
 			submit: 'Искать',
 			best: 'Лучшая',
+			cached: 'В кеше {{service}}',
 			bestIs: 'Лучшая: {{title}}',
 			downloadBest: 'Загрузить лучшую',
 			queries: 'Искали: {{queries}}',
@@ -1122,6 +1123,7 @@ export const ru: Translation = {
 			minSeeders: 'Минимум сидов',
 			preferred: 'Желаемые слова, от самого важного — группы, сайты',
 			excluded: 'Никогда не выбирать раздачи с этими словами',
+			preferCached: 'Предпочитать раздачи, которые уже есть в {{service}}: они приходят сразу',
 			save: 'Сохранить предпочтения',
 			saveFailed: 'Не удалось сохранить предпочтения'
 		},
@@ -1182,6 +1184,8 @@ export const ru: Translation = {
 			paused: 'На паузе',
 			stalled: 'Ищет пиров',
 			queued: 'В очереди клиента',
+			remote: '{{service}} качает',
+			remoteQueued: 'Ждёт свободный слот {{service}}',
 			checking: 'Проверка файлов',
 			metadata: 'Получение метаданных торрента',
 			error: 'Клиент сообщает об ошибке',
@@ -1219,8 +1223,11 @@ export const ru: Translation = {
 				'Mediary загружает торренты сама, больше ничего устанавливать не нужно. Ждёт пиров на порту 42069 и не открывает его на роутере.',
 			qbittorrentHint:
 				'Ваш qBittorrent через его Web UI. Включите Web UI в qBittorrent: Настройки → Веб-интерфейс.',
-			torboxHint:
-				'Ваш аккаунт TorBox: TorBox качает торрент на своих серверах, а Mediary забирает файлы по HTTPS. Бесплатный план качает один торрент за раз.',
+			debrid: 'Debrid-сервис',
+			debridHint:
+				'Ваш собственный debrid-аккаунт: сервис качает торрент на своих серверах, а Mediary забирает файлы по HTTPS. Никакого BitTorrent-трафика с этого компьютера.',
+			serviceLabel: 'Сервис',
+			torboxFree: 'У TorBox есть бесплатный план: один торрент за раз, несколько в месяц.',
 			noneHint: 'Торренты выключены.',
 			notConfigured: 'Не подключено',
 			configure: 'Подключить',
@@ -1234,7 +1241,7 @@ export const ru: Translation = {
 			passwordHint: 'Оставьте пустым, если Web UI пускает этот компьютер без пароля',
 			apiKeyLabel: 'Ключ API',
 			apiKeyHint:
-				'На torbox.app: Settings → API key. Нода хранит его в отдельном файле и больше никогда не показывает',
+				'Скопируйте его с {{page}}. Нода хранит его в отдельном файле и больше никогда не показывает',
 			apiKeyKept: 'Оставьте пустым, чтобы сохранить текущий ключ',
 			check: 'Проверить соединение',
 			ok: 'Подключено к qBittorrent {{version}}',

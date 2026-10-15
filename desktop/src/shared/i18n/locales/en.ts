@@ -1070,6 +1070,7 @@ export const en = {
 			episode: 'Episode',
 			submit: 'Search',
 			best: 'Best',
+			cached: 'Cached in {{service}}',
 			bestIs: 'Best match: {{title}}',
 			downloadBest: 'Download best',
 			queries: 'Searched for: {{queries}}',
@@ -1121,6 +1122,7 @@ export const en = {
 			minSeeders: 'Minimum seeders',
 			preferred: 'Preferred words, best first — groups, sites',
 			excluded: 'Never pick releases with these words',
+			preferCached: 'Prefer releases {{service}} already holds: they arrive at once',
 			save: 'Save preferences',
 			saveFailed: 'Could not save the preferences'
 		},
@@ -1181,6 +1183,8 @@ export const en = {
 			paused: 'Paused',
 			stalled: 'Looking for peers',
 			queued: 'Queued in the client',
+			remote: '{{service}} is downloading it',
+			remoteQueued: 'Waiting for a free {{service}} slot',
 			checking: 'Checking files',
 			metadata: 'Fetching the torrent’s metadata',
 			error: 'The client reports an error',
@@ -1218,8 +1222,11 @@ export const en = {
 				'Mediary downloads torrents itself; nothing else to install. It listens for peers on port 42069 and does not open it on the router.',
 			qbittorrentHint:
 				'Your own qBittorrent, through its Web UI. Turn the Web UI on in qBittorrent: Options → Web UI.',
-			torboxHint:
-				'Your TorBox account: TorBox downloads the torrent on its servers, then Mediary fetches the files over HTTPS. The free plan downloads one torrent at a time.',
+			debrid: 'Debrid service',
+			debridHint:
+				'Your own debrid account: the service downloads the torrent on its servers, then Mediary fetches the files over HTTPS. No BitTorrent traffic leaves this computer.',
+			serviceLabel: 'Service',
+			torboxFree: 'TorBox has a free plan: one torrent at a time, a few a month.',
 			noneHint: 'Torrents are off.',
 			notConfigured: 'Not connected',
 			configure: 'Connect',
@@ -1233,7 +1240,7 @@ export const en = {
 			passwordHint: 'Leave empty if the Web UI lets this computer in without one',
 			apiKeyLabel: 'API key',
 			apiKeyHint:
-				'On torbox.app: Settings → API key. The node keeps it in a file of its own and never shows it again',
+				'Copy it from {{page}}. The node keeps it in a file of its own and never shows it again',
 			apiKeyKept: 'Leave empty to keep the saved key',
 			check: 'Check the connection',
 			ok: 'Connected to qBittorrent {{version}}',

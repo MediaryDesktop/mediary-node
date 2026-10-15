@@ -2,6 +2,7 @@ import clsx from 'clsx'
 
 import { useTranslation } from '@shared/i18n'
 
+import { debridService } from '@entities/torrent'
 import type { TorrentSetup } from '@entities/torrent'
 
 import styles from './DownloadSummary.module.scss'
@@ -31,9 +32,7 @@ export function DownloadSummary({ active, inLibrary, setup }: DownloadSummaryPro
 					/>
 					{setup.clientKind === 'embedded'
 						? t('torrents.settings.embedded')
-						: setup.clientKind === 'torbox'
-							? 'TorBox'
-							: 'qBittorrent'}
+						: (debridService(setup.clientKind)?.name ?? 'qBittorrent')}
 				</span>
 			)}
 		</div>

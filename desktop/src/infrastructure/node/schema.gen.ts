@@ -1264,7 +1264,7 @@ export interface paths {
 		put?: never
 		/**
 		 * Try a torrent client connection
-		 * @description Signs in to qBittorrent with the given address and credentials, or to TorBox with the given key, saved or not, and reports the version or the plan.
+		 * @description Signs in to qBittorrent with the given address and credentials, or to a debrid service with the given key, saved or not, and reports the version or the account.
 		 */
 		post: operations['checkTorrentClient']
 		delete?: never
@@ -1487,7 +1487,7 @@ export interface paths {
 		}
 		/**
 		 * Torrent client settings
-		 * @description The password and the TorBox key are never returned; has_password and has_api_key say whether one is saved.
+		 * @description The password and debrid keys are never returned; has_password, has_api_key and debrid_keys say which are saved.
 		 */
 		get: operations['getTorrentSettings']
 		/**
@@ -1900,13 +1900,13 @@ export interface components {
 			 * @example https://example.com/schemas/CheckTorrentClientInputBody.json
 			 */
 			readonly $schema?: string
-			/** @description A TorBox API key to try; left out uses the saved key. */
+			/** @description A debrid service's key to try; left out uses the saved key. */
 			api_key?: string
 			/**
-			 * @description embedded checks the node's own client, torbox the TorBox key; anything else, qBittorrent at url.
+			 * @description embedded checks the node's own client, a debrid service its key; anything else, qBittorrent at url.
 			 * @enum {string}
 			 */
-			client?: '' | 'qbittorrent' | 'embedded' | 'torbox'
+			client?: '' | 'qbittorrent' | 'embedded' | 'torbox' | 'realdebrid' | 'alldebrid' | 'premiumize'
 			/** @description Left out uses the saved password. */
 			password?: string
 			url?: string
@@ -3009,13 +3009,13 @@ export interface components {
 			 * @example https://example.com/schemas/PutTorrentSettingsInputBody.json
 			 */
 			readonly $schema?: string
-			/** @description The TorBox API key. Left out keeps the saved key; empty removes it. */
+			/** @description The chosen debrid service's key. Left out keeps the saved key; empty removes it. */
 			api_key?: string
 			/**
-			 * @description The user's qBittorrent, the node's own client, the user's TorBox account, or none.
+			 * @description The user's qBittorrent, the node's own client, the user's account on a debrid service, or none.
 			 * @enum {string}
 			 */
-			client: '' | 'qbittorrent' | 'embedded' | 'torbox'
+			client: '' | 'qbittorrent' | 'embedded' | 'torbox' | 'realdebrid' | 'alldebrid' | 'premiumize'
 			/** @description Left out keeps the saved password; empty removes it. */
 			password?: string
 			/** @description How the client names the node's folders, when it runs in Docker or on another machine. */
@@ -3870,7 +3870,7 @@ export interface components {
 			configured: boolean
 			error?: string
 			/** @enum {string} */
-			kind: '' | 'qbittorrent' | 'embedded' | 'torbox'
+			kind: '' | 'qbittorrent' | 'embedded' | 'torbox' | 'realdebrid' | 'alldebrid' | 'premiumize'
 			reachable: boolean
 		}
 		TorrentDownload: {
@@ -3969,6 +3969,8 @@ export interface components {
 			peers: number
 			/** Format: double */
 			progress: number
+			/** @description Present while a debrid service is still getting the torrent itself; the fields above are the node's own download, which starts once the service has the files. */
+			remote?: components['schemas']['TorrentRemote']
 			/** Format: int64 */
 			seeds: number
 			/**
@@ -4011,6 +4013,8 @@ export interface components {
 			 * @description Fewer seeders keeps a release from being the best.
 			 */
 			min_seeders: number
+			/** @description With a debrid service as the client, rank the releases it already holds higher: they arrive at once. Weighs about one step of resolution. */
+			prefer_cached: boolean
 			/** @description Words a release name should have — groups, sites, "multi-sub" — best first. */
 			preferred: string[] | null
 			/**
@@ -4023,6 +4027,8 @@ export interface components {
 			batch: boolean
 			/** @description The one result the profile would pick. */
 			best: boolean
+			/** @description With a debrid service as the client, whether it already holds the release, which then arrives at once. Absent with other clients, or when the service could not be asked. */
+			cached?: boolean
 			/** @description e.g. HEVC */
 			codec?: string
 			/** @description False when an excluded word or too few seeders keep it from being the best. */
@@ -4067,6 +4073,21 @@ export interface components {
 			source_id: number
 			source_name: string
 			title: string
+		}
+		TorrentRemote: {
+			/** @description Why the service gave up on the torrent, in its own words. */
+			error?: string
+			/** Format: double */
+			progress: number
+			/** @description Waiting for a free slot on the account. */
+			queued: boolean
+			/** @example TorBox */
+			service: string
+			/**
+			 * Format: int64
+			 * @description The service's download speed, bytes per second.
+			 */
+			speed: number
 		}
 		TorrentRule: {
 			enabled: boolean
@@ -4129,6 +4150,11 @@ export interface components {
 			 * @example https://example.com/schemas/TorrentSearchResult.json
 			 */
 			readonly $schema?: string
+			/**
+			 * @description The debrid service the releases' cached marks are about; absent when there are none.
+			 * @example TorBox
+			 */
+			cache_service?: string
 			queries: string[] | null
 			releases: components['schemas']['TorrentRelease'][] | null
 			sources: components['schemas']['TorrentSourceOutcome'][] | null
@@ -4141,11 +4167,13 @@ export interface components {
 			 */
 			readonly $schema?: string
 			/**
-			 * @description The user's qBittorrent, the node's own client, the user's TorBox account, or none.
+			 * @description The user's qBittorrent, the node's own client, the user's account on a debrid service, or none.
 			 * @enum {string}
 			 */
-			client: '' | 'qbittorrent' | 'embedded' | 'torbox'
-			/** @description Whether a TorBox API key is saved; the key itself is never returned. */
+			client: '' | 'qbittorrent' | 'embedded' | 'torbox' | 'realdebrid' | 'alldebrid' | 'premiumize'
+			/** @description The debrid services that have a key saved, chosen or not. */
+			debrid_keys: string[] | null
+			/** @description Whether the chosen debrid service has a key saved; keys are never returned. */
 			has_api_key: boolean
 			has_password: boolean
 			path_map: components['schemas']['TorrentPathMap']
@@ -4438,6 +4466,7 @@ export type SchemaTorrentPathMap = components['schemas']['TorrentPathMap']
 export type SchemaTorrentPlannedDownload = components['schemas']['TorrentPlannedDownload']
 export type SchemaTorrentProfile = components['schemas']['TorrentProfile']
 export type SchemaTorrentRelease = components['schemas']['TorrentRelease']
+export type SchemaTorrentRemote = components['schemas']['TorrentRemote']
 export type SchemaTorrentRule = components['schemas']['TorrentRule']
 export type SchemaTorrentRuleCheck = components['schemas']['TorrentRuleCheck']
 export type SchemaTorrentRuleOutputBody = components['schemas']['TorrentRuleOutputBody']

@@ -15,12 +15,21 @@ export interface ReleaseCardProps {
 	// The missing episodes it would bring.
 	covered: number[]
 	poster?: string | null
+	// The debrid service the cached mark is about, when the client is one.
+	cacheService?: string
 	checked: boolean
 	onCheckedChange: (on: boolean) => void
 }
 
 // One search result, ticked to download.
-export function ReleaseCard({ release, covered, poster, checked, onCheckedChange }: ReleaseCardProps) {
+export function ReleaseCard({
+	release,
+	covered,
+	poster,
+	cacheService,
+	checked,
+	onCheckedChange
+}: ReleaseCardProps) {
 	const { t, i18n } = useTranslation()
 
 	return (
@@ -58,6 +67,11 @@ export function ReleaseCard({ release, covered, poster, checked, onCheckedChange
 				{release.best && (
 					<Badge tone='warning' icon='common/star'>
 						{t('torrents.search.best')}
+					</Badge>
+				)}
+				{release.cached && cacheService && (
+					<Badge tone='info' icon='common/download'>
+						{t('torrents.search.cached', { service: cacheService })}
 					</Badge>
 				)}
 				{covered.length > 0 && (

@@ -5,10 +5,12 @@ import { $nodeReady } from '@infra/node'
 
 import { torrentDownloadsQuery, torrentSourcesQuery } from '../model/model'
 
+import type { TorrentClientKind } from './clients'
+
 export interface TorrentSetup {
 	// False until both answers are in, so nothing warns about a setup still loading.
 	loaded: boolean
-	clientKind: '' | 'qbittorrent' | 'embedded' | 'torbox'
+	clientKind: TorrentClientKind
 	clientConfigured: boolean
 	// Null while the node has not asked the client yet.
 	clientReachable: boolean | null

@@ -6,6 +6,8 @@ export type TorrentDisplayState =
 	| 'paused'
 	| 'stalled'
 	| 'queued'
+	| 'remote'
+	| 'remoteQueued'
 	| 'checking'
 	| 'metadata'
 	| 'error'
@@ -33,6 +35,12 @@ export function displayState(download: TorrentDownload): TorrentDisplayState {
 
 	if (live.paused) {
 		return 'paused'
+	}
+
+	// A debrid service still getting the torrent itself: the node has nothing to
+	// download yet, and the service's own progress is the story.
+	if (live.remote) {
+		return live.remote.queued ? 'remoteQueued' : 'remote'
 	}
 
 	const state = live.state
