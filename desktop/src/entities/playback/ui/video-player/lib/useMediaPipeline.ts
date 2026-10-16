@@ -1,5 +1,6 @@
 import { useUnit } from 'effector-react'
 import Hls from 'hls.js'
+import type { HlsConfig } from 'hls.js'
 import JASSUB from 'jassub'
 import { useEffect, useRef } from 'react'
 import type { RefObject } from 'react'
@@ -20,6 +21,20 @@ interface AudioTrackList {
 
 function audioTracksOf(video: HTMLVideoElement): AudioTrackList | undefined {
 	return (video as HTMLVideoElement & { audioTracks?: AudioTrackList }).audioTracks
+}
+
+// A segment the node answers with an error is one ffmpeg crashed on, and the
+// node already tried it again: two more asks, not hls.js's six, before the
+// player gives up and offers mpv. Slow segments still get hls.js's own timeouts.
+const HLS_CONFIG: Partial<HlsConfig> = {
+	fragLoadPolicy: {
+		default: {
+			maxTimeToFirstByteMs: 10000,
+			maxLoadTimeMs: 120000,
+			timeoutRetry: { maxNumRetry: 4, retryDelayMs: 0, maxRetryDelayMs: 0 },
+			errorRetry: { maxNumRetry: 2, retryDelayMs: 1000, maxRetryDelayMs: 2000 }
+		}
+	}
 }
 
 export interface MediaPipelineOptions {
@@ -60,7 +75,7 @@ export function useMediaPipeline({
 			return
 		}
 
-		const hls = new Hls()
+		const hls = new Hls(HLS_CONFIG)
 		hlsRef.current = hls
 
 		hls.on(Hls.Events.ERROR, (_, data) => {
