@@ -22,6 +22,13 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/videofile"
 )
 
+// ErrEncoderFailed is a segment ffmpeg crashed on instead of writing.
+var ErrEncoderFailed = errors.New("cassette: ffmpeg could not encode the file")
+
+// After this many crashes without a segment in between, the file is taken to be
+// one ffmpeg cannot seek in (old AVIs with AC3 are), and segments stop being tried.
+const maxEncoderFailures = 3
+
 // PipelineKind distinguishes video from audio pipelines
 type PipelineKind int
 
@@ -65,6 +72,13 @@ type Pipeline struct {
 	// aborts any WaitFor in progress.
 	killCh chan struct{}
 
+	// failures counts encoders that crashed since a segment last came out;
+	// failedCh is closed and replaced on each crash, waking the requests
+	// waiting on segments the crashed encoder will now never write.
+	failMu   sync.Mutex
+	failures int
+	failedCh chan struct{}
+
 	settings *Settings
 	governor *Governor
 	logger   *zerolog.Logger
@@ -107,6 +121,7 @@ func NewPipeline(cfg PipelineConfig) *Pipeline {
 		velocity:   NewVelocityEstimator(30 * time.Second),
 		heads:      make([]head, 0, 4),
 		killCh:     make(chan struct{}),
+		failedCh:   make(chan struct{}),
 		settings:   cfg.Settings,
 		governor:   cfg.Governor,
 		logger:     cfg.Logger,
@@ -195,6 +210,15 @@ func (p *Pipeline) GetSegment(ctx context.Context, seg int32) (string, error) {
 		return p.segmentPath(seg), nil
 	}
 
+	// An encoder that keeps crashing on this file will crash again: answering
+	// at once lets the player give up and offer mpv instead of buffering.
+	p.failMu.Lock()
+	failures, failed := p.failures, p.failedCh
+	p.failMu.Unlock()
+	if failures >= maxEncoderFailures {
+		return "", fmt.Errorf("%w: %s crashed %d times in a row", ErrEncoderFailed, p.label, failures)
+	}
+
 	// decide whether to spawn a new encoder
 	p.headsMu.RLock()
 	distance := p.minHeadDistance(seg)
@@ -213,8 +237,25 @@ func (p *Pipeline) GetSegment(ctx context.Context, seg int32) (string, error) {
 	waitCtx, waitCancel := context.WithTimeout(ctx, 30*time.Second)
 	defer waitCancel()
 
+	crashed := make(chan struct{})
+	go func() {
+		select {
+		case <-failed:
+			close(crashed)
+			waitCancel()
+		case <-waitCtx.Done():
+		}
+	}()
+
 	if err := p.segments.WaitFor(waitCtx, seg, p.killCh); err != nil {
-		return "", fmt.Errorf("cassette: %s segment %d not ready: %w", p.label, seg, err)
+		select {
+		case <-crashed:
+			if !p.segments.IsReady(seg) {
+				return "", fmt.Errorf("%w: %s segment %d", ErrEncoderFailed, p.label, seg)
+			}
+		default:
+			return "", fmt.Errorf("cassette: %s segment %d not ready: %w", p.label, seg, err)
+		}
 	}
 
 	p.prefetch(seg) //nolint:contextcheck // prefetched heads outlive the request
@@ -554,6 +595,10 @@ func (p *Pipeline) readSegments(
 
 		p.segments.MarkReady(seg, encoderID)
 
+		p.failMu.Lock()
+		p.failures = 0
+		p.failMu.Unlock()
+
 		if seg == end-1 {
 			return // range complete, ffmpeg will finish naturally
 		}
@@ -593,6 +638,7 @@ func (p *Pipeline) reapProcess(encoderID int, cmd *exec.Cmd, stderr *strings.Bui
 		p.logger.Error().Int("eid", encoderID).
 			Err(fmt.Errorf("%w: %s", err, stderr.String())).
 			Msg("cassette: ffmpeg process failed")
+		p.encoderFailed()
 	default:
 		p.logger.Trace().Int("eid", encoderID).Str("pipeline", p.label).
 			Msg("cassette: ffmpeg process exited cleanly")
@@ -601,6 +647,15 @@ func (p *Pipeline) reapProcess(encoderID int, cmd *exec.Cmd, stderr *strings.Bui
 	p.headsMu.Lock()
 	defer p.headsMu.Unlock()
 	p.heads[encoderID] = deletedHead
+}
+
+func (p *Pipeline) encoderFailed() {
+	p.failMu.Lock()
+	defer p.failMu.Unlock()
+
+	p.failures++
+	close(p.failedCh)
+	p.failedCh = make(chan struct{})
 }
 
 // helpers
