@@ -19,6 +19,7 @@ import {
 import type { ReleaseWatching } from '@features/search-torrents'
 import {
 	$streamTarget,
+	$streamVia,
 	streamCancelled,
 	streamPlaying,
 	streamRequested,
@@ -38,7 +39,7 @@ import { TorrentSection } from '../torrent-section/TorrentSection'
 
 import styles from './MediaView.module.scss'
 
-// Kinds watched as video: what a debrid service can play without downloading.
+// Kinds watched as video: what can be played without downloading it first.
 const VIDEO_TYPES = ['anime', 'movie', 'series', 'dorama']
 
 export interface MediaViewProps {
@@ -53,12 +54,13 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 	const [descriptionOpen, setDescriptionOpen] = useState(false)
 	const [detailsOpen, setDetailsOpen] = useState(false)
 	const [view, setView] = useState<MediaViewKind>('library')
-	const [openSearch, closeSearch, streamTarget, requestStream, cancelStream] = useUnit([
+	const [openSearch, closeSearch, streamTarget, requestStream, cancelStream, chosenVia] = useUnit([
 		searchOpened,
 		searchClosed,
 		$streamTarget,
 		streamRequested,
-		streamCancelled
+		streamCancelled,
+		$streamVia
 	])
 	const setup = useTorrentSetup()
 
@@ -89,9 +91,10 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 	const description = media?.description ?? ''
 	const airing = media?.next_airing_episode
 
-	const streamable = torrents && VIDEO_TYPES.includes(mediaType) && Boolean(setup.debrid)
-	// A debrid service turned off while its view was open leaves the library.
+	// The built-in client streams any video; a debrid service is a faster way, not a need.
+	const streamable = torrents && VIDEO_TYPES.includes(mediaType)
 	const shown: MediaViewKind = view === 'stream' && !streamable ? 'library' : view
+	const via = setup.debrid ? chosenVia : 'embedded'
 
 	const releaseKey = (id: string) => `${mediaRef}/release:${id}`
 	const watching: ReleaseWatching | undefined = streamable
@@ -110,7 +113,8 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 							title,
 							release_id: release.id,
 							episode: episode.episode,
-							season: episode.season
+							season: episode.season,
+							via
 						}
 					}),
 				onCancel: cancelStream

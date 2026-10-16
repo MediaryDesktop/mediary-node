@@ -56,8 +56,9 @@ export function SearchForm({ mediaRef, title, missing, poster, watching, onDone 
 	const [onlyMissing, setOnlyMissing] = useState(Boolean(missing?.length) && !target.episode)
 	const [selected, setSelected] = useState<Set<string>>(new Set())
 
-	// Any set-up debrid service plays a release, whatever downloads the library.
-	const canStream = Boolean(setup.debrid && watching)
+	// The page offers watching whenever a release can be streamed: through the
+	// built-in client always, through a debrid service when one is set up.
+	const canStream = Boolean(watching)
 
 	const watchOf = (release: TorrentRelease) => {
 		const episode = streamEpisode(release, criteria)

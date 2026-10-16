@@ -19,6 +19,7 @@ function stream(fields: Partial<TorrentStream>): TorrentStream {
 	return {
 		id: 3,
 		state: 'preparing',
+		via: 'debrid',
 		service: 'TorBox',
 		progress: 0,
 		speed: 0,

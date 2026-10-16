@@ -2,6 +2,7 @@ import { createEffect, createEvent, createStore, merge, sample } from 'effector'
 
 import { HttpRequestError, problemDetail } from '@shared/api'
 import { translate } from '@shared/i18n'
+import { readStored, writeStored } from '@shared/lib'
 import { toast } from '@shared/ui'
 
 import { $playerMode, playbackModel, playerOpened } from '@entities/playback'
@@ -19,6 +20,22 @@ export interface StreamTarget {
 	label: string
 	params: StartTorrentStreamParams
 }
+
+// What a stream comes through: the debrid service set up, or the node's own
+// client, which downloads the file's start first and plays it as it comes.
+export type StreamVia = NonNullable<StartTorrentStreamParams['via']>
+
+const VIA_KEY = 'mediary.stream.via'
+
+export const streamViaChanged = createEvent<StreamVia>()
+
+// The choice as last made on this computer; without a debrid service only the
+// built-in client is there, whatever this says.
+export const $streamVia = createStore<StreamVia>(
+	readStored(VIA_KEY) === 'embedded' ? 'embedded' : 'debrid'
+).on(streamViaChanged, (_, via) => via)
+
+streamViaChanged.watch(via => writeStored(VIA_KEY, via))
 
 export const streamRequested = createEvent<StreamTarget>()
 export const streamCancelled = createEvent()

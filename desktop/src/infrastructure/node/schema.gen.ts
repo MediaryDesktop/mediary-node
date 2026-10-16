@@ -1622,7 +1622,7 @@ export interface paths {
 		put?: never
 		/**
 		 * Play a torrent without downloading it
-		 * @description Needs a debrid service as the torrent client. Gives it the torrent, which is not added to the downloads, and reports how far the service is; ask GET .../streams/{id} until the state is ready, then play file_id like a library file. A torrent the service already holds is ready at once.
+		 * @description Gives the torrent to the debrid service set up, or to the node's own client, without adding it to the downloads, and reports how far it is; ask GET .../streams/{id} until the state is ready, then play file_id like a library file. A torrent the service already holds is ready at once; the built-in client is ready once it has the file's start and end, and keeps one stream at a time.
 		 */
 		post: operations['startTorrentStream']
 		delete?: never
@@ -3733,7 +3733,7 @@ export interface components {
 			 * @example https://example.com/schemas/StartTorrentStreamInputBody.json
 			 */
 			readonly $schema?: string
-			/** @description Search for the episode and play the best release: one the debrid service already holds first, then by the release profile. In place of magnet, torrent or release_id. */
+			/** @description Search for the episode and play the best release: through a debrid service, one it already holds first; then by the release profile and seeders. In place of magnet, torrent or release_id. */
 			auto?: boolean
 			/**
 			 * Format: int64
@@ -3754,6 +3754,11 @@ export interface components {
 			title?: string
 			/** @description A .torrent file, base64-encoded. */
 			torrent?: string
+			/**
+			 * @description Through the debrid service set up, or the node's own client, which downloads the file's start and end first and plays it as it comes. Absent: the debrid service when there is one.
+			 * @enum {string}
+			 */
+			via?: 'debrid' | 'embedded'
 		}
 		StatusOutputBody: {
 			/**
@@ -4417,8 +4422,13 @@ export interface components {
 			/** @description The file that plays, once chosen. */
 			name?: string
 			/**
+			 * Format: int64
+			 * @description Peers the built-in client gets the torrent from.
+			 */
+			peers?: number
+			/**
 			 * Format: double
-			 * @description How far the service is with the torrent, while preparing.
+			 * @description While preparing: how far the service is with the torrent, or how much of the file's start the built-in client has.
 			 */
 			progress: number
 			/** @description The release the node picked, when it picked one. */
@@ -4427,14 +4437,19 @@ export interface components {
 			service: string
 			/**
 			 * Format: int64
-			 * @description The service's download speed, bytes per second, while preparing.
+			 * @description The download speed, bytes per second, while preparing.
 			 */
 			speed: number
 			/**
-			 * @description ready once the service holds the file; failed when it gave up, or the torrent has no fitting video.
+			 * @description ready once the service holds the file, or the built-in client has its start; failed when it gave up, or the torrent has no fitting video.
 			 * @enum {string}
 			 */
 			state: 'preparing' | 'queued' | 'ready' | 'failed'
+			/**
+			 * @description Whether a debrid service or the node's own client gets the torrent.
+			 * @enum {string}
+			 */
+			via: 'debrid' | 'embedded'
 		}
 		Trailer: {
 			/** @description Video id on the hosting site. */

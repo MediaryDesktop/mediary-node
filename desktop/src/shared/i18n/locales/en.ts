@@ -645,8 +645,12 @@ export const en = {
 		stream: {
 			autoSelect: 'Auto-select',
 			autoSelectHint:
-				'A click plays the best release of the episode through {{service}}, cached ones first',
+				'A click plays the best release of the episode through {{service}}, cached ones first when it can tell',
+			autoSelectBuiltInHint:
+				'A click plays the best-seeded release of the episode through the built-in client, as it downloads',
 			manualHint: 'A click opens the search on the episode, to pick the release to play',
+			via: 'Watch through',
+			viaBuiltIn: 'Built-in client',
 			preparing: 'Getting ready'
 		},
 		chapters: {
@@ -1221,8 +1225,10 @@ export const en = {
 			watch: 'Watch now, without downloading',
 			cancel: 'Stop getting it ready',
 			pickEpisode: 'A batch: type the episode in the search to watch it',
-			starting: 'Handing it to the service…',
+			starting: 'Getting it ready…',
 			preparing: '{{service}} is getting it · {{percent}}%',
+			builtIn: 'The built-in client',
+			swarm: 'Peers: {{count}} · {{speed}}',
 			queued: 'Waiting for a free {{service}} slot',
 			failed: 'Could not play it without downloading'
 		},

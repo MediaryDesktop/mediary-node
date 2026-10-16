@@ -1,4 +1,11 @@
 export { TorrentStreamOverlay } from './TorrentStreamOverlay'
 
-export { $streamTarget, streamCancelled, streamPlaying, streamRequested } from './model/model'
-export type { StreamTarget } from './model/model'
+export {
+	$streamTarget,
+	$streamVia,
+	streamCancelled,
+	streamPlaying,
+	streamRequested,
+	streamViaChanged
+} from './model/model'
+export type { StreamTarget, StreamVia } from './model/model'

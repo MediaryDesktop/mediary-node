@@ -5,7 +5,7 @@ import { useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { readStored, writeStored } from '@shared/lib'
-import { Badge, Button, Icon, Notice, Switch } from '@shared/ui'
+import { Badge, Button, Icon, Notice, SegmentedControl, Switch } from '@shared/ui'
 
 import type { MediaEpisode } from '@entities/media'
 import { useTorrentSetup } from '@entities/torrent'
@@ -13,7 +13,8 @@ import { useTorrentSetup } from '@entities/torrent'
 import { EpisodeImage } from '@features/continue-watching'
 import type { EpisodeIndex } from '@features/continue-watching'
 import { searchOpened } from '@features/search-torrents'
-import { $streamTarget, streamRequested } from '@features/stream-torrent'
+import { $streamTarget, $streamVia, streamRequested, streamViaChanged } from '@features/stream-torrent'
+import type { StreamVia } from '@features/stream-torrent'
 
 import { ToWatchRail } from '../library-section/episode-library/to-watch-rail/ToWatchRail'
 import cardStyles from '../library-section/episode-library/to-watch-rail/ToWatchRail.module.scss'
@@ -56,9 +57,10 @@ interface StreamItem {
 	position: number
 }
 
-// The title's episodes, played without downloading through the debrid service,
-// as Seanime's torrent streaming view: with auto-select a click plays the best
-// release at once, without it the search opens on that episode to pick one.
+// The title's episodes, played without downloading them into the library, as
+// Seanime's torrent streaming view: through the built-in client, which plays the
+// file as it comes, or the debrid service. With auto-select a click plays the
+// best release at once, without it the search opens on that episode to pick one.
 export function StreamSection({
 	mediaRef,
 	title,
@@ -75,7 +77,16 @@ export function StreamSection({
 	const { meta, count } = useEpisodeMeta(mediaRef)
 	const text = useEpisodeText()
 
-	const [target, request, openSearch] = useUnit([$streamTarget, streamRequested, searchOpened])
+	const [target, request, openSearch, chosenVia, chooseVia] = useUnit([
+		$streamTarget,
+		streamRequested,
+		searchOpened,
+		$streamVia,
+		streamViaChanged
+	])
+
+	// Without a debrid service the built-in client is the only way.
+	const via: StreamVia = setup.debrid ? chosenVia : 'embedded'
 
 	const [autoSelect, setAutoSelect] = useState(() => readStored(AUTO_SELECT_KEY) !== 'off')
 
@@ -103,7 +114,14 @@ export function StreamSection({
 			request({
 				key: `${mediaRef}/${item.key}`,
 				label: mediaType === 'movie' ? title : `${title} · ${item.label}`,
-				params: { media_ref: mediaRef, title, episode: item.episode, season: item.season, auto: true }
+				params: {
+					media_ref: mediaRef,
+					title,
+					episode: item.episode,
+					season: item.season,
+					auto: true,
+					via
+				}
 			})
 		} else {
 			openSearch({ episode: item.episode, season: item.season })
@@ -135,15 +153,28 @@ export function StreamSection({
 			)}
 
 			<div className={styles.toolbar}>
+				{setup.debrid && (
+					<SegmentedControl
+						label={t('media.stream.via')}
+						items={[
+							{ value: 'embedded', label: t('media.stream.viaBuiltIn') },
+							{ value: 'debrid', label: setup.debrid.name }
+						]}
+						value={via}
+						onValueChange={chooseVia}
+					/>
+				)}
 				<Switch
 					checked={autoSelect}
 					onChange={changeAutoSelect}
 					label={t('media.stream.autoSelect')}
 				/>
 				<p className={styles.hint}>
-					{autoSelect
-						? t('media.stream.autoSelectHint', { service: setup.debrid?.name ?? '' })
-						: t('media.stream.manualHint')}
+					{!autoSelect
+						? t('media.stream.manualHint')
+						: via === 'embedded'
+							? t('media.stream.autoSelectBuiltInHint')
+							: t('media.stream.autoSelectHint', { service: setup.debrid?.name ?? '' })}
 				</p>
 			</div>
 
