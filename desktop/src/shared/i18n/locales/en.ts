@@ -639,7 +639,15 @@ export const en = {
 		nextAiringDay: 'Episode {{episode}} {{when}}',
 		views: {
 			library: 'Local library',
+			stream: 'Torrent streaming',
 			torrent: 'Torrents'
+		},
+		stream: {
+			autoSelect: 'Auto-select',
+			autoSelectHint:
+				'A click plays the best release of the episode through {{service}}, cached ones first',
+			manualHint: 'A click opens the search on the episode, to pick the release to play',
+			preparing: 'Getting ready'
 		},
 		chapters: {
 			title: 'Chapters · {{count}}'

@@ -637,7 +637,14 @@ export const uk: Translation = {
 		nextAiringDay: 'Епізод {{episode}} {{when}}',
 		views: {
 			library: 'Локальна бібліотека',
+			stream: 'Торент-стрімінг',
 			torrent: 'Торенти'
+		},
+		stream: {
+			autoSelect: 'Автовибір',
+			autoSelectHint: 'Клік грає найкращу роздачу серії через {{service}}, спершу кешовані',
+			manualHint: 'Клік відкриває пошук на серії, щоб вибрати роздачу',
+			preparing: 'Готується'
 		},
 		chapters: {
 			title: 'Глави · {{count}}'

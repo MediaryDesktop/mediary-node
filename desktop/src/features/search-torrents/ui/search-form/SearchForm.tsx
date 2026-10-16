@@ -6,13 +6,14 @@ import { useTranslation } from '@shared/i18n'
 import { DrawerForm, EmptyState, Skeleton, toast } from '@shared/ui'
 
 import { torrentSearchQuery, TorrentSetupNotice, useTorrentSetup } from '@entities/torrent'
-import type { TorrentRelease, TorrentStream } from '@entities/torrent'
+import type { TorrentRelease } from '@entities/torrent'
 
 import { coveredEpisodes } from '../../lib/episodes'
 import { downloadRequests, filterReleases } from '../../lib/releases'
 import type { ReleaseKind } from '../../lib/releases'
-import { streamEpisode, useWatchRelease } from '../../lib/useWatchRelease'
-import { downloadReleasesFx } from '../../model/model'
+import { streamEpisode } from '../../lib/stream-episode'
+import type { ReleaseWatching } from '../../lib/stream-episode'
+import { $searchTarget, downloadReleasesFx } from '../../model/model'
 
 import { ReleaseCard } from './release-card/ReleaseCard'
 import { SearchBar } from './search-bar/SearchBar'
@@ -25,52 +26,47 @@ export interface SearchFormProps {
 	title: string
 	missing: number[] | null
 	poster?: string | null
+	watching?: ReleaseWatching
 	onDone: () => void
 }
 
 // The search, its filters and the results to tick; submitting downloads the ticked.
-export function SearchForm({ mediaRef, title, missing, poster, onDone }: SearchFormProps) {
+export function SearchForm({ mediaRef, title, missing, poster, watching, onDone }: SearchFormProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
 	const setup = useTorrentSetup()
 
-	const [result, error, pending, search, downloading] = useUnit([
+	const [result, error, pending, search, downloading, target] = useUnit([
 		torrentSearchQuery.$data,
 		torrentSearchQuery.$error,
 		torrentSearchQuery.$pending,
 		torrentSearchQuery.start,
-		downloadReleasesFx.pending
+		downloadReleasesFx.pending,
+		$searchTarget
 	])
 
-	const [criteria, setCriteria] = useState<SearchCriteria>({ query: '', season: '', episode: '' })
+	// Opened on an episode, the search starts with it typed in.
+	const [criteria, setCriteria] = useState<SearchCriteria>(() => ({
+		query: '',
+		season: target.season ? String(target.season) : '',
+		episode: target.episode ? String(target.episode) : ''
+	}))
 	const [kind, setKind] = useState<ReleaseKind>('all')
-	const [onlyMissing, setOnlyMissing] = useState(Boolean(missing?.length))
+	// An episode asked for may well be one the library has: it is watched, not missing.
+	const [onlyMissing, setOnlyMissing] = useState(Boolean(missing?.length) && !target.episode)
 	const [selected, setSelected] = useState<Set<string>>(new Set())
 
-	const watching = useWatchRelease({ mediaRef, title, onPlaying: onDone })
 	// Any set-up debrid service plays a release, whatever downloads the library.
-	const canStream = Boolean(setup.debrid)
-
-	const streamStatus = (stream: TorrentStream | null): string =>
-		!stream
-			? t('torrents.stream.starting')
-			: stream.state === 'queued'
-				? t('torrents.stream.queued', { service: stream.service })
-				: t('torrents.stream.preparing', {
-						service: stream.service,
-						percent: Math.floor(stream.progress * 100)
-					})
+	const canStream = Boolean(setup.debrid && watching)
 
 	const watchOf = (release: TorrentRelease) => {
 		const episode = streamEpisode(release, criteria)
-		const preparing = watching.releaseId === release.id
 
 		return {
-			possible: episode !== null && watching.releaseId === null,
-			preparing,
-			status: preparing ? streamStatus(watching.stream) : undefined,
-			onWatch: () => episode && watching.watch(release, episode),
-			onCancel: watching.cancel
+			possible: episode !== null && !watching?.busy,
+			preparing: watching?.activeId === release.id,
+			onWatch: () => episode && watching?.onWatch(release, episode),
+			onCancel: () => watching?.onCancel()
 		}
 	}
 
@@ -87,7 +83,7 @@ export function SearchForm({ mediaRef, title, missing, poster, onDone }: SearchF
 	// Opening the sheet is asking for releases: the first search needs no click.
 	useEffect(() => {
 		if (setup.loaded && setup.hasSources) {
-			search({ mediaRef, episode: 0, query: '' })
+			search({ mediaRef, episode: target.episode ?? 0, season: target.season ?? 0, query: '' })
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [setup.loaded, setup.hasSources, mediaRef])

@@ -3733,6 +3733,8 @@ export interface components {
 			 * @example https://example.com/schemas/StartTorrentStreamInputBody.json
 			 */
 			readonly $schema?: string
+			/** @description Search for the episode and play the best release: one the debrid service already holds first, then by the release profile. In place of magnet, torrent or release_id. */
+			auto?: boolean
 			/**
 			 * Format: int64
 			 * @description Picks the file from a batch, and is what gets marked watched.
@@ -4419,6 +4421,8 @@ export interface components {
 			 * @description How far the service is with the torrent, while preparing.
 			 */
 			progress: number
+			/** @description The release the node picked, when it picked one. */
+			release?: string
 			/** @example TorBox */
 			service: string
 			/**

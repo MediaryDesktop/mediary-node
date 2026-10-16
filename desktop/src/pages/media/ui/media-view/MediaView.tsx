@@ -2,14 +2,28 @@ import { useUnit } from 'effector-react'
 import { useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { formatRelativeTime, formatWeekday } from '@shared/lib'
+import { formatRelativeTime, formatWeekday, useUnitWatch } from '@shared/lib'
 import { Icon, Modal } from '@shared/ui'
 
 import { mediaTitle } from '@entities/media'
 import type { MediaDetails, MediaSource } from '@entities/media'
+import { useTorrentSetup } from '@entities/torrent'
 import type { TrackerEntry } from '@entities/tracker'
 
-import { searchOpened, TorrentSearchDrawer, useMissingEpisodes } from '@features/search-torrents'
+import {
+	searchClosed,
+	searchOpened,
+	TorrentSearchDrawer,
+	useMissingEpisodes
+} from '@features/search-torrents'
+import type { ReleaseWatching } from '@features/search-torrents'
+import {
+	$streamTarget,
+	streamCancelled,
+	streamPlaying,
+	streamRequested,
+	TorrentStreamOverlay
+} from '@features/stream-torrent'
 
 import { resolveSubject } from '../../lib/media-view'
 import { LibrarySection } from '../library-section/LibrarySection'
@@ -19,9 +33,13 @@ import { MediaFacts } from '../media-facts/MediaFacts'
 import { MediaHero } from '../media-hero/MediaHero'
 import { RecommendationsSection } from '../relations-section/RecommendationsSection'
 import { RelationsSection } from '../relations-section/RelationsSection'
+import { StreamSection } from '../stream-section/StreamSection'
 import { TorrentSection } from '../torrent-section/TorrentSection'
 
 import styles from './MediaView.module.scss'
+
+// Kinds watched as video: what a debrid service can play without downloading.
+const VIDEO_TYPES = ['anime', 'movie', 'series', 'dorama']
 
 export interface MediaViewProps {
 	mediaRef: string
@@ -35,7 +53,17 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 	const [descriptionOpen, setDescriptionOpen] = useState(false)
 	const [detailsOpen, setDetailsOpen] = useState(false)
 	const [view, setView] = useState<MediaViewKind>('library')
-	const openSearch = useUnit(searchOpened)
+	const [openSearch, closeSearch, streamTarget, requestStream, cancelStream] = useUnit([
+		searchOpened,
+		searchClosed,
+		$streamTarget,
+		streamRequested,
+		streamCancelled
+	])
+	const setup = useTorrentSetup()
+
+	// The search sheet gives way to the player a stream from it opened.
+	useUnitWatch(streamPlaying, () => closeSearch())
 
 	const subject = resolveSubject(media, entry)
 	// Manga is read and books too: neither is downloaded as video, nor tracks missing
@@ -61,6 +89,34 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 	const description = media?.description ?? ''
 	const airing = media?.next_airing_episode
 
+	const streamable = torrents && VIDEO_TYPES.includes(mediaType) && Boolean(setup.debrid)
+	// A debrid service turned off while its view was open leaves the library.
+	const shown: MediaViewKind = view === 'stream' && !streamable ? 'library' : view
+
+	const releaseKey = (id: string) => `${mediaRef}/release:${id}`
+	const watching: ReleaseWatching | undefined = streamable
+		? {
+				activeId:
+					streamTarget?.key.startsWith(`${mediaRef}/release:`) === true
+						? streamTarget.key.slice(`${mediaRef}/release:`.length)
+						: null,
+				busy: streamTarget !== null,
+				onWatch: (release, episode) =>
+					requestStream({
+						key: releaseKey(release.id),
+						label: release.title,
+						params: {
+							media_ref: mediaRef,
+							title,
+							release_id: release.id,
+							episode: episode.episode,
+							season: episode.season
+						}
+					}),
+				onCancel: cancelStream
+			}
+		: undefined
+
 	return (
 		<>
 			<MediaHero
@@ -81,8 +137,9 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 				sources={sources}
 				mediaType={mediaType}
 				siteUrl={base.site_url}
-				view={view}
+				view={shown}
 				onViewChange={torrents ? setView : undefined}
+				streamable={streamable}
 				missingCount={missing?.length ?? null}
 				onDownload={
 					torrents
@@ -101,8 +158,11 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 					title={title}
 					missing={missing}
 					poster={base.cover_image}
+					watching={watching}
 				/>
 			)}
+
+			{streamable && <TorrentStreamOverlay />}
 
 			{airing && (
 				<p className={styles.nextAiring}>
@@ -118,8 +178,19 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 			)}
 
 			<div className={styles.sections}>
-				{view === 'torrent' ? (
+				{shown === 'torrent' ? (
 					<TorrentSection mediaRef={mediaRef} title={title} poster={base.cover_image} />
+				) : shown === 'stream' ? (
+					<StreamSection
+						mediaRef={mediaRef}
+						title={title}
+						mediaType={mediaType}
+						cover={base.cover_image}
+						coverColor={base.cover_color}
+						banner={base.banner_image}
+						released={seasonal ? null : releasedEpisodes(media, total)}
+						progress={entry?.progress ?? 0}
+					/>
 				) : (
 					<LibrarySection
 						mediaRef={mediaRef}

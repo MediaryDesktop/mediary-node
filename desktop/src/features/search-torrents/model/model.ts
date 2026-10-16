@@ -5,12 +5,23 @@ import { HttpRequestError } from '@shared/api'
 import { addTorrentFx } from '@entities/torrent'
 import type { AddTorrentParams } from '@entities/torrent'
 
-// The search sheet, opened from the title's header or its Torrents tab.
-export const searchOpened = createEvent()
+// What the sheet opens on: an episode, from the stream view without auto-select.
+export interface SearchTarget {
+	episode?: number
+	season?: number
+}
+
+// The search sheet, opened from the title's header, its Torrents tab, or an
+// episode of the stream view.
+export const searchOpened = createEvent<SearchTarget | void>()
 export const searchClosed = createEvent()
 
 export const $searchOpen = createStore(false)
 	.on(searchOpened, () => true)
+	.reset(searchClosed)
+
+export const $searchTarget = createStore<SearchTarget>({})
+	.on(searchOpened, (_, target) => target ?? {})
 	.reset(searchClosed)
 
 export interface DownloadOutcome {

@@ -15,7 +15,7 @@ import { manageEntryModel, rateEntryModel } from '@features/track-media'
 
 import styles from './MediaActions.module.scss'
 
-export type MediaView = 'library' | 'torrent'
+export type MediaView = 'library' | 'stream' | 'torrent'
 
 export interface MediaActionsProps {
 	mediaRef: string
@@ -27,6 +27,8 @@ export interface MediaActionsProps {
 	view: MediaView
 	// Absent where torrents make no sense: manga is read, not downloaded as video.
 	onViewChange?: (view: MediaView) => void
+	// Offers the stream view: a debrid service is set up to play without downloading.
+	streamable?: boolean
 	// How many released episodes the library lacks; null when unknown.
 	missingCount?: number | null
 	// Opens the torrent search; absent where there are no torrents.
@@ -43,6 +45,7 @@ export function MediaActions({
 	siteUrl,
 	view,
 	onViewChange,
+	streamable = false,
 	missingCount,
 	onDownload,
 	onOpenDetails
@@ -155,6 +158,19 @@ export function MediaActions({
 				>
 					{t('media.views.library')}
 				</Button>
+
+				{onViewChange && streamable && (
+					<Button
+						role='tab'
+						aria-selected={view === 'stream'}
+						variant='ghost'
+						className={styles.viewTab}
+						startIcon={<Icon name='common/play' size={20} />}
+						onClick={() => onViewChange('stream')}
+					>
+						{t('media.views.stream')}
+					</Button>
+				)}
 
 				{onViewChange && (
 					<Button

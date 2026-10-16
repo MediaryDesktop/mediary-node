@@ -17,7 +17,7 @@ export interface ReleaseCardProps {
 	poster?: string | null
 	// The debrid service the cached mark is about, when the client is one.
 	cacheService?: string
-	// Playing without downloading, with a debrid service as the client.
+	// Playing without downloading, with a debrid service set up.
 	watch?: ReleaseWatch
 	checked: boolean
 	onCheckedChange: (on: boolean) => void
@@ -26,9 +26,8 @@ export interface ReleaseCardProps {
 export interface ReleaseWatch {
 	// False for a batch with no episode searched: there is nothing to pick by.
 	possible: boolean
-	// The service is readying this release, and how far it is.
+	// The service is readying this release; how far it is shows in the overlay.
 	preparing: boolean
-	status?: string
 	onWatch: () => void
 	onCancel: () => void
 }
@@ -74,7 +73,6 @@ export function ReleaseCard({
 					)}
 					<span>{release.indexer || release.source_name}</span>
 				</div>
-				{watch?.preparing && watch.status && <p className={styles.watchStatus}>{watch.status}</p>}
 			</div>
 
 			<div className={styles.badges}>

@@ -639,7 +639,14 @@ export const ru: Translation = {
 		nextAiringDay: 'Эпизод {{episode}} {{when}}',
 		views: {
 			library: 'Локальная библиотека',
+			stream: 'Торрент-стриминг',
 			torrent: 'Торренты'
+		},
+		stream: {
+			autoSelect: 'Автовыбор',
+			autoSelectHint: 'Клик играет лучшую раздачу серии через {{service}}, сначала кешированные',
+			manualHint: 'Клик открывает поиск на серии, чтобы выбрать раздачу',
+			preparing: 'Готовится'
 		},
 		chapters: {
 			title: 'Главы · {{count}}'

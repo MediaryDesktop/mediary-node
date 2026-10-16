@@ -42,7 +42,7 @@ export function TorrentSection({ mediaRef, title, poster }: TorrentSectionProps)
 					>
 						{t('torrents.add')}
 					</Button>
-					<Button startIcon={<Icon name='common/search' size={16} />} onClick={openSearch}>
+					<Button startIcon={<Icon name='common/search' size={16} />} onClick={() => openSearch()}>
 						{t('torrents.search.open')}
 					</Button>
 				</div>

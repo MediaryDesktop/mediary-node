@@ -1,0 +1,58 @@
+.overlay {
+	position: fixed;
+	z-index: 40;
+	right: 1.5rem;
+	bottom: 1.5rem;
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	width: min(28rem, calc(100vw - 3rem));
+	padding: 1rem 1.25rem;
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	background: var(--surface);
+	box-shadow: 0 1rem 2.5rem rgb(0 0 0 / 40%);
+
+	.icon {
+		display: inline-flex;
+		flex: none;
+		align-items: center;
+		justify-content: center;
+		width: 2.5rem;
+		height: 2.5rem;
+		border-radius: 999px;
+		background: var(--surface-hover);
+		color: var(--accent);
+	}
+
+	.body {
+		display: grid;
+		flex: 1;
+		gap: 0.25rem;
+		min-width: 0;
+
+		.label {
+			margin: 0;
+			font-weight: 600;
+		}
+
+		.status {
+			margin: 0;
+			color: var(--text-secondary);
+			font-size: 0.875rem;
+		}
+
+		.release {
+			overflow: hidden;
+			margin: 0;
+			color: var(--text-muted);
+			font-size: 0.75rem;
+			white-space: nowrap;
+			text-overflow: ellipsis;
+		}
+
+		.bar {
+			margin-top: 0.25rem;
+		}
+	}
+}
