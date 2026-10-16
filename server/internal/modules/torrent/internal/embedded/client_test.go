@@ -23,6 +23,16 @@ import (
 func seed(t *testing.T) (seeder *torrent.Torrent, torrentFile []byte, episodes map[string][]byte) {
 	t.Helper()
 
+	seeder, torrentFile, episodes, _ = seedOn(t)
+
+	return seeder, torrentFile, episodes
+}
+
+// seedOn is seed with the port the seeding client listens on, for a client to
+// dial it as it would a seeder found on the network.
+func seedOn(t *testing.T) (seeder *torrent.Torrent, torrentFile []byte, episodes map[string][]byte, port int) {
+	t.Helper()
+
 	dir := t.TempDir()
 	root := filepath.Join(dir, "Frieren E2E")
 	if err := os.MkdirAll(root, 0o755); err != nil {
@@ -91,7 +101,7 @@ func seed(t *testing.T) (seeder *torrent.Torrent, torrentFile []byte, episodes m
 		t.Fatal(err)
 	}
 
-	return seeder, buf.Bytes(), episodes
+	return seeder, buf.Bytes(), episodes, cl.LocalPort()
 }
 
 func newClient(t *testing.T, stateDir string) *Client {

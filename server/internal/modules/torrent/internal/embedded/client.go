@@ -77,6 +77,8 @@ type Client struct {
 	speeds   map[string][2]int64
 	// Each torrent's file storage; it holds the files open until closed.
 	stores map[string]storage.ClientImplCloser
+	// The torrent played without downloading it into the library; see stream.go.
+	stream *localStream
 }
 
 func New(opts Options) *Client {
@@ -128,6 +130,9 @@ func (c *Client) start() (*torrent.Client, error) {
 		return nil, c.startErr
 	}
 	c.cl = cl
+
+	// Streams do not outlive the node; what one left behind is only taking space.
+	_ = os.RemoveAll(c.streamsDir())
 
 	if err := c.load(); err != nil {
 		c.opts.Logger.Warn().Err(err).Msg("could not read the torrent client's list")
@@ -574,6 +579,11 @@ func (c *Client) Close() {
 		c.cl.Close()
 		<-c.cl.Closed()
 	}
+
+	if c.stream != nil && c.stream.store != nil {
+		_ = c.stream.store.Close()
+	}
+	c.stream = nil
 
 	for hash, store := range c.stores {
 		_ = store.Close()

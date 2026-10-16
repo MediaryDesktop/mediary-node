@@ -68,6 +68,8 @@ type Remote struct {
 	Progress float64
 	// Speed is the service's own download speed, bytes per second.
 	Speed int64
+	// Peers the torrent is coming from; only the node's own client knows.
+	Peers int
 	// Failed says why the service gave up on the torrent; "" while it has not.
 	Failed string
 	// Partial means the listing left the files out; Detail fills them in.
@@ -616,7 +618,8 @@ func (c *Client) listing(ctx context.Context, fresh bool) (map[string]Remote, er
 	c.mu.Unlock()
 
 	remotes := make(map[string]Remote, len(list))
-	for _, remote := range list {
+	for i := range list {
+		remote := list[i]
 		remote.Hash = strings.ToLower(remote.Hash)
 		if remote.Hash == "" {
 			remote.Hash = hashOfID[remote.ID]
@@ -645,7 +648,9 @@ func (c *Client) listing(ctx context.Context, fresh bool) (map[string]Remote, er
 // followed: starts the ones waiting for it, and fills in the files a listing left
 // out. A ready torrent's files do not change, so they are asked once.
 func (c *Client) prepare(ctx context.Context, remotes map[string]Remote) {
-	for hash, remote := range remotes {
+	for hash := range remotes {
+		remote := remotes[hash]
+
 		c.mu.Lock()
 		_, downloading := c.entries[hash]
 		_, streaming := c.streams[hash]
