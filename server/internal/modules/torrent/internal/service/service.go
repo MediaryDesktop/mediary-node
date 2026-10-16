@@ -50,23 +50,30 @@ type Library interface {
 	Episodes(ctx context.Context, mediaRef string) ([]int, error)
 }
 
-// Client kinds: the user's qBittorrent, the node's own client, the user's
-// account on a debrid service, or none.
+// Client kinds: who downloads torrents into the library — the user's
+// qBittorrent, the node's own client, the debrid service set up apart, or none.
 const (
 	ClientNone        = ""
 	ClientQBittorrent = "qbittorrent"
 	ClientEmbedded    = "embedded"
-	ClientTorBox      = "torbox"
-	ClientRealDebrid  = "realdebrid"
-	ClientAllDebrid   = "alldebrid"
-	ClientPremiumize  = "premiumize"
+	ClientDebrid      = "debrid"
 )
 
-// debridKinds are the client kinds that are debrid services; each keeps its key
-// in the secrets file under its own name.
-var debridKinds = []string{ClientTorBox, ClientRealDebrid, ClientAllDebrid, ClientPremiumize}
+// The debrid services. One is set up apart from the client: it plays torrents
+// without downloading them whatever the client, and downloads through it only
+// when the client is ClientDebrid. Each keeps its key in the secrets file under
+// its own name.
+const (
+	DebridNone       = ""
+	DebridTorBox     = "torbox"
+	DebridRealDebrid = "realdebrid"
+	DebridAllDebrid  = "alldebrid"
+	DebridPremiumize = "premiumize"
+)
 
-// IsDebrid reports whether a client kind is a debrid service.
+var debridKinds = []string{DebridTorBox, DebridRealDebrid, DebridAllDebrid, DebridPremiumize}
+
+// IsDebrid reports whether a name is a debrid service's.
 func IsDebrid(kind string) bool {
 	return slices.Contains(debridKinds, kind)
 }
@@ -77,11 +84,9 @@ type Connection struct {
 	URL      string
 	Username string
 	Password string
-	// APIKey is the debrid service's key, for a debrid kind.
-	APIKey string
 }
 
-// DebridService is one debrid service the node can use as its client.
+// DebridService is one debrid service the node can use.
 type DebridService struct {
 	// Client reads the service's saved key on every call.
 	Client Client

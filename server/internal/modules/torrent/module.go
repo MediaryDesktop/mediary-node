@@ -121,16 +121,16 @@ type debridSpec struct {
 
 func debridSpecs(userAgent string) []debridSpec {
 	return []debridSpec{
-		{service.ClientTorBox, "TorBox", func(key func() (string, error)) debrid.Provider {
+		{service.DebridTorBox, "TorBox", func(key func() (string, error)) debrid.Provider {
 			return torbox.NewProvider(torbox.New(torbox.Options{Key: key, UserAgent: userAgent}))
 		}},
-		{service.ClientRealDebrid, "Real-Debrid", func(key func() (string, error)) debrid.Provider {
+		{service.DebridRealDebrid, "Real-Debrid", func(key func() (string, error)) debrid.Provider {
 			return realdebrid.New(realdebrid.Options{Key: key, UserAgent: userAgent})
 		}},
-		{service.ClientAllDebrid, "AllDebrid", func(key func() (string, error)) debrid.Provider {
+		{service.DebridAllDebrid, "AllDebrid", func(key func() (string, error)) debrid.Provider {
 			return alldebrid.New(alldebrid.Options{Key: key, UserAgent: userAgent})
 		}},
-		{service.ClientPremiumize, "Premiumize", func(key func() (string, error)) debrid.Provider {
+		{service.DebridPremiumize, "Premiumize", func(key func() (string, error)) debrid.Provider {
 			return premiumize.New(premiumize.Options{Key: key, UserAgent: userAgent})
 		}},
 	}

@@ -57,12 +57,12 @@ func withStreaming(t *testing.T, h *harness) *streamingClient {
 	t.Helper()
 
 	client := &streamingClient{fakeClient: h.client}
-	h.svc.opts.Debrid = map[string]DebridService{ClientTorBox: {Client: client}}
+	h.svc.opts.Debrid = map[string]DebridService{DebridTorBox: {Client: client}}
 
-	key := "key"
-	if _, err := h.svc.UpdateSettings(context.Background(), TorrentSettingsUpdate{Client: ClientTorBox, APIKey: &key, RootID: 1}); err != nil {
-		t.Fatal(err)
-	}
+	// The library downloads through qBittorrent; streams come from the debrid
+	// service all the same.
+	h.configure(t)
+	setUpDebrid(t, h, DebridTorBox, "key")
 
 	return client
 }

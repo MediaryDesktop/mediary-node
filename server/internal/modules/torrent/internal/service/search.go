@@ -236,12 +236,14 @@ const cacheCheckTimeout = 10 * time.Second
 // them, returning the service's name; "" when the client is not one or could not
 // be asked, and then no release is marked either way.
 func (s *Service) markCached(ctx context.Context, releases []TorrentRelease) string {
-	client, err := s.currentClient(ctx)
-	if err != nil || client == nil {
+	// The debrid service set up, whatever the torrent client: a release it holds
+	// plays at once even when the library downloads through qBittorrent.
+	active, err := s.activeDebrid(ctx)
+	if err != nil || active == nil {
 		return ""
 	}
 
-	checker, ok := client.(CacheChecker)
+	checker, ok := active.service.Client.(CacheChecker)
 	if !ok {
 		return ""
 	}

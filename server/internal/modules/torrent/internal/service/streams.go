@@ -204,15 +204,20 @@ func (s *Service) RenewStreamLink(fileID int64) {
 	s.streams.mu.Unlock()
 }
 
+// streamer is the debrid service set up, whatever the torrent client: streams
+// do not download, so they do not depend on who does.
 func (s *Service) streamer(ctx context.Context) (Streamer, error) {
-	client, err := s.requireClient(ctx)
+	active, err := s.activeDebrid(ctx)
 	if err != nil {
 		return nil, err
 	}
+	if active == nil {
+		return nil, apperr.New(apperr.KindPrecondition, "watching without downloading needs a debrid service: set one up in the settings")
+	}
 
-	streamer, ok := client.(Streamer)
+	streamer, ok := active.service.Client.(Streamer)
 	if !ok {
-		return nil, apperr.New(apperr.KindPrecondition, "watching without downloading needs a debrid service as the torrent client")
+		return nil, apperr.New(apperr.KindUnavailable, "%s cannot play torrents here", debridNames[active.kind])
 	}
 
 	return streamer, nil

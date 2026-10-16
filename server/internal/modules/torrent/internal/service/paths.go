@@ -42,7 +42,7 @@ func folderName(title string) string {
 // a debrid service, whose files the node fetches itself, see the node's disk;
 // qBittorrent may see it under other names.
 func savePath(nodePath string, settings *TorrentSettings) string {
-	if settings.Client == ClientEmbedded || IsDebrid(settings.Client) {
+	if settings.Client == ClientEmbedded || settings.Client == ClientDebrid {
 		return nodePath
 	}
 

@@ -71,11 +71,10 @@ type TorrentSettingsOutput struct {
 
 type PutTorrentSettingsInput struct {
 	Body struct {
-		Client   string                 `json:"client" enum:",qbittorrent,embedded,torbox,realdebrid,alldebrid,premiumize" doc:"The user's qBittorrent, the node's own client, the user's account on a debrid service, or none."`
+		Client   string                 `json:"client" enum:",qbittorrent,embedded,debrid" doc:"Who downloads torrents into the library: the user's qBittorrent, the node's own client, the debrid service set up under /v1/torrent/debrid, or none."`
 		URL      string                 `json:"url" maxLength:"2048" doc:"qBittorrent WebUI address; empty disconnects."`
 		Username string                 `json:"username" maxLength:"256"`
 		Password *string                `json:"password,omitempty" maxLength:"1024" doc:"Left out keeps the saved password; empty removes it."`
-		APIKey   *string                `json:"api_key,omitempty" maxLength:"256" doc:"The chosen debrid service's key. Left out keeps the saved key; empty removes it."`
 		RootID   int64                  `json:"root_id" minimum:"0" doc:"Library folder torrents are saved into; 0 while none is chosen."`
 		PathMap  service.TorrentPathMap `json:"path_map" doc:"How the client names the node's folders, when it runs in Docker or on another machine."`
 	}
@@ -83,11 +82,10 @@ type PutTorrentSettingsInput struct {
 
 type CheckTorrentClientInput struct {
 	Body struct {
-		Client   string  `json:"client,omitempty" enum:",qbittorrent,embedded,torbox,realdebrid,alldebrid,premiumize" doc:"embedded checks the node's own client, a debrid service its key; anything else, qBittorrent at url."`
+		Client   string  `json:"client,omitempty" enum:",qbittorrent,embedded,debrid" doc:"embedded checks the node's own client, debrid the debrid service's saved key; anything else, qBittorrent at url."`
 		URL      string  `json:"url,omitempty" maxLength:"2048"`
 		Username string  `json:"username" maxLength:"256"`
 		Password *string `json:"password,omitempty" maxLength:"1024" doc:"Left out uses the saved password."`
-		APIKey   *string `json:"api_key,omitempty" maxLength:"256" doc:"A debrid service's key to try; left out uses the saved key."`
 	}
 }
 
@@ -99,6 +97,7 @@ func (h *Handler) Register(api huma.API) {
 	h.registerSearch(api)
 	h.registerRules(api)
 	h.registerStreams(api)
+	h.registerDebrid(api)
 
 	huma.Register(api, huma.Operation{
 		OperationID: "listTorrentDownloads",
@@ -229,7 +228,7 @@ func (h *Handler) Register(api huma.API) {
 		Method:      http.MethodGet,
 		Path:        "/v1/torrent/settings",
 		Summary:     "Torrent client settings",
-		Description: "The password and debrid keys are never returned; has_password, has_api_key and debrid_keys say which are saved.",
+		Description: "The password is never returned; has_password says whether one is saved. The debrid service has settings of its own, under /v1/torrent/debrid.",
 		Tags:        []string{"torrent"},
 	}, func(ctx context.Context, _ *struct{}) (*TorrentSettingsOutput, error) {
 		settings, err := h.svc.Settings(ctx)
@@ -253,7 +252,6 @@ func (h *Handler) Register(api huma.API) {
 			URL:      in.Body.URL,
 			Username: in.Body.Username,
 			Password: in.Body.Password,
-			APIKey:   in.Body.APIKey,
 			RootID:   in.Body.RootID,
 			PathMap:  in.Body.PathMap,
 		})
@@ -269,22 +267,15 @@ func (h *Handler) Register(api huma.API) {
 		Method:      http.MethodPost,
 		Path:        "/v1/torrent/check",
 		Summary:     "Try a torrent client connection",
-		Description: "Signs in to qBittorrent with the given address and credentials, or to a debrid service with the given key, saved or not, and reports the version or the account.",
+		Description: "Signs in to qBittorrent with the given address and credentials, saved or not, and reports its version; for the debrid client, tries the debrid service's saved key and names the account.",
 		Tags:        []string{"torrent"},
 	}, func(ctx context.Context, in *CheckTorrentClientInput) (*TorrentCheckOutput, error) {
 		conn := service.Connection{Kind: in.Body.Client, URL: in.Body.URL, Username: in.Body.Username}
-		keepSaved := in.Body.Password == nil
 		if in.Body.Password != nil {
 			conn.Password = *in.Body.Password
 		}
-		if service.IsDebrid(conn.Kind) {
-			keepSaved = in.Body.APIKey == nil
-			if in.Body.APIKey != nil {
-				conn.APIKey = *in.Body.APIKey
-			}
-		}
 
-		result, err := h.svc.Check(ctx, conn, keepSaved)
+		result, err := h.svc.Check(ctx, conn, in.Body.Password == nil)
 		if err != nil {
 			return nil, httpapi.ToHTTP(err)
 		}

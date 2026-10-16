@@ -387,20 +387,13 @@ components:
           format: uri
           readOnly: true
           type: string
-        api_key:
-          description: A debrid service's key to try; left out uses the saved key.
-          maxLength: 256
-          type: string
         client:
-          description: embedded checks the node's own client, a debrid service its key; anything else, qBittorrent at url.
+          description: embedded checks the node's own client, debrid the debrid service's saved key; anything else, qBittorrent at url.
           enum:
             - ""
             - qbittorrent
             - embedded
-            - torbox
-            - realdebrid
-            - alldebrid
-            - premiumize
+            - debrid
           type: string
         password:
           description: Left out uses the saved password.
@@ -414,6 +407,30 @@ components:
           type: string
       required:
         - username
+      type: object
+    CheckTorrentDebridInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/CheckTorrentDebridInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        api_key:
+          description: A key to try; left out uses the saved one.
+          maxLength: 256
+          type: string
+        service:
+          enum:
+            - torbox
+            - realdebrid
+            - alldebrid
+            - premiumize
+          type: string
+      required:
+        - service
       type: object
     CheckTorrentSourceInputBody:
       additionalProperties: false
@@ -2515,6 +2532,32 @@ components:
       required:
         - series_id
       type: object
+    PutTorrentDebridInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/PutTorrentDebridInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        api_key:
+          description: The service's key. Left out keeps the saved key; empty removes it.
+          maxLength: 256
+          type: string
+        service:
+          description: The service; empty turns it off.
+          enum:
+            - ""
+            - torbox
+            - realdebrid
+            - alldebrid
+            - premiumize
+          type: string
+      required:
+        - service
+      type: object
     PutTorrentRuleInputBody:
       additionalProperties: false
       properties:
@@ -2555,20 +2598,13 @@ components:
           format: uri
           readOnly: true
           type: string
-        api_key:
-          description: The chosen debrid service's key. Left out keeps the saved key; empty removes it.
-          maxLength: 256
-          type: string
         client:
-          description: The user's qBittorrent, the node's own client, the user's account on a debrid service, or none.
+          description: "Who downloads torrents into the library: the user's qBittorrent, the node's own client, the debrid service set up under /v1/torrent/debrid, or none."
           enum:
             - ""
             - qbittorrent
             - embedded
-            - torbox
-            - realdebrid
-            - alldebrid
-            - premiumize
+            - debrid
           type: string
         password:
           description: Left out keeps the saved password; empty removes it.
@@ -3930,17 +3966,59 @@ components:
             - ""
             - qbittorrent
             - embedded
+            - debrid
+          type: string
+        reachable:
+          type: boolean
+        service:
+          description: With the debrid client, the service it downloads through.
+          examples:
+            - TorBox
+          type: string
+      required:
+        - configured
+        - kind
+        - reachable
+      type: object
+    TorrentDebrid:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/TorrentDebrid.json
+          format: uri
+          readOnly: true
+          type: string
+        has_api_key:
+          description: Whether the service has a key saved; keys are never returned.
+          type: boolean
+        in_use:
+          type: boolean
+        keys:
+          description: "The services that have a key saved, chosen or not: switching back needs no key typed again."
+          items:
+            type: string
+          type:
+            - array
+            - "null"
+        ready:
+          type: boolean
+        service:
+          description: The service, or none.
+          enum:
+            - ""
             - torbox
             - realdebrid
             - alldebrid
             - premiumize
           type: string
-        reachable:
-          type: boolean
       required:
-        - configured
-        - kind
-        - reachable
+        - service
+        - has_api_key
+        - keys
+        - ready
+        - in_use
       type: object
     TorrentDownload:
       additionalProperties: false
@@ -4487,26 +4565,13 @@ components:
           readOnly: true
           type: string
         client:
-          description: The user's qBittorrent, the node's own client, the user's account on a debrid service, or none.
+          description: "Who downloads torrents into the library: the user's qBittorrent, the node's own client, the debrid service set up under /v1/torrent/debrid, or none."
           enum:
             - ""
             - qbittorrent
             - embedded
-            - torbox
-            - realdebrid
-            - alldebrid
-            - premiumize
+            - debrid
           type: string
-        debrid_keys:
-          description: The debrid services that have a key saved, chosen or not.
-          items:
-            type: string
-          type:
-            - array
-            - "null"
-        has_api_key:
-          description: Whether the chosen debrid service has a key saved; keys are never returned.
-          type: boolean
         has_password:
           type: boolean
         path_map:
@@ -4523,8 +4588,6 @@ components:
         - url
         - username
         - has_password
-        - has_api_key
-        - debrid_keys
         - root_id
         - path_map
       type: object
@@ -7291,7 +7354,7 @@ paths:
         - media
   /v1/torrent/check:
     post:
-      description: Signs in to qBittorrent with the given address and credentials, or to a debrid service with the given key, saved or not, and reports the version or the account.
+      description: Signs in to qBittorrent with the given address and credentials, saved or not, and reports its version; for the debrid client, tries the debrid service's saved key and names the account.
       operationId: checkTorrentClient
       requestBody:
         content:
@@ -7313,6 +7376,77 @@ paths:
                 $ref: "#/components/schemas/ErrorModel"
           description: Error
       summary: Try a torrent client connection
+      tags:
+        - torrent
+  /v1/torrent/debrid:
+    get:
+      description: Set up apart from the torrent client. With a key it plays torrents without downloading them and marks the releases it holds in search, whatever the client; the library downloads through it only when the client is debrid. Keys are never returned.
+      operationId: getTorrentDebrid
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TorrentDebrid"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: The debrid service
+      tags:
+        - torrent
+    put:
+      description: Each service keeps its own key in the node's secrets file, so switching back needs no key typed again. Turning the service off is refused while the torrent client downloads through it.
+      operationId: putTorrentDebrid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PutTorrentDebridInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TorrentDebrid"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Set up the debrid service
+      tags:
+        - torrent
+  /v1/torrent/debrid/check:
+    post:
+      description: "Signs in with the given key, or the saved one, and names the account and its plan. A free Real-Debrid, AllDebrid or Premiumize account is refused: those services play and download torrents only with premium."
+      operationId: checkTorrentDebrid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CheckTorrentDebridInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TorrentCheckResult"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Try a debrid service's key
       tags:
         - torrent
   /v1/torrent/downloads:
@@ -7726,7 +7860,7 @@ paths:
         - torrent
   /v1/torrent/settings:
     get:
-      description: The password and debrid keys are never returned; has_password, has_api_key and debrid_keys say which are saved.
+      description: The password is never returned; has_password says whether one is saved. The debrid service has settings of its own, under /v1/torrent/debrid.
       operationId: getTorrentSettings
       responses:
         "200":

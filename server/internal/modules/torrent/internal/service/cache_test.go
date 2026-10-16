@@ -39,12 +39,12 @@ func withCachingTorBox(t *testing.T, h *harness) *cachingClient {
 	t.Helper()
 
 	client := &cachingClient{fakeClient: h.client, held: map[string]bool{hashA: true}}
-	h.svc.opts.Debrid = map[string]DebridService{ClientTorBox: {Client: client}}
+	h.svc.opts.Debrid = map[string]DebridService{DebridTorBox: {Client: client}}
 
-	key := "key"
-	if _, err := h.svc.UpdateSettings(context.Background(), TorrentSettingsUpdate{Client: ClientTorBox, APIKey: &key, RootID: 1}); err != nil {
-		t.Fatal(err)
-	}
+	// The library downloads through qBittorrent; the marks come from the debrid
+	// service all the same.
+	h.configure(t)
+	setUpDebrid(t, h, DebridTorBox, "key")
 
 	return client
 }

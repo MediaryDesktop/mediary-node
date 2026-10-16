@@ -77,9 +77,11 @@ type TorrentDownload struct {
 // TorrentClientStatus says whether the downloads' live fields can be trusted.
 type TorrentClientStatus struct {
 	Configured bool   `json:"configured"`
-	Kind       string `json:"kind" enum:",qbittorrent,embedded,torbox,realdebrid,alldebrid,premiumize"`
-	Reachable  bool   `json:"reachable"`
-	Error      string `json:"error,omitempty"`
+	Kind       string `json:"kind" enum:",qbittorrent,embedded,debrid"`
+	// Service names the debrid service the client downloads through.
+	Service   string `json:"service,omitempty" example:"TorBox" doc:"With the debrid client, the service it downloads through."`
+	Reachable bool   `json:"reachable"`
+	Error     string `json:"error,omitempty"`
 }
 
 func (s *Service) Add(ctx context.Context, req AddRequest) (*TorrentDownload, error) {
@@ -216,15 +218,23 @@ func (s *Service) List(ctx context.Context) ([]TorrentDownload, TorrentClientSta
 		return nil, TorrentClientStatus{}, err
 	}
 
+	active, err := s.activeDebrid(ctx)
+	if err != nil {
+		return nil, TorrentClientStatus{}, err
+	}
+
 	s.mu.Lock()
 	configured := conn.Kind == ClientEmbedded ||
 		(conn.Kind == ClientQBittorrent && conn.URL != "") ||
-		(IsDebrid(conn.Kind) && conn.APIKey != "")
+		(conn.Kind == ClientDebrid && active != nil)
 	status := TorrentClientStatus{
 		Configured: configured,
 		Kind:       conn.Kind,
 		Reachable:  configured && s.polled && s.clientError == "",
 		Error:      s.clientError,
+	}
+	if conn.Kind == ClientDebrid && active != nil {
+		status.Service = debridNames[active.kind]
 	}
 	s.mu.Unlock()
 
