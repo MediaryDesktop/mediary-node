@@ -9,10 +9,10 @@ import { Button, Input, SelectDropdown, Switch, toast } from '@shared/ui'
 import { $nodeReady } from '@infra/node'
 
 import {
-	debridService,
 	putTorrentProfileMutation,
-	torrentProfileQuery,
-	torrentSettingsQuery
+	readyDebrid,
+	torrentDebridQuery,
+	torrentProfileQuery
 } from '@entities/torrent'
 import type { TorrentProfile } from '@entities/torrent'
 
@@ -34,17 +34,19 @@ function words(line: string): string[] {
 
 // What the user likes in a release. Search ranks by it and names the best result.
 export function ReleaseProfileSettings() {
-	const [profile, load, nodeReady] = useUnit([
+	const [profile, load, loadDebrid, nodeReady] = useUnit([
 		torrentProfileQuery.$data,
 		torrentProfileQuery.start,
+		torrentDebridQuery.start,
 		$nodeReady
 	])
 
 	useEffect(() => {
 		if (nodeReady) {
 			load()
+			loadDebrid()
 		}
-	}, [load, nodeReady])
+	}, [load, loadDebrid, nodeReady])
 
 	if (!profile) {
 		return null
@@ -57,10 +59,10 @@ export function ReleaseProfileSettings() {
 function ProfileForm({ profile }: { profile: TorrentProfile }) {
 	const { t } = useTranslation()
 
-	const [save, saving, settings] = useUnit([
+	const [save, saving, debridSettings] = useUnit([
 		putTorrentProfileMutation.start,
 		putTorrentProfileMutation.$pending,
-		torrentSettingsQuery.$data
+		torrentDebridQuery.$data
 	])
 
 	const [resolution, setResolution] = useState(profile.resolution)
@@ -71,8 +73,8 @@ function ProfileForm({ profile }: { profile: TorrentProfile }) {
 	const [preferCached, setPreferCached] = useState(profile.prefer_cached)
 
 	// Only a debrid service that can say what it holds makes this mean anything;
-	// with another client the choice is kept but not offered.
-	const service = debridService(settings?.client)
+	// without one the choice is kept but not offered.
+	const service = readyDebrid(debridSettings)
 	const debrid = service?.cacheCheck === true
 
 	useUnitWatch(putTorrentProfileMutation.finished.failure, ({ error }) =>

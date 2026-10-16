@@ -2,7 +2,7 @@ import { IoLibraryOutline } from 'react-icons/io5'
 
 import type { IconLike } from '@shared/ui'
 
-export type SetupStepId = 'anilist' | 'account' | 'library' | 'player' | 'downloads' | 'debrid'
+export type SetupStepId = 'anilist' | 'account' | 'library' | 'player' | 'downloads'
 
 export interface SetupStep {
 	id: SetupStepId
@@ -47,12 +47,5 @@ export const SETUP_STEPS: readonly SetupStep[] = [
 		labelKey: 'setup.steps.downloads.label',
 		titleKey: 'setup.steps.downloads.title',
 		descriptionKey: 'setup.steps.downloads.description'
-	},
-	{
-		id: 'debrid',
-		icon: 'common/database',
-		labelKey: 'setup.steps.debrid.label',
-		titleKey: 'setup.steps.debrid.title',
-		descriptionKey: 'setup.steps.debrid.description'
 	}
 ]

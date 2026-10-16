@@ -1232,11 +1232,11 @@ export const ru: Translation = {
 				'Mediary загружает торренты сама, больше ничего устанавливать не нужно. Ждёт пиров на порту 42069 и не открывает его на роутере.',
 			qbittorrentHint:
 				'Ваш qBittorrent через его Web UI. Включите Web UI в qBittorrent: Настройки → Веб-интерфейс.',
-			debrid: 'Debrid-сервис',
+			debrid: 'Через debrid',
 			debridHint:
-				'Ваш собственный debrid-аккаунт: сервис качает торрент на своих серверах, а Mediary забирает файлы по HTTPS. Никакого BitTorrent-трафика с этого компьютера.',
-			serviceLabel: 'Сервис',
-			torboxFree: 'У TorBox есть бесплатный план: один торрент за раз, несколько в месяц.',
+				'Загрузки идут через {{service}}: он качает торрент на своих серверах, а Mediary забирает файлы по HTTPS. Никакого BitTorrent-трафика с этого компьютера.',
+			debridMissing: 'Сначала подключите debrid-сервис: Настройки → Debrid-сервис.',
+			throughService: 'Через {{service}}',
 			noneHint: 'Торренты выключены.',
 			notConfigured: 'Не подключено',
 			configure: 'Подключить',
@@ -1248,10 +1248,6 @@ export const ru: Translation = {
 			passwordLabel: 'Пароль',
 			passwordKept: 'Оставьте пустым, чтобы сохранить текущий пароль',
 			passwordHint: 'Оставьте пустым, если Web UI пускает этот компьютер без пароля',
-			apiKeyLabel: 'Ключ API',
-			apiKeyHint:
-				'Скопируйте его с {{page}}. Нода хранит его в отдельном файле и больше никогда не показывает',
-			apiKeyKept: 'Оставьте пустым, чтобы сохранить текущий ключ',
 			check: 'Проверить соединение',
 			ok: 'Подключено к qBittorrent {{version}}',
 			okAccount: 'Подключено: {{account}}',
@@ -1379,6 +1375,10 @@ export const ru: Translation = {
 				title: 'Торрент-клиент',
 				subtitle: 'Куда загружаются торренты'
 			},
+			debrid: {
+				title: 'Debrid-сервис',
+				subtitle: 'Просмотр без загрузки'
+			},
 			torrentSearch: {
 				title: 'Поиск торрентов',
 				subtitle: 'Источники Torznab для поиска раздач'
@@ -1427,6 +1427,10 @@ export const ru: Translation = {
 		torrents: {
 			name: 'Торренты',
 			hint: 'Клиент, который загружает торренты в вашу библиотеку'
+		},
+		debrid: {
+			name: 'Debrid-сервис',
+			hint: 'Ваш собственный аккаунт TorBox, Real-Debrid, AllDebrid или Premiumize. Позволяет смотреть раздачу сразу, без загрузки, какой бы клиент ни наполнял библиотеку'
 		},
 		torrentSearch: {
 			name: 'Поиск торрентов',
@@ -1593,6 +1597,32 @@ export const ru: Translation = {
 		}
 	},
 
+	debrid: {
+		notConfigured: 'Не подключено',
+		readySubtitle: 'В поиске торрентов включено «Смотреть сейчас»',
+		offSubtitle: 'Подключите, чтобы смотреть раздачи без загрузки',
+		configure: 'Подключить',
+		edit: 'Изменить',
+		drawerTitle: 'Debrid-сервис',
+		drawerDescription: 'Сервис, который держит торренты на своих серверах и отдаёт их вам сразу.',
+		serviceLabel: 'Сервис',
+		serviceHint: 'Real-Debrid, AllDebrid и Premiumize работают только с премиум-аккаунтом.',
+		torboxFree: 'У TorBox есть бесплатный план: один торрент за раз, несколько в месяц.',
+		apiKeyLabel: 'Ключ API',
+		apiKeyHint:
+			'Скопируйте его с {{page}}. Нода хранит его в отдельном файле и больше никогда не показывает',
+		apiKeyKept: 'Оставьте пустым, чтобы сохранить текущий ключ',
+		check: 'Проверить ключ',
+		ok: 'Подключено: {{account}}',
+		checkFailed: 'Сервис не принял ключ',
+		save: 'Сохранить',
+		saveFailed: 'Не удалось сохранить debrid-сервис',
+		offLabel: 'Выключить',
+		offHint: '«Смотреть сейчас» исчезнет; ключ останется сохранённым на потом.',
+		offInUse: 'Торрент-клиент качает через него: сначала выберите другой клиент.',
+		turnOff: 'Выключить'
+	},
+
 	setup: {
 		note: 'Эти настройки можно изменить позже',
 		railLabel: 'Шаги настройки',
@@ -1617,7 +1647,8 @@ export const ru: Translation = {
 			downloads: {
 				label: 'Загрузки',
 				title: 'Загрузка файлов',
-				description: 'Настройте торрент-клиент для загрузки'
+				description:
+					'Выберите, как Mediary загружает торренты: встроенным клиентом, своим qBittorrent или debrid-сервисом'
 			},
 			anilist: {
 				label: 'AniList',
@@ -1630,11 +1661,6 @@ export const ru: Translation = {
 				title: 'Аккаунт Mediary',
 				description:
 					'Необязательно. Аккаунт Mediary только хранит бэкап ваших списков и настроек для других устройств'
-			},
-			debrid: {
-				label: 'Debrid-сервис',
-				title: 'Debrid-сервис',
-				description: 'Debrid-сервисы ускоряют загрузки и дают мгновенный стриминг из облака'
 			}
 		},
 		account: {
@@ -1666,30 +1692,6 @@ export const ru: Translation = {
 				hint: 'MPV рекомендуется для лучшего рендеринга субтитров и торрент-стриминга'
 			},
 			install: 'В Windows установите MPV через Scoop или Chocolatey. В macOS — через Homebrew'
-		},
-		downloading: {
-			client: {
-				title: 'Торрент-клиент',
-				description: 'Клиент для загрузки торрентов',
-				label: 'Клиент',
-				qbittorrent: 'qBittorrent'
-			},
-			qbittorrent: {
-				title: 'Настройки qBittorrent',
-				host: 'Хост',
-				username: 'Имя пользователя',
-				password: 'Пароль',
-				port: 'Порт',
-				executable: 'Путь к исполняемому файлу'
-			}
-		},
-		debrid: {
-			label: 'Debrid-сервис',
-			none: 'Нет',
-			torbox: 'TorBox',
-			realDebrid: 'Real-Debrid',
-			allDebrid: 'AllDebrid',
-			premiumize: 'Premiumize'
 		}
 	},
 

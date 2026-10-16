@@ -1,6 +1,6 @@
 export { SetupAccountStep } from './SetupAccountStep'
 export { SetupAniListStep } from './SetupAniListStep'
-export { SetupDebridStep } from './SetupDebridStep'
 export { SetupDownloadingStep } from './SetupDownloadingStep'
+export type { SetupDownloadingStepProps } from './SetupDownloadingStep'
 export { SetupLibraryStep } from './SetupLibraryStep'
 export { SetupPlayerStep } from './SetupPlayerStep'

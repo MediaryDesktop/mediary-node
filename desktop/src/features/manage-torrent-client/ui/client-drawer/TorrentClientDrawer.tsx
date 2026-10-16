@@ -18,12 +18,11 @@ import {
 import { libraryRootsQuery } from '@entities/library-item'
 import {
 	checkTorrentClientMutation,
-	DEBRID_SERVICES,
-	debridService,
-	isDebrid,
-	putTorrentSettingsMutation
+	putTorrentSettingsMutation,
+	readyDebrid,
+	torrentDebridQuery
 } from '@entities/torrent'
-import type { DebridKind, TorrentClientKind, TorrentSettings } from '@entities/torrent'
+import type { TorrentClientKind, TorrentSettings } from '@entities/torrent'
 
 import styles from './TorrentClientDrawer.module.scss'
 
@@ -35,23 +34,14 @@ export interface TorrentClientDrawerProps {
 
 type CheckState = { ok: true; version: string } | { ok: false; problem: string } | null
 
-// The node's "no client" is an empty string, which a selection cannot hold. The
-// debrid services share one choice, with the service picked below it.
+// The node's "no client" is an empty string, which a selection cannot hold.
 const NONE = 'none'
-const DEBRID = 'debrid'
-type ClientChoice = 'embedded' | 'qbittorrent' | typeof DEBRID | typeof NONE
-
-function choiceOf(kind: TorrentClientKind): ClientChoice {
-	if (kind === '') {
-		return NONE
-	}
-
-	return isDebrid(kind) ? DEBRID : kind
-}
+type ClientChoice = Exclude<TorrentClientKind, ''> | typeof NONE
 
 // The form is mounted afresh for every opening, so its fields start from the saved
-// settings. qBittorrent's address, sign-in and path mapping only show for it, and
-// a debrid service's key only for it: the node's own client needs none of them.
+// settings. qBittorrent's address, sign-in and path mapping only show for it: the
+// node's own client needs none of them, and downloading through the debrid
+// service uses the service set up on its own.
 export function TorrentClientDrawer({ open, settings, onClose }: TorrentClientDrawerProps) {
 	const { t } = useTranslation()
 
@@ -71,42 +61,37 @@ export function TorrentClientDrawer({ open, settings, onClose }: TorrentClientDr
 function ClientForm({ settings, onDone }: { settings: TorrentSettings; onDone: () => void }) {
 	const { t } = useTranslation()
 
-	const [save, check, saving, checking, roots] = useUnit([
+	const [save, check, saving, checking, roots, debridSettings] = useUnit([
 		putTorrentSettingsMutation.start,
 		checkTorrentClientMutation.start,
 		putTorrentSettingsMutation.$pending,
 		checkTorrentClientMutation.$pending,
-		libraryRootsQuery.$data
+		libraryRootsQuery.$data,
+		torrentDebridQuery.$data
 	])
 
-	const [choice, setChoice] = useState<ClientChoice>(choiceOf(settings.client))
-	const [service, setService] = useState<DebridKind>(
-		isDebrid(settings.client) ? settings.client : DEBRID_SERVICES[0]!.kind
-	)
+	const [choice, setChoice] = useState<ClientChoice>(settings.client || NONE)
 	const [url, setUrl] = useState(settings.url)
 	const [username, setUsername] = useState(settings.username)
 	const [password, setPassword] = useState('')
-	const [apiKey, setApiKey] = useState('')
 	const [rootId, setRootId] = useState(settings.root_id)
 	const [mapClient, setMapClient] = useState(settings.path_map.client)
 	const [mapNode, setMapNode] = useState(settings.path_map.node)
 	const [result, setResult] = useState<CheckState>(null)
 
 	const qbittorrent = choice === 'qbittorrent'
-	const debrid = choice === DEBRID ? debridService(service) : undefined
-	const client: TorrentClientKind = choice === NONE ? '' : choice === DEBRID ? service : choice
+	const throughDebrid = choice === 'debrid'
+	const debrid = readyDebrid(debridSettings)
+	const client: TorrentClientKind = choice === NONE ? '' : choice
 
-	// An untouched password or key field keeps the saved one; each service keeps
-	// its own key.
-	const keySaved = (settings.debrid_keys ?? []).includes(service)
+	// An untouched password field keeps the saved password.
 	const passwordValue = settings.has_password && password === '' ? undefined : password
-	const apiKeyValue = keySaved && apiKey.trim() === '' ? undefined : apiKey.trim()
 
-	// The node refuses half a mapping, qBittorrent without an address or a debrid
-	// service without a key; saying so before it does saves a round trip.
+	// The node refuses half a mapping, qBittorrent without an address or the
+	// debrid client without a service; saying so before it does saves a round trip.
 	const mappingHalf = qbittorrent && (mapClient.trim() === '') !== (mapNode.trim() === '')
 	const missingUrl = qbittorrent && url.trim() === ''
-	const missingKey = Boolean(debrid) && apiKeyValue === ''
+	const missingDebrid = throughDebrid && !debrid
 
 	// Only one form is open at a time, so whatever these mutations report is this form's.
 	useUnitWatch(putTorrentSettingsMutation.finished.success, () => onDone())
@@ -128,20 +113,13 @@ function ClientForm({ settings, onDone }: { settings: TorrentSettings; onDone: (
 			url,
 			username,
 			password: passwordValue,
-			api_key: debrid ? apiKeyValue : undefined,
 			root_id: rootId,
 			path_map: { client: mapClient, node: mapNode }
 		})
 
 	const runCheck = () => {
 		setResult(null)
-		check(
-			qbittorrent
-				? { client, url, username, password: passwordValue }
-				: debrid
-					? { client, username: '', api_key: apiKeyValue }
-					: { client: 'embedded', username: '' }
-		)
+		check(qbittorrent ? { client, url, username, password: passwordValue } : { client, username: '' })
 	}
 
 	const hint =
@@ -149,8 +127,10 @@ function ClientForm({ settings, onDone }: { settings: TorrentSettings; onDone: (
 			? t('torrents.settings.embeddedHint')
 			: qbittorrent
 				? t('torrents.settings.qbittorrentHint')
-				: debrid
-					? t('torrents.settings.debridHint')
+				: throughDebrid
+					? debrid
+						? t('torrents.settings.debridHint', { service: debrid.name })
+						: t('torrents.settings.debridMissing')
 					: t('torrents.settings.noneHint')
 
 	return (
@@ -158,7 +138,7 @@ function ClientForm({ settings, onDone }: { settings: TorrentSettings; onDone: (
 			onSubmit={submit}
 			onCancel={onDone}
 			submitLabel={t('torrents.settings.save')}
-			submitDisabled={saving || mappingHalf || missingUrl || missingKey}
+			submitDisabled={saving || mappingHalf || missingUrl || missingDebrid}
 			cancelDisabled={saving}
 			submitting={saving}
 		>
@@ -167,7 +147,7 @@ function ClientForm({ settings, onDone }: { settings: TorrentSettings; onDone: (
 					options={[
 						{ value: 'embedded', label: t('torrents.settings.embedded') },
 						{ value: 'qbittorrent', label: 'qBittorrent' },
-						{ value: DEBRID, label: t('torrents.settings.debrid') },
+						{ value: 'debrid', label: t('torrents.settings.debrid') },
 						{ value: NONE, label: t('torrents.settings.none') }
 					]}
 					value={choice}
@@ -180,27 +160,6 @@ function ClientForm({ settings, onDone }: { settings: TorrentSettings; onDone: (
 					stretch
 				/>
 			</DrawerSection>
-
-			{debrid && (
-				<DrawerSection
-					title={t('torrents.settings.serviceLabel')}
-					description={debrid.kind === 'torbox' ? t('torrents.settings.torboxFree') : undefined}
-				>
-					<SelectDropdown
-						options={DEBRID_SERVICES.map(option => ({ value: option.kind, label: option.name }))}
-						value={service}
-						onChange={value => {
-							const next = debridService(value as DebridKind)
-							if (next) {
-								setService(next.kind)
-								setApiKey('')
-								setResult(null)
-							}
-						}}
-						disabled={saving}
-					/>
-				</DrawerSection>
-			)}
 
 			{qbittorrent && (
 				<>
@@ -245,39 +204,18 @@ function ClientForm({ settings, onDone }: { settings: TorrentSettings; onDone: (
 				</>
 			)}
 
-			{debrid && (
-				<DrawerSection
-					title={t('torrents.settings.apiKeyLabel')}
-					description={
-						keySaved
-							? t('torrents.settings.apiKeyKept')
-							: t('torrents.settings.apiKeyHint', { page: debrid.keyPage })
-					}
-				>
-					<Input
-						type='password'
-						revealable
-						value={apiKey}
-						onChange={event => setApiKey(event.target.value)}
-						disabled={saving}
-						autoComplete='off'
-						spellCheck={false}
-					/>
-				</DrawerSection>
-			)}
-
-			{choice !== NONE && (
+			{choice !== NONE && !missingDebrid && (
 				<DrawerSection>
 					<ConnectionCheck
 						label={t('torrents.settings.check')}
 						checking={checking}
-						disabled={missingUrl || missingKey || saving}
+						disabled={missingUrl || saving}
 						onCheck={runCheck}
 						status={
 							result && {
 								ok: result.ok,
 								message: result.ok
-									? debrid
+									? throughDebrid
 										? t('torrents.settings.okAccount', { account: result.version })
 										: t('torrents.settings.ok', { version: result.version })
 									: result.problem

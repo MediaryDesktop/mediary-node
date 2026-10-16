@@ -7,7 +7,7 @@ import { Button, ListTile } from '@shared/ui'
 import { $nodeReady } from '@infra/node'
 
 import { libraryRootsQuery } from '@entities/library-item'
-import { debridService, torrentSettingsQuery } from '@entities/torrent'
+import { readyDebrid, torrentDebridQuery, torrentSettingsQuery } from '@entities/torrent'
 
 import styles from './TorrentClientSettings.module.scss'
 import { TorrentClientDrawer } from './ui/client-drawer/TorrentClientDrawer'
@@ -16,11 +16,13 @@ import { TorrentClientDrawer } from './ui/client-drawer/TorrentClientDrawer'
 export function TorrentClientSettings() {
 	const { t } = useTranslation()
 
-	const [settings, load, roots, loadRoots, nodeReady] = useUnit([
+	const [settings, load, roots, loadRoots, debrid, loadDebrid, nodeReady] = useUnit([
 		torrentSettingsQuery.$data,
 		torrentSettingsQuery.start,
 		libraryRootsQuery.$data,
 		libraryRootsQuery.start,
+		torrentDebridQuery.$data,
+		torrentDebridQuery.start,
 		$nodeReady
 	])
 
@@ -31,20 +33,24 @@ export function TorrentClientSettings() {
 		if (nodeReady) {
 			load()
 			loadRoots()
+			loadDebrid()
 		}
-	}, [load, loadRoots, nodeReady])
+	}, [load, loadRoots, loadDebrid, nodeReady])
 
 	if (!settings) {
 		return null
 	}
 
 	const connected = settings.client !== ''
+	const service = readyDebrid(debrid)
 	const name =
 		settings.client === 'embedded'
 			? t('torrents.settings.embedded')
 			: settings.client === 'qbittorrent'
 				? settings.url
-				: (debridService(settings.client)?.name ?? t('torrents.settings.notConfigured'))
+				: settings.client === 'debrid'
+					? t('torrents.settings.throughService', { service: service?.name ?? '—' })
+					: t('torrents.settings.notConfigured')
 	const folder = (roots?.roots ?? []).find(root => root.id === settings.root_id)?.path
 
 	return (

@@ -1264,9 +1264,53 @@ export interface paths {
 		put?: never
 		/**
 		 * Try a torrent client connection
-		 * @description Signs in to qBittorrent with the given address and credentials, or to a debrid service with the given key, saved or not, and reports the version or the account.
+		 * @description Signs in to qBittorrent with the given address and credentials, saved or not, and reports its version; for the debrid client, tries the debrid service's saved key and names the account.
 		 */
 		post: operations['checkTorrentClient']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/torrent/debrid': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * The debrid service
+		 * @description Set up apart from the torrent client. With a key it plays torrents without downloading them and marks the releases it holds in search, whatever the client; the library downloads through it only when the client is debrid. Keys are never returned.
+		 */
+		get: operations['getTorrentDebrid']
+		/**
+		 * Set up the debrid service
+		 * @description Each service keeps its own key in the node's secrets file, so switching back needs no key typed again. Turning the service off is refused while the torrent client downloads through it.
+		 */
+		put: operations['putTorrentDebrid']
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/torrent/debrid/check': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Try a debrid service's key
+		 * @description Signs in with the given key, or the saved one, and names the account and its plan. A free Real-Debrid, AllDebrid or Premiumize account is refused: those services play and download torrents only with premium.
+		 */
+		post: operations['checkTorrentDebrid']
 		delete?: never
 		options?: never
 		head?: never
@@ -1487,7 +1531,7 @@ export interface paths {
 		}
 		/**
 		 * Torrent client settings
-		 * @description The password and debrid keys are never returned; has_password, has_api_key and debrid_keys say which are saved.
+		 * @description The password is never returned; has_password says whether one is saved. The debrid service has settings of its own, under /v1/torrent/debrid.
 		 */
 		get: operations['getTorrentSettings']
 		/**
@@ -1940,17 +1984,27 @@ export interface components {
 			 * @example https://example.com/schemas/CheckTorrentClientInputBody.json
 			 */
 			readonly $schema?: string
-			/** @description A debrid service's key to try; left out uses the saved key. */
-			api_key?: string
 			/**
-			 * @description embedded checks the node's own client, a debrid service its key; anything else, qBittorrent at url.
+			 * @description embedded checks the node's own client, debrid the debrid service's saved key; anything else, qBittorrent at url.
 			 * @enum {string}
 			 */
-			client?: '' | 'qbittorrent' | 'embedded' | 'torbox' | 'realdebrid' | 'alldebrid' | 'premiumize'
+			client?: '' | 'qbittorrent' | 'embedded' | 'debrid'
 			/** @description Left out uses the saved password. */
 			password?: string
 			url?: string
 			username: string
+		}
+		CheckTorrentDebridInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/CheckTorrentDebridInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description A key to try; left out uses the saved one. */
+			api_key?: string
+			/** @enum {string} */
+			service: 'torbox' | 'realdebrid' | 'alldebrid' | 'premiumize'
 		}
 		CheckTorrentSourceInputBody: {
 			/**
@@ -3024,6 +3078,21 @@ export interface components {
 			series_id: string
 			series_title?: string
 		}
+		PutTorrentDebridInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/PutTorrentDebridInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The service's key. Left out keeps the saved key; empty removes it. */
+			api_key?: string
+			/**
+			 * @description The service; empty turns it off.
+			 * @enum {string}
+			 */
+			service: '' | 'torbox' | 'realdebrid' | 'alldebrid' | 'premiumize'
+		}
 		PutTorrentRuleInputBody: {
 			/**
 			 * Format: uri
@@ -3049,13 +3118,11 @@ export interface components {
 			 * @example https://example.com/schemas/PutTorrentSettingsInputBody.json
 			 */
 			readonly $schema?: string
-			/** @description The chosen debrid service's key. Left out keeps the saved key; empty removes it. */
-			api_key?: string
 			/**
-			 * @description The user's qBittorrent, the node's own client, the user's account on a debrid service, or none.
+			 * @description Who downloads torrents into the library: the user's qBittorrent, the node's own client, the debrid service set up under /v1/torrent/debrid, or none.
 			 * @enum {string}
 			 */
-			client: '' | 'qbittorrent' | 'embedded' | 'torbox' | 'realdebrid' | 'alldebrid' | 'premiumize'
+			client: '' | 'qbittorrent' | 'embedded' | 'debrid'
 			/** @description Left out keeps the saved password; empty removes it. */
 			password?: string
 			/** @description How the client names the node's folders, when it runs in Docker or on another machine. */
@@ -3937,8 +4004,32 @@ export interface components {
 			configured: boolean
 			error?: string
 			/** @enum {string} */
-			kind: '' | 'qbittorrent' | 'embedded' | 'torbox' | 'realdebrid' | 'alldebrid' | 'premiumize'
+			kind: '' | 'qbittorrent' | 'embedded' | 'debrid'
 			reachable: boolean
+			/**
+			 * @description With the debrid client, the service it downloads through.
+			 * @example TorBox
+			 */
+			service?: string
+		}
+		TorrentDebrid: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TorrentDebrid.json
+			 */
+			readonly $schema?: string
+			/** @description Whether the service has a key saved; keys are never returned. */
+			has_api_key: boolean
+			in_use: boolean
+			/** @description The services that have a key saved, chosen or not: switching back needs no key typed again. */
+			keys: string[] | null
+			ready: boolean
+			/**
+			 * @description The service, or none.
+			 * @enum {string}
+			 */
+			service: '' | 'torbox' | 'realdebrid' | 'alldebrid' | 'premiumize'
 		}
 		TorrentDownload: {
 			/**
@@ -4234,14 +4325,10 @@ export interface components {
 			 */
 			readonly $schema?: string
 			/**
-			 * @description The user's qBittorrent, the node's own client, the user's account on a debrid service, or none.
+			 * @description Who downloads torrents into the library: the user's qBittorrent, the node's own client, the debrid service set up under /v1/torrent/debrid, or none.
 			 * @enum {string}
 			 */
-			client: '' | 'qbittorrent' | 'embedded' | 'torbox' | 'realdebrid' | 'alldebrid' | 'premiumize'
-			/** @description The debrid services that have a key saved, chosen or not. */
-			debrid_keys: string[] | null
-			/** @description Whether the chosen debrid service has a key saved; keys are never returned. */
-			has_api_key: boolean
+			client: '' | 'qbittorrent' | 'embedded' | 'debrid'
 			has_password: boolean
 			path_map: components['schemas']['TorrentPathMap']
 			/** Format: int64 */
@@ -4446,6 +4533,7 @@ export type SchemaChapterOutputBody = components['schemas']['ChapterOutputBody']
 export type SchemaCheckOpdsServerInputBody = components['schemas']['CheckOPDSServerInputBody']
 export type SchemaCheckOpdsServerOutputBody = components['schemas']['CheckOPDSServerOutputBody']
 export type SchemaCheckTorrentClientInputBody = components['schemas']['CheckTorrentClientInputBody']
+export type SchemaCheckTorrentDebridInputBody = components['schemas']['CheckTorrentDebridInputBody']
 export type SchemaCheckTorrentSourceInputBody = components['schemas']['CheckTorrentSourceInputBody']
 export type SchemaCollectionOutputBody = components['schemas']['CollectionOutputBody']
 export type SchemaControlInputBody = components['schemas']['ControlInputBody']
@@ -4513,6 +4601,7 @@ export type SchemaPutMangaDexSettingsInputBody = components['schemas']['PutManga
 export type SchemaPutMangaDownloadSettingsInputBody =
 	components['schemas']['PutMangaDownloadSettingsInputBody']
 export type SchemaPutMangaLinkInputBody = components['schemas']['PutMangaLinkInputBody']
+export type SchemaPutTorrentDebridInputBody = components['schemas']['PutTorrentDebridInputBody']
 export type SchemaPutTorrentRuleInputBody = components['schemas']['PutTorrentRuleInputBody']
 export type SchemaPutTorrentSettingsInputBody = components['schemas']['PutTorrentSettingsInputBody']
 export type SchemaReadBody = components['schemas']['ReadBody']
@@ -4563,6 +4652,7 @@ export type SchemaTitle = components['schemas']['Title']
 export type SchemaTitleNames = components['schemas']['TitleNames']
 export type SchemaTorrentCheckResult = components['schemas']['TorrentCheckResult']
 export type SchemaTorrentClientStatus = components['schemas']['TorrentClientStatus']
+export type SchemaTorrentDebrid = components['schemas']['TorrentDebrid']
 export type SchemaTorrentDownload = components['schemas']['TorrentDownload']
 export type SchemaTorrentDownloadsOutputBody = components['schemas']['TorrentDownloadsOutputBody']
 export type SchemaTorrentFile = components['schemas']['TorrentFile']
@@ -7297,6 +7387,101 @@ export interface operations {
 		requestBody: {
 			content: {
 				'application/json': components['schemas']['CheckTorrentClientInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentCheckResult']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getTorrentDebrid: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentDebrid']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	putTorrentDebrid: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['PutTorrentDebridInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentDebrid']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	checkTorrentDebrid: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['CheckTorrentDebridInputBody']
 			}
 		}
 		responses: {

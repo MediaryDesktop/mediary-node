@@ -1231,11 +1231,11 @@ export const en = {
 				'Mediary downloads torrents itself; nothing else to install. It listens for peers on port 42069 and does not open it on the router.',
 			qbittorrentHint:
 				'Your own qBittorrent, through its Web UI. Turn the Web UI on in qBittorrent: Options → Web UI.',
-			debrid: 'Debrid service',
+			debrid: 'Through debrid',
 			debridHint:
-				'Your own debrid account: the service downloads the torrent on its servers, then Mediary fetches the files over HTTPS. No BitTorrent traffic leaves this computer.',
-			serviceLabel: 'Service',
-			torboxFree: 'TorBox has a free plan: one torrent at a time, a few a month.',
+				'Downloads go through {{service}}: it gets the torrent on its servers, then Mediary fetches the files over HTTPS. No BitTorrent traffic leaves this computer.',
+			debridMissing: 'Set up a debrid service first, in Settings → Debrid service.',
+			throughService: 'Through {{service}}',
 			noneHint: 'Torrents are off.',
 			notConfigured: 'Not connected',
 			configure: 'Connect',
@@ -1247,10 +1247,6 @@ export const en = {
 			passwordLabel: 'Password',
 			passwordKept: 'Leave empty to keep the saved password',
 			passwordHint: 'Leave empty if the Web UI lets this computer in without one',
-			apiKeyLabel: 'API key',
-			apiKeyHint:
-				'Copy it from {{page}}. The node keeps it in a file of its own and never shows it again',
-			apiKeyKept: 'Leave empty to keep the saved key',
 			check: 'Check the connection',
 			ok: 'Connected to qBittorrent {{version}}',
 			okAccount: 'Connected: {{account}}',
@@ -1378,6 +1374,10 @@ export const en = {
 				title: 'Torrent client',
 				subtitle: 'Where torrents are downloaded'
 			},
+			debrid: {
+				title: 'Debrid service',
+				subtitle: 'Watch without downloading'
+			},
 			torrentSearch: {
 				title: 'Torrent search',
 				subtitle: 'Torznab sources for finding releases'
@@ -1426,6 +1426,10 @@ export const en = {
 		torrents: {
 			name: 'Torrents',
 			hint: 'The client that downloads torrents into your library'
+		},
+		debrid: {
+			name: 'Debrid service',
+			hint: 'Your own TorBox, Real-Debrid, AllDebrid or Premiumize account. It lets you watch a release at once, without downloading it, whatever client fills the library'
 		},
 		torrentSearch: {
 			name: 'Torrent search',
@@ -1592,6 +1596,31 @@ export const en = {
 		}
 	},
 
+	debrid: {
+		notConfigured: 'Not connected',
+		readySubtitle: 'Watch now is on in torrent search',
+		offSubtitle: 'Connect one to watch releases without downloading them',
+		configure: 'Connect',
+		edit: 'Change',
+		drawerTitle: 'Debrid service',
+		drawerDescription: 'A service that holds torrents on its servers and plays them to you at once.',
+		serviceLabel: 'Service',
+		serviceHint: 'Real-Debrid, AllDebrid and Premiumize work only with a premium account.',
+		torboxFree: 'TorBox has a free plan: one torrent at a time, a few a month.',
+		apiKeyLabel: 'API key',
+		apiKeyHint: 'Copy it from {{page}}. The node keeps it in a file of its own and never shows it again',
+		apiKeyKept: 'Leave empty to keep the saved key',
+		check: 'Check the key',
+		ok: 'Connected: {{account}}',
+		checkFailed: 'The service did not accept the key',
+		save: 'Save',
+		saveFailed: 'Could not save the debrid service',
+		offLabel: 'Turn off',
+		offHint: 'Watch now goes away; the key stays saved for later.',
+		offInUse: 'The torrent client downloads through it: choose another client first.',
+		turnOff: 'Turn off'
+	},
+
 	setup: {
 		note: 'These settings can be changed later',
 		railLabel: 'Setup steps',
@@ -1616,7 +1645,8 @@ export const en = {
 			downloads: {
 				label: 'Downloads',
 				title: 'Downloading',
-				description: 'Configure your torrent client for downloading'
+				description:
+					'Choose how Mediary downloads torrents: its built-in client, your own qBittorrent, or a debrid service'
 			},
 			anilist: {
 				label: 'AniList',
@@ -1629,11 +1659,6 @@ export const en = {
 				title: 'Mediary account',
 				description:
 					'Optional. A Mediary account only keeps a backup of your lists and settings for your other devices'
-			},
-			debrid: {
-				label: 'Debrid service',
-				title: 'Debrid service',
-				description: 'Debrid services offer faster downloads and instant streaming from the cloud'
 			}
 		},
 		account: {
@@ -1665,30 +1690,6 @@ export const en = {
 				hint: 'MPV is recommended for better subtitle rendering and torrent streaming'
 			},
 			install: 'On Windows, install MPV using Scoop or Chocolatey. On macOS, install MPV using Homebrew'
-		},
-		downloading: {
-			client: {
-				title: 'Torrent client',
-				description: 'Client used to download torrents',
-				label: 'Client',
-				qbittorrent: 'qBittorrent'
-			},
-			qbittorrent: {
-				title: 'qBittorrent settings',
-				host: 'Host',
-				username: 'Username',
-				password: 'Password',
-				port: 'Port',
-				executable: 'Executable path'
-			}
-		},
-		debrid: {
-			label: 'Debrid service',
-			none: 'None',
-			torbox: 'TorBox',
-			realDebrid: 'Real-Debrid',
-			allDebrid: 'AllDebrid',
-			premiumize: 'Premiumize'
 		}
 	},
 

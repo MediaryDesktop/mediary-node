@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from '@shared/i18n'
 import { DrawerForm, EmptyState, Skeleton, toast } from '@shared/ui'
 
-import { isDebrid, torrentSearchQuery, TorrentSetupNotice, useTorrentSetup } from '@entities/torrent'
+import { torrentSearchQuery, TorrentSetupNotice, useTorrentSetup } from '@entities/torrent'
 import type { TorrentRelease, TorrentStream } from '@entities/torrent'
 
 import { coveredEpisodes } from '../../lib/episodes'
@@ -48,7 +48,8 @@ export function SearchForm({ mediaRef, title, missing, poster, onDone }: SearchF
 	const [selected, setSelected] = useState<Set<string>>(new Set())
 
 	const watching = useWatchRelease({ mediaRef, title, onPlaying: onDone })
-	const canStream = isDebrid(setup.clientKind)
+	// Any set-up debrid service plays a release, whatever downloads the library.
+	const canStream = Boolean(setup.debrid)
 
 	const streamStatus = (stream: TorrentStream | null): string =>
 		!stream

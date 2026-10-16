@@ -1,18 +1,21 @@
 export {
 	addTorrentMutation,
 	checkTorrentClientMutation,
+	checkTorrentDebridMutation,
 	checkTorrentRuleMutation,
 	checkTorrentSourceMutation,
 	createTorrentSourceMutation,
 	deleteTorrentRuleMutation,
 	deleteTorrentSourceMutation,
 	pauseTorrentMutation,
+	putTorrentDebridMutation,
 	putTorrentProfileMutation,
 	putTorrentRuleMutation,
 	putTorrentSettingsMutation,
 	removeTorrentMutation,
 	resumeTorrentMutation,
 	selectTorrentFilesMutation,
+	torrentDebridQuery,
 	torrentDownloadsQuery,
 	torrentFilesClosed,
 	torrentFilesOpened,
@@ -34,7 +37,7 @@ export { fetchTorrentStreamFx, startTorrentStreamFx } from './api/api'
 export type { StartTorrentStreamParams, TorrentStream } from './api/api'
 
 export { useTorrentSetup } from './lib/useTorrentSetup'
-export { DEBRID_SERVICES, debridService, isDebrid } from './lib/clients'
+export { DEBRID_SERVICES, debridService, readyDebrid } from './lib/clients'
 export type { DebridKind, DebridService, TorrentClientKind } from './lib/clients'
 export { TorrentSetupNotice } from './ui/torrent-setup-notice/TorrentSetupNotice'
 export type { TorrentSetupNoticeProps } from './ui/torrent-setup-notice/TorrentSetupNotice'
@@ -46,6 +49,9 @@ export type {
 	SelectTorrentFilesParams,
 	TorrentCheckParams,
 	TorrentCheckResult,
+	TorrentDebrid,
+	TorrentDebridCheckParams,
+	TorrentDebridUpdate,
 	TorrentClientStatus,
 	TorrentDownload,
 	TorrentDownloads,

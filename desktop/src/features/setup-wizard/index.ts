@@ -5,8 +5,8 @@ export { SetupLayout } from './ui/layout'
 export {
 	SetupAccountStep,
 	SetupAniListStep,
-	SetupDebridStep,
 	SetupDownloadingStep,
 	SetupLibraryStep,
 	SetupPlayerStep
 } from './ui/step'
+export type { SetupDownloadingStepProps } from './ui/step'

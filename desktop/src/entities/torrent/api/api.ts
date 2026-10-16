@@ -134,6 +134,29 @@ export const checkTorrentClientFx = createNodeRequestFx<TorrentCheckParams, Torr
 	timeout: 20_000
 }))
 
+export type TorrentDebrid = NodeSchemas['TorrentDebrid']
+export type TorrentDebridUpdate = Omit<NodeSchemas['PutTorrentDebridInputBody'], '$schema'>
+export type TorrentDebridCheckParams = Omit<NodeSchemas['CheckTorrentDebridInputBody'], '$schema'>
+
+export const fetchTorrentDebridFx = createNodeRequestFx<void, TorrentDebrid>(() => ({
+	url: '/v1/torrent/debrid'
+}))
+
+export const putTorrentDebridFx = createNodeRequestFx<TorrentDebridUpdate, TorrentDebrid>(body => ({
+	url: '/v1/torrent/debrid',
+	method: 'PUT',
+	body
+}))
+
+export const checkTorrentDebridFx = createNodeRequestFx<TorrentDebridCheckParams, TorrentCheckResult>(
+	body => ({
+		url: '/v1/torrent/debrid/check',
+		method: 'POST',
+		body,
+		timeout: 20_000
+	})
+)
+
 export const fetchTorrentSourcesFx = createNodeRequestFx<void, NodeSchemas['TorrentSourcesOutputBody']>(
 	() => ({
 		url: '/v1/torrent/sources'

@@ -11,11 +11,12 @@ import { returnAfterAuthRequested, sessionModel } from '@entities/session'
 
 import { BackupSettings } from '@features/back-up-node'
 import { ConnectAniList } from '@features/connect-anilist'
+import { DebridServiceSettings } from '@features/manage-debrid-service'
+import { TorrentClientSettings } from '@features/manage-torrent-client'
 import {
 	SETUP_STEPS,
 	SetupAccountStep,
 	SetupAniListStep,
-	SetupDebridStep,
 	SetupDownloadingStep,
 	SetupLayout,
 	SetupLibraryStep,
@@ -119,8 +120,16 @@ export function SetupPage({ initialStep }: SetupPageProps) {
 					)}
 					{step.id === 'library' && <SetupLibraryStep />}
 					{step.id === 'player' && <SetupPlayerStep />}
-					{step.id === 'downloads' && <SetupDownloadingStep />}
-					{step.id === 'debrid' && <SetupDebridStep />}
+					{step.id === 'downloads' && (
+						<SetupDownloadingStep
+							content={
+								<>
+									<TorrentClientSettings />
+									<DebridServiceSettings />
+								</>
+							}
+						/>
+					)}
 				</div>
 			</section>
 		</SetupLayout>

@@ -6,11 +6,13 @@ import { nodeStreamResumed, nodeTopic } from '@infra/node'
 import {
 	addTorrentFx,
 	checkTorrentClientFx,
+	checkTorrentDebridFx,
 	checkTorrentRuleFx,
 	checkTorrentSourceFx,
 	createTorrentSourceFx,
 	deleteTorrentRuleFx,
 	deleteTorrentSourceFx,
+	fetchTorrentDebridFx,
 	fetchTorrentDownloadsFx,
 	fetchTorrentFilesFx,
 	fetchTorrentProfileFx,
@@ -19,6 +21,7 @@ import {
 	fetchTorrentSettingsFx,
 	fetchTorrentSourcesFx,
 	pauseTorrentFx,
+	putTorrentDebridFx,
 	putTorrentProfileFx,
 	putTorrentRuleFx,
 	putTorrentSettingsFx,
@@ -102,6 +105,25 @@ sample({
 })
 
 keepFresh(torrentSettingsQuery, { triggers: [putTorrentSettingsMutation.finished.success] })
+
+// The debrid service is set up apart from the client: it plays torrents and
+// marks cached releases whatever the client is.
+export const torrentDebridQuery = createQuery({ effect: fetchTorrentDebridFx, name: 'torrentDebrid' })
+
+export const putTorrentDebridMutation = createMutation({
+	effect: putTorrentDebridFx,
+	name: 'putTorrentDebrid'
+})
+
+export const checkTorrentDebridMutation = createMutation({
+	effect: checkTorrentDebridFx,
+	name: 'checkTorrentDebrid'
+})
+
+// Whether it is in use depends on the client, so either change asks again.
+keepFresh(torrentDebridQuery, {
+	triggers: [putTorrentDebridMutation.finished.success, putTorrentSettingsMutation.finished.success]
+})
 
 export const torrentSourcesQuery = createQuery({ effect: fetchTorrentSourcesFx, name: 'torrentSources' })
 

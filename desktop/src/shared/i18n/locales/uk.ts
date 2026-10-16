@@ -1231,11 +1231,11 @@ export const uk: Translation = {
 				'Mediary завантажує торенти сама, нічого більше встановлювати не треба. Чекає на пірів на порту 42069 і не відкриває його на роутері.',
 			qbittorrentHint:
 				'Ваш qBittorrent через його Web UI. Увімкніть Web UI в qBittorrent: Налаштування → Веб-інтерфейс.',
-			debrid: 'Debrid-сервіс',
+			debrid: 'Через debrid',
 			debridHint:
-				'Ваш власний debrid-акаунт: сервіс качає торент на своїх серверах, а Mediary забирає файли по HTTPS. Жодного BitTorrent-трафіку з цього комп’ютера.',
-			serviceLabel: 'Сервіс',
-			torboxFree: 'TorBox має безкоштовний план: один торент за раз, кілька на місяць.',
+				'Завантаження йдуть через {{service}}: він качає торент на своїх серверах, а Mediary забирає файли по HTTPS. Жодного BitTorrent-трафіку з цього комп’ютера.',
+			debridMissing: 'Спершу підключіть debrid-сервіс: Налаштування → Debrid-сервіс.',
+			throughService: 'Через {{service}}',
 			noneHint: 'Торенти вимкнено.',
 			notConfigured: 'Не підключено',
 			configure: 'Підключити',
@@ -1247,10 +1247,6 @@ export const uk: Translation = {
 			passwordLabel: 'Пароль',
 			passwordKept: 'Лишіть порожнім, щоб зберегти поточний пароль',
 			passwordHint: 'Лишіть порожнім, якщо Web UI пускає цей комп’ютер без пароля',
-			apiKeyLabel: 'Ключ API',
-			apiKeyHint:
-				'Скопіюйте його з {{page}}. Нода зберігає його в окремому файлі й більше ніколи не показує',
-			apiKeyKept: 'Лишіть порожнім, щоб зберегти поточний ключ',
 			check: 'Перевірити з’єднання',
 			ok: 'Підключено до qBittorrent {{version}}',
 			okAccount: 'Підключено: {{account}}',
@@ -1378,6 +1374,10 @@ export const uk: Translation = {
 				title: 'Торент-клієнт',
 				subtitle: 'Куди завантажуються торенти'
 			},
+			debrid: {
+				title: 'Debrid-сервіс',
+				subtitle: 'Перегляд без завантаження'
+			},
 			torrentSearch: {
 				title: 'Пошук торентів',
 				subtitle: 'Джерела Torznab для пошуку роздач'
@@ -1426,6 +1426,10 @@ export const uk: Translation = {
 		torrents: {
 			name: 'Торенти',
 			hint: 'Клієнт, який завантажує торенти у вашу бібліотеку'
+		},
+		debrid: {
+			name: 'Debrid-сервіс',
+			hint: 'Ваш власний акаунт TorBox, Real-Debrid, AllDebrid чи Premiumize. Дає дивитися роздачу одразу, без завантаження, хоч би який клієнт наповнював бібліотеку'
 		},
 		torrentSearch: {
 			name: 'Пошук торентів',
@@ -1591,6 +1595,32 @@ export const uk: Translation = {
 		}
 	},
 
+	debrid: {
+		notConfigured: 'Не підключено',
+		readySubtitle: 'У пошуку торентів увімкнено «Дивитися зараз»',
+		offSubtitle: 'Підключіть, щоб дивитися роздачі без завантаження',
+		configure: 'Підключити',
+		edit: 'Змінити',
+		drawerTitle: 'Debrid-сервіс',
+		drawerDescription: 'Сервіс, що тримає торенти на своїх серверах і віддає їх вам одразу.',
+		serviceLabel: 'Сервіс',
+		serviceHint: 'Real-Debrid, AllDebrid і Premiumize працюють лише з преміум-акаунтом.',
+		torboxFree: 'TorBox має безкоштовний план: один торент за раз, кілька на місяць.',
+		apiKeyLabel: 'Ключ API',
+		apiKeyHint:
+			'Скопіюйте його з {{page}}. Нода зберігає його в окремому файлі й більше ніколи не показує',
+		apiKeyKept: 'Лишіть порожнім, щоб зберегти поточний ключ',
+		check: 'Перевірити ключ',
+		ok: 'Підключено: {{account}}',
+		checkFailed: 'Сервіс не прийняв ключ',
+		save: 'Зберегти',
+		saveFailed: 'Не вдалося зберегти debrid-сервіс',
+		offLabel: 'Вимкнути',
+		offHint: '«Дивитися зараз» зникне; ключ лишиться збереженим на потім.',
+		offInUse: 'Торент-клієнт качає через нього: спершу оберіть інший клієнт.',
+		turnOff: 'Вимкнути'
+	},
+
 	setup: {
 		note: 'Ці налаштування можна змінити пізніше',
 		railLabel: 'Кроки налаштування',
@@ -1615,7 +1645,8 @@ export const uk: Translation = {
 			downloads: {
 				label: 'Завантаження',
 				title: 'Завантаження файлів',
-				description: 'Налаштуйте торент-клієнт для завантаження'
+				description:
+					'Оберіть, як Mediary завантажує торенти: вбудованим клієнтом, своїм qBittorrent чи debrid-сервісом'
 			},
 			anilist: {
 				label: 'AniList',
@@ -1628,11 +1659,6 @@ export const uk: Translation = {
 				title: 'Акаунт Mediary',
 				description:
 					'Необовʼязково. Акаунт Mediary лише зберігає бекап ваших списків і налаштувань для інших пристроїв'
-			},
-			debrid: {
-				label: 'Debrid-сервіс',
-				title: 'Debrid-сервіс',
-				description: 'Debrid-сервіси пришвидшують завантаження й дають миттєвий стрімінг із хмари'
 			}
 		},
 		account: {
@@ -1664,30 +1690,6 @@ export const uk: Translation = {
 				hint: 'MPV рекомендовано для кращого рендерингу субтитрів і торент-стримінгу'
 			},
 			install: 'У Windows встановіть MPV через Scoop або Chocolatey. У macOS — через Homebrew'
-		},
-		downloading: {
-			client: {
-				title: 'Торент-клієнт',
-				description: 'Клієнт для завантаження торентів',
-				label: 'Клієнт',
-				qbittorrent: 'qBittorrent'
-			},
-			qbittorrent: {
-				title: 'Налаштування qBittorrent',
-				host: 'Хост',
-				username: 'Імʼя користувача',
-				password: 'Пароль',
-				port: 'Порт',
-				executable: 'Шлях до виконуваного файлу'
-			}
-		},
-		debrid: {
-			label: 'Debrid-сервіс',
-			none: 'Немає',
-			torbox: 'TorBox',
-			realDebrid: 'Real-Debrid',
-			allDebrid: 'AllDebrid',
-			premiumize: 'Premiumize'
 		}
 	},
 

@@ -11,6 +11,7 @@ import { nodeHealthQuery } from '@infra/node'
 import { BackupSettings, DevicesSettings } from '@features/back-up-node'
 import { PlayerModeSwitcher } from '@features/choose-player'
 import { DownloadFolderSetting } from '@features/download-chapters'
+import { DebridServiceSettings } from '@features/manage-debrid-service'
 import { LibraryRootsSettings } from '@features/manage-library-roots'
 import { MangaDexSettings } from '@features/manage-mangadex'
 import { OPDSServersSettings } from '@features/manage-opds-servers'
@@ -152,6 +153,14 @@ function SectionContent({ section }: { section: SectionInfo }) {
 				<Card>
 					<Row name={t('settings.torrents.name')} hint={t('settings.torrents.hint')} block>
 						<TorrentClientSettings />
+					</Row>
+				</Card>
+			)
+		case 'debrid':
+			return (
+				<Card>
+					<Row name={t('settings.debrid.name')} hint={t('settings.debrid.hint')} block>
+						<DebridServiceSettings />
 					</Row>
 				</Card>
 			)
