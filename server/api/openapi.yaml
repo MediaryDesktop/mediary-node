@@ -3491,6 +3491,9 @@ components:
           format: uri
           readOnly: true
           type: string
+        auto:
+          description: "Search for the episode and play the best release: one the debrid service already holds first, then by the release profile. In place of magnet, torrent or release_id."
+          type: boolean
         episode:
           description: Picks the file from a batch, and is what gets marked watched.
           format: int64
@@ -4736,6 +4739,9 @@ components:
           maximum: 1
           minimum: 0
           type: number
+        release:
+          description: The release the node picked, when it picked one.
+          type: string
         service:
           examples:
             - TorBox

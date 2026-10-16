@@ -17,6 +17,7 @@ type StartTorrentStreamInput struct {
 		Magnet    string `json:"magnet,omitempty" maxLength:"65536" doc:"A magnet link with a BitTorrent v1 hash. Give this, torrent or release_id."`
 		Torrent   []byte `json:"torrent,omitempty" doc:"A .torrent file, base64-encoded."`
 		ReleaseID string `json:"release_id,omitempty" maxLength:"100" doc:"A search result to play."`
+		Auto      bool   `json:"auto,omitempty" doc:"Search for the episode and play the best release: one the debrid service already holds first, then by the release profile. In place of magnet, torrent or release_id."`
 		Episode   *int   `json:"episode,omitempty" minimum:"0" doc:"Picks the file from a batch, and is what gets marked watched."`
 		Season    *int   `json:"season,omitempty" minimum:"0" doc:"For a show numbered by season: the episode counts within it."`
 	}
@@ -45,6 +46,7 @@ func (h *Handler) registerStreams(api huma.API) {
 			Magnet:    in.Body.Magnet,
 			Torrent:   in.Body.Torrent,
 			ReleaseID: in.Body.ReleaseID,
+			Auto:      in.Body.Auto,
 			Episode:   in.Body.Episode,
 			Season:    in.Body.Season,
 		})

@@ -35,6 +35,9 @@ type StreamRequest struct {
 	Torrent  []byte
 	// ReleaseID is a search result to play, in place of a magnet or a file.
 	ReleaseID string
+	// Auto has the node search for the episode and play the best release, in
+	// place of a magnet, a file or a search result.
+	Auto bool
 	// Episode, and Season for a show numbered by season, pick the file from a
 	// batch and are what the player marks watched.
 	Episode *int
@@ -51,6 +54,7 @@ type TorrentStream struct {
 	Error    string  `json:"error,omitempty"`
 	FileID   int64   `json:"file_id,omitempty" doc:"Once ready: a negative ID the player takes like a library file's — /v1/playback/files/{id}/stream, /direct, /hls and POST /v1/playback all accept it."`
 	Name     string  `json:"name,omitempty" doc:"The file that plays, once chosen."`
+	Release  string  `json:"release,omitempty" doc:"The release the node picked, when it picked one."`
 	MediaRef string  `json:"media_ref"`
 	Episode  *int    `json:"episode,omitempty"`
 }
@@ -79,6 +83,7 @@ type streamEntry struct {
 	// The chosen file, once the service has the files; -1 until then.
 	file     int
 	name     string
+	release  string
 	size     int64
 	link     string
 	linkedAt time.Time
@@ -100,18 +105,27 @@ func (s *Service) StartStream(ctx context.Context, req StreamRequest) (*TorrentS
 	}
 
 	given := 0
-	for _, set := range []bool{req.Magnet != "", len(req.Torrent) > 0, req.ReleaseID != ""} {
+	for _, set := range []bool{req.Magnet != "", len(req.Torrent) > 0, req.ReleaseID != "", req.Auto} {
 		if set {
 			given++
 		}
 	}
 	if given != 1 {
-		return nil, apperr.Invalid("magnet", "give one of a magnet link, a .torrent file or a search result")
+		return nil, apperr.Invalid("magnet", "give one of a magnet link, a .torrent file, a search result or auto")
 	}
 
 	streamer, err := s.streamer(ctx)
 	if err != nil {
 		return nil, err
+	}
+
+	var picked string
+	if req.Auto {
+		release, pickErr := s.pickStreamRelease(ctx, req)
+		if pickErr != nil {
+			return nil, pickErr
+		}
+		req.ReleaseID, picked = release.ID, release.Title
 	}
 
 	if req.ReleaseID != "" {
@@ -126,8 +140,100 @@ func (s *Service) StartStream(ctx context.Context, req StreamRequest) (*TorrentS
 	}
 
 	entry := s.streamFor(hash, req)
+	if picked != "" {
+		s.streams.mu.Lock()
+		entry.release = picked
+		s.streams.mu.Unlock()
+	}
 
 	return s.streamView(ctx, streamer, entry)
+}
+
+// pickStreamRelease searches for the episode and takes the release that plays
+// soonest and best: one the debrid service already holds first — it plays in
+// seconds, whatever its seeders — then one the profile allows, then the better
+// scored. A batch counts when it holds the episode; the file is picked from it.
+func (s *Service) pickStreamRelease(ctx context.Context, req StreamRequest) (*TorrentRelease, error) {
+	var episode, season int
+	if req.Episode != nil {
+		episode = *req.Episode
+	}
+	if req.Season != nil {
+		season = *req.Season
+	}
+
+	result, err := s.Search(ctx, SearchRequest{MediaRef: req.MediaRef, Episode: episode, Season: season})
+	if err != nil {
+		return nil, err
+	}
+
+	profile, err := s.Profile(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	best := bestStreamRelease(result.Releases, episode > 0, profile)
+	if best == nil {
+		if episode > 0 {
+			return nil, apperr.New(apperr.KindNotFound, "no release of episode %d was found: try choosing one in the search", episode)
+		}
+		return nil, apperr.New(apperr.KindNotFound, "no release was found: try choosing one in the search")
+	}
+
+	return best, nil
+}
+
+func bestStreamRelease(releases []TorrentRelease, forEpisode bool, profile *TorrentProfile) *TorrentRelease {
+	var best *TorrentRelease
+
+	for i := range releases {
+		found := &releases[i]
+
+		// With an episode asked, only a release that holds it: a name without
+		// episodes may well be another season or a film.
+		if forEpisode && found.Match != "episode" && found.Match != "batch" {
+			continue
+		}
+		if excluded(found.Title, profile) {
+			continue
+		}
+
+		held := found.Cached != nil && *found.Cached
+		// Nothing plays from a torrent nobody seeds, unless the service has it.
+		if !held && found.Seeders == 0 {
+			continue
+		}
+
+		if best == nil || streamsBetter(found, best) {
+			best = found
+		}
+	}
+
+	return best
+}
+
+func streamsBetter(a, b *TorrentRelease) bool {
+	aHeld, bHeld := a.Cached != nil && *a.Cached, b.Cached != nil && *b.Cached
+	if aHeld != bHeld {
+		return aHeld
+	}
+	if a.Eligible != b.Eligible {
+		return a.Eligible
+	}
+
+	return beats(*a, *b)
+}
+
+// excluded reports whether a release name carries a word the profile never wants.
+func excluded(title string, profile *TorrentProfile) bool {
+	name := strings.ToLower(title)
+	for _, word := range profile.Excluded {
+		if strings.Contains(name, strings.ToLower(word)) {
+			return true
+		}
+	}
+
+	return false
 }
 
 // StreamStatus is how far a stream is; the client asks again until it is ready.
@@ -284,11 +390,16 @@ func (s *Service) streamView(ctx context.Context, streamer Streamer, entry *stre
 		return nil, err
 	}
 
+	s.streams.mu.Lock()
+	release := entry.release
+	s.streams.mu.Unlock()
+
 	view := &TorrentStream{
 		ID:       entry.id,
 		Service:  streamer.Service(),
 		MediaRef: entry.mediaRef,
 		Episode:  entry.episode,
+		Release:  release,
 	}
 
 	switch {

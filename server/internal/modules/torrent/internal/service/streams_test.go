@@ -21,11 +21,12 @@ type streamingClient struct {
 
 func (c *streamingClient) Service() string { return "Fake" }
 
-func (c *streamingClient) Stream(context.Context, string, []byte) (string, error) {
+// Stream records the magnet it was given, so a test sees which release played.
+func (c *streamingClient) Stream(_ context.Context, magnet string, _ []byte) (string, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	c.streams = append(c.streams, frierenHash)
+	c.streams = append(c.streams, magnet)
 
 	return frierenHash, nil
 }
