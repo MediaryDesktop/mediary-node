@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"time"
 
 	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/mpv"
@@ -27,11 +28,15 @@ type PlayableFile struct {
 
 	Missing bool
 
-	// Remote is a file a debrid service holds, played without downloading it:
-	// Path is then its HTTPS address, and Key names it for the caches, since
-	// there is nothing on disk to tell one version from another.
+	// Remote is a stream, played without downloading it into the library: Path
+	// is then a debrid service's HTTPS address, or Open reads it from the node's
+	// own client. Key names it for the caches, since there is nothing in the
+	// library to tell one version from another.
 	Remote bool
 	Key    string
+	// Open reads a stream the node's own client downloads, in place of Path's
+	// address; the reader waits for the pieces it reaches.
+	Open func(ctx context.Context) (io.ReadSeekCloser, error)
 }
 
 // Library answers "what is this file". Implemented over the library module by the

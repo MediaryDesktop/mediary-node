@@ -78,11 +78,11 @@ func batchFiles() []debrid.RemoteFile {
 	}
 }
 
-func TestStreamNeedsADebridService(t *testing.T) {
+func TestStreamThroughDebridNeedsAService(t *testing.T) {
 	h := newHarness(t)
 	h.configure(t)
 
-	_, err := h.svc.StartStream(context.Background(), StreamRequest{MediaRef: "anilist:154587", Magnet: frierenMagnet})
+	_, err := h.svc.StartStream(context.Background(), StreamRequest{MediaRef: "anilist:154587", Magnet: frierenMagnet, Via: StreamViaDebrid})
 	if apperr.KindOf(err) != apperr.KindPrecondition {
 		t.Fatalf("err = %v, want precondition", err)
 	}

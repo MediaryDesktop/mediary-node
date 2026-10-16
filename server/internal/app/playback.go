@@ -60,6 +60,7 @@ func (p playableFiles) stream(ctx context.Context, fileID int64) (*playback.Play
 		Episode:  p.overallEpisode(ctx, file.MediaRef, file.Season, file.Episode),
 		Remote:   true,
 		Key:      file.Key,
+		Open:     file.Open,
 	}, nil
 }
 

@@ -2,9 +2,11 @@ package handler
 
 import (
 	"context"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humachi"
@@ -255,6 +257,10 @@ func (h *Handler) Register(api huma.API) {
 		contentType := videofile.ContainerMimeType(filepath.Ext(source.Name))
 
 		return &huma.StreamResponse{Body: func(hctx huma.Context) {
+			if source.Open != nil {
+				serveStream(ctx, hctx, source.Open, source.Name, contentType)
+				return
+			}
 			if source.Remote {
 				proxyRemote(hctx, source.Path, contentType, func() (string, error) {
 					fresh, renewErr := h.svc.RenewDirectSource(ctx, in.ID)
@@ -357,6 +363,28 @@ func serveFile(hctx huma.Context, path, contentType string) {
 	}
 
 	http.ServeContent(w, r, filepath.Base(path), stat.ModTime(), file)
+}
+
+// serveStream serves a stream from the node's own client as it downloads. The
+// reader is tied to the request, so a player that hangs up stops its waits.
+func serveStream(ctx context.Context, hctx huma.Context, open func(context.Context) (io.ReadSeekCloser, error), name, contentType string) {
+	r, w := humachi.Unwrap(hctx)
+	writeStream(ctx, w, r, open, name, contentType)
+}
+
+func writeStream(ctx context.Context, w http.ResponseWriter, r *http.Request, open func(context.Context) (io.ReadSeekCloser, error), name, contentType string) {
+	reader, err := open(ctx)
+	if err != nil {
+		http.Error(w, "the stream cannot be opened: "+err.Error(), http.StatusNotFound)
+		return
+	}
+	defer func() { _ = reader.Close() }()
+
+	if contentType != "" {
+		w.Header().Set("Content-Type", contentType)
+	}
+
+	http.ServeContent(w, r, name, time.Time{}, reader)
 }
 
 func (h *Handler) hls(ctx context.Context, name string, req service.HLSRequest) (*huma.StreamResponse, error) {

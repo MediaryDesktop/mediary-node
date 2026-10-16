@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"io"
 	"path"
 	"strconv"
 	"strings"
@@ -13,14 +14,36 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
 )
 
-// Streamer is a client that can play a torrent without downloading it: a debrid
-// service, which holds the files and links to them.
+// Streamer is a client that can play a torrent without downloading it into the
+// library: a debrid service, or the node's own client.
 type Streamer interface {
 	Service() string
 	Stream(ctx context.Context, magnet string, torrent []byte) (hash string, err error)
+	// StreamState is ready once the files are known and one can be chosen.
 	StreamState(ctx context.Context, hash string) (debrid.Remote, error)
+}
+
+// LinkStreamer is a debrid service: it holds the files and links to them.
+type LinkStreamer interface {
+	Streamer
 	StreamLink(ctx context.Context, hash string, fileID int) (string, error)
 }
+
+// LocalStreamer is the node's own client: it downloads the chosen file, its
+// start and end first, and the player reads it as it comes.
+type LocalStreamer interface {
+	Streamer
+	// Buffer starts the file and reports whether enough of it is in to play.
+	Buffer(ctx context.Context, hash string, fileID int) (ready bool, progress float64, err error)
+	OpenStream(ctx context.Context, hash string, fileID int) (io.ReadSeekCloser, error)
+}
+
+// The ways a stream can come: StreamVia when a request names neither takes the
+// debrid service when one is set up, the node's own client otherwise.
+const (
+	StreamViaDebrid   = "debrid"
+	StreamViaEmbedded = "embedded"
+)
 
 // A link is asked for again after this long. Services keep theirs for hours; a
 // fresh one now and then costs one call and never plays an expired one.
@@ -47,15 +70,19 @@ type StreamRequest struct {
 	// batch and are what the player marks watched.
 	Episode *int
 	Season  *int
+	// Via is StreamViaDebrid or StreamViaEmbedded; empty picks one.
+	Via string
 }
 
 // TorrentStream is a torrent being readied to play without downloading it.
 type TorrentStream struct {
 	ID       int64   `json:"id"`
-	State    string  `json:"state" enum:"preparing,queued,ready,failed" doc:"ready once the service holds the file; failed when it gave up, or the torrent has no fitting video."`
+	State    string  `json:"state" enum:"preparing,queued,ready,failed" doc:"ready once the service holds the file, or the built-in client has its start; failed when it gave up, or the torrent has no fitting video."`
+	Via      string  `json:"via" enum:"debrid,embedded" doc:"Whether a debrid service or the node's own client gets the torrent."`
 	Service  string  `json:"service" example:"TorBox"`
-	Progress float64 `json:"progress" minimum:"0" maximum:"1" doc:"How far the service is with the torrent, while preparing."`
-	Speed    int64   `json:"speed" doc:"The service's download speed, bytes per second, while preparing."`
+	Progress float64 `json:"progress" minimum:"0" maximum:"1" doc:"While preparing: how far the service is with the torrent, or how much of the file's start the built-in client has."`
+	Speed    int64   `json:"speed" doc:"The download speed, bytes per second, while preparing."`
+	Peers    int     `json:"peers,omitempty" doc:"Peers the built-in client gets the torrent from."`
 	Error    string  `json:"error,omitempty"`
 	FileID   int64   `json:"file_id,omitempty" doc:"Once ready: a negative ID the player takes like a library file's — /v1/playback/files/{id}/stream, /direct, /hls and POST /v1/playback all accept it."`
 	Name     string  `json:"name,omitempty" doc:"The file that plays, once chosen."`
@@ -69,8 +96,11 @@ type StreamFile struct {
 	FileID int64
 	// Key names the file for the player's caches: the torrent's hash and the
 	// file in it, which outlive the stream's own ID across restarts.
-	Key      string
+	Key string
+	// URL is the debrid service's link; Open reads the file from the node's own
+	// client instead. One of the two is set.
 	URL      string
+	Open     func(ctx context.Context) (io.ReadSeekCloser, error)
 	Name     string
 	Size     int64
 	MediaRef string
@@ -80,6 +110,7 @@ type StreamFile struct {
 
 type streamEntry struct {
 	id       int64
+	via      string
 	hash     string
 	mediaRef string
 	title    string
@@ -116,6 +147,8 @@ func (s *Service) StartStream(ctx context.Context, req StreamRequest) (*TorrentS
 		return nil, apperr.Invalid("media_ref", "a stream has to be for a title")
 	}
 
+	var err error
+
 	given := 0
 	for _, set := range []bool{req.Magnet != "", len(req.Torrent) > 0, req.ReleaseID != "", req.Auto} {
 		if set {
@@ -126,7 +159,12 @@ func (s *Service) StartStream(ctx context.Context, req StreamRequest) (*TorrentS
 		return nil, apperr.Invalid("magnet", "give one of a magnet link, a .torrent file, a search result or auto")
 	}
 
-	streamer, err := s.streamer(ctx)
+	req.Via, err = s.streamVia(ctx, req.Via)
+	if err != nil {
+		return nil, err
+	}
+
+	streamer, err := s.streamer(ctx, req.Via)
 	if err != nil {
 		return nil, err
 	}
@@ -199,7 +237,7 @@ func (s *Service) pickStreamRelease(ctx context.Context, req StreamRequest) (*To
 	}
 	s.streams.mu.Unlock()
 
-	best := bestStreamRelease(live, episode > 0, profile)
+	best := bestStreamRelease(live, episode > 0, req.Via == StreamViaEmbedded, profile)
 	if best == nil {
 		if episode > 0 {
 			return nil, apperr.New(apperr.KindNotFound, "no release of episode %d was found: try choosing one in the search", episode)
@@ -210,7 +248,10 @@ func (s *Service) pickStreamRelease(ctx context.Context, req StreamRequest) (*To
 	return best, nil
 }
 
-func bestStreamRelease(releases []TorrentRelease, forEpisode bool, profile *TorrentProfile) *TorrentRelease {
+// bestStreamRelease picks what to play. local is the node's own client, which
+// knows nothing of a service's cache and fetches only the episode's file, so a
+// batch costs it no more than the episode alone: profile and seeders decide.
+func bestStreamRelease(releases []TorrentRelease, forEpisode, local bool, profile *TorrentProfile) *TorrentRelease {
 	var best *TorrentRelease
 
 	for i := range releases {
@@ -225,13 +266,13 @@ func bestStreamRelease(releases []TorrentRelease, forEpisode bool, profile *Torr
 			continue
 		}
 
-		held := found.Cached != nil && *found.Cached
+		held := !local && found.Cached != nil && *found.Cached
 		// Nothing plays from a torrent nobody seeds, unless the service has it.
 		if !held && found.Seeders == 0 {
 			continue
 		}
 
-		if best == nil || streamsBetter(found, best) {
+		if best == nil || streamsBetter(found, best, local) {
 			best = found
 		}
 	}
@@ -239,17 +280,18 @@ func bestStreamRelease(releases []TorrentRelease, forEpisode bool, profile *Torr
 	return best
 }
 
-func streamsBetter(a, b *TorrentRelease) bool {
-	aHeld, bHeld := a.Cached != nil && *a.Cached, b.Cached != nil && *b.Cached
+func streamsBetter(a, b *TorrentRelease, local bool) bool {
+	aHeld := !local && a.Cached != nil && *a.Cached
+	bHeld := !local && b.Cached != nil && *b.Cached
 	if aHeld != bHeld {
 		return aHeld
 	}
 	if a.Eligible != b.Eligible {
 		return a.Eligible
 	}
-	// A batch the service does not hold has to be fetched whole before the
+	// A batch a debrid service does not hold has to be fetched whole before the
 	// episode plays, which for a long show is hundreds of gigabytes.
-	if !aHeld && !bHeld && (a.Match == "episode") != (b.Match == "episode") {
+	if !local && !aHeld && !bHeld && (a.Match == "episode") != (b.Match == "episode") {
 		return a.Match == "episode"
 	}
 
@@ -275,7 +317,7 @@ func (s *Service) StreamStatus(ctx context.Context, id int64) (*TorrentStream, e
 		return nil, apperr.New(apperr.KindNotFound, "stream %d does not exist", id)
 	}
 
-	streamer, err := s.streamer(ctx)
+	streamer, err := s.streamer(ctx, entry.via)
 	if err != nil {
 		return nil, err
 	}
@@ -299,34 +341,41 @@ func (s *Service) StreamFile(ctx context.Context, fileID int64) (*StreamFile, er
 		return nil, apperr.New(apperr.KindPrecondition, "the stream is not ready yet")
 	}
 
-	if link == "" || time.Since(linkedAt) >= streamLinkTTL {
-		streamer, err := s.streamer(ctx)
-		if err != nil {
-			return nil, err
-		}
+	streamer, err := s.streamer(ctx, entry.via)
+	if err != nil {
+		return nil, err
+	}
 
-		if link, err = streamer.StreamLink(ctx, entry.hash, file); err != nil {
-			return nil, err
-		}
+	out := &StreamFile{FileID: fileID, Key: "stream-" + entry.hash + "-" + strconv.Itoa(file)}
 
-		s.streams.mu.Lock()
-		entry.link, entry.linkedAt = link, time.Now()
-		s.streams.mu.Unlock()
+	switch streamer := streamer.(type) {
+	case LocalStreamer:
+		hash := entry.hash
+		out.Open = func(ctx context.Context) (io.ReadSeekCloser, error) {
+			return streamer.OpenStream(ctx, hash, file)
+		}
+	case LinkStreamer:
+		if link == "" || time.Since(linkedAt) >= streamLinkTTL {
+			if link, err = streamer.StreamLink(ctx, entry.hash, file); err != nil {
+				return nil, err
+			}
+
+			s.streams.mu.Lock()
+			entry.link, entry.linkedAt = link, time.Now()
+			s.streams.mu.Unlock()
+		}
+		out.URL = link
+	default:
+		return nil, apperr.New(apperr.KindUnavailable, "%s cannot play torrents here", streamer.Service())
 	}
 
 	s.streams.mu.Lock()
 	defer s.streams.mu.Unlock()
 
-	return &StreamFile{
-		FileID:   fileID,
-		Key:      "stream-" + entry.hash + "-" + strconv.Itoa(file),
-		URL:      link,
-		Name:     entry.name,
-		Size:     entry.size,
-		MediaRef: entry.mediaRef,
-		Episode:  entry.episode,
-		Season:   entry.season,
-	}, nil
+	out.Name, out.Size = entry.name, entry.size
+	out.MediaRef, out.Episode, out.Season = entry.mediaRef, entry.episode, entry.season
+
+	return out, nil
 }
 
 // RenewStreamLink forgets a stream's link, so the next StreamFile asks the
@@ -342,18 +391,47 @@ func (s *Service) RenewStreamLink(fileID int64) {
 	s.streams.mu.Unlock()
 }
 
-// streamer is the debrid service set up, whatever the torrent client: streams
-// do not download, so they do not depend on who does.
-func (s *Service) streamer(ctx context.Context) (Streamer, error) {
+// streamVia settles which way a stream comes: the one asked for, or, when none
+// is, the debrid service when there is one and the node's own client otherwise.
+func (s *Service) streamVia(ctx context.Context, via string) (string, error) {
+	switch via {
+	case StreamViaDebrid, StreamViaEmbedded:
+		return via, nil
+	case "":
+		active, err := s.activeDebrid(ctx)
+		if err != nil {
+			return "", err
+		}
+		if active != nil {
+			return StreamViaDebrid, nil
+		}
+		return StreamViaEmbedded, nil
+	default:
+		return "", apperr.Invalid("via", "a stream comes through %q or %q, not %q", StreamViaDebrid, StreamViaEmbedded, via)
+	}
+}
+
+// streamer is what a stream comes through. Either way it does not depend on
+// the torrent client the library downloads with: a debrid service streams
+// whatever the client, and the node's own client streams beside qBittorrent.
+func (s *Service) streamer(ctx context.Context, via string) (Streamer, error) {
+	if via == StreamViaEmbedded {
+		streamer, ok := s.opts.Embedded.(LocalStreamer)
+		if !ok {
+			return nil, apperr.New(apperr.KindUnavailable, "the built-in torrent client is not available on this node")
+		}
+		return streamer, nil
+	}
+
 	active, err := s.activeDebrid(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if active == nil {
-		return nil, apperr.New(apperr.KindPrecondition, "watching without downloading needs a debrid service: set one up in the settings")
+		return nil, apperr.New(apperr.KindPrecondition, "watching through a debrid service needs one: set it up in the settings")
 	}
 
-	streamer, ok := active.service.Client.(Streamer)
+	streamer, ok := active.service.Client.(LinkStreamer)
 	if !ok {
 		return nil, apperr.New(apperr.KindUnavailable, "%s cannot play torrents here", debridNames[active.kind])
 	}
@@ -379,7 +457,7 @@ func (s *Service) streamFor(hash string, req StreamRequest) *streamEntry {
 	}
 
 	for _, entry := range s.streams.byID {
-		if entry.hash == hash && sameEpisode(entry.episode, req.Episode) && sameEpisode(entry.season, req.Season) {
+		if entry.via == req.Via && entry.hash == hash && sameEpisode(entry.episode, req.Episode) && sameEpisode(entry.season, req.Season) {
 			entry.usedAt, entry.askedAt = now, now
 			return entry
 		}
@@ -392,6 +470,7 @@ func (s *Service) streamFor(hash string, req StreamRequest) *streamEntry {
 	s.streams.last++
 	entry := &streamEntry{
 		id:       s.streams.last,
+		via:      req.Via,
 		hash:     hash,
 		mediaRef: req.MediaRef,
 		title:    strings.TrimSpace(req.Title),
@@ -449,10 +528,23 @@ func (s *Service) streamView(ctx context.Context, streamer Streamer, entry *stre
 
 	view := &TorrentStream{
 		ID:       entry.id,
+		Via:      entry.via,
 		Service:  streamer.Service(),
+		Peers:    remote.Peers,
 		MediaRef: entry.mediaRef,
 		Episode:  entry.episode,
 		Release:  release,
+	}
+
+	stalled := func() bool {
+		if s.opts.Now().Sub(askedAt) <= streamStall {
+			return false
+		}
+		s.markStalled(entry)
+		view.State = "failed"
+		view.Error = fmt.Sprintf("%s found nobody sharing this release in %d minutes: choose another one in the search",
+			streamer.Service(), int(streamStall.Minutes()))
+		return true
 	}
 
 	switch {
@@ -462,11 +554,7 @@ func (s *Service) streamView(ctx context.Context, streamer Streamer, entry *stre
 	case remote.Queued:
 		view.State = "queued"
 		return view, nil
-	case !remote.Ready && remote.Progress <= 0 && remote.Speed <= 0 && s.opts.Now().Sub(askedAt) > streamStall:
-		s.markStalled(entry)
-		view.State = "failed"
-		view.Error = fmt.Sprintf("%s found nobody sharing this release in %d minutes: choose another one in the search",
-			streamer.Service(), int(streamStall.Minutes()))
+	case !remote.Ready && remote.Progress <= 0 && remote.Speed <= 0 && stalled():
 		return view, nil
 	case !remote.Ready || len(remote.Files) == 0:
 		view.State = "preparing"
@@ -496,8 +584,25 @@ func (s *Service) streamView(ctx context.Context, streamer Streamer, entry *stre
 	}
 
 	s.streams.mu.Lock()
-	view.Name = entry.name
+	view.Name, chosen = entry.name, entry.file
 	s.streams.mu.Unlock()
+
+	// The node's own client plays once it has the file's start and end.
+	if local, ok := streamer.(LocalStreamer); ok {
+		ready, progress, bufErr := local.Buffer(ctx, entry.hash, chosen)
+		if bufErr != nil {
+			return nil, bufErr
+		}
+		if !ready {
+			if progress <= 0 && remote.Speed <= 0 && stalled() {
+				return view, nil
+			}
+			view.State = "preparing"
+			view.Progress = min(max(progress, 0), 1)
+			view.Speed = max(remote.Speed, 0)
+			return view, nil
+		}
+	}
 
 	view.State, view.Progress, view.FileID = "ready", 1, -entry.id
 

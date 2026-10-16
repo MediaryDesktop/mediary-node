@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -80,6 +81,9 @@ func (s *Service) hlsURL(fileID int64) string {
 type DirectSource struct {
 	Path   string
 	Remote bool
+	// Open, when set, reads the stream from the node's own client in place of
+	// passing the request on to Path.
+	Open func(ctx context.Context) (io.ReadSeekCloser, error)
 	// Name is the file's own name, whose extension says the container.
 	Name string
 }
@@ -94,7 +98,7 @@ func (s *Service) DirectSource(ctx context.Context, fileID int64) (*DirectSource
 	}
 
 	if file.Remote {
-		return &DirectSource{Path: file.Path, Remote: true, Name: file.Title}, nil
+		return &DirectSource{Path: file.Path, Remote: true, Open: file.Open, Name: file.Title}, nil
 	}
 
 	return &DirectSource{Path: file.Path, Name: file.Path}, nil

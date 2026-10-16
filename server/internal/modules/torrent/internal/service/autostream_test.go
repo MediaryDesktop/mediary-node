@@ -94,13 +94,13 @@ func TestHeldReleaseStreamsBeforeABetterSeededOne(t *testing.T) {
 		{ID: "other", Title: "other", Match: "unknown", Seeders: 900, Eligible: true, Score: 500},
 	}
 
-	best := bestStreamRelease(releases, true, &TorrentProfile{})
+	best := bestStreamRelease(releases, true, false, &TorrentProfile{})
 	if best == nil || best.ID != "held" {
 		t.Fatalf("best = %+v, want the release the service holds", best)
 	}
 
 	releases[1].Cached = &notHeld
-	if best = bestStreamRelease(releases, true, &TorrentProfile{}); best == nil || best.ID != "seeded" {
+	if best = bestStreamRelease(releases, true, false, &TorrentProfile{}); best == nil || best.ID != "seeded" {
 		t.Fatalf("best = %+v, want the seeded one: nothing plays from a dead torrent", best)
 	}
 }
@@ -111,13 +111,13 @@ func TestEpisodeStreamsBeforeABatchTheServiceMustFetch(t *testing.T) {
 		{ID: "episode", Title: "episode", Match: "episode", Seeders: 40, Eligible: true, Score: 200},
 	}
 
-	if best := bestStreamRelease(releases, true, &TorrentProfile{}); best == nil || best.ID != "episode" {
+	if best := bestStreamRelease(releases, true, false, &TorrentProfile{}); best == nil || best.ID != "episode" {
 		t.Fatalf("best = %+v, want the episode alone", best)
 	}
 
 	held := true
 	releases[0].Cached = &held
-	if best := bestStreamRelease(releases, true, &TorrentProfile{}); best == nil || best.ID != "batch" {
+	if best := bestStreamRelease(releases, true, false, &TorrentProfile{}); best == nil || best.ID != "batch" {
 		t.Fatalf("best = %+v, want the batch the service holds", best)
 	}
 }
