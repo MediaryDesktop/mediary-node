@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/debrid"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
@@ -101,5 +102,50 @@ func TestHeldReleaseStreamsBeforeABetterSeededOne(t *testing.T) {
 	releases[1].Cached = &notHeld
 	if best = bestStreamRelease(releases, true, &TorrentProfile{}); best == nil || best.ID != "seeded" {
 		t.Fatalf("best = %+v, want the seeded one: nothing plays from a dead torrent", best)
+	}
+}
+
+func TestEpisodeStreamsBeforeABatchTheServiceMustFetch(t *testing.T) {
+	releases := []TorrentRelease{
+		{ID: "batch", Title: "batch", Match: "batch", Seeders: 900, Eligible: true, Score: 500},
+		{ID: "episode", Title: "episode", Match: "episode", Seeders: 40, Eligible: true, Score: 200},
+	}
+
+	if best := bestStreamRelease(releases, true, &TorrentProfile{}); best == nil || best.ID != "episode" {
+		t.Fatalf("best = %+v, want the episode alone", best)
+	}
+
+	held := true
+	releases[0].Cached = &held
+	if best := bestStreamRelease(releases, true, &TorrentProfile{}); best == nil || best.ID != "batch" {
+		t.Fatalf("best = %+v, want the batch the service holds", best)
+	}
+}
+
+func TestAutoStreamPassesOverAReleaseThatStalled(t *testing.T) {
+	h := newHarness(t)
+	client := withAutoStreaming(t, h)
+	ctx := context.Background()
+
+	now := time.Date(2026, 10, 6, 12, 0, 0, 0, time.UTC)
+	h.svc.opts.Now = func() time.Time { return now }
+	client.set(debrid.Remote{Hash: frierenHash})
+
+	first, err := h.svc.StartStream(ctx, autoRequest(12))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	now = now.Add(streamStall + time.Second)
+	if stalled, statusErr := h.svc.StreamStatus(ctx, first.ID); statusErr != nil || stalled.State != "failed" {
+		t.Fatalf("stalled = %+v, err = %v", stalled, statusErr)
+	}
+
+	again, err := h.svc.StartStream(ctx, autoRequest(12))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if again.Release != "[Erai-raws] Frieren - 01 ~ 28 [1080p][Batch]" {
+		t.Errorf("release = %q, want the batch once the episode's release stalled", again.Release)
 	}
 }

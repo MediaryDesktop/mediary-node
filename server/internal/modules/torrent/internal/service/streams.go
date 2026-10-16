@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"path"
 	"strconv"
 	"strings"
@@ -27,6 +28,10 @@ const streamLinkTTL = 20 * time.Minute
 
 // Streams are kept this long after they were last looked at.
 const streamIdle = 6 * time.Hour
+
+// A torrent the service has not got a byte of in this long has nobody sharing
+// it: waiting more only keeps the player from opening on another release.
+const streamStall = 3 * time.Minute
 
 type StreamRequest struct {
 	MediaRef string
@@ -81,19 +86,26 @@ type streamEntry struct {
 	episode  *int
 	season   *int
 	// The chosen file, once the service has the files; -1 until then.
-	file     int
-	name     string
-	release  string
-	size     int64
-	link     string
-	linkedAt time.Time
-	usedAt   time.Time
+	file    int
+	name    string
+	release string
+	// The search result it came from, when it came from one.
+	releaseID string
+	size      int64
+	link      string
+	linkedAt  time.Time
+	usedAt    time.Time
+	// When the stream was last asked for, which the stall is counted from.
+	askedAt time.Time
 }
 
 type streamRegistry struct {
 	mu   sync.Mutex
 	last int64
 	byID map[int64]*streamEntry
+	// Hashes and search results that stalled, and when: auto-select passes
+	// them over rather than wait on the same dead torrent again.
+	stalled map[string]time.Time
 }
 
 // StartStream gives the torrent to the debrid service and starts readying it.
@@ -140,11 +152,14 @@ func (s *Service) StartStream(ctx context.Context, req StreamRequest) (*TorrentS
 	}
 
 	entry := s.streamFor(hash, req)
+	s.streams.mu.Lock()
 	if picked != "" {
-		s.streams.mu.Lock()
 		entry.release = picked
-		s.streams.mu.Unlock()
 	}
+	if req.ReleaseID != "" {
+		entry.releaseID = req.ReleaseID
+	}
+	s.streams.mu.Unlock()
 
 	return s.streamView(ctx, streamer, entry)
 }
@@ -172,7 +187,19 @@ func (s *Service) pickStreamRelease(ctx context.Context, req StreamRequest) (*To
 		return nil, err
 	}
 
-	best := bestStreamRelease(result.Releases, episode > 0, profile)
+	s.streams.mu.Lock()
+	live := make([]TorrentRelease, 0, len(result.Releases))
+	for i := range result.Releases {
+		found := &result.Releases[i]
+		_, deadHash := s.streams.stalled[strings.ToLower(found.InfoHash)]
+		_, deadID := s.streams.stalled["release:"+found.ID]
+		if !deadID && (found.InfoHash == "" || !deadHash) {
+			live = append(live, *found)
+		}
+	}
+	s.streams.mu.Unlock()
+
+	best := bestStreamRelease(live, episode > 0, profile)
 	if best == nil {
 		if episode > 0 {
 			return nil, apperr.New(apperr.KindNotFound, "no release of episode %d was found: try choosing one in the search", episode)
@@ -219,6 +246,11 @@ func streamsBetter(a, b *TorrentRelease) bool {
 	}
 	if a.Eligible != b.Eligible {
 		return a.Eligible
+	}
+	// A batch the service does not hold has to be fetched whole before the
+	// episode plays, which for a long show is hundreds of gigabytes.
+	if !aHeld && !bHeld && (a.Match == "episode") != (b.Match == "episode") {
+		return a.Match == "episode"
 	}
 
 	return beats(*a, *b)
@@ -340,10 +372,15 @@ func (s *Service) streamFor(hash string, req StreamRequest) *streamEntry {
 			delete(s.streams.byID, id)
 		}
 	}
+	for key, at := range s.streams.stalled {
+		if now.Sub(at) > streamIdle {
+			delete(s.streams.stalled, key)
+		}
+	}
 
 	for _, entry := range s.streams.byID {
 		if entry.hash == hash && sameEpisode(entry.episode, req.Episode) && sameEpisode(entry.season, req.Season) {
-			entry.usedAt = now
+			entry.usedAt, entry.askedAt = now, now
 			return entry
 		}
 	}
@@ -362,10 +399,26 @@ func (s *Service) streamFor(hash string, req StreamRequest) *streamEntry {
 		season:   req.Season,
 		file:     -1,
 		usedAt:   now,
+		askedAt:  now,
 	}
 	s.streams.byID[entry.id] = entry
 
 	return entry
+}
+
+func (s *Service) markStalled(entry *streamEntry) {
+	s.streams.mu.Lock()
+	defer s.streams.mu.Unlock()
+
+	if s.streams.stalled == nil {
+		s.streams.stalled = map[string]time.Time{}
+	}
+
+	now := s.opts.Now()
+	s.streams.stalled[strings.ToLower(entry.hash)] = now
+	if entry.releaseID != "" {
+		s.streams.stalled["release:"+entry.releaseID] = now
+	}
 }
 
 func (s *Service) streamEntry(id int64) *streamEntry {
@@ -391,7 +444,7 @@ func (s *Service) streamView(ctx context.Context, streamer Streamer, entry *stre
 	}
 
 	s.streams.mu.Lock()
-	release := entry.release
+	release, askedAt := entry.release, entry.askedAt
 	s.streams.mu.Unlock()
 
 	view := &TorrentStream{
@@ -408,6 +461,12 @@ func (s *Service) streamView(ctx context.Context, streamer Streamer, entry *stre
 		return view, nil
 	case remote.Queued:
 		view.State = "queued"
+		return view, nil
+	case !remote.Ready && remote.Progress <= 0 && remote.Speed <= 0 && s.opts.Now().Sub(askedAt) > streamStall:
+		s.markStalled(entry)
+		view.State = "failed"
+		view.Error = fmt.Sprintf("%s found nobody sharing this release in %d minutes: choose another one in the search",
+			streamer.Service(), int(streamStall.Minutes()))
 		return view, nil
 	case !remote.Ready || len(remote.Files) == 0:
 		view.State = "preparing"

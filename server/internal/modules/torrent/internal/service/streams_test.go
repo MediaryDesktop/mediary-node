@@ -2,8 +2,10 @@ package service
 
 import (
 	"context"
+	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/debrid"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
@@ -196,5 +198,43 @@ func TestStreamTheServiceGaveUpOn(t *testing.T) {
 	}
 	if got.State != "failed" || got.Error != "Fake: no seeds" {
 		t.Errorf("got = %+v", got)
+	}
+}
+
+func TestStreamNobodySharesGivesUp(t *testing.T) {
+	h := newHarness(t)
+	client := withStreaming(t, h)
+	ctx := context.Background()
+
+	now := time.Date(2026, 10, 6, 12, 0, 0, 0, time.UTC)
+	h.svc.opts.Now = func() time.Time { return now }
+
+	client.set(debrid.Remote{Hash: frierenHash})
+
+	started, err := h.svc.StartStream(ctx, StreamRequest{MediaRef: "anilist:154587", Magnet: frierenMagnet})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if started.State != "preparing" {
+		t.Fatalf("started = %+v", started)
+	}
+
+	now = now.Add(streamStall + time.Second)
+	stalled, err := h.svc.StreamStatus(ctx, started.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stalled.State != "failed" || !strings.Contains(stalled.Error, "Fake found nobody sharing") {
+		t.Fatalf("stalled = %+v", stalled)
+	}
+
+	// A torrent that moves, however slowly, is still waited for.
+	client.set(debrid.Remote{Hash: frierenHash, Progress: 0.01})
+	moving, err := h.svc.StreamStatus(ctx, started.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if moving.State != "preparing" {
+		t.Fatalf("moving = %+v", moving)
 	}
 }
