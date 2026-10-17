@@ -1246,9 +1246,9 @@ export const ru: Translation = {
 			},
 			score: 'Оценка: {{score}}',
 			speed: 'Скорость:',
-			peers: 'Пиры:',
 			seeders: 'Сиды:',
-			complete: 'Готово {{percent}}%'
+			complete: 'Готово {{percent}}%',
+			upload: 'Отдача: {{speed}}'
 		},
 		client: {
 			notConfigured: 'Выберите торрент-клиент в настройках, чтобы загружать торренты',

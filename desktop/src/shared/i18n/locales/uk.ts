@@ -1245,9 +1245,9 @@ export const uk: Translation = {
 			},
 			score: 'Оцінка: {{score}}',
 			speed: 'Швидкість:',
-			peers: 'Піри:',
 			seeders: 'Сіди:',
-			complete: 'Готово {{percent}}%'
+			complete: 'Готово {{percent}}%',
+			upload: 'Віддача: {{speed}}'
 		},
 		client: {
 			notConfigured: 'Виберіть торент-клієнт у налаштуваннях, щоб завантажувати торенти',

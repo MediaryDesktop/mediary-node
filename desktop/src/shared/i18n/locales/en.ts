@@ -1245,9 +1245,9 @@ export const en = {
 			},
 			score: 'Score: {{score}}',
 			speed: 'Speed:',
-			peers: 'Peers:',
 			seeders: 'Seeders:',
-			complete: '{{percent}}% complete'
+			complete: '{{percent}}% complete',
+			upload: 'Upload: {{speed}}'
 		},
 		client: {
 			notConfigured: 'Choose a torrent client in the settings to download torrents',

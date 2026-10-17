@@ -4452,6 +4452,11 @@ export interface components {
 			progress: number
 			/** @description The release the node picked, when it picked one. */
 			release?: string
+			/**
+			 * Format: int64
+			 * @description Seeders among the built-in client's peers; through a debrid service, the release's seeders as its source counted them.
+			 */
+			seeders?: number
 			/** @example TorBox */
 			service: string
 			/**
@@ -4464,6 +4469,11 @@ export interface components {
 			 * @enum {string}
 			 */
 			state: 'preparing' | 'queued' | 'ready' | 'failed'
+			/**
+			 * Format: int64
+			 * @description What the built-in client gives back to peers, bytes per second.
+			 */
+			upload?: number
 			/**
 			 * @description Whether a debrid service or the node's own client gets the torrent.
 			 * @enum {string}
