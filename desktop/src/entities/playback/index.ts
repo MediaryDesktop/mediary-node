@@ -15,7 +15,8 @@ export {
 	playerClosed,
 	playerExpanded,
 	playerMinimized,
-	playerOpened
+	playerOpened,
+	playerOpening
 } from './model/player-session'
 export type { PlayerMode } from './model/player-mode'
 

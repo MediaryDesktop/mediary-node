@@ -4,7 +4,7 @@ import { HttpRequestError, problemDetail } from '@shared/api'
 import { translate } from '@shared/i18n'
 import { readStored, writeStored } from '@shared/lib'
 
-import { $playerMode, playbackModel, playerOpened } from '@entities/playback'
+import { $playerMode, playbackModel, playerClosed, playerOpened, playerOpening } from '@entities/playback'
 import { fetchTorrentStreamFx, startTorrentStreamFx } from '@entities/torrent'
 import type { StartTorrentStreamParams, TorrentStream } from '@entities/torrent'
 
@@ -84,6 +84,9 @@ const pollFx = createEffect(async ({ key, id }: { key: string; id: number }): Pr
 
 sample({ clock: streamRequested, target: startFx })
 
+// The player slides up at once, as it does for a file, and shows the stream readied.
+sample({ clock: streamRequested, target: playerOpening })
+
 // An answer counts only for the stream still wanted: one cancelled, or replaced
 // by another, may still be answered after.
 const current = sample({
@@ -141,6 +144,15 @@ sample({
 	filter: mode => mode === 'external',
 	fn: (_, fileId) => fileId,
 	target: playbackModel.playRequested
+})
+
+// mpv takes it from here: the built-in player that showed the stream readied closes,
+// and the next one opened slides up afresh.
+sample({
+	clock: streamPlaying,
+	source: $playerMode,
+	filter: mode => mode === 'external',
+	target: playerClosed
 })
 
 sample({

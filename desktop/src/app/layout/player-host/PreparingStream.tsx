@@ -84,100 +84,108 @@ export function PreparingStream({ target, stream, error, onStop }: PreparingStre
 		</button>
 	)
 
+	// One surface that opens from the pill into the card and back, as Seanime's does:
+	// its width and corners ease between the two, the bar's line gives way to the
+	// title, and the rest unfolds below.
 	return (
 		<div className={styles.view}>
-			{expanded ? (
-				<section className={styles.card} aria-label={target.label}>
-					<header className={styles.head}>
-						<div className={styles.titles}>
-							<p className={styles.title}>{title}</p>
-							{episode && <p className={styles.episode}>{episode}</p>}
-						</div>
-						{toggle}
-						{stop}
-					</header>
-
-					{!fetching && (
-						<div className={clsx(styles.status, error && styles.statusFailed)} role='status'>
-							{!error && <span className={styles.spinner} aria-hidden />}
-							<span>{status}</span>
-						</div>
-					)}
-
-					{candidates.length > 0 && (
-						<div className={styles.block}>
-							<p className={styles.section}>{t('torrents.stream.candidates')}</p>
-							<ul className={styles.candidates}>
-								{candidates.map((candidate, index) => (
-									<li
-										key={`${index}-${candidate.title}`}
-										className={clsx(
-											styles.candidate,
-											candidate.state === 'trying' && styles.current
-										)}
-										title={candidate.error ?? candidate.title}
-									>
-										<span className={styles.candidateText}>
-											<span className={styles.candidateTitle}>{candidate.title}</span>
-											{candidate.source && (
-												<span className={styles.candidateSource}>
-													{candidate.source}
-												</span>
-											)}
-										</span>
-										<span className={styles.score}>
-											{t('torrents.stream.score', { score: candidate.score })}
-										</span>
-										<span className={clsx(styles.tag, styles[candidate.state])}>
-											{t(`torrents.stream.candidate.${candidate.state}`)}
-										</span>
-									</li>
-								))}
-							</ul>
-						</div>
-					)}
-
-					{fetching && (
-						<div className={styles.stats}>
-							<div className={styles.statsRow}>
-								<span>
-									{t('torrents.stream.speed')} <strong>{speed}</strong>
+			<section className={clsx(styles.box, expanded && styles.open)} aria-label={target.label}>
+				<header className={styles.bar}>
+					<div className={styles.barContent}>
+						<div className={clsx(styles.layer, !expanded && styles.shown)} aria-hidden={expanded}>
+							{fetching ? (
+								<span className={styles.numbers}>
+									<strong>{percent}%</strong>
+									<span className={styles.number}>
+										<Icon name='common/users' size={14} />
+										{peers}
+									</span>
+									<span className={styles.number}>▽ {speed}</span>
+									<span className={styles.number}>△ {upload}</span>
 								</span>
-								<span>
-									{t('torrents.stream.seeders')} <strong>{stream.seeders ?? 0}</strong>
+							) : (
+								<span className={clsx(styles.pillStatus, error && styles.statusFailed)}>
+									{status}
 								</span>
-							</div>
-							<div className={styles.track}>
-								<span className={styles.fill} style={{ width: `${percent}%` }} />
-							</div>
-							<div className={clsx(styles.statsRow, styles.muted)}>
-								<span>{t('torrents.stream.complete', { percent })}</span>
-								<span>{t('torrents.stream.upload', { speed: upload })}</span>
-							</div>
+							)}
 						</div>
-					)}
-				</section>
-			) : (
-				<div className={styles.pill} role='status' aria-label={status}>
-					{fetching ? (
-						<span className={styles.numbers}>
-							<strong>{percent}%</strong>
-							<span className={styles.number}>
-								<Icon name='common/users' size={14} />
-								{peers}
+						<div className={clsx(styles.layer, expanded && styles.shown)} aria-hidden={!expanded}>
+							<span className={styles.titles}>
+								<span className={styles.title}>{title}</span>
+								{episode && <span className={styles.episode}>{episode}</span>}
 							</span>
-							<span className={styles.number}>▽ {speed}</span>
-							<span className={styles.number}>△ {upload}</span>
-						</span>
-					) : (
-						<span className={clsx(styles.pillStatus, error && styles.statusFailed)}>
-							{status}
-						</span>
-					)}
+						</div>
+					</div>
 					{toggle}
 					{stop}
+				</header>
+
+				<div className={styles.drawer} aria-hidden={!expanded}>
+					<div className={styles.drawerInner}>
+						{!fetching && (
+							<div className={clsx(styles.status, error && styles.statusFailed)} role='status'>
+								{!error && <span className={styles.spinner} aria-hidden />}
+								<span>{status}</span>
+							</div>
+						)}
+
+						{candidates.length > 0 && (
+							<div className={styles.block}>
+								<p className={styles.section}>{t('torrents.stream.candidates')}</p>
+								<ul className={styles.candidates}>
+									{candidates.map((candidate, index) => (
+										<li
+											key={`${index}-${candidate.title}`}
+											className={clsx(
+												styles.candidate,
+												candidate.state === 'trying' && styles.current
+											)}
+											title={candidate.error ?? candidate.title}
+										>
+											<span className={styles.candidateText}>
+												<span className={styles.candidateTitle}>
+													{candidate.title}
+												</span>
+												{candidate.source && (
+													<span className={styles.candidateSource}>
+														{candidate.source}
+													</span>
+												)}
+											</span>
+											<span className={styles.score}>
+												{t('torrents.stream.score', { score: candidate.score })}
+											</span>
+											<span className={clsx(styles.tag, styles[candidate.state])}>
+												{t(`torrents.stream.candidate.${candidate.state}`)}
+											</span>
+										</li>
+									))}
+								</ul>
+							</div>
+						)}
+
+						{fetching && (
+							<div className={styles.stats}>
+								<div className={styles.statsRow}>
+									<span>
+										{t('torrents.stream.speed')} <strong>{speed}</strong>
+									</span>
+									<span>
+										{t('torrents.stream.seeders')} <strong>{stream.seeders ?? 0}</strong>
+									</span>
+								</div>
+								<div className={styles.track}>
+									<span className={styles.fill} style={{ width: `${percent}%` }} />
+								</div>
+								<div className={clsx(styles.statsRow, styles.muted)}>
+									<span>{t('torrents.stream.complete', { percent })}</span>
+									<span>{t('torrents.stream.upload', { speed: upload })}</span>
+								</div>
+							</div>
+						)}
+					</div>
 				</div>
-			)}
+			</section>
 
 			<div className={styles.center}>
 				{error ? (
