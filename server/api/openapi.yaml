@@ -3608,6 +3608,38 @@ components:
         - info
         - direct_url
       type: object
+    StreamCandidate:
+      additionalProperties: false
+      properties:
+        cached:
+          description: The debrid service already holds it.
+          type: boolean
+        error:
+          type: string
+        score:
+          format: int64
+          type: integer
+        seeders:
+          format: int64
+          type: integer
+        source:
+          description: The site or source it was found on.
+          type: string
+        state:
+          description: trying is the one being readied; failed ones were given up on, error says why.
+          enum:
+            - trying
+            - waiting
+            - failed
+          type: string
+        title:
+          type: string
+      required:
+        - title
+        - score
+        - seeders
+        - state
+      type: object
     StreamOutputBody:
       additionalProperties: false
       properties:
@@ -4722,6 +4754,13 @@ components:
           format: uri
           readOnly: true
           type: string
+        candidates:
+          description: "With auto: the releases lined up, best first. When one cannot be played the next is tried."
+          items:
+            $ref: "#/components/schemas/StreamCandidate"
+          type:
+            - array
+            - "null"
         episode:
           format: int64
           type: integer

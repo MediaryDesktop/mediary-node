@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"path"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -56,6 +57,14 @@ const streamIdle = 6 * time.Hour
 // it: waiting more only keeps the player from opening on another release.
 const streamStall = 3 * time.Minute
 
+// Auto-select lines up this many releases, best first, and moves to the next
+// when one cannot be played; one that is not the last is given up on sooner,
+// since another is waiting.
+const (
+	maxStreamCandidates = 5
+	candidateStall      = time.Minute
+)
+
 type StreamRequest struct {
 	MediaRef string
 	Title    string
@@ -89,6 +98,25 @@ type TorrentStream struct {
 	Release  string  `json:"release,omitempty" doc:"The release the node picked, when it picked one."`
 	MediaRef string  `json:"media_ref"`
 	Episode  *int    `json:"episode,omitempty"`
+
+	Candidates []StreamCandidate `json:"candidates,omitempty" doc:"With auto: the releases lined up, best first. When one cannot be played the next is tried."`
+}
+
+// StreamCandidate is one release auto-select lined up for the episode.
+type StreamCandidate struct {
+	Title   string `json:"title"`
+	Source  string `json:"source,omitempty" doc:"The site or source it was found on."`
+	Score   int    `json:"score"`
+	Seeders int    `json:"seeders"`
+	Cached  bool   `json:"cached,omitempty" doc:"The debrid service already holds it."`
+	State   string `json:"state" enum:"trying,waiting,failed" doc:"trying is the one being readied; failed ones were given up on, error says why."`
+	Error   string `json:"error,omitempty"`
+}
+
+// streamCandidate is a release in an auto-select line, and why it was given up on.
+type streamCandidate struct {
+	release TorrentRelease
+	failed  string
 }
 
 // StreamFile is a ready stream as the player needs it.
@@ -126,8 +154,13 @@ type streamEntry struct {
 	link      string
 	linkedAt  time.Time
 	usedAt    time.Time
-	// When the stream was last asked for, which the stall is counted from.
+	// When the stream was last asked for, or moved to another candidate, which
+	// the stall is counted from.
 	askedAt time.Time
+	// With auto-select: the releases lined up, and which one is being readied.
+	// hash, release and the file change as it moves along.
+	candidates []streamCandidate
+	current    int
 }
 
 type streamRegistry struct {
@@ -169,13 +202,12 @@ func (s *Service) StartStream(ctx context.Context, req StreamRequest) (*TorrentS
 		return nil, err
 	}
 
-	var picked string
 	if req.Auto {
-		release, pickErr := s.pickStreamRelease(ctx, req)
+		ranked, pickErr := s.pickStreamReleases(ctx, req)
 		if pickErr != nil {
 			return nil, pickErr
 		}
-		req.ReleaseID, picked = release.ID, release.Title
+		return s.startCandidates(ctx, streamer, req, ranked)
 	}
 
 	if req.ReleaseID != "" {
@@ -190,23 +222,58 @@ func (s *Service) StartStream(ctx context.Context, req StreamRequest) (*TorrentS
 	}
 
 	entry := s.streamFor(hash, req)
-	s.streams.mu.Lock()
-	if picked != "" {
-		entry.release = picked
-	}
 	if req.ReleaseID != "" {
+		s.streams.mu.Lock()
 		entry.releaseID = req.ReleaseID
+		s.streams.mu.Unlock()
 	}
-	s.streams.mu.Unlock()
 
 	return s.streamView(ctx, streamer, entry)
 }
 
-// pickStreamRelease searches for the episode and takes the release that plays
-// soonest and best: one the debrid service already holds first — it plays in
-// seconds, whatever its seeders — then one the profile allows, then the better
-// scored. A batch counts when it holds the episode; the file is picked from it.
-func (s *Service) pickStreamRelease(ctx context.Context, req StreamRequest) (*TorrentRelease, error) {
+// startCandidates readies the first release in line that the service or the
+// built-in client takes; the ones refused on the way stay in the line as failed.
+func (s *Service) startCandidates(ctx context.Context, streamer Streamer, req StreamRequest, ranked []TorrentRelease) (*TorrentStream, error) {
+	line := make([]streamCandidate, len(ranked))
+	for i := range ranked {
+		line[i] = streamCandidate{release: ranked[i]}
+	}
+
+	var lastErr error
+	for i := range line {
+		hash, err := s.streamRelease(ctx, streamer, line[i].release.ID)
+		if err != nil {
+			line[i].failed, lastErr = messageOf(err), err
+			continue
+		}
+
+		entry := s.streamFor(hash, req)
+		s.streams.mu.Lock()
+		entry.candidates, entry.current = line, i
+		entry.release, entry.releaseID = line[i].release.Title, line[i].release.ID
+		s.streams.mu.Unlock()
+
+		return s.streamView(ctx, streamer, entry)
+	}
+
+	return nil, lastErr
+}
+
+func (s *Service) streamRelease(ctx context.Context, streamer Streamer, releaseID string) (string, error) {
+	magnet, torrent, err := s.resolveRelease(ctx, releaseID)
+	if err != nil {
+		return "", err
+	}
+
+	return streamer.Stream(ctx, magnet, torrent)
+}
+
+// pickStreamReleases searches for the episode and lines up the releases that
+// play soonest and best: ones the debrid service already holds first — they
+// play in seconds, whatever their seeders — then ones the profile allows, then
+// the better scored. A batch counts when it holds the episode; the file is
+// picked from it.
+func (s *Service) pickStreamReleases(ctx context.Context, req StreamRequest) ([]TorrentRelease, error) {
 	var episode, season int
 	if req.Episode != nil {
 		episode = *req.Episode
@@ -237,22 +304,32 @@ func (s *Service) pickStreamRelease(ctx context.Context, req StreamRequest) (*To
 	}
 	s.streams.mu.Unlock()
 
-	best := bestStreamRelease(live, episode > 0, req.Via == StreamViaEmbedded, profile)
-	if best == nil {
+	ranked := rankStreamReleases(live, episode > 0, req.Via == StreamViaEmbedded, profile)
+	if len(ranked) == 0 {
 		if episode > 0 {
-			return nil, apperr.New(apperr.KindNotFound, "no release of episode %d was found: try choosing one in the search", episode)
+			return nil, apperr.New(apperr.KindNotFound, "no seeded release of episode %d was found: try choosing one in the search", episode)
 		}
-		return nil, apperr.New(apperr.KindNotFound, "no release was found: try choosing one in the search")
+		return nil, apperr.New(apperr.KindNotFound, "no seeded release was found: try choosing one in the search")
 	}
 
-	return best, nil
+	return ranked[:min(len(ranked), maxStreamCandidates)], nil
 }
 
-// bestStreamRelease picks what to play. local is the node's own client, which
-// knows nothing of a service's cache and fetches only the episode's file, so a
-// batch costs it no more than the episode alone: profile and seeders decide.
 func bestStreamRelease(releases []TorrentRelease, forEpisode, local bool, profile *TorrentProfile) *TorrentRelease {
-	var best *TorrentRelease
+	ranked := rankStreamReleases(releases, forEpisode, local, profile)
+	if len(ranked) == 0 {
+		return nil
+	}
+
+	return &ranked[0]
+}
+
+// rankStreamReleases orders what can be played, best first. local is the node's
+// own client, which knows nothing of a service's cache and fetches only the
+// episode's file, so a batch costs it no more than the episode alone: profile
+// and seeders decide.
+func rankStreamReleases(releases []TorrentRelease, forEpisode, local bool, profile *TorrentProfile) []TorrentRelease {
+	var ranked []TorrentRelease
 
 	for i := range releases {
 		found := &releases[i]
@@ -272,12 +349,12 @@ func bestStreamRelease(releases []TorrentRelease, forEpisode, local bool, profil
 			continue
 		}
 
-		if best == nil || streamsBetter(found, best, local) {
-			best = found
-		}
+		ranked = append(ranked, *found)
 	}
 
-	return best
+	sort.SliceStable(ranked, func(i, j int) bool { return streamsBetter(&ranked[i], &ranked[j], local) })
+
+	return ranked
 }
 
 func streamsBetter(a, b *TorrentRelease, local bool) bool {
@@ -334,7 +411,7 @@ func (s *Service) StreamFile(ctx context.Context, fileID int64) (*StreamFile, er
 	}
 
 	s.streams.mu.Lock()
-	file, link, linkedAt := entry.file, entry.link, entry.linkedAt
+	hash, file, link, linkedAt := entry.hash, entry.file, entry.link, entry.linkedAt
 	s.streams.mu.Unlock()
 
 	if file < 0 {
@@ -346,17 +423,16 @@ func (s *Service) StreamFile(ctx context.Context, fileID int64) (*StreamFile, er
 		return nil, err
 	}
 
-	out := &StreamFile{FileID: fileID, Key: "stream-" + entry.hash + "-" + strconv.Itoa(file)}
+	out := &StreamFile{FileID: fileID, Key: "stream-" + hash + "-" + strconv.Itoa(file)}
 
 	switch streamer := streamer.(type) {
 	case LocalStreamer:
-		hash := entry.hash
 		out.Open = func(ctx context.Context) (io.ReadSeekCloser, error) {
 			return streamer.OpenStream(ctx, hash, file)
 		}
 	case LinkStreamer:
 		if link == "" || time.Since(linkedAt) >= streamLinkTTL {
-			if link, err = streamer.StreamLink(ctx, entry.hash, file); err != nil {
+			if link, err = streamer.StreamLink(ctx, hash, file); err != nil {
 				return nil, err
 			}
 
@@ -517,45 +593,42 @@ func sameEpisode(a, b *int) bool {
 }
 
 func (s *Service) streamView(ctx context.Context, streamer Streamer, entry *streamEntry) (*TorrentStream, error) {
-	remote, err := streamer.StreamState(ctx, entry.hash)
+	s.streams.mu.Lock()
+	hash, release, askedAt := entry.hash, entry.release, entry.askedAt
+	// A candidate with another behind it is given up on sooner.
+	limit := streamStall
+	if entry.current+1 < len(entry.candidates) {
+		limit = candidateStall
+	}
+	s.streams.mu.Unlock()
+
+	remote, err := streamer.StreamState(ctx, hash)
 	if err != nil {
 		return nil, err
 	}
 
-	s.streams.mu.Lock()
-	release, askedAt := entry.release, entry.askedAt
-	s.streams.mu.Unlock()
-
 	view := &TorrentStream{
-		ID:       entry.id,
-		Via:      entry.via,
-		Service:  streamer.Service(),
-		Peers:    remote.Peers,
-		MediaRef: entry.mediaRef,
-		Episode:  entry.episode,
-		Release:  release,
+		ID:         entry.id,
+		Via:        entry.via,
+		Service:    streamer.Service(),
+		Peers:      remote.Peers,
+		MediaRef:   entry.mediaRef,
+		Episode:    entry.episode,
+		Release:    release,
+		Candidates: s.candidatesView(entry),
 	}
 
-	stalled := func() bool {
-		if s.opts.Now().Sub(askedAt) <= streamStall {
-			return false
-		}
-		s.markStalled(entry)
-		view.State = "failed"
-		view.Error = fmt.Sprintf("%s found nobody sharing this release in %d minutes: choose another one in the search",
-			streamer.Service(), int(streamStall.Minutes()))
-		return true
-	}
+	stalled := s.opts.Now().Sub(askedAt) > limit
+	nobody := fmt.Sprintf("%s found nobody sharing this release", streamer.Service())
 
 	switch {
 	case remote.Failed != "":
-		view.State, view.Error = "failed", remote.Failed
-		return view, nil
+		return s.giveUp(ctx, streamer, entry, view, remote.Failed, false), nil
 	case remote.Queued:
 		view.State = "queued"
 		return view, nil
-	case !remote.Ready && remote.Progress <= 0 && remote.Speed <= 0 && stalled():
-		return view, nil
+	case !remote.Ready && remote.Progress <= 0 && remote.Speed <= 0 && stalled:
+		return s.giveUp(ctx, streamer, entry, view, nobody, true), nil
 	case !remote.Ready || len(remote.Files) == 0:
 		view.State = "preparing"
 		view.Progress = min(max(remote.Progress, 0), 1)
@@ -570,12 +643,11 @@ func (s *Service) streamView(ctx context.Context, streamer Streamer, entry *stre
 	if chosen < 0 {
 		file, ok := s.chooseFile(remote.Files, entry.episode, entry.season)
 		if !ok {
-			view.State = "failed"
-			view.Error = "the torrent has no video for this episode"
+			reason := "the torrent has no video for this episode"
 			if entry.episode == nil {
-				view.Error = "the torrent has no video"
+				reason = "the torrent has no video"
 			}
-			return view, nil
+			return s.giveUp(ctx, streamer, entry, view, reason, false), nil
 		}
 
 		s.streams.mu.Lock()
@@ -589,13 +661,13 @@ func (s *Service) streamView(ctx context.Context, streamer Streamer, entry *stre
 
 	// The node's own client plays once it has the file's start and end.
 	if local, ok := streamer.(LocalStreamer); ok {
-		ready, progress, bufErr := local.Buffer(ctx, entry.hash, chosen)
+		ready, progress, bufErr := local.Buffer(ctx, hash, chosen)
 		if bufErr != nil {
 			return nil, bufErr
 		}
 		if !ready {
-			if progress <= 0 && remote.Speed <= 0 && stalled() {
-				return view, nil
+			if progress <= 0 && remote.Speed <= 0 && stalled {
+				return s.giveUp(ctx, streamer, entry, view, nobody, true), nil
 			}
 			view.State = "preparing"
 			view.Progress = min(max(progress, 0), 1)
@@ -607,6 +679,95 @@ func (s *Service) streamView(ctx context.Context, streamer Streamer, entry *stre
 	view.State, view.Progress, view.FileID = "ready", 1, -entry.id
 
 	return view, nil
+}
+
+// giveUp drops the release being readied. With auto-select it moves on to the
+// next candidate the service or the client takes; otherwise, or when none is
+// left, the stream fails with why.
+func (s *Service) giveUp(ctx context.Context, streamer Streamer, entry *streamEntry, view *TorrentStream, reason string, stalled bool) *TorrentStream {
+	if stalled {
+		s.markStalled(entry)
+	}
+
+	s.streams.mu.Lock()
+	tried := len(entry.candidates)
+	if tried > 0 {
+		entry.candidates[entry.current].failed = reason
+	}
+	next := entry.current + 1
+	s.streams.mu.Unlock()
+
+	for ; next < tried; next++ {
+		s.streams.mu.Lock()
+		release := entry.candidates[next].release
+		s.streams.mu.Unlock()
+
+		hash, err := s.streamRelease(ctx, streamer, release.ID)
+
+		s.streams.mu.Lock()
+		if err != nil {
+			entry.candidates[next].failed = messageOf(err)
+			s.streams.mu.Unlock()
+			continue
+		}
+		entry.current, entry.hash = next, hash
+		entry.file, entry.name, entry.size, entry.link = -1, "", 0, ""
+		entry.release, entry.releaseID = release.Title, release.ID
+		entry.askedAt = s.opts.Now()
+		s.streams.mu.Unlock()
+
+		view.State, view.Error, view.Release, view.Name = "preparing", "", release.Title, ""
+		view.Progress, view.Speed, view.Peers = 0, 0, 0
+		view.Candidates = s.candidatesView(entry)
+
+		return view
+	}
+
+	view.State, view.Error = "failed", reason
+	if tried > 1 {
+		view.Error = fmt.Sprintf("none of the %d releases found could be played; the last: %s", tried, reason)
+	}
+	view.Candidates = s.candidatesView(entry)
+
+	return view
+}
+
+func (s *Service) candidatesView(entry *streamEntry) []StreamCandidate {
+	s.streams.mu.Lock()
+	defer s.streams.mu.Unlock()
+
+	if len(entry.candidates) == 0 {
+		return nil
+	}
+
+	out := make([]StreamCandidate, len(entry.candidates))
+	for i := range entry.candidates {
+		c := &entry.candidates[i]
+		state := "waiting"
+		switch {
+		case c.failed != "":
+			state = "failed"
+		case i == entry.current:
+			state = "trying"
+		}
+
+		source := c.release.Indexer
+		if source == "" {
+			source = c.release.SourceName
+		}
+
+		out[i] = StreamCandidate{
+			Title:   c.release.Title,
+			Source:  source,
+			Score:   c.release.Score,
+			Seeders: c.release.Seeders,
+			Cached:  entry.via == StreamViaDebrid && c.release.Cached != nil && *c.release.Cached,
+			State:   state,
+			Error:   c.failed,
+		}
+	}
+
+	return out
 }
 
 // chooseFile picks the video to play: the one whose name gives the episode, in

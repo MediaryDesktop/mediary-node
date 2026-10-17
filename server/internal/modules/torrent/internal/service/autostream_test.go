@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"strings"
 	"testing"
 	"time"
 
@@ -135,17 +136,74 @@ func TestAutoStreamPassesOverAReleaseThatStalled(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	now = now.Add(streamStall + time.Second)
-	if stalled, statusErr := h.svc.StreamStatus(ctx, first.ID); statusErr != nil || stalled.State != "failed" {
-		t.Fatalf("stalled = %+v, err = %v", stalled, statusErr)
+	if len(first.Candidates) != 2 || first.Candidates[0].State != "trying" || first.Candidates[1].State != "waiting" {
+		t.Fatalf("candidates = %+v, want the episode's release tried and the batch in line", first.Candidates)
 	}
 
-	again, err := h.svc.StartStream(ctx, autoRequest(12))
+	// With another in line, the first is given up on after a minute, not three.
+	now = now.Add(candidateStall + time.Second)
+	moved, err := h.svc.StreamStatus(ctx, first.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if again.Release != "[Erai-raws] Frieren - 01 ~ 28 [1080p][Batch]" {
-		t.Errorf("release = %q, want the batch once the episode's release stalled", again.Release)
+	if moved.State != "preparing" || moved.Release != "[Erai-raws] Frieren - 01 ~ 28 [1080p][Batch]" {
+		t.Fatalf("moved = %+v, want the batch tried in the same stream", moved)
+	}
+	if moved.Candidates[0].State != "failed" || moved.Candidates[0].Error == "" || moved.Candidates[1].State != "trying" {
+		t.Fatalf("candidates = %+v", moved.Candidates)
+	}
+
+	// The last one gets the full wait, and then the stream fails.
+	now = now.Add(candidateStall + time.Second)
+	if waiting, _ := h.svc.StreamStatus(ctx, first.ID); waiting.State != "preparing" {
+		t.Fatalf("the last candidate was given up on after a minute: %+v", waiting)
+	}
+
+	now = now.Add(streamStall)
+	failed, err := h.svc.StreamStatus(ctx, first.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if failed.State != "failed" || !strings.Contains(failed.Error, "none of the 2 releases") {
+		t.Fatalf("failed = %+v", failed)
+	}
+
+	// Asked again, the stalled releases are passed over.
+	if _, err = h.svc.StartStream(ctx, autoRequest(12)); apperr.KindOf(err) != apperr.KindNotFound {
+		t.Errorf("err = %v, want nothing left to try", err)
+	}
+}
+
+func TestAutoStreamMovesOnFromATorrentWithoutTheEpisode(t *testing.T) {
+	h := newHarness(t)
+	client := withAutoStreaming(t, h)
+
+	// Every release turns out to hold episodes 1 and 2, not 12.
+	client.set(debrid.Remote{Hash: frierenHash, Ready: true, Files: batchFiles()})
+
+	started, err := h.svc.StartStream(context.Background(), autoRequest(12))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if started.State != "preparing" || started.Candidates[0].State != "failed" {
+		t.Fatalf("started = %+v, want the batch tried after the first", started)
+	}
+
+	// The next poll looks into the batch.
+	got, err := h.svc.StreamStatus(context.Background(), started.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(client.streams) != 2 {
+		t.Errorf("tried %d releases, want both in line", len(client.streams))
+	}
+	if got.State != "failed" || !strings.Contains(got.Error, "no video for this episode") {
+		t.Fatalf("stream = %+v", got)
+	}
+	for _, c := range got.Candidates {
+		if c.State != "failed" {
+			t.Errorf("candidate %q is %s, want failed", c.Title, c.State)
+		}
 	}
 }
