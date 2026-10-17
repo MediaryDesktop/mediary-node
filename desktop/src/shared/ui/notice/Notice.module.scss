@@ -3,14 +3,13 @@
 	align-items: center;
 	gap: 0.75rem;
 	padding: 0.75rem 1rem;
-	border: 1px solid transparent;
 	border-radius: var(--radius);
 
 	.icon {
 		display: inline-flex;
 		flex: none;
 		align-self: flex-start;
-		padding-top: 0.0625rem;
+		margin-top: 0.2rem;
 	}
 
 	.body {
@@ -43,7 +42,6 @@
 	}
 
 	&.info {
-		border-color: var(--border);
 		background: var(--info-muted);
 
 		.icon {
@@ -52,7 +50,6 @@
 	}
 
 	&.warning {
-		border-color: var(--border);
 		background: var(--warning-muted);
 
 		.icon {
@@ -61,7 +58,6 @@
 	}
 
 	&.danger {
-		border-color: var(--border);
 		background: var(--danger-muted);
 
 		.icon {

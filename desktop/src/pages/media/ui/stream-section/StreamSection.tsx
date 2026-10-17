@@ -5,7 +5,7 @@ import { useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { readStored, writeStored } from '@shared/lib'
-import { Button, CollapsibleSection, Icon, Notice, SegmentedControl, Switch } from '@shared/ui'
+import { Button, CollapsibleSection, Icon, Notice, RippleButton, SegmentedControl, Switch } from '@shared/ui'
 
 import type { MediaEpisode } from '@entities/media'
 import { useTorrentSetup } from '@entities/torrent'
@@ -165,8 +165,7 @@ export function StreamSection({
 			)}
 
 			<section className={styles.card}>
-				<button
-					type='button'
+				<RippleButton
 					className={styles.head}
 					aria-expanded={settingsOpen}
 					aria-controls='stream-settings-body'
@@ -184,12 +183,12 @@ export function StreamSection({
 					<span className={clsx(styles.chevron, settingsOpen && styles.chevronOpen)} aria-hidden>
 						<Icon name='common/chevron-down' size={18} />
 					</span>
-				</button>
+				</RippleButton>
 
 				<CollapsibleSection open={settingsOpen}>
 					<div id='stream-settings-body' className={styles.body}>
 						<div className={styles.info}>
-							<Icon name='common/info' size={16} className={styles.infoIcon} />
+							<Icon name='common/info' size={18} className={styles.infoIcon} />
 							<p>{t('media.stream.explain')}</p>
 						</div>
 
@@ -199,7 +198,8 @@ export function StreamSection({
 								action={
 									<Button
 										size='small'
-										variant='secondary'
+										variant='ghost'
+										className={styles.infoButton}
 										onClick={() =>
 											navigate({ to: '/settings', search: { section: 'debrid' } })
 										}

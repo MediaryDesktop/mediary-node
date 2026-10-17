@@ -654,7 +654,7 @@ export const en = {
 			settings: 'Streaming settings',
 			settingsHint: 'Who gets the file, and whether a click picks the release on its own',
 			explain:
-				'An episode plays as it comes in, rather than waiting for the whole file. The built-in client fetches it from the torrent’s own swarm, free of charge, at whatever speed its seeders give. A debrid service fetches it on its own servers instead, so it is ready in seconds and your own connection never joins the swarm.',
+				'An episode plays as it comes in, rather than waiting for the whole file. The built-in client fetches it from the torrent’s own swarm, free of charge, at whatever speed its seeders give. A debrid service fetches it on its own servers instead, so playback starts faster, often within seconds, and your own connection never joins the swarm.',
 			debridPitch: 'No debrid service is set up',
 			debridPitchHint:
 				'Connect one in the settings for a faster start and without your address showing up to other peers.'
