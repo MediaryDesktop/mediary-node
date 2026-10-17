@@ -164,70 +164,87 @@ export function StreamSection({
 				</Notice>
 			)}
 
-			<div className={styles.settingsTrigger}>
-				<Button
-					variant='secondary'
-					startIcon={<Icon name='common/settings' size={18} />}
+			<section className={styles.card}>
+				<button
+					type='button'
+					className={styles.head}
 					aria-expanded={settingsOpen}
+					aria-controls='stream-settings-body'
 					onClick={toggleSettings}
 				>
-					{t('media.stream.settings')}
-				</Button>
-			</div>
+					<span className={styles.headIcon}>
+						<Icon name='common/settings' size={18} />
+					</span>
 
-			<CollapsibleSection
-				open={settingsOpen}
-				className={clsx(settingsOpen && styles.settingsSectionOpen)}
-			>
-				<div className={styles.settings}>
-					<p className={styles.explain}>{t('media.stream.explain')}</p>
+					<span className={styles.headText}>
+						<span className={styles.headTitle}>{t('media.stream.settings')}</span>
+						<span className={styles.headSubtitle}>{t('media.stream.settingsHint')}</span>
+					</span>
 
-					{!setup.debrid && (
-						<Notice
-							title={t('media.stream.debridPitch')}
-							action={
-								<Button
-									size='small'
-									variant='secondary'
-									onClick={() =>
-										navigate({ to: '/settings', search: { section: 'debrid' } })
-									}
-								>
-									{t('torrents.setup.openSettings')}
-								</Button>
-							}
-						>
-							{t('media.stream.debridPitchHint')}
-						</Notice>
-					)}
+					<span className={clsx(styles.chevron, settingsOpen && styles.chevronOpen)} aria-hidden>
+						<Icon name='common/chevron-down' size={18} />
+					</span>
+				</button>
 
-					<div className={styles.toolbar}>
-						{setup.debrid && (
-							<SegmentedControl
-								label={t('media.stream.via')}
-								items={[
-									{ value: 'embedded', label: t('media.stream.viaBuiltIn') },
-									{ value: 'debrid', label: setup.debrid.name }
-								]}
-								value={via}
-								onValueChange={chooseVia}
-							/>
+				<CollapsibleSection open={settingsOpen}>
+					<div id='stream-settings-body' className={styles.body}>
+						<div className={styles.info}>
+							<Icon name='common/info' size={16} className={styles.infoIcon} />
+							<p>{t('media.stream.explain')}</p>
+						</div>
+
+						{!setup.debrid && (
+							<Notice
+								title={t('media.stream.debridPitch')}
+								action={
+									<Button
+										size='small'
+										variant='secondary'
+										onClick={() =>
+											navigate({ to: '/settings', search: { section: 'debrid' } })
+										}
+									>
+										{t('torrents.setup.openSettings')}
+									</Button>
+								}
+							>
+								{t('media.stream.debridPitchHint')}
+							</Notice>
 						)}
-						<Switch
-							checked={autoSelect}
-							onChange={changeAutoSelect}
-							label={t('media.stream.autoSelect')}
-						/>
-						<p className={styles.hint}>
-							{!autoSelect
-								? t('media.stream.manualHint')
-								: via === 'embedded'
-									? t('media.stream.autoSelectBuiltInHint')
-									: t('media.stream.autoSelectHint', { service: setup.debrid?.name ?? '' })}
-						</p>
+
+						<div className={styles.toolbar}>
+							{setup.debrid && (
+								<>
+									<SegmentedControl
+										label={t('media.stream.via')}
+										items={[
+											{ value: 'embedded', label: t('media.stream.viaBuiltIn') },
+											{ value: 'debrid', label: setup.debrid.name }
+										]}
+										value={via}
+										onValueChange={chooseVia}
+									/>
+									<span className={styles.divider} aria-hidden />
+								</>
+							)}
+							<Switch
+								checked={autoSelect}
+								onChange={changeAutoSelect}
+								label={t('media.stream.autoSelect')}
+							/>
+							<p className={styles.hint}>
+								{!autoSelect
+									? t('media.stream.manualHint')
+									: via === 'embedded'
+										? t('media.stream.autoSelectBuiltInHint')
+										: t('media.stream.autoSelectHint', {
+												service: setup.debrid?.name ?? ''
+											})}
+							</p>
+						</div>
 					</div>
-				</div>
-			</CollapsibleSection>
+				</CollapsibleSection>
+			</section>
 
 			{toWatch.length > 0 && (
 				<ToWatchRail>
