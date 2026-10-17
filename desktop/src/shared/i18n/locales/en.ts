@@ -1077,6 +1077,7 @@ export const en = {
 			missing: 'Missing episodes:',
 			open: 'Search torrents',
 			drawerTitle: 'Search torrents',
+			watchDrawerTitle: 'Pick a release to watch',
 			placeholder: 'Search by the title’s names, or type your own query',
 			episode: 'Episode',
 			submit: 'Search',

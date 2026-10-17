@@ -124,6 +124,84 @@ export function SearchForm({ mediaRef, title, missing, poster, watching, onDone 
 		error && 'body' in error ? (error.body as { detail?: string; status?: number } | null) : null
 	const failedSources = (result?.sources ?? []).filter(source => source.error)
 
+	// Picking what to watch ticks nothing and downloads nothing: each result plays
+	// on its own, so there is no selection to submit — only the sheet's own close.
+	const watchOnly = target.intent === 'watch'
+
+	const content = (
+		<div className={styles.root}>
+			<TorrentSetupNotice
+				setup={setup}
+				needSearch
+				onOpenSettings={missing =>
+					navigate({
+						to: '/settings',
+						search: { section: missing === 'client' ? 'torrent-client' : 'torrent-search' }
+					})
+				}
+			/>
+
+			<SearchBar
+				criteria={criteria}
+				onChange={setCriteria}
+				seasonal={mediaRef.startsWith('tmdb:tv:')}
+				pending={pending}
+				disabled={!setup.hasSources}
+				onSearch={run}
+			/>
+
+			<SearchFilters
+				kind={kind}
+				onKind={setKind}
+				canFilterMissing={Boolean(missing?.length)}
+				onlyMissing={onlyMissing}
+				onOnlyMissing={setOnlyMissing}
+				count={result ? releases.length : null}
+			/>
+
+			{problem && problem.status !== 428 && (
+				<p className={styles.problem}>{problem.detail ?? t('torrents.search.failed')}</p>
+			)}
+			{failedSources.map(source => (
+				<p key={source.id} className={styles.problem}>
+					{t('torrents.search.sourceFailed', { name: source.name, error: source.error ?? '' })}
+				</p>
+			))}
+
+			{pending ? (
+				<ul className={styles.list}>
+					{Array.from({ length: 4 }, (_, index) => (
+						<li key={index}>
+							<Skeleton height='5.25rem' radius='12px' />
+						</li>
+					))}
+				</ul>
+			) : result && releases.length === 0 ? (
+				<EmptyState title={t('torrents.search.empty')} description={t('torrents.search.emptyHint')} />
+			) : (
+				<ul className={styles.list}>
+					{releases.map(found => (
+						<li key={found.id}>
+							<ReleaseCard
+								release={found}
+								covered={coveredEpisodes(found, missing)}
+								poster={poster}
+								cacheService={result?.cache_service}
+								watch={canStream ? watchOf(found) : undefined}
+								checked={watchOnly ? undefined : selected.has(found.id)}
+								onCheckedChange={watchOnly ? undefined : on => toggle(found.id, on)}
+							/>
+						</li>
+					))}
+				</ul>
+			)}
+		</div>
+	)
+
+	if (watchOnly) {
+		return content
+	}
+
 	return (
 		<DrawerForm
 			onSubmit={() => void download()}
@@ -133,76 +211,7 @@ export function SearchForm({ mediaRef, title, missing, poster, watching, onDone 
 			cancelDisabled={downloading}
 			submitting={downloading}
 		>
-			<div className={styles.root}>
-				<TorrentSetupNotice
-					setup={setup}
-					needSearch
-					onOpenSettings={missing =>
-						navigate({
-							to: '/settings',
-							search: { section: missing === 'client' ? 'torrent-client' : 'torrent-search' }
-						})
-					}
-				/>
-
-				<SearchBar
-					criteria={criteria}
-					onChange={setCriteria}
-					seasonal={mediaRef.startsWith('tmdb:tv:')}
-					pending={pending}
-					disabled={!setup.hasSources}
-					onSearch={run}
-				/>
-
-				<SearchFilters
-					kind={kind}
-					onKind={setKind}
-					canFilterMissing={Boolean(missing?.length)}
-					onlyMissing={onlyMissing}
-					onOnlyMissing={setOnlyMissing}
-					count={result ? releases.length : null}
-				/>
-
-				{problem && problem.status !== 428 && (
-					<p className={styles.problem}>{problem.detail ?? t('torrents.search.failed')}</p>
-				)}
-				{failedSources.map(source => (
-					<p key={source.id} className={styles.problem}>
-						{t('torrents.search.sourceFailed', { name: source.name, error: source.error ?? '' })}
-					</p>
-				))}
-
-				{pending ? (
-					<ul className={styles.list}>
-						{Array.from({ length: 4 }, (_, index) => (
-							<li key={index}>
-								<Skeleton height='5.25rem' radius='12px' />
-							</li>
-						))}
-					</ul>
-				) : result && releases.length === 0 ? (
-					<EmptyState
-						title={t('torrents.search.empty')}
-						description={t('torrents.search.emptyHint')}
-					/>
-				) : (
-					<ul className={styles.list}>
-						{releases.map(found => (
-							<li key={found.id}>
-								<ReleaseCard
-									release={found}
-									covered={coveredEpisodes(found, missing)}
-									poster={poster}
-									cacheService={result?.cache_service}
-									watch={canStream ? watchOf(found) : undefined}
-									checked={selected.has(found.id)}
-									onCheckedChange={on => toggle(found.id, on)}
-								/>
-							</li>
-						))}
-					</ul>
-				)}
-			</div>
+			{content}
 		</DrawerForm>
 	)
 }

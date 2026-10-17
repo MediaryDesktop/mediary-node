@@ -19,8 +19,10 @@ export interface ReleaseCardProps {
 	cacheService?: string
 	// Playing without downloading, with a debrid service set up.
 	watch?: ReleaseWatch
-	checked: boolean
-	onCheckedChange: (on: boolean) => void
+	// Absent for a release only ever watched: there is nothing to tick, each
+	// result plays on its own rather than joining a batch to download.
+	checked?: boolean
+	onCheckedChange?: (on: boolean) => void
 }
 
 export interface ReleaseWatch {
@@ -43,19 +45,29 @@ export function ReleaseCard({
 	onCheckedChange
 }: ReleaseCardProps) {
 	const { t, i18n } = useTranslation()
+	const selectable = onCheckedChange !== undefined
+
+	const Container = selectable ? 'label' : 'div'
 
 	return (
-		<label
-			className={clsx(styles.card, checked && styles.checked, !release.eligible && styles.ineligible)}
+		<Container
+			className={clsx(
+				styles.card,
+				!selectable && styles.plain,
+				checked && styles.checked,
+				!release.eligible && styles.ineligible
+			)}
 		>
 			{poster && <PosterFade src={poster} />}
 
-			<Checkbox
-				checked={checked}
-				onCheckedChange={onCheckedChange}
-				label={release.title}
-				className={styles.check}
-			/>
+			{selectable && (
+				<Checkbox
+					checked={checked ?? false}
+					onCheckedChange={onCheckedChange}
+					label={release.title}
+					className={styles.check}
+				/>
+			)}
 
 			<div className={styles.body}>
 				<span className={styles.episodeLabel}>{releaseLabel(release, t)}</span>
@@ -134,6 +146,6 @@ export function ReleaseCard({
 					<Icon name='common/external-link' size={16} />
 				</button>
 			)}
-		</label>
+		</Container>
 	)
 }

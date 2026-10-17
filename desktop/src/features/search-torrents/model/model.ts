@@ -9,6 +9,10 @@ import type { AddTorrentParams } from '@entities/torrent'
 export interface SearchTarget {
 	episode?: number
 	season?: number
+	// 'watch' is the stream view picking a release to play; nothing is ticked or
+	// downloaded, each result plays on its own. Absent, as from the title's header
+	// or the Torrents tab, means picking what to download.
+	intent?: 'download' | 'watch'
 }
 
 // The search sheet, opened from the title's header, its Torrents tab, or an

@@ -126,7 +126,7 @@ export function StreamSection({
 				}
 			})
 		} else {
-			openSearch({ episode: item.episode, season: item.season })
+			openSearch({ episode: item.episode, season: item.season, intent: 'watch' })
 		}
 	}
 

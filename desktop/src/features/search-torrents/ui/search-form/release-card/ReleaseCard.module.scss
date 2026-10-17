@@ -23,6 +23,16 @@
 		background: var(--accent-muted);
 	}
 
+	// A release only ever watched: nothing here ticks, so the card itself is not
+	// a control — only its own buttons are.
+	&.plain {
+		cursor: default;
+
+		&:hover {
+			background: var(--surface);
+		}
+	}
+
 	&.ineligible .body {
 		opacity: 0.6;
 	}

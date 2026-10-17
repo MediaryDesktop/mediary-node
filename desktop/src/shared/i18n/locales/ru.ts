@@ -1078,6 +1078,7 @@ export const ru: Translation = {
 			missing: 'Недостающие серии:',
 			open: 'Искать торренты',
 			drawerTitle: 'Поиск торрентов',
+			watchDrawerTitle: 'Выберите раздачу для просмотра',
 			placeholder: 'Поиск по названиям тайтла или своему запросу',
 			episode: 'Серия',
 			submit: 'Искать',

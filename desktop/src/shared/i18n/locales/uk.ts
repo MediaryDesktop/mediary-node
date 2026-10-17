@@ -1077,6 +1077,7 @@ export const uk: Translation = {
 			missing: 'Відсутні серії:',
 			open: 'Шукати торенти',
 			drawerTitle: 'Пошук торентів',
+			watchDrawerTitle: 'Виберіть роздачу для перегляду',
 			placeholder: 'Пошук за назвами тайтлу або власним запитом',
 			episode: 'Серія',
 			submit: 'Шукати',
