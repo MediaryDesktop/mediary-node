@@ -650,7 +650,13 @@ export const en = {
 				'A click plays the best-seeded release of the episode through the built-in client, as it downloads',
 			manualHint: 'A click opens the search on the episode, to pick the release to play',
 			via: 'Watch through',
-			viaBuiltIn: 'Built-in client'
+			viaBuiltIn: 'Built-in client',
+			settings: 'Streaming settings',
+			explain:
+				'An episode plays as it comes in, rather than waiting for the whole file. The built-in client fetches it from the torrent’s own swarm, free of charge, at whatever speed its seeders give. A debrid service fetches it on its own servers instead, so it is ready in seconds and your own connection never joins the swarm.',
+			debridPitch: 'No debrid service is set up',
+			debridPitchHint:
+				'Connect one in the settings for a faster start and without your address showing up to other peers.'
 		},
 		chapters: {
 			title: 'Chapters · {{count}}'

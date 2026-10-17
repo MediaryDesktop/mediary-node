@@ -5,7 +5,7 @@ import { useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { readStored, writeStored } from '@shared/lib'
-import { Button, Icon, Notice, SegmentedControl, Switch } from '@shared/ui'
+import { Button, CollapsibleSection, Icon, Notice, SegmentedControl, Switch } from '@shared/ui'
 
 import type { MediaEpisode } from '@entities/media'
 import { useTorrentSetup } from '@entities/torrent'
@@ -28,6 +28,7 @@ import { useEpisodeText } from '../library-section/lib/useEpisodeText'
 import styles from './StreamSection.module.scss'
 
 const AUTO_SELECT_KEY = 'mediary.stream.autoSelect'
+const SETTINGS_OPEN_KEY = 'mediary.stream.settingsOpen'
 
 // The next episodes the rail offers, after what was watched.
 const RAIL_SIZE = 8
@@ -95,6 +96,17 @@ export function StreamSection({
 		writeStored(AUTO_SELECT_KEY, on ? 'on' : 'off')
 	}
 
+	// Shut by default: the explanation and the two choices are worth reading once,
+	// not on every visit, so they sit behind a button rather than always in view.
+	const [settingsOpen, setSettingsOpen] = useState(() => readStored(SETTINGS_OPEN_KEY) === 'on')
+
+	const toggleSettings = () => {
+		setSettingsOpen(on => {
+			writeStored(SETTINGS_OPEN_KEY, on ? 'off' : 'on')
+			return !on
+		})
+	}
+
 	const items = streamItems({
 		mediaType,
 		title,
@@ -152,31 +164,70 @@ export function StreamSection({
 				</Notice>
 			)}
 
-			<div className={styles.toolbar}>
-				{setup.debrid && (
-					<SegmentedControl
-						label={t('media.stream.via')}
-						items={[
-							{ value: 'embedded', label: t('media.stream.viaBuiltIn') },
-							{ value: 'debrid', label: setup.debrid.name }
-						]}
-						value={via}
-						onValueChange={chooseVia}
-					/>
-				)}
-				<Switch
-					checked={autoSelect}
-					onChange={changeAutoSelect}
-					label={t('media.stream.autoSelect')}
-				/>
-				<p className={styles.hint}>
-					{!autoSelect
-						? t('media.stream.manualHint')
-						: via === 'embedded'
-							? t('media.stream.autoSelectBuiltInHint')
-							: t('media.stream.autoSelectHint', { service: setup.debrid?.name ?? '' })}
-				</p>
+			<div className={styles.settingsTrigger}>
+				<Button
+					variant='secondary'
+					startIcon={<Icon name='common/settings' size={18} />}
+					aria-expanded={settingsOpen}
+					onClick={toggleSettings}
+				>
+					{t('media.stream.settings')}
+				</Button>
 			</div>
+
+			<CollapsibleSection
+				open={settingsOpen}
+				className={clsx(settingsOpen && styles.settingsSectionOpen)}
+			>
+				<div className={styles.settings}>
+					<p className={styles.explain}>{t('media.stream.explain')}</p>
+
+					{!setup.debrid && (
+						<Notice
+							title={t('media.stream.debridPitch')}
+							action={
+								<Button
+									size='small'
+									variant='secondary'
+									onClick={() =>
+										navigate({ to: '/settings', search: { section: 'debrid' } })
+									}
+								>
+									{t('torrents.setup.openSettings')}
+								</Button>
+							}
+						>
+							{t('media.stream.debridPitchHint')}
+						</Notice>
+					)}
+
+					<div className={styles.toolbar}>
+						{setup.debrid && (
+							<SegmentedControl
+								label={t('media.stream.via')}
+								items={[
+									{ value: 'embedded', label: t('media.stream.viaBuiltIn') },
+									{ value: 'debrid', label: setup.debrid.name }
+								]}
+								value={via}
+								onValueChange={chooseVia}
+							/>
+						)}
+						<Switch
+							checked={autoSelect}
+							onChange={changeAutoSelect}
+							label={t('media.stream.autoSelect')}
+						/>
+						<p className={styles.hint}>
+							{!autoSelect
+								? t('media.stream.manualHint')
+								: via === 'embedded'
+									? t('media.stream.autoSelectBuiltInHint')
+									: t('media.stream.autoSelectHint', { service: setup.debrid?.name ?? '' })}
+						</p>
+					</div>
+				</div>
+			</CollapsibleSection>
 
 			{toWatch.length > 0 && (
 				<ToWatchRail>

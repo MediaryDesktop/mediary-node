@@ -40,6 +40,8 @@ export type { BadgeProps, BadgeTone } from './badge/Badge'
 
 export { Checkbox } from './checkbox/Checkbox'
 export type { CheckboxProps, CheckboxState } from './checkbox/Checkbox'
+export { CollapsibleSection } from './collapsible-section/CollapsibleSection'
+export type { CollapsibleSectionProps } from './collapsible-section/CollapsibleSection'
 
 export { Disclosure } from './disclosure/Disclosure'
 export type { DisclosureProps } from './disclosure/Disclosure'
