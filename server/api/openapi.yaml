@@ -4791,6 +4791,10 @@ components:
         release:
           description: The release the node picked, when it picked one.
           type: string
+        seeders:
+          description: Seeders among the built-in client's peers; through a debrid service, the release's seeders as its source counted them.
+          format: int64
+          type: integer
         service:
           examples:
             - TorBox
@@ -4807,6 +4811,10 @@ components:
             - ready
             - failed
           type: string
+        upload:
+          description: What the built-in client gives back to peers, bytes per second.
+          format: int64
+          type: integer
         via:
           description: Whether a debrid service or the node's own client gets the torrent.
           enum:

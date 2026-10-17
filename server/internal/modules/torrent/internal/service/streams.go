@@ -92,6 +92,8 @@ type TorrentStream struct {
 	Progress float64 `json:"progress" minimum:"0" maximum:"1" doc:"While preparing: how far the service is with the torrent, or how much of the file's start the built-in client has."`
 	Speed    int64   `json:"speed" doc:"The download speed, bytes per second, while preparing."`
 	Peers    int     `json:"peers,omitempty" doc:"Peers the built-in client gets the torrent from."`
+	Seeders  int     `json:"seeders,omitempty" doc:"Seeders among the built-in client's peers; through a debrid service, the release's seeders as its source counted them."`
+	Upload   int64   `json:"upload,omitempty" doc:"What the built-in client gives back to peers, bytes per second."`
 	Error    string  `json:"error,omitempty"`
 	FileID   int64   `json:"file_id,omitempty" doc:"Once ready: a negative ID the player takes like a library file's — /v1/playback/files/{id}/stream, /direct, /hls and POST /v1/playback all accept it."`
 	Name     string  `json:"name,omitempty" doc:"The file that plays, once chosen."`
@@ -612,10 +614,22 @@ func (s *Service) streamView(ctx context.Context, streamer Streamer, entry *stre
 		Via:        entry.via,
 		Service:    streamer.Service(),
 		Peers:      remote.Peers,
+		Seeders:    remote.Seeders,
+		Upload:     max(remote.Upload, 0),
 		MediaRef:   entry.mediaRef,
 		Episode:    entry.episode,
 		Release:    release,
 		Candidates: s.candidatesView(entry),
+	}
+
+	// A debrid service does not say whom it gets the torrent from; the source's
+	// count of the release's seeders is what there is.
+	if entry.via == StreamViaDebrid {
+		for _, c := range view.Candidates {
+			if c.State == "trying" {
+				view.Seeders = c.Seeders
+			}
+		}
 	}
 
 	stalled := s.opts.Now().Sub(askedAt) > limit
@@ -717,7 +731,7 @@ func (s *Service) giveUp(ctx context.Context, streamer Streamer, entry *streamEn
 		s.streams.mu.Unlock()
 
 		view.State, view.Error, view.Release, view.Name = "preparing", "", release.Title, ""
-		view.Progress, view.Speed, view.Peers = 0, 0, 0
+		view.Progress, view.Speed, view.Upload, view.Peers, view.Seeders = 0, 0, 0, 0, release.Seeders
 		view.Candidates = s.candidatesView(entry)
 
 		return view

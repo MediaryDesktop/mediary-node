@@ -39,8 +39,8 @@ type localStream struct {
 	// The file the player wants, once said; -1 until then.
 	file int
 	last sample
-	// Bytes per second, from the last two samples.
-	speed int64
+	// Bytes per second in and out, from the last two samples.
+	speed, upload int64
 }
 
 func (c *Client) streamsDir() string {
@@ -143,8 +143,9 @@ func (c *Client) StreamState(_ context.Context, hash string) (debrid.Remote, err
 
 	remote := debrid.Remote{Hash: hash, Name: stream.t.Name()}
 	c.sampleLocked(stream)
-	remote.Speed = stream.speed
-	remote.Peers = stream.t.Stats().ActivePeers
+	stats := stream.t.Stats()
+	remote.Speed, remote.Upload = stream.speed, stream.upload
+	remote.Peers, remote.Seeders = stats.ActivePeers, stats.ConnectedSeeders
 
 	if stream.t.Info() == nil {
 		return remote, nil
@@ -268,15 +269,18 @@ func (c *Client) streamLocked(hash string) (*localStream, error) {
 	return c.stream, nil
 }
 
-// sampleLocked updates a stream's speed from its useful bytes read.
+// sampleLocked updates a stream's speeds from its useful bytes read and the
+// bytes it gave to peers.
 func (c *Client) sampleLocked(stream *localStream) {
 	now := time.Now()
 	stats := stream.t.Stats()
 	read := stats.BytesReadUsefulData.Int64()
+	written := stats.BytesWrittenData.Int64()
 
 	if elapsed := now.Sub(stream.last.at).Seconds(); elapsed >= 0.5 {
 		stream.speed = max(int64(float64(read-stream.last.read)/elapsed), 0)
-		stream.last = sample{read: read, at: now}
+		stream.upload = max(int64(float64(written-stream.last.written)/elapsed), 0)
+		stream.last = sample{read: read, written: written, at: now}
 	}
 }
 

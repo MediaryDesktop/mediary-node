@@ -68,8 +68,10 @@ type Remote struct {
 	Progress float64
 	// Speed is the service's own download speed, bytes per second.
 	Speed int64
-	// Peers the torrent is coming from; only the node's own client knows.
-	Peers int
+	// Peers the torrent is coming from, the seeders among them and what goes
+	// back to them; only the node's own client knows.
+	Peers, Seeders int
+	Upload         int64
 	// Failed says why the service gave up on the torrent; "" while it has not.
 	Failed string
 	// Partial means the listing left the files out; Detail fills them in.
