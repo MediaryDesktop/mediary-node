@@ -1,6 +1,6 @@
-export { TorrentStreamOverlay } from './TorrentStreamOverlay'
-
 export {
+	$stream,
+	$streamError,
 	$streamTarget,
 	$streamVia,
 	streamCancelled,

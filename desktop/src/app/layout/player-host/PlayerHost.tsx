@@ -24,7 +24,10 @@ import {
 } from '@entities/playback'
 import type { VideoSource } from '@entities/playback'
 
+import { $stream, $streamError, $streamTarget, streamCancelled } from '@features/stream-torrent'
+
 import styles from './PlayerHost.module.scss'
+import { PreparingStream } from './PreparingStream'
 
 // The player lives at the root of the app and sits over the page behind it, so the
 // page stays visible while the player slides in. Minimised, it is a corner card that
@@ -32,20 +35,39 @@ import styles from './PlayerHost.module.scss'
 export function PlayerHost() {
 	const { t } = useTranslation()
 
-	const [fileId, full, data, error, pending, load, playExternally, nodeReady, minimize, expand, close] =
-		useUnit([
-			$playerFileId,
-			$playerExpanded,
-			playbackStreamQuery.$data,
-			playbackStreamQuery.$error,
-			playbackStreamQuery.$pending,
-			playbackStreamQuery.start,
-			playbackModel.playRequested,
-			$nodeReady,
-			playerMinimized,
-			playerExpanded,
-			playerClosed
-		])
+	const [
+		fileId,
+		full,
+		data,
+		error,
+		pending,
+		load,
+		playExternally,
+		nodeReady,
+		minimize,
+		expand,
+		close,
+		streamTarget,
+		stream,
+		streamError,
+		cancelStream
+	] = useUnit([
+		$playerFileId,
+		$playerExpanded,
+		playbackStreamQuery.$data,
+		playbackStreamQuery.$error,
+		playbackStreamQuery.$pending,
+		playbackStreamQuery.start,
+		playbackModel.playRequested,
+		$nodeReady,
+		playerMinimized,
+		playerExpanded,
+		playerClosed,
+		$streamTarget,
+		$stream,
+		$streamError,
+		streamCancelled
+	])
 
 	// The file whose direct play failed; the transcode takes over for that file only.
 	const [directFailedFor, setDirectFailedFor] = useState<number | null>(null)
@@ -55,7 +77,10 @@ export function PlayerHost() {
 
 	// The page behind a full player must not draw its scrollbar over the picture.
 	useEffect(() => {
-		if (!full || fileId === null) {
+		if (fileId === null && !streamTarget) {
+			return
+		}
+		if (fileId !== null && !full) {
 			return
 		}
 
@@ -66,7 +91,7 @@ export function PlayerHost() {
 		return () => {
 			style.overflow = previous
 		}
-	}, [full, fileId])
+	}, [full, fileId, streamTarget])
 
 	useEffect(() => {
 		if (fileId !== null && nodeReady) {
@@ -74,15 +99,28 @@ export function PlayerHost() {
 		}
 	}, [fileId, load, nodeReady])
 
-	if (fileId === null) {
-		return null
-	}
-
 	const requestClose = () => setLeaving(true)
 
+	// Closing covers both the built-in player, which may or may not be open, and a
+	// stream still being readied: whichever applies, the other call is a no-op.
 	const finish = () => {
 		setLeaving(false)
 		close()
+		cancelStream()
+	}
+
+	// A stream opens the player the moment it is asked for, so there is something to
+	// watch fill in rather than a wait with nothing to show for it, as Seanime does.
+	if (fileId === null) {
+		if (!streamTarget) {
+			return null
+		}
+
+		return (
+			<Panel onClose={requestClose} leaving={leaving} onLeft={finish}>
+				<PreparingStream target={streamTarget} stream={stream} error={streamError} />
+			</Panel>
+		)
 	}
 
 	const openExternally = () => {
@@ -90,9 +128,9 @@ export function PlayerHost() {
 		finish()
 	}
 
-	const stream = data?.stream.file_id === fileId ? data.stream : null
+	const loadedStream = data?.stream.file_id === fileId ? data.stream : null
 
-	if (!stream) {
+	if (!loadedStream) {
 		if (!full) {
 			return null
 		}
@@ -114,14 +152,17 @@ export function PlayerHost() {
 	}
 
 	const subheading =
-		stream.episode !== undefined ? t('playback.episode', { number: stream.episode }) : undefined
+		loadedStream.episode !== undefined
+			? t('playback.episode', { number: loadedStream.episode })
+			: undefined
 
-	const direct = directFailedFor !== fileId && canDirectPlay(stream.info.mime_codec, browserCanPlayType)
+	const direct =
+		directFailedFor !== fileId && canDirectPlay(loadedStream.info.mime_codec, browserCanPlayType)
 
 	const source: VideoSource | null = direct
 		? { kind: 'direct' }
-		: stream.hls_url
-			? { kind: 'hls', path: stream.hls_url }
+		: loadedStream.hls_url
+			? { kind: 'hls', path: loadedStream.hls_url }
 			: null
 
 	if (!source) {
@@ -131,7 +172,7 @@ export function PlayerHost() {
 
 		return (
 			<Panel onClose={requestClose} leaving={leaving} onLeft={finish}>
-				<p className={styles.heading}>{stream.title}</p>
+				<p className={styles.heading}>{loadedStream.title}</p>
 				<p>{t('player.needsTranscode')}</p>
 				<Button onClick={openExternally}>{t('player.openExternally')}</Button>
 			</Panel>
@@ -141,9 +182,9 @@ export function PlayerHost() {
 	return (
 		<VideoPlayer
 			key={`${fileId}-${source.kind}`}
-			stream={stream}
+			stream={loadedStream}
 			source={source}
-			heading={stream.title}
+			heading={loadedStream.title}
 			subheading={subheading}
 			mode={full ? 'full' : 'mini'}
 			onMinimize={minimize}
@@ -153,7 +194,9 @@ export function PlayerHost() {
 			onLeft={finish}
 			onOpenExternally={openExternally}
 			onFallback={
-				source.kind === 'direct' && stream.hls_url ? () => setDirectFailedFor(fileId) : undefined
+				source.kind === 'direct' && loadedStream.hls_url
+					? () => setDirectFailedFor(fileId)
+					: undefined
 			}
 		/>
 	)

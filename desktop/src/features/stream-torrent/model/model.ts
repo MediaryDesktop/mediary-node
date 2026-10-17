@@ -3,7 +3,6 @@ import { createEffect, createEvent, createStore, merge, sample } from 'effector'
 import { HttpRequestError, problemDetail } from '@shared/api'
 import { translate } from '@shared/i18n'
 import { readStored, writeStored } from '@shared/lib'
-import { toast } from '@shared/ui'
 
 import { $playerMode, playbackModel, playerOpened } from '@entities/playback'
 import { fetchTorrentStreamFx, startTorrentStreamFx } from '@entities/torrent'
@@ -47,13 +46,20 @@ export const $streamTarget = createStore<StreamTarget | null>(null)
 	.on(streamRequested, (_, target) => target)
 	.reset(streamCancelled, streamPlaying, streamFailed)
 
-// How far the service is; null until it first answers.
+// How far the service is; null until it first answers. The player shows this
+// while it readies a stream, in place of the picture.
 export const $stream = createStore<TorrentStream | null>(null).reset(
 	streamRequested,
 	streamCancelled,
 	streamPlaying,
 	streamFailed
 )
+
+// Set when the service or the built-in client gave up; the player shows this in
+// place of the picture, rather than a toast the player itself would sit under.
+export const $streamError = createStore<string | null>(null)
+	.on(streamFailed, (_, message) => message)
+	.reset(streamRequested, streamCancelled, streamPlaying)
 
 interface Answer {
 	key: string
@@ -143,5 +149,3 @@ sample({
 	fn: (_, fileId) => fileId,
 	target: playerOpened
 })
-
-streamFailed.watch(message => toast.error(message, { id: 'torrent-stream' }))

@@ -17,14 +17,7 @@ import {
 	useMissingEpisodes
 } from '@features/search-torrents'
 import type { ReleaseWatching } from '@features/search-torrents'
-import {
-	$streamTarget,
-	$streamVia,
-	streamCancelled,
-	streamPlaying,
-	streamRequested,
-	TorrentStreamOverlay
-} from '@features/stream-torrent'
+import { $streamTarget, $streamVia, streamCancelled, streamRequested } from '@features/stream-torrent'
 
 import { resolveSubject } from '../../lib/media-view'
 import { LibrarySection } from '../library-section/LibrarySection'
@@ -64,8 +57,9 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 	])
 	const setup = useTorrentSetup()
 
-	// The search sheet gives way to the player a stream from it opened.
-	useUnitWatch(streamPlaying, () => closeSearch())
+	// The search sheet gives way to the player, which opens the moment a stream is
+	// asked for — from here or from the stream view — and covers it.
+	useUnitWatch(streamRequested, () => closeSearch())
 
 	const subject = resolveSubject(media, entry)
 	// Manga is read and books too: neither is downloaded as video, nor tracks missing
@@ -165,8 +159,6 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 					watching={watching}
 				/>
 			)}
-
-			{streamable && <TorrentStreamOverlay />}
 
 			{airing && (
 				<p className={styles.nextAiring}>

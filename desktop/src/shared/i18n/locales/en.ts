@@ -650,8 +650,7 @@ export const en = {
 				'A click plays the best-seeded release of the episode through the built-in client, as it downloads',
 			manualHint: 'A click opens the search on the episode, to pick the release to play',
 			via: 'Watch through',
-			viaBuiltIn: 'Built-in client',
-			preparing: 'Getting ready'
+			viaBuiltIn: 'Built-in client'
 		},
 		chapters: {
 			title: 'Chapters · {{count}}'

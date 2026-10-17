@@ -5,7 +5,7 @@ import { useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { readStored, writeStored } from '@shared/lib'
-import { Badge, Button, Icon, Notice, SegmentedControl, Switch } from '@shared/ui'
+import { Button, Icon, Notice, SegmentedControl, Switch } from '@shared/ui'
 
 import type { MediaEpisode } from '@entities/media'
 import { useTorrentSetup } from '@entities/torrent'
@@ -107,6 +107,8 @@ export function StreamSection({
 	})
 	const toWatch = items.filter(item => item.position > progress).slice(0, RAIL_SIZE)
 	const fallback = banner ?? cover
+	// The player opens over this section the moment one is asked for, so a second
+	// click has nothing to reach; this only guards the instant before it covers it.
 	const busy = target !== null
 
 	const play = (item: StreamItem) => {
@@ -127,8 +129,6 @@ export function StreamSection({
 			openSearch({ episode: item.episode, season: item.season })
 		}
 	}
-
-	const preparing = (item: StreamItem) => target?.key === `${mediaRef}/${item.key}`
 
 	return (
 		<section className={sectionStyles.section}>
@@ -194,12 +194,7 @@ export function StreamSection({
 									style={{ backgroundColor: coverColor ?? undefined }}
 								>
 									<EpisodeImage sources={[item.meta?.image, fallback]} />
-									<span
-										className={clsx(
-											cardStyles.cardPlay,
-											preparing(item) && styles.active
-										)}
-									>
+									<span className={cardStyles.cardPlay}>
 										<Icon name='common/play' size={32} />
 									</span>
 								</span>
@@ -248,11 +243,6 @@ export function StreamSection({
 								name={text.name(item.meta)}
 								duration={text.minutes(null, item.meta)}
 								overview={item.meta?.overview ?? null}
-								badge={
-									preparing(item) && (
-										<Badge tone='accent'>{t('media.stream.preparing')}</Badge>
-									)
-								}
 							/>
 
 							<EpisodeAside episode={item.meta} watched={watched} />
