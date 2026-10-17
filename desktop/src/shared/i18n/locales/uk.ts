@@ -1227,9 +1227,27 @@ export const uk: Translation = {
 			starting: 'Готуємо…',
 			preparing: '{{service}} готує · {{percent}}%',
 			builtIn: 'Вбудований клієнт',
-			swarm: 'Піри: {{count}} · {{speed}}',
+			searching: 'Шукаємо найкращі роздачі…',
+			metadata: 'Завантажуємо метадані…',
+			buffering: 'Буферизуємо початок · {{percent}}%',
 			queued: 'Чекає на вільний слот {{service}}',
-			failed: 'Не вдалося дивитися без завантаження'
+			failed: 'Не вдалося дивитися без завантаження',
+			failedTitle: 'Не вдалося запустити відео',
+			close: 'Закрити',
+			stop: 'Зупинити',
+			collapse: 'Сховати деталі',
+			expand: 'Показати деталі',
+			candidates: 'Найкращі кандидати',
+			candidate: {
+				trying: 'Перевіряємо',
+				waiting: 'У черзі',
+				failed: 'Не вдалося'
+			},
+			score: 'Оцінка: {{score}}',
+			speed: 'Швидкість:',
+			peers: 'Піри:',
+			seeders: 'Сіди:',
+			complete: 'Готово {{percent}}%'
 		},
 		client: {
 			notConfigured: 'Виберіть торент-клієнт у налаштуваннях, щоб завантажувати торенти',

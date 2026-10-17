@@ -1228,9 +1228,27 @@ export const ru: Translation = {
 			starting: 'Готовим…',
 			preparing: '{{service}} готовит · {{percent}}%',
 			builtIn: 'Встроенный клиент',
-			swarm: 'Пиры: {{count}} · {{speed}}',
+			searching: 'Ищем лучшие раздачи…',
+			metadata: 'Загружаем метаданные…',
+			buffering: 'Буферизуем начало · {{percent}}%',
 			queued: 'Ждёт свободный слот {{service}}',
-			failed: 'Не удалось смотреть без загрузки'
+			failed: 'Не удалось смотреть без загрузки',
+			failedTitle: 'Не удалось запустить видео',
+			close: 'Закрыть',
+			stop: 'Остановить',
+			collapse: 'Скрыть детали',
+			expand: 'Показать детали',
+			candidates: 'Лучшие кандидаты',
+			candidate: {
+				trying: 'Проверяем',
+				waiting: 'В очереди',
+				failed: 'Не удалось'
+			},
+			score: 'Оценка: {{score}}',
+			speed: 'Скорость:',
+			peers: 'Пиры:',
+			seeders: 'Сиды:',
+			complete: 'Готово {{percent}}%'
 		},
 		client: {
 			notConfigured: 'Выберите торрент-клиент в настройках, чтобы загружать торренты',

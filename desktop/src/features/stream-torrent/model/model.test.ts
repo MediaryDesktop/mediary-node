@@ -6,7 +6,7 @@ import { $playerFileId } from '@entities/playback'
 import { fetchTorrentStreamFx, startTorrentStreamFx } from '@entities/torrent'
 import type { TorrentStream } from '@entities/torrent'
 
-import { $stream, $streamTarget, pollPauseFx, streamCancelled, streamRequested } from './model'
+import { $stream, $streamError, $streamTarget, pollPauseFx, streamCancelled, streamRequested } from './model'
 import type { StreamTarget } from './model'
 
 const TARGET: StreamTarget = {
@@ -92,8 +92,15 @@ describe('torrent stream', () => {
 
 		await allSettled(streamRequested, { scope, params: TARGET })
 
-		expect(scope.getState($streamTarget)).toBeNull()
-		expect(scope.getState($stream)).toBeNull()
+		// The player stays open on what went wrong until the user closes it.
+		expect(scope.getState($streamTarget)).toEqual(TARGET)
+		expect(scope.getState($streamError)).toBe('TorBox: no seeds')
+		expect(scope.getState($stream)?.state).toBe('failed')
 		expect(scope.getState($playerFileId)).toBeNull()
+
+		await allSettled(streamCancelled, { scope })
+
+		expect(scope.getState($streamTarget)).toBeNull()
+		expect(scope.getState($streamError)).toBeNull()
 	})
 })

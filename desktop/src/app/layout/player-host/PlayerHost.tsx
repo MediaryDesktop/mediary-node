@@ -118,7 +118,12 @@ export function PlayerHost() {
 
 		return (
 			<Panel onClose={requestClose} leaving={leaving} onLeft={finish}>
-				<PreparingStream target={streamTarget} stream={stream} error={streamError} />
+				<PreparingStream
+					target={streamTarget}
+					stream={stream}
+					error={streamError}
+					onStop={requestClose}
+				/>
 			</Panel>
 		)
 	}

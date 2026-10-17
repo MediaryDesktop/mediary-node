@@ -1227,9 +1227,27 @@ export const en = {
 			starting: 'Getting it ready…',
 			preparing: '{{service}} is getting it · {{percent}}%',
 			builtIn: 'The built-in client',
-			swarm: 'Peers: {{count}} · {{speed}}',
+			searching: 'Looking for the best releases…',
+			metadata: 'Downloading metadata…',
+			buffering: 'Buffering the start · {{percent}}%',
 			queued: 'Waiting for a free {{service}} slot',
-			failed: 'Could not play it without downloading'
+			failed: 'Could not play it without downloading',
+			failedTitle: 'Could not start the video',
+			close: 'Close',
+			stop: 'Stop',
+			collapse: 'Hide details',
+			expand: 'Show details',
+			candidates: 'Top candidates',
+			candidate: {
+				trying: 'Analyzing',
+				waiting: 'Waiting',
+				failed: 'Failed'
+			},
+			score: 'Score: {{score}}',
+			speed: 'Speed:',
+			peers: 'Peers:',
+			seeders: 'Seeders:',
+			complete: '{{percent}}% complete'
 		},
 		client: {
 			notConfigured: 'Choose a torrent client in the settings to download torrents',

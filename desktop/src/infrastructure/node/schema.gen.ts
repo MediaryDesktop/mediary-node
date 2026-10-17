@@ -3812,6 +3812,23 @@ export interface components {
 			/** @description Title as the library reads it, for the UI. */
 			title: string
 		}
+		StreamCandidate: {
+			/** @description The debrid service already holds it. */
+			cached?: boolean
+			error?: string
+			/** Format: int64 */
+			score: number
+			/** Format: int64 */
+			seeders: number
+			/** @description The site or source it was found on. */
+			source?: string
+			/**
+			 * @description trying is the one being readied; failed ones were given up on, error says why.
+			 * @enum {string}
+			 */
+			state: 'trying' | 'waiting' | 'failed'
+			title: string
+		}
 		StreamOutputBody: {
 			/**
 			 * Format: uri
@@ -4408,6 +4425,8 @@ export interface components {
 			 * @example https://example.com/schemas/TorrentStream.json
 			 */
 			readonly $schema?: string
+			/** @description With auto: the releases lined up, best first. When one cannot be played the next is tried. */
+			candidates?: components['schemas']['StreamCandidate'][] | null
 			/** Format: int64 */
 			episode?: number
 			error?: string
@@ -4655,6 +4674,7 @@ export type SchemaStartTorrentStreamInputBody = components['schemas']['StartTorr
 export type SchemaStatusOutputBody = components['schemas']['StatusOutputBody']
 export type SchemaStatusOutputBody1 = components['schemas']['StatusOutputBody1']
 export type SchemaStream = components['schemas']['Stream']
+export type SchemaStreamCandidate = components['schemas']['StreamCandidate']
 export type SchemaStreamOutputBody = components['schemas']['StreamOutputBody']
 export type SchemaSubtitle = components['schemas']['Subtitle']
 export type SchemaSuggestion = components['schemas']['Suggestion']

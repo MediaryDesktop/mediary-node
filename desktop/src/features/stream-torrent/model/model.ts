@@ -42,17 +42,18 @@ export const streamCancelled = createEvent()
 export const streamPlaying = createEvent<number>()
 const streamFailed = createEvent<string>()
 
+// What is being readied. A failure keeps it, so the player stays open on what
+// went wrong until the user closes it.
 export const $streamTarget = createStore<StreamTarget | null>(null)
 	.on(streamRequested, (_, target) => target)
-	.reset(streamCancelled, streamPlaying, streamFailed)
+	.reset(streamCancelled, streamPlaying)
 
-// How far the service is; null until it first answers. The player shows this
-// while it readies a stream, in place of the picture.
+// The node's last answer, failed ones too, so the candidates it gave up on stay
+// shown; null until it first answers. The player shows this in place of the picture.
 export const $stream = createStore<TorrentStream | null>(null).reset(
 	streamRequested,
 	streamCancelled,
-	streamPlaying,
-	streamFailed
+	streamPlaying
 )
 
 // Set when the service or the built-in client gave up; the player shows this in
@@ -97,7 +98,7 @@ const waiting = sample({
 	filter: stream => stream.state === 'preparing' || stream.state === 'queued'
 })
 
-sample({ clock: waiting, target: $stream })
+sample({ clock: current, filter: stream => stream.state !== 'ready', target: $stream })
 
 sample({
 	clock: waiting,
