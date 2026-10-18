@@ -52,8 +52,7 @@ export function SearchForm({ mediaRef, title, missing, poster, watching, onDone 
 		episode: target.episode ? String(target.episode) : ''
 	}))
 	const [kind, setKind] = useState<ReleaseKind>('all')
-	// An episode asked for may well be one the library has: it is watched, not missing.
-	const [onlyMissing, setOnlyMissing] = useState(Boolean(missing?.length) && !target.episode)
+	const [onlyMissing, setOnlyMissing] = useState(false)
 	const [selected, setSelected] = useState<Set<string>>(new Set())
 
 	// The page offers watching whenever a release can be streamed: through the

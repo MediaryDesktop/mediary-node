@@ -1,20 +1,51 @@
 .details {
 	display: flex;
 	flex-direction: column;
-	gap: 0.75rem;
-	padding-top: 0.875rem;
-	border-top: 1px solid var(--border);
 
-	.status {
-		margin: 0;
-		color: var(--text-secondary);
-		font-size: 0.8125rem;
+	.overview {
+		display: flex;
+		flex-direction: column;
+		gap: 0.875rem;
+		padding: 1rem 1.125rem 1.125rem;
+		border-top: 1px solid var(--border);
 	}
 
-	.problem {
+	.stats {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 0.625rem;
 		margin: 0;
-		color: var(--danger-text);
-		font-size: 0.8125rem;
+
+		@media (max-width: 720px) {
+			grid-template-columns: 1fr;
+		}
+
+		.stat {
+			display: flex;
+			flex-direction: column;
+			gap: 0.25rem;
+			min-width: 0;
+			padding: 0.75rem 0.875rem;
+			border: 1px solid var(--border);
+			border-radius: var(--radius);
+			background: var(--bg-subtle);
+
+			dt {
+				color: var(--text-muted);
+				font-size: 0.75rem;
+			}
+
+			dd {
+				overflow: hidden;
+				margin: 0;
+				color: var(--text);
+				font-size: 1rem;
+				font-weight: 650;
+				font-variant-numeric: tabular-nums;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+		}
 	}
 
 	.actions {
@@ -23,29 +54,35 @@
 		align-items: center;
 		gap: 0.5rem;
 
-		.remove {
+		// Doubled to out-specificity Button's own .ghost rule, which otherwise wins
+		// or loses depending on CSS module import order rather than source intent.
+		.remove.remove {
 			margin-left: auto;
-			color: var(--danger-text);
+			color: var(--accent);
+
+			&:not(:disabled):hover {
+				color: var(--accent);
+			}
+
+			// The ripple paints in currentcolor by default; pinned here instead so
+			// it stays accent-muted regardless of the button's own text colour.
+			:global(.ripple__animation) {
+				background: var(--accent);
+			}
 		}
 	}
 
-	.result {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-		padding: 0.75rem 0.875rem;
-		border-radius: var(--radius-sm);
-		background: var(--bg-subtle);
+	.problem {
+		color: var(--danger-text);
 	}
 
 	.planned {
 		display: flex;
 		flex-direction: column;
 		gap: 0.25rem;
-		margin: 0;
+		margin: 0.25rem 0 0;
 		padding: 0;
 		list-style: none;
-		font-size: 0.8125rem;
 
 		li {
 			display: flex;
@@ -61,29 +98,129 @@
 
 		.release {
 			overflow: hidden;
-			color: var(--text-muted);
 			text-overflow: ellipsis;
 			white-space: nowrap;
 		}
 	}
 
 	.settings {
+		border-top: 1px solid var(--border);
+					border-radius: var(--radius);
+
+
+		.settingsHead {
+			display: flex;
+			align-items: center;
+			gap: 0.625rem;
+			width: 100%;
+			padding: 1.275rem 1.125rem;
+			border-radius: var(--radius);
+			border: none;
+			// The ripple paints in currentcolor; every child sets its own colour.
+			color: #99999965;
+			background: none;
+			cursor: pointer;
+			text-align: left;
+
+			.settingsIcon {
+				flex: none;
+				color: var(--text-secondary);
+			}
+
+			.settingsTitle {
+				flex: 1;
+				color: var(--text);
+				font-size: 0.9375rem;
+				font-weight: 650;
+			}
+
+			.chevron {
+				display: inline-flex;
+				flex: none;
+				color: var(--text-muted);
+
+				svg {
+					transition: transform 160ms ease;
+				}
+
+				&.chevronOpen svg {
+					transform: rotate(180deg);
+				}
+			}
+		}
+
+		.settingsBody {
+			display: flex;
+			flex-direction: column;
+			gap: 1rem;
+			padding: 0.25rem 1.125rem 1.125rem;
+		}
+
 		.fields {
 			display: grid;
-			grid-template-columns: 8rem 1fr;
-			gap: 0.75rem;
-			padding-top: 0.75rem;
+			grid-template-columns: 13rem minmax(0, 1fr);
+			gap: 1rem;
 
-			.field {
-				display: grid;
-				gap: 0.25rem;
+			@media (max-width: 720px) {
+				grid-template-columns: 1fr;
+			}
+		}
+
+		.field {
+			display: flex;
+			flex-direction: column;
+			gap: 0.375rem;
+			min-width: 0;
+
+			.label {
+				color: var(--text-secondary);
+				font-size: 0.8125rem;
+				font-weight: 600;
+			}
+
+			.fieldHint {
 				color: var(--text-muted);
 				font-size: 0.75rem;
 			}
 		}
 
-		.save {
-			margin-top: 0.75rem;
+		.stepper {
+			height: var(--control-height);
+			padding: 0 0.375rem;
+			border-radius: var(--radius);
+			background: var(--field);
+		}
+
+		.stepperInput {
+			width: 100%;
+			padding: 0;
+			border: 0;
+			background: transparent;
+			color: var(--text);
+			font: inherit;
+			text-align: center;
+			appearance: textfield;
+
+			&::-webkit-outer-spin-button,
+			&::-webkit-inner-spin-button {
+				margin: 0;
+				appearance: none;
+			}
+
+			&:focus {
+				outline: none;
+			}
+		}
+
+		.footer {
+			display: flex;
+			align-items: center;
+			gap: 0.75rem;
+
+			.saveState {
+				color: var(--text-muted);
+				font-size: 0.8125rem;
+			}
 		}
 	}
 }

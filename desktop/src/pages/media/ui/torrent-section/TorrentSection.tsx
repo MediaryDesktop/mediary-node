@@ -30,8 +30,13 @@ export function TorrentSection({ mediaRef, title, poster }: TorrentSectionProps)
 		<section className={styles.root}>
 			<div className={styles.header}>
 				<div className={styles.heading}>
-					<h2 className={styles.title}>{t('torrents.list.title')}</h2>
-					<p className={styles.hint}>{t('torrents.section.hint')}</p>
+					<span className={styles.icon}>
+						<Icon name='common/download' size={24} />
+					</span>
+					<div className={styles.text}>
+						<h2 className={styles.title}>{t('torrents.list.title')}</h2>
+						<p className={styles.hint}>{t('torrents.section.hint')}</p>
+					</div>
 				</div>
 
 				<div className={styles.actions}>
@@ -42,7 +47,11 @@ export function TorrentSection({ mediaRef, title, poster }: TorrentSectionProps)
 					>
 						{t('torrents.add')}
 					</Button>
-					<Button startIcon={<Icon name='common/search' size={16} />} onClick={() => openSearch()}>
+					<Button
+						variant='primary'
+						startIcon={<Icon name='common/search' size={16} />}
+						onClick={() => openSearch()}
+					>
 						{t('torrents.search.open')}
 					</Button>
 				</div>
@@ -52,10 +61,7 @@ export function TorrentSection({ mediaRef, title, poster }: TorrentSectionProps)
 			    numbered by season is not supported by the node yet. */}
 			{!mediaRef.startsWith('tmdb:tv:') && <AutoDownloadPanel mediaRef={mediaRef} title={title} />}
 
-			<div className={styles.block}>
-				<h3 className={styles.subtitle}>{t('torrents.list.forTitle')}</h3>
-				<TorrentDownloadList mediaRef={mediaRef} poster={poster} />
-			</div>
+			<TorrentDownloadList mediaRef={mediaRef} title={title} poster={poster} />
 
 			<AddTorrentDrawer open={adding} mediaRef={mediaRef} title={title} onClose={close} />
 		</section>

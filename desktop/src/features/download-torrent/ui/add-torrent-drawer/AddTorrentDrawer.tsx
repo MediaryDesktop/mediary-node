@@ -18,6 +18,8 @@ import {
 
 import { addTorrentMutation } from '@entities/torrent'
 
+import { readTorrentFile } from '../../lib/read-torrent-file'
+
 import styles from './AddTorrentDrawer.module.scss'
 
 export interface AddTorrentDrawerProps {
@@ -52,20 +54,6 @@ interface TorrentFile {
 	content: string
 }
 
-function readAsBase64(file: File): Promise<string> {
-	return new Promise((resolve, reject) => {
-		const reader = new FileReader()
-
-		reader.onload = () => {
-			const url = String(reader.result)
-			resolve(url.slice(url.indexOf(',') + 1))
-		}
-		reader.onerror = () => reject(reader.error)
-
-		reader.readAsDataURL(file)
-	})
-}
-
 function AddForm({ mediaRef, title, onDone }: { mediaRef: string; title: string; onDone: () => void }) {
 	const { t } = useTranslation()
 
@@ -88,7 +76,7 @@ function AddForm({ mediaRef, title, onDone }: { mediaRef: string; title: string;
 		}
 
 		try {
-			setFile({ name: chosen.name, content: await readAsBase64(chosen) })
+			setFile({ name: chosen.name, content: await readTorrentFile(chosen) })
 			setMagnet('')
 		} catch {
 			toast.error(t('torrents.drawer.fileUnreadable'), { id: 'torrent-file' })

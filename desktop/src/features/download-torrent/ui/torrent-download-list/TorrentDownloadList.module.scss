@@ -3,6 +3,12 @@
 	flex-direction: column;
 	gap: 1rem;
 
+	.subtitle {
+		margin: 0;
+		font-size: 1.0625rem;
+		font-weight: 650;
+	}
+
 	.list {
 		display: flex;
 		flex-direction: column;

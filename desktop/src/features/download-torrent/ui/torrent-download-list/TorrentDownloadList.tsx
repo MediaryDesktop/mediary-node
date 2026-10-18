@@ -26,17 +26,20 @@ import { $filesFor, filesDismissed, filesRequested } from '../../model/model'
 import { DownloadRow } from './download-row/DownloadRow'
 import { DownloadSummary } from './download-summary/DownloadSummary'
 import { TorrentFilesDrawer } from './files-drawer/TorrentFilesDrawer'
+import { TorrentQuickAdd } from './quick-add/TorrentQuickAdd'
 import styles from './TorrentDownloadList.module.scss'
 
 export interface TorrentDownloadListProps {
 	// Only this title's downloads; all of them, with a summary, when left out.
 	mediaRef?: string
+	// The title's name; needed only alongside mediaRef, to label a quick add.
+	title?: string
 	poster?: string | null
 }
 
 // Torrents the node added to its client, newest first. The node polls the client
 // and announces each change, so the list moves while a torrent downloads.
-export function TorrentDownloadList({ mediaRef, poster }: TorrentDownloadListProps) {
+export function TorrentDownloadList({ mediaRef, title, poster }: TorrentDownloadListProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
 	const setup = useTorrentSetup()
@@ -112,17 +115,23 @@ export function TorrentDownloadList({ mediaRef, poster }: TorrentDownloadListPro
 				}
 			/>
 
+			{mediaRef && <h3 className={styles.subtitle}>{t('torrents.list.forTitle')}</h3>}
+
 			{!mediaRef && downloads.length > 0 && (
 				<DownloadSummary active={active} inLibrary={inLibrary} setup={setup} />
 			)}
 
 			{downloads.length === 0 ? (
-				<EmptyState
-					title={mediaRef ? t('torrents.list.emptyForTitle') : t('torrents.list.empty')}
-					description={
-						mediaRef ? t('torrents.list.emptyForTitleHint') : t('torrents.list.emptyHint')
-					}
-				/>
+				mediaRef && title ? (
+					<TorrentQuickAdd mediaRef={mediaRef} title={title} />
+				) : (
+					<EmptyState
+						title={mediaRef ? t('torrents.list.emptyForTitle') : t('torrents.list.empty')}
+						description={
+							mediaRef ? t('torrents.list.emptyForTitleHint') : t('torrents.list.emptyHint')
+						}
+					/>
+				)
 			) : (
 				<ul className={styles.list}>
 					{downloads.map(item => (

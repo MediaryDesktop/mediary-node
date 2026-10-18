@@ -1,8 +1,5 @@
 .root {
-	display: flex;
-	flex-direction: column;
-	gap: 0.875rem;
-	padding: 1rem 1.125rem;
+	overflow: hidden;
 	border: 1px solid var(--border);
 	border-radius: var(--radius);
 	background: var(--surface);
@@ -11,15 +8,16 @@
 		display: flex;
 		align-items: center;
 		gap: 0.875rem;
+		padding: 1rem 1.125rem;
 
 		.icon {
 			display: inline-flex;
 			flex: none;
 			align-items: center;
 			justify-content: center;
-			width: 2.25rem;
-			height: 2.25rem;
-			border-radius: var(--radius-sm);
+			width: 2.75rem;
+			height: 2.75rem;
+			border-radius: var(--radius-md);
 			background: var(--accent-muted);
 			color: var(--accent-text);
 		}
