@@ -5,6 +5,7 @@ import type { ReactNode } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { Carousel } from '@shared/ui'
+import type { IconLike } from '@shared/ui'
 
 import { aniListAccountModel } from '@entities/anilist-account'
 import { MediaCard, mediaTitle } from '@entities/media'
@@ -18,6 +19,7 @@ export type RelatedTitle = NonNullable<MediaDetails['relations']>[number]
 export interface RelatedCardsProps {
 	titles: RelatedTitle[]
 	title?: ReactNode
+	icon?: IconLike
 	'aria-label'?: string
 	// What a card is to this title — "Sequel" — when there is something to say.
 	cornerLabel?: (title: RelatedTitle) => string | undefined
@@ -25,7 +27,7 @@ export interface RelatedCardsProps {
 
 // A carousel of titles another title points at, each opening its own page and
 // offering the list menu where the title can be tracked.
-export function RelatedCards({ titles, title, cornerLabel, ...rest }: RelatedCardsProps) {
+export function RelatedCards({ titles, title, icon, cornerLabel, ...rest }: RelatedCardsProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
 
@@ -35,7 +37,7 @@ export function RelatedCards({ titles, title, cornerLabel, ...rest }: RelatedCar
 	const trackedByRef = useMemo(() => new Map(tracked.map(entry => [entry.media_ref, entry])), [tracked])
 
 	return (
-		<Carousel title={title} aria-label={rest['aria-label']}>
+		<Carousel title={title} icon={icon} aria-label={rest['aria-label']}>
 			{titles.map(title => {
 				const entry = trackedByRef.get(title.media_ref)
 

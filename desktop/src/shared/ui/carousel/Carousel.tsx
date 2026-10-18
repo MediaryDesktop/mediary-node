@@ -3,8 +3,8 @@ import useEmblaCarousel from 'embla-carousel-react'
 import { Children, useCallback, useEffect, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 
-import { Icon } from '../icon/Icon'
-import type { IconName } from '../icon/Icon'
+import { Icon, renderIcon } from '../icon/Icon'
+import type { IconLike } from '../icon/Icon'
 
 import styles from './Carousel.module.scss'
 
@@ -17,7 +17,7 @@ export interface CarouselProps {
 	// renders as its own <section>; without one, as a plain row of items.
 	title?: ReactNode
 	// Shown before the title, same row.
-	icon?: IconName
+	icon?: IconLike
 	// A trailing arrow next to the title that jumps to the full list.
 	more?: { label: string; onClick: () => void }
 	// Width of one item, as CSS; the row shows as many as fit.
@@ -80,7 +80,7 @@ export function Carousel({
 				<div className={styles.header}>
 					{title != null && (
 						<h2 className={styles.title}>
-							{icon && <Icon name={icon} size={24} className={styles.titleIcon} />}
+							{icon && <span className={styles.titleIcon}>{renderIcon(icon, 24)}</span>}
 							{title}
 							{more && (
 								<button

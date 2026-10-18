@@ -20,8 +20,9 @@
 			font-weight: 650;
 
 			.titleIcon {
+				display: inline-flex;
+				align-items: center;
 				flex: none;
-				margin-top: 2px;
 				color: var(--text);
 			}
 

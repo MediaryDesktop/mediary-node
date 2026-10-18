@@ -3,7 +3,7 @@ import { useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { formatRelativeTime, formatWeekday, useUnitWatch } from '@shared/lib'
-import { Icon, Modal } from '@shared/ui'
+import { Icon, Modal, PhaseTransition } from '@shared/ui'
 
 import { mediaTitle } from '@entities/media'
 import type { MediaDetails, MediaSource } from '@entities/media'
@@ -174,31 +174,33 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 			)}
 
 			<div className={styles.sections}>
-				{shown === 'torrent' ? (
-					<TorrentSection mediaRef={mediaRef} title={title} poster={base.cover_image} />
-				) : shown === 'stream' ? (
-					<StreamSection
-						mediaRef={mediaRef}
-						title={title}
-						mediaType={mediaType}
-						cover={base.cover_image}
-						coverColor={base.cover_color}
-						banner={base.banner_image}
-						released={seasonal ? null : releasedEpisodes(media, total)}
-						progress={entry?.progress ?? 0}
-					/>
-				) : (
-					<LibrarySection
-						mediaRef={mediaRef}
-						title={title}
-						cover={base.cover_image}
-						coverColor={base.cover_color}
-						banner={base.banner_image}
-						total={total}
-						mediaType={mediaType}
-						progress={entry?.progress ?? 0}
-					/>
-				)}
+				<PhaseTransition phase={shown}>
+					{shown === 'torrent' ? (
+						<TorrentSection mediaRef={mediaRef} title={title} poster={base.cover_image} />
+					) : shown === 'stream' ? (
+						<StreamSection
+							mediaRef={mediaRef}
+							title={title}
+							mediaType={mediaType}
+							cover={base.cover_image}
+							coverColor={base.cover_color}
+							banner={base.banner_image}
+							released={seasonal ? null : releasedEpisodes(media, total)}
+							progress={entry?.progress ?? 0}
+						/>
+					) : (
+						<LibrarySection
+							mediaRef={mediaRef}
+							title={title}
+							cover={base.cover_image}
+							coverColor={base.cover_color}
+							banner={base.banner_image}
+							total={total}
+							mediaType={mediaType}
+							progress={entry?.progress ?? 0}
+						/>
+					)}
+				</PhaseTransition>
 
 				<RelationsSection relations={media?.relations ?? []} />
 

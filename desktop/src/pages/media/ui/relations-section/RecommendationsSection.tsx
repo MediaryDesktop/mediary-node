@@ -1,3 +1,5 @@
+import { IoGitCompareOutline } from "react-icons/io5";
+
 import { useTranslation } from '@shared/i18n'
 
 import { RelatedCards } from './RelatedCards'
@@ -22,10 +24,13 @@ export function RecommendationsSection({ recommendations, similar }: Recommendat
 				<RelatedCards
 					titles={recommendations}
 					title={t(both ? 'media.sections.recommended' : 'media.sections.recommendations')}
+					icon='common/sparkles'
 				/>
 			)}
 
-			{similar.length > 0 && <RelatedCards titles={similar} title={t('media.sections.similar')} />}
+			{similar.length > 0 && (
+				<RelatedCards titles={similar} title={t('media.sections.similar')} icon={<IoGitCompareOutline size={24} />} />
+			)}
 		</>
 	)
 }

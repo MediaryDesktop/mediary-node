@@ -1,3 +1,5 @@
+import { IoLayers } from 'react-icons/io5'
+
 import { useTranslation } from '@shared/i18n'
 
 import { enumLabel } from '@entities/media'
@@ -20,6 +22,7 @@ export function RelationsSection({ relations }: RelationsSectionProps) {
 		<RelatedCards
 			titles={relations}
 			title={t('media.sections.relations')}
+			icon={<IoLayers size={24} />}
 			cornerLabel={relation => enumLabel(t, 'relation', relation.relation_type) ?? undefined}
 		/>
 	)
