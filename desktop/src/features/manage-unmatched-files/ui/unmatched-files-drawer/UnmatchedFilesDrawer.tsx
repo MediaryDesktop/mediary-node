@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from '@shared/i18n'
 import { Button, Drawer, EmptyState, Icon } from '@shared/ui'
 
-import { libraryTreeQuery } from '@entities/library-item'
+import { libraryRootsQuery, libraryTreeQuery } from '@entities/library-item'
 
 import { unmatchedGroups } from '../../lib/groups'
 import { unmatchedFilesModel } from '../../model/model'
@@ -19,16 +19,21 @@ export function UnmatchedFilesDrawer() {
 
 	const [open, closed] = useUnit([unmatchedFilesModel.$unmatchedOpen, unmatchedFilesModel.unmatchedClosed])
 	const [treeData, startTree] = useUnit([libraryTreeQuery.$data, libraryTreeQuery.start])
+	const [rootsData, startRoots] = useUnit([libraryRootsQuery.$data, libraryRootsQuery.start])
 
 	const [page, setPage] = useState(0)
 
 	useEffect(() => {
 		if (open) {
 			startTree()
+			startRoots()
 		}
-	}, [open, startTree])
+	}, [open, startTree, startRoots])
 
-	const groups = useMemo(() => unmatchedGroups(treeData?.files.items ?? []), [treeData])
+	const groups = useMemo(
+		() => unmatchedGroups(treeData?.files.items ?? [], rootsData?.roots ?? []),
+		[treeData, rootsData]
+	)
 
 	const lastPage = Math.max(groups.length - 1, 0)
 	const shown = Math.min(page, lastPage)

@@ -28,7 +28,14 @@ function changeVolume(video: HTMLVideoElement, next: number): void {
 
 // What the controls and the keyboard do to the element. Each is a no-op before the
 // element mounts.
-export function useVideoActions(videoRef: RefObject<HTMLVideoElement | null>): VideoActions {
+//
+// onSeek fires with the target position as soon as a seek is issued, before the
+// browser has anything buffered there — the scrubber moves on it immediately,
+// instead of snapping back each render until `timeupdate` catches up.
+export function useVideoActions(
+	videoRef: RefObject<HTMLVideoElement | null>,
+	onSeek?: (position: number) => void
+): VideoActions {
 	return useMemo(
 		() => ({
 			togglePlay: () => {
@@ -37,11 +44,16 @@ export function useVideoActions(videoRef: RefObject<HTMLVideoElement | null>): V
 			},
 			seekBy: delta => {
 				const video = videoRef.current
-				if (video) video.currentTime = clamp(video.currentTime + delta, 0, video.duration || 0)
+				if (!video) return
+				const next = clamp(video.currentTime + delta, 0, video.duration || 0)
+				video.currentTime = next
+				onSeek?.(next)
 			},
 			seekTo: position => {
 				const video = videoRef.current
-				if (video) video.currentTime = position
+				if (!video) return
+				video.currentTime = position
+				onSeek?.(position)
 			},
 			changeVolume: next => {
 				const video = videoRef.current
@@ -52,6 +64,6 @@ export function useVideoActions(videoRef: RefObject<HTMLVideoElement | null>): V
 				if (video) video.muted = !video.muted
 			}
 		}),
-		[videoRef]
+		[videoRef, onSeek]
 	)
 }

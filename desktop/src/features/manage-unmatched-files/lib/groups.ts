@@ -1,10 +1,29 @@
 import { fileNumber, isIgnored, isMatched, isTrackable } from '@entities/library-item'
-import type { LibraryFile } from '@entities/library-item'
+import type { LibraryContent, LibraryFile, LibraryRoot } from '@entities/library-item'
 
 export interface UnmatchedGroup {
 	key: string
 	folder: string
 	files: LibraryFile[]
+
+	// Only an AniList id is something people know by heart; TMDB needs movie or
+	// show on top of the number, and book ids are opaque strings from two sources.
+	typedId: boolean
+}
+
+// Mirrors the node's choice of source: comics go to AniList anywhere, videos
+// only under an anime folder. An unknown root is not assumed to be anime.
+function matchesOnAniList(file: LibraryFile, content: LibraryContent | undefined): boolean {
+	if (file.kind === 'manga') {
+		return true
+	}
+
+	return (
+		file.kind === 'video' &&
+		content !== undefined &&
+		content !== 'movies_and_shows' &&
+		content !== 'doramas'
+	)
 }
 
 // What still needs a title: not matched, not set aside, and not an opening or a
@@ -21,7 +40,8 @@ function folderOf(file: LibraryFile): string {
 
 // One page per folder: the files of one release almost always sit together, so a
 // folder is the unit someone matches in one go.
-export function unmatchedGroups(files: LibraryFile[]): UnmatchedGroup[] {
+export function unmatchedGroups(files: LibraryFile[], roots: LibraryRoot[]): UnmatchedGroup[] {
+	const contentOf = new Map(roots.map(root => [root.id, root.content]))
 	const byFolder = new Map<string, LibraryFile[]>()
 
 	for (const file of files) {
@@ -37,7 +57,8 @@ export function unmatchedGroups(files: LibraryFile[]): UnmatchedGroup[] {
 		.map(([folder, list]) => ({
 			key: folder,
 			folder,
-			files: list.sort((left, right) => (fileNumber(left) ?? 0) - (fileNumber(right) ?? 0))
+			files: list.sort((left, right) => (fileNumber(left) ?? 0) - (fileNumber(right) ?? 0)),
+			typedId: list.every(file => matchesOnAniList(file, contentOf.get(file.root_id)))
 		}))
 		.sort((left, right) => left.folder.localeCompare(right.folder))
 }

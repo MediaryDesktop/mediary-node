@@ -31,7 +31,12 @@ export function usePlayerKeyboard(options: PlayerKeyboardOptions): void {
 		}
 
 		const onKey = (event: KeyboardEvent) => {
-			if (event.target instanceof HTMLInputElement || event.ctrlKey || event.metaKey || event.altKey) {
+			// The seek and volume sliders are the only inputs in the player; once one
+			// has focus (e.g. after a click), arrow keys would otherwise nudge it by its
+			// own tiny `step` instead of running the player's shortcuts below.
+			const onRangeInput = event.target instanceof HTMLInputElement && event.target.type === 'range'
+
+			if ((event.target instanceof HTMLInputElement && !onRangeInput) || event.ctrlKey || event.metaKey || event.altKey) {
 				return
 			}
 

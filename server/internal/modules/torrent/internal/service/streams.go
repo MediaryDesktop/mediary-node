@@ -309,9 +309,9 @@ func (s *Service) pickStreamReleases(ctx context.Context, req StreamRequest) ([]
 	ranked := rankStreamReleases(live, episode > 0, req.Via == StreamViaEmbedded, profile)
 	if len(ranked) == 0 {
 		if episode > 0 {
-			return nil, apperr.New(apperr.KindNotFound, "no seeded release of episode %d was found: try choosing one in the search", episode)
+			return nil, apperr.New(apperr.KindNotFound, "No seeded release of episode %d was found: try choosing one in the search", episode)
 		}
-		return nil, apperr.New(apperr.KindNotFound, "no seeded release was found: try choosing one in the search")
+		return nil, apperr.New(apperr.KindNotFound, "No seeded release was found: try choosing one in the search")
 	}
 
 	return ranked[:min(len(ranked), maxStreamCandidates)], nil

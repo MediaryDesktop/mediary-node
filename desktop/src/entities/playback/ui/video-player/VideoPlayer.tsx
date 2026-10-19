@@ -109,7 +109,7 @@ export function VideoPlayer({
 	})
 
 	const report = useProgressReport({ videoRef, fileId, probedDuration: info.duration, playing })
-	const actions = useVideoActions(videoRef)
+	const actions = useVideoActions(videoRef, setPosition)
 	const { fullscreen, toggleFullscreen } = useFullscreen()
 	const { controlsVisible, wake } = useIdleControls(playing)
 

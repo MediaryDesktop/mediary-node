@@ -1,5 +1,6 @@
 // Fills the player's body: the pill or the card on top, the spinner in what is left.
 .view {
+	position: relative;
 	display: flex;
 	flex: 1;
 	flex-direction: column;
@@ -15,13 +16,15 @@ $morph: 380ms cubic-bezier(0.32, 0.72, 0, 1);
 // The pill and the card are one surface: shut, a pill as wide as its line; open,
 // a card, its corners and padding eased between the two.
 .box {
+	position: relative;
+	z-index: 2;
 	display: flex;
 	flex: none;
 	flex-direction: column;
 	width: min(26rem, 100%);
 	padding: 0 0.75rem 0 1.25rem;
 	border: 1px solid rgb(255 255 255 / 9%);
-	border-radius: 1.875rem;
+	border-radius: 1.2rem;
 	background: #0e0e0e;
 	box-shadow: 0 1.25rem 3rem rgb(0 0 0 / 55%);
 	transition:
@@ -32,7 +35,7 @@ $morph: 380ms cubic-bezier(0.32, 0.72, 0, 1);
 	&.open {
 		width: min(31rem, 100%);
 		padding: 1.25rem 1.25rem 1.5rem 1.5rem;
-		border-radius: 2.25rem;
+		border-radius: 1.2rem;
 	}
 }
 
@@ -92,7 +95,7 @@ $morph: 380ms cubic-bezier(0.32, 0.72, 0, 1);
 		white-space: nowrap;
 
 		strong {
-			color: #fff;
+			color: var(--text);
 			font-weight: 700;
 		}
 	}
@@ -122,7 +125,7 @@ $morph: 380ms cubic-bezier(0.32, 0.72, 0, 1);
 
 	.title {
 		overflow: hidden;
-		color: #fff;
+		color: var(--text);
 		font-size: 1.0625rem;
 		font-weight: 700;
 		white-space: nowrap;
@@ -130,7 +133,7 @@ $morph: 380ms cubic-bezier(0.32, 0.72, 0, 1);
 	}
 
 	.episode {
-		color: rgb(255 255 255 / 50%);
+		color: var(--text-secondary);
 		font-size: 0.875rem;
 	}
 }
@@ -176,7 +179,7 @@ $morph: 380ms cubic-bezier(0.32, 0.72, 0, 1);
 	width: 2.25rem;
 	height: 2.25rem;
 	border: none;
-	border-radius: 999px;
+	border-radius: var(--radius-md);
 	background: transparent;
 	color: rgb(255 255 255 / 55%);
 	cursor: pointer;
@@ -198,7 +201,11 @@ $morph: 380ms cubic-bezier(0.32, 0.72, 0, 1);
 	}
 
 	&.danger {
-		color: #f87171;
+		color: var(--accent);
+
+		&:hover {
+			background: var(--accent-muted);
+		}
 	}
 }
 
@@ -231,7 +238,7 @@ $morph: 380ms cubic-bezier(0.32, 0.72, 0, 1);
 	width: 1.25rem;
 	height: 1.25rem;
 	border: 2.5px solid rgb(255 255 255 / 18%);
-	border-top-color: #c4b5fd;
+	border-top-color: var(--accent);
 	border-radius: 50%;
 	animation: spin 0.8s linear infinite;
 }
@@ -378,14 +385,21 @@ $morph: 380ms cubic-bezier(0.32, 0.72, 0, 1);
 	}
 }
 
+// Laid over the pill instead of in flow, so the pill opening or closing never
+// shifts this, and this appearing never pushes the pill.
 .center {
+	position: absolute;
+	inset: 0;
+	z-index: 1;
 	display: flex;
-	flex: 1;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
 	gap: 1rem;
 	text-align: center;
+	// Covers the pill's own area too, but has nothing drawn there: let clicks
+	// through to the pill's buttons underneath.
+	pointer-events: none;
 
 	.centerText {
 		max-width: 34rem;
@@ -402,6 +416,7 @@ $morph: 380ms cubic-bezier(0.32, 0.72, 0, 1);
 	align-items: center;
 	gap: 0.75rem;
 	max-width: 30rem;
+	pointer-events: auto;
 
 	.failureTitle {
 		margin: 0;

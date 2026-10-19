@@ -63,7 +63,7 @@ export function PreparingStream({ target, stream, error, onStop }: PreparingStre
 	const stop = (
 		<button
 			type='button'
-			className={clsx(styles.iconButton, expanded && styles.danger)}
+			className={clsx(styles.iconButton, styles.danger)}
 			aria-label={t('torrents.stream.stop')}
 			title={t('torrents.stream.stop')}
 			onClick={onStop}

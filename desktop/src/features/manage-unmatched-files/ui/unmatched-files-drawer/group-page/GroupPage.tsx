@@ -2,7 +2,7 @@ import { useUnit } from 'effector-react'
 import { useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, Icon, Input } from '@shared/ui'
+import { Button, Icon, Input, ReelLoader } from '@shared/ui'
 
 import {
 	fileName,
@@ -18,7 +18,7 @@ import { CheckRow } from '../../check-row/CheckRow'
 import styles from './GroupPage.module.scss'
 import { SuggestionCard } from './suggestion-card/SuggestionCard'
 
-const SOURCE = 'anilist'
+const ANILIST = 'anilist:'
 
 // A new folder starts with all of it picked and nothing typed: most folders are
 // one show, and the last folder's answer is almost never this one's.
@@ -39,13 +39,15 @@ export function GroupPage({ group }: { group: UnmatchedGroup }) {
 	])
 
 	const [selected, setSelected] = useState<Set<number>>(() => new Set(group.files.map(file => file.id)))
-	const [mediaId, setMediaId] = useState('')
+	const [mediaRef, setMediaRef] = useState('')
 	const [asked, setAsked] = useState(false)
 
 	const picked = group.files.filter(file => selected.has(file.id))
 	const busy = matching || ignoring
 
-	const suggestions: LibrarySuggestion[] = asked ? (candidates?.suggestions ?? []) : []
+	// The query is shared across folders and keeps its last answer while a new
+	// one loads, so that answer belongs to whatever was asked before.
+	const suggestions: LibrarySuggestion[] = asked && !suggesting ? (candidates?.suggestions ?? []) : []
 
 	const allState = picked.length === 0 ? false : picked.length === group.files.length ? true : 'mixed'
 
@@ -69,34 +71,21 @@ export function GroupPage({ group }: { group: UnmatchedGroup }) {
 				<span>{group.folder}</span>
 			</div>
 
-			<div className={styles.idRow}>
-				<p className={styles.idLabel}>{t('library.unmatched.sourceId')}</p>
+			{group.typedId && (
+				<div className={styles.idRow}>
+					<p className={styles.idLabel}>{t('library.unmatched.sourceId')}</p>
 
-				<Input
-					value={mediaId}
-					inputMode='numeric'
-					onChange={event => setMediaId(event.target.value.replace(/\D/g, ''))}
-					className={styles.idInput}
-				/>
-
-				<Button
-					variant='primary'
-					disabled={mediaId === '' || picked.length === 0 || busy}
-					loading={matching}
-					onClick={() =>
-						matchFiles(
-							picked.map(file => ({
-								fileId: file.id,
-								mediaRef: `${SOURCE}:${mediaId}`,
-								season: file.parsed.season ?? undefined,
-								episode: file.parsed.episode ?? file.parsed.chapter ?? undefined
-							}))
-						)
-					}
-				>
-					{t('library.unmatched.matchSelection')}
-				</Button>
-			</div>
+					<Input
+						value={mediaRef.startsWith(ANILIST) ? mediaRef.slice(ANILIST.length) : ''}
+						inputMode='numeric'
+						onChange={event => {
+							const id = event.target.value.replace(/\D/g, '')
+							setMediaRef(id === '' ? '' : `${ANILIST}${id}`)
+						}}
+						className={styles.idInput}
+					/>
+				</div>
+			)}
 
 			<div className={styles.files}>
 				<CheckRow
@@ -147,9 +136,31 @@ export function GroupPage({ group }: { group: UnmatchedGroup }) {
 				>
 					{t('library.unmatched.ignoreSelection')}
 				</Button>
+
+				<Button
+					variant='primary'
+					disabled={mediaRef === '' || picked.length === 0 || busy}
+					loading={matching}
+					onClick={() =>
+						matchFiles(
+							picked.map(file => ({
+								fileId: file.id,
+								mediaRef,
+								season: file.parsed.season ?? undefined,
+								episode: file.parsed.episode ?? file.parsed.chapter ?? undefined
+							}))
+						)
+					}
+				>
+					{t('library.unmatched.matchSelection')}
+				</Button>
 			</div>
 
-			{asked && suggesting && <p className={styles.muted}>{t('library.match.loading')}</p>}
+			{asked && suggesting && (
+				<div className={styles.loading}>
+					<ReelLoader spinning />
+				</div>
+			)}
 
 			{asked && !suggesting && suggestions.length === 0 && (
 				<p className={styles.muted}>{t('library.match.none')}</p>
@@ -160,19 +171,14 @@ export function GroupPage({ group }: { group: UnmatchedGroup }) {
 					<h3 className={styles.heading}>{t('library.unmatched.pickTitle')}</h3>
 
 					<div className={styles.grid} role='radiogroup'>
-						{suggestions.map(suggestion => {
-							const id = suggestion.media_ref.split(':')[1] ?? ''
-							const chosen = mediaId !== '' && id === mediaId
-
-							return (
-								<SuggestionCard
-									key={suggestion.media_ref}
-									suggestion={suggestion}
-									chosen={chosen}
-									onClick={() => setMediaId(id)}
-								/>
-							)
-						})}
+						{suggestions.map(suggestion => (
+							<SuggestionCard
+								key={suggestion.media_ref}
+								suggestion={suggestion}
+								chosen={suggestion.media_ref === mediaRef}
+								onClick={() => setMediaRef(suggestion.media_ref)}
+							/>
+						))}
 					</div>
 				</section>
 			)}

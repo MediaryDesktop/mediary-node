@@ -25,15 +25,14 @@
 	}
 
 	&.chosen {
-		border-color: var(--accent);
 		background: var(--accent-muted);
 		color: var(--accent-text);
 
-		.cardTitle {
+		.cardText .cardTitle {
 			color: var(--accent-text);
 		}
 
-		.cardMeta {
+		.cardText .cardMeta {
 			color: #ff6b67;
 		}
 	}
