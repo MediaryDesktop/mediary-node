@@ -22,7 +22,7 @@ const probeTimeout = 40 * time.Second
 // Probing a large mkv takes long enough to notice, and the answer only changes
 // when the file does.
 type Prober struct {
-	FFprobePath string
+	FFprobe Locate
 
 	// CacheDir holds one JSON file per probed file version. Empty disables the
 	// cache.
@@ -36,7 +36,7 @@ func (p Prober) Info(ctx context.Context, path string) (*MediaInfo, error) {
 		probeCtx, cancel := context.WithTimeout(ctx, probeTimeout)
 		defer cancel()
 
-		info, err := probe(probeCtx, p.FFprobePath, path)
+		info, err := probe(probeCtx, p.FFprobe, path)
 		if err != nil {
 			return nil, fmt.Errorf("probe the stream: %w", err)
 		}
@@ -61,7 +61,7 @@ func (p Prober) Info(ctx context.Context, path string) (*MediaInfo, error) {
 	ctx, cancel := context.WithTimeout(ctx, probeTimeout)
 	defer cancel()
 
-	info, err := probe(ctx, p.FFprobePath, path)
+	info, err := probe(ctx, p.FFprobe, path)
 	if err != nil {
 		return nil, fmt.Errorf("probe %s: %w", path, err)
 	}

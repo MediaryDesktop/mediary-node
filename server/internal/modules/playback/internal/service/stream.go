@@ -161,8 +161,7 @@ func (s *Service) info(ctx context.Context, file *PlayableFile) (*videofile.Medi
 	info, err := s.opts.Prober.Info(ctx, source)
 	if err != nil {
 		if errors.Is(err, exec.ErrNotFound) {
-			return nil, apperr.Wrap(err, apperr.KindPrecondition,
-				"ffprobe was not found on PATH: install FFmpeg or set NODE_FFPROBE_PATH")
+			return nil, missingTool(err, "ffprobe")
 		}
 
 		if file.Remote {
@@ -212,8 +211,7 @@ func (s *Service) extracted(ctx context.Context, fileID int64) (*videofile.Media
 	out, err := s.opts.Extractor.Extract(ctx, source, file.Key, info)
 	if err != nil {
 		if errors.Is(err, exec.ErrNotFound) {
-			return nil, videofile.Extracted{}, apperr.Wrap(err, apperr.KindPrecondition,
-				"ffmpeg was not found on PATH: install FFmpeg or set NODE_FFMPEG_PATH")
+			return nil, videofile.Extracted{}, missingTool(err, "ffmpeg")
 		}
 
 		return nil, videofile.Extracted{}, apperr.Wrap(err, apperr.KindInternal, "could not extract the subtitles of %s", file.Path)
@@ -279,12 +277,27 @@ func (s *Service) ThumbnailPath(ctx context.Context, fileID int64) (string, erro
 	path, err := s.opts.Thumbnailer.Thumbnail(ctx, file.Path, duration)
 	if err != nil {
 		if errors.Is(err, exec.ErrNotFound) {
-			return "", apperr.Wrap(err, apperr.KindPrecondition,
-				"ffmpeg was not found on PATH: install FFmpeg or set NODE_FFMPEG_PATH")
+			return "", missingTool(err, "ffmpeg")
 		}
 
 		return "", apperr.Wrap(err, apperr.KindInternal, "could not cut a still from %s", file.Path)
 	}
 
 	return path, nil
+}
+
+// missingTool is the error for a program the node could not run. The finder's
+// own message says what to do — install it, or fix the path set by hand — so it
+// is the message, as with mpv.
+func missingTool(err error, program string) error {
+	var missing interface {
+		error
+		MissingProgram() string
+	}
+	if errors.As(err, &missing) {
+		return apperr.Wrap(err, apperr.KindPrecondition, "%v", missing)
+	}
+
+	return apperr.Wrap(err, apperr.KindPrecondition,
+		"%s was not found: install FFmpeg on the Extensions page, under Dependencies", program)
 }

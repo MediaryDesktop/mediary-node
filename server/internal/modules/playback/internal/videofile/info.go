@@ -81,13 +81,36 @@ type Chapter struct {
 	Name      string  `json:"name"`
 }
 
-// go-ffprobe keeps the binary path in a package global, so it is set once.
-var ffprobeOnce sync.Once
+// go-ffprobe keeps the binary path in a package global. Probes hold it for
+// reading; a new path, after an install, waits for the ones running.
+var ffprobeBin struct {
+	sync.RWMutex
+	path string
+}
 
-func probe(ctx context.Context, ffprobePath, path string) (*MediaInfo, error) {
-	if ffprobePath != "" {
-		ffprobeOnce.Do(func() { ffprobe.SetFFProbeBinPath(ffprobePath) })
+func useFFprobe(bin string) (release func()) {
+	for {
+		ffprobeBin.RLock()
+		if ffprobeBin.path == bin {
+			return ffprobeBin.RUnlock
+		}
+		ffprobeBin.RUnlock()
+
+		ffprobeBin.Lock()
+		ffprobe.SetFFProbeBinPath(bin)
+		ffprobeBin.path = bin
+		ffprobeBin.Unlock()
 	}
+}
+
+func probe(ctx context.Context, locate Locate, path string) (*MediaInfo, error) {
+	bin, err := locate.path("ffprobe")
+	if err != nil {
+		return nil, err
+	}
+
+	release := useFFprobe(bin)
+	defer release()
 
 	data, err := ffprobe.ProbeURL(ctx, path)
 	if err != nil {

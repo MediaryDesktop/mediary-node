@@ -2,9 +2,7 @@ package mpv
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"os"
 	"os/exec"
 	"time"
 )
@@ -15,29 +13,6 @@ const (
 	connectTimeout = 10 * time.Second
 	connectRetry   = 100 * time.Millisecond
 )
-
-var ErrPlayerNotFound = errors.New("mpv was not found")
-
-// Locate resolves the mpv binary. The configured path wins, because a user who
-// pointed the node at a specific build meant it; otherwise mpv has to be on PATH,
-// and if it is not, saying so plainly is more useful than a failure later.
-func Locate(configured string) (string, error) {
-	if configured != "" {
-		info, err := os.Stat(configured)
-		if err != nil || info.IsDir() {
-			return "", fmt.Errorf("%w at the configured path %s", ErrPlayerNotFound, configured)
-		}
-
-		return configured, nil
-	}
-
-	path, err := exec.LookPath("mpv")
-	if err != nil {
-		return "", fmt.Errorf("%w on PATH: install mpv or set NODE_MPV_PATH", ErrPlayerNotFound)
-	}
-
-	return path, nil
-}
 
 type LaunchOptions struct {
 	Binary string

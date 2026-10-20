@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"errors"
+	"os/exec"
 
 	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/videofile"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
@@ -153,5 +155,9 @@ func (s *Service) StopTranscode(ctx context.Context, fileID int64) error {
 }
 
 func transcodeError(err error) error {
+	if errors.Is(err, exec.ErrNotFound) {
+		return missingTool(err, "ffmpeg")
+	}
+
 	return apperr.Wrap(err, apperr.KindUnavailable, "the transcoder could not serve this: %v", err)
 }

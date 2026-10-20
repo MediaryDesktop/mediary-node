@@ -6,7 +6,6 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/rs/zerolog"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/cassette"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/handler"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/mpv"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/service"
@@ -20,19 +19,15 @@ type (
 	PlayableFile = service.PlayableFile
 	Library      = service.Library
 	Progress     = service.Progress
+	Tools        = service.Tools
 )
 
 type Deps struct {
 	Logger zerolog.Logger
 	Events *events.Hub
 
-	// MPVPath is the configured player. Empty means the node looks for mpv on PATH.
-	MPVPath string
-
-	// FFmpegPath and FFprobePath are the configured tools. Empty means the node
-	// looks for them on PATH.
-	FFmpegPath  string
-	FFprobePath string
+	// Tools says where mpv, ffmpeg and ffprobe are, on every use.
+	Tools Tools
 
 	// DataDir is where the player's control socket goes on platforms where it is a
 	// file rather than a named pipe, and where probed media info is cached.
@@ -53,35 +48,22 @@ type Deps struct {
 }
 
 func New(deps Deps) *Module {
-	var transcoder *cassette.Cassette
+	var transcoder *lazyTranscoder
 
 	if deps.Transcode {
-		logger := deps.Logger
-
-		ffmpeg := deps.FFmpegPath
-		if ffmpeg == "" {
-			ffmpeg = "ffmpeg"
-		}
-
-		var err error
-		transcoder, err = cassette.New(&cassette.NewCassetteOptions{
-			Logger:      &logger,
-			HwAccelKind: deps.TranscodeHWAccel,
-			TempOutDir:  deps.TranscodeDir,
-			FfmpegPath:  ffmpeg,
-			FfprobePath: deps.FFprobePath,
-		})
-		if err != nil {
-			// Direct play and mpv do not need it; a broken transcode dir should
-			// not take them down.
-			deps.Logger.Error().Err(err).Msg("transcoding is unavailable")
-			transcoder = nil
+		transcoder = &lazyTranscoder{
+			tools:   deps.Tools,
+			logger:  deps.Logger,
+			hwAccel: deps.TranscodeHWAccel,
+			dir:     deps.TranscodeDir,
 		}
 	}
 
+	ffmpeg := func() (string, error) { return deps.Tools.Path("ffmpeg") }
+
 	opts := service.Options{
 		Launcher: service.MPVLauncher{
-			Binary: deps.MPVPath,
+			Tools:  deps.Tools,
 			Socket: mpv.SocketPath(deps.DataDir),
 			Logger: deps.Logger,
 		},
@@ -89,16 +71,16 @@ func New(deps Deps) *Module {
 		Progress: deps.Progress,
 		LocalURL: deps.LocalURL,
 		Prober: videofile.Prober{
-			FFprobePath: deps.FFprobePath,
-			CacheDir:    filepath.Join(deps.DataDir, "cache", "mediainfo"),
+			FFprobe:  func() (string, error) { return deps.Tools.Path("ffprobe") },
+			CacheDir: filepath.Join(deps.DataDir, "cache", "mediainfo"),
 		},
 		Extractor: &videofile.Extractor{
-			FFmpegPath: deps.FFmpegPath,
-			CacheDir:   filepath.Join(deps.DataDir, "cache", "extracted"),
+			FFmpeg:   ffmpeg,
+			CacheDir: filepath.Join(deps.DataDir, "cache", "extracted"),
 		},
 		Thumbnailer: &videofile.Thumbnailer{
-			FFmpegPath: deps.FFmpegPath,
-			CacheDir:   filepath.Join(deps.DataDir, "cache", "thumbnails"),
+			FFmpeg:   ffmpeg,
+			CacheDir: filepath.Join(deps.DataDir, "cache", "thumbnails"),
 		},
 	}
 
@@ -114,13 +96,13 @@ func New(deps Deps) *Module {
 
 type Module struct {
 	handler    *handler.Handler
-	transcoder *cassette.Cassette
+	transcoder *lazyTranscoder
 }
 
 // Close stops every encoder, so no ffmpeg outlives the node.
 func (m *Module) Close() {
 	if m.transcoder != nil {
-		m.transcoder.Destroy()
+		m.transcoder.close()
 	}
 }
 

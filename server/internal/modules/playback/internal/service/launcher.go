@@ -14,10 +14,16 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
 )
 
+// Tools finds the programs playback runs: mpv, ffmpeg and ffprobe. It is asked
+// on every use, so one installed while the node runs is used at once. When a
+// program is nowhere its error wraps exec.ErrNotFound and says what to do.
+type Tools interface {
+	Path(program string) (string, error)
+}
+
 // MPVLauncher opens mpv on a file and connects to its control socket.
 type MPVLauncher struct {
-	// Binary is the configured path to mpv. Empty means "find it on PATH".
-	Binary string
+	Tools Tools
 
 	// Socket is where mpv is told to open its IPC endpoint.
 	Socket string
@@ -26,7 +32,7 @@ type MPVLauncher struct {
 }
 
 func (l MPVLauncher) Start(ctx context.Context, path string, startAt float64) (Player, error) {
-	binary, err := mpv.Locate(l.Binary)
+	binary, err := l.Tools.Path("mpv")
 	if err != nil {
 		// The reason is the whole value of this error — the user has to install mpv
 		// or point the node at it — so it is the message, not a cause buried under a

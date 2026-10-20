@@ -34,8 +34,8 @@ const (
 // long as the file stays the same. It stands in for an episode image when no
 // source has one.
 type Thumbnailer struct {
-	FFmpegPath string
-	CacheDir   string
+	FFmpeg   Locate
+	CacheDir string
 
 	once  sync.Once
 	slots chan struct{}
@@ -107,9 +107,9 @@ func (t *Thumbnailer) run(ctx context.Context, path string, position float64, ou
 	ctx, cancel := context.WithTimeout(ctx, thumbnailTimeout)
 	defer cancel()
 
-	ffmpeg := t.FFmpegPath
-	if ffmpeg == "" {
-		ffmpeg = "ffmpeg"
+	ffmpeg, err := t.FFmpeg.path("ffmpeg")
+	if err != nil {
+		return err
 	}
 
 	args := []string{

@@ -144,7 +144,7 @@ func TestProberReadsARealFileAndCachesIt(t *testing.T) {
 		t.Fatalf("cache holds %d entries, want 1", len(entries))
 	}
 
-	again, err := Prober{FFprobePath: filepath.Join(dir, "missing-ffprobe"), CacheDir: prober.CacheDir}.Info(context.Background(), path)
+	again, err := Prober{FFprobe: At(filepath.Join(dir, "missing-ffprobe")), CacheDir: prober.CacheDir}.Info(context.Background(), path)
 	if err != nil {
 		t.Fatalf("second probe did not come from the cache: %v", err)
 	}

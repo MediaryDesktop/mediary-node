@@ -56,7 +56,7 @@ func TestThumbnailIsCutOnceAndKept(t *testing.T) {
 		t.Skipf("cannot make a test video: %v: %s", genErr, output)
 	}
 
-	thumbnailer := &Thumbnailer{FFmpegPath: ffmpeg, CacheDir: filepath.Join(dir, "thumbs")}
+	thumbnailer := &Thumbnailer{FFmpeg: At(ffmpeg), CacheDir: filepath.Join(dir, "thumbs")}
 
 	first, err := thumbnailer.Thumbnail(context.Background(), video, 10)
 	if err != nil {

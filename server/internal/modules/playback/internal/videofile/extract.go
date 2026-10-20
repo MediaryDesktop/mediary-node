@@ -19,8 +19,8 @@ const extractTimeout = 2 * time.Minute
 // once per file version. Matroska keeps subtitles interleaved through the whole
 // file, so one pass for every track costs the same as one pass for one track.
 type Extractor struct {
-	FFmpegPath string
-	CacheDir   string
+	FFmpeg   Locate
+	CacheDir string
 
 	mu    sync.Mutex
 	locks map[string]*sync.Mutex
@@ -109,9 +109,9 @@ func (x *Extractor) run(ctx context.Context, path string, info *MediaInfo, out E
 	ctx, cancel := context.WithTimeout(ctx, extractTimeout)
 	defer cancel()
 
-	binary := x.FFmpegPath
-	if binary == "" {
-		binary = "ffmpeg"
+	binary, err := x.FFmpeg.path("ffmpeg")
+	if err != nil {
+		return err
 	}
 
 	cmd := exec.CommandContext(ctx, binary, args...) //nolint:gosec // the configured ffmpeg, arguments built here
