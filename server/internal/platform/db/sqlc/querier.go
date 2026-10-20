@@ -32,6 +32,7 @@ type Querier interface {
 	DeleteAutoVideoMatchesForRoot(ctx context.Context, rootID int64) error
 	DeleteCustomList(ctx context.Context, id int64) (int64, error)
 	DeleteCustomListItemsForRef(ctx context.Context, mediaRef string) error
+	DeleteExtension(ctx context.Context, id string) (int64, error)
 	DeleteFileMatch(ctx context.Context, fileID int64) (int64, error)
 	// The match hangs off the file row and goes with it: the user deleted the file
 	// itself, not only what it was tied to.
@@ -57,6 +58,7 @@ type Querier interface {
 	GetAniListOutboxEntry(ctx context.Context, arg GetAniListOutboxEntryParams) (AnilistOutbox, error)
 	GetBookPosition(ctx context.Context, fileID int64) (BookPosition, error)
 	GetCustomList(ctx context.Context, id int64) (CustomList, error)
+	GetExtension(ctx context.Context, id string) (Extension, error)
 	GetLibraryFile(ctx context.Context, id int64) (GetLibraryFileRow, error)
 	GetLibraryRoot(ctx context.Context, id int64) (GetLibraryRootRow, error)
 	GetMangaDownload(ctx context.Context, id int64) (MangaDownload, error)
@@ -74,6 +76,7 @@ type Querier interface {
 	GetTrackerEntry(ctx context.Context, mediaRef string) (TrackerEntry, error)
 	InsertCustomList(ctx context.Context, arg InsertCustomListParams) (CustomList, error)
 	InsertCustomListItem(ctx context.Context, arg InsertCustomListItemParams) error
+	InsertExtension(ctx context.Context, arg InsertExtensionParams) (Extension, error)
 	InsertLibraryFile(ctx context.Context, arg InsertLibraryFileParams) (int64, error)
 	InsertLibraryRoot(ctx context.Context, arg InsertLibraryRootParams) (InsertLibraryRootRow, error)
 	InsertScanRun(ctx context.Context, arg InsertScanRunParams) (int64, error)
@@ -90,6 +93,7 @@ type Querier interface {
 	ListCustomListItems(ctx context.Context, listID int64) ([]CustomListItem, error)
 	ListCustomListMembership(ctx context.Context, mediaType string) ([]ListCustomListMembershipRow, error)
 	ListCustomLists(ctx context.Context) ([]ListCustomListsRow, error)
+	ListExtensions(ctx context.Context) ([]Extension, error)
 	// The library as a list of titles rather than of files: one row per title the
 	// user has something of, which is what a shelf of posters is made from.
 	ListLibraryCollection(ctx context.Context) ([]ListLibraryCollectionRow, error)
@@ -151,6 +155,8 @@ type Querier interface {
 	// state always encodes to the same bytes and the cloud can tell it is unchanged.
 	SnapshotTrackerEntries(ctx context.Context) ([]TrackerEntry, error)
 	TouchLibraryRoot(ctx context.Context, arg TouchLibraryRootParams) error
+	UpdateExtensionManifest(ctx context.Context, arg UpdateExtensionManifestParams) (Extension, error)
+	UpdateExtensionSettings(ctx context.Context, arg UpdateExtensionSettingsParams) (Extension, error)
 	UpdateLibraryFile(ctx context.Context, arg UpdateLibraryFileParams) error
 	// Only the parsed columns: the file itself did not change, a newer parser reads
 	// its name differently.

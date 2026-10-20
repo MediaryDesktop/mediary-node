@@ -29,6 +29,7 @@ require (
 	github.com/go-chi/cors v1.2.2
 	github.com/pressly/goose/v3 v3.27.3
 	github.com/rs/zerolog v1.35.1
+	golang.org/x/mod v0.41.0
 	golang.org/x/net v0.58.0
 	golang.org/x/sync v0.23.0
 	golang.org/x/text v0.42.0
@@ -134,7 +135,7 @@ require (
 	go4.org v0.0.0-20260112195520-a5071408f32f // indirect
 	golang.org/x/crypto v0.55.0 // indirect
 	golang.org/x/exp v0.0.0-20260718201538-764159d718ef // indirect
-	golang.org/x/mod v0.41.0 // indirect
+
 	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/time v0.14.0 // indirect
 	golang.org/x/tools v0.49.0 // indirect

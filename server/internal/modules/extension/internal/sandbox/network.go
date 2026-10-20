@@ -73,6 +73,10 @@ type LocalAddressError struct {
 }
 
 func (e *LocalAddressError) Error() string {
+	if e.Host == e.Addr.String() {
+		return fmt.Sprintf("%s is a local or private address", e.Host)
+	}
+
 	return fmt.Sprintf("%s resolves to %s, a local or private address", e.Host, e.Addr)
 }
 

@@ -227,8 +227,11 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 	}
 
 	extension.New(extension.Deps{
-		DB:     deps.DB,
-		Logger: moduleLogger(deps.Logger, "extension"),
+		DB:          deps.DB,
+		Logger:      moduleLogger(deps.Logger, "extension"),
+		Events:      deps.Events,
+		DataDir:     deps.DataDir,
+		NodeVersion: deps.Build.Version,
 	}).Register(api)
 
 	return func() {

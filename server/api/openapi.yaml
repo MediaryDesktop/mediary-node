@@ -480,6 +480,40 @@ components:
         - collection
         - sources
       type: object
+    ConfigField:
+      additionalProperties: false
+      properties:
+        default:
+          type: string
+        label:
+          type: string
+        name:
+          type: string
+        options:
+          items:
+            type: string
+          type:
+            - array
+            - "null"
+        secret:
+          type: boolean
+        set:
+          type: boolean
+        type:
+          enum:
+            - text
+            - select
+            - switch
+          type: string
+        value:
+          type: string
+      required:
+        - name
+        - label
+        - type
+        - secret
+        - set
+      type: object
     ControlInputBody:
       additionalProperties: false
       properties:
@@ -979,6 +1013,95 @@ components:
           format: uri
           type: string
       type: object
+    Extension:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/Extension.json
+          format: uri
+          readOnly: true
+          type: string
+        author:
+          type: string
+        config:
+          items:
+            $ref: "#/components/schemas/ConfigField"
+          type:
+            - array
+            - "null"
+        description:
+          type: string
+        enabled:
+          type: boolean
+        homepage:
+          type: string
+        icon:
+          type: string
+        id:
+          type: string
+        installed_at:
+          format: date-time
+          type: string
+        lang:
+          type: string
+        manifest_url:
+          type: string
+        name:
+          type: string
+        network:
+          description: Every host the plugin may reach. Nothing else is reachable to it.
+          items:
+            type: string
+          type:
+            - array
+            - "null"
+        type:
+          enum:
+            - torrent-provider
+          type: string
+        update:
+          $ref: "#/components/schemas/Update"
+          description: What the last update check found.
+        updated_at:
+          format: date-time
+          type: string
+        version:
+          type: string
+      required:
+        - config
+        - enabled
+        - manifest_url
+        - installed_at
+        - updated_at
+        - id
+        - name
+        - version
+        - type
+        - author
+        - lang
+        - network
+      type: object
+    ExtensionsOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/ExtensionsOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        extensions:
+          items:
+            $ref: "#/components/schemas/Extension"
+          type:
+            - array
+            - "null"
+      required:
+        - extensions
+      type: object
     File:
       additionalProperties: false
       properties:
@@ -1288,6 +1411,28 @@ components:
         - commit
         - built
         - linked
+      type: object
+    InstallInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/InstallInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        consent:
+          description: From the preview the user agreed to.
+          pattern: ^[0-9a-f]{64}$
+          type: string
+        url:
+          format: uri
+          maxLength: 2048
+          type: string
+      required:
+        - url
+        - consent
       type: object
     LibraryCollection:
       additionalProperties: false
@@ -2429,6 +2574,92 @@ components:
       required:
         - playing
       type: object
+    Preview:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/Preview.json
+          format: uri
+          readOnly: true
+          type: string
+        author:
+          type: string
+        compatible:
+          type: boolean
+        config:
+          items:
+            $ref: "#/components/schemas/ConfigField"
+          type:
+            - array
+            - "null"
+        consent:
+          description: Pass back to install exactly this; a manifest that changed in between is refused.
+          type: string
+        description:
+          type: string
+        homepage:
+          type: string
+        icon:
+          type: string
+        id:
+          type: string
+        installed:
+          description: The version already installed, if any.
+          type: string
+        lang:
+          type: string
+        manifest_url:
+          type: string
+        min_node_version:
+          type: string
+        name:
+          type: string
+        network:
+          description: Every host the plugin may reach. Nothing else is reachable to it.
+          items:
+            type: string
+          type:
+            - array
+            - "null"
+        type:
+          enum:
+            - torrent-provider
+          type: string
+        version:
+          type: string
+      required:
+        - config
+        - manifest_url
+        - consent
+        - compatible
+        - id
+        - name
+        - version
+        - type
+        - author
+        - lang
+        - network
+      type: object
+    PreviewInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/PreviewInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        url:
+          description: The plugin's manifest.json, at an https:// address.
+          format: uri
+          maxLength: 2048
+          type: string
+      required:
+        - url
+      type: object
     ProgressInputBody:
       additionalProperties: false
       properties:
@@ -3419,6 +3650,24 @@ components:
           type: integer
       required:
         - media_ref
+      type: object
+    SettingsInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/SettingsInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        config:
+          additionalProperties:
+            type: string
+          description: Only the settings to change. Empty goes back to the default; for a secret, removes it.
+          type: object
+        enabled:
+          type: boolean
       type: object
     SignInInputBody:
       additionalProperties: false
@@ -4971,6 +5220,31 @@ components:
         - site
         - thumbnail
       type: object
+    Update:
+      additionalProperties: false
+      properties:
+        added_hosts:
+          description: Hosts the new version reaches that this one does not.
+          items:
+            type: string
+          type:
+            - array
+            - "null"
+        compatible:
+          type: boolean
+        consent:
+          type: string
+        error:
+          description: Why the check could not tell.
+          type: string
+        needs_consent:
+          type: boolean
+        version:
+          type: string
+      required:
+        - needs_consent
+        - compatible
+      type: object
     UpdateEntryInputBody:
       additionalProperties: false
       properties:
@@ -5026,6 +5300,23 @@ components:
             - PAUSED
             - REPEATING
           type: string
+      type: object
+    UpdateInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/UpdateInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        consent:
+          description: From the update check the user saw.
+          pattern: ^[0-9a-f]{64}$
+          type: string
+      required:
+        - consent
       type: object
     UpdateRootInputBody:
       additionalProperties: false
@@ -5164,7 +5455,6 @@ paths:
         - tracker
   /v1/extension/status:
     get:
-      description: Reports whether the extension module is wired. Placeholder for phase 0.
       operationId: getExtensionStatus
       responses:
         "200":
@@ -5180,6 +5470,184 @@ paths:
                 $ref: "#/components/schemas/ErrorModel"
           description: Error
       summary: Extension module status
+      tags:
+        - extension
+  /v1/extensions:
+    get:
+      description: Each with the hosts it may reach, its settings — secrets only as set or not — and what the last update check found. Changes arrive on the extension topic.
+      operationId: listExtensions
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExtensionsOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Installed plugins
+      tags:
+        - extension
+    post:
+      description: Reads the manifest again and installs it only if it is the one the consent was given for. The code is downloaded once, refused unless it matches the manifest's sum, and run only from the saved copy.
+      operationId: installExtension
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InstallInputBody"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Extension"
+          description: Created
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Install a plugin
+      tags:
+        - extension
+  /v1/extensions/preview:
+    post:
+      description: "Reads the manifest and says what installing it means: the hosts the plugin will reach and the settings it asks for. Nothing is downloaded but the manifest, nothing is saved. Install with the consent it returns."
+      operationId: previewExtension
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PreviewInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Preview"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Read a plugin before installing it
+      tags:
+        - extension
+  /v1/extensions/updates:
+    post:
+      description: Reads each plugin's manifest at the address it was installed from. Nothing is installed. A newer version that reaches new hosts or plays another role needs the user's consent again.
+      operationId: checkExtensionUpdates
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExtensionsOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Look for newer versions of the plugins
+      tags:
+        - extension
+  /v1/extensions/{id}:
+    delete:
+      description: Its code, settings and secrets go with it.
+      operationId: removeExtension
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            pattern: ^[a-z][a-z0-9-]{1,47}$
+            type: string
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Remove a plugin
+      tags:
+        - extension
+    patch:
+      operationId: configureExtension
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            pattern: ^[a-z][a-z0-9-]{1,47}$
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SettingsInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Extension"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Turn a plugin on or off, or change its settings
+      tags:
+        - extension
+  /v1/extensions/{id}/update:
+    post:
+      description: Only from the address it was installed from, only newer, only the manifest the consent was given for. Settings that still fit carry over.
+      operationId: updateExtension
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            pattern: ^[a-z][a-z0-9-]{1,47}$
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Extension"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Install a plugin's newer version
       tags:
         - extension
   /v1/google-books/settings:

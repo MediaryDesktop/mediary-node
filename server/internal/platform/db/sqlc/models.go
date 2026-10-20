@@ -48,6 +48,16 @@ type CustomListItem struct {
 	AddedAt  int64  `json:"added_at"`
 }
 
+type Extension struct {
+	ID          string `json:"id"`
+	ManifestUrl string `json:"manifest_url"`
+	Manifest    string `json:"manifest"`
+	Enabled     int64  `json:"enabled"`
+	Config      string `json:"config"`
+	InstalledAt string `json:"installed_at"`
+	UpdatedAt   string `json:"updated_at"`
+}
+
 type FileMatch struct {
 	FileID     int64         `json:"file_id"`
 	MediaRef   string        `json:"media_ref"`

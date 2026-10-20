@@ -694,3 +694,47 @@ func TestConsoleGoesToTheLogWithinBounds(t *testing.T) {
 		t.Fatalf("last line %s", lines[3])
 	}
 }
+
+// Manifests and code are fetched under the plugins' own rule: a manifest's
+// payload pointing at the node or the LAN is refused before any request.
+func TestPublicClientRefusesLocalAddresses(t *testing.T) {
+	served := false
+	local := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		served = true
+		fmt.Fprint(w, "x")
+	}))
+	t.Cleanup(local.Close)
+
+	req, _ := http.NewRequestWithContext(context.Background(), http.MethodGet, local.URL+"/plugin.js", http.NoBody)
+	resp, err := PublicClient(5 * time.Second).Do(req)
+	if err == nil {
+		_ = resp.Body.Close()
+	}
+
+	var refused *LocalAddressError
+	if !errors.As(err, &refused) || served {
+		t.Fatalf("%v; served %v; want it refused before any request", err, served)
+	}
+}
+
+func TestPublicClientFollowsOnlyHTTPS(t *testing.T) {
+	s := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "http://plugins.example.org/plugin.js", http.StatusFound)
+	}))
+	t.Cleanup(s.Close)
+
+	loopback := netip.MustParseAddr("127.0.0.1")
+	client := publicClient(5*time.Second,
+		func(context.Context, string) ([]netip.Addr, error) { return []netip.Addr{loopback}, nil },
+		func(addr netip.Addr) bool { return addr == loopback })
+	client.Transport.(*http.Transport).TLSClientConfig = s.Client().Transport.(*http.Transport).TLSClientConfig
+
+	req, _ := http.NewRequestWithContext(context.Background(), http.MethodGet, s.URL+"/manifest.json", http.NoBody)
+	resp, err := client.Do(req)
+	if err == nil {
+		_ = resp.Body.Close()
+	}
+	if err == nil || !strings.Contains(err.Error(), "only https") {
+		t.Fatalf("%v; want the http redirect refused", err)
+	}
+}

@@ -36,13 +36,115 @@ export interface paths {
 			path?: never
 			cookie?: never
 		}
-		/**
-		 * Extension module status
-		 * @description Reports whether the extension module is wired. Placeholder for phase 0.
-		 */
+		/** Extension module status */
 		get: operations['getExtensionStatus']
 		put?: never
 		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/extensions': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Installed plugins
+		 * @description Each with the hosts it may reach, its settings — secrets only as set or not — and what the last update check found. Changes arrive on the extension topic.
+		 */
+		get: operations['listExtensions']
+		put?: never
+		/**
+		 * Install a plugin
+		 * @description Reads the manifest again and installs it only if it is the one the consent was given for. The code is downloaded once, refused unless it matches the manifest's sum, and run only from the saved copy.
+		 */
+		post: operations['installExtension']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/extensions/preview': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Read a plugin before installing it
+		 * @description Reads the manifest and says what installing it means: the hosts the plugin will reach and the settings it asks for. Nothing is downloaded but the manifest, nothing is saved. Install with the consent it returns.
+		 */
+		post: operations['previewExtension']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/extensions/updates': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Look for newer versions of the plugins
+		 * @description Reads each plugin's manifest at the address it was installed from. Nothing is installed. A newer version that reaches new hosts or plays another role needs the user's consent again.
+		 */
+		post: operations['checkExtensionUpdates']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/extensions/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		post?: never
+		/**
+		 * Remove a plugin
+		 * @description Its code, settings and secrets go with it.
+		 */
+		delete: operations['removeExtension']
+		options?: never
+		head?: never
+		/** Turn a plugin on or off, or change its settings */
+		patch: operations['configureExtension']
+		trace?: never
+	}
+	'/v1/extensions/{id}/update': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Install a plugin's newer version
+		 * @description Only from the address it was installed from, only newer, only the manifest the consent was given for. Settings that still fit carry over.
+		 */
+		post: operations['updateExtension']
 		delete?: never
 		options?: never
 		head?: never
@@ -2097,6 +2199,17 @@ export interface components {
 			/** @description Attribution for every field that came from an external source. */
 			sources: components['schemas']['Source'][] | null
 		}
+		ConfigField: {
+			default?: string
+			label: string
+			name: string
+			options?: string[] | null
+			secret: boolean
+			set: boolean
+			/** @enum {string} */
+			type: 'text' | 'select' | 'switch'
+			value?: string
+		}
 		ControlInputBody: {
 			/**
 			 * Format: uri
@@ -2376,6 +2489,44 @@ export interface components {
 			 */
 			type: string
 		}
+		Extension: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/Extension.json
+			 */
+			readonly $schema?: string
+			author: string
+			config: components['schemas']['ConfigField'][] | null
+			description?: string
+			enabled: boolean
+			homepage?: string
+			icon?: string
+			id: string
+			/** Format: date-time */
+			installed_at: string
+			lang: string
+			manifest_url: string
+			name: string
+			/** @description Every host the plugin may reach. Nothing else is reachable to it. */
+			network: string[] | null
+			/** @enum {string} */
+			type: 'torrent-provider'
+			/** @description What the last update check found. */
+			update?: components['schemas']['Update']
+			/** Format: date-time */
+			updated_at: string
+			version: string
+		}
+		ExtensionsOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ExtensionsOutputBody.json
+			 */
+			readonly $schema?: string
+			extensions: components['schemas']['Extension'][] | null
+		}
 		File: {
 			/**
 			 * Format: int64
@@ -2553,6 +2704,18 @@ export interface components {
 			 * @example 0.1.0
 			 */
 			version: string
+		}
+		InstallInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/InstallInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description From the preview the user agreed to. */
+			consent: string
+			/** Format: uri */
+			url: string
 		}
 		LibraryCollection: {
 			/** @description Titles the library holds files of, by name. */
@@ -3079,6 +3242,47 @@ export interface components {
 			playing: boolean
 			/** @description The open session. Absent when nothing is playing. */
 			session?: components['schemas']['PlaybackSession']
+		}
+		Preview: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/Preview.json
+			 */
+			readonly $schema?: string
+			author: string
+			compatible: boolean
+			config: components['schemas']['ConfigField'][] | null
+			/** @description Pass back to install exactly this; a manifest that changed in between is refused. */
+			consent: string
+			description?: string
+			homepage?: string
+			icon?: string
+			id: string
+			/** @description The version already installed, if any. */
+			installed?: string
+			lang: string
+			manifest_url: string
+			min_node_version?: string
+			name: string
+			/** @description Every host the plugin may reach. Nothing else is reachable to it. */
+			network: string[] | null
+			/** @enum {string} */
+			type: 'torrent-provider'
+			version: string
+		}
+		PreviewInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/PreviewInputBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * Format: uri
+			 * @description The plugin's manifest.json, at an https:// address.
+			 */
+			url: string
 		}
 		ProgressInputBody: {
 			/**
@@ -3747,6 +3951,19 @@ export interface components {
 			 * @description Season number, when the title has seasons.
 			 */
 			season?: number
+		}
+		SettingsInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/SettingsInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description Only the settings to change. Empty goes back to the default; for a secret, removes it. */
+			config?: {
+				[key: string]: string
+			}
+			enabled?: boolean
 		}
 		SignInInputBody: {
 			/**
@@ -4617,6 +4834,16 @@ export interface components {
 			/** @description Preview frame for the trailer. */
 			thumbnail: string | null
 		}
+		Update: {
+			/** @description Hosts the new version reaches that this one does not. */
+			added_hosts?: string[] | null
+			compatible: boolean
+			consent?: string
+			/** @description Why the check could not tell. */
+			error?: string
+			needs_consent: boolean
+			version?: string
+		}
 		UpdateEntryInputBody: {
 			/**
 			 * Format: uri
@@ -4657,6 +4884,16 @@ export interface components {
 			 * @enum {string}
 			 */
 			status?: 'CURRENT' | 'PLANNING' | 'COMPLETED' | 'DROPPED' | 'PAUSED' | 'REPEATING'
+		}
+		UpdateInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/UpdateInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description From the update check the user saw. */
+			consent: string
 		}
 		UpdateRootInputBody: {
 			/**
@@ -4713,6 +4950,7 @@ export type SchemaCheckTorrentClientInputBody = components['schemas']['CheckTorr
 export type SchemaCheckTorrentDebridInputBody = components['schemas']['CheckTorrentDebridInputBody']
 export type SchemaCheckTorrentSourceInputBody = components['schemas']['CheckTorrentSourceInputBody']
 export type SchemaCollectionOutputBody = components['schemas']['CollectionOutputBody']
+export type SchemaConfigField = components['schemas']['ConfigField']
 export type SchemaControlInputBody = components['schemas']['ControlInputBody']
 export type SchemaCounts = components['schemas']['Counts']
 export type SchemaCreateListInputBody = components['schemas']['CreateListInputBody']
@@ -4728,6 +4966,8 @@ export type SchemaEpisodes = components['schemas']['Episodes']
 export type SchemaEpisodesOutputBody = components['schemas']['EpisodesOutputBody']
 export type SchemaErrorDetail = components['schemas']['ErrorDetail']
 export type SchemaErrorModel = components['schemas']['ErrorModel']
+export type SchemaExtension = components['schemas']['Extension']
+export type SchemaExtensionsOutputBody = components['schemas']['ExtensionsOutputBody']
 export type SchemaFile = components['schemas']['File']
 export type SchemaFileOutputBody = components['schemas']['FileOutputBody']
 export type SchemaFilePage = components['schemas']['FilePage']
@@ -4740,6 +4980,7 @@ export type SchemaFuzzyDate = components['schemas']['FuzzyDate']
 export type SchemaGoogleBooksKeyInputBody = components['schemas']['GoogleBooksKeyInputBody']
 export type SchemaGoogleBooksSettings = components['schemas']['GoogleBooksSettings']
 export type SchemaHealthOutputBody = components['schemas']['HealthOutputBody']
+export type SchemaInstallInputBody = components['schemas']['InstallInputBody']
 export type SchemaLibraryCollection = components['schemas']['LibraryCollection']
 export type SchemaLibraryCollectionEntry = components['schemas']['LibraryCollectionEntry']
 export type SchemaList = components['schemas']['List']
@@ -4772,6 +5013,8 @@ export type SchemaParsed = components['schemas']['Parsed']
 export type SchemaPlaybackOutputBody = components['schemas']['PlaybackOutputBody']
 export type SchemaPlaybackSession = components['schemas']['PlaybackSession']
 export type SchemaPlaybackStatus = components['schemas']['PlaybackStatus']
+export type SchemaPreview = components['schemas']['Preview']
+export type SchemaPreviewInputBody = components['schemas']['PreviewInputBody']
 export type SchemaProgressInputBody = components['schemas']['ProgressInputBody']
 export type SchemaProgressOutputBody = components['schemas']['ProgressOutputBody']
 export type SchemaPutMangaDexSettingsInputBody = components['schemas']['PutMangaDexSettingsInputBody']
@@ -4806,6 +5049,7 @@ export type SchemaSelectTorrentFilesInputBody = components['schemas']['SelectTor
 export type SchemaSessionOutputBody = components['schemas']['SessionOutputBody']
 export type SchemaSetIgnoredInputBody = components['schemas']['SetIgnoredInputBody']
 export type SchemaSetMatchInputBody = components['schemas']['SetMatchInputBody']
+export type SchemaSettingsInputBody = components['schemas']['SettingsInputBody']
 export type SchemaSignInInputBody = components['schemas']['SignInInputBody']
 export type SchemaSource = components['schemas']['Source']
 export type SchemaStartInputBody = components['schemas']['StartInputBody']
@@ -4857,7 +5101,9 @@ export type SchemaTorrentSourceOutcome = components['schemas']['TorrentSourceOut
 export type SchemaTorrentSourcesOutputBody = components['schemas']['TorrentSourcesOutputBody']
 export type SchemaTorrentStream = components['schemas']['TorrentStream']
 export type SchemaTrailer = components['schemas']['Trailer']
+export type SchemaUpdate = components['schemas']['Update']
 export type SchemaUpdateEntryInputBody = components['schemas']['UpdateEntryInputBody']
+export type SchemaUpdateInputBody = components['schemas']['UpdateInputBody']
 export type SchemaUpdateRootInputBody = components['schemas']['UpdateRootInputBody']
 export type SchemaVideo = components['schemas']['Video']
 export type $defs = Record<string, never>
@@ -4967,6 +5213,229 @@ export interface operations {
 				}
 				content: {
 					'application/json': components['schemas']['StatusOutputBody1']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listExtensions: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ExtensionsOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	installExtension: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['InstallInputBody']
+			}
+		}
+		responses: {
+			/** @description Created */
+			201: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['Extension']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	previewExtension: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['PreviewInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['Preview']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	checkExtensionUpdates: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ExtensionsOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	removeExtension: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	configureExtension: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['SettingsInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['Extension']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	updateExtension: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['UpdateInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['Extension']
 				}
 			}
 			/** @description Error */
