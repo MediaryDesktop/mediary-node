@@ -3980,6 +3980,128 @@ components:
         - english
         - native
       type: object
+    Tool:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/Tool.json
+          format: uri
+          readOnly: true
+          type: string
+        author:
+          description: Whose build the node installs.
+          type: string
+        available:
+          description: The version the node would install.
+          type: string
+        env:
+          description: The settings that point the node at the programs by hand.
+          items:
+            type: string
+          type:
+            - array
+            - "null"
+        error:
+          description: Why the last install failed.
+          type: string
+        hint:
+          description: The command that installs it by hand, where the node cannot.
+          type: string
+        id:
+          enum:
+            - mpv
+            - ffmpeg
+          type: string
+        name:
+          type: string
+        path:
+          description: Where the node finds the first program now.
+          type: string
+        programs:
+          description: What the package gives the node; FFmpeg's has ffprobe too.
+          items:
+            type: string
+          type:
+            - array
+            - "null"
+        progress:
+          $ref: "#/components/schemas/ToolProgress"
+        size:
+          description: Size of the download in bytes.
+          format: int64
+          type: integer
+        state:
+          description: "custom: a path is set by hand, which wins; installed: the node's own copy; system: found on PATH."
+          enum:
+            - missing
+            - system
+            - installed
+            - custom
+            - installing
+          type: string
+        supported:
+          description: Whether the node can install the package on this system.
+          type: boolean
+        update:
+          description: The node's copy is older than the one it would install.
+          type: boolean
+        version:
+          description: The version the node installed.
+          type: string
+      required:
+        - id
+        - name
+        - author
+        - programs
+        - state
+        - env
+        - supported
+        - update
+      type: object
+    ToolProgress:
+      additionalProperties: false
+      properties:
+        done:
+          description: Bytes downloaded.
+          format: int64
+          type: integer
+        stage:
+          enum:
+            - downloading
+            - verifying
+            - extracting
+            - checking
+          type: string
+        total:
+          description: Bytes to download.
+          format: int64
+          type: integer
+      required:
+        - stage
+        - done
+        - total
+      type: object
+    ToolsOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/ToolsOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        tools:
+          items:
+            $ref: "#/components/schemas/Tool"
+          type:
+            - array
+            - "null"
+      required:
+        - tools
+      type: object
     TorrentCheckResult:
       additionalProperties: false
       properties:
@@ -7422,6 +7544,112 @@ paths:
       summary: Use your own TMDB key
       tags:
         - media
+  /v1/tools:
+    get:
+      description: mpv plays files in its own window; FFmpeg transcodes, cuts stills and pulls out tracks. Each is found at the path set by hand, else the node's own copy, else on PATH. Changes arrive on the tools topic.
+      operationId: listTools
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ToolsOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: The programs the node runs
+      tags:
+        - tools
+  /v1/tools/{id}:
+    delete:
+      description: The program comes from PATH again, if it is there.
+      operationId: removeTool
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            enum:
+              - mpv
+              - ffmpeg
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tool"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Remove the node's copy of a program
+      tags:
+        - tools
+  /v1/tools/{id}/install:
+    delete:
+      description: Nothing of the install stays on disk; the version in use, if any, stays as it was.
+      operationId: cancelToolInstall
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            enum:
+              - mpv
+              - ffmpeg
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tool"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Stop installing a program
+      tags:
+        - tools
+    post:
+      description: Downloads the official build the node names, at the version it pins, and refuses it unless its SHA-256 matches. It returns at once; the install goes on in the background. Refused where a path is set by hand.
+      operationId: installTool
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            enum:
+              - mpv
+              - ffmpeg
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tool"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Install or update a program
+      tags:
+        - tools
   /v1/torrent/check:
     post:
       description: Signs in to qBittorrent with the given address and credentials, saved or not, and reports its version; for the debrid client, tries the debrid service's saved key and names the account.
