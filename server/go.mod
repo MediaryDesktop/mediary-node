@@ -17,6 +17,8 @@ go 1.27
 
 require (
 	github.com/5rahim/habari v0.1.12
+	github.com/PuerkitoBio/goquery v1.13.0
+	github.com/andybalholm/cascadia v1.3.4
 	github.com/anacrolix/torrent v1.61.0
 	github.com/bodgit/sevenzip v1.6.5
 	github.com/caarlos0/env/v11 v11.4.1

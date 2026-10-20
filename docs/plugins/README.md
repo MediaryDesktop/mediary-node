@@ -52,9 +52,32 @@ it.
 
 The script gets `fetch`, `parseHTML`, `console` and `config` — nothing else.
 No `require`, no files, no processes, no timers, no storage between calls:
-every search starts in a fresh runtime. A search that runs too long is
-stopped. Responses are capped in size, and a call makes a limited number of
-requests.
+every search starts in a fresh runtime.
+
+| Limit | Value |
+|---|---|
+| One search, every request in it included | 30 s; then it is stopped, `catch` or not |
+| One request | 15 s |
+| Requests per search | 10 |
+| Response body | 5 MB |
+| Request body (POST) | 1 MB |
+| Releases kept per search | 500 |
+| Console lines per search | 50 |
+
+`fetch` takes `GET` or `POST`, headers and a string body. `User-Agent`,
+`Host` and the connection headers are the node's; setting one is an error.
+There are no cookies kept between requests. A failed request rejects with an
+`Error` saying why — catch it to try another way.
+
+`parseHTML` takes the page as a string and returns a selection with `find`,
+`first`, `eq`, `text`, `attr`, `each` (return `false` to stop) and `map`. A
+selector that does not parse is an error, not an empty match.
+
+Release fields that are not what [`plugin.d.ts`](plugin.d.ts) says are
+dropped. A release without a title, or without a magnet link, a `.torrent`
+link or an info hash, is left out; so is a `.torrent` link on a host the
+manifest does not list, because the node downloads it later itself. Info
+hashes may be hex or base32.
 
 `fetch` checks every redirect against `network`, and refuses any host that
 resolves to a loopback, private or link-local address — a plugin cannot reach
