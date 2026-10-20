@@ -18,6 +18,7 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/modules/playback"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/reader"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/sync"
+	"github.com/mediaryorg/mediary-node/server/internal/modules/tools"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/tracker"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/cloud"
@@ -143,19 +144,28 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 	})
 	torrentModule.Register(api)
 
+	// mpv and FFmpeg: the paths set by hand, else the node's own copies, else PATH.
+	toolsModule := tools.New(tools.Deps{
+		Logger:      moduleLogger(deps.Logger, "tools"),
+		Events:      deps.Events,
+		DataDir:     deps.DataDir,
+		MPVPath:     deps.MPVPath,
+		FFmpegPath:  deps.FFmpegPath,
+		FFprobePath: deps.FFprobePath,
+	})
+	toolsModule.Register(api)
+
 	// The player opens files the library scanned, and streams the torrent module
 	// made from a debrid service, and reports what was watched to the tracker.
 	// Every edge is a port, joined here: playback knows none of these modules.
 	playbackModule := playback.New(playback.Deps{
-		Logger:      moduleLogger(deps.Logger, "playback"),
-		Events:      deps.Events,
-		MPVPath:     deps.MPVPath,
-		FFmpegPath:  deps.FFmpegPath,
-		FFprobePath: deps.FFprobePath,
-		DataDir:     deps.DataDir,
-		Library:     playableFiles{library: libraryModule, media: mediaModule, streams: torrentModule},
-		Progress:    watchedEpisodes{tracker: trackerModule},
-		LocalURL:    deps.LocalURL,
+		Logger:   moduleLogger(deps.Logger, "playback"),
+		Events:   deps.Events,
+		Tools:    toolsModule,
+		DataDir:  deps.DataDir,
+		Library:  playableFiles{library: libraryModule, media: mediaModule, streams: torrentModule},
+		Progress: watchedEpisodes{tracker: trackerModule},
+		LocalURL: deps.LocalURL,
 
 		Transcode:        deps.Transcode,
 		TranscodeDir:     deps.TranscodeDir,
@@ -224,6 +234,7 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 	return func() {
 		stopQueue()
 		playbackModule.Close()
+		toolsModule.Close()
 		torrentModule.Close()
 	}
 }
