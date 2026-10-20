@@ -1253,6 +1253,70 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/v1/tools': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * The programs the node runs
+		 * @description mpv plays files in its own window; FFmpeg transcodes, cuts stills and pulls out tracks. Each is found at the path set by hand, else the node's own copy, else on PATH. Changes arrive on the tools topic.
+		 */
+		get: operations['listTools']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/tools/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		post?: never
+		/**
+		 * Remove the node's copy of a program
+		 * @description The program comes from PATH again, if it is there.
+		 */
+		delete: operations['removeTool']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/tools/{id}/install': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Install or update a program
+		 * @description Downloads the official build the node names, at the version it pins, and refuses it unless its SHA-256 matches. It returns at once; the install goes on in the background. Refused where a path is set by hand.
+		 */
+		post: operations['installTool']
+		/**
+		 * Stop installing a program
+		 * @description Nothing of the install stays on disk; the version in use, if any, stays as it was.
+		 */
+		delete: operations['cancelToolInstall']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/v1/torrent/check': {
 		parameters: {
 			query?: never
@@ -4015,6 +4079,71 @@ export interface components {
 			romaji: string | null
 			user_preferred: string | null
 		}
+		Tool: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/Tool.json
+			 */
+			readonly $schema?: string
+			/** @description Whose build the node installs. */
+			author: string
+			/** @description The version the node would install. */
+			available?: string
+			/** @description The settings that point the node at the programs by hand. */
+			env: string[] | null
+			/** @description Why the last install failed. */
+			error?: string
+			/** @description The command that installs it by hand, where the node cannot. */
+			hint?: string
+			/** @enum {string} */
+			id: 'mpv' | 'ffmpeg'
+			name: string
+			/** @description Where the node finds the first program now. */
+			path?: string
+			/** @description What the package gives the node; FFmpeg's has ffprobe too. */
+			programs: string[] | null
+			progress?: components['schemas']['ToolProgress']
+			/**
+			 * Format: int64
+			 * @description Size of the download in bytes.
+			 */
+			size?: number
+			/**
+			 * @description custom: a path is set by hand, which wins; installed: the node's own copy; system: found on PATH.
+			 * @enum {string}
+			 */
+			state: 'missing' | 'system' | 'installed' | 'custom' | 'installing'
+			/** @description Whether the node can install the package on this system. */
+			supported: boolean
+			/** @description The node's copy is older than the one it would install. */
+			update: boolean
+			/** @description The version the node installed. */
+			version?: string
+		}
+		ToolProgress: {
+			/**
+			 * Format: int64
+			 * @description Bytes downloaded.
+			 */
+			done: number
+			/** @enum {string} */
+			stage: 'downloading' | 'verifying' | 'extracting' | 'checking'
+			/**
+			 * Format: int64
+			 * @description Bytes to download.
+			 */
+			total: number
+		}
+		ToolsOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ToolsOutputBody.json
+			 */
+			readonly $schema?: string
+			tools: components['schemas']['Tool'][] | null
+		}
 		TorrentCheckResult: {
 			/**
 			 * Format: uri
@@ -4699,6 +4828,9 @@ export type SchemaTmdbKeyInputBody = components['schemas']['TMDBKeyInputBody']
 export type SchemaTmdbSettings = components['schemas']['TMDBSettings']
 export type SchemaTitle = components['schemas']['Title']
 export type SchemaTitleNames = components['schemas']['TitleNames']
+export type SchemaTool = components['schemas']['Tool']
+export type SchemaToolProgress = components['schemas']['ToolProgress']
+export type SchemaToolsOutputBody = components['schemas']['ToolsOutputBody']
 export type SchemaTorrentCheckResult = components['schemas']['TorrentCheckResult']
 export type SchemaTorrentClientStatus = components['schemas']['TorrentClientStatus']
 export type SchemaTorrentDebrid = components['schemas']['TorrentDebrid']
@@ -7413,6 +7545,128 @@ export interface operations {
 				}
 				content: {
 					'application/json': components['schemas']['TMDBSettings']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listTools: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ToolsOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	removeTool: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: 'mpv' | 'ffmpeg'
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['Tool']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	installTool: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: 'mpv' | 'ffmpeg'
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['Tool']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	cancelToolInstall: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: 'mpv' | 'ffmpeg'
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['Tool']
 				}
 			}
 			/** @description Error */
