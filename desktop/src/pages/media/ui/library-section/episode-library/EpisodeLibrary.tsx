@@ -12,6 +12,7 @@ import { titleFilesQuery } from '@entities/library-item'
 import type { LibraryFile } from '@entities/library-item'
 import type { MediaEpisode } from '@entities/media'
 import { $playerMode, playbackModel, playerOpened, thumbnailUrl } from '@entities/playback'
+import { useMissingToolAction } from '@entities/tool'
 
 import { episodeFor, episodeOrder, groupTitleFiles, isWatched } from '@features/continue-watching'
 
@@ -72,8 +73,13 @@ export function EpisodeLibrary({
 		}
 	}, [mediaRef, load, nodeReady])
 
+	const missingTool = useMissingToolAction()
+
 	useUnitWatch(playbackModel.playFailed, ({ error }) =>
-		toast.error(problemDetail(error, t('playback.failed')), { id: 'playback-failed' })
+		toast.error(problemDetail(error, t('playback.failed')), {
+			id: 'playback-failed',
+			action: missingTool(error)
+		})
 	)
 
 	// The query is shared across title pages, so what it holds may still be the

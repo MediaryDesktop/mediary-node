@@ -10,6 +10,7 @@ import { $nodeReady } from '@infra/node'
 
 import { fileTitle, libraryCollectionQuery } from '@entities/library-item'
 import { $playerMode, playbackModel, playerOpened } from '@entities/playback'
+import { useMissingToolAction } from '@entities/tool'
 import type { TrackerEntry } from '@entities/tracker'
 
 import { $items, $loading, candidatesChanged } from '../model/model'
@@ -119,8 +120,13 @@ export function usePlayFile(): { play: (fileId: number) => void; starting: boole
 		playerOpened
 	])
 
+	const missingTool = useMissingToolAction()
+
 	useUnitWatch(playbackModel.playFailed, ({ error }) =>
-		toast.error(problemDetail(error, t('playback.failed')), { id: 'playback-failed' })
+		toast.error(problemDetail(error, t('playback.failed')), {
+			id: 'playback-failed',
+			action: missingTool(error)
+		})
 	)
 
 	return {
