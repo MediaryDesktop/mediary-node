@@ -51,10 +51,21 @@ type Deps struct {
 	// Titles names a title for a release search.
 	Titles    Titles
 	UserAgent string
+
+	// Providers are the user's search plugins; nil where plugins do not run.
+	Providers Providers
 }
 
 // Titles is where a release search gets a title's names, wired by internal/app.
 type Titles = service.Titles
+
+// The search plugins as a release search asks them, wired by internal/app.
+type (
+	Providers       = service.Providers
+	Provider        = service.Provider
+	ProviderQuery   = service.ProviderQuery
+	ProviderRelease = service.ProviderRelease
+)
 
 // Library is the library module as downloads need it, wired by internal/app.
 type Library = service.Library
@@ -102,11 +113,12 @@ func New(deps Deps) *Module {
 		deps.Events,
 		deps.Logger,
 		service.Options{
-			Defaults: deps.Client,
-			Embedded: builtin,
-			Debrid:   services,
-			Titles:   deps.Titles,
-			Torznab:  torznab.New(20*time.Second, deps.UserAgent),
+			Defaults:  deps.Client,
+			Embedded:  builtin,
+			Debrid:    services,
+			Titles:    deps.Titles,
+			Torznab:   torznab.New(20*time.Second, deps.UserAgent),
+			Providers: deps.Providers,
 		},
 	)
 

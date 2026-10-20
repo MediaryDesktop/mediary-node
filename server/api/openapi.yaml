@@ -3930,7 +3930,7 @@ components:
         module:
           description: Module name.
           examples:
-            - reader
+            - extension
           type: string
         ready:
           description: True when the module's dependencies are wired.
@@ -3952,7 +3952,7 @@ components:
         module:
           description: Module name.
           examples:
-            - extension
+            - reader
           type: string
         ready:
           description: True when the module's dependencies are wired.
@@ -4900,6 +4900,9 @@ components:
         peers:
           format: int64
           type: integer
+        plugin:
+          description: The search plugin it came from, by id.
+          type: string
         published_at:
           format: date-time
           type: string
@@ -4921,6 +4924,7 @@ components:
           format: int64
           type: integer
         source_id:
+          description: The Torznab source it came from; 0 when a plugin found it.
           format: int64
           type: integer
         source_name:
@@ -5220,9 +5224,13 @@ components:
         error:
           type: string
         id:
+          description: The Torznab source; 0 for a plugin.
           format: int64
           type: integer
         name:
+          type: string
+        plugin:
+          description: The search plugin, by id.
           type: string
         results:
           format: int64
@@ -5597,7 +5605,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/StatusOutputBody1"
+                $ref: "#/components/schemas/StatusOutputBody"
           description: OK
         default:
           content:
@@ -7948,7 +7956,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/StatusOutputBody"
+                $ref: "#/components/schemas/StatusOutputBody1"
           description: OK
         default:
           content:

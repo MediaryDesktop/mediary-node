@@ -15,6 +15,7 @@ import (
 	"golang.org/x/mod/semver"
 
 	"github.com/mediaryorg/mediary-node/server/internal/modules/extension/internal/manifest"
+	"github.com/mediaryorg/mediary-node/server/internal/modules/extension/internal/sandbox"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/extension/internal/store"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
@@ -29,7 +30,9 @@ type Options struct {
 	NodeVersion string
 	// HTTP fetches manifests and code; it must refuse local addresses.
 	HTTP *http.Client
-	Now  func() time.Time
+	// Runner runs plugins; nil on a node that does not.
+	Runner *sandbox.Runner
+	Now    func() time.Time
 }
 
 type Service struct {
@@ -48,6 +51,10 @@ type Service struct {
 	updates   map[string]Update
 
 	catalog catalogCache
+
+	// Each plugin's places for calls running at once.
+	slotsMu sync.Mutex
+	slots   map[string]chan struct{}
 }
 
 func New(st *store.Store, sec *secrets.Store, logger zerolog.Logger, hub *events.Hub, opts Options) *Service {
@@ -63,6 +70,7 @@ func New(st *store.Store, sec *secrets.Store, logger zerolog.Logger, hub *events
 		opts:    opts,
 		updates: map[string]Update{},
 		catalog: catalogCache{reads: map[int64]read{}},
+		slots:   map[string]chan struct{}{},
 	}
 }
 

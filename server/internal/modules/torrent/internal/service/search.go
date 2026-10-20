@@ -53,8 +53,9 @@ type SearchRequest struct {
 // TorrentRelease is one search result.
 type TorrentRelease struct {
 	ID          string     `json:"id" doc:"Pass as release_id to download it."`
-	SourceID    int64      `json:"source_id"`
+	SourceID    int64      `json:"source_id" doc:"The Torznab source it came from; 0 when a plugin found it."`
 	SourceName  string     `json:"source_name"`
+	Plugin      string     `json:"plugin,omitempty" doc:"The search plugin it came from, by id."`
 	Indexer     string     `json:"indexer,omitempty" doc:"The site behind the source, when the source says."`
 	Title       string     `json:"title"`
 	PageURL     string     `json:"page_url,omitempty"`
@@ -81,7 +82,8 @@ type TorrentRelease struct {
 
 // TorrentSourceOutcome is how one source answered.
 type TorrentSourceOutcome struct {
-	ID      int64  `json:"id"`
+	ID      int64  `json:"id" doc:"The Torznab source; 0 for a plugin."`
+	Plugin  string `json:"plugin,omitempty" doc:"The search plugin, by id."`
 	Name    string `json:"name"`
 	Results int    `json:"results"`
 	Error   string `json:"error,omitempty"`
@@ -98,6 +100,7 @@ type TorrentSearchResult struct {
 type searchCache struct {
 	mu       sync.Mutex
 	answers  map[string]cachedAnswer
+	plugins  map[string]cachedPluginAnswer
 	releases map[string]cachedRelease
 }
 
@@ -116,6 +119,7 @@ func (s *Service) forgetSearches() {
 	defer s.search.mu.Unlock()
 
 	s.search.answers = map[string]cachedAnswer{}
+	s.search.plugins = map[string]cachedPluginAnswer{}
 }
 
 func (s *Service) Search(ctx context.Context, req SearchRequest) (*TorrentSearchResult, error) {
@@ -126,7 +130,7 @@ func (s *Service) Search(ctx context.Context, req SearchRequest) (*TorrentSearch
 		return nil, apperr.Invalid("season", "a season number cannot be negative")
 	}
 
-	queries, err := s.queries(ctx, req)
+	queries, names, err := s.queries(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -135,21 +139,34 @@ func (s *Service) Search(ctx context.Context, req SearchRequest) (*TorrentSearch
 	if err != nil {
 		return nil, apperr.Wrap(err, apperr.KindInternal, "list search sources")
 	}
-	if len(sources) == 0 {
-		return nil, apperr.New(apperr.KindPrecondition, "add a Torznab source — Jackett or Prowlarr — in the settings first")
+
+	var providers []Provider
+	if s.opts.Providers != nil {
+		if providers, err = s.opts.Providers.TorrentProviders(ctx); err != nil {
+			return nil, apperr.Wrap(err, apperr.KindInternal, "list search plugins")
+		}
+	}
+
+	if len(sources) == 0 && len(providers) == 0 {
+		return nil, apperr.New(apperr.KindPrecondition, "add a Torznab source — Jackett or Prowlarr — or install a search plugin first")
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, searchTimeout)
 	defer cancel()
 
+	// One answer from one source or plugin to one query, already turned into
+	// releases.
 	type answer struct {
-		source store.Source
-		items  []torznab.Item
-		err    error
+		outcome  string
+		releases []TorrentRelease
+		err      error
 	}
 
 	answers := make(chan answer)
 	var wg sync.WaitGroup
+
+	outcomes := make(map[string]*TorrentSourceOutcome, len(sources)+len(providers))
+	order := make([]string, 0, len(sources)+len(providers))
 
 	for _, source := range sources {
 		key, keyErr := s.secrets.Get(sourceKey(source.ID))
@@ -157,13 +174,51 @@ func (s *Service) Search(ctx context.Context, req SearchRequest) (*TorrentSearch
 			return nil, apperr.Wrap(keyErr, apperr.KindInternal, "read a search source's key")
 		}
 
+		outcomeKey := "t" + strconv.FormatInt(source.ID, 10)
+		outcomes[outcomeKey] = &TorrentSourceOutcome{ID: source.ID, Name: source.Name}
+		order = append(order, outcomeKey)
+
 		for _, query := range queries {
 			wg.Add(1)
 			go func(source store.Source, query string) {
 				defer wg.Done()
 				items, askErr := s.ask(ctx, source, key, query)
-				answers <- answer{source: source, items: items, err: askErr}
+
+				found := make([]TorrentRelease, 0, len(items))
+				for i := range items {
+					found = append(found, s.releaseOf(source, items[i]))
+				}
+				answers <- answer{outcome: outcomeKey, releases: found, err: askErr}
 			}(source, query)
+		}
+	}
+
+	anilistID, tmdbID := titleIDs(req.MediaRef)
+
+	for _, provider := range providers {
+		outcomeKey := "p" + provider.ID
+		outcomes[outcomeKey] = &TorrentSourceOutcome{Plugin: provider.ID, Name: provider.Name}
+		order = append(order, outcomeKey)
+
+		for _, query := range queries {
+			wg.Add(1)
+			go func(provider Provider, query string) {
+				defer wg.Done()
+				items, askErr := s.askPlugin(ctx, provider, ProviderQuery{
+					Query:     query,
+					Titles:    names,
+					Episode:   req.Episode,
+					Season:    req.Season,
+					AniListID: anilistID,
+					TMDBID:    tmdbID,
+				})
+
+				found := make([]TorrentRelease, 0, len(items))
+				for i := range items {
+					found = append(found, s.releaseOfPlugin(provider, items[i]))
+				}
+				answers <- answer{outcome: outcomeKey, releases: found, err: askErr}
+			}(provider, query)
 		}
 	}
 
@@ -172,15 +227,10 @@ func (s *Service) Search(ctx context.Context, req SearchRequest) (*TorrentSearch
 		close(answers)
 	}()
 
-	outcomes := make(map[int64]*TorrentSourceOutcome, len(sources))
-	for _, source := range sources {
-		outcomes[source.ID] = &TorrentSourceOutcome{ID: source.ID, Name: source.Name}
-	}
-
 	byID := map[string]TorrentRelease{}
 
 	for got := range answers {
-		outcome := outcomes[got.source.ID]
+		outcome := outcomes[got.outcome]
 
 		if got.err != nil {
 			if outcome.Error == "" {
@@ -189,8 +239,8 @@ func (s *Service) Search(ctx context.Context, req SearchRequest) (*TorrentSearch
 			continue
 		}
 
-		for i := range got.items {
-			found := s.releaseOf(got.source, got.items[i])
+		for i := range got.releases {
+			found := got.releases[i]
 			outcome.Results++
 
 			if existing, ok := byID[found.ID]; !ok || better(found, existing) {
@@ -221,8 +271,8 @@ func (s *Service) Search(ctx context.Context, req SearchRequest) (*TorrentSearch
 	s.keep(releases)
 
 	result := &TorrentSearchResult{Queries: queries, Releases: releases, CacheService: cacheService}
-	for _, source := range sources {
-		result.Sources = append(result.Sources, *outcomes[source.ID])
+	for _, key := range order {
+		result.Sources = append(result.Sources, *outcomes[key])
 	}
 
 	return result, nil
@@ -289,22 +339,23 @@ func (s *Service) markCached(ctx context.Context, releases []TorrentRelease) str
 	return checker.Service()
 }
 
-func (s *Service) queries(ctx context.Context, req SearchRequest) ([]string, error) {
+// queries are what each source is asked, at most maxQueries; names are every
+// name the title goes by, which a plugin is given beside its query.
+func (s *Service) queries(ctx context.Context, req SearchRequest) (queries, names []string, err error) {
 	if query := strings.TrimSpace(req.Query); query != "" {
-		return []string{query}, nil
+		return []string{query}, []string{query}, nil
 	}
 
 	if s.opts.Titles == nil || strings.TrimSpace(req.MediaRef) == "" {
-		return nil, apperr.Invalid("q", "type what to search for")
+		return nil, nil, apperr.Invalid("q", "type what to search for")
 	}
 
-	names, err := s.opts.Titles.Names(ctx, req.MediaRef)
+	names, err = s.opts.Titles.Names(ctx, req.MediaRef)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	seen := map[string]bool{}
-	var queries []string
 
 	for _, name := range names {
 		name = strings.TrimSpace(name)
@@ -329,10 +380,10 @@ func (s *Service) queries(ctx context.Context, req SearchRequest) ([]string, err
 	}
 
 	if len(queries) == 0 {
-		return nil, apperr.Invalid("q", "the node does not know this title's names yet; type what to search for")
+		return nil, nil, apperr.Invalid("q", "the node does not know this title's names yet; type what to search for")
 	}
 
-	return queries, nil
+	return queries, names, nil
 }
 
 // ask is one source's answer to one query, from the cache while it is fresh.
@@ -488,6 +539,22 @@ func (s *Service) resolveRelease(ctx context.Context, id string) (magnet string,
 
 	if cached.release.magnet != "" {
 		return cached.release.magnet, nil, nil
+	}
+
+	// A plugin's link is fetched under that plugin's rules — its own hosts,
+	// public addresses — never with the Torznab client, which reaches the
+	// user's own Jackett on the local network by design.
+	if cached.release.Plugin != "" {
+		if s.opts.Providers == nil {
+			return "", nil, apperr.New(apperr.KindUnavailable, "search plugins do not run on this node")
+		}
+
+		data, linked, fetchErr := s.opts.Providers.FetchTorrent(ctx, cached.release.Plugin, cached.release.link)
+		if fetchErr != nil {
+			return "", nil, apperr.Wrap(fetchErr, apperr.KindUpstream, "could not fetch the torrent from %s: %s", cached.release.SourceName, messageOf(fetchErr))
+		}
+
+		return linked, data, nil
 	}
 
 	data, magnet, err := s.opts.Torznab.Fetch(ctx, cached.release.link)

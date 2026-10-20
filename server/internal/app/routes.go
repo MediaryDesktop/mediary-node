@@ -126,6 +126,17 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 	})
 	libraryModule.Register(api)
 
+	// Plugins search for releases in a sandbox of their own; the torrent module
+	// asks them through a port, as it asks its Torznab sources.
+	extensionModule := extension.New(extension.Deps{
+		DB:          deps.DB,
+		Logger:      moduleLogger(deps.Logger, "extension"),
+		Events:      deps.Events,
+		DataDir:     deps.DataDir,
+		NodeVersion: deps.Build.Version,
+	})
+	extensionModule.Register(api)
+
 	// Torrents are saved into a library folder and their videos join the library
 	// through it, like downloaded chapters.
 	torrentModule := torrent.New(torrent.Deps{
@@ -140,6 +151,7 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 		ListenPort:  deps.TorrentListenPort,
 		EnableUPnP:  deps.TorrentEnableUPnP,
 		Titles:      releaseTitles{media: mediaModule},
+		Providers:   searchPlugins{extension: extensionModule},
 		UserAgent:   "mediary-node/" + deps.Build.Version,
 	})
 	torrentModule.Register(api)
@@ -225,14 +237,6 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 			deps.Logger.Error().Err(err).Msg("automatic backups are off")
 		}
 	}
-
-	extension.New(extension.Deps{
-		DB:          deps.DB,
-		Logger:      moduleLogger(deps.Logger, "extension"),
-		Events:      deps.Events,
-		DataDir:     deps.DataDir,
-		NodeVersion: deps.Build.Version,
-	}).Register(api)
 
 	return func() {
 		stopQueue()

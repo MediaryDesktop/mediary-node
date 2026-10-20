@@ -4183,7 +4183,7 @@ export interface components {
 			readonly $schema?: string
 			/**
 			 * @description Module name.
-			 * @example reader
+			 * @example extension
 			 */
 			module: string
 			/** @description True when the module's dependencies are wired. */
@@ -4198,7 +4198,7 @@ export interface components {
 			readonly $schema?: string
 			/**
 			 * @description Module name.
-			 * @example extension
+			 * @example reader
 			 */
 			module: string
 			/** @description True when the module's dependencies are wired. */
@@ -4712,6 +4712,8 @@ export interface components {
 			page_url?: string
 			/** Format: int64 */
 			peers: number
+			/** @description The search plugin it came from, by id. */
+			plugin?: string
 			/** Format: date-time */
 			published_at?: string
 			/** @description e.g. 1080p */
@@ -4730,7 +4732,10 @@ export interface components {
 			seeders: number
 			/** Format: int64 */
 			size: number
-			/** Format: int64 */
+			/**
+			 * Format: int64
+			 * @description The Torznab source it came from; 0 when a plugin found it.
+			 */
 			source_id: number
 			source_name: string
 			title: string
@@ -4882,9 +4887,14 @@ export interface components {
 		}
 		TorrentSourceOutcome: {
 			error?: string
-			/** Format: int64 */
+			/**
+			 * Format: int64
+			 * @description The Torznab source; 0 for a plugin.
+			 */
 			id: number
 			name: string
+			/** @description The search plugin, by id. */
+			plugin?: string
 			/** Format: int64 */
 			results: number
 		}
@@ -5349,7 +5359,7 @@ export interface operations {
 					[name: string]: unknown
 				}
 				content: {
-					'application/json': components['schemas']['StatusOutputBody1']
+					'application/json': components['schemas']['StatusOutputBody']
 				}
 			}
 			/** @description Error */
@@ -7861,7 +7871,7 @@ export interface operations {
 					[name: string]: unknown
 				}
 				content: {
-					'application/json': components['schemas']['StatusOutputBody']
+					'application/json': components['schemas']['StatusOutputBody1']
 				}
 			}
 			/** @description Error */

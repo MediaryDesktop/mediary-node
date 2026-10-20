@@ -113,6 +113,8 @@ type Options struct {
 	// Torznab searches the user's sources; Titles names the title searched for.
 	Torznab *torznab.Client
 	Titles  Titles
+	// Providers are the user's search plugins; nil where plugins do not run.
+	Providers Providers
 
 	// How often the client is asked about torrents while one is downloading, and
 	// while none is.
@@ -185,6 +187,7 @@ func New(st *store.Store, secretFile *secrets.Store, library Library, hub *event
 		missing: map[string]int{},
 		search: searchCache{
 			answers:  map[string]cachedAnswer{},
+			plugins:  map[string]cachedPluginAnswer{},
 			releases: map[string]cachedRelease{},
 		},
 	}

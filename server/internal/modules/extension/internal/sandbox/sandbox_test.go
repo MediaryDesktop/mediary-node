@@ -738,3 +738,64 @@ func TestPublicClientFollowsOnlyHTTPS(t *testing.T) {
 		t.Fatalf("%v; want the http redirect refused", err)
 	}
 }
+
+func TestFetchTorrentFollowsThePluginsRule(t *testing.T) {
+	s := newSite(t, func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/file.torrent":
+			fmt.Fprint(w, "d8:announce...e")
+		case "/to-magnet":
+			http.Redirect(w, r, "magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567", http.StatusFound)
+		case "/away":
+			http.Redirect(w, r, "http://elsewhere.example.org/file.torrent", http.StatusFound)
+		case "/huge":
+			_, _ = w.Write(make([]byte, maxTorrentFile+1))
+		default:
+			http.NotFound(w, r)
+		}
+	})
+	r := s.runner(DefaultLimits())
+	p := plugin("", "tracker.example.org")
+	base := "http://tracker.example.org:" + s.port
+
+	data, magnet, err := r.FetchTorrent(context.Background(), p, base+"/file.torrent")
+	if err != nil || string(data) != "d8:announce...e" || magnet != "" {
+		t.Fatalf("file: %q, %q, %v", data, magnet, err)
+	}
+
+	data, magnet, err = r.FetchTorrent(context.Background(), p, base+"/to-magnet")
+	if err != nil || data != nil || !strings.HasPrefix(magnet, "magnet:?xt=urn:btih:") {
+		t.Fatalf("magnet: %q, %q, %v", data, magnet, err)
+	}
+
+	for path, says := range map[string]string{
+		"/away":    "redirected to elsewhere.example.org is not one of the hosts",
+		"/huge":    "larger than 10 MB",
+		"/missing": "404",
+	} {
+		if _, _, err = r.FetchTorrent(context.Background(), p, base+path); err == nil || !strings.Contains(err.Error(), says) {
+			t.Errorf("%s: %v; want %q", path, err, says)
+		}
+	}
+
+	// A link off the list, or to an address, is refused before any request.
+	before := s.hits.Load()
+	for _, link := range []string{"http://elsewhere.example.org/file.torrent", "http://127.0.0.1:" + s.port + "/file.torrent", "file:///C:/x.torrent"} {
+		if _, _, err = r.FetchTorrent(context.Background(), p, link); err == nil {
+			t.Errorf("%s: fetched", link)
+		}
+	}
+	if s.hits.Load() != before {
+		t.Fatal("a refused link reached the site")
+	}
+}
+
+// The node's own rule, not the test's: a listed host on a local address.
+func TestFetchTorrentRefusesLocalAddresses(t *testing.T) {
+	r := strictRunner(map[string]string{"tracker.example.org": "192.168.1.20"})
+
+	_, _, err := r.FetchTorrent(context.Background(), plugin("", "tracker.example.org"), "http://tracker.example.org/file.torrent")
+	if err == nil || !strings.Contains(err.Error(), "local or private") {
+		t.Fatalf("%v; want it refused", err)
+	}
+}
