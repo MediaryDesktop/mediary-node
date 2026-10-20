@@ -1,0 +1,153 @@
+.header {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem 1rem;
+
+	.heading {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.title {
+		margin: 0;
+		color: var(--text);
+		font-size: 2.25rem;
+		font-weight: 700;
+		line-height: 1.2;
+	}
+
+	.subtitle {
+		margin: 0.125rem 0 0;
+		color: var(--text-secondary);
+		font-size: 1rem;
+	}
+
+	.source {
+		margin: 0.25rem 0 0;
+		color: var(--text-muted);
+		font-size: 0.8125rem;
+	}
+
+	.actions {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+
+		button {
+			border-radius: 999px;
+		}
+	}
+}
+
+.filters {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+
+	.types {
+		display: inline-flex;
+		flex-wrap: wrap;
+		align-self: flex-start;
+		gap: 0.25rem;
+		padding: 0.25rem;
+		border: 1px solid var(--border);
+		border-radius: 999px;
+	}
+
+	.type {
+		padding: 0.5rem 1.25rem;
+		border: none;
+		border-radius: 999px;
+		background: transparent;
+		color: var(--text-secondary);
+		font: inherit;
+		font-size: 0.9375rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition:
+			background 0.15s var(--ease),
+			color 0.15s var(--ease);
+
+		&:hover {
+			color: var(--text);
+		}
+
+		&.active {
+			background: var(--surface-muted);
+			color: var(--text);
+		}
+	}
+
+	.fields {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+
+	.select {
+		flex: 0 0 15.5rem;
+		max-width: 100%;
+	}
+
+	.search {
+		flex: 1 1 20rem;
+		min-width: 0;
+	}
+}
+
+.section {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+	padding: 1rem;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-lg);
+
+	.sectionHead {
+		display: flex;
+		flex-direction: column;
+		gap: 0.375rem;
+	}
+
+	.sectionTitle {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		margin: 0;
+		color: var(--text);
+		font-size: 1.75rem;
+		font-weight: 650;
+	}
+
+	.sectionDescription {
+		margin: 0;
+		color: var(--text-muted);
+		font-size: 0.875rem;
+	}
+
+	// One column on a narrow window, three on a wide one, four on a very wide
+	// one, as Seanime's grids.
+	.grid {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 1rem;
+
+		@media (width >= 64rem) {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
+
+		@media (width >= 96rem) {
+			grid-template-columns: repeat(4, minmax(0, 1fr));
+		}
+	}
+}
+
+.empty {
+	padding: 2rem;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-lg);
+	background: var(--surface);
+	color: var(--text-muted);
+	text-align: center;
+}

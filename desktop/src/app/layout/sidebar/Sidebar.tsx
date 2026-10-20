@@ -3,6 +3,7 @@ import clsx from 'clsx'
 import { useUnit } from 'effector-react'
 import { cloneElement } from 'react'
 import type { ReactElement, ReactNode } from 'react'
+import { IoExtensionPuzzleOutline } from 'react-icons/io5'
 
 import type { NodeState } from '@shared/bridge'
 import { useTranslation } from '@shared/i18n'
@@ -25,7 +26,8 @@ const SECTIONS = [
 	{ to: '/search', icon: 'common/search', labelKey: 'nav.search', size: 26 },
 	{ to: '/lists', icon: 'common/list', labelKey: 'nav.lists', size: 22 },
 	{ to: '/library', icon: 'common/file-tree', labelKey: 'nav.library', size: 22 },
-	{ to: '/downloads', icon: 'common/download', labelKey: 'nav.downloads', size: 22 }
+	{ to: '/downloads', icon: 'common/download', labelKey: 'nav.downloads', size: 22 },
+	{ to: '/extensions', icon: <IoExtensionPuzzleOutline />, labelKey: 'nav.extensions', size: 22 }
 ] as const satisfies readonly { to: string; icon: SectionIcon; labelKey: string; size?: number }[]
 
 const VISIBLE_NODE_STATES = new Set<NodeState>(['starting', 'restarting', 'failed'])

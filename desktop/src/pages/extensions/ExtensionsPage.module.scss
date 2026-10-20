@@ -1,0 +1,21 @@
+.root {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+
+	.tabs {
+		align-self: center;
+	}
+
+	.tabLabel {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.content {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+}

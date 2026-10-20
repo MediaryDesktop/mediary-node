@@ -45,6 +45,7 @@ export const en = {
 		lists: 'My lists',
 		library: 'Local library',
 		downloads: 'Downloads',
+		extensions: 'Extensions',
 		settings: 'Settings',
 		signIn: 'Sign in'
 	},
@@ -1339,6 +1340,84 @@ export const en = {
 			torrents: 'Torrents',
 			auto: 'Auto-download',
 			manga: 'Manga chapters'
+		}
+	},
+	extensions: {
+		refresh: 'Refresh',
+		refreshed: 'Refreshed',
+		notFound: 'Nothing found matching your criteria.',
+		extensions: {
+			tab: 'Extensions',
+			title: 'Extensions',
+			subtitle: 'Browse and install plugins that add sources to Mediary.',
+			types: {
+				all: 'All types',
+				plugins: 'Plugins',
+				animeTorrents: 'Anime torrents',
+				manga: 'Manga',
+				onlineStreaming: 'Online streaming',
+				customSources: 'Custom sources'
+			},
+			allLanguages: 'All languages',
+			search: 'Search extensions…',
+			emptyTitle: 'No extensions yet',
+			emptyDescription: 'Plugins that add sources will appear here'
+		},
+		dependencies: {
+			tab: 'Dependencies',
+			title: 'Dependencies',
+			subtitle: 'Install the programs Mediary plays and transcodes video with.',
+			source: 'Source: official builds by Gyan (FFmpeg) and shinchiro (mpv) on GitHub',
+			kinds: {
+				all: 'All types',
+				player: 'Player',
+				media: 'Video processing'
+			},
+			statuses: {
+				all: 'Any status',
+				ready: 'Available',
+				missing: 'Not installed'
+			},
+			search: 'Search programs…'
+		}
+	},
+	tools: {
+		note: 'Mediary downloads official builds at fixed versions and refuses any that does not match its checksum. New versions arrive only with a Mediary update, and install only when you choose to.',
+		purpose: {
+			mpv: 'Plays files in its own window',
+			ffmpeg: 'Transcodes what the built-in player cannot play, cuts episode stills and pulls out subtitles'
+		},
+		state: {
+			missing: 'Not installed',
+			system: 'Found on PATH',
+			installed: 'Installed',
+			custom: 'Set by hand',
+			installing: 'Installing'
+		},
+		stage: {
+			downloading: 'Downloading',
+			verifying: 'Checking the checksum',
+			extracting: 'Unpacking',
+			checking: 'Checking that it runs'
+		},
+		install: 'Install',
+		installSize: 'Install · {{size}}',
+		installOwn: 'Install its own copy',
+		update: 'Update to {{version}}',
+		remove: 'Remove',
+		cancel: 'Cancel',
+		customHint: 'The path is set by {{env}}. Mediary uses it and does not install its own.',
+		unsupported: 'Mediary cannot install it on this system yet. Install it yourself:',
+		unsupportedNoHint: 'Mediary cannot install it on this system yet.',
+		failed: 'Could not install',
+		actionFailed: 'Could not do that',
+		open: 'Open Dependencies',
+		more: 'More',
+		updateAvailable: 'Update available',
+		official: {
+			title: 'Official Mediary dependency',
+			description:
+				'Recommended by Mediary: an official build at a pinned version, checked against its checksum before it is installed.'
 		}
 	},
 	tmdb: {

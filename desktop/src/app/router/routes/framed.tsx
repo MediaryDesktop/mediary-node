@@ -3,6 +3,8 @@ import { createRoute, Outlet } from '@tanstack/react-router'
 import { DiscoverPage, isDiscoverTab } from '@pages/discover'
 import type { DiscoverTab } from '@pages/discover'
 import { DownloadsPage } from '@pages/downloads'
+import { ExtensionsPage, isExtensionsTab } from '@pages/extensions'
+import type { ExtensionsTab } from '@pages/extensions'
 import { HomePage } from '@pages/home'
 import { LibraryPage, ScanHistoryPage } from '@pages/library'
 import { ListDetailPage, ListsPage } from '@pages/lists'
@@ -98,6 +100,26 @@ const downloadsRoute = createRoute({
 	component: DownloadsPage
 })
 
+// The tab lives in the address, so a missing-program error can open Dependencies.
+// Dependencies is the one with anything in it until plugins exist.
+const extensionsRoute = createRoute({
+	getParentRoute: () => framedRoute,
+	path: '/extensions',
+	validateSearch: (search: Record<string, unknown>): { tab?: ExtensionsTab } =>
+		isExtensionsTab(search.tab) ? { tab: search.tab } : {},
+	component: function ExtensionsScreen() {
+		const { tab } = extensionsRoute.useSearch()
+		const navigate = extensionsRoute.useNavigate()
+
+		return (
+			<ExtensionsPage
+				tab={tab ?? 'dependencies'}
+				onTabChange={next => void navigate({ search: { tab: next }, replace: true })}
+			/>
+		)
+	}
+})
+
 const settingsRoute = createRoute({
 	getParentRoute: () => framedRoute,
 	path: '/settings',
@@ -119,5 +141,6 @@ export const framedTree = framedRoute.addChildren([
 	libraryRoute,
 	scanHistoryRoute,
 	downloadsRoute,
+	extensionsRoute,
 	settingsRoute
 ])
