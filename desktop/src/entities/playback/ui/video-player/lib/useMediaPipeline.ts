@@ -27,6 +27,10 @@ function audioTracksOf(video: HTMLVideoElement): AudioTrackList | undefined {
 // node already tried it again: two more asks, not hls.js's six, before the
 // player gives up and offers mpv. Slow segments still get hls.js's own timeouts.
 const HLS_CONFIG: Partial<HlsConfig> = {
+	// hls.js keeps everything already played by default, so a long episode held
+	// gigabytes until the player closed. The node has the segments on disk, so a
+	// seek further back only refetches them.
+	backBufferLength: 90,
 	fragLoadPolicy: {
 		default: {
 			maxTimeToFirstByteMs: 10000,
