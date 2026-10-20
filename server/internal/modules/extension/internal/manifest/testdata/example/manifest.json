@@ -1,0 +1,24 @@
+{
+	"id": "example-tracker",
+	"name": "Example tracker",
+	"version": "1.0.0",
+	"type": "torrent-provider",
+	"author": "Mediary tests",
+	"description": "Reads search results from a made-up tracker. Used by the node's tests only.",
+	"lang": "multi",
+	"homepage": "https://tracker.example.org",
+	"minNodeVersion": "0.1.0",
+	"network": ["tracker.example.org", "*.tracker.example.org"],
+	"config": [
+		{
+			"name": "mirror",
+			"label": "Mirror",
+			"type": "select",
+			"options": ["tracker.example.org", "mirror.tracker.example.org"],
+			"default": "tracker.example.org"
+		},
+		{ "name": "apiKey", "label": "API key", "type": "text", "secret": true }
+	],
+	"payload": "https://plugins.example.org/example-tracker/1.0.0/plugin.js",
+	"sha256": "16514d11e6e721e021b1dcc427a83803ce89ba848ae7870ada43dc09464980ac"
+}
