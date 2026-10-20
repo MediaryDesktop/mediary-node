@@ -11,6 +11,7 @@ import { directUrl } from '../../lib/urls'
 import { useFullscreen } from './lib/useFullscreen'
 import { useIdleControls } from './lib/useIdleControls'
 import { useMediaPipeline } from './lib/useMediaPipeline'
+import type { PlayerFailure } from './lib/useMediaPipeline'
 import { usePlayerEntrance } from './lib/usePlayerEntrance'
 import { usePlayerKeyboard } from './lib/usePlayerKeyboard'
 import { useProgressReport } from './lib/useProgressReport'
@@ -40,6 +41,9 @@ export interface VideoPlayerProps {
 	onExpand: () => void
 	onClose: () => void
 	onOpenExternally: () => void
+	// Another way out of a failure the host recognises — FFmpeg missing, say —
+	// as a label and an action, or nothing.
+	failureAction?: (failure: PlayerFailure) => { label: string; onClick: () => void } | undefined
 
 	// Called instead of showing a failure when there is somewhere else to go:
 	// a file Chromium said it could play directly and then could not.
@@ -60,6 +64,7 @@ export function VideoPlayer({
 	onExpand,
 	onClose,
 	onOpenExternally,
+	failureAction,
 	onFallback,
 	leaving = false,
 	onLeft
@@ -83,7 +88,8 @@ export function VideoPlayer({
 	const [duration, setDuration] = useState(info.duration)
 	const [volume, setVolume] = useState(1)
 	const [muted, setMuted] = useState(false)
-	const [failed, setFailed] = useState(false)
+	const [failure, setFailure] = useState<PlayerFailure | null>(null)
+	const failed = failure !== null
 	const [subtitle, setSubtitle] = useState<number | null>(() => initialSubtitle(subtitles))
 	const [audio, setAudio] = useState(() => initialAudio(audios))
 
@@ -105,7 +111,7 @@ export function VideoPlayer({
 		fonts,
 		audio,
 		audios,
-		onFailed: () => setFailed(true)
+		onFailed: setFailure
 	})
 
 	const report = useProgressReport({ videoRef, fileId, probedDuration: info.duration, playing })
@@ -123,6 +129,7 @@ export function VideoPlayer({
 	})
 
 	const shown = controlsVisible || !playing || failed
+	const extraAction = failure ? failureAction?.(failure) : undefined
 
 	return (
 		<div
@@ -168,7 +175,7 @@ export function VideoPlayer({
 						if (onFallback) {
 							onFallback()
 						} else {
-							setFailed(true)
+							setFailure({})
 						}
 					}}
 				/>
@@ -185,12 +192,19 @@ export function VideoPlayer({
 				onClose={onClose}
 			/>
 
-			{failed && (
+			{failure && (
 				<div className={styles.failure}>
-					<p>{t('player.failed')}</p>
-					<button type='button' className={styles.action} onClick={onOpenExternally}>
-						{t('player.openExternally')}
-					</button>
+					<p>{failure.message ?? t('player.failed')}</p>
+					<div className={styles.failureActions}>
+						{extraAction && (
+							<button type='button' className={styles.action} onClick={extraAction.onClick}>
+								{extraAction.label}
+							</button>
+						)}
+						<button type='button' className={styles.action} onClick={onOpenExternally}>
+							{t('player.openExternally')}
+						</button>
+					</div>
 				</div>
 			)}
 

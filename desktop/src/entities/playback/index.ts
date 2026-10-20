@@ -27,6 +27,7 @@ export { NowPlayingBar } from './ui/now-playing-bar/NowPlayingBar'
 export { VideoPlayer } from './ui/video-player/VideoPlayer'
 export { usePlayerEntrance } from './ui/video-player/lib/usePlayerEntrance'
 export type { VideoPlayerProps, VideoSource } from './ui/video-player/VideoPlayer'
+export type { PlayerFailure } from './ui/video-player/lib/useMediaPipeline'
 
 export { fetchPlaybackStreamFx } from './api/api'
 export type { MediaInfo, PlaybackAction, PlaybackSession, PlaybackStatus, PlaybackStream } from './api/api'

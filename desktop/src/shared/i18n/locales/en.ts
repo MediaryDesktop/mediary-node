@@ -841,7 +841,8 @@ export const en = {
 		failed: 'There were problems transcoding this video. Choose another player to keep watching.',
 		loadFailed: 'Could not read this file.',
 		needsTranscode: 'This file uses codecs the built-in player cannot decode yet. It plays in mpv.',
-		openExternally: 'Open in mpv'
+		openExternally: 'Open in mpv',
+		openDependencies: 'Open Dependencies'
 	},
 	reader: {
 		close: 'Back',
@@ -1619,6 +1620,11 @@ export const en = {
 			modes: {
 				builtin: 'Built-in',
 				external: 'mpv'
+			},
+			mpvMissing: {
+				title: 'mpv is not installed',
+				description:
+					'Episodes will not open until it is. Install it in one click, or switch to the built-in player.'
 			}
 		},
 		wizard: {

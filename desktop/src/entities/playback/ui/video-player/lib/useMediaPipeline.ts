@@ -1,6 +1,6 @@
 import { useUnit } from 'effector-react'
 import Hls from 'hls.js'
-import type { HlsConfig } from 'hls.js'
+import type { ErrorData, HlsConfig } from 'hls.js'
 import JASSUB from 'jassub'
 import { useEffect, useRef } from 'react'
 import type { RefObject } from 'react'
@@ -50,7 +50,31 @@ export interface MediaPipelineOptions {
 	fonts: Font[]
 	audio: number
 	audios: Track[]
-	onFailed: () => void
+	onFailed: (failure: PlayerFailure) => void
+}
+
+// Why the transcoded stream stopped: the node's own answer when it gave one, so
+// "ffmpeg was not found: install it…" reaches the user instead of a generic line.
+export interface PlayerFailure {
+	status?: number
+	message?: string
+}
+
+function failureOf(data: ErrorData): PlayerFailure {
+	const status = data.response?.code || undefined
+	const details = data.networkDetails as { responseText?: unknown } | undefined
+
+	let message: string | undefined
+	if (typeof details?.responseText === 'string') {
+		try {
+			const body = JSON.parse(details.responseText) as { detail?: unknown }
+			message = typeof body.detail === 'string' ? body.detail : undefined
+		} catch {
+			message = undefined
+		}
+	}
+
+	return { status, message }
 }
 
 // Everything that feeds the element besides its src: hls.js for a transcode, libass
@@ -85,7 +109,7 @@ export function useMediaPipeline({
 		hls.on(Hls.Events.ERROR, (_, data) => {
 			if (data.fatal) {
 				console.warn('transcoded stream failed', data)
-				onFailedRef.current()
+				onFailedRef.current(failureOf(data))
 			}
 		})
 

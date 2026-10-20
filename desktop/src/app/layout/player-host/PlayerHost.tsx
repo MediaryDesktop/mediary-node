@@ -1,3 +1,4 @@
+import { useNavigate } from '@tanstack/react-router'
 import clsx from 'clsx'
 import { useUnit } from 'effector-react'
 import { useEffect, useRef, useState } from 'react'
@@ -23,6 +24,7 @@ import {
 	VideoPlayer
 } from '@entities/playback'
 import type { VideoSource } from '@entities/playback'
+import { isMissingToolError } from '@entities/tool'
 
 import { $stream, $streamError, $streamTarget, streamCancelled } from '@features/stream-torrent'
 
@@ -99,7 +101,16 @@ export function PlayerHost() {
 		}
 	}, [fileId, load, nodeReady])
 
+	const navigate = useNavigate()
+
 	const requestClose = () => setLeaving(true)
+
+	// mpv or FFmpeg is nowhere: the player covers the page, so it slides away to
+	// show the tab that installs them.
+	const openDependencies = () => {
+		requestClose()
+		void navigate({ to: '/extensions', search: { tab: 'dependencies' } })
+	}
 
 	// Closing covers both the built-in player, which may or may not be open, and a
 	// stream still being readied: whichever applies, the other call is a no-op.
@@ -144,7 +155,13 @@ export function PlayerHost() {
 			return (
 				<Panel onClose={requestClose} leaving={leaving} onLeft={finish}>
 					<p>{problemDetail(error, t('player.loadFailed'))}</p>
-					<Button onClick={() => load(fileId)}>{t('media.retry')}</Button>
+					{isMissingToolError(error) ? (
+						<Button variant='primary' onClick={openDependencies}>
+							{t('player.openDependencies')}
+						</Button>
+					) : (
+						<Button onClick={() => load(fileId)}>{t('media.retry')}</Button>
+					)}
 				</Panel>
 			)
 		}
@@ -198,6 +215,11 @@ export function PlayerHost() {
 			onClose={requestClose}
 			onLeft={finish}
 			onOpenExternally={openExternally}
+			failureAction={failure =>
+				isMissingToolError({ status: failure.status, body: { detail: failure.message } })
+					? { label: t('player.openDependencies'), onClick: openDependencies }
+					: undefined
+			}
 			onFallback={
 				source.kind === 'direct' && loadedStream.hls_url
 					? () => setDirectFailedFor(fileId)

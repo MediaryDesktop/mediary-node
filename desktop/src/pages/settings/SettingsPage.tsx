@@ -9,7 +9,7 @@ import { PageTransition, renderIcon, RippleButton } from '@shared/ui'
 import { nodeHealthQuery } from '@infra/node'
 
 import { BackupSettings, DevicesSettings } from '@features/back-up-node'
-import { PlayerModeSwitcher } from '@features/choose-player'
+import { MissingPlayerNotice, PlayerModeSwitcher } from '@features/choose-player'
 import { DownloadFolderSetting } from '@features/download-chapters'
 import { DebridServiceSettings } from '@features/manage-debrid-service'
 import { LibraryRootsSettings } from '@features/manage-library-roots'
@@ -130,6 +130,7 @@ function SectionContent({ section }: { section: SectionInfo }) {
 					<Row name={t('settings.player.name')} hint={t('settings.player.hint')}>
 						<PlayerModeSwitcher />
 					</Row>
+					<MissingPlayerNotice className={styles.cardNotice} />
 				</Card>
 			)
 		case 'tmdb':

@@ -842,7 +842,8 @@ export const ru: Translation = {
 		loadFailed: 'Не удалось прочитать этот файл.',
 		needsTranscode:
 			'Этот файл использует кодеки, которые встроенный плеер пока не декодирует. Его можно открыть в mpv.',
-		openExternally: 'Открыть в mpv'
+		openExternally: 'Открыть в mpv',
+		openDependencies: 'Открыть зависимости'
 	},
 	reader: {
 		close: 'Назад',
@@ -1622,6 +1623,11 @@ export const ru: Translation = {
 			modes: {
 				builtin: 'Встроенный',
 				external: 'mpv'
+			},
+			mpvMissing: {
+				title: 'mpv не установлен',
+				description:
+					'Пока его нет, серии не будут открываться. Установите его в один клик или переключитесь на встроенный плеер.'
 			}
 		},
 		wizard: {
