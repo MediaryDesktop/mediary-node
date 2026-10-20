@@ -58,6 +58,13 @@ type Extension struct {
 	UpdatedAt   string `json:"updated_at"`
 }
 
+type ExtensionRepository struct {
+	ID      int64  `json:"id"`
+	Url     string `json:"url"`
+	Name    string `json:"name"`
+	AddedAt string `json:"added_at"`
+}
+
 type FileMatch struct {
 	FileID     int64         `json:"file_id"`
 	MediaRef   string        `json:"media_ref"`

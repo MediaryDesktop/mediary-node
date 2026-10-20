@@ -33,6 +33,7 @@ type Querier interface {
 	DeleteCustomList(ctx context.Context, id int64) (int64, error)
 	DeleteCustomListItemsForRef(ctx context.Context, mediaRef string) error
 	DeleteExtension(ctx context.Context, id string) (int64, error)
+	DeleteExtensionRepository(ctx context.Context, id int64) (int64, error)
 	DeleteFileMatch(ctx context.Context, fileID int64) (int64, error)
 	// The match hangs off the file row and goes with it: the user deleted the file
 	// itself, not only what it was tied to.
@@ -77,6 +78,7 @@ type Querier interface {
 	InsertCustomList(ctx context.Context, arg InsertCustomListParams) (CustomList, error)
 	InsertCustomListItem(ctx context.Context, arg InsertCustomListItemParams) error
 	InsertExtension(ctx context.Context, arg InsertExtensionParams) (Extension, error)
+	InsertExtensionRepository(ctx context.Context, arg InsertExtensionRepositoryParams) (ExtensionRepository, error)
 	InsertLibraryFile(ctx context.Context, arg InsertLibraryFileParams) (int64, error)
 	InsertLibraryRoot(ctx context.Context, arg InsertLibraryRootParams) (InsertLibraryRootRow, error)
 	InsertScanRun(ctx context.Context, arg InsertScanRunParams) (int64, error)
@@ -93,6 +95,7 @@ type Querier interface {
 	ListCustomListItems(ctx context.Context, listID int64) ([]CustomListItem, error)
 	ListCustomListMembership(ctx context.Context, mediaType string) ([]ListCustomListMembershipRow, error)
 	ListCustomLists(ctx context.Context) ([]ListCustomListsRow, error)
+	ListExtensionRepositories(ctx context.Context) ([]ExtensionRepository, error)
 	ListExtensions(ctx context.Context) ([]Extension, error)
 	// The library as a list of titles rather than of files: one row per title the
 	// user has something of, which is what a shelf of posters is made from.
@@ -130,6 +133,7 @@ type Querier interface {
 	PruneScanRuns(ctx context.Context, limit int64) error
 	RecordAniListOutboxFailure(ctx context.Context, arg RecordAniListOutboxFailureParams) error
 	RenameCustomList(ctx context.Context, arg RenameCustomListParams) (int64, error)
+	RenameExtensionRepository(ctx context.Context, arg RenameExtensionRepositoryParams) error
 	RequeueRunningMangaDownloads(ctx context.Context, updatedAt string) ([]MangaDownload, error)
 	// The id is kept: items refer to it.
 	RestoreCustomList(ctx context.Context, arg RestoreCustomListParams) error

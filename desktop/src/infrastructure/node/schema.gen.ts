@@ -70,6 +70,26 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/v1/extensions/catalog': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Plugins the user's repositories offer
+		 * @description What a repository says about a plugin is shown as it says it; installing previews the plugin's own manifest and asks for consent to that. Reads are reused for an hour. A repository that fails keeps the plugins of its last good read, with the error beside it. There is no repository until the user adds one.
+		 */
+		get: operations['getExtensionCatalog']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/v1/extensions/preview': {
 		parameters: {
 			query?: never
@@ -85,6 +105,46 @@ export interface paths {
 		 */
 		post: operations['previewExtension']
 		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/extensions/repositories': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Add a plugin repository
+		 * @description Read first: an address that is not a repository is refused rather than saved.
+		 */
+		post: operations['addExtensionRepository']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/extensions/repositories/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		post?: never
+		/**
+		 * Remove a plugin repository
+		 * @description Plugins installed from it stay installed and keep updating from their own addresses.
+		 */
+		delete: operations['removeExtensionRepository']
 		options?: never
 		head?: never
 		patch?: never
@@ -1958,6 +2018,19 @@ export interface components {
 			score_format: string
 			site_url: string
 		}
+		AddRepositoryInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/AddRepositoryInputBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * Format: uri
+			 * @description The repository's JSON, at an https:// address.
+			 */
+			url: string
+		}
 		AddRootInputBody: {
 			/**
 			 * Format: uri
@@ -2074,6 +2147,38 @@ export interface components {
 			book: components['schemas']['BookInfo']
 			/** @description Where the reader left the book; null for a book never opened. */
 			position: components['schemas']['BookPosition']
+		}
+		Catalog: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/Catalog.json
+			 */
+			readonly $schema?: string
+			plugins: components['schemas']['CatalogEntry'][] | null
+			repositories: components['schemas']['RepositoryInfo'][] | null
+		}
+		CatalogEntry: {
+			author: string
+			description?: string
+			icon?: string
+			id: string
+			/** @description The version installed under this plugin's id, if any. */
+			installed?: string
+			/** @description Installed from this very manifest address. */
+			installed_here: boolean
+			lang?: string
+			/** @description Preview and install from here. */
+			manifest_url: string
+			name: string
+			/** Format: int64 */
+			repository_id: number
+			repository_name: string
+			/** @enum {string} */
+			type: 'torrent-provider'
+			/** @description Installed from here, and the repository lists a newer version. */
+			update: boolean
+			version: string
 		}
 		Chapter: {
 			/** Format: float */
@@ -3450,6 +3555,34 @@ export interface components {
 			icon?: string
 			/** @description The new name. */
 			name: string
+		}
+		RepositoryInfo: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/RepositoryInfo.json
+			 */
+			readonly $schema?: string
+			/** Format: date-time */
+			added_at: string
+			/** Format: date-time */
+			checked_at?: string
+			/** @description Why the last read failed; the plugins shown are from the read before. */
+			error?: string
+			/** Format: int64 */
+			id: number
+			name: string
+			/**
+			 * Format: int64
+			 * @description How many plugins it lists that this node can run.
+			 */
+			plugins: number
+			/**
+			 * Format: int64
+			 * @description Entries left out: another type of plugin, or not well formed.
+			 */
+			skipped: number
+			url: string
 		}
 		Root: {
 			/**
@@ -4933,6 +5066,7 @@ export interface components {
 }
 export type SchemaAcceptedOutputBody = components['schemas']['AcceptedOutputBody']
 export type SchemaAccount = components['schemas']['Account']
+export type SchemaAddRepositoryInputBody = components['schemas']['AddRepositoryInputBody']
 export type SchemaAddRootInputBody = components['schemas']['AddRootInputBody']
 export type SchemaAddTorrentDownloadInputBody = components['schemas']['AddTorrentDownloadInputBody']
 export type SchemaAiringEpisode = components['schemas']['AiringEpisode']
@@ -4941,6 +5075,8 @@ export type SchemaBookInfo = components['schemas']['BookInfo']
 export type SchemaBookPosition = components['schemas']['BookPosition']
 export type SchemaBookPositionInputBody = components['schemas']['BookPositionInputBody']
 export type SchemaBookPositionOutputBody = components['schemas']['BookPositionOutputBody']
+export type SchemaCatalog = components['schemas']['Catalog']
+export type SchemaCatalogEntry = components['schemas']['CatalogEntry']
 export type SchemaChapter = components['schemas']['Chapter']
 export type SchemaChapterBody = components['schemas']['ChapterBody']
 export type SchemaChapterOutputBody = components['schemas']['ChapterOutputBody']
@@ -5028,6 +5164,7 @@ export type SchemaReadBody = components['schemas']['ReadBody']
 export type SchemaReadOutputBody = components['schemas']['ReadOutputBody']
 export type SchemaRelatedMedia = components['schemas']['RelatedMedia']
 export type SchemaRenameListInputBody = components['schemas']['RenameListInputBody']
+export type SchemaRepositoryInfo = components['schemas']['RepositoryInfo']
 export type SchemaRoot = components['schemas']['Root']
 export type SchemaRootOutputBody = components['schemas']['RootOutputBody']
 export type SchemaRootsOutputBody = components['schemas']['RootsOutputBody']
@@ -5288,6 +5425,38 @@ export interface operations {
 			}
 		}
 	}
+	getExtensionCatalog: {
+		parameters: {
+			query?: {
+				/** @description Read every repository again instead of reusing reads under an hour old. */
+				refresh?: boolean
+			}
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['Catalog']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
 	previewExtension: {
 		parameters: {
 			query?: never
@@ -5309,6 +5478,68 @@ export interface operations {
 				content: {
 					'application/json': components['schemas']['Preview']
 				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	addExtensionRepository: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['AddRepositoryInputBody']
+			}
+		}
+		responses: {
+			/** @description Created */
+			201: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['RepositoryInfo']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	removeExtensionRepository: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
 			}
 			/** @description Error */
 			default: {

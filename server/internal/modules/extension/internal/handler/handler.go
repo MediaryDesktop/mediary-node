@@ -71,7 +71,31 @@ type UpdateInput struct {
 	}
 }
 
+type CatalogInput struct {
+	Refresh bool `query:"refresh" doc:"Read every repository again instead of reusing reads under an hour old."`
+}
+
+type CatalogOutput struct {
+	Body service.Catalog
+}
+
+type AddRepositoryInput struct {
+	Body struct {
+		URL string `json:"url" format:"uri" maxLength:"2048" doc:"The repository's JSON, at an https:// address."`
+	}
+}
+
+type RepositoryOutput struct {
+	Body service.RepositoryInfo
+}
+
+type RepositoryIDInput struct {
+	ID int64 `path:"id"`
+}
+
 func (h *Handler) Register(api huma.API) {
+	h.registerCatalog(api)
+
 	huma.Register(api, huma.Operation{
 		OperationID: "getExtensionStatus",
 		Method:      http.MethodGet,
@@ -207,5 +231,56 @@ func (h *Handler) Register(api huma.API) {
 		}
 
 		return &ExtensionOutput{Body: *ext}, nil
+	})
+}
+
+func (h *Handler) registerCatalog(api huma.API) {
+	huma.Register(api, huma.Operation{
+		OperationID: "getExtensionCatalog",
+		Method:      http.MethodGet,
+		Path:        "/v1/extensions/catalog",
+		Summary:     "Plugins the user's repositories offer",
+		Description: "What a repository says about a plugin is shown as it says it; installing previews the plugin's own manifest and asks for consent to that. Reads are reused for an hour. A repository that fails keeps the plugins of its last good read, with the error beside it. There is no repository until the user adds one.",
+		Tags:        []string{"extension"},
+	}, func(ctx context.Context, in *CatalogInput) (*CatalogOutput, error) {
+		catalog, err := h.svc.Catalog(ctx, in.Refresh)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return &CatalogOutput{Body: *catalog}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID:   "addExtensionRepository",
+		Method:        http.MethodPost,
+		Path:          "/v1/extensions/repositories",
+		DefaultStatus: http.StatusCreated,
+		Summary:       "Add a plugin repository",
+		Description:   "Read first: an address that is not a repository is refused rather than saved.",
+		Tags:          []string{"extension"},
+	}, func(ctx context.Context, in *AddRepositoryInput) (*RepositoryOutput, error) {
+		repo, err := h.svc.AddRepository(ctx, in.Body.URL)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return &RepositoryOutput{Body: *repo}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID:   "removeExtensionRepository",
+		Method:        http.MethodDelete,
+		Path:          "/v1/extensions/repositories/{id}",
+		DefaultStatus: http.StatusNoContent,
+		Summary:       "Remove a plugin repository",
+		Description:   "Plugins installed from it stay installed and keep updating from their own addresses.",
+		Tags:          []string{"extension"},
+	}, func(ctx context.Context, in *RepositoryIDInput) (*struct{}, error) {
+		if err := h.svc.RemoveRepository(ctx, in.ID); err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return nil, nil
 	})
 }

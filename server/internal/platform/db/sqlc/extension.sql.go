@@ -21,6 +21,18 @@ func (q *Queries) DeleteExtension(ctx context.Context, id string) (int64, error)
 	return result.RowsAffected()
 }
 
+const deleteExtensionRepository = `-- name: DeleteExtensionRepository :execrows
+DELETE FROM extension_repository WHERE id = ?
+`
+
+func (q *Queries) DeleteExtensionRepository(ctx context.Context, id int64) (int64, error) {
+	result, err := q.db.ExecContext(ctx, deleteExtensionRepository, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
 const getExtension = `-- name: GetExtension :one
 SELECT id, manifest_url, manifest, enabled, config, installed_at, updated_at FROM extension WHERE id = ?
 `
@@ -77,6 +89,62 @@ func (q *Queries) InsertExtension(ctx context.Context, arg InsertExtensionParams
 	return i, err
 }
 
+const insertExtensionRepository = `-- name: InsertExtensionRepository :one
+INSERT INTO extension_repository (url, name, added_at)
+VALUES (?, ?, ?)
+RETURNING id, url, name, added_at
+`
+
+type InsertExtensionRepositoryParams struct {
+	Url     string `json:"url"`
+	Name    string `json:"name"`
+	AddedAt string `json:"added_at"`
+}
+
+func (q *Queries) InsertExtensionRepository(ctx context.Context, arg InsertExtensionRepositoryParams) (ExtensionRepository, error) {
+	row := q.db.QueryRowContext(ctx, insertExtensionRepository, arg.Url, arg.Name, arg.AddedAt)
+	var i ExtensionRepository
+	err := row.Scan(
+		&i.ID,
+		&i.Url,
+		&i.Name,
+		&i.AddedAt,
+	)
+	return i, err
+}
+
+const listExtensionRepositories = `-- name: ListExtensionRepositories :many
+SELECT id, url, name, added_at FROM extension_repository ORDER BY id
+`
+
+func (q *Queries) ListExtensionRepositories(ctx context.Context) ([]ExtensionRepository, error) {
+	rows, err := q.db.QueryContext(ctx, listExtensionRepositories)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ExtensionRepository{}
+	for rows.Next() {
+		var i ExtensionRepository
+		if err := rows.Scan(
+			&i.ID,
+			&i.Url,
+			&i.Name,
+			&i.AddedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listExtensions = `-- name: ListExtensions :many
 SELECT id, manifest_url, manifest, enabled, config, installed_at, updated_at FROM extension ORDER BY id
 `
@@ -110,6 +178,20 @@ func (q *Queries) ListExtensions(ctx context.Context) ([]Extension, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const renameExtensionRepository = `-- name: RenameExtensionRepository :exec
+UPDATE extension_repository SET name = ? WHERE id = ?
+`
+
+type RenameExtensionRepositoryParams struct {
+	Name string `json:"name"`
+	ID   int64  `json:"id"`
+}
+
+func (q *Queries) RenameExtensionRepository(ctx context.Context, arg RenameExtensionRepositoryParams) error {
+	_, err := q.db.ExecContext(ctx, renameExtensionRepository, arg.Name, arg.ID)
+	return err
 }
 
 const updateExtensionManifest = `-- name: UpdateExtensionManifest :one

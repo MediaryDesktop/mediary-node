@@ -19,3 +19,17 @@ RETURNING *;
 
 -- name: DeleteExtension :execrows
 DELETE FROM extension WHERE id = ?;
+
+-- name: ListExtensionRepositories :many
+SELECT * FROM extension_repository ORDER BY id;
+
+-- name: InsertExtensionRepository :one
+INSERT INTO extension_repository (url, name, added_at)
+VALUES (?, ?, ?)
+RETURNING *;
+
+-- name: RenameExtensionRepository :exec
+UPDATE extension_repository SET name = ? WHERE id = ?;
+
+-- name: DeleteExtensionRepository :execrows
+DELETE FROM extension_repository WHERE id = ?;

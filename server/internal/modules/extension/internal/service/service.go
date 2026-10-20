@@ -46,6 +46,8 @@ type Service struct {
 	// What the last update check found, by plugin.
 	updatesMu sync.Mutex
 	updates   map[string]Update
+
+	catalog catalogCache
 }
 
 func New(st *store.Store, sec *secrets.Store, logger zerolog.Logger, hub *events.Hub, opts Options) *Service {
@@ -60,6 +62,7 @@ func New(st *store.Store, sec *secrets.Store, logger zerolog.Logger, hub *events
 		hub:     hub,
 		opts:    opts,
 		updates: map[string]Update{},
+		catalog: catalogCache{reads: map[int64]read{}},
 	}
 }
 
@@ -285,8 +288,16 @@ func secretKey(id, field string) string {
 	return "extension." + id + "." + field
 }
 
+// publish announces a change to a plugin, or to the repositories when id is
+// empty.
 func (s *Service) publish(id string) {
-	if s.hub != nil {
-		s.hub.Publish(events.TopicExtension, map[string]any{"id": id})
+	if s.hub == nil {
+		return
 	}
+
+	payload := map[string]any{}
+	if id != "" {
+		payload["id"] = id
+	}
+	s.hub.Publish(events.TopicExtension, payload)
 }

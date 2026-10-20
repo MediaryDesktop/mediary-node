@@ -49,6 +49,24 @@ components:
         - score_format
         - display_adult_content
       type: object
+    AddRepositoryInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/AddRepositoryInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        url:
+          description: The repository's JSON, at an https:// address.
+          format: uri
+          maxLength: 2048
+          type: string
+      required:
+        - url
+      type: object
     AddRootInputBody:
       additionalProperties: false
       properties:
@@ -256,6 +274,82 @@ components:
       required:
         - book
         - position
+      type: object
+    Catalog:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/Catalog.json
+          format: uri
+          readOnly: true
+          type: string
+        plugins:
+          items:
+            $ref: "#/components/schemas/CatalogEntry"
+          type:
+            - array
+            - "null"
+        repositories:
+          items:
+            $ref: "#/components/schemas/RepositoryInfo"
+          type:
+            - array
+            - "null"
+      required:
+        - plugins
+        - repositories
+      type: object
+    CatalogEntry:
+      additionalProperties: false
+      properties:
+        author:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+        id:
+          type: string
+        installed:
+          description: The version installed under this plugin's id, if any.
+          type: string
+        installed_here:
+          description: Installed from this very manifest address.
+          type: boolean
+        lang:
+          type: string
+        manifest_url:
+          description: Preview and install from here.
+          type: string
+        name:
+          type: string
+        repository_id:
+          format: int64
+          type: integer
+        repository_name:
+          type: string
+        type:
+          enum:
+            - torrent-provider
+          type: string
+        update:
+          description: Installed from here, and the repository lists a newer version.
+          type: boolean
+        version:
+          type: string
+      required:
+        - manifest_url
+        - id
+        - name
+        - version
+        - type
+        - author
+        - repository_id
+        - repository_name
+        - installed_here
+        - update
       type: object
     Chapter:
       additionalProperties: false
@@ -2962,6 +3056,48 @@ components:
       required:
         - name
       type: object
+    RepositoryInfo:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/RepositoryInfo.json
+          format: uri
+          readOnly: true
+          type: string
+        added_at:
+          format: date-time
+          type: string
+        checked_at:
+          format: date-time
+          type: string
+        error:
+          description: Why the last read failed; the plugins shown are from the read before.
+          type: string
+        id:
+          format: int64
+          type: integer
+        name:
+          type: string
+        plugins:
+          description: How many plugins it lists that this node can run.
+          format: int64
+          type: integer
+        skipped:
+          description: "Entries left out: another type of plugin, or not well formed."
+          format: int64
+          type: integer
+        url:
+          type: string
+      required:
+        - id
+        - url
+        - name
+        - added_at
+        - plugins
+        - skipped
+      type: object
     Root:
       additionalProperties: false
       properties:
@@ -5517,6 +5653,34 @@ paths:
       summary: Install a plugin
       tags:
         - extension
+  /v1/extensions/catalog:
+    get:
+      description: What a repository says about a plugin is shown as it says it; installing previews the plugin's own manifest and asks for consent to that. Reads are reused for an hour. A repository that fails keeps the plugins of its last good read, with the error beside it. There is no repository until the user adds one.
+      operationId: getExtensionCatalog
+      parameters:
+        - description: Read every repository again instead of reusing reads under an hour old.
+          explode: false
+          in: query
+          name: refresh
+          schema:
+            description: Read every repository again instead of reusing reads under an hour old.
+            type: boolean
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Catalog"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Plugins the user's repositories offer
+      tags:
+        - extension
   /v1/extensions/preview:
     post:
       description: "Reads the manifest and says what installing it means: the hosts the plugin will reach and the settings it asks for. Nothing is downloaded but the manifest, nothing is saved. Install with the consent it returns."
@@ -5541,6 +5705,55 @@ paths:
                 $ref: "#/components/schemas/ErrorModel"
           description: Error
       summary: Read a plugin before installing it
+      tags:
+        - extension
+  /v1/extensions/repositories:
+    post:
+      description: "Read first: an address that is not a repository is refused rather than saved."
+      operationId: addExtensionRepository
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddRepositoryInputBody"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RepositoryInfo"
+          description: Created
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Add a plugin repository
+      tags:
+        - extension
+  /v1/extensions/repositories/{id}:
+    delete:
+      description: Plugins installed from it stay installed and keep updating from their own addresses.
+      operationId: removeExtensionRepository
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            format: int64
+            type: integer
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Remove a plugin repository
       tags:
         - extension
   /v1/extensions/updates:

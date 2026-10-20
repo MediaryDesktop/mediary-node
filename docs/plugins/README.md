@@ -84,3 +84,38 @@ resolves to a loopback, private or link-local address — a plugin cannot reach
 the node's own API or the user's local network, whatever its hosts point to.
 
 Write JavaScript; if you write TypeScript, compile it yourself.
+
+## Publishing a repository
+
+A repository is one JSON file listing plugins; the user adds its `https://`
+address in the app. Mediary ships with no repository and recommends none.
+
+```json
+{
+  "name": "Example plugins",
+  "plugins": [
+    {
+      "manifest": "https://example.org/example-tracker/manifest.json",
+      "id": "example-tracker",
+      "name": "Example tracker",
+      "version": "1.0.0",
+      "type": "torrent-provider",
+      "author": "you",
+      "description": "What it searches",
+      "lang": "en",
+      "icon": "https://example.org/example-tracker/icon.png"
+    }
+  ]
+}
+```
+
+What an entry says is only shown in the catalog. Installing reads the
+plugin's own manifest at `manifest` and asks the user to agree to that — so
+keep the entry in step with the manifest, or the user sees one thing in the
+catalog and another before installing.
+
+An entry the node cannot use — another type of plugin, a manifest not at an
+`https://` address, a bad `id` or `version` — is left out and counted; the rest
+of the list still shows. Unknown fields are ignored. Up to 1 MB and 1000
+plugins; the node reads a repository again after an hour, or when the user
+refreshes the catalog, and if a read fails it keeps showing the last good one.

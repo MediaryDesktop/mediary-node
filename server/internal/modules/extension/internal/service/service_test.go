@@ -30,15 +30,17 @@ type host struct {
 	server *httptest.Server
 	mu     sync.Mutex
 	files  map[string]string
+	hits   map[string]int
 }
 
 func newHost(t *testing.T) *host {
 	t.Helper()
 
-	h := &host{files: map[string]string{}}
+	h := &host{files: map[string]string{}, hits: map[string]int{}}
 	h.server = httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		h.mu.Lock()
 		body, ok := h.files[r.URL.Path]
+		h.hits[r.URL.Path]++
 		h.mu.Unlock()
 		if !ok {
 			http.NotFound(w, r)
@@ -49,6 +51,13 @@ func newHost(t *testing.T) *host {
 	t.Cleanup(h.server.Close)
 
 	return h
+}
+
+func (h *host) hitsOf(path string) int {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	return h.hits[path]
 }
 
 func (h *host) serve(path, body string) {
