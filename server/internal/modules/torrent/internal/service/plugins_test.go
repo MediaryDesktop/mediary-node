@@ -6,6 +6,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
 )
@@ -17,9 +18,11 @@ type fakeProviders struct {
 	providers []Provider
 	answers   map[string][]ProviderRelease
 	errs      map[string]error
-	asked     map[string][]ProviderQuery
-	fetched   []string
-	torrent   []byte
+	// Plugins that answer only when the search stops waiting.
+	hangs   map[string]bool
+	asked   map[string][]ProviderQuery
+	fetched []string
+	torrent []byte
 }
 
 func newFakeProviders(providers ...Provider) *fakeProviders {
@@ -27,6 +30,7 @@ func newFakeProviders(providers ...Provider) *fakeProviders {
 		providers: providers,
 		answers:   map[string][]ProviderRelease{},
 		errs:      map[string]error{},
+		hangs:     map[string]bool{},
 		asked:     map[string][]ProviderQuery{},
 	}
 }
@@ -38,13 +42,18 @@ func (f *fakeProviders) TorrentProviders(context.Context) ([]Provider, error) {
 	return f.providers, nil
 }
 
-func (f *fakeProviders) Search(_ context.Context, id string, query ProviderQuery) ([]ProviderRelease, error) {
+func (f *fakeProviders) Search(ctx context.Context, id string, query ProviderQuery) ([]ProviderRelease, error) {
 	f.mu.Lock()
-	defer f.mu.Unlock()
-
 	f.asked[id] = append(f.asked[id], query)
+	answers, err, hangs := f.answers[id], f.errs[id], f.hangs[id]
+	f.mu.Unlock()
 
-	return f.answers[id], f.errs[id]
+	if hangs {
+		<-ctx.Done()
+		return nil, ctx.Err()
+	}
+
+	return answers, err
 }
 
 func (f *fakeProviders) FetchTorrent(_ context.Context, id, link string) (data []byte, magnet string, err error) {
@@ -139,6 +148,33 @@ func TestPluginsAndSourcesShareOneList(t *testing.T) {
 	}
 	if got := strings.Join(names, "|"); got != "Jackett:|Nyaa:|Broken:plugin broken: the site is down" {
 		t.Fatalf("sources %s", got)
+	}
+}
+
+// A plugin that never answers costs the search its wait, not the results the
+// others found.
+func TestAHangingPluginLeavesTheOthersResults(t *testing.T) {
+	h := newHarness(t)
+	h.withSearch(frierenNames)
+	stuck := Provider{ID: "stuck", Name: "Stuck", Version: "1.0.0"}
+	plugins := newFakeProviders(nyaa, stuck)
+	plugins.answers["nyaa"] = []ProviderRelease{
+		{Title: "[SubsPlease] Sousou no Frieren - 13 (1080p)", InfoHash: "dddddddddddddddddddddddddddddddddddddddd", Seeders: 50},
+	}
+	plugins.hangs["stuck"] = true
+	h.svc.opts.Providers = plugins
+	h.svc.opts.SearchTimeout = 100 * time.Millisecond
+
+	result, err := h.svc.Search(context.Background(), SearchRequest{MediaRef: "anilist:154587", Episode: 13})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(result.Releases) != 1 || result.Releases[0].Plugin != "nyaa" {
+		t.Fatalf("releases %+v", result.Releases)
+	}
+	if len(result.Sources) != 2 || result.Sources[0].Error != "" || result.Sources[1].Error == "" {
+		t.Fatalf("sources %+v; want the stuck plugin's alone failed", result.Sources)
 	}
 }
 

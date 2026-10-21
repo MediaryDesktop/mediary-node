@@ -122,6 +122,8 @@ type Options struct {
 	IdleInterval   time.Duration
 	// How often the auto-download rules look for new episodes.
 	RuleInterval time.Duration
+	// How long a search waits for its sources; tests shorten it.
+	SearchTimeout time.Duration
 
 	Now func() time.Time
 }
@@ -167,6 +169,9 @@ func New(st *store.Store, secretFile *secrets.Store, library Library, hub *event
 	}
 	if opts.RuleInterval <= 0 {
 		opts.RuleInterval = defaultRuleInterval
+	}
+	if opts.SearchTimeout <= 0 {
+		opts.SearchTimeout = searchTimeout
 	}
 	if opts.Now == nil {
 		opts.Now = time.Now

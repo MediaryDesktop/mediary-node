@@ -56,7 +56,7 @@ every search starts in a fresh runtime.
 
 | Limit | Value |
 |---|---|
-| One search, every request in it included | 30 s; then it is stopped, `catch` or not |
+| One search, every request in it included | 20 s; then it is stopped, `catch` or not |
 | One request | 15 s |
 | Requests per search | 10 |
 | Response body | 5 MB |

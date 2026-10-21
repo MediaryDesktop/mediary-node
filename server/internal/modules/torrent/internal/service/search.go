@@ -26,7 +26,8 @@ const (
 	releaseTTL = 30 * time.Minute
 	// The most title names one search asks for.
 	maxQueries = 3
-	// How long a search waits for the slowest source.
+	// How long a search waits for the slowest source or plugin; more than either
+	// gives itself, so each fails with its own reason.
 	searchTimeout = 25 * time.Second
 )
 
@@ -151,7 +152,9 @@ func (s *Service) Search(ctx context.Context, req SearchRequest) (*TorrentSearch
 		return nil, apperr.New(apperr.KindPrecondition, "add a Torznab source — Jackett or Prowlarr — or install a search plugin first")
 	}
 
-	ctx, cancel := context.WithTimeout(ctx, searchTimeout)
+	// The wait is the sources' alone: reading the profile and asking the debrid
+	// service afterwards still have the request's own time.
+	askCtx, cancel := context.WithTimeout(ctx, s.opts.SearchTimeout)
 	defer cancel()
 
 	// One answer from one source or plugin to one query, already turned into
@@ -182,7 +185,7 @@ func (s *Service) Search(ctx context.Context, req SearchRequest) (*TorrentSearch
 			wg.Add(1)
 			go func(source store.Source, query string) {
 				defer wg.Done()
-				items, askErr := s.ask(ctx, source, key, query)
+				items, askErr := s.ask(askCtx, source, key, query)
 
 				found := make([]TorrentRelease, 0, len(items))
 				for i := range items {
@@ -204,7 +207,7 @@ func (s *Service) Search(ctx context.Context, req SearchRequest) (*TorrentSearch
 			wg.Add(1)
 			go func(provider Provider, query string) {
 				defer wg.Done()
-				items, askErr := s.askPlugin(ctx, provider, ProviderQuery{
+				items, askErr := s.askPlugin(askCtx, provider, ProviderQuery{
 					Query:     query,
 					Titles:    names,
 					Episode:   req.Episode,

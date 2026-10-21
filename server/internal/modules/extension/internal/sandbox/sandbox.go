@@ -32,7 +32,9 @@ type Limits struct {
 
 func DefaultLimits() Limits {
 	return Limits{
-		Call:           30 * time.Second,
+		// Under the 25 s a search waits for its sources, as a Torznab source's
+		// 20 s is: a plugin that runs out of time says so itself.
+		Call:           20 * time.Second,
 		Request:        15 * time.Second,
 		MaxRequests:    10,
 		MaxBody:        5 << 20,
