@@ -27,13 +27,13 @@ const codeFile = "plugin.js"
 
 // Preview reads the manifest at an address and says what installing it means.
 // Nothing is downloaded but the manifest; nothing is saved.
-func (s *Service) Preview(ctx context.Context, manifestURL string) (*Preview, error) {
+func (s *Service) Preview(ctx context.Context, manifestURL string) (*ExtensionPreview, error) {
 	m, err := s.fetchManifest(ctx, manifestURL)
 	if err != nil {
 		return nil, err
 	}
 
-	preview := &Preview{
+	preview := &ExtensionPreview{
 		Info:        info(m),
 		Config:      fields(m),
 		ManifestURL: manifestURL,
@@ -99,7 +99,7 @@ func (s *Service) CheckUpdates(ctx context.Context) ([]Extension, error) {
 		return nil, apperr.Wrap(err, apperr.KindInternal, "list plugins")
 	}
 
-	found := make(map[string]Update, len(exts))
+	found := make(map[string]ExtensionUpdate, len(exts))
 	var mu sync.Mutex
 	var wg sync.WaitGroup
 	slots := make(chan struct{}, 4)
@@ -130,22 +130,22 @@ func (s *Service) CheckUpdates(ctx context.Context) ([]Extension, error) {
 }
 
 // checkOne reports false when the plugin is up to date.
-func (s *Service) checkOne(ctx context.Context, ext *store.Extension) (Update, bool) {
+func (s *Service) checkOne(ctx context.Context, ext *store.Extension) (ExtensionUpdate, bool) {
 	m, err := s.fetchManifest(ctx, ext.ManifestURL)
 	if err != nil {
-		return Update{Error: messageOf(err)}, true
+		return ExtensionUpdate{Error: messageOf(err)}, true
 	}
 
 	if m.ID != ext.ID {
-		return Update{Error: fmt.Sprintf("the address now holds another plugin, %q", m.ID)}, true
+		return ExtensionUpdate{Error: fmt.Sprintf("the address now holds another plugin, %q", m.ID)}, true
 	}
 	if !newer(m.Version, ext.Manifest.Version) {
-		return Update{}, false
+		return ExtensionUpdate{}, false
 	}
 
 	added := addedHosts(ext.Manifest.Network, m.Network)
 
-	return Update{
+	return ExtensionUpdate{
 		Version:      m.Version,
 		Consent:      consentOf(m),
 		AddedHosts:   added,

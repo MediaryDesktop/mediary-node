@@ -22,7 +22,7 @@ const (
 
 // RepositoryInfo is a repository the user added, with what its last read
 // found.
-type RepositoryInfo struct {
+type ExtensionRepository struct {
 	ID        int64      `json:"id"`
 	URL       string     `json:"url"`
 	Name      string     `json:"name"`
@@ -36,7 +36,7 @@ type RepositoryInfo struct {
 // CatalogEntry is a plugin a repository lists. What it says is the
 // repository's word, shown and nothing more: installing reads the plugin's own
 // manifest and asks for consent to that.
-type CatalogEntry struct {
+type CatalogPlugin struct {
 	ManifestURL    string `json:"manifest_url" doc:"Preview and install from here."`
 	ID             string `json:"id"`
 	Name           string `json:"name"`
@@ -53,9 +53,9 @@ type CatalogEntry struct {
 	Update         bool   `json:"update" doc:"Installed from here, and the repository lists a newer version."`
 }
 
-type Catalog struct {
-	Plugins      []CatalogEntry   `json:"plugins"`
-	Repositories []RepositoryInfo `json:"repositories"`
+type ExtensionCatalog struct {
+	Plugins      []CatalogPlugin       `json:"plugins"`
+	Repositories []ExtensionRepository `json:"repositories"`
 }
 
 // read is what a repository answered last, kept between catalog views.
@@ -75,7 +75,7 @@ type catalogCache struct {
 	reads map[int64]read
 }
 
-func (s *Service) AddRepository(ctx context.Context, rawURL string) (*RepositoryInfo, error) {
+func (s *Service) AddRepository(ctx context.Context, rawURL string) (*ExtensionRepository, error) {
 	if !repository.HTTPSURL(rawURL) {
 		return nil, apperr.Invalid("url", "a repository is at an https:// address")
 	}
@@ -136,7 +136,7 @@ func (s *Service) RemoveRepository(ctx context.Context, id int64) error {
 // Catalog lists every plugin the user's repositories offer, read again when
 // older than an hour or when refresh asks for it. A plugin listed in two
 // repositories at the same address is shown once.
-func (s *Service) Catalog(ctx context.Context, refresh bool) (*Catalog, error) {
+func (s *Service) Catalog(ctx context.Context, refresh bool) (*ExtensionCatalog, error) {
 	repos, err := s.store.Repositories(ctx)
 	if err != nil {
 		return nil, apperr.Wrap(err, apperr.KindInternal, "list repositories")
@@ -153,7 +153,7 @@ func (s *Service) Catalog(ctx context.Context, refresh bool) (*Catalog, error) {
 		byID[installed[i].ID] = &installed[i]
 	}
 
-	out := &Catalog{Plugins: []CatalogEntry{}, Repositories: make([]RepositoryInfo, 0, len(repos))}
+	out := &ExtensionCatalog{Plugins: []CatalogPlugin{}, Repositories: make([]ExtensionRepository, 0, len(repos))}
 	seen := map[string]bool{}
 
 	for _, repo := range repos {
@@ -176,7 +176,7 @@ func (s *Service) Catalog(ctx context.Context, refresh bool) (*Catalog, error) {
 			}
 			seen[entry.Manifest] = true
 
-			item := CatalogEntry{
+			item := CatalogPlugin{
 				ManifestURL:    entry.Manifest,
 				ID:             entry.ID,
 				Name:           entry.Name,
@@ -279,8 +279,8 @@ func (s *Service) readRepository(ctx context.Context, rawURL string) read {
 	return r
 }
 
-func infoOf(repo store.Repository, r read) RepositoryInfo {
-	info := RepositoryInfo{
+func infoOf(repo store.Repository, r read) ExtensionRepository {
+	info := ExtensionRepository{
 		ID:      repo.ID,
 		URL:     repo.URL,
 		Name:    repo.Name,

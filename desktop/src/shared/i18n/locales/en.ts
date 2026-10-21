@@ -1026,7 +1026,8 @@ export const en = {
 				'Choose the built-in client, connect qBittorrent or add a TorBox key in the settings.',
 			unreachable: 'The torrent client does not answer',
 			noSources: 'No search source',
-			noSourcesHint: 'Add Jackett or Prowlarr in the settings to search for releases.'
+			noSourcesHint:
+				'Add Jackett or Prowlarr in the settings, or install a search plugin on the Extensions page, to search for releases.'
 		},
 		add: 'Add torrent',
 		drawer: {
@@ -1095,7 +1096,8 @@ export const en = {
 			bestIs: 'Best match: {{title}}',
 			downloadBest: 'Download best',
 			queries: 'Searched for: {{queries}}',
-			noSources: 'Add Jackett or Prowlarr in the settings to search for releases.',
+			noSources:
+				'Add Jackett or Prowlarr in the settings, or install a search plugin on the Extensions page, to search for releases.',
 			failed: 'The search failed',
 			sourceFailed: '{{name}} did not answer: {{error}}',
 			empty: 'Nothing found',
@@ -1351,18 +1353,8 @@ export const en = {
 			tab: 'Extensions',
 			title: 'Extensions',
 			subtitle: 'Browse and install plugins that add sources to Mediary.',
-			types: {
-				all: 'All types',
-				plugins: 'Plugins',
-				animeTorrents: 'Anime torrents',
-				manga: 'Manga',
-				onlineStreaming: 'Online streaming',
-				customSources: 'Custom sources'
-			},
 			allLanguages: 'All languages',
-			search: 'Search extensions…',
-			emptyTitle: 'No extensions yet',
-			emptyDescription: 'Plugins that add sources will appear here'
+			search: 'Search extensions…'
 		},
 		dependencies: {
 			tab: 'Dependencies',
@@ -1380,6 +1372,102 @@ export const en = {
 				missing: 'Not installed'
 			},
 			search: 'Search programs…'
+		}
+	},
+	plugins: {
+		view: {
+			installed: 'Installed',
+			installedWithUpdates: 'Installed · {{count}} to update',
+			catalog: 'Catalog'
+		},
+		types: {
+			all: 'All types',
+			'torrent-provider': 'Torrent search'
+		},
+		addByUrl: 'Add by address',
+		checkUpdates: 'Check for updates',
+		noUpdates: 'Every plugin is up to date',
+		updatesFound: 'Updates found: {{count}}',
+		emptyInstalled: {
+			title: 'No plugins yet',
+			description: 'Find them in the catalog of a repository you trust, or add one by its address.'
+		},
+		emptyCatalog: {
+			title: 'The catalog is empty',
+			description: 'Mediary has no repository of its own and recommends none. Add one you trust.'
+		},
+		hosts: 'Reaches {{hosts}}',
+		noHosts: 'Reaches no sites',
+		multiLanguage: 'Many languages',
+		from: 'from {{repository}}',
+		disabled: 'Turned off',
+		updateCheckFailed: 'Could not check for updates',
+		installedHere: 'Installed',
+		installedElsewhere: 'Installed from another address',
+		install: 'Install',
+		update: 'Update to {{version}}',
+		settings: 'Settings',
+		more: 'More',
+		enable: 'Turn on',
+		disable: 'Turn off',
+		remove: 'Remove',
+		removeConfirm: {
+			title: 'Remove {{name}}?',
+			description:
+				'Its code, settings and saved keys go with it. Releases it found stay where they were added.',
+			confirm: 'Remove'
+		},
+		installed: '{{name}} is installed',
+		updated: '{{name}} is updated to {{version}}',
+		actionFailed: 'Could not do that',
+		dialog: {
+			installTitle: 'Install a plugin',
+			updateTitle: 'Update {{name}}',
+			urlLabel: 'Manifest address',
+			urlHint:
+				"The plugin's manifest.json, at an https:// address. Nothing is installed until you agree to what it shows.",
+			next: 'Continue',
+			reading: 'Reading the manifest…',
+			readFailed: 'Could not read the plugin',
+			installFailed: 'Could not install the plugin',
+			retry: 'Try again',
+			hostsTitle: 'Sites it will reach',
+			hostsNone: 'It reaches no sites at all.',
+			hostsNew: 'new',
+			receivesTitle: 'What it is given',
+			receives:
+				"The title's names, the episode and season, and its AniList or TMDB id — nothing from your accounts.",
+			settingsTitle: 'Settings it asks for',
+			secret: 'kept secret',
+			sandbox:
+				'It runs in a sandbox: no files, no programs, no other sites, no local network. It only finds releases; Mediary downloads them.',
+			source: 'Manifest',
+			incompatible: 'It needs Mediary {{version}} or newer.',
+			alreadyInstalled: 'Version {{version}} is installed. Update it from the list instead.',
+			install: 'Install',
+			update: 'Update',
+			cancel: 'Cancel'
+		},
+		settingsDrawer: {
+			title: '{{name}} settings',
+			description: 'Secret values are kept apart from the rest and never shown again.',
+			default: 'Default ({{value}})',
+			secretSet: 'Saved. Type a new one to replace it.',
+			secretClear: 'Remove',
+			save: 'Save',
+			saved: 'Settings saved'
+		},
+		repositories: {
+			title: 'Repositories',
+			description:
+				'Lists of plugins someone publishes. Mediary does not know who stands behind one — add only repositories you trust.',
+			urlLabel: 'Repository address',
+			add: 'Add repository',
+			added: '{{name}} added',
+			none: 'No repositories yet.',
+			count: 'Plugins: {{count}}',
+			skipped: 'left out: {{count}}',
+			remove: 'Remove repository'
 		}
 	},
 	tools: {

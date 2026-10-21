@@ -35,28 +35,28 @@ type ExtensionOutput struct {
 	Body service.Extension
 }
 
-type PreviewInput struct {
+type PreviewExtensionInput struct {
 	Body struct {
 		URL string `json:"url" format:"uri" maxLength:"2048" doc:"The plugin's manifest.json, at an https:// address."`
 	}
 }
 
-type PreviewOutput struct {
-	Body service.Preview
+type PreviewExtensionOutput struct {
+	Body service.ExtensionPreview
 }
 
-type InstallInput struct {
+type InstallExtensionInput struct {
 	Body struct {
 		URL     string `json:"url" format:"uri" maxLength:"2048"`
 		Consent string `json:"consent" pattern:"^[0-9a-f]{64}$" doc:"From the preview the user agreed to."`
 	}
 }
 
-type IDInput struct {
+type ExtensionIDInput struct {
 	ID string `path:"id" pattern:"^[a-z][a-z0-9-]{1,47}$"`
 }
 
-type SettingsInput struct {
+type ConfigureExtensionInput struct {
 	ID   string `path:"id" pattern:"^[a-z][a-z0-9-]{1,47}$"`
 	Body struct {
 		Enabled *bool             `json:"enabled,omitempty"`
@@ -64,19 +64,19 @@ type SettingsInput struct {
 	}
 }
 
-type UpdateInput struct {
+type UpdateExtensionInput struct {
 	ID   string `path:"id" pattern:"^[a-z][a-z0-9-]{1,47}$"`
 	Body struct {
 		Consent string `json:"consent" pattern:"^[0-9a-f]{64}$" doc:"From the update check the user saw."`
 	}
 }
 
-type CatalogInput struct {
+type ExtensionCatalogInput struct {
 	Refresh bool `query:"refresh" doc:"Read every repository again instead of reusing reads under an hour old."`
 }
 
-type CatalogOutput struct {
-	Body service.Catalog
+type ExtensionCatalogOutput struct {
+	Body service.ExtensionCatalog
 }
 
 type AddRepositoryInput struct {
@@ -85,11 +85,11 @@ type AddRepositoryInput struct {
 	}
 }
 
-type RepositoryOutput struct {
-	Body service.RepositoryInfo
+type ExtensionRepositoryOutput struct {
+	Body service.ExtensionRepository
 }
 
-type RepositoryIDInput struct {
+type ExtensionRepositoryIDInput struct {
 	ID int64 `path:"id"`
 }
 
@@ -141,13 +141,13 @@ func (h *Handler) Register(api huma.API) {
 		Summary:     "Read a plugin before installing it",
 		Description: "Reads the manifest and says what installing it means: the hosts the plugin will reach and the settings it asks for. Nothing is downloaded but the manifest, nothing is saved. Install with the consent it returns.",
 		Tags:        []string{"extension"},
-	}, func(ctx context.Context, in *PreviewInput) (*PreviewOutput, error) {
+	}, func(ctx context.Context, in *PreviewExtensionInput) (*PreviewExtensionOutput, error) {
 		preview, err := h.svc.Preview(ctx, in.Body.URL)
 		if err != nil {
 			return nil, httpapi.ToHTTP(err)
 		}
 
-		return &PreviewOutput{Body: *preview}, nil
+		return &PreviewExtensionOutput{Body: *preview}, nil
 	})
 
 	huma.Register(api, huma.Operation{
@@ -158,7 +158,7 @@ func (h *Handler) Register(api huma.API) {
 		Summary:       "Install a plugin",
 		Description:   "Reads the manifest again and installs it only if it is the one the consent was given for. The code is downloaded once, refused unless it matches the manifest's sum, and run only from the saved copy.",
 		Tags:          []string{"extension"},
-	}, func(ctx context.Context, in *InstallInput) (*ExtensionOutput, error) {
+	}, func(ctx context.Context, in *InstallExtensionInput) (*ExtensionOutput, error) {
 		ext, err := h.svc.Install(ctx, in.Body.URL, in.Body.Consent)
 		if err != nil {
 			return nil, httpapi.ToHTTP(err)
@@ -173,7 +173,7 @@ func (h *Handler) Register(api huma.API) {
 		Path:        "/v1/extensions/{id}",
 		Summary:     "Turn a plugin on or off, or change its settings",
 		Tags:        []string{"extension"},
-	}, func(ctx context.Context, in *SettingsInput) (*ExtensionOutput, error) {
+	}, func(ctx context.Context, in *ConfigureExtensionInput) (*ExtensionOutput, error) {
 		ext, err := h.svc.Configure(ctx, in.ID, service.Settings{Enabled: in.Body.Enabled, Config: in.Body.Config})
 		if err != nil {
 			return nil, httpapi.ToHTTP(err)
@@ -190,7 +190,7 @@ func (h *Handler) Register(api huma.API) {
 		Summary:       "Remove a plugin",
 		Description:   "Its code, settings and secrets go with it.",
 		Tags:          []string{"extension"},
-	}, func(ctx context.Context, in *IDInput) (*struct{}, error) {
+	}, func(ctx context.Context, in *ExtensionIDInput) (*struct{}, error) {
 		if err := h.svc.Remove(ctx, in.ID); err != nil {
 			return nil, httpapi.ToHTTP(err)
 		}
@@ -224,7 +224,7 @@ func (h *Handler) Register(api huma.API) {
 		Summary:     "Install a plugin's newer version",
 		Description: "Only from the address it was installed from, only newer, only the manifest the consent was given for. Settings that still fit carry over.",
 		Tags:        []string{"extension"},
-	}, func(ctx context.Context, in *UpdateInput) (*ExtensionOutput, error) {
+	}, func(ctx context.Context, in *UpdateExtensionInput) (*ExtensionOutput, error) {
 		ext, err := h.svc.Update(ctx, in.ID, in.Body.Consent)
 		if err != nil {
 			return nil, httpapi.ToHTTP(err)
@@ -242,13 +242,13 @@ func (h *Handler) registerCatalog(api huma.API) {
 		Summary:     "Plugins the user's repositories offer",
 		Description: "What a repository says about a plugin is shown as it says it; installing previews the plugin's own manifest and asks for consent to that. Reads are reused for an hour. A repository that fails keeps the plugins of its last good read, with the error beside it. There is no repository until the user adds one.",
 		Tags:        []string{"extension"},
-	}, func(ctx context.Context, in *CatalogInput) (*CatalogOutput, error) {
+	}, func(ctx context.Context, in *ExtensionCatalogInput) (*ExtensionCatalogOutput, error) {
 		catalog, err := h.svc.Catalog(ctx, in.Refresh)
 		if err != nil {
 			return nil, httpapi.ToHTTP(err)
 		}
 
-		return &CatalogOutput{Body: *catalog}, nil
+		return &ExtensionCatalogOutput{Body: *catalog}, nil
 	})
 
 	huma.Register(api, huma.Operation{
@@ -259,13 +259,13 @@ func (h *Handler) registerCatalog(api huma.API) {
 		Summary:       "Add a plugin repository",
 		Description:   "Read first: an address that is not a repository is refused rather than saved.",
 		Tags:          []string{"extension"},
-	}, func(ctx context.Context, in *AddRepositoryInput) (*RepositoryOutput, error) {
+	}, func(ctx context.Context, in *AddRepositoryInput) (*ExtensionRepositoryOutput, error) {
 		repo, err := h.svc.AddRepository(ctx, in.Body.URL)
 		if err != nil {
 			return nil, httpapi.ToHTTP(err)
 		}
 
-		return &RepositoryOutput{Body: *repo}, nil
+		return &ExtensionRepositoryOutput{Body: *repo}, nil
 	})
 
 	huma.Register(api, huma.Operation{
@@ -276,7 +276,7 @@ func (h *Handler) registerCatalog(api huma.API) {
 		Summary:       "Remove a plugin repository",
 		Description:   "Plugins installed from it stay installed and keep updating from their own addresses.",
 		Tags:          []string{"extension"},
-	}, func(ctx context.Context, in *RepositoryIDInput) (*struct{}, error) {
+	}, func(ctx context.Context, in *ExtensionRepositoryIDInput) (*struct{}, error) {
 		if err := h.svc.RemoveRepository(ctx, in.ID); err != nil {
 			return nil, httpapi.ToHTTP(err)
 		}

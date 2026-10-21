@@ -252,3 +252,16 @@ func TestTitleIDs(t *testing.T) {
 		}
 	}
 }
+
+func TestSearchPluginsCountsThoseOn(t *testing.T) {
+	h := newHarness(t)
+
+	if n, err := h.svc.SearchPlugins(context.Background()); err != nil || n != 0 {
+		t.Fatalf("without plugins: %d, %v", n, err)
+	}
+
+	h.svc.opts.Providers = newFakeProviders(nyaa, Provider{ID: "other", Name: "Other", Version: "1.0.0"})
+	if n, err := h.svc.SearchPlugins(context.Background()); err != nil || n != 2 {
+		t.Fatalf("with two: %d, %v", n, err)
+	}
+}

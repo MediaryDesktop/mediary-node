@@ -151,7 +151,9 @@ keepFresh(torrentSourcesQuery, {
 	triggers: [
 		createTorrentSourceMutation.finished.success,
 		updateTorrentSourceMutation.finished.success,
-		deleteTorrentSourceMutation.finished.success
+		deleteTorrentSourceMutation.finished.success,
+		// A plugin installed, turned on or off counts toward being able to search.
+		nodeTopic('extension')
 	]
 })
 

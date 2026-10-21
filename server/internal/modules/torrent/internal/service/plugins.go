@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/release"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
 )
 
 // Providers are the user's search plugins, wired by internal/app. A plugin
@@ -52,6 +53,21 @@ type ProviderRelease struct {
 	Grabs       int
 	PublishedAt *time.Time
 	PageURL     string
+}
+
+// SearchPlugins is how many search plugins are on: with one, a search needs no
+// Torznab source.
+func (s *Service) SearchPlugins(ctx context.Context) (int, error) {
+	if s.opts.Providers == nil {
+		return 0, nil
+	}
+
+	providers, err := s.opts.Providers.TorrentProviders(ctx)
+	if err != nil {
+		return 0, apperr.Wrap(err, apperr.KindInternal, "list search plugins")
+	}
+
+	return len(providers), nil
 }
 
 type cachedPluginAnswer struct {

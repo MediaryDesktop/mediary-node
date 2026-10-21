@@ -48,7 +48,7 @@ type Service struct {
 
 	// What the last update check found, by plugin.
 	updatesMu sync.Mutex
-	updates   map[string]Update
+	updates   map[string]ExtensionUpdate
 
 	catalog catalogCache
 
@@ -68,7 +68,7 @@ func New(st *store.Store, sec *secrets.Store, logger zerolog.Logger, hub *events
 		logger:  logger,
 		hub:     hub,
 		opts:    opts,
-		updates: map[string]Update{},
+		updates: map[string]ExtensionUpdate{},
 		catalog: catalogCache{reads: map[int64]read{}},
 		slots:   map[string]chan struct{}{},
 	}
@@ -92,7 +92,7 @@ type Info struct {
 	Network     []string `json:"network" doc:"Every host the plugin may reach. Nothing else is reachable to it."`
 }
 
-type ConfigField struct {
+type ExtensionSetting struct {
 	Name    string   `json:"name"`
 	Label   string   `json:"label"`
 	Type    string   `json:"type" enum:"text,select,switch"`
@@ -108,28 +108,28 @@ type ConfigField struct {
 // Extension is an installed plugin.
 type Extension struct {
 	Info
-	Config      []ConfigField `json:"config"`
-	Enabled     bool          `json:"enabled"`
-	ManifestURL string        `json:"manifest_url"`
-	InstalledAt time.Time     `json:"installed_at"`
-	UpdatedAt   time.Time     `json:"updated_at"`
-	Update      *Update       `json:"update,omitempty" doc:"What the last update check found."`
+	Config      []ExtensionSetting `json:"config"`
+	Enabled     bool               `json:"enabled"`
+	ManifestURL string             `json:"manifest_url"`
+	InstalledAt time.Time          `json:"installed_at"`
+	UpdatedAt   time.Time          `json:"updated_at"`
+	Update      *ExtensionUpdate   `json:"update,omitempty" doc:"What the last update check found."`
 }
 
 // Preview is a plugin about to be installed: everything the user agrees to,
 // and the consent that installing it takes.
-type Preview struct {
+type ExtensionPreview struct {
 	Info
-	Config      []ConfigField `json:"config"`
-	ManifestURL string        `json:"manifest_url"`
-	Consent     string        `json:"consent" doc:"Pass back to install exactly this; a manifest that changed in between is refused."`
-	Installed   string        `json:"installed,omitempty" doc:"The version already installed, if any."`
-	MinNode     string        `json:"min_node_version,omitempty"`
-	Compatible  bool          `json:"compatible"`
+	Config      []ExtensionSetting `json:"config"`
+	ManifestURL string             `json:"manifest_url"`
+	Consent     string             `json:"consent" doc:"Pass back to install exactly this; a manifest that changed in between is refused."`
+	Installed   string             `json:"installed,omitempty" doc:"The version already installed, if any."`
+	MinNode     string             `json:"min_node_version,omitempty"`
+	Compatible  bool               `json:"compatible"`
 }
 
 // Update is a newer version waiting at the plugin's address.
-type Update struct {
+type ExtensionUpdate struct {
 	Version    string   `json:"version,omitempty"`
 	Consent    string   `json:"consent,omitempty"`
 	AddedHosts []string `json:"added_hosts,omitempty" doc:"Hosts the new version reaches that this one does not."`
@@ -160,10 +160,10 @@ func info(m *manifest.Manifest) Info {
 	}
 }
 
-func fields(m *manifest.Manifest) []ConfigField {
-	out := make([]ConfigField, 0, len(m.Config))
+func fields(m *manifest.Manifest) []ExtensionSetting {
+	out := make([]ExtensionSetting, 0, len(m.Config))
 	for _, f := range m.Config {
-		out = append(out, ConfigField{
+		out = append(out, ExtensionSetting{
 			Name:    f.Name,
 			Label:   f.Label,
 			Type:    string(f.Type),

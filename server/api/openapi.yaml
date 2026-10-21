@@ -275,33 +275,7 @@ components:
         - book
         - position
       type: object
-    Catalog:
-      additionalProperties: false
-      properties:
-        $schema:
-          description: A URL to the JSON Schema for this object.
-          examples:
-            - https://example.com/schemas/Catalog.json
-          format: uri
-          readOnly: true
-          type: string
-        plugins:
-          items:
-            $ref: "#/components/schemas/CatalogEntry"
-          type:
-            - array
-            - "null"
-        repositories:
-          items:
-            $ref: "#/components/schemas/RepositoryInfo"
-          type:
-            - array
-            - "null"
-      required:
-        - plugins
-        - repositories
-      type: object
-    CatalogEntry:
+    CatalogPlugin:
       additionalProperties: false
       properties:
         author:
@@ -574,39 +548,23 @@ components:
         - collection
         - sources
       type: object
-    ConfigField:
+    ConfigureExtensionInputBody:
       additionalProperties: false
       properties:
-        default:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/ConfigureExtensionInputBody.json
+          format: uri
+          readOnly: true
           type: string
-        label:
-          type: string
-        name:
-          type: string
-        options:
-          items:
+        config:
+          additionalProperties:
             type: string
-          type:
-            - array
-            - "null"
-        secret:
+          description: Only the settings to change. Empty goes back to the default; for a secret, removes it.
+          type: object
+        enabled:
           type: boolean
-        set:
-          type: boolean
-        type:
-          enum:
-            - text
-            - select
-            - switch
-          type: string
-        value:
-          type: string
-      required:
-        - name
-        - label
-        - type
-        - secret
-        - set
       type: object
     ControlInputBody:
       additionalProperties: false
@@ -1121,7 +1079,7 @@ components:
           type: string
         config:
           items:
-            $ref: "#/components/schemas/ConfigField"
+            $ref: "#/components/schemas/ExtensionSetting"
           type:
             - array
             - "null"
@@ -1156,7 +1114,7 @@ components:
             - torrent-provider
           type: string
         update:
-          $ref: "#/components/schemas/Update"
+          $ref: "#/components/schemas/ExtensionUpdate"
           description: What the last update check found.
         updated_at:
           format: date-time
@@ -1176,6 +1134,201 @@ components:
         - author
         - lang
         - network
+      type: object
+    ExtensionCatalog:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/ExtensionCatalog.json
+          format: uri
+          readOnly: true
+          type: string
+        plugins:
+          items:
+            $ref: "#/components/schemas/CatalogPlugin"
+          type:
+            - array
+            - "null"
+        repositories:
+          items:
+            $ref: "#/components/schemas/ExtensionRepository"
+          type:
+            - array
+            - "null"
+      required:
+        - plugins
+        - repositories
+      type: object
+    ExtensionPreview:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/ExtensionPreview.json
+          format: uri
+          readOnly: true
+          type: string
+        author:
+          type: string
+        compatible:
+          type: boolean
+        config:
+          items:
+            $ref: "#/components/schemas/ExtensionSetting"
+          type:
+            - array
+            - "null"
+        consent:
+          description: Pass back to install exactly this; a manifest that changed in between is refused.
+          type: string
+        description:
+          type: string
+        homepage:
+          type: string
+        icon:
+          type: string
+        id:
+          type: string
+        installed:
+          description: The version already installed, if any.
+          type: string
+        lang:
+          type: string
+        manifest_url:
+          type: string
+        min_node_version:
+          type: string
+        name:
+          type: string
+        network:
+          description: Every host the plugin may reach. Nothing else is reachable to it.
+          items:
+            type: string
+          type:
+            - array
+            - "null"
+        type:
+          enum:
+            - torrent-provider
+          type: string
+        version:
+          type: string
+      required:
+        - config
+        - manifest_url
+        - consent
+        - compatible
+        - id
+        - name
+        - version
+        - type
+        - author
+        - lang
+        - network
+      type: object
+    ExtensionRepository:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/ExtensionRepository.json
+          format: uri
+          readOnly: true
+          type: string
+        added_at:
+          format: date-time
+          type: string
+        checked_at:
+          format: date-time
+          type: string
+        error:
+          description: Why the last read failed; the plugins shown are from the read before.
+          type: string
+        id:
+          format: int64
+          type: integer
+        name:
+          type: string
+        plugins:
+          description: How many plugins it lists that this node can run.
+          format: int64
+          type: integer
+        skipped:
+          description: "Entries left out: another type of plugin, or not well formed."
+          format: int64
+          type: integer
+        url:
+          type: string
+      required:
+        - id
+        - url
+        - name
+        - added_at
+        - plugins
+        - skipped
+      type: object
+    ExtensionSetting:
+      additionalProperties: false
+      properties:
+        default:
+          type: string
+        label:
+          type: string
+        name:
+          type: string
+        options:
+          items:
+            type: string
+          type:
+            - array
+            - "null"
+        secret:
+          type: boolean
+        set:
+          type: boolean
+        type:
+          enum:
+            - text
+            - select
+            - switch
+          type: string
+        value:
+          type: string
+      required:
+        - name
+        - label
+        - type
+        - secret
+        - set
+      type: object
+    ExtensionUpdate:
+      additionalProperties: false
+      properties:
+        added_hosts:
+          description: Hosts the new version reaches that this one does not.
+          items:
+            type: string
+          type:
+            - array
+            - "null"
+        compatible:
+          type: boolean
+        consent:
+          type: string
+        error:
+          description: Why the check could not tell.
+          type: string
+        needs_consent:
+          type: boolean
+        version:
+          type: string
+      required:
+        - needs_consent
+        - compatible
       type: object
     ExtensionsOutputBody:
       additionalProperties: false
@@ -1506,13 +1659,13 @@ components:
         - built
         - linked
       type: object
-    InstallInputBody:
+    InstallExtensionInputBody:
       additionalProperties: false
       properties:
         $schema:
           description: A URL to the JSON Schema for this object.
           examples:
-            - https://example.com/schemas/InstallInputBody.json
+            - https://example.com/schemas/InstallExtensionInputBody.json
           format: uri
           readOnly: true
           type: string
@@ -2668,81 +2821,13 @@ components:
       required:
         - playing
       type: object
-    Preview:
+    PreviewExtensionInputBody:
       additionalProperties: false
       properties:
         $schema:
           description: A URL to the JSON Schema for this object.
           examples:
-            - https://example.com/schemas/Preview.json
-          format: uri
-          readOnly: true
-          type: string
-        author:
-          type: string
-        compatible:
-          type: boolean
-        config:
-          items:
-            $ref: "#/components/schemas/ConfigField"
-          type:
-            - array
-            - "null"
-        consent:
-          description: Pass back to install exactly this; a manifest that changed in between is refused.
-          type: string
-        description:
-          type: string
-        homepage:
-          type: string
-        icon:
-          type: string
-        id:
-          type: string
-        installed:
-          description: The version already installed, if any.
-          type: string
-        lang:
-          type: string
-        manifest_url:
-          type: string
-        min_node_version:
-          type: string
-        name:
-          type: string
-        network:
-          description: Every host the plugin may reach. Nothing else is reachable to it.
-          items:
-            type: string
-          type:
-            - array
-            - "null"
-        type:
-          enum:
-            - torrent-provider
-          type: string
-        version:
-          type: string
-      required:
-        - config
-        - manifest_url
-        - consent
-        - compatible
-        - id
-        - name
-        - version
-        - type
-        - author
-        - lang
-        - network
-      type: object
-    PreviewInputBody:
-      additionalProperties: false
-      properties:
-        $schema:
-          description: A URL to the JSON Schema for this object.
-          examples:
-            - https://example.com/schemas/PreviewInputBody.json
+            - https://example.com/schemas/PreviewExtensionInputBody.json
           format: uri
           readOnly: true
           type: string
@@ -3055,48 +3140,6 @@ components:
           type: string
       required:
         - name
-      type: object
-    RepositoryInfo:
-      additionalProperties: false
-      properties:
-        $schema:
-          description: A URL to the JSON Schema for this object.
-          examples:
-            - https://example.com/schemas/RepositoryInfo.json
-          format: uri
-          readOnly: true
-          type: string
-        added_at:
-          format: date-time
-          type: string
-        checked_at:
-          format: date-time
-          type: string
-        error:
-          description: Why the last read failed; the plugins shown are from the read before.
-          type: string
-        id:
-          format: int64
-          type: integer
-        name:
-          type: string
-        plugins:
-          description: How many plugins it lists that this node can run.
-          format: int64
-          type: integer
-        skipped:
-          description: "Entries left out: another type of plugin, or not well formed."
-          format: int64
-          type: integer
-        url:
-          type: string
-      required:
-        - id
-        - url
-        - name
-        - added_at
-        - plugins
-        - skipped
       type: object
     Root:
       additionalProperties: false
@@ -3786,24 +3829,6 @@ components:
           type: integer
       required:
         - media_ref
-      type: object
-    SettingsInputBody:
-      additionalProperties: false
-      properties:
-        $schema:
-          description: A URL to the JSON Schema for this object.
-          examples:
-            - https://example.com/schemas/SettingsInputBody.json
-          format: uri
-          readOnly: true
-          type: string
-        config:
-          additionalProperties:
-            type: string
-          description: Only the settings to change. Empty goes back to the default; for a secret, removes it.
-          type: object
-        enabled:
-          type: boolean
       type: object
     SignInInputBody:
       additionalProperties: false
@@ -5250,6 +5275,10 @@ components:
           format: uri
           readOnly: true
           type: string
+        plugins:
+          description: Search plugins on now. A search needs a source or a plugin.
+          format: int64
+          type: integer
         sources:
           items:
             $ref: "#/components/schemas/TorrentSource"
@@ -5258,6 +5287,7 @@ components:
             - "null"
       required:
         - sources
+        - plugins
       type: object
     TorrentStream:
       additionalProperties: false
@@ -5364,31 +5394,6 @@ components:
         - site
         - thumbnail
       type: object
-    Update:
-      additionalProperties: false
-      properties:
-        added_hosts:
-          description: Hosts the new version reaches that this one does not.
-          items:
-            type: string
-          type:
-            - array
-            - "null"
-        compatible:
-          type: boolean
-        consent:
-          type: string
-        error:
-          description: Why the check could not tell.
-          type: string
-        needs_consent:
-          type: boolean
-        version:
-          type: string
-      required:
-        - needs_consent
-        - compatible
-      type: object
     UpdateEntryInputBody:
       additionalProperties: false
       properties:
@@ -5445,13 +5450,13 @@ components:
             - REPEATING
           type: string
       type: object
-    UpdateInputBody:
+    UpdateExtensionInputBody:
       additionalProperties: false
       properties:
         $schema:
           description: A URL to the JSON Schema for this object.
           examples:
-            - https://example.com/schemas/UpdateInputBody.json
+            - https://example.com/schemas/UpdateExtensionInputBody.json
           format: uri
           readOnly: true
           type: string
@@ -5643,7 +5648,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/InstallInputBody"
+              $ref: "#/components/schemas/InstallExtensionInputBody"
         required: true
       responses:
         "201":
@@ -5678,7 +5683,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Catalog"
+                $ref: "#/components/schemas/ExtensionCatalog"
           description: OK
         default:
           content:
@@ -5697,14 +5702,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PreviewInputBody"
+              $ref: "#/components/schemas/PreviewExtensionInputBody"
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Preview"
+                $ref: "#/components/schemas/ExtensionPreview"
           description: OK
         default:
           content:
@@ -5730,7 +5735,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RepositoryInfo"
+                $ref: "#/components/schemas/ExtensionRepository"
           description: Created
         default:
           content:
@@ -5820,7 +5825,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/SettingsInputBody"
+              $ref: "#/components/schemas/ConfigureExtensionInputBody"
         required: true
       responses:
         "200":
@@ -5853,7 +5858,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateInputBody"
+              $ref: "#/components/schemas/UpdateExtensionInputBody"
         required: true
       responses:
         "200":
@@ -8892,7 +8897,7 @@ paths:
         - torrent
   /v1/torrent/sources:
     get:
-      description: The user's Torznab endpoints — Jackett, Prowlarr. The node ships no indexers of its own.
+      description: The user's Torznab endpoints — Jackett, Prowlarr — and how many search plugins are on. The node ships no indexers of its own.
       operationId: listTorrentSources
       responses:
         "200":

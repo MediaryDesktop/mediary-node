@@ -162,7 +162,7 @@ export function SearchForm({ mediaRef, title, missing, poster, watching, onDone 
 				<p className={styles.problem}>{problem.detail ?? t('torrents.search.failed')}</p>
 			)}
 			{failedSources.map(source => (
-				<p key={source.id} className={styles.problem}>
+				<p key={source.plugin ?? source.id} className={styles.problem}>
 					{t('torrents.search.sourceFailed', { name: source.name, error: source.error ?? '' })}
 				</p>
 			))}

@@ -1027,7 +1027,8 @@ export const ru: Translation = {
 				'Выберите встроенный клиент, подключите qBittorrent или добавьте ключ TorBox в настройках.',
 			unreachable: 'Торрент-клиент не отвечает',
 			noSources: 'Нет источника поиска',
-			noSourcesHint: 'Добавьте Jackett или Prowlarr в настройках, чтобы искать раздачи.'
+			noSourcesHint:
+				'Добавьте Jackett или Prowlarr в настройках или установите плагин поиска на странице «Расширения», чтобы искать раздачи.'
 		},
 		add: 'Добавить торрент',
 		drawer: {
@@ -1096,7 +1097,8 @@ export const ru: Translation = {
 			bestIs: 'Лучшая: {{title}}',
 			downloadBest: 'Загрузить лучшую',
 			queries: 'Искали: {{queries}}',
-			noSources: 'Добавьте Jackett или Prowlarr в настройках, чтобы искать раздачи.',
+			noSources:
+				'Добавьте Jackett или Prowlarr в настройках или установите плагин поиска на странице «Расширения», чтобы искать раздачи.',
 			failed: 'Поиск не удался',
 			sourceFailed: '{{name}} не ответил: {{error}}',
 			empty: 'Ничего не найдено',
@@ -1354,18 +1356,8 @@ export const ru: Translation = {
 			tab: 'Расширения',
 			title: 'Расширения',
 			subtitle: 'Просматривайте и устанавливайте плагины, добавляющие в Mediary источники.',
-			types: {
-				all: 'Все типы',
-				plugins: 'Плагины',
-				animeTorrents: 'Торренты аниме',
-				manga: 'Манга',
-				onlineStreaming: 'Онлайн-просмотр',
-				customSources: 'Свои источники'
-			},
 			allLanguages: 'Все языки',
-			search: 'Поиск расширений…',
-			emptyTitle: 'Расширений пока нет',
-			emptyDescription: 'Здесь появятся плагины, добавляющие источники'
+			search: 'Поиск расширений…'
 		},
 		dependencies: {
 			tab: 'Зависимости',
@@ -1383,6 +1375,103 @@ export const ru: Translation = {
 				missing: 'Не установленные'
 			},
 			search: 'Поиск программ…'
+		}
+	},
+	plugins: {
+		view: {
+			installed: 'Установленные',
+			installedWithUpdates: 'Установленные · обновлений: {{count}}',
+			catalog: 'Каталог'
+		},
+		types: {
+			all: 'Все типы',
+			'torrent-provider': 'Поиск раздач'
+		},
+		addByUrl: 'Добавить по адресу',
+		checkUpdates: 'Проверить обновления',
+		noUpdates: 'Все плагины обновлены',
+		updatesFound: 'Найдено обновлений: {{count}}',
+		emptyInstalled: {
+			title: 'Плагинов пока нет',
+			description: 'Найдите их в каталоге репозитория, которому доверяете, или добавьте по адресу.'
+		},
+		emptyCatalog: {
+			title: 'Каталог пуст',
+			description:
+				'У Mediary нет своего репозитория, и она никакой не советует. Добавьте тот, которому доверяете.'
+		},
+		hosts: 'Ходит на {{hosts}}',
+		noHosts: 'Не ходит ни на один сайт',
+		multiLanguage: 'Много языков',
+		from: 'из {{repository}}',
+		disabled: 'Выключен',
+		updateCheckFailed: 'Не удалось проверить обновления',
+		installedHere: 'Установлен',
+		installedElsewhere: 'Установлен с другого адреса',
+		install: 'Установить',
+		update: 'Обновить до {{version}}',
+		settings: 'Настройки',
+		more: 'Ещё',
+		enable: 'Включить',
+		disable: 'Выключить',
+		remove: 'Удалить',
+		removeConfirm: {
+			title: 'Удалить {{name}}?',
+			description:
+				'Вместе с ним исчезнут его код, настройки и сохранённые ключи. Найденные им раздачи останутся там, куда их добавили.',
+			confirm: 'Удалить'
+		},
+		installed: '{{name}} установлен',
+		updated: '{{name}} обновлён до {{version}}',
+		actionFailed: 'Не удалось это сделать',
+		dialog: {
+			installTitle: 'Установить плагин',
+			updateTitle: 'Обновить {{name}}',
+			urlLabel: 'Адрес манифеста',
+			urlHint:
+				'manifest.json плагина по адресу https://. Ничего не установится, пока вы не согласитесь с тем, что он покажет.',
+			next: 'Далее',
+			reading: 'Читаю манифест…',
+			readFailed: 'Не удалось прочитать плагин',
+			installFailed: 'Не удалось установить плагин',
+			retry: 'Попробовать ещё',
+			hostsTitle: 'Сайты, на которые он будет ходить',
+			hostsNone: 'Он не ходит ни на один сайт.',
+			hostsNew: 'новый',
+			receivesTitle: 'Что он получает',
+			receives: 'Названия тайтла, серию и сезон и id AniList или TMDB — ничего из ваших аккаунтов.',
+			settingsTitle: 'Настройки, которые он просит',
+			secret: 'секрет',
+			sandbox:
+				'Он работает в песочнице: без файлов, программ, других сайтов и локальной сети. Он только находит раздачи, качает их Mediary.',
+			source: 'Манифест',
+			incompatible: 'Ему нужна Mediary {{version}} или новее.',
+			alreadyInstalled: 'Установлена версия {{version}}. Обновите её из списка.',
+			install: 'Установить',
+			update: 'Обновить',
+			cancel: 'Отмена'
+		},
+		settingsDrawer: {
+			title: 'Настройки {{name}}',
+			description:
+				'Секретные значения хранятся отдельно от остальных и больше никогда не показываются.',
+			default: 'По умолчанию ({{value}})',
+			secretSet: 'Сохранено. Введите новое, чтобы заменить.',
+			secretClear: 'Удалить',
+			save: 'Сохранить',
+			saved: 'Настройки сохранены'
+		},
+		repositories: {
+			title: 'Репозитории',
+			description:
+				'Списки плагинов, которые кто-то публикует. Mediary не знает, кто стоит за репозиторием, — добавляйте только те, которым доверяете.',
+			urlLabel: 'Адрес репозитория',
+			add: 'Добавить репозиторий',
+			added: '{{name}} добавлен',
+			none: 'Репозиториев пока нет.',
+			count: 'Плагинов: {{count}}',
+			skipped: 'пропущено: {{count}}',
+			remove: 'Удалить репозиторий'
 		}
 	},
 	tools: {

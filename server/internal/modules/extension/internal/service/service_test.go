@@ -327,7 +327,7 @@ func TestSettings(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	byName := map[string]ConfigField{}
+	byName := map[string]ExtensionSetting{}
 	for _, f := range ext.Config {
 		byName[f.Name] = f
 	}

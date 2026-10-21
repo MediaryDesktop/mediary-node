@@ -1781,7 +1781,7 @@ export interface paths {
 		}
 		/**
 		 * Release search sources
-		 * @description The user's Torznab endpoints — Jackett, Prowlarr. The node ships no indexers of its own.
+		 * @description The user's Torznab endpoints — Jackett, Prowlarr — and how many search plugins are on. The node ships no indexers of its own.
 		 */
 		get: operations['listTorrentSources']
 		put?: never
@@ -2148,17 +2148,7 @@ export interface components {
 			/** @description Where the reader left the book; null for a book never opened. */
 			position: components['schemas']['BookPosition']
 		}
-		Catalog: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/Catalog.json
-			 */
-			readonly $schema?: string
-			plugins: components['schemas']['CatalogEntry'][] | null
-			repositories: components['schemas']['RepositoryInfo'][] | null
-		}
-		CatalogEntry: {
+		CatalogPlugin: {
 			author: string
 			description?: string
 			icon?: string
@@ -2304,16 +2294,18 @@ export interface components {
 			/** @description Attribution for every field that came from an external source. */
 			sources: components['schemas']['Source'][] | null
 		}
-		ConfigField: {
-			default?: string
-			label: string
-			name: string
-			options?: string[] | null
-			secret: boolean
-			set: boolean
-			/** @enum {string} */
-			type: 'text' | 'select' | 'switch'
-			value?: string
+		ConfigureExtensionInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ConfigureExtensionInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description Only the settings to change. Empty goes back to the default; for a secret, removes it. */
+			config?: {
+				[key: string]: string
+			}
+			enabled?: boolean
 		}
 		ControlInputBody: {
 			/**
@@ -2602,7 +2594,7 @@ export interface components {
 			 */
 			readonly $schema?: string
 			author: string
-			config: components['schemas']['ConfigField'][] | null
+			config: components['schemas']['ExtensionSetting'][] | null
 			description?: string
 			enabled: boolean
 			homepage?: string
@@ -2618,10 +2610,97 @@ export interface components {
 			/** @enum {string} */
 			type: 'torrent-provider'
 			/** @description What the last update check found. */
-			update?: components['schemas']['Update']
+			update?: components['schemas']['ExtensionUpdate']
 			/** Format: date-time */
 			updated_at: string
 			version: string
+		}
+		ExtensionCatalog: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ExtensionCatalog.json
+			 */
+			readonly $schema?: string
+			plugins: components['schemas']['CatalogPlugin'][] | null
+			repositories: components['schemas']['ExtensionRepository'][] | null
+		}
+		ExtensionPreview: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ExtensionPreview.json
+			 */
+			readonly $schema?: string
+			author: string
+			compatible: boolean
+			config: components['schemas']['ExtensionSetting'][] | null
+			/** @description Pass back to install exactly this; a manifest that changed in between is refused. */
+			consent: string
+			description?: string
+			homepage?: string
+			icon?: string
+			id: string
+			/** @description The version already installed, if any. */
+			installed?: string
+			lang: string
+			manifest_url: string
+			min_node_version?: string
+			name: string
+			/** @description Every host the plugin may reach. Nothing else is reachable to it. */
+			network: string[] | null
+			/** @enum {string} */
+			type: 'torrent-provider'
+			version: string
+		}
+		ExtensionRepository: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ExtensionRepository.json
+			 */
+			readonly $schema?: string
+			/** Format: date-time */
+			added_at: string
+			/** Format: date-time */
+			checked_at?: string
+			/** @description Why the last read failed; the plugins shown are from the read before. */
+			error?: string
+			/** Format: int64 */
+			id: number
+			name: string
+			/**
+			 * Format: int64
+			 * @description How many plugins it lists that this node can run.
+			 */
+			plugins: number
+			/**
+			 * Format: int64
+			 * @description Entries left out: another type of plugin, or not well formed.
+			 */
+			skipped: number
+			url: string
+		}
+		ExtensionSetting: {
+			default?: string
+			label: string
+			name: string
+			options?: string[] | null
+			secret: boolean
+			set: boolean
+			/** @enum {string} */
+			type: 'text' | 'select' | 'switch'
+			value?: string
+		}
+		ExtensionUpdate: {
+			/** @description Hosts the new version reaches that this one does not. */
+			added_hosts?: string[] | null
+			compatible: boolean
+			consent?: string
+			/** @description Why the check could not tell. */
+			error?: string
+			needs_consent: boolean
+			version?: string
 		}
 		ExtensionsOutputBody: {
 			/**
@@ -2810,11 +2889,11 @@ export interface components {
 			 */
 			version: string
 		}
-		InstallInputBody: {
+		InstallExtensionInputBody: {
 			/**
 			 * Format: uri
 			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/InstallInputBody.json
+			 * @example https://example.com/schemas/InstallExtensionInputBody.json
 			 */
 			readonly $schema?: string
 			/** @description From the preview the user agreed to. */
@@ -3348,39 +3427,11 @@ export interface components {
 			/** @description The open session. Absent when nothing is playing. */
 			session?: components['schemas']['PlaybackSession']
 		}
-		Preview: {
+		PreviewExtensionInputBody: {
 			/**
 			 * Format: uri
 			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/Preview.json
-			 */
-			readonly $schema?: string
-			author: string
-			compatible: boolean
-			config: components['schemas']['ConfigField'][] | null
-			/** @description Pass back to install exactly this; a manifest that changed in between is refused. */
-			consent: string
-			description?: string
-			homepage?: string
-			icon?: string
-			id: string
-			/** @description The version already installed, if any. */
-			installed?: string
-			lang: string
-			manifest_url: string
-			min_node_version?: string
-			name: string
-			/** @description Every host the plugin may reach. Nothing else is reachable to it. */
-			network: string[] | null
-			/** @enum {string} */
-			type: 'torrent-provider'
-			version: string
-		}
-		PreviewInputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/PreviewInputBody.json
+			 * @example https://example.com/schemas/PreviewExtensionInputBody.json
 			 */
 			readonly $schema?: string
 			/**
@@ -3555,34 +3606,6 @@ export interface components {
 			icon?: string
 			/** @description The new name. */
 			name: string
-		}
-		RepositoryInfo: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/RepositoryInfo.json
-			 */
-			readonly $schema?: string
-			/** Format: date-time */
-			added_at: string
-			/** Format: date-time */
-			checked_at?: string
-			/** @description Why the last read failed; the plugins shown are from the read before. */
-			error?: string
-			/** Format: int64 */
-			id: number
-			name: string
-			/**
-			 * Format: int64
-			 * @description How many plugins it lists that this node can run.
-			 */
-			plugins: number
-			/**
-			 * Format: int64
-			 * @description Entries left out: another type of plugin, or not well formed.
-			 */
-			skipped: number
-			url: string
 		}
 		Root: {
 			/**
@@ -4084,19 +4107,6 @@ export interface components {
 			 * @description Season number, when the title has seasons.
 			 */
 			season?: number
-		}
-		SettingsInputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/SettingsInputBody.json
-			 */
-			readonly $schema?: string
-			/** @description Only the settings to change. Empty goes back to the default; for a secret, removes it. */
-			config?: {
-				[key: string]: string
-			}
-			enabled?: boolean
 		}
 		SignInInputBody: {
 			/**
@@ -4905,6 +4915,11 @@ export interface components {
 			 * @example https://example.com/schemas/TorrentSourcesOutputBody.json
 			 */
 			readonly $schema?: string
+			/**
+			 * Format: int64
+			 * @description Search plugins on now. A search needs a source or a plugin.
+			 */
+			plugins: number
 			sources: components['schemas']['TorrentSource'][] | null
 		}
 		TorrentStream: {
@@ -4977,16 +4992,6 @@ export interface components {
 			/** @description Preview frame for the trailer. */
 			thumbnail: string | null
 		}
-		Update: {
-			/** @description Hosts the new version reaches that this one does not. */
-			added_hosts?: string[] | null
-			compatible: boolean
-			consent?: string
-			/** @description Why the check could not tell. */
-			error?: string
-			needs_consent: boolean
-			version?: string
-		}
 		UpdateEntryInputBody: {
 			/**
 			 * Format: uri
@@ -5028,11 +5033,11 @@ export interface components {
 			 */
 			status?: 'CURRENT' | 'PLANNING' | 'COMPLETED' | 'DROPPED' | 'PAUSED' | 'REPEATING'
 		}
-		UpdateInputBody: {
+		UpdateExtensionInputBody: {
 			/**
 			 * Format: uri
 			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/UpdateInputBody.json
+			 * @example https://example.com/schemas/UpdateExtensionInputBody.json
 			 */
 			readonly $schema?: string
 			/** @description From the update check the user saw. */
@@ -5085,8 +5090,7 @@ export type SchemaBookInfo = components['schemas']['BookInfo']
 export type SchemaBookPosition = components['schemas']['BookPosition']
 export type SchemaBookPositionInputBody = components['schemas']['BookPositionInputBody']
 export type SchemaBookPositionOutputBody = components['schemas']['BookPositionOutputBody']
-export type SchemaCatalog = components['schemas']['Catalog']
-export type SchemaCatalogEntry = components['schemas']['CatalogEntry']
+export type SchemaCatalogPlugin = components['schemas']['CatalogPlugin']
 export type SchemaChapter = components['schemas']['Chapter']
 export type SchemaChapterBody = components['schemas']['ChapterBody']
 export type SchemaChapterOutputBody = components['schemas']['ChapterOutputBody']
@@ -5096,7 +5100,7 @@ export type SchemaCheckTorrentClientInputBody = components['schemas']['CheckTorr
 export type SchemaCheckTorrentDebridInputBody = components['schemas']['CheckTorrentDebridInputBody']
 export type SchemaCheckTorrentSourceInputBody = components['schemas']['CheckTorrentSourceInputBody']
 export type SchemaCollectionOutputBody = components['schemas']['CollectionOutputBody']
-export type SchemaConfigField = components['schemas']['ConfigField']
+export type SchemaConfigureExtensionInputBody = components['schemas']['ConfigureExtensionInputBody']
 export type SchemaControlInputBody = components['schemas']['ControlInputBody']
 export type SchemaCounts = components['schemas']['Counts']
 export type SchemaCreateListInputBody = components['schemas']['CreateListInputBody']
@@ -5113,6 +5117,11 @@ export type SchemaEpisodesOutputBody = components['schemas']['EpisodesOutputBody
 export type SchemaErrorDetail = components['schemas']['ErrorDetail']
 export type SchemaErrorModel = components['schemas']['ErrorModel']
 export type SchemaExtension = components['schemas']['Extension']
+export type SchemaExtensionCatalog = components['schemas']['ExtensionCatalog']
+export type SchemaExtensionPreview = components['schemas']['ExtensionPreview']
+export type SchemaExtensionRepository = components['schemas']['ExtensionRepository']
+export type SchemaExtensionSetting = components['schemas']['ExtensionSetting']
+export type SchemaExtensionUpdate = components['schemas']['ExtensionUpdate']
 export type SchemaExtensionsOutputBody = components['schemas']['ExtensionsOutputBody']
 export type SchemaFile = components['schemas']['File']
 export type SchemaFileOutputBody = components['schemas']['FileOutputBody']
@@ -5126,7 +5135,7 @@ export type SchemaFuzzyDate = components['schemas']['FuzzyDate']
 export type SchemaGoogleBooksKeyInputBody = components['schemas']['GoogleBooksKeyInputBody']
 export type SchemaGoogleBooksSettings = components['schemas']['GoogleBooksSettings']
 export type SchemaHealthOutputBody = components['schemas']['HealthOutputBody']
-export type SchemaInstallInputBody = components['schemas']['InstallInputBody']
+export type SchemaInstallExtensionInputBody = components['schemas']['InstallExtensionInputBody']
 export type SchemaLibraryCollection = components['schemas']['LibraryCollection']
 export type SchemaLibraryCollectionEntry = components['schemas']['LibraryCollectionEntry']
 export type SchemaList = components['schemas']['List']
@@ -5159,8 +5168,7 @@ export type SchemaParsed = components['schemas']['Parsed']
 export type SchemaPlaybackOutputBody = components['schemas']['PlaybackOutputBody']
 export type SchemaPlaybackSession = components['schemas']['PlaybackSession']
 export type SchemaPlaybackStatus = components['schemas']['PlaybackStatus']
-export type SchemaPreview = components['schemas']['Preview']
-export type SchemaPreviewInputBody = components['schemas']['PreviewInputBody']
+export type SchemaPreviewExtensionInputBody = components['schemas']['PreviewExtensionInputBody']
 export type SchemaProgressInputBody = components['schemas']['ProgressInputBody']
 export type SchemaProgressOutputBody = components['schemas']['ProgressOutputBody']
 export type SchemaPutMangaDexSettingsInputBody = components['schemas']['PutMangaDexSettingsInputBody']
@@ -5174,7 +5182,6 @@ export type SchemaReadBody = components['schemas']['ReadBody']
 export type SchemaReadOutputBody = components['schemas']['ReadOutputBody']
 export type SchemaRelatedMedia = components['schemas']['RelatedMedia']
 export type SchemaRenameListInputBody = components['schemas']['RenameListInputBody']
-export type SchemaRepositoryInfo = components['schemas']['RepositoryInfo']
 export type SchemaRoot = components['schemas']['Root']
 export type SchemaRootOutputBody = components['schemas']['RootOutputBody']
 export type SchemaRootsOutputBody = components['schemas']['RootsOutputBody']
@@ -5196,7 +5203,6 @@ export type SchemaSelectTorrentFilesInputBody = components['schemas']['SelectTor
 export type SchemaSessionOutputBody = components['schemas']['SessionOutputBody']
 export type SchemaSetIgnoredInputBody = components['schemas']['SetIgnoredInputBody']
 export type SchemaSetMatchInputBody = components['schemas']['SetMatchInputBody']
-export type SchemaSettingsInputBody = components['schemas']['SettingsInputBody']
 export type SchemaSignInInputBody = components['schemas']['SignInInputBody']
 export type SchemaSource = components['schemas']['Source']
 export type SchemaStartInputBody = components['schemas']['StartInputBody']
@@ -5248,9 +5254,8 @@ export type SchemaTorrentSourceOutcome = components['schemas']['TorrentSourceOut
 export type SchemaTorrentSourcesOutputBody = components['schemas']['TorrentSourcesOutputBody']
 export type SchemaTorrentStream = components['schemas']['TorrentStream']
 export type SchemaTrailer = components['schemas']['Trailer']
-export type SchemaUpdate = components['schemas']['Update']
 export type SchemaUpdateEntryInputBody = components['schemas']['UpdateEntryInputBody']
-export type SchemaUpdateInputBody = components['schemas']['UpdateInputBody']
+export type SchemaUpdateExtensionInputBody = components['schemas']['UpdateExtensionInputBody']
 export type SchemaUpdateRootInputBody = components['schemas']['UpdateRootInputBody']
 export type SchemaVideo = components['schemas']['Video']
 export type $defs = Record<string, never>
@@ -5411,7 +5416,7 @@ export interface operations {
 		}
 		requestBody: {
 			content: {
-				'application/json': components['schemas']['InstallInputBody']
+				'application/json': components['schemas']['InstallExtensionInputBody']
 			}
 		}
 		responses: {
@@ -5453,7 +5458,7 @@ export interface operations {
 					[name: string]: unknown
 				}
 				content: {
-					'application/json': components['schemas']['Catalog']
+					'application/json': components['schemas']['ExtensionCatalog']
 				}
 			}
 			/** @description Error */
@@ -5476,7 +5481,7 @@ export interface operations {
 		}
 		requestBody: {
 			content: {
-				'application/json': components['schemas']['PreviewInputBody']
+				'application/json': components['schemas']['PreviewExtensionInputBody']
 			}
 		}
 		responses: {
@@ -5486,7 +5491,7 @@ export interface operations {
 					[name: string]: unknown
 				}
 				content: {
-					'application/json': components['schemas']['Preview']
+					'application/json': components['schemas']['ExtensionPreview']
 				}
 			}
 			/** @description Error */
@@ -5519,7 +5524,7 @@ export interface operations {
 					[name: string]: unknown
 				}
 				content: {
-					'application/json': components['schemas']['RepositoryInfo']
+					'application/json': components['schemas']['ExtensionRepository']
 				}
 			}
 			/** @description Error */
@@ -5631,7 +5636,7 @@ export interface operations {
 		}
 		requestBody: {
 			content: {
-				'application/json': components['schemas']['SettingsInputBody']
+				'application/json': components['schemas']['ConfigureExtensionInputBody']
 			}
 		}
 		responses: {
@@ -5666,7 +5671,7 @@ export interface operations {
 		}
 		requestBody: {
 			content: {
-				'application/json': components['schemas']['UpdateInputBody']
+				'application/json': components['schemas']['UpdateExtensionInputBody']
 			}
 		}
 		responses: {

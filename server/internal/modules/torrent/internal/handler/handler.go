@@ -287,6 +287,7 @@ func (h *Handler) Register(api huma.API) {
 type TorrentSourcesOutput struct {
 	Body struct {
 		Sources []service.TorrentSource `json:"sources"`
+		Plugins int                     `json:"plugins" doc:"Search plugins on now. A search needs a source or a plugin."`
 	}
 }
 
@@ -510,7 +511,7 @@ func (h *Handler) registerSearch(api huma.API) {
 		Method:      http.MethodGet,
 		Path:        "/v1/torrent/sources",
 		Summary:     "Release search sources",
-		Description: "The user's Torznab endpoints — Jackett, Prowlarr. The node ships no indexers of its own.",
+		Description: "The user's Torznab endpoints — Jackett, Prowlarr — and how many search plugins are on. The node ships no indexers of its own.",
 		Tags:        []string{"torrent"},
 	}, func(ctx context.Context, _ *struct{}) (*TorrentSourcesOutput, error) {
 		sources, err := h.svc.Sources(ctx)
@@ -518,8 +519,14 @@ func (h *Handler) registerSearch(api huma.API) {
 			return nil, httpapi.ToHTTP(err)
 		}
 
+		plugins, err := h.svc.SearchPlugins(ctx)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
 		out := &TorrentSourcesOutput{}
 		out.Body.Sources = sources
+		out.Body.Plugins = plugins
 
 		return out, nil
 	})

@@ -18,6 +18,7 @@ export interface TorrentSetup {
 	// Null while the node has not asked the client yet.
 	clientReachable: boolean | null
 	clientError: string
+	// Something to search with: a Torznab source, or a search plugin that is on.
 	hasSources: boolean
 	// The debrid service ready to play torrents and mark cached releases,
 	// whatever the client; undefined while none is set up.
@@ -61,7 +62,7 @@ export function useTorrentSetup(): TorrentSetup {
 		clientConfigured: client?.configured ?? false,
 		clientReachable: !client?.configured ? null : client.error ? false : client.reachable ? true : null,
 		clientError: client?.error ?? '',
-		hasSources: (sources?.sources ?? []).length > 0,
+		hasSources: (sources?.sources ?? []).length > 0 || (sources?.plugins ?? 0) > 0,
 		debrid: readyDebrid(debrid)
 	}
 }

@@ -101,7 +101,6 @@ const downloadsRoute = createRoute({
 })
 
 // The tab lives in the address, so a missing-program error can open Dependencies.
-// Dependencies is the one with anything in it until plugins exist.
 const extensionsRoute = createRoute({
 	getParentRoute: () => framedRoute,
 	path: '/extensions',
@@ -113,7 +112,7 @@ const extensionsRoute = createRoute({
 
 		return (
 			<ExtensionsPage
-				tab={tab ?? 'dependencies'}
+				tab={tab ?? 'extensions'}
 				onTabChange={next => void navigate({ search: { tab: next }, replace: true })}
 			/>
 		)
