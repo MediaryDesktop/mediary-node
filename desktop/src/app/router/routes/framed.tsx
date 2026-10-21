@@ -112,7 +112,7 @@ const extensionsRoute = createRoute({
 
 		return (
 			<ExtensionsPage
-				tab={tab ?? 'extensions'}
+				tab={tab ?? 'installed'}
 				onTabChange={next => void navigate({ search: { tab: next }, replace: true })}
 			/>
 		)

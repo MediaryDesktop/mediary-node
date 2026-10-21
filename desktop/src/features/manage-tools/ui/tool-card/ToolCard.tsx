@@ -1,11 +1,11 @@
 import clsx from 'clsx'
 import { useUnit } from 'effector-react'
 import type { ReactNode } from 'react'
-import { LuCheck, LuDownload, LuEllipsisVertical, LuRefreshCw, LuX } from 'react-icons/lu'
+import { LuDownload, LuEllipsisVertical, LuRefreshCw, LuX } from 'react-icons/lu'
 
 import { useTranslation } from '@shared/i18n'
 import { formatBytes } from '@shared/lib'
-import { DropdownMenu, Logo, Notice, ProgressBar, RippleButton, Tooltip } from '@shared/ui'
+import { DropdownMenu, Icon, Logo, Notice, ProgressBar, RippleButton, Tooltip } from '@shared/ui'
 import type { DropdownMenuItem } from '@shared/ui'
 
 import { cancelToolInstallMutation, installToolMutation, removeToolMutation } from '@entities/tool'
@@ -65,7 +65,7 @@ export function ToolCard({ tool }: ToolCardProps) {
 		if (tool.state === 'installed') {
 			return (
 				<CornerButton label={t('tools.state.installed')} tone='done'>
-					<LuCheck size={16} />
+					<Icon name='common/check' size={16} />
 				</CornerButton>
 			)
 		}
@@ -74,19 +74,19 @@ export function ToolCard({ tool }: ToolCardProps) {
 			return null
 		}
 
-		// Found on PATH already works; the own copy is an optional upgrade to a
-		// pinned, checksummed build, not something missing. The muted check reads
-		// as "already fine" rather than the red "needs attention" of a real install.
+		// Found on PATH already works: the mark says so, but it is not a button —
+		// there is nothing here to install or remove.
 		if (tool.state === 'system') {
 			return (
-				<CornerButton
-					label={t('tools.installOwn')}
-					tone='muted'
-					disabled={installing}
-					onClick={() => install(tool.id)}
-				>
-					<LuCheck size={16} />
-				</CornerButton>
+				<Tooltip content={t('tools.state.system')} side='left'>
+					<span
+						className={clsx(styles.cornerButton, styles.muted)}
+						tabIndex={0}
+						aria-label={t('tools.state.system')}
+					>
+						<Icon name='common/check' size={16} />
+					</span>
+				</Tooltip>
 			)
 		}
 
@@ -198,7 +198,8 @@ export function ToolCard({ tool }: ToolCardProps) {
 					}
 				>
 					<span className={styles.official} tabIndex={0} aria-label={t('tools.official.title')}>
-						<Logo markOnly iconSize={16} />
+						<Logo markOnly iconSize={13} />
+						{t('tools.official.badge')}
 					</span>
 				</Tooltip>
 			</div>
@@ -208,7 +209,7 @@ export function ToolCard({ tool }: ToolCardProps) {
 
 interface CornerButtonProps {
 	label: string
-	tone?: 'primary' | 'success' | 'done' | 'muted'
+	tone?: 'primary' | 'success' | 'done'
 	disabled?: boolean
 	onClick?: () => void
 	children: ReactNode

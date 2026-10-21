@@ -1349,18 +1349,26 @@ export const en = {
 		refresh: 'Refresh',
 		refreshed: 'Refreshed',
 		notFound: 'Nothing found matching your criteria.',
-		extensions: {
-			tab: 'Extensions',
-			title: 'Extensions',
-			subtitle: 'Browse and install plugins that add sources to Mediary.',
+		subtitle: 'Manage your media sources and integrations',
+		installed: {
+			tab: 'Installed',
+			tabWithUpdates: 'Installed · {{count}} to update',
+			section: 'Installed extensions',
+			description: 'Sources currently available to Mediary. Manage, configure, or remove them here.',
+			search: 'Search installed extensions…',
+			browseCatalog: 'Browse catalog'
+		},
+		catalog: {
+			tab: 'Catalog',
+			section: 'Available extensions',
+			description: 'Extensions from the repositories you added: {{repositories}}.'
+		},
+		filters: {
 			allLanguages: 'All languages',
 			search: 'Search extensions…'
 		},
 		dependencies: {
 			tab: 'Dependencies',
-			title: 'Dependencies',
-			subtitle: 'Install the programs Mediary plays and transcodes video with.',
-			source: 'Source: official builds by Gyan (FFmpeg) and shinchiro (mpv) on GitHub',
 			kinds: {
 				all: 'All types',
 				player: 'Player',
@@ -1375,11 +1383,6 @@ export const en = {
 		}
 	},
 	plugins: {
-		view: {
-			installed: 'Installed',
-			installedWithUpdates: 'Installed · {{count}} to update',
-			catalog: 'Catalog'
-		},
 		types: {
 			all: 'All types',
 			'torrent-provider': 'Torrent search'
@@ -1389,8 +1392,9 @@ export const en = {
 		noUpdates: 'Every plugin is up to date',
 		updatesFound: 'Updates found: {{count}}',
 		emptyInstalled: {
-			title: 'No plugins yet',
-			description: 'Find them in the catalog of a repository you trust, or add one by its address.'
+			title: 'No extensions installed',
+			description:
+				'Install a trusted source from the catalog or add one by its address to start discovering media.'
 		},
 		emptyCatalog: {
 			title: 'The catalog is empty',
@@ -1471,7 +1475,6 @@ export const en = {
 		}
 	},
 	tools: {
-		note: 'Mediary downloads official builds at fixed versions and refuses any that does not match its checksum. New versions arrive only with a Mediary update, and install only when you choose to.',
 		purpose: {
 			mpv: 'Plays files in its own window',
 			ffmpeg: 'Transcodes what the built-in player cannot play, cuts episode stills and pulls out subtitles'
@@ -1491,7 +1494,6 @@ export const en = {
 		},
 		install: 'Install',
 		installSize: 'Install · {{size}}',
-		installOwn: 'Install its own copy',
 		update: 'Update to {{version}}',
 		remove: 'Remove',
 		cancel: 'Cancel',
@@ -1504,6 +1506,7 @@ export const en = {
 		more: 'More',
 		updateAvailable: 'Update available',
 		official: {
+			badge: 'Official',
 			title: 'Official Mediary dependency',
 			description:
 				'Recommended by Mediary: an official build at a pinned version, checked against its checksum before it is installed.'

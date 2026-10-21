@@ -1,17 +1,15 @@
-import { useUnit } from 'effector-react'
 import { useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
-import { LuFilm, LuMonitorPlay } from 'react-icons/lu'
+import { LuFilm, LuMonitorPlay, LuSearchX } from 'react-icons/lu'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, Skeleton, toast } from '@shared/ui'
+import { Skeleton } from '@shared/ui'
 
-import { toolsQuery } from '@entities/tool'
 import type { Tool, ToolId } from '@entities/tool'
 
 import { ToolCard, useTools } from '@features/manage-tools'
 
-import { CatalogEmpty, CatalogFilters, CatalogHeader, CatalogSection } from '../catalog/Catalog'
+import { CatalogEmpty, CatalogFilters, CatalogSection } from '../catalog/Catalog'
 
 const KINDS = ['player', 'media'] as const
 
@@ -25,8 +23,8 @@ const KIND_OF: Record<ToolId, Kind> = {
 }
 
 const KIND_ICONS: Record<Kind, ReactNode> = {
-	player: <LuMonitorPlay size={24} />,
-	media: <LuFilm size={24} />
+	player: <LuMonitorPlay size={20} />,
+	media: <LuFilm size={20} />
 }
 
 function matches(tool: Tool, status: StatusFilter, search: string): boolean {
@@ -47,13 +45,12 @@ function matches(tool: Tool, status: StatusFilter, search: string): boolean {
 	)
 }
 
-// mpv and FFmpeg, in the marketplace's layout: a panel per kind of program,
-// filtered by kind, by whether it is there, and by name.
+// mpv and FFmpeg: a section per kind of program, filtered by kind, by whether
+// it is there, and by name.
 export function DependenciesTab() {
 	const { t } = useTranslation()
 
 	const tools = useTools()
-	const [refresh, refreshing] = useUnit([toolsQuery.start, toolsQuery.$pending])
 
 	const [kind, setKind] = useState<KindFilter>('all')
 	const [status, setStatus] = useState<StatusFilter>('all')
@@ -71,23 +68,6 @@ export function DependenciesTab() {
 
 	return (
 		<>
-			<CatalogHeader
-				title={t('extensions.dependencies.title')}
-				subtitle={t('extensions.dependencies.subtitle')}
-				source={t('extensions.dependencies.source')}
-				actions={
-					<Button
-						loading={refreshing}
-						onClick={() => {
-							refresh()
-							toast.success(t('extensions.refreshed'), { duration: 1000 })
-						}}
-					>
-						{t('extensions.refresh')}
-					</Button>
-				}
-			/>
-
 			<CatalogFilters
 				types={[
 					{ value: 'all', label: t('extensions.dependencies.kinds.all') },
@@ -109,14 +89,13 @@ export function DependenciesTab() {
 			{tools === null ? (
 				<Skeleton height='14rem' radius='var(--radius-lg)' />
 			) : groups.length === 0 ? (
-				<CatalogEmpty>{t('extensions.notFound')}</CatalogEmpty>
+				<CatalogEmpty icon={<LuSearchX size={28} />} title={t('extensions.notFound')} />
 			) : (
 				groups.map(group => (
 					<CatalogSection
 						key={group.kind}
 						icon={KIND_ICONS[group.kind]}
 						title={t(`extensions.dependencies.kinds.${group.kind}`)}
-						description={group.kind === 'media' ? t('tools.note') : undefined}
 					>
 						{group.tools.map(tool => (
 							<ToolCard key={tool.id} tool={tool} />

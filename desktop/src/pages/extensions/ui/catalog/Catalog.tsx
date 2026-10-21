@@ -1,35 +1,13 @@
-import clsx from 'clsx'
 import type { ReactNode } from 'react'
 import { LuSearch } from 'react-icons/lu'
 
-import { Input, RippleButton, SelectDropdown } from '@shared/ui'
+import { Input, SelectDropdown } from '@shared/ui'
 import type { SelectDropdownOption } from '@shared/ui'
 
 import styles from './Catalog.module.scss'
 
-// The pieces both tabs are built from, after Seanime's marketplace: a heading
-// with its actions, the filters, and a panel of cards per kind.
-
-export interface CatalogHeaderProps {
-	title: string
-	subtitle: string
-	source?: string
-	actions?: ReactNode
-}
-
-export function CatalogHeader({ title, subtitle, source, actions }: CatalogHeaderProps) {
-	return (
-		<header className={styles.header}>
-			<div className={styles.heading}>
-				<h1 className={styles.title}>{title}</h1>
-				<p className={styles.subtitle}>{subtitle}</p>
-				{source && <p className={styles.source}>{source}</p>}
-			</div>
-
-			{actions && <div className={styles.actions}>{actions}</div>}
-		</header>
-	)
-}
+// The pieces every tab is built from: the filters, then a section of cards per
+// kind, or a box saying why there are none.
 
 export interface CatalogFiltersProps<Type extends string> {
 	types: readonly { value: Type; label: string }[]
@@ -58,35 +36,25 @@ export function CatalogFilters<Type extends string>({
 }: CatalogFiltersProps<Type>) {
 	return (
 		<div className={styles.filters}>
-			<div className={styles.types} role='tablist'>
-				{types.map(item => (
-					<RippleButton
-						key={item.value}
-						role='tab'
-						aria-selected={item.value === type}
-						className={clsx(styles.type, item.value === type && styles.active)}
-						onClick={() => onTypeChange(item.value)}
-					>
-						{item.label}
-					</RippleButton>
-				))}
-			</div>
-
-			<div className={styles.fields}>
-				<SelectDropdown
-					className={styles.select}
-					options={options}
-					value={option}
-					onChange={value => onOptionChange(value ?? options[0]?.value ?? '')}
-				/>
-				<Input
-					className={styles.search}
-					value={search}
-					onChange={event => onSearchChange(event.target.value)}
-					placeholder={searchPlaceholder}
-					startIcon={<LuSearch size={18} />}
-				/>
-			</div>
+			<SelectDropdown
+				className={styles.select}
+				options={[...types]}
+				value={type}
+				onChange={value => onTypeChange((value as Type | null) ?? types[0]?.value ?? type)}
+			/>
+			<SelectDropdown
+				className={styles.select}
+				options={options}
+				value={option}
+				onChange={value => onOptionChange(value ?? options[0]?.value ?? '')}
+			/>
+			<Input
+				className={styles.search}
+				value={search}
+				onChange={event => onSearchChange(event.target.value)}
+				placeholder={searchPlaceholder}
+				startIcon={<LuSearch size={18} />}
+			/>
 		</div>
 	)
 }
@@ -114,6 +82,22 @@ export function CatalogSection({ icon, title, description, children }: CatalogSe
 	)
 }
 
-export function CatalogEmpty({ children }: { children: ReactNode }) {
-	return <div className={styles.empty}>{children}</div>
+export interface CatalogEmptyProps {
+	icon: ReactNode
+	title: string
+	description?: string
+	actions?: ReactNode
+}
+
+// Nothing to show: inside a section it spans the whole grid, on its own it is
+// a box of its own.
+export function CatalogEmpty({ icon, title, description, actions }: CatalogEmptyProps) {
+	return (
+		<div className={styles.empty}>
+			<span className={styles.emptyIcon}>{icon}</span>
+			<p className={styles.emptyTitle}>{title}</p>
+			{description && <p className={styles.emptyDescription}>{description}</p>}
+			{actions && <div className={styles.emptyActions}>{actions}</div>}
+		</div>
+	)
 }

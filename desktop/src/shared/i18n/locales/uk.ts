@@ -1351,18 +1351,27 @@ export const uk: Translation = {
 		refresh: 'Оновити',
 		refreshed: 'Оновлено',
 		notFound: 'За цими умовами нічого не знайдено.',
-		extensions: {
-			tab: 'Розширення',
-			title: 'Розширення',
-			subtitle: 'Переглядайте й встановлюйте плагіни, що додають у Mediary джерела.',
+		subtitle: 'Керуйте джерелами медіа та інтеграціями',
+		installed: {
+			tab: 'Встановлені',
+			tabWithUpdates: 'Встановлені · оновлень: {{count}}',
+			section: 'Встановлені розширення',
+			description:
+				'Джерела, які зараз доступні в Mediary. Керуйте ними, налаштовуйте чи видаляйте тут.',
+			search: 'Пошук серед встановлених…',
+			browseCatalog: 'Переглянути каталог'
+		},
+		catalog: {
+			tab: 'Каталог',
+			section: 'Доступні розширення',
+			description: 'Розширення з доданих вами репозиторіїв: {{repositories}}.'
+		},
+		filters: {
 			allLanguages: 'Усі мови',
 			search: 'Пошук розширень…'
 		},
 		dependencies: {
 			tab: 'Залежності',
-			title: 'Залежності',
-			subtitle: 'Встановлюйте програми, якими Mediary відтворює й транскодує відео.',
-			source: 'Джерело: офіційні збірки Gyan (FFmpeg) і shinchiro (mpv) на GitHub',
 			kinds: {
 				all: 'Усі типи',
 				player: 'Плеєр',
@@ -1377,11 +1386,6 @@ export const uk: Translation = {
 		}
 	},
 	plugins: {
-		view: {
-			installed: 'Встановлені',
-			installedWithUpdates: 'Встановлені · оновлень: {{count}}',
-			catalog: 'Каталог'
-		},
 		types: {
 			all: 'Усі типи',
 			'torrent-provider': 'Пошук роздач'
@@ -1391,8 +1395,9 @@ export const uk: Translation = {
 		noUpdates: 'Усі плагіни оновлені',
 		updatesFound: 'Знайдено оновлень: {{count}}',
 		emptyInstalled: {
-			title: 'Плагінів поки немає',
-			description: 'Знайдіть їх у каталозі репозиторію, якому довіряєте, або додайте за адресою.'
+			title: 'Немає встановлених розширень',
+			description:
+				'Встановіть довірене джерело з каталогу або додайте за адресою, щоб почати знаходити медіа.'
 		},
 		emptyCatalog: {
 			title: 'Каталог порожній',
@@ -1473,7 +1478,6 @@ export const uk: Translation = {
 		}
 	},
 	tools: {
-		note: 'Mediary качає офіційні збірки закріплених версій і відмовляється від будь-якої, що не збігається з контрольною сумою. Нові версії приходять лише з оновленням Mediary і ставляться, тільки коли ви цього захочете.',
 		purpose: {
 			mpv: 'Відтворює файли у власному вікні',
 			ffmpeg: 'Транскодує те, що не грає вбудований плеєр, робить кадри серій і дістає субтитри'
@@ -1493,7 +1497,6 @@ export const uk: Translation = {
 		},
 		install: 'Встановити',
 		installSize: 'Встановити · {{size}}',
-		installOwn: 'Встановити власну копію',
 		update: 'Оновити до {{version}}',
 		remove: 'Видалити',
 		cancel: 'Скасувати',
@@ -1506,6 +1509,7 @@ export const uk: Translation = {
 		more: 'Більше',
 		updateAvailable: 'Є оновлення',
 		official: {
+			badge: 'Офіційно',
 			title: 'Офіційна залежність Mediary',
 			description:
 				'Рекомендовано Mediary: офіційна збірка закріпленої версії, яку перед встановленням звіряють із контрольною сумою.'
