@@ -29,13 +29,18 @@ func TestSearchTorrentsRunsTheInstalledPlugin(t *testing.T) {
 	h.install(t, h.host.publish(t, "1.0.0", echo, nil))
 
 	providers, err := h.svc.TorrentProviders(ctx)
-	if err != nil || len(providers) != 1 || providers[0].ID != "example" || providers[0].Version != "1.0.0" {
+	if err != nil || len(providers) != 1 || providers[0].ID != "example" || providers[0].Revision == "" {
 		t.Fatalf("providers %+v, %v", providers, err)
 	}
+	before := providers[0].Revision
 
 	releases, err := h.svc.SearchTorrents(ctx, "example", sandbox.SearchRequest{Query: "frieren"})
 	if err != nil || len(releases) != 1 || releases[0].Title != "frieren via a.example.org" {
 		t.Fatalf("releases %+v, %v; want the default mirror", releases, err)
+	}
+
+	if providers, _ = h.svc.TorrentProviders(ctx); providers[0].Revision != before {
+		t.Fatalf("the revision moved with nothing changed: %s, then %s", before, providers[0].Revision)
 	}
 
 	if _, err = h.svc.Configure(ctx, "example", Settings{Config: map[string]string{"mirror": "b.example.org"}}); err != nil {
@@ -44,6 +49,12 @@ func TestSearchTorrentsRunsTheInstalledPlugin(t *testing.T) {
 	releases, _ = h.svc.SearchTorrents(ctx, "example", sandbox.SearchRequest{Query: "frieren"})
 	if releases[0].Title != "frieren via b.example.org" {
 		t.Fatalf("after changing the mirror: %q", releases[0].Title)
+	}
+
+	// The search keeps a plugin's answers by its revision: another setting is
+	// another answer.
+	if providers, _ = h.svc.TorrentProviders(ctx); providers[0].Revision == before {
+		t.Fatal("the revision stayed when a setting changed")
 	}
 
 	// Off: not offered, and not run if asked anyway.

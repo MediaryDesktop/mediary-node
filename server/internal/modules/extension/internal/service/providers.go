@@ -2,6 +2,9 @@ package service
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 
 	"github.com/mediaryorg/mediary-node/server/internal/modules/extension/internal/manifest"
@@ -16,9 +19,11 @@ const perPlugin = 2
 
 // TorrentProvider is a plugin on now that searches for torrents.
 type TorrentProvider struct {
-	ID      string
-	Name    string
-	Version string
+	ID   string
+	Name string
+	// Revision changes whenever the plugin could answer differently — other
+	// code, other settings — so answers kept under the last one are not reused.
+	Revision string
 }
 
 func (s *Service) TorrentProviders(ctx context.Context) ([]TorrentProvider, error) {
@@ -29,12 +34,41 @@ func (s *Service) TorrentProviders(ctx context.Context) ([]TorrentProvider, erro
 
 	var out []TorrentProvider
 	for i := range exts {
-		if exts[i].Enabled && exts[i].Manifest.Type == manifest.TypeTorrentProvider {
-			out = append(out, TorrentProvider{ID: exts[i].ID, Name: exts[i].Manifest.Name, Version: exts[i].Manifest.Version})
+		ext := &exts[i]
+		if !ext.Enabled || ext.Manifest.Type != manifest.TypeTorrentProvider {
+			continue
 		}
+
+		revision, revErr := s.revision(ext)
+		if revErr != nil {
+			return nil, revErr
+		}
+		out = append(out, TorrentProvider{ID: ext.ID, Name: ext.Manifest.Name, Revision: revision})
 	}
 
 	return out, nil
+}
+
+// revision is a fingerprint of what the plugin's answer depends on: its code,
+// by the manifest's sum, and its settings as it runs with them. A secret leaves
+// only its share of the hash.
+func (s *Service) revision(ext *store.Extension) (string, error) {
+	config, err := s.RuntimeConfig(ext)
+	if err != nil {
+		return "", err
+	}
+
+	raw, err := json.Marshal(struct {
+		Code   string
+		Config map[string]string
+	}{ext.Manifest.SHA256, config})
+	if err != nil {
+		return "", fmt.Errorf("fingerprint %s: %w", ext.ID, err)
+	}
+
+	sum := sha256.Sum256(raw)
+
+	return hex.EncodeToString(sum[:12]), nil
 }
 
 // SearchTorrents runs one plugin's search in the sandbox.

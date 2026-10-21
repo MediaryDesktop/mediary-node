@@ -26,9 +26,11 @@ type Providers interface {
 }
 
 type Provider struct {
-	ID      string
-	Name    string
-	Version string
+	ID   string
+	Name string
+	// Revision changes with the plugin's code or settings, and with it what the
+	// plugin would answer.
+	Revision string
 }
 
 // ProviderQuery is what a plugin is asked: one query of the search, with what
@@ -76,10 +78,11 @@ type cachedPluginAnswer struct {
 }
 
 // askPlugin is one plugin's answer to one query, from the cache while it is
-// fresh. The plugin's version is part of the key: an update answers anew.
+// fresh. The plugin's revision is part of the key: an update or a changed
+// setting answers anew.
 func (s *Service) askPlugin(ctx context.Context, provider Provider, query ProviderQuery) ([]ProviderRelease, error) {
 	cacheKey := strings.Join([]string{
-		provider.ID, provider.Version,
+		provider.ID, provider.Revision,
 		strconv.Itoa(query.Episode), strconv.Itoa(query.Season),
 		strings.ToLower(query.Query),
 	}, "\x00")

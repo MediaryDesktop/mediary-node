@@ -23,7 +23,7 @@ func (p searchPlugins) TorrentProviders(ctx context.Context) ([]torrent.Provider
 
 	out := make([]torrent.Provider, 0, len(found))
 	for _, provider := range found {
-		out = append(out, torrent.Provider{ID: provider.ID, Name: provider.Name, Version: provider.Version})
+		out = append(out, torrent.Provider{ID: provider.ID, Name: provider.Name, Revision: provider.Revision})
 	}
 
 	return out, nil

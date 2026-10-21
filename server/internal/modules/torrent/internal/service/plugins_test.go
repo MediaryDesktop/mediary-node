@@ -72,7 +72,7 @@ func (f *fakeProviders) askedOf(id string) []ProviderQuery {
 	return append([]ProviderQuery(nil), f.asked[id]...)
 }
 
-var nyaa = Provider{ID: "nyaa", Name: "Nyaa", Version: "1.0.0"}
+var nyaa = Provider{ID: "nyaa", Name: "Nyaa", Revision: "r1"}
 
 func TestAPluginIsEnoughToSearch(t *testing.T) {
 	h := newHarness(t)
@@ -115,7 +115,7 @@ func TestPluginsAndSourcesShareOneList(t *testing.T) {
 	ix := newIndexer(t)
 	addSource(t, h, "Jackett", ix.server.URL+"/api", "key")
 
-	broken := Provider{ID: "broken", Name: "Broken", Version: "1.0.0"}
+	broken := Provider{ID: "broken", Name: "Broken", Revision: "r1"}
 	plugins := newFakeProviders(nyaa, broken)
 	// The same 13th episode Jackett finds, by its hash, with more seeders.
 	plugins.answers["nyaa"] = []ProviderRelease{
@@ -156,7 +156,7 @@ func TestPluginsAndSourcesShareOneList(t *testing.T) {
 func TestAHangingPluginLeavesTheOthersResults(t *testing.T) {
 	h := newHarness(t)
 	h.withSearch(frierenNames)
-	stuck := Provider{ID: "stuck", Name: "Stuck", Version: "1.0.0"}
+	stuck := Provider{ID: "stuck", Name: "Stuck", Revision: "r1"}
 	plugins := newFakeProviders(nyaa, stuck)
 	plugins.answers["nyaa"] = []ProviderRelease{
 		{Title: "[SubsPlease] Sousou no Frieren - 13 (1080p)", InfoHash: "dddddddddddddddddddddddddddddddddddddddd", Seeders: 50},
@@ -225,7 +225,7 @@ func TestAPluginsLinkIsFetchedThroughThePlugin(t *testing.T) {
 	}
 }
 
-func TestPluginAnswersAreReusedUntilTheyUpdate(t *testing.T) {
+func TestPluginAnswersAreReusedUntilThePluginChanges(t *testing.T) {
 	h := newHarness(t)
 	h.withSearch(frierenNames)
 	plugins := newFakeProviders(nyaa)
@@ -252,13 +252,13 @@ func TestPluginAnswersAreReusedUntilTheyUpdate(t *testing.T) {
 		t.Fatalf("asked %d times", n)
 	}
 
-	// A new version answers anew.
+	// A new version, or a changed setting, answers anew.
 	plugins.mu.Lock()
-	plugins.providers = []Provider{{ID: "nyaa", Name: "Nyaa", Version: "1.1.0"}}
+	plugins.providers = []Provider{{ID: "nyaa", Name: "Nyaa", Revision: "r2"}}
 	plugins.mu.Unlock()
 	search(13)
 	if n := len(plugins.askedOf("nyaa")); n != 3 {
-		t.Fatalf("an updated plugin was not asked again (%d)", n)
+		t.Fatalf("a changed plugin was not asked again (%d)", n)
 	}
 }
 
@@ -296,7 +296,7 @@ func TestSearchPluginsCountsThoseOn(t *testing.T) {
 		t.Fatalf("without plugins: %d, %v", n, err)
 	}
 
-	h.svc.opts.Providers = newFakeProviders(nyaa, Provider{ID: "other", Name: "Other", Version: "1.0.0"})
+	h.svc.opts.Providers = newFakeProviders(nyaa, Provider{ID: "other", Name: "Other", Revision: "r1"})
 	if n, err := h.svc.SearchPlugins(context.Background()); err != nil || n != 2 {
 		t.Fatalf("with two: %d, %v", n, err)
 	}
