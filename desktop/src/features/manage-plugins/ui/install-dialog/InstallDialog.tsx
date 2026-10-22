@@ -1,11 +1,23 @@
 import clsx from 'clsx'
 import { useUnit } from 'effector-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
+import type { ReactNode } from 'react'
+import {
+	LuCheck,
+	LuCopy,
+	LuDownload,
+	LuGlobe,
+	LuRefreshCw,
+	LuShieldCheck,
+	LuSlidersHorizontal,
+	LuTag,
+	LuX
+} from 'react-icons/lu'
 
 import { problemDetail } from '@shared/api'
 import type { RequestFailure } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
-import { Button, Input, Modal, Notice, ReelLoader, toast } from '@shared/ui'
+import { Button, Input, Modal, Notice, ReelLoader, toast, Tooltip } from '@shared/ui'
 
 import { installExtensionFx, previewExtensionFx, updateExtensionFx } from '@entities/extension'
 import type { Extension, ExtensionPreview } from '@entities/extension'
@@ -23,25 +35,23 @@ export interface InstallDialogProps {
 	onClose: () => void
 }
 
+// The last target stays on screen while the dialog closes, so the closing
+// animation shows what was there rather than an empty box. Every new target
+// starts the steps over.
 export function InstallDialog({ target, onClose }: InstallDialogProps) {
-	const { t } = useTranslation()
+	const [shown, setShown] = useState(target)
+	const [generation, setGeneration] = useState(0)
 
-	const title =
-		target?.kind === 'update'
-			? t('plugins.dialog.updateTitle', { name: target.extension.name })
-			: t('plugins.dialog.installTitle')
+	if (target && target !== shown) {
+		setShown(target)
+		setGeneration(generation + 1)
+	}
 
-	return (
-		<Modal open={target !== null} onOpenChange={open => !open && onClose()} title={title} size='md'>
-			{target && (
-				<Steps
-					key={target.kind === 'update' ? target.extension.id : (target.url ?? '')}
-					target={target}
-					onClose={onClose}
-				/>
-			)}
-		</Modal>
-	)
+	if (!shown) {
+		return null
+	}
+
+	return <Steps key={generation} target={shown} open={target !== null} onClose={onClose} />
 }
 
 // The node's own explanation of a failed request, or the fallback.
@@ -55,8 +65,15 @@ type Step =
 	| { kind: 'consent'; preview: ExtensionPreview }
 	| { kind: 'failed'; message: string }
 
-function Steps({ target, onClose }: { target: InstallTarget; onClose: () => void }) {
+interface StepsProps {
+	target: InstallTarget
+	open: boolean
+	onClose: () => void
+}
+
+function Steps({ target, open, onClose }: StepsProps) {
 	const { t } = useTranslation()
+	const formId = useId()
 	const [preview, install, update] = useUnit([previewExtensionFx, installExtensionFx, updateExtensionFx])
 
 	const initialURL = target.kind === 'update' ? target.extension.manifest_url : (target.url ?? '')
@@ -81,17 +98,17 @@ function Steps({ target, onClose }: { target: InstallTarget; onClose: () => void
 			return
 		}
 
-		let open = true
+		let alive = true
 		preview(initialURL)
-			.then(result => open && setStep({ kind: 'consent', preview: result }))
+			.then(result => alive && setStep({ kind: 'consent', preview: result }))
 			.catch(
 				(error: unknown) =>
-					open &&
+					alive &&
 					setStep({ kind: 'failed', message: failure(error, t('plugins.dialog.readFailed')) })
 			)
 
 		return () => {
-			open = false
+			alive = false
 		}
 	}, [initialURL, preview, t])
 
@@ -115,89 +132,171 @@ function Steps({ target, onClose }: { target: InstallTarget; onClose: () => void
 		})
 	}
 
-	if (step.kind === 'address') {
-		return (
-			<form
-				className={styles.body}
-				onSubmit={event => {
-					event.preventDefault()
-					if (url.trim()) {
-						read(url.trim())
-					}
-				}}
-			>
-				<label className={styles.label}>
-					{t('plugins.dialog.urlLabel')}
-					<Input
-						value={url}
-						onChange={event => setURL(event.target.value)}
-						placeholder='https://example.org/plugin/manifest.json'
-						spellCheck={false}
-						autoFocus
-					/>
-				</label>
-				<p className={styles.hint}>{t('plugins.dialog.urlHint')}</p>
-				<div className={styles.footer}>
-					<Button onClick={onClose}>{t('plugins.dialog.cancel')}</Button>
-					<Button type='submit' variant='primary' disabled={!url.trim()}>
-						{t('plugins.dialog.next')}
-					</Button>
-				</div>
-			</form>
-		)
+	const cancel = (
+		<Button onClick={onClose} disabled={busy}>
+			{t('plugins.dialog.cancel')}
+		</Button>
+	)
+
+	const view = (): { body: ReactNode; footer: ReactNode } => {
+		switch (step.kind) {
+			case 'address':
+				return {
+					body: (
+						<form
+							id={formId}
+							className={styles.address}
+							onSubmit={event => {
+								event.preventDefault()
+								if (url.trim()) {
+									read(url.trim())
+								}
+							}}
+						>
+							<label className={styles.label}>
+								{t('plugins.dialog.urlLabel')}
+								<Input
+									value={url}
+									onChange={event => setURL(event.target.value)}
+									placeholder='https://example.org/plugin/manifest.json'
+									spellCheck={false}
+									autoFocus
+								/>
+							</label>
+							<p className={styles.hint}>{t('plugins.dialog.urlHint')}</p>
+						</form>
+					),
+					footer: (
+						<>
+							{cancel}
+							<Button type='submit' form={formId} variant='primary' disabled={!url.trim()}>
+								{t('plugins.dialog.next')}
+							</Button>
+						</>
+					)
+				}
+
+			case 'reading':
+				return {
+					body: (
+						<div className={styles.reading}>
+							<ReelLoader spinning />
+							<p className={styles.hint}>{t('plugins.dialog.reading')}</p>
+						</div>
+					),
+					footer: cancel
+				}
+
+			case 'failed':
+				return {
+					body: <Notice tone='danger'>{step.message}</Notice>,
+					footer: (
+						<>
+							{cancel}
+							<Button
+								onClick={() =>
+									target.kind === 'install' && !target.url
+										? setStep({ kind: 'address' })
+										: read(url)
+								}
+							>
+								{t('plugins.dialog.retry')}
+							</Button>
+						</>
+					)
+				}
+
+			case 'consent':
+				return consentView(step.preview)
+		}
 	}
 
-	if (step.kind === 'reading') {
-		return (
-			<div className={clsx(styles.body, styles.center)}>
-				<ReelLoader spinning />
-				<p className={styles.hint}>{t('plugins.dialog.reading')}</p>
-			</div>
-		)
-	}
+	const consentView = (p: ExtensionPreview) => {
+		const alreadyInstalled = target.kind === 'install' && Boolean(p.installed)
 
-	if (step.kind === 'failed') {
-		return (
-			<div className={styles.body}>
-				<Notice tone='danger'>{step.message}</Notice>
-				<div className={styles.footer}>
-					<Button onClick={onClose}>{t('plugins.dialog.cancel')}</Button>
+		return {
+			body: (
+				<Consent
+					preview={p}
+					before={target.kind === 'update' ? (target.extension.network ?? []) : null}
+					alreadyInstalled={alreadyInstalled}
+				/>
+			),
+			footer: (
+				<>
+					<ManifestAddress url={p.manifest_url} />
+					{cancel}
 					<Button
-						onClick={() =>
-							target.kind === 'install' && !target.url
-								? setStep({ kind: 'address' })
-								: read(url)
+						variant='primary'
+						loading={busy}
+						disabled={!p.compatible || alreadyInstalled}
+						startIcon={
+							target.kind === 'update' ? <LuRefreshCw size={16} /> : <LuDownload size={16} />
 						}
+						onClick={() => confirm(p)}
 					>
-						{t('plugins.dialog.retry')}
+						{target.kind === 'update' ? t('plugins.dialog.update') : t('plugins.dialog.install')}
 					</Button>
-				</div>
-			</div>
-		)
+				</>
+			)
+		}
 	}
 
-	const p = step.preview
-	const before = target.kind === 'update' ? (target.extension.network ?? []) : null
-	const hosts = p.network ?? []
-	const settings = p.config ?? []
-	const alreadyInstalled = target.kind === 'install' && Boolean(p.installed)
+	const { body, footer } = view()
 
 	return (
-		<div className={styles.body}>
+		<Modal
+			open={open}
+			onOpenChange={next => !next && onClose()}
+			title={
+				target.kind === 'update'
+					? t('plugins.dialog.updateTitle', { name: target.extension.name })
+					: t('plugins.dialog.installTitle')
+			}
+			size='md'
+			footer={footer}
+		>
+			{body}
+		</Modal>
+	)
+}
+
+interface ConsentProps {
+	preview: ExtensionPreview
+	// The hosts the installed version reaches, when this is an update: the ones
+	// not among them are marked new.
+	before: string[] | null
+	alreadyInstalled: boolean
+}
+
+// Everything the user agrees to, in the order it matters: who the plugin is,
+// where it goes, what it gets, what it asks for, and what it cannot do.
+function Consent({ preview: p, before, alreadyInstalled }: ConsentProps) {
+	const { t } = useTranslation()
+	const [broken, setBroken] = useState(false)
+
+	const hosts = p.network ?? []
+	const settings = p.config ?? []
+
+	return (
+		<div className={styles.consent}>
 			<div className={styles.plugin}>
 				<span className={styles.icon}>
-					{p.icon ? (
-						<img src={p.icon} alt='' referrerPolicy='no-referrer' />
+					{p.icon && !broken ? (
+						<img
+							src={p.icon}
+							alt=''
+							referrerPolicy='no-referrer'
+							onError={() => setBroken(true)}
+						/>
 					) : (
 						p.name.slice(0, 1).toUpperCase()
 					)}
 				</span>
 				<div className={styles.titles}>
-					<p className={styles.name}>
-						{p.name} <span className={styles.version}>{p.version}</span>
-					</p>
+					<p className={styles.name}>{p.name}</p>
 					<p className={styles.byline}>
-						{[p.author, languageName(p.lang, t('plugins.multiLanguage'))]
+						{[`v${p.version}`, p.author, languageName(p.lang, t('plugins.multiLanguage'))]
 							.filter(Boolean)
 							.join(' · ')}
 					</p>
@@ -206,50 +305,86 @@ function Steps({ target, onClose }: { target: InstallTarget; onClose: () => void
 
 			{p.description && <p className={styles.description}>{p.description}</p>}
 
-			<section className={styles.section}>
-				<h3 className={styles.sectionTitle}>{t('plugins.dialog.hostsTitle')}</h3>
-				{hosts.length === 0 ? (
-					<p className={styles.hint}>{t('plugins.dialog.hostsNone')}</p>
-				) : (
-					<ul className={styles.hosts}>
-						{hosts.map(host => (
-							<li key={host} className={clsx(before && !before.includes(host) && styles.added)}>
-								{host}
-								{before && !before.includes(host) && (
-									<span className={styles.tag}>{t('plugins.dialog.hostsNew')}</span>
-								)}
-							</li>
-						))}
-					</ul>
+			<ul className={styles.facts}>
+				<Fact
+					icon={<LuGlobe size={18} />}
+					tone='info'
+					title={
+						hosts.length > 0
+							? t('plugins.dialog.hosts', { count: hosts.length })
+							: t('plugins.dialog.hostsNone')
+					}
+				>
+					{hosts.length > 0 ? (
+						<ul className={styles.chips}>
+							{hosts.map(host => {
+								const added = before !== null && !before.includes(host)
+
+								return (
+									<li key={host} className={clsx(styles.host, added && styles.added)}>
+										{host}
+										{added && (
+											<span className={styles.tag}>{t('plugins.dialog.hostsNew')}</span>
+										)}
+									</li>
+								)
+							})}
+						</ul>
+					) : (
+						<p className={styles.text}>{t('plugins.dialog.hostsNoneHint')}</p>
+					)}
+				</Fact>
+
+				<Fact icon={<LuTag size={18} />} tone='warning' title={t('plugins.dialog.receivesTitle')}>
+					<p className={styles.text}>{t('plugins.dialog.receives')}</p>
+					<p className={styles.private}>
+						<LuCheck size={14} />
+						{t('plugins.dialog.receivesPrivate')}
+					</p>
+				</Fact>
+
+				{settings.length > 0 && (
+					<Fact
+						icon={<LuSlidersHorizontal size={18} />}
+						tone='purple'
+						title={t('plugins.dialog.settings', { count: settings.length })}
+					>
+						<ul className={styles.chips}>
+							{settings.map(field => (
+								<li key={field.name} className={styles.setting}>
+									{field.label}
+									{field.secret && (
+										<span className={styles.tag}>{t('plugins.dialog.secret')}</span>
+									)}
+								</li>
+							))}
+						</ul>
+					</Fact>
 				)}
-			</section>
+			</ul>
 
-			<section className={styles.section}>
-				<h3 className={styles.sectionTitle}>{t('plugins.dialog.receivesTitle')}</h3>
-				<p className={styles.hint}>{t('plugins.dialog.receives')}</p>
-			</section>
-
-			{settings.length > 0 && (
-				<section className={styles.section}>
-					<h3 className={styles.sectionTitle}>{t('plugins.dialog.settingsTitle')}</h3>
-					<ul className={styles.settings}>
-						{settings.map(field => (
-							<li key={field.name}>
-								{field.label}
-								{field.secret && (
-									<span className={styles.tag}>{t('plugins.dialog.secret')}</span>
-								)}
-							</li>
-						))}
-					</ul>
-				</section>
-			)}
-
-			<p className={styles.sandbox}>{t('plugins.dialog.sandbox')}</p>
-
-			<p className={styles.source} title={p.manifest_url}>
-				{t('plugins.dialog.source')}: {p.manifest_url}
-			</p>
+			<div className={styles.sandbox}>
+				<p className={styles.sandboxTitle}>
+					<LuShieldCheck size={18} />
+					{t('plugins.dialog.sandboxTitle')}
+				</p>
+				<ul className={styles.sandboxList}>
+					{(
+						[
+							'plugins.dialog.sandboxFiles',
+							'plugins.dialog.sandboxSites',
+							'plugins.dialog.sandboxPrograms',
+							'plugins.dialog.sandboxNetwork'
+						] as const
+					).map(key => (
+						<li key={key}>
+							<LuX size={13} />
+							{t(key)}
+						</li>
+					))}
+				</ul>
+				<p className={styles.sandboxNote}>{t('plugins.dialog.sandboxNote')}</p>
+			</div>
 
 			{!p.compatible && (
 				<Notice tone='warning'>
@@ -261,19 +396,58 @@ function Steps({ target, onClose }: { target: InstallTarget; onClose: () => void
 					{t('plugins.dialog.alreadyInstalled', { version: p.installed ?? '' })}
 				</Notice>
 			)}
+		</div>
+	)
+}
 
-			<div className={styles.footer}>
-				<Button onClick={onClose} disabled={busy}>
-					{t('plugins.dialog.cancel')}
-				</Button>
-				<Button
-					variant='primary'
-					loading={busy}
-					disabled={!p.compatible || alreadyInstalled}
-					onClick={() => confirm(p)}
-				>
-					{target.kind === 'update' ? t('plugins.dialog.update') : t('plugins.dialog.install')}
-				</Button>
+interface FactProps {
+	icon: ReactNode
+	tone: 'info' | 'warning' | 'purple'
+	title: string
+	children: ReactNode
+}
+
+function Fact({ icon, tone, title, children }: FactProps) {
+	return (
+		<li className={styles.fact}>
+			<span className={clsx(styles.factIcon, styles[tone])}>{icon}</span>
+			<div className={styles.factBody}>
+				<p className={styles.factTitle}>{title}</p>
+				{children}
+			</div>
+		</li>
+	)
+}
+
+// The manifest's address, short enough to fit beside the buttons; the whole of
+// it is in the tooltip and one click away on the clipboard.
+function ManifestAddress({ url }: { url: string }) {
+	const { t } = useTranslation()
+
+	const copy = () => {
+		navigator.clipboard
+			.writeText(url)
+			.then(() => toast.success(t('plugins.dialog.copied'), { duration: 1500 }))
+			.catch(() => undefined)
+	}
+
+	return (
+		<div className={styles.manifest}>
+			<span className={styles.manifestLabel}>{t('plugins.dialog.source')}</span>
+			<div className={styles.manifestRow}>
+				<span className={styles.manifestUrl} title={url}>
+					{url.replace(/^https:\/\//u, '')}
+				</span>
+				<Tooltip content={t('plugins.dialog.copy')}>
+					<button
+						type='button'
+						className={styles.copy}
+						aria-label={t('plugins.dialog.copy')}
+						onClick={copy}
+					>
+						<LuCopy size={12} />
+					</button>
+				</Tooltip>
 			</div>
 		</div>
 	)

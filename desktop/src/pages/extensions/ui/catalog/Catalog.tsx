@@ -62,20 +62,16 @@ export function CatalogFilters<Type extends string>({
 export interface CatalogSectionProps {
 	icon: ReactNode
 	title: string
-	description?: string
 	children: ReactNode
 }
 
-export function CatalogSection({ icon, title, description, children }: CatalogSectionProps) {
+export function CatalogSection({ icon, title, children }: CatalogSectionProps) {
 	return (
 		<section className={styles.section}>
-			<div className={styles.sectionHead}>
-				<h2 className={styles.sectionTitle}>
-					{icon}
-					{title}
-				</h2>
-				{description && <p className={styles.sectionDescription}>{description}</p>}
-			</div>
+			<h2 className={styles.sectionTitle}>
+				{icon}
+				{title}
+			</h2>
 
 			<div className={styles.grid}>{children}</div>
 		</section>

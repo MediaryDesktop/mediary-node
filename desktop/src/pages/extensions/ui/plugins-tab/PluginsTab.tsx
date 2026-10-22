@@ -93,11 +93,7 @@ export function PluginsTab({
 	const body = () => {
 		if (view === 'installed') {
 			const section = (children: ReactNode) => (
-				<CatalogSection
-					icon={<LuBlocks size={20} />}
-					title={t('extensions.installed.section')}
-					description={t('extensions.installed.description')}
-				>
+				<CatalogSection icon={<LuBlocks size={20} />} title={t('extensions.installed.section')}>
 					{children}
 				</CatalogSection>
 			)
@@ -164,13 +160,7 @@ export function PluginsTab({
 		}
 
 		return (
-			<CatalogSection
-				icon={<LuBlocks size={20} />}
-				title={t('extensions.catalog.section')}
-				description={t('extensions.catalog.description', {
-					repositories: repositories.map(repository => repository.name).join(', ')
-				})}
-			>
+			<CatalogSection icon={<LuBlocks size={20} />} title={t('extensions.catalog.section')}>
 				{shownCatalog.length === 0
 					? notFound
 					: shownCatalog.map((plugin: CatalogPlugin) => (

@@ -1,11 +1,9 @@
-import clsx from 'clsx'
 import { useUnit } from 'effector-react'
 import { useState } from 'react'
-import type { ReactNode } from 'react'
-import { LuCheck, LuDownload, LuEllipsisVertical, LuRefreshCw, LuSettings2 } from 'react-icons/lu'
+import { LuDownload, LuEllipsisVertical, LuRefreshCw, LuSettings2 } from 'react-icons/lu'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, DropdownMenu, Modal, RippleButton, Tooltip } from '@shared/ui'
+import { Button, DropdownMenu, Icon, ItemCard, ItemCardAction, ItemCardMark, Modal } from '@shared/ui'
 import type { DropdownMenuItem } from '@shared/ui'
 
 import { configureExtensionMutation, removeExtensionMutation } from '@entities/extension'
@@ -15,86 +13,25 @@ import { languageName } from '../../lib/languages'
 
 import styles from './PluginCard.module.scss'
 
-interface FrameProps {
-	name: string
-	id: string
-	icon?: string
-	description?: string
-	meta: ReactNode[]
-	hosts?: string[]
-	corner: ReactNode
-	muted?: boolean
-	update?: boolean
-}
-
-// The card both lists share, laid out like Seanime's extension card: icon,
-// name and id, what it does, a line of facts, the actions in the corner.
-function Frame({ name, id, icon, description, meta, hosts, corner, muted, update }: FrameProps) {
-	const { t } = useTranslation()
+// The plugin's own icon from its manifest, or its first letter when there is
+// none or it does not load.
+function PluginIcon({ name, icon }: { name: string; icon?: string }) {
 	const [broken, setBroken] = useState(false)
 
-	return (
-		<article className={clsx(styles.card, muted && styles.muted, update && styles.update)}>
-			<div className={styles.corner}>{corner}</div>
+	if (icon && !broken) {
+		return <img src={icon} alt='' referrerPolicy='no-referrer' onError={() => setBroken(true)} />
+	}
 
-			<div className={styles.head}>
-				<span className={styles.icon}>
-					{icon && !broken ? (
-						<img src={icon} alt='' referrerPolicy='no-referrer' onError={() => setBroken(true)} />
-					) : (
-						<span className={styles.letter}>{name.slice(0, 1).toUpperCase()}</span>
-					)}
-				</span>
-
-				<div className={styles.titles}>
-					<p className={styles.name}>{name}</p>
-					<p className={styles.id}>{id}</p>
-				</div>
-			</div>
-
-			{description && <p className={styles.description}>{description}</p>}
-
-			{hosts && (
-				<p className={styles.hosts} title={hosts.join(', ')}>
-					{hosts.length > 0
-						? t('plugins.hosts', { hosts: hosts.join(', ') })
-						: t('plugins.noHosts')}
-				</p>
-			)}
-
-			<div className={styles.meta}>
-				{meta.filter(Boolean).map((item, index) => (
-					<span key={index}>{item}</span>
-				))}
-			</div>
-		</article>
-	)
+	return <span className={styles.letter}>{name.slice(0, 1).toUpperCase()}</span>
 }
 
-function CornerButton({
-	label,
-	tone = 'default',
-	disabled,
-	onClick,
-	children
-}: {
-	label: string
-	tone?: 'default' | 'primary' | 'success' | 'done'
-	disabled?: boolean
-	onClick?: () => void
-	children: ReactNode
-}) {
+function Hosts({ hosts }: { hosts: string[] }) {
+	const { t } = useTranslation()
+
 	return (
-		<Tooltip content={label} side='left'>
-			<RippleButton
-				className={clsx(styles.cornerButton, styles[tone])}
-				aria-label={label}
-				disabled={disabled}
-				onClick={onClick}
-			>
-				{children}
-			</RippleButton>
-		</Tooltip>
+		<p className={styles.hosts} title={hosts.join(', ')}>
+			{hosts.length > 0 ? t('plugins.hosts', { hosts: hosts.join(', ') }) : t('plugins.noHosts')}
+		</p>
 	)
 }
 
@@ -133,57 +70,57 @@ export function InstalledPluginCard({ extension, onUpdate, onSettings }: Install
 
 	return (
 		<>
-			<Frame
-				name={extension.name}
-				id={extension.id}
-				icon={extension.icon}
+			<ItemCard
+				icon={<PluginIcon name={extension.name} icon={extension.icon} />}
+				title={extension.name}
+				subtitle={extension.id}
 				description={extension.description}
-				hosts={extension.network ?? []}
 				muted={!extension.enabled}
-				update={hasUpdate}
+				highlight={hasUpdate ? 'success' : undefined}
 				meta={[
 					hasUpdate ? `${extension.version} → ${update?.version}` : extension.version,
 					extension.author,
 					languageName(extension.lang, t('plugins.multiLanguage')),
-					!extension.enabled && (
-						<span key='off' className={styles.off}>
-							{t('plugins.disabled')}
-						</span>
-					),
+					!extension.enabled && <span className={styles.off}>{t('plugins.disabled')}</span>,
 					update?.error && (
-						<span key='update' className={styles.warning} title={update.error}>
+						<span className={styles.warning} title={update.error}>
 							{t('plugins.updateCheckFailed')}
 						</span>
 					)
 				]}
-				corner={
+				actions={
 					<>
 						{hasUpdate && (
-							<CornerButton
+							<ItemCardAction
 								label={t('plugins.update', { version: update?.version ?? '' })}
 								tone='success'
 								onClick={() => onUpdate(extension)}
 							>
 								<LuRefreshCw size={16} />
-							</CornerButton>
+							</ItemCardAction>
 						)}
 						{(extension.config ?? []).length > 0 && (
-							<CornerButton label={t('plugins.settings')} onClick={() => onSettings(extension)}>
+							<ItemCardAction
+								label={t('plugins.settings')}
+								onClick={() => onSettings(extension)}
+							>
 								<LuSettings2 size={16} />
-							</CornerButton>
+							</ItemCardAction>
 						)}
 						<DropdownMenu
 							align='end'
 							items={menu}
 							trigger={
-								<RippleButton className={styles.cornerButton} aria-label={t('plugins.more')}>
+								<ItemCardAction label={t('plugins.more')} tooltip={false}>
 									<LuEllipsisVertical size={16} />
-								</RippleButton>
+								</ItemCardAction>
 							}
 						/>
 					</>
 				}
-			/>
+			>
+				<Hosts hosts={extension.network ?? []} />
+			</ItemCard>
 
 			<Modal
 				open={confirming}
@@ -220,59 +157,56 @@ export interface CatalogPluginCardProps {
 export function CatalogPluginCard({ plugin, onInstall, onUpdate }: CatalogPluginCardProps) {
 	const { t } = useTranslation()
 
-	const corner = () => {
+	const action = () => {
 		if (plugin.update) {
 			return (
-				<CornerButton
+				<ItemCardAction
 					label={t('plugins.update', { version: plugin.version })}
 					tone='success'
 					onClick={() => onUpdate(plugin.id)}
 				>
 					<LuRefreshCw size={16} />
-				</CornerButton>
+				</ItemCardAction>
 			)
 		}
 
 		if (plugin.installed) {
 			return (
-				<CornerButton
+				<ItemCardMark
 					label={
 						plugin.installed_here ? t('plugins.installedHere') : t('plugins.installedElsewhere')
 					}
-					tone='done'
 				>
-					<LuCheck size={16} />
-				</CornerButton>
+					<Icon name='common/check' size={16} />
+				</ItemCardMark>
 			)
 		}
 
 		return (
-			<CornerButton
+			<ItemCardAction
 				label={t('plugins.install')}
 				tone='primary'
 				onClick={() => onInstall(plugin.manifest_url)}
 			>
 				<LuDownload size={16} />
-			</CornerButton>
+			</ItemCardAction>
 		)
 	}
 
 	return (
-		<Frame
-			name={plugin.name}
-			id={plugin.id}
-			icon={plugin.icon}
+		<ItemCard
+			icon={<PluginIcon name={plugin.name} icon={plugin.icon} />}
+			title={plugin.name}
+			subtitle={plugin.id}
 			description={plugin.description}
-			update={plugin.update}
+			highlight={plugin.update ? 'success' : undefined}
 			meta={[
 				plugin.version,
 				plugin.author,
 				languageName(plugin.lang, t('plugins.multiLanguage')),
-				<span key='source' className={styles.source}>
-					{t('plugins.from', { repository: plugin.repository_name })}
-				</span>
+				t('plugins.from', { repository: plugin.repository_name })
 			]}
-			corner={corner()}
+			actions={action()}
 		/>
 	)
 }

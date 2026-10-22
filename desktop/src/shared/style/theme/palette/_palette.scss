@@ -95,6 +95,10 @@ $shadow-rgb: 10, 10, 10;
 	--info-muted: rgba(29, 78, 216, 0.1);
 	--info-text: #1e40af;
 
+	--purple: #6d28d9;
+	--purple-muted: rgba(109, 40, 217, 0.1);
+	--purple-text: #5b21b6;
+
 	--color-shadow: rgba(15, 23, 42, 0.12);
 	--shadow-sm: 1px 1px 4px 2px color-mix(in srgb, var(--color-shadow) 10%, transparent);
 	--shadow-md: 0 4px 20px 0 color-mix(in srgb, var(--color-shadow) 40%, transparent);
@@ -166,6 +170,10 @@ $shadow-rgb: 10, 10, 10;
 	--info: #60a5fa;
 	--info-muted: rgba(96, 165, 250, 0.16);
 	--info-text: #93c5fd;
+
+	--purple: #a78bfa;
+	--purple-muted: rgba(167, 139, 250, 0.16);
+	--purple-text: #c4b5fd;
 
 	--color-shadow: #{$grey-950};
 	--shadow-sm: 1px 1px 4px 2px color-mix(in srgb, var(--color-shadow) 10%, transparent);

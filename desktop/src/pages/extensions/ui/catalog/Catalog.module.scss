@@ -19,12 +19,6 @@
 	flex-direction: column;
 	gap: 0.7rem;
 
-	.sectionHead {
-		display: flex;
-		flex-direction: column;
-		gap: 0.375rem;
-	}
-
 	.sectionTitle {
 		display: flex;
 		align-items: center;
@@ -38,12 +32,6 @@
 			flex: none;
 			color: var(--text-secondary);
 		}
-	}
-
-	.sectionDescription {
-		margin: 0;
-		color: var(--text-secondary);
-		font-size: 0.875rem;
 	}
 
 	// One column on a narrow window, three on a wide one, four on a very wide

@@ -121,6 +121,15 @@ export type { NoticeProps, NoticeTone } from './notice/Notice'
 export { ListTile } from './list-tile/ListTile'
 export type { ListTileProps } from './list-tile/ListTile'
 
+export { ItemCard, ItemCardAction, ItemCardMark } from './item-card/ItemCard'
+export type {
+	ItemCardActionProps,
+	ItemCardActionTone,
+	ItemCardHighlight,
+	ItemCardMarkProps,
+	ItemCardProps
+} from './item-card/ItemCard'
+
 export { ManagedList } from './managed-list/ManagedList'
 export type { ManagedListProps } from './managed-list/ManagedList'
 

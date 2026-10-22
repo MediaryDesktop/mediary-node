@@ -1,11 +1,19 @@
-import clsx from 'clsx'
 import { useUnit } from 'effector-react'
-import type { ReactNode } from 'react'
 import { LuDownload, LuEllipsisVertical, LuRefreshCw, LuX } from 'react-icons/lu'
 
 import { useTranslation } from '@shared/i18n'
 import { formatBytes } from '@shared/lib'
-import { DropdownMenu, Icon, Logo, Notice, ProgressBar, RippleButton, Tooltip } from '@shared/ui'
+import {
+	DropdownMenu,
+	Icon,
+	ItemCard,
+	ItemCardAction,
+	ItemCardMark,
+	Logo,
+	Notice,
+	ProgressBar,
+	Tooltip
+} from '@shared/ui'
 import type { DropdownMenuItem } from '@shared/ui'
 
 import { cancelToolInstallMutation, installToolMutation, removeToolMutation } from '@entities/tool'
@@ -19,8 +27,8 @@ export interface ToolCardProps {
 	tool: Tool
 }
 
-// One program the node runs, laid out like a marketplace card in Seanime: icon,
-// name and id, what it does, version and author badges, the action in the corner.
+// One program the node runs, on the same card as a plugin: icon, name and the
+// programs it brings, what it does, version and author, the action in the corner.
 export function ToolCard({ tool }: ToolCardProps) {
 	const { t } = useTranslation()
 
@@ -43,30 +51,35 @@ export function ToolCard({ tool }: ToolCardProps) {
 	const action = () => {
 		if (progress) {
 			return (
-				<CornerButton label={t('tools.cancel')} disabled={cancelling} onClick={() => cancel(tool.id)}>
+				<ItemCardAction
+					label={t('tools.cancel')}
+					tone='primary'
+					disabled={cancelling}
+					onClick={() => cancel(tool.id)}
+				>
 					<LuX size={16} />
-				</CornerButton>
+				</ItemCardAction>
 			)
 		}
 
 		if (tool.update) {
 			return (
-				<CornerButton
+				<ItemCardAction
 					label={t('tools.update', { version: tool.available ?? '' })}
 					tone='success'
 					disabled={installing}
 					onClick={() => install(tool.id)}
 				>
 					<LuRefreshCw size={16} />
-				</CornerButton>
+				</ItemCardAction>
 			)
 		}
 
-		if (tool.state === 'installed') {
+		if (tool.state === 'installed' || tool.state === 'system') {
 			return (
-				<CornerButton label={t('tools.state.installed')} tone='done'>
+				<ItemCardMark label={t(`tools.state.${tool.state}`)}>
 					<Icon name='common/check' size={16} />
-				</CornerButton>
+				</ItemCardMark>
 			)
 		}
 
@@ -74,70 +87,78 @@ export function ToolCard({ tool }: ToolCardProps) {
 			return null
 		}
 
-		// Found on PATH already works: the mark says so, but it is not a button —
-		// there is nothing here to install or remove.
-		if (tool.state === 'system') {
-			return (
-				<Tooltip content={t('tools.state.system')} side='left'>
-					<span
-						className={clsx(styles.cornerButton, styles.muted)}
-						tabIndex={0}
-						aria-label={t('tools.state.system')}
-					>
-						<Icon name='common/check' size={16} />
-					</span>
-				</Tooltip>
-			)
-		}
-
 		const label = size ? t('tools.installSize', { size }) : t('tools.install')
 
 		return (
-			<CornerButton label={label} disabled={installing} onClick={() => install(tool.id)}>
+			<ItemCardAction
+				label={label}
+				tone='primary'
+				disabled={installing}
+				onClick={() => install(tool.id)}
+			>
 				<LuDownload size={16} />
-			</CornerButton>
+			</ItemCardAction>
 		)
 	}
 
 	const version = tool.update ? `${tool.version} → ${tool.available}` : (tool.version ?? tool.available)
 
 	return (
-		<article className={clsx(styles.card, tool.update && styles.update, tool.error && styles.failed)}>
-			<div className={styles.corner}>
-				{action()}
-				{menu.length > 0 && (
-					<DropdownMenu
-						align='end'
-						items={menu}
-						trigger={
-							<RippleButton className={styles.cornerButton} aria-label={t('tools.more')}>
-								<LuEllipsisVertical size={16} />
-							</RippleButton>
-						}
-					/>
-				)}
-			</div>
-
-			<div className={styles.head}>
-				<span className={styles.icon}>
-					<ToolIcon tool={tool.id} size={26} />
-				</span>
-
-				<div className={styles.titles}>
-					<p className={styles.name} title={tool.path}>
-						{tool.name}
-					</p>
-					<p className={styles.id}>
-						{tool.state !== 'missing' && (
-							<span className={styles.stateText}>{t(`tools.state.${tool.state}`)} - </span>
-						)}
-						<span className={styles.idText}>{(tool.programs ?? []).join(', ')}</span>
-					</p>
-				</div>
-			</div>
-
-			<p className={styles.description}>{t(`tools.purpose.${tool.id}`)}</p>
-
+		<ItemCard
+			icon={<ToolIcon tool={tool.id} size={26} />}
+			title={tool.name}
+			titleHint={tool.path}
+			subtitle={
+				<>
+					{tool.state !== 'missing' && (
+						<span className={styles.stateText}>{t(`tools.state.${tool.state}`)} - </span>
+					)}
+					{(tool.programs ?? []).join(', ')}
+				</>
+			}
+			description={t(`tools.purpose.${tool.id}`)}
+			highlight={tool.error ? 'warning' : tool.update ? 'success' : undefined}
+			meta={[
+				version,
+				tool.author,
+				size,
+				tool.update && <span className={styles.updateText}>{t('tools.updateAvailable')}</span>
+			]}
+			badge={
+				// Every program here is one Mediary picked and pins: the mark says so,
+				// as opposed to a plugin someone else wrote.
+				<Tooltip
+					side='top'
+					content={
+						<span className={styles.officialTip}>
+							<strong>{t('tools.official.title')}</strong>
+							{t('tools.official.description')}
+						</span>
+					}
+				>
+					<span className={styles.official} tabIndex={0} aria-label={t('tools.official.title')}>
+						<Logo markOnly iconSize={13} />
+						{t('tools.official.badge')}
+					</span>
+				</Tooltip>
+			}
+			actions={
+				<>
+					{action()}
+					{menu.length > 0 && (
+						<DropdownMenu
+							align='end'
+							items={menu}
+							trigger={
+								<ItemCardAction label={t('tools.more')} tooltip={false}>
+									<LuEllipsisVertical size={16} />
+								</ItemCardAction>
+							}
+						/>
+					)}
+				</>
+			}
+		>
 			{progress && (
 				<div className={styles.progress}>
 					<div className={styles.progressLabel}>
@@ -177,55 +198,6 @@ export function ToolCard({ tool }: ToolCardProps) {
 					)}
 				</p>
 			)}
-
-			<div className={styles.meta}>
-				<div className={styles.metaText}>
-					{version && <span>{version}</span>}
-					<span>{tool.author}</span>
-					{size && <span>{size}</span>}
-					{tool.update && <span className={styles.updateText}>{t('tools.updateAvailable')}</span>}
-				</div>
-
-				{/* Every program here is one Mediary picked and pins: the mark says so,
-				    as opposed to a plugin someone else wrote. */}
-				<Tooltip
-					side='top'
-					content={
-						<span className={styles.officialTip}>
-							<strong>{t('tools.official.title')}</strong>
-							{t('tools.official.description')}
-						</span>
-					}
-				>
-					<span className={styles.official} tabIndex={0} aria-label={t('tools.official.title')}>
-						<Logo markOnly iconSize={13} />
-						{t('tools.official.badge')}
-					</span>
-				</Tooltip>
-			</div>
-		</article>
-	)
-}
-
-interface CornerButtonProps {
-	label: string
-	tone?: 'primary' | 'success' | 'done'
-	disabled?: boolean
-	onClick?: () => void
-	children: ReactNode
-}
-
-function CornerButton({ label, tone = 'primary', disabled, onClick, children }: CornerButtonProps) {
-	return (
-		<Tooltip content={label} side='left'>
-			<RippleButton
-				className={clsx(styles.cornerButton, styles[tone])}
-				aria-label={label}
-				disabled={disabled}
-				onClick={onClick}
-			>
-				{children}
-			</RippleButton>
-		</Tooltip>
+		</ItemCard>
 	)
 }

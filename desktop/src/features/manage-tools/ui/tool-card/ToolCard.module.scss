@@ -1,232 +1,58 @@
-.card {
-	position: relative;
-	display: flex;
-	flex-direction: column;
-	gap: 0.75rem;
-	min-width: 0;
-	padding: 0.75rem;
-	overflow: hidden;
-	border: 1px solid var(--border);
-	border-radius: 0.75rem;
-	background: var(--surface);
-	transition: border-color 0.2s var(--ease);
-
-	&.update {
-		border-color: var(--success);
-	}
-
-	&.failed {
-		border-color: var(--warning);
-	}
-
-	.corner {
-		position: absolute;
-		top: 0.75rem;
-		right: 0.75rem;
-		z-index: 2;
-		display: flex;
-		gap: 0.25rem;
-	}
-
-	.cornerButton {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 2.3rem;
-		height: 2.3rem;
-		border: none;
-		border-radius: var(--radius-md);
-		background: var(--surface-muted);
-		color: var(--text);
-		cursor: pointer;
-		transition:
-			background 0.15s var(--ease),
-			color 0.15s var(--ease);
-
-		&:hover:not(:disabled) {
-			background: var(--surface-muted-hover);
-		}
-
-		&:disabled {
-			cursor: default;
-			opacity: var(--opacity-inactive);
-		}
-
-		&.primary {
-			background: var(--accent-muted);
-			color: var(--accent-text);
-
-			&:hover:not(:disabled) {
-				background: var(--accent-muted-hover);
-			}
-		}
-
-		&.success {
-			background: var(--success-muted);
-			color: var(--success-text);
-		}
-
-		&.done {
-			background: var(--success-muted);
-			color: var(--success-text);
-			cursor: default;
-			opacity: 0.6;
-		}
-
-		// A static mark, not a button: found on PATH already works, so there is
-		// nothing here to click, and no hover feedback pretends otherwise.
-		&.muted {
-			background: var(--success-muted);
-			color: var(--success-text);
-			cursor: default;
-
-			&:hover {
-				background: var(--success-muted);
-			}
-		}
-	}
-
-	.head {
-		display: flex;
-		gap: 0.75rem;
-		padding-right: 4.5rem;
-	}
-
-	// The tool's own mark sits on a neutral tile: it brings its own brand color,
-	// so the tile does not tint it the way .cornerButton tints a UI glyph.
-	.icon {
-		display: inline-flex;
-		flex: none;
-		align-items: center;
-		justify-content: center;
-		width: 3rem;
-		height: 3rem;
-		border-radius: 0.375rem;
-		background: var(--bg);
-	}
-
-	.titles {
-		min-width: 0;
-	}
-
-	.name,
-	.id {
-		margin: 0;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-
-	.name {
-		color: var(--text);
-		font-size: 1rem;
-		font-weight: 600;
-	}
-
-	.id {
-		margin-top: 0.125rem;
-		font-size: 0.75rem;
-		letter-spacing: 0.025em;
-
-		.stateText {
-			color: var(--text-secondary);
-		}
-
-		.idText {
-			color: var(--text-muted);
-		}
-	}
-
-	.description {
-		display: -webkit-box;
-		margin: 0;
-		overflow: hidden;
-		color: var(--text-secondary);
-		font-size: 0.875rem;
-		line-height: 1.45;
-		line-clamp: 2;
-		-webkit-box-orient: vertical;
-		-webkit-line-clamp: 2;
-	}
-
-	.progress {
-		display: flex;
-		flex-direction: column;
-		gap: 0.375rem;
-	}
-
-	.progressLabel {
-		display: flex;
-		justify-content: space-between;
-		gap: 0.5rem;
-		color: var(--text-secondary);
-		font-size: 0.75rem;
-	}
-
-	.hint {
-		margin: 0;
-		color: var(--text-secondary);
-		font-size: 0.8125rem;
-	}
-
-	.command {
-		padding: 0.0625rem 0.375rem;
-		border-radius: var(--radius-sm);
-		background: var(--surface-muted);
-		font-family: var(--font-mono);
-		font-size: 0.75rem;
-	}
-
-	.meta {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 0.5rem;
-		margin-top: auto;
-	}
-
-	// Plain text, not badges: this is passive metadata, and a row of outlined
-	// pills fought with the badge that still means something (the mark in the
-	// corner).
-	.metaText {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		min-width: 0;
-		color: var(--text-muted);
-		font-size: 0.8125rem;
-
-		> :not(:last-child)::after {
-			content: "·";
-			margin: 0 0.375rem;
-			color: var(--text-muted);
-		}
-	}
-
-	.updateText {
-		color: var(--success-text);
-		font-weight: 600;
-	}
-
-	.official {
-		display: inline-flex;
-		flex: none;
-		align-items: center;
-		gap: 0.25rem;
-		padding: 0.1875rem 0.5rem;
-		border-radius: 999px;
-		background: var(--accent-muted);
-		color: var(--accent-text);
-		font-size: 0.6875rem;
-		font-weight: 600;
-		line-height: 1.3;
-		white-space: nowrap;
-		cursor: help;
-	}
+.stateText {
+	color: var(--text-secondary);
 }
 
-// Rendered through Tooltip's portal, straight under <body> — never a descendant
-// of .card — so it has to be its own top-level rule, not nested under .card.
+.progress {
+	display: flex;
+	flex-direction: column;
+	gap: 0.375rem;
+}
+
+.progressLabel {
+	display: flex;
+	justify-content: space-between;
+	gap: 0.5rem;
+	color: var(--text-secondary);
+	font-size: 0.75rem;
+}
+
+.hint {
+	margin: 0;
+	color: var(--text-secondary);
+	font-size: 0.8125rem;
+}
+
+.command {
+	padding: 0.0625rem 0.375rem;
+	border-radius: var(--radius-sm);
+	background: var(--surface-muted);
+	font-family: var(--font-mono);
+	font-size: 0.75rem;
+}
+
+.updateText {
+	color: var(--success-text);
+	font-weight: 600;
+}
+
+.official {
+	display: inline-flex;
+	flex: none;
+	align-items: center;
+	gap: 0.25rem;
+	padding: 0.1875rem 0.5rem;
+	border-radius: 999px;
+	background: var(--accent-muted);
+	color: var(--accent-text);
+	font-size: 0.6875rem;
+	font-weight: 600;
+	line-height: 1.3;
+	white-space: nowrap;
+	cursor: help;
+}
+
+// Rendered through Tooltip's portal, straight under <body>, so it is a rule of
+// its own rather than nested under the card.
 .officialTip {
 	display: flex;
 	flex-direction: column;
