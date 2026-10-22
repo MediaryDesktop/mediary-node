@@ -1,22 +1,77 @@
 .root {
 	position: relative;
 
-	.back {
+	.topBar {
 		position: absolute;
 		top: 0;
+		right: 0;
 		left: 0;
 		z-index: 5;
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		// The banner runs under the whole row, so only the controls take clicks.
+		pointer-events: none;
+
+		> * {
+			pointer-events: auto;
+		}
 	}
 
 	.offline {
-		position: relative;
-		z-index: 4;
-		margin: 3rem 0 0;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		min-width: 0;
+		padding: 0.25rem 0.25rem 0.25rem 0.75rem;
+		border: 1px solid var(--glass-border);
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--bg) 72%, transparent);
+		box-shadow: var(--shadow-sm);
 		color: var(--text-secondary);
 		font-size: 0.8125rem;
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		animation: chip-in 0.4s cubic-bezier(0.2, 0, 0, 1) 0.1s backwards;
+
+		.offlineIcon {
+			flex: none;
+			color: var(--warning-text);
+		}
+
+		.offlineText {
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		// Shrunk so the pill ends up the same height as the back button beside it.
+		.offlineRetry {
+			flex: none;
+			height: var(--control-height-xs);
+			min-height: var(--control-height-xs);
+			border-radius: 999px;
+
+			&:not(:disabled):hover {
+				background: var(--surface-hover);
+			}
+		}
 	}
 
 	.failure {
 		min-height: 60vh;
+	}
+}
+
+@keyframes chip-in {
+	from {
+		opacity: 0;
+		transform: translateY(-6px);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.root .offline {
+		animation: none;
 	}
 }

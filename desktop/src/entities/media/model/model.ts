@@ -69,6 +69,7 @@ export const mediaDetailsModel = atom(() => {
 	return {
 		$data: mediaDetailsQuery.$data,
 		$failedMediaRef,
+		$pending: mediaDetailsQuery.$pending,
 		detailsRequested: mediaDetailsQuery.start
 	}
 })

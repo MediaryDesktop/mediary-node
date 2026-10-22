@@ -24,9 +24,10 @@ export function MediaPage({ mediaRef }: MediaPageProps) {
 	const { t } = useTranslation()
 	const router = useRouter()
 
-	const { data, failedMediaRef, requestDetails, connected, nodeReady } = useUnit({
+	const { data, failedMediaRef, pending, requestDetails, connected, nodeReady } = useUnit({
 		data: mediaDetailsModel.$data,
 		failedMediaRef: mediaDetailsModel.$failedMediaRef,
+		pending: mediaDetailsModel.$pending,
 		requestDetails: mediaDetailsModel.detailsRequested,
 		connected: aniListAccountModel.$connected,
 		nodeReady: $nodeReady
@@ -59,13 +60,33 @@ export function MediaPage({ mediaRef }: MediaPageProps) {
 
 	return (
 		<PageTransition className={styles.root}>
-			<Button
-				variant='ghost'
-				size='small'
-				className={styles.back}
-				startIcon={<Icon name='common/arrow-left' size={18} />}
-				onClick={() => router.history.back()}
-			/>
+			{/* Floating over the hero rather than above it: anything in flow here pushes
+			    the banner down and uncovers the page behind its negative top inset. */}
+			<div className={styles.topBar}>
+				<Button
+					variant='ghost'
+					size='small'
+					startIcon={<Icon name='common/arrow-left' size={18} />}
+					onClick={() => router.history.back()}
+				/>
+
+				{phase === 'offline' && (
+					<div className={styles.offline} role='status'>
+						<Icon name='common/cloud' size={15} className={styles.offlineIcon} />
+						<span className={styles.offlineText}>{t('media.offline')}</span>
+						<Button
+							variant='ghost'
+							size='small'
+							className={styles.offlineRetry}
+							loading={pending}
+							startIcon={<IoIosRefresh size={14} />}
+							onClick={() => requestDetails(mediaRef)}
+						>
+							{t('media.retry')}
+						</Button>
+					</div>
+				)}
+			</div>
 
 			<PhaseTransition phase={`${mediaRef}:${phase}`}>
 				{phase === 'details' && details && (
@@ -80,10 +101,7 @@ export function MediaPage({ mediaRef }: MediaPageProps) {
 				{phase === 'loading' && <MediaHeroSkeleton />}
 
 				{phase === 'offline' && (
-					<>
-						<p className={styles.offline}>{t('media.offline')}</p>
-						<MediaView mediaRef={mediaRef} media={null} sources={[]} entry={entry} />
-					</>
+					<MediaView mediaRef={mediaRef} media={null} sources={[]} entry={entry} />
 				)}
 
 				{phase === 'failed' && (
