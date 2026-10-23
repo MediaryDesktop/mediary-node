@@ -26,6 +26,27 @@ type AnilistOutbox struct {
 	LastError     sql.NullString `json:"last_error"`
 }
 
+type BookDownload struct {
+	ID         int64  `json:"id"`
+	EditionRef string `json:"edition_ref"`
+	Format     string `json:"format"`
+	Ext        string `json:"ext"`
+	Location   string `json:"location"`
+	MediaRef   string `json:"media_ref"`
+	Title      string `json:"title"`
+	Authors    string `json:"authors"`
+	SourceName string `json:"source_name"`
+	RootID     int64  `json:"root_id"`
+	State      string `json:"state"`
+	BytesDone  int64  `json:"bytes_done"`
+	BytesTotal int64  `json:"bytes_total"`
+	RelPath    string `json:"rel_path"`
+	FileID     int64  `json:"file_id"`
+	Error      string `json:"error"`
+	CreatedAt  string `json:"created_at"`
+	UpdatedAt  string `json:"updated_at"`
+}
+
 type BookPosition struct {
 	FileID    int64   `json:"file_id"`
 	Locator   string  `json:"locator"`

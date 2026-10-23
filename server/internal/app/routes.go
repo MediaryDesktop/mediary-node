@@ -11,6 +11,7 @@ import (
 
 	"github.com/mediaryorg/mediary-node/server/internal/config"
 	"github.com/mediaryorg/mediary-node/server/internal/httpapi"
+	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/extension"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/library"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/manga"
@@ -201,12 +202,24 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 	})
 	mangaModule.Register(api)
 
+	// Free copies of books are saved into a library folder of books and join the
+	// library through it, as the book their search started from.
+	bookSourceModule := booksource.New(booksource.Deps{
+		DB:      deps.DB,
+		Logger:  moduleLogger(deps.Logger, "booksource"),
+		Events:  deps.Events,
+		Library: bookFolders{library: libraryModule},
+		Works:   bookWorks{media: mediaModule},
+	})
+	bookSourceModule.Register(api)
+
 	queueCtx, stopQueue := context.WithCancel(ctx)
 
 	// The OpenAPI generator registers the routes without a database; there is no
 	// queue to work through then.
 	if deps.DB != nil {
 		mangaModule.Start(queueCtx)
+		bookSourceModule.Start(queueCtx)
 		torrentModule.Start(queueCtx)
 	}
 

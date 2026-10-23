@@ -17,6 +17,7 @@ const (
 	TopicTracker       Topic = "tracker"
 	TopicAniListAuth   Topic = "anilist.session"
 	TopicMangaDownload Topic = "manga.download"
+	TopicBookDownload  Topic = "books.download"
 	TopicTools         Topic = "tools"
 	TopicExtension     Topic = "extension"
 )

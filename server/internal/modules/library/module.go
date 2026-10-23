@@ -83,6 +83,24 @@ func (m *Module) RootPath(ctx context.Context, rootID int64) (path string, found
 	return "", false, nil
 }
 
+// RootContent is what a library folder holds — "books", "manga", "anime"… — for a
+// module that writes files of one kind into it. It returns false when there is
+// no folder with the id.
+func (m *Module) RootContent(ctx context.Context, rootID int64) (content string, found bool, err error) {
+	roots, err := m.svc.Roots(ctx)
+	if err != nil {
+		return "", false, err
+	}
+
+	for _, root := range roots {
+		if root.ID == rootID {
+			return root.Content, true, nil
+		}
+	}
+
+	return "", false, nil
+}
+
 // ImportFile adds a file the node wrote into a library folder and matches it to
 // the title it belongs to, without a scan of the whole folder.
 func (m *Module) ImportFile(ctx context.Context, rootID int64, relPath, mediaRef string, episode *int) (int64, error) {

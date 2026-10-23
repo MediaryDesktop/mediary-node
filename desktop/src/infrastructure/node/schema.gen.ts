@@ -29,6 +29,142 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/v1/books/downloads': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Book downloads
+		 * @description The queue and recent downloads, newest first. Changes arrive on the books.download topic.
+		 */
+		get: operations['listBookDownloads']
+		put?: never
+		/**
+		 * Save a free copy of a book
+		 * @description Queues the copy into the folder for books, where it joins the library as the book given. A copy already queued or saved is left as it is; a failed one is queued again.
+		 */
+		post: operations['enqueueBookDownload']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/books/downloads/settings': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/** Where copies of books are saved */
+		get: operations['getBookDownloadSettings']
+		/**
+		 * Choose where copies of books are saved
+		 * @description One of the library folders of books, so a saved copy is part of the library at once.
+		 */
+		put: operations['putBookDownloadSettings']
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/books/downloads/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		post?: never
+		/**
+		 * Remove a finished book download from the list
+		 * @description The saved file stays where it is.
+		 */
+		delete: operations['forgetBookDownload']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/books/downloads/{id}/cancel': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/** Stop a book download */
+		post: operations['cancelBookDownload']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/books/downloads/{id}/retry': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/** Try a failed book download again */
+		post: operations['retryBookDownload']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/books/editions': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Find free copies of a book
+		 * @description Searches every source at once, by the book's title and authors or by the text given.
+		 */
+		get: operations['searchBookEditions']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/books/sources': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/** Sources of free copies of books */
+		get: operations['listBookSources']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/v1/extension/status': {
 		parameters: {
 			query?: never
@@ -2094,6 +2230,91 @@ export interface components {
 			mime_codec?: string
 			title?: string
 		}
+		BookDownload: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/BookDownload.json
+			 */
+			readonly $schema?: string
+			authors?: string
+			/** Format: int64 */
+			bytes_done: number
+			/**
+			 * Format: int64
+			 * @description 0 while the size is unknown.
+			 */
+			bytes_total: number
+			edition_ref: string
+			error?: string
+			/**
+			 * Format: int64
+			 * @description The library file, once the book is saved; open it in the reader.
+			 */
+			file_id?: number
+			format: string
+			/** Format: int64 */
+			id: number
+			media_ref: string
+			/** @description Where the book is saved, inside the folder for books. */
+			rel_path?: string
+			source_name: string
+			/** @enum {string} */
+			state: 'queued' | 'running' | 'done' | 'failed' | 'cancelled'
+			title: string
+		}
+		BookDownloadSettings: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/BookDownloadSettings.json
+			 */
+			readonly $schema?: string
+			/**
+			 * Format: int64
+			 * @description Library folder of books copies are saved to; 0 while none is chosen.
+			 */
+			root_id: number
+		}
+		BookDownloadsOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/BookDownloadsOutputBody.json
+			 */
+			readonly $schema?: string
+			downloads: components['schemas']['BookDownload'][] | null
+		}
+		BookEdition: {
+			authors: string[] | null
+			/** @description Only the formats the library keeps. */
+			formats: components['schemas']['BookFormat'][] | null
+			language?: string
+			/**
+			 * @description Pass as edition_ref to download it, within 30 minutes of the search.
+			 * @example gutenberg:84
+			 */
+			ref: string
+			/** @description The source's name. */
+			source: string
+			title: string
+			/** Format: int64 */
+			year?: number
+		}
+		BookFormat: {
+			/** @example .epub */
+			ext: string
+			/**
+			 * Format: int64
+			 * @description Bytes, when the source says.
+			 */
+			size?: number
+			/**
+			 * @description Pass as format to download the copy in it.
+			 * @example application/epub+zip
+			 */
+			type: string
+		}
 		BookInfo: {
 			/** @description The type getReaderBook serves the bytes as, which picks the viewer. */
 			content_type: string
@@ -2147,6 +2368,32 @@ export interface components {
 			book: components['schemas']['BookInfo']
 			/** @description Where the reader left the book; null for a book never opened. */
 			position: components['schemas']['BookPosition']
+		}
+		BookSource: {
+			/**
+			 * @description The prefix of the source's edition references.
+			 * @example gutenberg
+			 */
+			id: string
+			/** @example Project Gutenberg */
+			name: string
+		}
+		BookSourceOutcome: {
+			error?: string
+			id: string
+			name: string
+			/** Format: int64 */
+			results: number
+		}
+		BookSourcesOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/BookSourcesOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The sources the node searches; empty while none is set up. */
+			sources: components['schemas']['BookSource'][] | null
 		}
 		CatalogPlugin: {
 			author: string
@@ -2418,6 +2665,20 @@ export interface components {
 			media: components['schemas']['MediaDetails']
 			/** @description Attribution for every field that came from an external source. */
 			sources: components['schemas']['Source'][] | null
+		}
+		EnqueueBookDownloadInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/EnqueueBookDownloadInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description A copy from a search in the last 30 minutes. */
+			edition_ref: string
+			/** @description One of the copy's formats, by type. */
+			format: string
+			/** @description The book the file belongs to in the library. */
+			media_ref: string
 		}
 		EnqueueMangaDownloadsInputBody: {
 			/**
@@ -3470,6 +3731,16 @@ export interface components {
 			/** @description True once this file counts as watched and the tracker was told. */
 			watched: boolean
 		}
+		PutBookDownloadSettingsInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/PutBookDownloadSettingsInputBody.json
+			 */
+			readonly $schema?: string
+			/** Format: int64 */
+			root_id: number
+		}
 		PutMangaDexSettingsInputBody: {
 			/**
 			 * Format: uri
@@ -4028,6 +4299,17 @@ export interface components {
 			 * @description When the current or last scan started.
 			 */
 			started_at?: string
+		}
+		SearchBookEditionsOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/SearchBookEditionsOutputBody.json
+			 */
+			readonly $schema?: string
+			editions: components['schemas']['BookEdition'][] | null
+			/** @description How each source answered; a failed one says why. */
+			sources: components['schemas']['BookSourceOutcome'][] | null
 		}
 		SearchOutputBody: {
 			/**
@@ -5086,10 +5368,18 @@ export type SchemaAddRootInputBody = components['schemas']['AddRootInputBody']
 export type SchemaAddTorrentDownloadInputBody = components['schemas']['AddTorrentDownloadInputBody']
 export type SchemaAiringEpisode = components['schemas']['AiringEpisode']
 export type SchemaAudio = components['schemas']['Audio']
+export type SchemaBookDownload = components['schemas']['BookDownload']
+export type SchemaBookDownloadSettings = components['schemas']['BookDownloadSettings']
+export type SchemaBookDownloadsOutputBody = components['schemas']['BookDownloadsOutputBody']
+export type SchemaBookEdition = components['schemas']['BookEdition']
+export type SchemaBookFormat = components['schemas']['BookFormat']
 export type SchemaBookInfo = components['schemas']['BookInfo']
 export type SchemaBookPosition = components['schemas']['BookPosition']
 export type SchemaBookPositionInputBody = components['schemas']['BookPositionInputBody']
 export type SchemaBookPositionOutputBody = components['schemas']['BookPositionOutputBody']
+export type SchemaBookSource = components['schemas']['BookSource']
+export type SchemaBookSourceOutcome = components['schemas']['BookSourceOutcome']
+export type SchemaBookSourcesOutputBody = components['schemas']['BookSourcesOutputBody']
 export type SchemaCatalogPlugin = components['schemas']['CatalogPlugin']
 export type SchemaChapter = components['schemas']['Chapter']
 export type SchemaChapterBody = components['schemas']['ChapterBody']
@@ -5107,6 +5397,7 @@ export type SchemaCreateListInputBody = components['schemas']['CreateListInputBo
 export type SchemaCustomList = components['schemas']['CustomList']
 export type SchemaDate = components['schemas']['Date']
 export type SchemaDetailsOutputBody = components['schemas']['DetailsOutputBody']
+export type SchemaEnqueueBookDownloadInputBody = components['schemas']['EnqueueBookDownloadInputBody']
 export type SchemaEnqueueMangaDownloadsInputBody = components['schemas']['EnqueueMangaDownloadsInputBody']
 export type SchemaEntriesOutputBody = components['schemas']['EntriesOutputBody']
 export type SchemaEntry = components['schemas']['Entry']
@@ -5171,6 +5462,7 @@ export type SchemaPlaybackStatus = components['schemas']['PlaybackStatus']
 export type SchemaPreviewExtensionInputBody = components['schemas']['PreviewExtensionInputBody']
 export type SchemaProgressInputBody = components['schemas']['ProgressInputBody']
 export type SchemaProgressOutputBody = components['schemas']['ProgressOutputBody']
+export type SchemaPutBookDownloadSettingsInputBody = components['schemas']['PutBookDownloadSettingsInputBody']
 export type SchemaPutMangaDexSettingsInputBody = components['schemas']['PutMangaDexSettingsInputBody']
 export type SchemaPutMangaDownloadSettingsInputBody =
 	components['schemas']['PutMangaDownloadSettingsInputBody']
@@ -5197,6 +5489,7 @@ export type SchemaScanRunOutputBody = components['schemas']['ScanRunOutputBody']
 export type SchemaScanRunRootDetail = components['schemas']['ScanRunRootDetail']
 export type SchemaScanRunSummary = components['schemas']['ScanRunSummary']
 export type SchemaScanStatus = components['schemas']['ScanStatus']
+export type SchemaSearchBookEditionsOutputBody = components['schemas']['SearchBookEditionsOutputBody']
 export type SchemaSearchOutputBody = components['schemas']['SearchOutputBody']
 export type SchemaSearchPage = components['schemas']['SearchPage']
 export type SchemaSelectTorrentFilesInputBody = components['schemas']['SelectTorrentFilesInputBody']
@@ -5337,6 +5630,280 @@ export interface operations {
 					[name: string]: unknown
 				}
 				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listBookDownloads: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['BookDownloadsOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	enqueueBookDownload: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['EnqueueBookDownloadInputBody']
+			}
+		}
+		responses: {
+			/** @description Accepted */
+			202: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['BookDownload']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getBookDownloadSettings: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['BookDownloadSettings']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	putBookDownloadSettings: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['PutBookDownloadSettingsInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['BookDownloadSettings']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	forgetBookDownload: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	cancelBookDownload: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	retryBookDownload: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	searchBookEditions: {
+		parameters: {
+			query?: {
+				/** @description The book to find copies of, by its title and authors. */
+				media_ref?: string
+				/** @description Text to search for, in place of or beside media_ref. */
+				q?: string
+			}
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['SearchBookEditionsOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listBookSources: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['BookSourcesOutputBody']
+				}
 			}
 			/** @description Error */
 			default: {

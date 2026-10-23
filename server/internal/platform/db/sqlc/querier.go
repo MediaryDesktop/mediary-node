@@ -30,6 +30,7 @@ type Querier interface {
 	// Videos matched under the old content type point at the wrong source. The
 	// user's own choices stay: a manual match is never undone by a setting.
 	DeleteAutoVideoMatchesForRoot(ctx context.Context, rootID int64) error
+	DeleteBookDownload(ctx context.Context, id int64) (int64, error)
 	DeleteCustomList(ctx context.Context, id int64) (int64, error)
 	DeleteCustomListItemsForRef(ctx context.Context, mediaRef string) error
 	DeleteExtension(ctx context.Context, id string) (int64, error)
@@ -51,12 +52,16 @@ type Querier interface {
 	DeleteTorrentRule(ctx context.Context, mediaRef string) (int64, error)
 	DeleteTorznabSource(ctx context.Context, id int64) (int64, error)
 	DeleteTrackerEntry(ctx context.Context, mediaRef string) (int64, error)
+	// A copy already queued, running or saved stays as it is; a failed or cancelled
+	// one goes back in the queue.
+	EnqueueBookDownload(ctx context.Context, arg EnqueueBookDownloadParams) (BookDownload, error)
 	// A chapter already queued, running or done stays as it is; a failed or cancelled
 	// one goes back in the queue.
 	EnqueueMangaDownload(ctx context.Context, arg EnqueueMangaDownloadParams) (MangaDownload, error)
 	FinishTorrentDownload(ctx context.Context, arg FinishTorrentDownloadParams) error
 	GetAniListMirror(ctx context.Context, kind string) (AnilistMirror, error)
 	GetAniListOutboxEntry(ctx context.Context, arg GetAniListOutboxEntryParams) (AnilistOutbox, error)
+	GetBookDownload(ctx context.Context, id int64) (BookDownload, error)
 	GetBookPosition(ctx context.Context, fileID int64) (BookPosition, error)
 	GetCustomList(ctx context.Context, id int64) (CustomList, error)
 	GetExtension(ctx context.Context, id string) (Extension, error)
@@ -92,6 +97,7 @@ type Querier interface {
 	// before it can draw anything.
 	ListAllLibraryFiles(ctx context.Context) ([]ListAllLibraryFilesRow, error)
 	ListAniListOutbox(ctx context.Context, accountID int64) ([]AnilistOutbox, error)
+	ListBookDownloads(ctx context.Context, limit int64) ([]BookDownload, error)
 	ListCustomListItems(ctx context.Context, listID int64) ([]CustomListItem, error)
 	ListCustomListMembership(ctx context.Context, mediaType string) ([]ListCustomListMembershipRow, error)
 	ListCustomLists(ctx context.Context) ([]ListCustomListsRow, error)
@@ -127,6 +133,7 @@ type Querier interface {
 	MarkLibraryFileMissing(ctx context.Context, arg MarkLibraryFileMissingParams) error
 	MoveListIcon(ctx context.Context, arg MoveListIconParams) error
 	NextCustomListPosition(ctx context.Context, mediaType string) (int64, error)
+	NextQueuedBookDownload(ctx context.Context) (BookDownload, error)
 	NextQueuedMangaDownload(ctx context.Context) (MangaDownload, error)
 	// A local database has no reason to grow scan history forever; the newest runs
 	// are the only ones anyone comes back to read.
@@ -134,13 +141,19 @@ type Querier interface {
 	RecordAniListOutboxFailure(ctx context.Context, arg RecordAniListOutboxFailureParams) error
 	RenameCustomList(ctx context.Context, arg RenameCustomListParams) (int64, error)
 	RenameExtensionRepository(ctx context.Context, arg RenameExtensionRepositoryParams) error
+	RequeueRunningBookDownloads(ctx context.Context, updatedAt string) ([]BookDownload, error)
 	RequeueRunningMangaDownloads(ctx context.Context, updatedAt string) ([]MangaDownload, error)
 	// The id is kept: items refer to it.
 	RestoreCustomList(ctx context.Context, arg RestoreCustomListParams) error
 	RestoreCustomListItem(ctx context.Context, arg RestoreCustomListItemParams) error
 	RestoreListIcon(ctx context.Context, arg RestoreListIconParams) error
 	RestoreTrackerEntry(ctx context.Context, arg RestoreTrackerEntryParams) error
+	RetryBookDownload(ctx context.Context, arg RetryBookDownloadParams) (int64, error)
 	RetryMangaDownload(ctx context.Context, arg RetryMangaDownloadParams) (int64, error)
+	SetBookDownloadFile(ctx context.Context, arg SetBookDownloadFileParams) error
+	SetBookDownloadProgress(ctx context.Context, arg SetBookDownloadProgressParams) error
+	SetBookDownloadState(ctx context.Context, arg SetBookDownloadStateParams) error
+	SetBookDownloadTarget(ctx context.Context, arg SetBookDownloadTargetParams) error
 	SetLibraryFileIgnored(ctx context.Context, arg SetLibraryFileIgnoredParams) (int64, error)
 	SetLibraryRootContent(ctx context.Context, arg SetLibraryRootContentParams) (int64, error)
 	SetListIcon(ctx context.Context, arg SetListIconParams) error

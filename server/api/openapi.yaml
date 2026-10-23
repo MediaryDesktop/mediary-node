@@ -188,6 +188,160 @@ components:
         - is_forced
         - channels
       type: object
+    BookDownload:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/BookDownload.json
+          format: uri
+          readOnly: true
+          type: string
+        authors:
+          type: string
+        bytes_done:
+          format: int64
+          type: integer
+        bytes_total:
+          description: 0 while the size is unknown.
+          format: int64
+          type: integer
+        edition_ref:
+          type: string
+        error:
+          type: string
+        file_id:
+          description: The library file, once the book is saved; open it in the reader.
+          format: int64
+          type: integer
+        format:
+          type: string
+        id:
+          format: int64
+          type: integer
+        media_ref:
+          type: string
+        rel_path:
+          description: Where the book is saved, inside the folder for books.
+          type: string
+        source_name:
+          type: string
+        state:
+          enum:
+            - queued
+            - running
+            - done
+            - failed
+            - cancelled
+          type: string
+        title:
+          type: string
+      required:
+        - id
+        - edition_ref
+        - format
+        - media_ref
+        - title
+        - source_name
+        - state
+        - bytes_done
+        - bytes_total
+      type: object
+    BookDownloadSettings:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/BookDownloadSettings.json
+          format: uri
+          readOnly: true
+          type: string
+        root_id:
+          description: Library folder of books copies are saved to; 0 while none is chosen.
+          format: int64
+          type: integer
+      required:
+        - root_id
+      type: object
+    BookDownloadsOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/BookDownloadsOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        downloads:
+          items:
+            $ref: "#/components/schemas/BookDownload"
+          type:
+            - array
+            - "null"
+      required:
+        - downloads
+      type: object
+    BookEdition:
+      additionalProperties: false
+      properties:
+        authors:
+          items:
+            type: string
+          type:
+            - array
+            - "null"
+        formats:
+          description: Only the formats the library keeps.
+          items:
+            $ref: "#/components/schemas/BookFormat"
+          type:
+            - array
+            - "null"
+        language:
+          type: string
+        ref:
+          description: Pass as edition_ref to download it, within 30 minutes of the search.
+          examples:
+            - gutenberg:84
+          type: string
+        source:
+          description: The source's name.
+          type: string
+        title:
+          type: string
+        year:
+          format: int64
+          type: integer
+      required:
+        - ref
+        - title
+        - authors
+        - source
+        - formats
+      type: object
+    BookFormat:
+      additionalProperties: false
+      properties:
+        ext:
+          examples:
+            - .epub
+          type: string
+        size:
+          description: Bytes, when the source says.
+          format: int64
+          type: integer
+        type:
+          description: Pass as format to download the copy in it.
+          examples:
+            - application/epub+zip
+          type: string
+      required:
+        - type
+        - ext
+      type: object
     BookInfo:
       additionalProperties: false
       properties:
@@ -274,6 +428,59 @@ components:
       required:
         - book
         - position
+      type: object
+    BookSource:
+      additionalProperties: false
+      properties:
+        id:
+          description: The prefix of the source's edition references.
+          examples:
+            - gutenberg
+          type: string
+        name:
+          examples:
+            - Project Gutenberg
+          type: string
+      required:
+        - id
+        - name
+      type: object
+    BookSourceOutcome:
+      additionalProperties: false
+      properties:
+        error:
+          type: string
+        id:
+          type: string
+        name:
+          type: string
+        results:
+          format: int64
+          type: integer
+      required:
+        - id
+        - name
+        - results
+      type: object
+    BookSourcesOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/BookSourcesOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        sources:
+          description: The sources the node searches; empty while none is set up.
+          items:
+            $ref: "#/components/schemas/BookSource"
+          type:
+            - array
+            - "null"
+      required:
+        - sources
       type: object
     CatalogPlugin:
       additionalProperties: false
@@ -752,6 +959,36 @@ components:
       required:
         - media
         - sources
+      type: object
+    EnqueueBookDownloadInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/EnqueueBookDownloadInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        edition_ref:
+          description: A copy from a search in the last 30 minutes.
+          maxLength: 2000
+          minLength: 1
+          type: string
+        format:
+          description: One of the copy's formats, by type.
+          maxLength: 200
+          minLength: 1
+          type: string
+        media_ref:
+          description: The book the file belongs to in the library.
+          maxLength: 200
+          minLength: 1
+          type: string
+      required:
+        - edition_ref
+        - format
+        - media_ref
       type: object
     EnqueueMangaDownloadsInputBody:
       additionalProperties: false
@@ -2882,6 +3119,23 @@ components:
       required:
         - watched
       type: object
+    PutBookDownloadSettingsInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/PutBookDownloadSettingsInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        root_id:
+          format: int64
+          minimum: 1
+          type: integer
+      required:
+        - root_id
+      type: object
     PutMangaDexSettingsInputBody:
       additionalProperties: false
       properties:
@@ -3688,6 +3942,33 @@ components:
         - probed
         - considered
         - matched
+      type: object
+    SearchBookEditionsOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/SearchBookEditionsOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        editions:
+          items:
+            $ref: "#/components/schemas/BookEdition"
+          type:
+            - array
+            - "null"
+        sources:
+          description: How each source answered; a failed one says why.
+          items:
+            $ref: "#/components/schemas/BookSourceOutcome"
+          type:
+            - array
+            - "null"
+      required:
+        - editions
+        - sources
       type: object
     SearchOutputBody:
       additionalProperties: false
@@ -5602,6 +5883,218 @@ paths:
       summary: Connect an AniList account
       tags:
         - tracker
+  /v1/books/downloads:
+    get:
+      description: The queue and recent downloads, newest first. Changes arrive on the books.download topic.
+      operationId: listBookDownloads
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookDownloadsOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Book downloads
+      tags:
+        - books
+    post:
+      description: Queues the copy into the folder for books, where it joins the library as the book given. A copy already queued or saved is left as it is; a failed one is queued again.
+      operationId: enqueueBookDownload
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EnqueueBookDownloadInputBody"
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookDownload"
+          description: Accepted
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Save a free copy of a book
+      tags:
+        - books
+  /v1/books/downloads/settings:
+    get:
+      operationId: getBookDownloadSettings
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookDownloadSettings"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Where copies of books are saved
+      tags:
+        - books
+    put:
+      description: One of the library folders of books, so a saved copy is part of the library at once.
+      operationId: putBookDownloadSettings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PutBookDownloadSettingsInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookDownloadSettings"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Choose where copies of books are saved
+      tags:
+        - books
+  /v1/books/downloads/{id}:
+    delete:
+      description: The saved file stays where it is.
+      operationId: forgetBookDownload
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            format: int64
+            type: integer
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Remove a finished book download from the list
+      tags:
+        - books
+  /v1/books/downloads/{id}/cancel:
+    post:
+      operationId: cancelBookDownload
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            format: int64
+            type: integer
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Stop a book download
+      tags:
+        - books
+  /v1/books/downloads/{id}/retry:
+    post:
+      operationId: retryBookDownload
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            format: int64
+            type: integer
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Try a failed book download again
+      tags:
+        - books
+  /v1/books/editions:
+    get:
+      description: Searches every source at once, by the book's title and authors or by the text given.
+      operationId: searchBookEditions
+      parameters:
+        - description: The book to find copies of, by its title and authors.
+          explode: false
+          in: query
+          name: media_ref
+          schema:
+            description: The book to find copies of, by its title and authors.
+            maxLength: 200
+            type: string
+        - description: Text to search for, in place of or beside media_ref.
+          explode: false
+          in: query
+          name: q
+          schema:
+            description: Text to search for, in place of or beside media_ref.
+            maxLength: 500
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchBookEditionsOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Find free copies of a book
+      tags:
+        - books
+  /v1/books/sources:
+    get:
+      operationId: listBookSources
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookSourcesOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Sources of free copies of books
+      tags:
+        - books
   /v1/extension/status:
     get:
       operationId: getExtensionStatus
