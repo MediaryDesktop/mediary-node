@@ -1026,6 +1026,7 @@ export const en = {
 			sourceFailed: '{{name}}: {{error}}',
 			queued: 'The book is queued',
 			failedToQueue: 'Could not queue the book',
+			chooseFolder: 'Choose a folder',
 			saving: 'Saving {{percent}}%',
 			retry: 'Retry {{format}}'
 		},

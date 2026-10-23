@@ -1025,6 +1025,7 @@ export const uk: Translation = {
 			sourceFailed: '{{name}}: {{error}}',
 			queued: 'Книгу додано в чергу',
 			failedToQueue: 'Не вдалося додати книгу в чергу',
+			chooseFolder: 'Обрати теку',
 			saving: 'Зберігаємо {{percent}}%',
 			retry: 'Повторити {{format}}'
 		},

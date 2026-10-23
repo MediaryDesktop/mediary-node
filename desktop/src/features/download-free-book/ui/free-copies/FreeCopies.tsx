@@ -11,11 +11,13 @@ import { Button, Icon, toast } from '@shared/ui'
 import { $nodeReady } from '@infra/node'
 
 import {
+	bookDownloadSettingsQuery,
 	bookDownloadsQuery,
 	bookEditionsQuery,
 	bookSourcesQuery,
 	enqueueBookDownloadMutation,
-	retryBookDownloadMutation
+	retryBookDownloadMutation,
+	useBookFolderAction
 } from '@entities/book-source'
 import type { BookDownload, BookEdition, BookFormat } from '@entities/book-source'
 
@@ -33,17 +35,29 @@ export interface FreeCopiesProps {
 export function FreeCopies({ mediaRef }: FreeCopiesProps) {
 	const { t } = useTranslation()
 
-	const [sources, loadSources, editions, loadEditions, searching, downloads, loadDownloads, nodeReady] =
-		useUnit([
-			bookSourcesQuery.$data,
-			bookSourcesQuery.start,
-			bookEditionsQuery.$data,
-			bookEditionsQuery.start,
-			bookEditionsQuery.$pending,
-			bookDownloadsQuery.$data,
-			bookDownloadsQuery.start,
-			$nodeReady
-		])
+	const [
+		sources,
+		loadSources,
+		editions,
+		loadEditions,
+		searching,
+		downloads,
+		loadDownloads,
+		loadDownloadSettings,
+		nodeReady
+	] = useUnit([
+		bookSourcesQuery.$data,
+		bookSourcesQuery.start,
+		bookEditionsQuery.$data,
+		bookEditionsQuery.start,
+		bookEditionsQuery.$pending,
+		bookDownloadsQuery.$data,
+		bookDownloadsQuery.start,
+		bookDownloadSettingsQuery.start,
+		$nodeReady
+	])
+
+	const folderAction = useBookFolderAction()
 
 	const anySource = (sources?.sources?.length ?? 0) > 0
 
@@ -51,8 +65,11 @@ export function FreeCopies({ mediaRef }: FreeCopiesProps) {
 		if (nodeReady) {
 			loadSources()
 			loadDownloads()
+			// So a click already knows whether a folder for books is chosen, and
+			// asks for one instead of reaching the node without one.
+			loadDownloadSettings()
 		}
-	}, [loadSources, loadDownloads, nodeReady])
+	}, [loadSources, loadDownloads, loadDownloadSettings, nodeReady])
 
 	useEffect(() => {
 		if (nodeReady && anySource) {
@@ -65,7 +82,8 @@ export function FreeCopies({ mediaRef }: FreeCopiesProps) {
 	)
 	useUnitWatch(enqueueBookDownloadMutation.finished.failure, ({ error }) =>
 		toast.error(problemDetail(error, t('bookSources.copies.failedToQueue')), {
-			id: 'book-download-failed'
+			id: 'book-download-failed',
+			action: folderAction(error)
 		})
 	)
 

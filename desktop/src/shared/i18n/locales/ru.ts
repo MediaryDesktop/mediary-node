@@ -1027,6 +1027,7 @@ export const ru: Translation = {
 			sourceFailed: '{{name}}: {{error}}',
 			queued: 'Книга добавлена в очередь',
 			failedToQueue: 'Не удалось добавить книгу в очередь',
+			chooseFolder: 'Выбрать папку',
 			saving: 'Сохраняем {{percent}}%',
 			retry: 'Повторить {{format}}'
 		},

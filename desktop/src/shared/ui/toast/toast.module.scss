@@ -16,6 +16,12 @@
 .title {
 	font-weight: 600;
 	line-height: 1.25rem;
+
+	// The node words its own messages in lower case, as part of a sentence; a
+	// toast stands alone, so it reads as one here.
+	&::first-letter {
+		text-transform: uppercase;
+	}
 }
 
 .description {
