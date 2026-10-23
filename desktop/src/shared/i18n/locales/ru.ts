@@ -1016,6 +1016,91 @@ export const ru: Translation = {
 			failed: 'Не удалось привязать серию'
 		}
 	},
+	bookSources: {
+		copies: {
+			title: 'Бесплатные экземпляры',
+			subtitle: 'Книги в общественном достоянии из Project Gutenberg и книги на ваших OPDS-серверах',
+			searching: 'Ищем в ваших источниках…',
+			none: 'Во включённых источниках этой книги нет',
+			noneHint:
+				'В Project Gutenberg только книги в общественном достоянии, в основном старые и на английском. Более новой книги там обычно нет.',
+			sourceFailed: '{{name}}: {{error}}',
+			queued: 'Книга добавлена в очередь',
+			failedToQueue: 'Не удалось добавить книгу в очередь',
+			saving: 'Сохраняем {{percent}}%',
+			retry: 'Повторить {{format}}'
+		},
+		downloads: {
+			empty: 'Ещё не сохранено ни одной книги',
+			actionFailed: 'Не удалось изменить загрузку',
+			cancel: 'Остановить',
+			retry: 'Попробовать ещё',
+			forget: 'Убрать из списка',
+			folderTitle: 'Куда сохранять книги',
+			folderDescription:
+				'Книги сохраняются в папку библиотеки с книгами, поэтому сразу попадают в библиотеку',
+			noFolders: 'Сначала добавьте в настройках папку библиотеки для книг',
+			folderPlaceholder: 'Выберите папку',
+			states: {
+				queued: 'Ожидает',
+				running: 'Сохраняется',
+				done: 'Сохранено',
+				failed: 'Ошибка',
+				cancelled: 'Остановлено'
+			}
+		},
+		gutenberg: {
+			enable: 'Искать в Project Gutenberg',
+			note: 'Включение загружает каталог Gutenberg (около 6 МБ) и ищет по нему на этом компьютере; сайт запрашивается только о книге, которую вы сохраняете. Почти всё в нём на английском.',
+			unavailable: 'Project Gutenberg выключен на этом узле',
+			saveFailed: 'Не удалось изменить Project Gutenberg',
+			syncing: 'Загружаем каталог…',
+			books_one: '{{number}} книга · каталог от {{date}}',
+			books_few: '{{number}} книги · каталог от {{date}}',
+			books_many: '{{number}} книг · каталог от {{date}}',
+			books_other: '{{number}} книги · каталог от {{date}}',
+			noCatalog: 'Каталог ещё не загружен',
+			refresh: 'Проверить обновления'
+		},
+		servers: {
+			none: 'Серверов пока нет',
+			add: 'Добавить OPDS-сервер',
+			menu: 'Действия с сервером',
+			edit: 'Изменить',
+			remove: 'Удалить',
+			removeFailed: 'Не удалось удалить сервер',
+			saveFailed: 'Не удалось сохранить сервер',
+			drawer: {
+				createTitle: 'Добавить OPDS-сервер',
+				editTitle: 'Изменить OPDS-сервер',
+				description: 'Адрес корневого фида каталога, например http://nas:8083/opds для Calibre-Web',
+				standardTitle: 'Standard Ebooks',
+				standardHint:
+					'Его OPDS-фид открыт участникам Patrons Circle: логин — ваш email, пароль остаётся пустым.',
+				standardLink: 'О фидах',
+				standardFill: 'Заполнить для Standard Ebooks',
+				standardUsername: 'Email, с которым вы в Patrons Circle',
+				nameLabel: 'Название',
+				namePlaceholder: 'Calibre-Web дома',
+				urlLabel: 'Адрес',
+				usernameLabel: 'Имя пользователя',
+				passwordLabel: 'Пароль',
+				passwordHint: 'Узел хранит его в отдельном файле и больше никогда не показывает',
+				passwordKept: 'Оставьте пустым, чтобы сохранить текущий пароль',
+				create: 'Добавить',
+				save: 'Сохранить',
+				check: 'Проверить соединение',
+				ok: 'Соединено',
+				problems: {
+					unauthorized: 'Сервер отклонил имя пользователя или пароль',
+					not_opds: 'По этому адресу нет OPDS-каталога',
+					no_search: 'В каталоге нет поиска, поэтому он не участвует в поиске книг',
+					unreachable: 'Не удалось связаться с сервером',
+					other_host: 'Каталог ссылается на другой сервер'
+				}
+			}
+		}
+	},
 	torrents: {
 		section: {
 			hint: 'Ищите раздачи, добавляйте свои и получайте новые серии автоматически'
@@ -1341,11 +1426,12 @@ export const ru: Translation = {
 		}
 	},
 	downloads: {
-		subtitle: 'Торренты, правила, которые добавляют их сами, и сохранённые главы манги',
+		subtitle: 'Торренты, правила, которые добавляют их сами, сохранённые главы манги и бесплатные книги',
 		tabs: {
 			torrents: 'Торренты',
 			auto: 'Автозагрузка',
-			manga: 'Главы манги'
+			manga: 'Главы манги',
+			books: 'Бесплатные книги'
 		}
 	},
 	extensions: {
@@ -1646,7 +1732,7 @@ export const ru: Translation = {
 			},
 			mangaSources: {
 				title: 'Источники манги',
-				subtitle: 'Каталоги OPDS с мангой и книгами'
+				subtitle: 'Каталоги OPDS с мангой'
 			},
 			tmdb: {
 				title: 'TMDB',
@@ -1663,6 +1749,14 @@ export const ru: Translation = {
 			mangaDownloads: {
 				title: 'Загрузка манги',
 				subtitle: 'Где хранятся загруженные главы'
+			},
+			bookSources: {
+				title: 'Источники книг',
+				subtitle: 'Project Gutenberg и ваши OPDS-каталоги книг'
+			},
+			bookDownloads: {
+				title: 'Загрузка книг',
+				subtitle: 'Где хранятся сохранённые книги'
 			}
 		},
 		tmdb: {
@@ -1680,6 +1774,18 @@ export const ru: Translation = {
 		mangaDownloads: {
 			name: 'Загрузки манги',
 			hint: 'Папка библиотеки, куда сохраняются главы в формате CBZ'
+		},
+		gutenberg: {
+			name: 'Project Gutenberg',
+			hint: 'Более 75 000 книг в общественном достоянии, поиск на этом компьютере'
+		},
+		bookServers: {
+			name: 'OPDS-серверы',
+			hint: 'Ваши каталоги книг — Calibre-Web, Kavita — и Standard Ebooks для его меценатов'
+		},
+		bookDownloads: {
+			name: 'Загрузки книг',
+			hint: 'Папка библиотеки с книгами, куда сохраняются экземпляры'
 		},
 		torrents: {
 			name: 'Торренты',

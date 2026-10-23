@@ -11,6 +11,8 @@ import { nodeHealthQuery } from '@infra/node'
 import { BackupSettings, DevicesSettings } from '@features/back-up-node'
 import { MissingPlayerNotice, PlayerModeSwitcher } from '@features/choose-player'
 import { DownloadFolderSetting } from '@features/download-chapters'
+import { BookFolderSetting } from '@features/download-free-book'
+import { BookServersSettings, GutenbergSettings } from '@features/manage-book-sources'
 import { DebridServiceSettings } from '@features/manage-debrid-service'
 import { LibraryRootsSettings } from '@features/manage-library-roots'
 import { MangaDexSettings } from '@features/manage-mangadex'
@@ -210,6 +212,25 @@ function SectionContent({ section }: { section: SectionInfo }) {
 				<Card>
 					<Row name={t('settings.mangaDownloads.name')} hint={t('settings.mangaDownloads.hint')}>
 						<DownloadFolderSetting />
+					</Row>
+				</Card>
+			)
+		case 'book-sources':
+			return (
+				<Card>
+					<Row name={t('settings.gutenberg.name')} hint={t('settings.gutenberg.hint')} block>
+						<GutenbergSettings />
+					</Row>
+					<Row name={t('settings.bookServers.name')} hint={t('settings.bookServers.hint')} block>
+						<BookServersSettings />
+					</Row>
+				</Card>
+			)
+		case 'book-downloads':
+			return (
+				<Card>
+					<Row name={t('settings.bookDownloads.name')} hint={t('settings.bookDownloads.hint')}>
+						<BookFolderSetting />
 					</Row>
 				</Card>
 			)

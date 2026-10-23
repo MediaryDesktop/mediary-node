@@ -1,6 +1,9 @@
+import { FreeCopies } from '@features/download-free-book'
+
 import { BookFiles } from './book-files/BookFiles'
 import { ChapterList } from './chapter-list/ChapterList'
 import { EpisodeLibrary } from './episode-library/EpisodeLibrary'
+import styles from './LibrarySection.module.scss'
 
 const VIDEO_TYPES = ['anime', 'movie', 'series', 'dorama']
 
@@ -29,8 +32,14 @@ export function LibrarySection({ mediaType, ...props }: LibrarySectionProps) {
 		)
 	}
 
+	// The copies the library has, then the free ones a source could add to it.
 	if (mediaType === 'book') {
-		return <BookFiles mediaRef={props.mediaRef} />
+		return (
+			<div className={styles.book}>
+				<BookFiles mediaRef={props.mediaRef} />
+				<FreeCopies mediaRef={props.mediaRef} />
+			</div>
+		)
 	}
 
 	if (!VIDEO_TYPES.includes(mediaType)) {

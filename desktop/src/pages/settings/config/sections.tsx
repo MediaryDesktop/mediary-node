@@ -18,7 +18,9 @@ export const SETTINGS_SECTIONS = [
 	'torrent-preferences',
 	'manga-sources',
 	'mangadex',
-	'manga-downloads'
+	'manga-downloads',
+	'book-sources',
+	'book-downloads'
 ] as const
 
 export type SettingsSection = (typeof SETTINGS_SECTIONS)[number]
@@ -46,6 +48,8 @@ export interface SectionInfo {
 		| 'mangaSources'
 		| 'mangaDex'
 		| 'mangaDownloads'
+		| 'bookSources'
+		| 'bookDownloads'
 }
 
 // The menu's cards: what belongs together sits in one, as in Seanime.
@@ -73,5 +77,9 @@ export const SECTION_GROUPS: readonly (readonly SectionInfo[])[] = [
 		{ id: 'manga-sources', icon: 'common/database', key: 'mangaSources' },
 		{ id: 'mangadex', icon: 'common/book-open', key: 'mangaDex' },
 		{ id: 'manga-downloads', icon: 'common/folder', key: 'mangaDownloads' }
+	],
+	[
+		{ id: 'book-sources', icon: 'categories/book', key: 'bookSources' },
+		{ id: 'book-downloads', icon: 'common/folder', key: 'bookDownloads' }
 	]
 ]

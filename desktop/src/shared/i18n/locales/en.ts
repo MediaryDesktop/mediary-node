@@ -1015,6 +1015,92 @@ export const en = {
 			failed: 'Could not link the series'
 		}
 	},
+	bookSources: {
+		copies: {
+			title: 'Free copies',
+			subtitle: 'Public-domain books from Project Gutenberg and books on your own OPDS servers',
+			searching: 'Looking in your sources…',
+			none: 'None of your sources has this book',
+			noneHint:
+				'Project Gutenberg holds only books in the public domain, mostly older ones in English. A newer book is usually not there.',
+			sourceFailed: '{{name}}: {{error}}',
+			queued: 'The book is queued',
+			failedToQueue: 'Could not queue the book',
+			saving: 'Saving {{percent}}%',
+			retry: 'Retry {{format}}'
+		},
+		downloads: {
+			empty: 'No books saved yet',
+			actionFailed: 'Could not change the download',
+			cancel: 'Stop',
+			retry: 'Try again',
+			forget: 'Remove from the list',
+			folderTitle: 'Where to save books',
+			folderDescription:
+				'Books are saved into a library folder of books, so they are in the library at once',
+			noFolders: 'Add a library folder for books in the settings first',
+			folderPlaceholder: 'Choose a folder',
+			states: {
+				queued: 'Waiting',
+				running: 'Saving',
+				done: 'Saved',
+				failed: 'Failed',
+				cancelled: 'Stopped'
+			}
+		},
+		gutenberg: {
+			enable: 'Search Project Gutenberg',
+			note: 'Turning it on downloads Gutenberg’s catalogue, about 6 MB, and searches it on this computer; the site is asked only for a book you save. Almost all of it is in English, and there are no books in Ukrainian.',
+			unavailable: 'Project Gutenberg is turned off on this node',
+			saveFailed: 'Could not change Project Gutenberg',
+			syncing: 'Downloading the catalogue…',
+			books_one: '{{number}} book · catalogue of {{date}}',
+			books_few: '{{number}} books · catalogue of {{date}}',
+			books_many: '{{number}} books · catalogue of {{date}}',
+			books_other: '{{number}} books · catalogue of {{date}}',
+			noCatalog: 'The catalogue is not downloaded yet',
+			refresh: 'Check for updates'
+		},
+		servers: {
+			none: 'No servers yet',
+			add: 'Add OPDS server',
+			menu: 'Server actions',
+			edit: 'Edit',
+			remove: 'Remove',
+			removeFailed: 'Could not remove the server',
+			saveFailed: 'Could not save the server',
+			drawer: {
+				createTitle: 'Add OPDS server',
+				editTitle: 'Edit OPDS server',
+				description:
+					'Address of the catalogue’s root feed, such as http://nas:8083/opds for Calibre-Web',
+				standardTitle: 'Standard Ebooks',
+				standardHint:
+					'Its OPDS feed is open to members of the Patrons Circle: the user name is your e-mail, the password stays empty.',
+				standardLink: 'About the feeds',
+				standardFill: 'Fill in for Standard Ebooks',
+				standardUsername: 'The e-mail of your Patrons Circle membership',
+				nameLabel: 'Name',
+				namePlaceholder: 'Calibre-Web at home',
+				urlLabel: 'Address',
+				usernameLabel: 'User name',
+				passwordLabel: 'Password',
+				passwordHint: 'The node keeps it in a file of its own and never shows it again',
+				passwordKept: 'Leave empty to keep the stored password',
+				create: 'Add',
+				save: 'Save',
+				check: 'Check connection',
+				ok: 'Connected',
+				problems: {
+					unauthorized: 'The server refused the user name or password',
+					not_opds: 'This address does not serve an OPDS catalogue',
+					no_search: 'The catalogue cannot be searched, so it takes no part in finding books',
+					unreachable: 'The server could not be reached',
+					other_host: 'The catalogue points to another server'
+				}
+			}
+		}
+	},
 	torrents: {
 		section: {
 			hint: 'Search for releases, add your own, and get new episodes by themselves'
@@ -1338,11 +1424,12 @@ export const en = {
 		}
 	},
 	downloads: {
-		subtitle: 'Torrents, the rules that add them by themselves, and saved manga chapters',
+		subtitle: 'Torrents, the rules that add them by themselves, saved manga chapters and free books',
 		tabs: {
 			torrents: 'Torrents',
 			auto: 'Auto-download',
-			manga: 'Manga chapters'
+			manga: 'Manga chapters',
+			books: 'Free books'
 		}
 	},
 	extensions: {
@@ -1641,7 +1728,7 @@ export const en = {
 			},
 			mangaSources: {
 				title: 'Manga sources',
-				subtitle: 'OPDS catalogs with manga and books'
+				subtitle: 'OPDS catalogs with manga'
 			},
 			tmdb: {
 				title: 'TMDB',
@@ -1658,6 +1745,14 @@ export const en = {
 			mangaDownloads: {
 				title: 'Manga downloads',
 				subtitle: 'Where downloaded chapters are kept'
+			},
+			bookSources: {
+				title: 'Book sources',
+				subtitle: 'Project Gutenberg and your OPDS catalogues of books'
+			},
+			bookDownloads: {
+				title: 'Book downloads',
+				subtitle: 'Where saved books are kept'
 			}
 		},
 		tmdb: {
@@ -1675,6 +1770,18 @@ export const en = {
 		mangaDownloads: {
 			name: 'Manga downloads',
 			hint: 'Library folder chapters are saved to, as CBZ files'
+		},
+		gutenberg: {
+			name: 'Project Gutenberg',
+			hint: 'Over 75,000 public-domain books, searched on this computer'
+		},
+		bookServers: {
+			name: 'OPDS servers',
+			hint: 'Your own catalogues of books — Calibre-Web, Kavita — and Standard Ebooks for its patrons'
+		},
+		bookDownloads: {
+			name: 'Book downloads',
+			hint: 'Library folder of books that saved copies go to'
 		},
 		torrents: {
 			name: 'Torrents',

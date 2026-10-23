@@ -5,6 +5,7 @@ import type { ReactNode } from 'react'
 import { NowPlayingBar, playbackQuery } from '@entities/playback'
 
 import { DownloadFolderPrompt } from '@features/download-chapters'
+import { BookFolderPrompt } from '@features/download-free-book'
 import { DeleteListDialog, ListDrawer } from '@features/manage-lists'
 import { ScanProgress } from '@features/scan-library'
 import { ManageEntryDrawer, RateEntryDrawer } from '@features/track-media'
@@ -34,6 +35,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 			<ListDrawer />
 			<DeleteListDialog />
 			<DownloadFolderPrompt />
+			<BookFolderPrompt />
 
 			<ScanProgress />
 		</div>

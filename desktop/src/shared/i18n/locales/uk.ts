@@ -1014,6 +1014,92 @@ export const uk: Translation = {
 			failed: 'Не вдалося прив’язати серію'
 		}
 	},
+	bookSources: {
+		copies: {
+			title: 'Безкоштовні примірники',
+			subtitle: 'Книги в суспільному надбанні з Project Gutenberg і книги на ваших OPDS-серверах',
+			searching: 'Шукаємо у ваших джерелах…',
+			none: 'У ввімкнених джерелах цієї книги немає',
+			noneHint:
+				'У Project Gutenberg лише книги в суспільному надбанні, переважно старі й англійською. Новішої книги там зазвичай немає.',
+			sourceFailed: '{{name}}: {{error}}',
+			queued: 'Книгу додано в чергу',
+			failedToQueue: 'Не вдалося додати книгу в чергу',
+			saving: 'Зберігаємо {{percent}}%',
+			retry: 'Повторити {{format}}'
+		},
+		downloads: {
+			empty: 'Ще не збережено жодної книги',
+			actionFailed: 'Не вдалося змінити завантаження',
+			cancel: 'Зупинити',
+			retry: 'Спробувати ще',
+			forget: 'Прибрати зі списку',
+			folderTitle: 'Куди зберігати книги',
+			folderDescription:
+				'Книги зберігаються в теку бібліотеки з книгами, тож одразу потрапляють у бібліотеку',
+			noFolders: 'Спершу додайте в налаштуваннях теку бібліотеки для книг',
+			folderPlaceholder: 'Оберіть теку',
+			states: {
+				queued: 'Очікує',
+				running: 'Зберігається',
+				done: 'Збережено',
+				failed: 'Помилка',
+				cancelled: 'Зупинено'
+			}
+		},
+		gutenberg: {
+			enable: 'Шукати в Project Gutenberg',
+			note: 'Увімкнення завантажує каталог Gutenberg (близько 6 МБ) і шукає по ньому на цьому комп’ютері; сайт запитується лише про книгу, яку ви зберігаєте. Майже все в ньому англійською, українських книг немає.',
+			unavailable: 'Project Gutenberg вимкнено на цьому вузлі',
+			saveFailed: 'Не вдалося змінити Project Gutenberg',
+			syncing: 'Завантажуємо каталог…',
+			books_one: '{{number}} книга · каталог від {{date}}',
+			books_few: '{{number}} книги · каталог від {{date}}',
+			books_many: '{{number}} книг · каталог від {{date}}',
+			books_other: '{{number}} книги · каталог від {{date}}',
+			noCatalog: 'Каталог ще не завантажено',
+			refresh: 'Перевірити оновлення'
+		},
+		servers: {
+			none: 'Серверів ще немає',
+			add: 'Додати OPDS-сервер',
+			menu: 'Дії із сервером',
+			edit: 'Змінити',
+			remove: 'Видалити',
+			removeFailed: 'Не вдалося видалити сервер',
+			saveFailed: 'Не вдалося зберегти сервер',
+			drawer: {
+				createTitle: 'Додати OPDS-сервер',
+				editTitle: 'Змінити OPDS-сервер',
+				description:
+					'Адреса кореневого фіду каталогу, наприклад http://nas:8083/opds для Calibre-Web',
+				standardTitle: 'Standard Ebooks',
+				standardHint:
+					'Його OPDS-фід відкритий учасникам Patrons Circle: логін — ваш email, пароль лишається порожнім.',
+				standardLink: 'Про фіди',
+				standardFill: 'Заповнити для Standard Ebooks',
+				standardUsername: 'Email, з яким ви в Patrons Circle',
+				nameLabel: 'Назва',
+				namePlaceholder: 'Calibre-Web удома',
+				urlLabel: 'Адреса',
+				usernameLabel: 'Ім’я користувача',
+				passwordLabel: 'Пароль',
+				passwordHint: 'Вузол зберігає його в окремому файлі й більше ніколи не показує',
+				passwordKept: 'Залиште порожнім, щоб зберегти поточний пароль',
+				create: 'Додати',
+				save: 'Зберегти',
+				check: 'Перевірити з’єднання',
+				ok: 'З’єднано',
+				problems: {
+					unauthorized: 'Сервер відхилив ім’я користувача або пароль',
+					not_opds: 'За цією адресою немає OPDS-каталогу',
+					no_search: 'У каталозі немає пошуку, тож він не бере участі в пошуку книг',
+					unreachable: 'Не вдалося зв’язатися із сервером',
+					other_host: 'Каталог посилається на інший сервер'
+				}
+			}
+		}
+	},
 	torrents: {
 		section: {
 			hint: 'Шукайте роздачі, додавайте свої й отримуйте нові серії автоматично'
@@ -1340,11 +1426,12 @@ export const uk: Translation = {
 		}
 	},
 	downloads: {
-		subtitle: 'Торенти, правила, що додають їх самі, і збережені розділи манги',
+		subtitle: 'Торенти, правила, що додають їх самі, збережені розділи манги й безкоштовні книги',
 		tabs: {
 			torrents: 'Торенти',
 			auto: 'Автозавантаження',
-			manga: 'Розділи манги'
+			manga: 'Розділи манги',
+			books: 'Безкоштовні книги'
 		}
 	},
 	extensions: {
@@ -1644,7 +1731,7 @@ export const uk: Translation = {
 			},
 			mangaSources: {
 				title: 'Джерела манги',
-				subtitle: 'Каталоги OPDS з мангою та книгами'
+				subtitle: 'Каталоги OPDS з мангою'
 			},
 			tmdb: {
 				title: 'TMDB',
@@ -1661,6 +1748,14 @@ export const uk: Translation = {
 			mangaDownloads: {
 				title: 'Завантаження манги',
 				subtitle: 'Де зберігаються завантажені розділи'
+			},
+			bookSources: {
+				title: 'Джерела книг',
+				subtitle: 'Project Gutenberg і ваші OPDS-каталоги книг'
+			},
+			bookDownloads: {
+				title: 'Завантаження книг',
+				subtitle: 'Де зберігаються збережені книги'
 			}
 		},
 		tmdb: {
@@ -1678,6 +1773,18 @@ export const uk: Translation = {
 		mangaDownloads: {
 			name: 'Завантаження манги',
 			hint: 'Тека бібліотеки, куди зберігаються розділи у форматі CBZ'
+		},
+		gutenberg: {
+			name: 'Project Gutenberg',
+			hint: 'Понад 75 000 книг у суспільному надбанні, пошук на цьому комп’ютері'
+		},
+		bookServers: {
+			name: 'OPDS-сервери',
+			hint: 'Ваші каталоги книг — Calibre-Web, Kavita — і Standard Ebooks для його меценатів'
+		},
+		bookDownloads: {
+			name: 'Завантаження книг',
+			hint: 'Тека бібліотеки з книгами, куди зберігаються примірники'
 		},
 		torrents: {
 			name: 'Торенти',

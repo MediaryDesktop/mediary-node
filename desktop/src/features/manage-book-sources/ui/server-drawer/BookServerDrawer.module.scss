@@ -1,0 +1,17 @@
+.standard {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.5rem;
+
+	.hint {
+		margin: 0;
+		color: var(--text-secondary);
+		font-size: 0.8125rem;
+		line-height: 1.45;
+
+		a {
+			color: var(--accent-text);
+		}
+	}
+}
