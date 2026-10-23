@@ -75,6 +75,23 @@ func TestWithoutAProfileSeedersAndTheExactEpisodeDecide(t *testing.T) {
 	}
 }
 
+// Real releases for Frieren with no episode asked, 24.10.2026: one episode had
+// more seeders than the whole season.
+func TestForTheWholeTitleARangeOfEpisodesIsBest(t *testing.T) {
+	releases := []TorrentRelease{
+		candidate("[Arg0] Frieren: Beyond Journey's End (2023) - S01E01 v3 (WEB 1080p HEVC x265 E-AC-3) [Dual-Audio]", 111, "any"),
+		candidate("Sousou no Frieren - AniLiberty.TOP [WEBRip 1080p][HEVC][1-28]", 101, "any"),
+		candidate("[SubsPlease] Sousou no Frieren (01-28) (1080p) [V2] [Batch]", 101, "any"),
+		candidate("Frieren Complete Movie Collection [1080p]", 400, "any"),
+	}
+
+	rank(releases, &TorrentProfile{})
+
+	if got := bestOf(t, releases); got != "Sousou no Frieren - AniLiberty.TOP [WEBRip 1080p][HEVC][1-28]" && got != "[SubsPlease] Sousou no Frieren (01-28) (1080p) [V2] [Batch]" {
+		t.Fatalf("best = %q, want a batch of the 28 episodes", got)
+	}
+}
+
 func TestTheProfileIsSavedClean(t *testing.T) {
 	h := newHarness(t)
 	ctx := context.Background()
