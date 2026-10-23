@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"regexp"
 	"slices"
 	"sort"
 	"strconv"
@@ -26,6 +27,8 @@ const (
 	releaseTTL = 30 * time.Minute
 	// The most title names one search asks for.
 	maxQueries = 3
+	// The most short forms of those names a sequel adds: "Sousou no Frieren S2".
+	maxSeasonQueries = 2
 	// How long a search waits for the slowest source or plugin; more than either
 	// gives itself, so each fails with its own reason.
 	searchTimeout = 25 * time.Second
@@ -386,7 +389,51 @@ func (s *Service) queries(ctx context.Context, req SearchRequest) (queries, name
 		return nil, nil, apperr.Invalid("q", "the node does not know this title's names yet; type what to search for")
 	}
 
+	// Indexers want every word, and a sequel's releases are rarely named as its
+	// title is: "Sousou no Frieren 2nd Season" finds none of "Sousou no Frieren
+	// S2 - 05".
+	added := 0
+	for _, query := range queries[:len(queries):len(queries)] {
+		short := shortSeason(query)
+		if short == "" || seen[strings.ToLower(short)] {
+			continue
+		}
+
+		seen[strings.ToLower(short)] = true
+		queries = append(queries, short)
+
+		added++
+		if added == maxSeasonQueries {
+			break
+		}
+	}
+
 	return queries, names, nil
+}
+
+// "2nd Season" or "Season 2", and whatever subtitle follows it.
+var seasonInQuery = regexp.MustCompile(`(?i)[\s:,–-]*\b(?:(\d+)(?:st|nd|rd|th)\s+season|season\s+(\d+))\b.*$`)
+
+// shortSeason is a sequel's name as releases put it — "JUJUTSU KAISEN Season
+// 2" as "JUJUTSU KAISEN S2" — or "" for a name that gives no later season.
+func shortSeason(name string) string {
+	match := seasonInQuery.FindStringSubmatchIndex(name)
+	if len(match) == 0 || match[0] == 0 {
+		return ""
+	}
+
+	number := ""
+	for i := 2; i < len(match); i += 2 {
+		if match[i] >= 0 {
+			number = name[match[i]:match[i+1]]
+		}
+	}
+	season, err := strconv.Atoi(number)
+	if err != nil || season < 2 {
+		return ""
+	}
+
+	return name[:match[0]] + " S" + strconv.Itoa(season)
 }
 
 // ask is one source's answer to one query, from the cache while it is fresh.

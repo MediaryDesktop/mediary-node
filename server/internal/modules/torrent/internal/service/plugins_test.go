@@ -183,6 +183,31 @@ func TestAPluginsMagnetNamesItsTorrent(t *testing.T) {
 	}
 }
 
+// A sequel is asked for as releases name it too, with the title's own names
+// still given beside each query.
+func TestASequelIsAskedForByItsShortName(t *testing.T) {
+	h := newHarness(t)
+	h.withSearch(fakeTitles{"anilist:182255": {"Frieren: Beyond Journey’s End Season 2", "Sousou no Frieren 2nd Season"}})
+	plugins := newFakeProviders(nyaa)
+	h.svc.opts.Providers = plugins
+
+	result, err := h.svc.Search(context.Background(), SearchRequest{MediaRef: "anilist:182255", Episode: 5})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := []string{"Frieren: Beyond Journey’s End Season 2", "Sousou no Frieren 2nd Season", "Frieren: Beyond Journey’s End S2", "Sousou no Frieren S2"}
+	if strings.Join(result.Queries, "|") != strings.Join(want, "|") {
+		t.Fatalf("queries %q, want %q", result.Queries, want)
+	}
+
+	for _, q := range plugins.askedOf("nyaa") {
+		if len(q.Titles) != 2 || q.Titles[1] != "Sousou no Frieren 2nd Season" {
+			t.Fatalf("asked %+v; the short name is a query, not one of the title's names", q)
+		}
+	}
+}
+
 // A plugin that never answers costs the search its wait, not the results the
 // others found.
 func TestAHangingPluginLeavesTheOthersResults(t *testing.T) {

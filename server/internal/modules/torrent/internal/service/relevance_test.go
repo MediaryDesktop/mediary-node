@@ -41,6 +41,29 @@ func TestNamesTitle(t *testing.T) {
 	}
 }
 
+func TestShortSeason(t *testing.T) {
+	cases := map[string]string{
+		"Sousou no Frieren 2nd Season":                               "Sousou no Frieren S2",
+		"Frieren: Beyond Journey’s End Season 2":                     "Frieren: Beyond Journey’s End S2",
+		"JUJUTSU KAISEN Season 2":                                    "JUJUTSU KAISEN S2",
+		"Ore dake Level Up na Ken: Season 2 - Arise from the Shadow": "Ore dake Level Up na Ken S2",
+		"Tensei Kizoku, Kantei Skill de Nariagaru 3rd Season":        "Tensei Kizoku, Kantei Skill de Nariagaru S3",
+		"Re:Zero kara Hajimeru Isekai Seikatsu 10th Season":          "Re:Zero kara Hajimeru Isekai Seikatsu S10",
+		// The first season, no season, or nothing but the season: nothing shorter.
+		"Sousou no Frieren Season 1": "",
+		"Sousou no Frieren":          "",
+		"Season 2":                   "",
+		"Mob Psycho 100 II":          "",
+		"Breaking Bad S02":           "",
+	}
+
+	for name, want := range cases {
+		if got := shortSeason(name); got != want {
+			t.Errorf("shortSeason(%q) = %q, want %q", name, got, want)
+		}
+	}
+}
+
 func TestOfAnotherSeason(t *testing.T) {
 	frieren := []string{"Frieren: Beyond Journey’s End", "Sousou no Frieren", "Frieren at the Funeral"}
 	frieren2 := []string{"Frieren: Beyond Journey’s End Season 2", "Sousou no Frieren 2nd Season"}
