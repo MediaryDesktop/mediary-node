@@ -289,11 +289,30 @@ func (c *Client) Add(_ context.Context, req qbittorrent.AddRequest) error {
 		return apperr.New(apperr.KindUnavailable, "the built-in torrent client is not running")
 	}
 
+	// The client holds one torrent per hash: added while it plays as a stream,
+	// the download would get the stream's torrent and folder, and vanish with
+	// it. The stream gives way and plays on from the download.
+	playing := c.stream
+	if playing == nil || playing.hash != hash || playing.store == nil {
+		playing = nil
+	} else {
+		if spec.InfoBytes == nil && playing.t.Info() != nil {
+			spec.InfoBytes = playing.t.Metainfo().InfoBytes
+		}
+		c.dropStreamLocked()
+	}
+
 	if err := c.addSpec(hash, spec, saved); err != nil {
 		return apperr.Wrap(err, apperr.KindInternal, "add the torrent")
 	}
 
 	c.entries[hash] = saved
+
+	if playing != nil {
+		if t, ok := cl.Torrent(spec.InfoHash); ok {
+			c.stream = &localStream{hash: hash, t: t, file: playing.file, last: sample{at: time.Now()}}
+		}
+	}
 
 	return c.saveLocked()
 }
