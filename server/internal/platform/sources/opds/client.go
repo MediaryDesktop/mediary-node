@@ -100,40 +100,15 @@ func (c *Client) Check(ctx context.Context, server Server) error {
 
 // Search finds series by name, through the search the catalogue describes.
 func (c *Client) Search(ctx context.Context, server Server, query string) ([]Series, error) {
-	root, err := c.feed(ctx, server, "")
-	if err != nil {
-		return nil, err
-	}
-
-	link, ok := root.Link(RelSearch)
-	if !ok {
-		return nil, ErrNoSearch
-	}
-
-	template := link.Href
-	if !strings.Contains(template, "{searchTerms}") {
-		body, getErr := c.get(ctx, server, link.Href, maxFeedBytes)
-		if getErr != nil {
-			return nil, getErr
-		}
-
-		if template, err = parseOpenSearch(bytes.NewReader(body)); err != nil {
-			return nil, err
-		}
-	}
-
-	results, err := c.feed(ctx, server, strings.ReplaceAll(template, "{searchTerms}", url.QueryEscape(query)))
-	if err != nil {
-		return nil, err
-	}
-
-	base, err := url.Parse(server.URL)
+	results, base, err := c.search(ctx, server, query)
 	if err != nil {
 		return nil, err
 	}
 
 	var series []Series
-	for _, entry := range results.Entries {
+	for i := range results.Entries {
+		entry := &results.Entries[i]
+
 		link, ok := entry.Link(RelSubsection)
 		if !ok || !link.IsCatalogue() {
 			continue
@@ -148,6 +123,119 @@ func (c *Client) Search(ctx context.Context, server Server, query string) ([]Ser
 	}
 
 	return series, nil
+}
+
+// search runs the catalogue's own search and returns the first page of results,
+// with the server's address to resolve their links against.
+func (c *Client) search(ctx context.Context, server Server, query string) (*Feed, *url.URL, error) {
+	root, err := c.feed(ctx, server, "")
+	if err != nil {
+		return nil, nil, err
+	}
+
+	link, ok := root.Link(RelSearch)
+	if !ok {
+		return nil, nil, ErrNoSearch
+	}
+
+	template := link.Href
+	if !strings.Contains(template, "{searchTerms}") {
+		body, getErr := c.get(ctx, server, link.Href, maxFeedBytes)
+		if getErr != nil {
+			return nil, nil, getErr
+		}
+
+		if template, err = parseOpenSearch(bytes.NewReader(body)); err != nil {
+			return nil, nil, err
+		}
+	}
+
+	results, err := c.feed(ctx, server, strings.ReplaceAll(template, "{searchTerms}", url.QueryEscape(query)))
+	if err != nil {
+		return nil, nil, err
+	}
+
+	base, err := url.Parse(server.URL)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return results, base, nil
+}
+
+// Publication is one book a catalogue offers as files to take whole, as
+// Calibre-Web and Standard Ebooks do, rather than a series of chapters.
+type Publication struct {
+	ID       string
+	Title    string
+	Authors  []string
+	Language string
+	Issued   string
+	Summary  string
+	Files    []File
+}
+
+// File is one way to take a publication: a format and where it is on the server.
+type File struct {
+	Path string
+	// Type is the media type without its parameters, in lower case.
+	Type string
+	// Length is the size in bytes, 0 when the catalogue does not say.
+	Length int64
+}
+
+// SearchPublications finds books through the catalogue's search. An entry
+// without a file anyone may take — a navigation entry, a book only for sale or
+// lending — is left out.
+func (c *Client) SearchPublications(ctx context.Context, server Server, query string) ([]Publication, error) {
+	results, base, err := c.search(ctx, server, query)
+	if err != nil {
+		return nil, err
+	}
+
+	var out []Publication
+	for i := range results.Entries {
+		entry := &results.Entries[i]
+
+		pub := Publication{
+			ID:       strings.TrimSpace(entry.ID),
+			Title:    strings.TrimSpace(entry.Title),
+			Language: strings.TrimSpace(entry.Language),
+			Issued:   strings.TrimSpace(entry.Issued),
+			Summary:  strings.TrimSpace(entry.Summary),
+		}
+		for _, author := range entry.Authors {
+			if name := strings.TrimSpace(author.Name); name != "" {
+				pub.Authors = append(pub.Authors, name)
+			}
+		}
+
+		for _, link := range entry.Links {
+			if link.Rel != RelAcquisition && link.Rel != RelOpenAccess {
+				continue
+			}
+			if link.IsCatalogue() {
+				continue
+			}
+
+			path, pathErr := serverPath(base, link.Href)
+			if pathErr != nil {
+				continue
+			}
+
+			pub.Files = append(pub.Files, File{Path: path, Type: mediaType(link.Type), Length: link.Length})
+		}
+
+		if len(pub.Files) > 0 && pub.Title != "" {
+			out = append(out, pub)
+		}
+	}
+
+	return out, nil
+}
+
+func mediaType(value string) string {
+	return strings.ToLower(strings.TrimSpace(strings.Split(value, ";")[0]))
 }
 
 // Books lists a series' chapters, following the feed's pages.
@@ -166,8 +254,8 @@ func (c *Client) Books(ctx context.Context, server Server, seriesID string) ([]B
 			return nil, err
 		}
 
-		for _, entry := range feed.Entries {
-			books = append(books, book(base, entry))
+		for i := range feed.Entries {
+			books = append(books, book(base, &feed.Entries[i]))
 		}
 
 		link, ok := feed.Link(RelNext)
@@ -182,7 +270,7 @@ func (c *Client) Books(ctx context.Context, server Server, seriesID string) ([]B
 	return books, nil
 }
 
-func book(base *url.URL, entry Entry) Book {
+func book(base *url.URL, entry *Entry) Book {
 	title := strings.TrimSpace(entry.Title)
 	out := Book{ID: entry.ID, Title: title, Number: ChapterNumber(title)}
 
@@ -256,27 +344,36 @@ func isComicArchive(link Link) bool {
 // Archive opens a book's archive for reading. The caller closes it; reading past
 // MaxArchiveBytes fails rather than filling the disk.
 func (c *Client) Archive(ctx context.Context, server Server, path string) (io.ReadCloser, error) {
+	body, _, err := c.Open(ctx, server, path, MaxArchiveBytes)
+
+	return body, err
+}
+
+// Open opens a file on the server for reading, with the type the server gave it.
+// The caller closes it; what it reads stops one byte past limit, so a caller that
+// reads limit+1 bytes knows the file was too large.
+func (c *Client) Open(ctx context.Context, server Server, path string, limit int64) (io.ReadCloser, string, error) {
 	req, err := c.request(ctx, server, path)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
-	// The client's timeout covers the whole body, and an archive takes longer to
+	// The client's timeout covers the whole body, and a file takes longer to
 	// arrive than a feed; the caller's context bounds it instead.
-	archiveClient := *c.http
-	archiveClient.Timeout = 0
+	fileClient := *c.http
+	fileClient.Timeout = 0
 
-	resp, err := archiveClient.Do(req)
+	resp, err := fileClient.Do(req)
 	if err != nil {
-		return nil, unreachable(err)
+		return nil, "", unreachable(err)
 	}
 
 	if statusErr := status(resp); statusErr != nil {
 		_ = resp.Body.Close()
-		return nil, statusErr
+		return nil, "", statusErr
 	}
 
-	return limitedBody{Reader: io.LimitReader(resp.Body, MaxArchiveBytes+1), body: resp.Body}, nil
+	return limitedBody{Reader: io.LimitReader(resp.Body, limit+1), body: resp.Body}, mediaType(resp.Header.Get("Content-Type")), nil
 }
 
 type limitedBody struct {

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/terms/" xmlns:dcterms="http://purl.org/dc/terms/">
+  <id>urn:uuid:2853dacf-ed79-42f5-8e8a-a7bb3d1ae6a2</id>
+  <updated>2026-10-23T10:00:00+00:00</updated>
+  <link rel="self" href="/opds/search/dune" type="application/atom+xml;profile=opds-catalog;type=feed;kind=navigation"/>
+  <title>Calibre-Web</title>
+  <entry>
+    <title>Dune</title>
+    <id>urn:uuid:8b2c1f3e-0000-4000-8000-000000000001</id>
+    <updated>2026-09-01T12:00:00+00:00</updated>
+    <author><name>Frank Herbert</name></author>
+    <dcterms:language>eng</dcterms:language>
+    <dcterms:issued>1965-08-01</dcterms:issued>
+    <summary>A desert planet and the spice.</summary>
+    <link type="image/jpeg" href="/opds/cover/1" rel="http://opds-spec.org/image"/>
+    <link rel="http://opds-spec.org/acquisition" href="/opds/download/1/epub/" length="812345" type="application/epub+zip"/>
+    <link rel="http://opds-spec.org/acquisition" href="/opds/download/1/pdf/" length="2345678" type="application/pdf"/>
+  </entry>
+  <entry>
+    <title>Frank Herbert</title>
+    <id>/opds/author/7</id>
+    <link rel="subsection" href="/opds/author/7" type="application/atom+xml;profile=opds-catalog"/>
+  </entry>
+  <entry>
+    <title>Dune Messiah</title>
+    <id>urn:uuid:8b2c1f3e-0000-4000-8000-000000000002</id>
+    <author><name>Frank Herbert</name></author>
+    <link rel="http://opds-spec.org/acquisition/buy" href="https://shop.example/dune-messiah" type="text/html"/>
+  </entry>
+  <entry>
+    <title>Elsewhere</title>
+    <id>urn:uuid:8b2c1f3e-0000-4000-8000-000000000003</id>
+    <link rel="http://opds-spec.org/acquisition" href="https://other.example/book.epub" type="application/epub+zip"/>
+  </entry>
+</feed>

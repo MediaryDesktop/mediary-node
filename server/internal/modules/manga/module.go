@@ -11,11 +11,11 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/modules/manga/internal/download"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/manga/internal/handler"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/manga/internal/mangadex"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/manga/internal/opds"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/manga/internal/secrets"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/manga/internal/service"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/manga/internal/store"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/opds"
 )
 
 type Deps struct {

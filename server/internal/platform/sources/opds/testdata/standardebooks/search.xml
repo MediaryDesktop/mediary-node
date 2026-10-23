@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/terms/" xmlns:schema="http://schema.org/">
+	<id>https://standardebooks.test/feeds/opds/all?query=frankenstein</id>
+	<title>Search results</title>
+	<updated>2026-10-22T00:00:00Z</updated>
+	<entry>
+		<id>https://standardebooks.test/ebooks/mary-shelley/frankenstein</id>
+		<dc:identifier>url:https://standardebooks.test/ebooks/mary-shelley/frankenstein</dc:identifier>
+		<title>Frankenstein</title>
+		<author>
+			<name>Mary Shelley</name>
+			<uri>https://standardebooks.test/ebooks/mary-shelley</uri>
+		</author>
+		<dc:issued>1818-01-01T00:00:00Z</dc:issued>
+		<updated>2026-01-11T00:00:00Z</updated>
+		<dc:language>en-GB</dc:language>
+		<summary type="text">A young scientist creates a living being.</summary>
+		<link href="https://standardebooks.test/images/covers/frankenstein.jpg" rel="http://opds-spec.org/image" type="image/jpeg"/>
+		<link href="https://standardebooks.test/ebooks/mary-shelley/frankenstein/downloads/mary-shelley_frankenstein.epub" length="563210" rel="http://opds-spec.org/acquisition/open-access" title="Recommended compatible epub" type="application/epub+zip"/>
+		<link href="https://standardebooks.test/ebooks/mary-shelley/frankenstein/downloads/mary-shelley_frankenstein.azw3" length="701234" rel="http://opds-spec.org/acquisition/open-access" title="Amazon Kindle azw3" type="application/x-mobipocket-ebook"/>
+		<link href="https://standardebooks.test/ebooks/mary-shelley/frankenstein" rel="related" type="text/html" title="This ebook’s page at Standard Ebooks"/>
+	</entry>
+</feed>

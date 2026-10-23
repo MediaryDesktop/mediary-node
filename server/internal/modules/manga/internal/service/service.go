@@ -12,9 +12,9 @@ import (
 	"github.com/rs/zerolog"
 
 	"github.com/mediaryorg/mediary-node/server/internal/modules/manga/internal/mangadex"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/manga/internal/opds"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/manga/internal/store"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/opds"
 )
 
 const SourcePrefixOPDS = "opds:"

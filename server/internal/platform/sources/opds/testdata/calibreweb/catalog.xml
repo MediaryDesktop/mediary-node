@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/terms/" xmlns:dcterms="http://purl.org/dc/terms/">
+  <id>urn:uuid:2853dacf-ed79-42f5-8e8a-a7bb3d1ae6a2</id>
+  <updated>2026-10-23T10:00:00+00:00</updated>
+  <link rel="self" href="/opds" type="application/atom+xml;profile=opds-catalog;type=feed;kind=navigation"/>
+  <link rel="start" href="/opds" type="application/atom+xml;profile=opds-catalog;type=feed;kind=navigation"/>
+  <link rel="search" href="/opds/search/{searchTerms}" type="application/atom+xml"/>
+  <title>Calibre-Web</title>
+  <entry>
+    <title>Recently added Books</title>
+    <id>/opds/new</id>
+    <link rel="subsection" href="/opds/new" type="application/atom+xml;profile=opds-catalog"/>
+  </entry>
+</feed>

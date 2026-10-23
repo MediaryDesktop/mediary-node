@@ -1,5 +1,6 @@
-// Package opds reads OPDS 1.2 catalogues — Komga, Kavita, Calibre-Web — and the
-// Page Streaming Extension that serves a chapter one page at a time.
+// Package opds reads OPDS 1.2 catalogues — Komga, Kavita, Calibre-Web, Standard
+// Ebooks — and the Page Streaming Extension that serves a chapter one page at a
+// time.
 package opds
 
 import (
@@ -15,7 +16,9 @@ const (
 	RelNext        = "next"
 	RelSubsection  = "subsection"
 	RelAcquisition = "http://opds-spec.org/acquisition"
-	RelPSEStream   = "http://vaemendis.net/opds-pse/stream"
+	// RelOpenAccess is a file anyone may take, as Standard Ebooks marks theirs.
+	RelOpenAccess = "http://opds-spec.org/acquisition/open-access"
+	RelPSEStream  = "http://vaemendis.net/opds-pse/stream"
 )
 
 type Feed struct {
@@ -26,16 +29,28 @@ type Feed struct {
 }
 
 type Entry struct {
-	ID      string `xml:"id"`
-	Title   string `xml:"title"`
-	Updated string `xml:"updated"`
-	Links   []Link `xml:"link"`
+	ID      string   `xml:"id"`
+	Title   string   `xml:"title"`
+	Updated string   `xml:"updated"`
+	Authors []Author `xml:"author"`
+	// Language and Issued come from Dublin Core, which catalogues put under
+	// either of its two namespaces; the tags match both.
+	Language string `xml:"language"`
+	Issued   string `xml:"issued"`
+	Summary  string `xml:"summary"`
+	Links    []Link `xml:"link"`
+}
+
+type Author struct {
+	Name string `xml:"name"`
 }
 
 type Link struct {
 	Rel  string `xml:"rel,attr"`
 	Type string `xml:"type,attr"`
 	Href string `xml:"href,attr"`
+	// Length is the file's size in bytes, when the catalogue says.
+	Length int64 `xml:"length,attr"`
 	// Count is the number of pages, on a page-streaming link.
 	Count int `xml:"http://vaemendis.net/opds-pse/ns count,attr"`
 }
