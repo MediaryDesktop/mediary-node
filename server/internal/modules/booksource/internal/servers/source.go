@@ -101,7 +101,7 @@ func (s *serverSource) Search(ctx context.Context, query source.Query) ([]source
 		return []source.Edition{}, nil
 	}
 	if err != nil {
-		return nil, apperr.Wrap(err, apperr.KindUpstream, "%s", err.Error())
+		return nil, describe(err, "")
 	}
 
 	stems := stemsOf(query.Authors)
@@ -179,10 +179,37 @@ func (s *serverSource) Open(ctx context.Context, _, location string) (io.ReadClo
 
 	body, _, err := s.servers.client.Open(ctx, server, location, maxFileBytes)
 	if err != nil {
-		return nil, apperr.Wrap(err, apperr.KindUpstream, "%s: %s", s.name, err.Error())
+		return nil, describe(err, s.name)
 	}
 
 	return body, nil
+}
+
+// describe says in a sentence what went wrong with a server, named when the
+// message is read away from the server's own row. The client's error, with its
+// addresses and causes, stays in the log.
+func describe(err error, name string) error {
+	if errors.Is(err, context.Canceled) {
+		return err
+	}
+
+	var message string
+	switch {
+	case errors.Is(err, opds.ErrUnauthorized):
+		message = "the server refused the user name or password"
+	case errors.Is(err, opds.ErrOtherHost):
+		message = "the server sent the file from another address, which Mediary does not follow"
+	case errors.Is(err, opds.ErrNotOPDS):
+		message = "the server no longer has this file or catalogue"
+	default:
+		message = "the server could not be reached"
+	}
+
+	if name != "" {
+		message = name + ": " + message
+	}
+
+	return apperr.Wrap(err, apperr.KindUpstream, "%s", message)
 }
 
 // byAuthor keeps a publication by one of the work's authors. One that names no

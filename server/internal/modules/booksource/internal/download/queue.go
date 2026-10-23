@@ -154,8 +154,20 @@ func (q *Queue) process(ctx context.Context, item *store.Download) {
 		q.setState(ctx, item, store.DownloadCancelled, "")
 	default:
 		q.logger.Warn().Err(err).Str("edition", item.EditionRef).Msg("book download failed")
-		q.setState(ctx, item, store.DownloadFailed, err.Error())
+		q.setState(ctx, item, store.DownloadFailed, reasonOf(err))
 	}
+}
+
+// reasonOf is what the user reads about a failed download: a source's own
+// message without its kind and causes, or the queue's error as it is. Only an
+// error the source returned as it is counts: one the queue wrapped says more
+// than its cause.
+func reasonOf(err error) string {
+	if appErr, ok := err.(*apperr.Error); ok { //nolint:errorlint // see above
+		return appErr.Message
+	}
+
+	return err.Error()
 }
 
 func (q *Queue) run(ctx context.Context, item *store.Download) error {

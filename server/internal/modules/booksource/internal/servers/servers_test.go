@@ -2,6 +2,7 @@ package servers
 
 import (
 	"context"
+	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -105,6 +106,11 @@ func newCatalogue(t *testing.T, user, pass string, routes map[string]string) *ca
 		body, ok := c.routes[r.URL.Path]
 		if !ok {
 			http.NotFound(w, r)
+			return
+		}
+
+		if target, redirect := strings.CutPrefix(body, "redirect:"); redirect {
+			http.Redirect(w, r, target, http.StatusFound)
 			return
 		}
 
@@ -357,6 +363,28 @@ func TestACatalogueWithoutSearchSitsOut(t *testing.T) {
 	editions, err := s.Sources(ctx)[0].Search(ctx, source.Query{Text: "dune"})
 	if err != nil || len(editions) != 0 {
 		t.Errorf("search: %+v, %v", editions, err)
+	}
+}
+
+// A file the server sends from elsewhere is not followed, and the user is told
+// so without the addresses.
+func TestAFileFromAnotherHostIsRefused(t *testing.T) {
+	elsewhere := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = io.WriteString(w, "PK\x03\x04not from the server")
+	}))
+	defer elsewhere.Close()
+
+	c := calibre(t)
+	c.routes["/opds/download/9/epub/"] = "redirect:" + elsewhere.URL + "/book.epub"
+	s := newServers(t)
+	addCalibre(t, s, c)
+	ctx := context.Background()
+
+	_, err := s.Sources(ctx)[0].Open(ctx, "opds:1:urn:uuid:nine", "/opds/download/9/epub/")
+
+	var appErr *apperr.Error
+	if !errors.As(err, &appErr) || appErr.Message != "Home Calibre: the server sent the file from another address, which Mediary does not follow" {
+		t.Errorf("open: %v", err)
 	}
 }
 

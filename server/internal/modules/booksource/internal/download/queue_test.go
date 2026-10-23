@@ -25,6 +25,8 @@ type fakeSource struct {
 	mu     sync.Mutex
 	files  map[string][]byte
 	opened []string
+	// fail, when set, is what Open answers.
+	fail error
 	// wait holds Open until it is closed, or the download is cancelled.
 	wait chan struct{}
 }
@@ -42,6 +44,10 @@ func (f *fakeSource) Open(ctx context.Context, ref, location string) (io.ReadClo
 	defer f.mu.Unlock()
 
 	f.opened = append(f.opened, ref+" "+location)
+
+	if f.fail != nil {
+		return nil, f.fail
+	}
 
 	data, ok := f.files[ref]
 	if !ok {
@@ -270,6 +276,20 @@ func TestWhatIsNotABookIsNotKept(t *testing.T) {
 	}
 	if len(h.library.imported) != 0 {
 		t.Errorf("imported %+v", h.library.imported)
+	}
+}
+
+// The user reads what the source says went wrong, not its addresses and causes.
+func TestAFailedSourceIsReportedInItsOwnWords(t *testing.T) {
+	h := newHarness(t)
+	h.source.fail = apperr.Wrap(errors.New(`Get "http://127.0.0.1:43799/x.epub": dial tcp: refused`),
+		apperr.KindUpstream, "Home Calibre: the server could not be reached")
+	h.start(t)
+
+	item := h.wait(t, h.enqueue(t, frankenstein()).ID, store.DownloadDone, store.DownloadFailed)
+
+	if item.State != store.DownloadFailed || item.Error != "Home Calibre: the server could not be reached" {
+		t.Fatalf("download = %+v", item)
 	}
 }
 
