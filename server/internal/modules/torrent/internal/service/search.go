@@ -255,11 +255,16 @@ func (s *Service) Search(ctx context.Context, req SearchRequest) (*TorrentSearch
 		}
 	}
 
+	// Without a season — anime, a title per season — another season's release
+	// fits by episode number alone: "Sousou no Frieren 2nd Season - 10" is no
+	// 10th episode of the first. What the user typed is shown as found.
+	seasonless := req.Season == 0 && strings.TrimSpace(req.Query) == ""
+
 	releases := make([]TorrentRelease, 0, len(byID))
 	for id := range byID {
 		found := byID[id]
 		found.Match = matchOf(found.Info, req.Episode, req.Season)
-		if found.Match == "" {
+		if found.Match == "" || (seasonless && ofAnotherSeason(&found, names)) {
 			continue
 		}
 		releases = append(releases, found)

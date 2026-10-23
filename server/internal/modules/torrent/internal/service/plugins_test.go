@@ -183,6 +183,37 @@ func TestAPluginsMagnetNamesItsTorrent(t *testing.T) {
 	}
 }
 
+// The first season's search does not list the second's episode 10 as its own:
+// "Best" and "missing" on it would download the wrong episode. A query the user
+// types is shown as found.
+func TestASearchByTheTitleLeavesOutAnotherSeason(t *testing.T) {
+	h := newHarness(t)
+	h.withSearch(frierenNames)
+	plugins := newFakeProviders(nyaa)
+	plugins.answers["nyaa"] = []ProviderRelease{
+		{Title: "[Erai-raws] Sousou no Frieren 2nd Season - 10 [1080p CR WEB-DL AVC AAC][MultiSub][5A357DEE]", InfoHash: "1111111111111111111111111111111111111111", Seeders: 734},
+		{Title: "[Feibanyama] Frieren Beyond Journeys End S02E10 [IQIYI WebRip 2160p HEVC OPUS Multi-Subs] (Sousou no Frieren)", InfoHash: "2222222222222222222222222222222222222222", Seeders: 149},
+		{Title: "[SubsPlease] Sousou no Frieren - 10 (1080p) [E1B5E0D1].mkv", InfoHash: "3333333333333333333333333333333333333333", Seeders: 40},
+	}
+	h.svc.opts.Providers = plugins
+
+	result, err := h.svc.Search(context.Background(), SearchRequest{MediaRef: "anilist:154587"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.Releases) != 1 || !strings.Contains(result.Releases[0].Title, "[SubsPlease] Sousou no Frieren - 10") {
+		t.Fatalf("releases %+v; want the first season's alone", result.Releases)
+	}
+
+	typed, err := h.svc.Search(context.Background(), SearchRequest{MediaRef: "anilist:154587", Query: "Frieren 10"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(typed.Releases) != 3 {
+		t.Fatalf("typed query found %d releases, want all 3 as the plugin gave them", len(typed.Releases))
+	}
+}
+
 // A sequel is asked for as releases name it too, with the title's own names
 // still given beside each query.
 func TestASequelIsAskedForByItsShortName(t *testing.T) {
