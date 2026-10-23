@@ -79,6 +79,9 @@ interface FieldProps {
 	disabled: boolean
 }
 
+// The select's own value for "default": it reads an empty value as nothing chosen.
+const DEFAULT_OPTION = '\u0000default'
+
 function Field({ field, value, onChange, disabled }: FieldProps) {
 	const { t } = useTranslation()
 
@@ -92,13 +95,13 @@ function Field({ field, value, onChange, disabled }: FieldProps) {
 					<SelectDropdown
 						options={[
 							{
-								value: '',
+								value: DEFAULT_OPTION,
 								label: t('plugins.settingsDrawer.default', { value: field.default ?? '—' })
 							},
 							...(field.options ?? []).map(option => ({ value: option, label: option }))
 						]}
-						value={current}
-						onChange={next => onChange(next ?? '')}
+						value={current || DEFAULT_OPTION}
+						onChange={next => onChange(!next || next === DEFAULT_OPTION ? '' : next)}
 						disabled={disabled}
 					/>
 				</DrawerSection>
