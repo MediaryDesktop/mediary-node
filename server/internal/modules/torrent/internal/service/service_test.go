@@ -487,6 +487,12 @@ func TestRemoveTakesTheTorrentOutOfTheClient(t *testing.T) {
 
 	h.client.set(qbittorrent.Torrent{Hash: frierenHash, State: "downloading", Progress: 0.1})
 
+	// The title's folder the node made, left empty by the client.
+	folder := filepath.Join(h.root, "Sousou no Frieren")
+	if err := os.MkdirAll(folder, 0o700); err != nil {
+		t.Fatal(err)
+	}
+
 	if err := h.svc.Remove(context.Background(), download.ID, true); err != nil {
 		t.Fatal(err)
 	}
@@ -498,6 +504,41 @@ func TestRemoveTakesTheTorrentOutOfTheClient(t *testing.T) {
 	downloads, _, _ := h.svc.List(context.Background())
 	if len(downloads) != 0 {
 		t.Fatalf("downloads = %+v", downloads)
+	}
+
+	if _, err := os.Stat(folder); !os.IsNotExist(err) {
+		t.Errorf("the empty title folder is still there: %v", err)
+	}
+	if _, err := os.Stat(h.root); err != nil {
+		t.Errorf("the library folder went with it: %v", err)
+	}
+}
+
+// Another download's files, or a removal that keeps the files, leave the
+// title's folder alone.
+func TestRemoveKeepsATitleFolderInUse(t *testing.T) {
+	for _, withFiles := range []bool{true, false} {
+		h := newHarness(t)
+		h.configure(t)
+		download := h.add(t)
+		h.client.set(qbittorrent.Torrent{Hash: frierenHash, State: "downloading", Progress: 0.1})
+
+		folder := filepath.Join(h.root, "Sousou no Frieren")
+		if err := os.MkdirAll(folder, 0o700); err != nil {
+			t.Fatal(err)
+		}
+		if withFiles {
+			if err := os.WriteFile(filepath.Join(folder, "Sousou no Frieren - 01.mkv"), []byte("x"), 0o600); err != nil {
+				t.Fatal(err)
+			}
+		}
+
+		if err := h.svc.Remove(context.Background(), download.ID, withFiles); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := os.Stat(folder); err != nil {
+			t.Errorf("withFiles=%v: the title folder was removed: %v", withFiles, err)
+		}
 	}
 }
 

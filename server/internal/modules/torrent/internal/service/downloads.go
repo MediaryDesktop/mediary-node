@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"os"
 	"path"
 	"path/filepath"
 	"strings"
@@ -363,6 +364,10 @@ func (s *Service) Remove(ctx context.Context, id int64, withFiles bool) error {
 		}
 	}
 
+	if withFiles {
+		s.removeEmptyFolder(ctx, download)
+	}
+
 	if _, err := s.store.Delete(ctx, id); err != nil {
 		return apperr.Wrap(err, apperr.KindInternal, "delete the download")
 	}
@@ -374,6 +379,23 @@ func (s *Service) Remove(ctx context.Context, id int64, withFiles bool) error {
 	s.publish("removed", id)
 
 	return nil
+}
+
+// removeEmptyFolder takes away the title's folder the node made for a download
+// once nothing is left in it: the client deletes only what the torrent holds.
+// os.Remove leaves a folder another download still has files in.
+func (s *Service) removeEmptyFolder(ctx context.Context, download *store.Download) {
+	rootPath, found, err := s.library.RootPath(ctx, download.RootID)
+	if err != nil || !found || download.RelDir == "" {
+		return
+	}
+
+	dir := filepath.Join(rootPath, download.RelDir)
+	if filepath.Dir(dir) != filepath.Clean(rootPath) {
+		return
+	}
+
+	_ = os.Remove(dir)
 }
 
 func (s *Service) find(ctx context.Context, id int64) (*store.Download, error) {
