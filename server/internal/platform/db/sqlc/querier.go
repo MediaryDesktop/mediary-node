@@ -24,6 +24,7 @@ type Querier interface {
 	CountLibraryFileStates(ctx context.Context, arg CountLibraryFileStatesParams) (CountLibraryFileStatesRow, error)
 	CountLibraryFiles(ctx context.Context, arg CountLibraryFilesParams) (int64, error)
 	CountScanRuns(ctx context.Context, arg CountScanRunsParams) (int64, error)
+	CreateBookOPDSServer(ctx context.Context, arg CreateBookOPDSServerParams) (BookOpdsServer, error)
 	CreateOPDSServer(ctx context.Context, arg CreateOPDSServerParams) (OpdsServer, error)
 	DeleteAniListMirror(ctx context.Context) error
 	DeleteAniListOutbox(ctx context.Context) error
@@ -33,6 +34,7 @@ type Querier interface {
 	// user's own choices stay: a manual match is never undone by a setting.
 	DeleteAutoVideoMatchesForRoot(ctx context.Context, rootID int64) error
 	DeleteBookDownload(ctx context.Context, id int64) (int64, error)
+	DeleteBookOPDSServer(ctx context.Context, id int64) (int64, error)
 	DeleteCustomList(ctx context.Context, id int64) (int64, error)
 	DeleteCustomListItemsForRef(ctx context.Context, mediaRef string) error
 	DeleteExtension(ctx context.Context, id string) (int64, error)
@@ -64,6 +66,7 @@ type Querier interface {
 	GetAniListMirror(ctx context.Context, kind string) (AnilistMirror, error)
 	GetAniListOutboxEntry(ctx context.Context, arg GetAniListOutboxEntryParams) (AnilistOutbox, error)
 	GetBookDownload(ctx context.Context, id int64) (BookDownload, error)
+	GetBookOPDSServer(ctx context.Context, id int64) (BookOpdsServer, error)
 	GetBookPosition(ctx context.Context, fileID int64) (BookPosition, error)
 	GetCustomList(ctx context.Context, id int64) (CustomList, error)
 	GetExtension(ctx context.Context, id string) (Extension, error)
@@ -101,6 +104,7 @@ type Querier interface {
 	ListAllLibraryFiles(ctx context.Context) ([]ListAllLibraryFilesRow, error)
 	ListAniListOutbox(ctx context.Context, accountID int64) ([]AnilistOutbox, error)
 	ListBookDownloads(ctx context.Context, limit int64) ([]BookDownload, error)
+	ListBookOPDSServers(ctx context.Context) ([]BookOpdsServer, error)
 	ListCustomListItems(ctx context.Context, listID int64) ([]CustomListItem, error)
 	ListCustomListMembership(ctx context.Context, mediaType string) ([]ListCustomListMembershipRow, error)
 	ListCustomLists(ctx context.Context) ([]ListCustomListsRow, error)
@@ -178,6 +182,7 @@ type Querier interface {
 	// state always encodes to the same bytes and the cloud can tell it is unchanged.
 	SnapshotTrackerEntries(ctx context.Context) ([]TrackerEntry, error)
 	TouchLibraryRoot(ctx context.Context, arg TouchLibraryRootParams) error
+	UpdateBookOPDSServer(ctx context.Context, arg UpdateBookOPDSServerParams) (BookOpdsServer, error)
 	UpdateExtensionManifest(ctx context.Context, arg UpdateExtensionManifestParams) (Extension, error)
 	UpdateExtensionSettings(ctx context.Context, arg UpdateExtensionSettingsParams) (Extension, error)
 	UpdateLibraryFile(ctx context.Context, arg UpdateLibraryFileParams) error

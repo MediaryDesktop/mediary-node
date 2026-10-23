@@ -6,6 +6,7 @@ package booksource
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/rs/zerolog"
@@ -13,11 +14,14 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/download"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/gutenberg"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/handler"
+	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/servers"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/service"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/source"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/store"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/secrets"
 	pg "github.com/mediaryorg/mediary-node/server/internal/platform/sources/gutenberg"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/opds"
 )
 
 type Deps struct {
@@ -32,6 +36,10 @@ type Deps struct {
 
 	// Gutenberg is Project Gutenberg's site; nil on a node configured without it.
 	Gutenberg *pg.Client
+
+	// SecretsPath is the file the OPDS servers' passwords are kept in.
+	SecretsPath string
+	UserAgent   string
 }
 
 // Library is the library module as downloads need it, wired by internal/app.
@@ -60,20 +68,26 @@ func New(deps Deps) *Module {
 		})
 	}
 
-	// The user's OPDS servers join these in their own step.
+	opdsServers := servers.New(servers.Options{
+		DB:        deps.DB,
+		Client:    opds.New(30*time.Second, deps.UserAgent),
+		Passwords: secrets.New(deps.SecretsPath),
+		Logger:    deps.Logger,
+	})
+
 	sources := func(ctx context.Context) []source.Source {
 		var on []source.Source
 		if catalog != nil && catalog.Enabled(ctx) {
 			on = append(on, catalog)
 		}
 
-		return on
+		return append(on, opdsServers.Sources(ctx)...)
 	}
 
 	svc := service.New(service.Options{Sources: sources, Works: deps.Works})
 	queue := download.New(store.New(deps.DB), svc, deps.Library, deps.Events, deps.Logger)
 
-	return &Module{handler: handler.New(svc, queue, catalog), queue: queue, gutenberg: catalog}
+	return &Module{handler: handler.New(svc, queue, catalog, opdsServers), queue: queue, gutenberg: catalog}
 }
 
 // Start resumes the download queue and keeps the Gutenberg catalogue up to date,

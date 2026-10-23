@@ -213,7 +213,9 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 		Library: bookFolders{library: libraryModule},
 		Works:   bookWorks{media: mediaModule},
 
-		Gutenberg: deps.Gutenberg,
+		Gutenberg:   deps.Gutenberg,
+		SecretsPath: filepath.Join(deps.DataDir, "book-opds-secrets.json"),
+		UserAgent:   "mediary-node/" + deps.Build.Version,
 	})
 	bookSourceModule.Register(api)
 

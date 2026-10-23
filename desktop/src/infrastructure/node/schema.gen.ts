@@ -148,6 +148,68 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/v1/books/opds/check': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Try an OPDS server of books
+		 * @description Reads the catalogue and runs a search in it, before or after the server is saved.
+		 */
+		post: operations['checkBookOPDSServer']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/books/opds/servers': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * OPDS servers of books
+		 * @description The user's own catalogues of books — Calibre-Web, Kavita — and Standard Ebooks for its patrons. Each is searched beside Project Gutenberg.
+		 */
+		get: operations['listBookOPDSServers']
+		put?: never
+		/** Add an OPDS server of books */
+		post: operations['createBookOPDSServer']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/books/opds/servers/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		/** Change an OPDS server of books */
+		put: operations['updateBookOPDSServer']
+		post?: never
+		/**
+		 * Remove an OPDS server of books
+		 * @description Books saved from it stay in the library.
+		 */
+		delete: operations['deleteBookOPDSServer']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/v1/books/sources': {
 		parameters: {
 			query?: never
@@ -2366,6 +2428,49 @@ export interface components {
 			/** @description The book's name as the library knows it. */
 			title: string
 		}
+		BookOPDSServerBody: {
+			/** @description Whether a password is stored. The password itself is never sent back. */
+			has_password: boolean
+			/** Format: int64 */
+			id: number
+			name: string
+			/** @description Address of the catalogue's root feed. */
+			url: string
+			username?: string
+		}
+		BookOPDSServerInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/BookOPDSServerInputBody.json
+			 */
+			readonly $schema?: string
+			name: string
+			/** @description Absent keeps the stored password; an empty string removes it. */
+			password?: string
+			/** @description Address of the catalogue's root feed: http://nas:8083/opds for Calibre-Web, https://standardebooks.org/feeds/opds for Standard Ebooks. */
+			url: string
+			/** @description For Standard Ebooks, the e-mail of a Patrons Circle member, with no password. */
+			username?: string
+		}
+		BookOPDSServerOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/BookOPDSServerOutputBody.json
+			 */
+			readonly $schema?: string
+			server: components['schemas']['BookOPDSServerBody']
+		}
+		BookOPDSServersOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/BookOPDSServersOutputBody.json
+			 */
+			readonly $schema?: string
+			servers: components['schemas']['BookOPDSServerBody'][] | null
+		}
 		BookPosition: {
 			/**
 			 * Format: double
@@ -2491,6 +2596,37 @@ export interface components {
 			 */
 			readonly $schema?: string
 			chapter: components['schemas']['ChapterBody']
+		}
+		CheckBookOPDSServerInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/CheckBookOPDSServerInputBody.json
+			 */
+			readonly $schema?: string
+			password?: string
+			/**
+			 * Format: int64
+			 * @description A saved server, whose stored password is used when none is given.
+			 */
+			server_id?: number
+			url: string
+			username?: string
+		}
+		CheckBookOPDSServerOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/CheckBookOPDSServerOutputBody.json
+			 */
+			readonly $schema?: string
+			detail?: string
+			ok: boolean
+			/**
+			 * @description What is wrong, when something is. no_search: the catalogue is listed but cannot be searched, so it takes no part in finding books.
+			 * @enum {string}
+			 */
+			problem?: 'unauthorized' | 'not_opds' | 'no_search' | 'unreachable' | 'other_host'
 		}
 		CheckOPDSServerInputBody: {
 			/**
@@ -5452,6 +5588,10 @@ export type SchemaBookDownloadsOutputBody = components['schemas']['BookDownloads
 export type SchemaBookEdition = components['schemas']['BookEdition']
 export type SchemaBookFormat = components['schemas']['BookFormat']
 export type SchemaBookInfo = components['schemas']['BookInfo']
+export type SchemaBookOpdsServerBody = components['schemas']['BookOPDSServerBody']
+export type SchemaBookOpdsServerInputBody = components['schemas']['BookOPDSServerInputBody']
+export type SchemaBookOpdsServerOutputBody = components['schemas']['BookOPDSServerOutputBody']
+export type SchemaBookOpdsServersOutputBody = components['schemas']['BookOPDSServersOutputBody']
 export type SchemaBookPosition = components['schemas']['BookPosition']
 export type SchemaBookPositionInputBody = components['schemas']['BookPositionInputBody']
 export type SchemaBookPositionOutputBody = components['schemas']['BookPositionOutputBody']
@@ -5462,6 +5602,8 @@ export type SchemaCatalogPlugin = components['schemas']['CatalogPlugin']
 export type SchemaChapter = components['schemas']['Chapter']
 export type SchemaChapterBody = components['schemas']['ChapterBody']
 export type SchemaChapterOutputBody = components['schemas']['ChapterOutputBody']
+export type SchemaCheckBookOpdsServerInputBody = components['schemas']['CheckBookOPDSServerInputBody']
+export type SchemaCheckBookOpdsServerOutputBody = components['schemas']['CheckBookOPDSServerOutputBody']
 export type SchemaCheckOpdsServerInputBody = components['schemas']['CheckOPDSServerInputBody']
 export type SchemaCheckOpdsServerOutputBody = components['schemas']['CheckOPDSServerOutputBody']
 export type SchemaCheckTorrentClientInputBody = components['schemas']['CheckTorrentClientInputBody']
@@ -5955,6 +6097,165 @@ export interface operations {
 				content: {
 					'application/json': components['schemas']['SearchBookEditionsOutputBody']
 				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	checkBookOPDSServer: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['CheckBookOPDSServerInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['CheckBookOPDSServerOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listBookOPDSServers: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['BookOPDSServersOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	createBookOPDSServer: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['BookOPDSServerInputBody']
+			}
+		}
+		responses: {
+			/** @description Created */
+			201: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['BookOPDSServerOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	updateBookOPDSServer: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['BookOPDSServerInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['BookOPDSServerOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	deleteBookOPDSServer: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
 			}
 			/** @description Error */
 			default: {

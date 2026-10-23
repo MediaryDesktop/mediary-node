@@ -9,6 +9,7 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/httpapi"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/download"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/gutenberg"
+	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/servers"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/service"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/store"
 )
@@ -18,10 +19,11 @@ type Handler struct {
 	queue *download.Queue
 	// gutenberg is nil on a node configured without it.
 	gutenberg *gutenberg.Gutenberg
+	servers   *servers.Servers
 }
 
-func New(svc *service.Service, queue *download.Queue, pg *gutenberg.Gutenberg) *Handler {
-	return &Handler{svc: svc, queue: queue, gutenberg: pg}
+func New(svc *service.Service, queue *download.Queue, pg *gutenberg.Gutenberg, opds *servers.Servers) *Handler {
+	return &Handler{svc: svc, queue: queue, gutenberg: pg, servers: opds}
 }
 
 type BookSource struct {
@@ -124,6 +126,7 @@ type PutBookDownloadSettingsInput struct {
 
 func (h *Handler) Register(api huma.API) {
 	h.registerGutenberg(api)
+	h.registerServers(api)
 
 	huma.Register(api, huma.Operation{
 		OperationID: "listBookSources",

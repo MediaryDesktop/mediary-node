@@ -47,6 +47,15 @@ type BookDownload struct {
 	UpdatedAt  string `json:"updated_at"`
 }
 
+type BookOpdsServer struct {
+	ID        int64  `json:"id"`
+	Name      string `json:"name"`
+	Url       string `json:"url"`
+	Username  string `json:"username"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
+}
+
 type BookPosition struct {
 	FileID    int64   `json:"file_id"`
 	Locator   string  `json:"locator"`
