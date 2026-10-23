@@ -56,6 +56,12 @@ func TestNamesAnotherSeason(t *testing.T) {
 
 		{"[SubsPlease] Sousou no Frieren S2 - 05 (1080p)", frieren, true},
 		{"[Group] Sousou no Frieren II - 05", frieren, true},
+		// Real Nyaa names, 24.10.2026: the season after a separator.
+		{"[Yameii] Frieren: Beyond Journey's End - S02E05 [English Dub] [CR WEB-DL 1080p H264 AAC] [0564F2F3] (Sousou no Frieren Season 2 | S2)", frieren, true},
+		{"[Erai-raws] Sousou no Frieren 2nd Season - 05 [1080p CR WEBRip HEVC AAC][MultiSub][D3077C54]", frieren, true},
+		{"[Yameii] Frieren: Beyond Journey's End - S02E05 [English Dub] [CR WEB-DL 1080p H264 AAC] [0564F2F3] (Sousou no Frieren Season 2 | S2)", frieren2, false},
+		{"Frieren - Beyond Journey's End - S01E05 1080p", frieren, false},
+		{"[SubsPlease] Sousou no Frieren - 05 (1080p) [E1B5E0D1]", frieren, false},
 		// The first season named as such is the title itself.
 		{"Sousou no Frieren S01 1080p WEB", frieren, false},
 		{"Sousou no Frieren Season 1 [1080p]", frieren, false},

@@ -15,12 +15,13 @@ var sequelMarker = regexp.MustCompile(`(?i)^(?:\d+(?:st|nd|rd|th)?\s*season\b|se
 
 // A season named outright. Unlike sequelMarker, never a bare number, which is as
 // often the episode: "Frieren 05".
-var seasonMarker = regexp.MustCompile(`(?i)^(?:(\d+)(?:st|nd|rd|th)?\s*season\b|season\s*(\d+)\b|s(\d+)\b|ii+\b)`)
+var seasonMarker = regexp.MustCompile(`(?i)^(?:(\d+)(?:st|nd|rd|th)?\s*season\b|season\s*(\d+)\b|s(\d+)(?:\b|e\d)|ii+\b)`)
 
 // laterSeason reports whether a tail begins by naming a season after the
-// first: "S01" or "Season 1" is the title itself.
+// first, the separator before it aside: "- S02E05" does, while "S01" or
+// "Season 1" is the title itself.
 func laterSeason(tail string) bool {
-	match := seasonMarker.FindStringSubmatch(tail)
+	match := seasonMarker.FindStringSubmatch(strings.TrimLeft(tail, " -–_.:"))
 	if match == nil {
 		return false
 	}

@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/metainfo"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/release"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
 )
@@ -125,6 +126,14 @@ func (s *Service) releaseOfPlugin(provider Provider, item ProviderRelease) Torre
 		Info:        release.Parse(item.Title),
 		magnet:      item.Magnet,
 		link:        item.Link,
+	}
+
+	// Sites put the hash in the magnet and nowhere else; the node needs it apart
+	// to tell one torrent found twice and to ask a debrid service about it.
+	if found.InfoHash == "" && found.magnet != "" {
+		if info, err := metainfo.FromMagnet(found.magnet); err == nil {
+			found.InfoHash = info.InfoHash
+		}
 	}
 
 	// A hash alone is enough to fetch a torrent: the client finds its peers

@@ -151,6 +151,38 @@ func TestPluginsAndSourcesShareOneList(t *testing.T) {
 	}
 }
 
+// A site gives the hash only inside the magnet, as Nyaa does: it is still the
+// torrent Jackett found.
+func TestAPluginsMagnetNamesItsTorrent(t *testing.T) {
+	h := newHarness(t)
+	h.withSearch(frierenNames)
+	ix := newIndexer(t)
+	addSource(t, h, "Jackett", ix.server.URL+"/api", "key")
+
+	plugins := newFakeProviders(nyaa)
+	plugins.answers["nyaa"] = []ProviderRelease{{
+		Title:   "[SubsPlease] Sousou no Frieren - 13 (1080p)",
+		Magnet:  "magnet:?xt=urn:btih:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA&dn=Frieren&tr=http%3A%2F%2Fnyaa.tracker.wf%3A7777%2Fannounce",
+		Seeders: 400,
+	}}
+	h.svc.opts.Providers = plugins
+
+	result, err := h.svc.Search(context.Background(), SearchRequest{MediaRef: "anilist:154587", Episode: 13})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var thirteen []TorrentRelease
+	for _, r := range result.Releases {
+		if strings.Contains(r.Title, "- 13 ") {
+			thirteen = append(thirteen, r)
+		}
+	}
+	if len(thirteen) != 1 || thirteen[0].Plugin != "nyaa" || thirteen[0].InfoHash != "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" {
+		t.Fatalf("the 13th episode: %+v; want one result, the plugin's, with the magnet's hash", thirteen)
+	}
+}
+
 // A plugin that never answers costs the search its wait, not the results the
 // others found.
 func TestAHangingPluginLeavesTheOthersResults(t *testing.T) {
