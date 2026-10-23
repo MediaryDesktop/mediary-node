@@ -90,6 +90,17 @@ func TestForTheWholeTitleARangeOfEpisodesIsBest(t *testing.T) {
 	if got := bestOf(t, releases); got != "Sousou no Frieren - AniLiberty.TOP [WEBRip 1080p][HEVC][1-28]" && got != "[SubsPlease] Sousou no Frieren (01-28) (1080p) [V2] [Batch]" {
 		t.Fatalf("best = %q, want a batch of the 28 episodes", got)
 	}
+
+	// A season's pack named by season alone is as whole.
+	releases = append(releases, candidate("[EMBER] Frieren: Beyond Journey`s End (2023) (Season 1) [BDRip] [1080p Dual Audio HEVC 10-bit Opus]", 305, "any"))
+	for i := range releases {
+		releases[i].Best = false
+	}
+	rank(releases, &TorrentProfile{})
+
+	if got := bestOf(t, releases); got != releases[len(releases)-1].Title {
+		t.Fatalf("best = %q, want the season's pack with the most seeders", got)
+	}
 }
 
 func TestTheProfileIsSavedClean(t *testing.T) {

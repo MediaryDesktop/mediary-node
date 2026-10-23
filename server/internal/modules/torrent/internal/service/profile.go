@@ -124,10 +124,10 @@ func score(found *TorrentRelease, profile *TorrentProfile) (points int, eligible
 	case "episode":
 		points += 15
 	case "any":
-		// Asked for the whole title, a range of its episodes gets more of it than
-		// one episode does. A range, not any batch: a film's "Complete
-		// Collection" is no better than the film.
-		if found.Episodes != nil && found.Episodes.To > found.Episodes.From {
+		// Asked for the whole title, a range of its episodes or a season's pack
+		// gets more of it than one episode does. Not any batch: a film's
+		// "Complete Collection" is no better than the film.
+		if found.Episodes != nil && found.Episodes.To > found.Episodes.From || found.Episodes == nil && found.Season != nil {
 			points += 15
 		}
 	case "unknown":
