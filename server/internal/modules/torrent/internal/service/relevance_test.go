@@ -36,3 +36,40 @@ func TestNamesTitle(t *testing.T) {
 		}
 	}
 }
+
+func TestNamesAnotherSeason(t *testing.T) {
+	frieren := []string{"Frieren: Beyond Journey's End", "Sousou no Frieren"}
+	frieren2 := []string{"Frieren: Beyond Journey's End Season 2", "Sousou no Frieren 2nd Season"}
+	solo := []string{"Ore dake Level Up na Ken", "Solo Leveling"}
+
+	cases := []struct {
+		release string
+		names   []string
+		want    bool
+	}{
+		// Real AniLiberty names, 23.10.2026.
+		{"Sousou no Frieren 2nd Season - AniLiberty.TOP [WEB-DL 1080p][HEVC][1-10]", frieren, true},
+		{"Sousou no Frieren - AniLiberty.TOP [WEBRip 1080p][HEVC][1-28]", frieren, false},
+		{"Sousou no Frieren 2nd Season - AniLiberty.TOP [WEB-DL 1080p][HEVC][1-10]", frieren2, false},
+		{"Ore dake Level Up na Ken Season 2- Arise from the Shadow - AniLiberty.TOP [WEBRip 1080p][AVC][1-13]", solo, true},
+		{"Ore dake Level Up na Ken - AniLiberty.TOP [WEBRip 1080p][AVC][1-12]", solo, false},
+
+		{"[SubsPlease] Sousou no Frieren S2 - 05 (1080p)", frieren, true},
+		{"[Group] Sousou no Frieren II - 05", frieren, true},
+		// The first season named as such is the title itself.
+		{"Sousou no Frieren S01 1080p WEB", frieren, false},
+		{"Sousou no Frieren Season 1 [1080p]", frieren, false},
+		{"Frieren - Beyond Journey's End S01E07 1080p WEB H.264", frieren, false},
+		// A bare number is as often the episode.
+		{"Sousou.no.Frieren.05.1080p", frieren, false},
+		// Nothing of the title's names: not for this check to say.
+		{"[Erai-raws] Frieren - 01 ~ 28 [1080p][Batch]", frieren, false},
+		{"Sousou no Frieren 2nd Season - 05", nil, false},
+	}
+
+	for _, tc := range cases {
+		if got := namesAnotherSeason(tc.release, tc.names); got != tc.want {
+			t.Errorf("namesAnotherSeason(%q, %v) = %v, want %v", tc.release, tc.names, got, tc.want)
+		}
+	}
+}

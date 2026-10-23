@@ -294,13 +294,23 @@ func (s *Service) pickStreamReleases(ctx context.Context, req StreamRequest) ([]
 		return nil, err
 	}
 
+	// A loose search for "Sousou no Frieren" finds its 2nd Season too, and that
+	// batch holds an episode 5 as well. A show asked by season is left alone:
+	// its "Show S02" pack is the season asked, matched as such.
+	var names []string
+	if season == 0 && s.opts.Titles != nil {
+		if names, err = s.opts.Titles.Names(ctx, req.MediaRef); err != nil {
+			return nil, err
+		}
+	}
+
 	s.streams.mu.Lock()
 	live := make([]TorrentRelease, 0, len(result.Releases))
 	for i := range result.Releases {
 		found := &result.Releases[i]
 		_, deadHash := s.streams.stalled[strings.ToLower(found.InfoHash)]
 		_, deadID := s.streams.stalled["release:"+found.ID]
-		if !deadID && (found.InfoHash == "" || !deadHash) {
+		if !deadID && (found.InfoHash == "" || !deadHash) && !namesAnotherSeason(found.Title, names) {
 			live = append(live, *found)
 		}
 	}

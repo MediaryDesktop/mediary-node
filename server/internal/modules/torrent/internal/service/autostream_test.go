@@ -74,6 +74,36 @@ func TestAutoStreamWithNothingForTheEpisode(t *testing.T) {
 	}
 }
 
+func TestAutoStreamPassesOverAnotherSeasonsBatch(t *testing.T) {
+	h := newHarness(t)
+	h.withSearch(frierenNames)
+	client := withStreaming(t, h)
+	client.set(debrid.Remote{Hash: frierenHash, Progress: 0.1})
+
+	// As AniLiberty names them: the sequel's batch holds an episode 5 too, and
+	// has more seeders.
+	plugins := newFakeProviders(Provider{ID: "aniliberty", Name: "AniLiberty", Revision: "r1"})
+	plugins.answers["aniliberty"] = []ProviderRelease{
+		{Title: "Sousou no Frieren 2nd Season - AniLiberty.TOP [WEB-DL 1080p][HEVC][1-10]", Magnet: "magnet:?xt=urn:btih:2222222222222222222222222222222222222222", Seeders: 137},
+		{Title: "Sousou no Frieren - AniLiberty.TOP [WEBRip 1080p][HEVC][1-28]", Magnet: "magnet:?xt=urn:btih:1111111111111111111111111111111111111111", Seeders: 114},
+	}
+	h.svc.opts.Providers = plugins
+
+	got, err := h.svc.StartStream(context.Background(), autoRequest(5))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(client.streams) != 1 || client.streams[0] != "magnet:?xt=urn:btih:1111111111111111111111111111111111111111" {
+		t.Fatalf("played %v, want the first season's batch", client.streams)
+	}
+	for _, c := range got.Candidates {
+		if strings.Contains(c.Title, "2nd Season") {
+			t.Errorf("the 2nd Season is in line: %+v", got.Candidates)
+		}
+	}
+}
+
 func TestAutoStreamIsOneWayToSayWhatToPlay(t *testing.T) {
 	h := newHarness(t)
 	withAutoStreaming(t, h)
