@@ -18,6 +18,7 @@ const (
 	TopicAniListAuth   Topic = "anilist.session"
 	TopicMangaDownload Topic = "manga.download"
 	TopicBookDownload  Topic = "books.download"
+	TopicBookCatalog   Topic = "books.catalog"
 	TopicTools         Topic = "tools"
 	TopicExtension     Topic = "extension"
 )

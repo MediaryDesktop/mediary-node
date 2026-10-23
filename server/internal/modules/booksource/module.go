@@ -11,11 +11,13 @@ import (
 	"github.com/rs/zerolog"
 
 	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/download"
+	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/gutenberg"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/handler"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/service"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/source"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/store"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
+	pg "github.com/mediaryorg/mediary-node/server/internal/platform/sources/gutenberg"
 )
 
 type Deps struct {
@@ -27,6 +29,9 @@ type Deps struct {
 	Library Library
 	// Works names the book a search is for.
 	Works Works
+
+	// Gutenberg is Project Gutenberg's site; nil on a node configured without it.
+	Gutenberg *pg.Client
 }
 
 // Library is the library module as downloads need it, wired by internal/app.
@@ -39,24 +44,46 @@ type Works = service.Works
 type Work = service.Work
 
 type Module struct {
-	handler *handler.Handler
-	queue   *download.Queue
+	handler   *handler.Handler
+	queue     *download.Queue
+	gutenberg *gutenberg.Gutenberg
 }
 
 func New(deps Deps) *Module {
-	// The sources arrive with the steps that add them: Project Gutenberg, then
-	// the user's OPDS servers.
-	var sources []source.Source
+	var catalog *gutenberg.Gutenberg
+	if deps.Gutenberg != nil {
+		catalog = gutenberg.New(gutenberg.Options{
+			DB:     deps.DB,
+			Client: deps.Gutenberg,
+			Events: deps.Events,
+			Logger: deps.Logger,
+		})
+	}
+
+	// The user's OPDS servers join these in their own step.
+	sources := func(ctx context.Context) []source.Source {
+		var on []source.Source
+		if catalog != nil && catalog.Enabled(ctx) {
+			on = append(on, catalog)
+		}
+
+		return on
+	}
 
 	svc := service.New(service.Options{Sources: sources, Works: deps.Works})
 	queue := download.New(store.New(deps.DB), svc, deps.Library, deps.Events, deps.Logger)
 
-	return &Module{handler: handler.New(svc, queue), queue: queue}
+	return &Module{handler: handler.New(svc, queue, catalog), queue: queue, gutenberg: catalog}
 }
 
-// Start resumes the download queue and works through it until ctx ends.
+// Start resumes the download queue and keeps the Gutenberg catalogue up to date,
+// until ctx ends.
 func (m *Module) Start(ctx context.Context) {
 	m.queue.Start(ctx)
+
+	if m.gutenberg != nil {
+		m.gutenberg.Start(ctx)
+	}
 }
 
 func (m *Module) Register(api huma.API) {

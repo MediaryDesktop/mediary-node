@@ -86,7 +86,7 @@ func newHarness() *harness {
 	}
 
 	h.svc = New(Options{
-		Sources: []source.Source{h.gutenberg, h.opds},
+		Sources: func(context.Context) []source.Source { return []source.Source{h.gutenberg, h.opds} },
 		Works: fakeWorks{"openlibrary:OL450063W": {
 			Title:   "Frankenstein",
 			Authors: []string{"Mary Shelley"},

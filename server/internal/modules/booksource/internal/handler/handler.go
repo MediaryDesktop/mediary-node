@@ -8,6 +8,7 @@ import (
 
 	"github.com/mediaryorg/mediary-node/server/internal/httpapi"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/download"
+	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/gutenberg"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/service"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/store"
 )
@@ -15,10 +16,12 @@ import (
 type Handler struct {
 	svc   *service.Service
 	queue *download.Queue
+	// gutenberg is nil on a node configured without it.
+	gutenberg *gutenberg.Gutenberg
 }
 
-func New(svc *service.Service, queue *download.Queue) *Handler {
-	return &Handler{svc: svc, queue: queue}
+func New(svc *service.Service, queue *download.Queue, pg *gutenberg.Gutenberg) *Handler {
+	return &Handler{svc: svc, queue: queue, gutenberg: pg}
 }
 
 type BookSource struct {
@@ -120,17 +123,19 @@ type PutBookDownloadSettingsInput struct {
 }
 
 func (h *Handler) Register(api huma.API) {
+	h.registerGutenberg(api)
+
 	huma.Register(api, huma.Operation{
 		OperationID: "listBookSources",
 		Method:      http.MethodGet,
 		Path:        "/v1/books/sources",
 		Summary:     "Sources of free copies of books",
 		Tags:        []string{"books"},
-	}, func(_ context.Context, _ *struct{}) (*BookSourcesOutput, error) {
+	}, func(ctx context.Context, _ *struct{}) (*BookSourcesOutput, error) {
 		out := &BookSourcesOutput{}
 		out.Body.Sources = []BookSource{}
 
-		for _, src := range h.svc.Sources() {
+		for _, src := range h.svc.Sources(ctx) {
 			out.Body.Sources = append(out.Body.Sources, BookSource{ID: src.ID, Name: src.Name})
 		}
 

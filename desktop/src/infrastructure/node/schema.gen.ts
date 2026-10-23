@@ -165,6 +165,44 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/v1/books/sources/gutenberg': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/** Project Gutenberg as a source of books */
+		get: operations['getGutenbergSettings']
+		/**
+		 * Turn Project Gutenberg on or off
+		 * @description On, the node downloads Gutenberg's catalogue and searches it locally: the site is asked only for a book the user downloads. Off removes the catalogue.
+		 */
+		put: operations['putGutenbergSettings']
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/books/sources/gutenberg/refresh': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/** Check for a newer Project Gutenberg catalogue now */
+		post: operations['refreshGutenbergCatalog']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/v1/extension/status': {
 		parameters: {
 			query?: never
@@ -3120,6 +3158,37 @@ export interface components {
 			 */
 			key_source: 'user' | 'build' | 'none'
 		}
+		GutenbergSettingsBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/GutenbergSettingsBody.json
+			 */
+			readonly $schema?: string
+			/** @description False when the node is configured without Project Gutenberg. */
+			available: boolean
+			/**
+			 * Format: int64
+			 * @description Books in the node's copy of the catalogue; 0 until it is downloaded.
+			 */
+			books: number
+			/**
+			 * Format: date-time
+			 * @description When the node last asked for a newer one; it asks once a week.
+			 */
+			checked_at?: string
+			/** @description Off until the user turns it on; turning it on downloads the catalogue (about 6 MB, mostly books in English). */
+			enabled: boolean
+			/** @description Why the last download or check failed. */
+			error?: string
+			/** @description The catalogue is being downloaded or checked. Changes arrive on the books.catalog topic. */
+			syncing: boolean
+			/**
+			 * Format: date-time
+			 * @description When the node took the catalogue it has.
+			 */
+			updated_at?: string
+		}
 		HealthOutputBody: {
 			/**
 			 * Format: uri
@@ -3740,6 +3809,15 @@ export interface components {
 			readonly $schema?: string
 			/** Format: int64 */
 			root_id: number
+		}
+		PutGutenbergSettingsInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/PutGutenbergSettingsInputBody.json
+			 */
+			readonly $schema?: string
+			enabled: boolean
 		}
 		PutMangaDexSettingsInputBody: {
 			/**
@@ -5425,6 +5503,7 @@ export type SchemaFont = components['schemas']['Font']
 export type SchemaFuzzyDate = components['schemas']['FuzzyDate']
 export type SchemaGoogleBooksKeyInputBody = components['schemas']['GoogleBooksKeyInputBody']
 export type SchemaGoogleBooksSettings = components['schemas']['GoogleBooksSettings']
+export type SchemaGutenbergSettingsBody = components['schemas']['GutenbergSettingsBody']
 export type SchemaHealthOutputBody = components['schemas']['HealthOutputBody']
 export type SchemaInstallExtensionInputBody = components['schemas']['InstallExtensionInputBody']
 export type SchemaLibraryCollection = components['schemas']['LibraryCollection']
@@ -5463,6 +5542,7 @@ export type SchemaPreviewExtensionInputBody = components['schemas']['PreviewExte
 export type SchemaProgressInputBody = components['schemas']['ProgressInputBody']
 export type SchemaProgressOutputBody = components['schemas']['ProgressOutputBody']
 export type SchemaPutBookDownloadSettingsInputBody = components['schemas']['PutBookDownloadSettingsInputBody']
+export type SchemaPutGutenbergSettingsInputBody = components['schemas']['PutGutenbergSettingsInputBody']
 export type SchemaPutMangaDexSettingsInputBody = components['schemas']['PutMangaDexSettingsInputBody']
 export type SchemaPutMangaDownloadSettingsInputBody =
 	components['schemas']['PutMangaDownloadSettingsInputBody']
@@ -5903,6 +5983,97 @@ export interface operations {
 				}
 				content: {
 					'application/json': components['schemas']['BookSourcesOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getGutenbergSettings: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['GutenbergSettingsBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	putGutenbergSettings: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['PutGutenbergSettingsInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['GutenbergSettingsBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	refreshGutenbergCatalog: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description Accepted */
+			202: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['GutenbergSettingsBody']
 				}
 			}
 			/** @description Error */

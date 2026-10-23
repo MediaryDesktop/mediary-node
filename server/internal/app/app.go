@@ -23,6 +23,7 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anizip"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/googlebooks"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/gutenberg"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/openlibrary"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/tmdb"
 	"github.com/mediaryorg/mediary-node/server/internal/wsapi"
@@ -129,6 +130,19 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 		})
 	}
 
+	var gutenbergClient *gutenberg.Client
+	if cfg.Gutenberg.Endpoint != "" {
+		gutenbergClient, err = gutenberg.New(gutenberg.Options{
+			Endpoint:  cfg.Gutenberg.Endpoint,
+			Timeout:   cfg.Gutenberg.Timeout,
+			UserAgent: "mediary-node/" + build.Version,
+			Contact:   cfg.Gutenberg.Contact,
+		})
+		if err != nil {
+			return err
+		}
+	}
+
 	router, api := httpapi.New(httpapi.Options{
 		Version:        build.Version,
 		Token:          token,
@@ -150,6 +164,7 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 		TMDB:                tmdbClient,
 		OpenLibrary:         openLibrary,
 		GoogleBooks:         googleBooks,
+		Gutenberg:           gutenbergClient,
 		MangaDex:            cfg.MangaDex,
 		AniListClientID:     cfg.AniList.ClientID,
 		AniListAuthorizeURL: cfg.AniList.AuthorizeURL,

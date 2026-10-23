@@ -34,14 +34,18 @@ type Work struct {
 	Authors []string
 }
 
+// Sources are the sources on now: one the user turned off is not searched, and
+// a download from it fails.
+type Sources func(ctx context.Context) []source.Source
+
 type Options struct {
-	Sources []source.Source
+	Sources Sources
 	Works   Works
 	Now     func() time.Time
 }
 
 type Service struct {
-	sources []source.Source
+	sources Sources
 	works   Works
 	now     func() time.Time
 
@@ -73,9 +77,11 @@ type SourceInfo struct {
 	Name string
 }
 
-func (s *Service) Sources() []SourceInfo {
-	out := make([]SourceInfo, 0, len(s.sources))
-	for _, src := range s.sources {
+func (s *Service) Sources(ctx context.Context) []SourceInfo {
+	sources := s.sources(ctx)
+
+	out := make([]SourceInfo, 0, len(sources))
+	for _, src := range sources {
 		out = append(out, SourceInfo{ID: src.ID(), Name: src.Name()})
 	}
 
@@ -124,17 +130,19 @@ func (s *Service) Search(ctx context.Context, mediaRef, text string) (*SearchRes
 		return nil, apperr.Invalid("q", "give the text to search for, or a book")
 	}
 
+	sources := s.sources(ctx)
+
 	result := &SearchResult{
 		Editions: []source.Edition{},
-		Sources:  make([]SourceOutcome, len(s.sources)),
+		Sources:  make([]SourceOutcome, len(sources)),
 	}
-	found := make([][]source.Edition, len(s.sources))
+	found := make([][]source.Edition, len(sources))
 
 	searchCtx, cancel := context.WithTimeout(ctx, searchTimeout)
 	defer cancel()
 
 	var wg sync.WaitGroup
-	for i, src := range s.sources {
+	for i, src := range sources {
 		result.Sources[i] = SourceOutcome{ID: src.ID(), Name: src.Name()}
 
 		wg.Add(1)
@@ -243,13 +251,13 @@ func (s *Service) Prepare(editionRef, formatType, mediaRef string) (download.New
 func (s *Service) Open(ctx context.Context, ref, location string) (io.ReadCloser, error) {
 	id := source.SourceOf(ref)
 
-	for _, src := range s.sources {
+	for _, src := range s.sources(ctx) {
 		if src.ID() == id {
 			return src.Open(ctx, ref, location)
 		}
 	}
 
-	return nil, apperr.New(apperr.KindPrecondition, "the source of %s is not set up any more", ref)
+	return nil, apperr.New(apperr.KindPrecondition, "the source of %s is turned off or no longer set up", ref)
 }
 
 // messageOf is what a source's failure says to the user: an apperr's own
