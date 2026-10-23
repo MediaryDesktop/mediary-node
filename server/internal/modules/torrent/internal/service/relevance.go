@@ -65,6 +65,38 @@ func namesAnotherSeason(release string, names []string) bool {
 	return len(found) > 0
 }
 
+// A season a title's own name gives: "Sousou no Frieren 2nd Season".
+var seasonInName = regexp.MustCompile(`(?i)\b(?:(\d+)(?:st|nd|rd|th)\s*season|season\s*(\d+))\b`)
+
+// namedSeason is the season a title's names give it, and the first when they
+// give none.
+func namedSeason(names []string) int {
+	for _, name := range names {
+		if match := seasonInName.FindStringSubmatch(name); match != nil {
+			for _, number := range match[1:] {
+				if n, err := strconv.Atoi(number); err == nil {
+					return n
+				}
+			}
+		}
+	}
+
+	return 1
+}
+
+// ofAnotherSeason reports whether a release found for a title numbered without
+// seasons is of another one: named so right after the title's name, or
+// numbered by another season — "Frieren Beyond Journeys End S02E05 (Sousou no
+// Frieren)" — while naming the title somewhere. A release that never names the
+// title is left to the episode match.
+func ofAnotherSeason(found *TorrentRelease, names []string) bool {
+	if namesAnotherSeason(found.Title, names) {
+		return true
+	}
+
+	return found.Season != nil && *found.Season != namedSeason(names) && len(tails(found.Title, names)) > 0
+}
+
 // tails are what follows each place a release name holds one of the title's
 // names as whole words.
 func tails(release string, names []string) []string {

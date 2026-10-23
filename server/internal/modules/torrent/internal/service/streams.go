@@ -310,7 +310,7 @@ func (s *Service) pickStreamReleases(ctx context.Context, req StreamRequest) ([]
 		found := &result.Releases[i]
 		_, deadHash := s.streams.stalled[strings.ToLower(found.InfoHash)]
 		_, deadID := s.streams.stalled["release:"+found.ID]
-		if !deadID && (found.InfoHash == "" || !deadHash) && !namesAnotherSeason(found.Title, names) {
+		if !deadID && (found.InfoHash == "" || !deadHash) && !ofAnotherSeason(found, names) {
 			live = append(live, *found)
 		}
 	}

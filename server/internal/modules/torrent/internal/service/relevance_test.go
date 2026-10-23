@@ -1,6 +1,10 @@
 package service
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/release"
+)
 
 func TestNamesTitle(t *testing.T) {
 	season3 := []string{"Tensei Kizoku, Kantei Skill de Nariagaru 3rd Season"}
@@ -33,6 +37,35 @@ func TestNamesTitle(t *testing.T) {
 	for _, tc := range cases {
 		if got := namesTitle(tc.release, tc.names); got != tc.want {
 			t.Errorf("namesTitle(%q, %v) = %v, want %v", tc.release, tc.names, got, tc.want)
+		}
+	}
+}
+
+func TestOfAnotherSeason(t *testing.T) {
+	frieren := []string{"Frieren: Beyond Journey’s End", "Sousou no Frieren", "Frieren at the Funeral"}
+	frieren2 := []string{"Frieren: Beyond Journey’s End Season 2", "Sousou no Frieren 2nd Season"}
+
+	cases := []struct {
+		release string
+		names   []string
+		want    bool
+	}{
+		// Real Nyaa names, 24.10.2026: the title named only at the end.
+		{"[ToonsHub] Frieren Beyond Journeys End S02E05 1080p BILI WEB-DL AAC2.0 H.265 (Sousou no Frieren, Multi-Subs)", frieren, true},
+		{"[ToonsHub] Frieren Beyond Journeys End S02E05 1080p BILI WEB-DL AAC2.0 H.265 (Sousou no Frieren, Multi-Subs)", frieren2, false},
+		{"[SubsPlease] Sousou no Frieren - 05 (1080p) [8E3F8FA5].mkv", frieren, false},
+		{"[SubsPlease] Sousou no Frieren S2 - 05 (1080p) [6AAEC79A].mkv", frieren, true},
+		{"[SubsPlease] Sousou no Frieren S2 - 05 (1080p) [6AAEC79A].mkv", frieren2, false},
+		{"Frieren - Beyond Journey's End S01E05 1080p WEB H.264", frieren, false},
+		// Another season by number, but the title not named: the episode match decides.
+		{"Demon Slayer S03E05 1080p", frieren, false},
+		{"Anything", nil, false},
+	}
+
+	for _, tc := range cases {
+		found := &TorrentRelease{Title: tc.release, Info: release.Parse(tc.release)}
+		if got := ofAnotherSeason(found, tc.names); got != tc.want {
+			t.Errorf("ofAnotherSeason(%q, %v) = %v, want %v", tc.release, tc.names, got, tc.want)
 		}
 	}
 }
@@ -74,6 +107,10 @@ func TestNamesAnotherSeason(t *testing.T) {
 	}
 
 	for _, tc := range cases {
+		found := &TorrentRelease{Title: tc.release, Info: release.Parse(tc.release)}
+		if tc.want && !ofAnotherSeason(found, tc.names) {
+			t.Errorf("ofAnotherSeason(%q) = false; what names another season right after the title is another", tc.release)
+		}
 		if got := namesAnotherSeason(tc.release, tc.names); got != tc.want {
 			t.Errorf("namesAnotherSeason(%q, %v) = %v, want %v", tc.release, tc.names, got, tc.want)
 		}
