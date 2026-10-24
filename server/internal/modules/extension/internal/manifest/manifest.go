@@ -31,12 +31,21 @@ const (
 )
 
 // Type is the one role a plugin plays. The type is the whole of what it may
-// do: a torrent provider is handed a search and returns releases.
+// do: a torrent provider is handed a search and returns releases; a manga
+// provider finds series, lists their chapters and names the pages' images.
 type Type string
 
-const TypeTorrentProvider Type = "torrent-provider"
+const (
+	TypeTorrentProvider Type = "torrent-provider"
+	TypeMangaProvider   Type = "manga-provider"
+)
 
-var types = map[Type]bool{TypeTorrentProvider: true}
+var types = map[Type]bool{TypeTorrentProvider: true, TypeMangaProvider: true}
+
+// Known reports whether the node can run a plugin of this type.
+func Known(t Type) bool {
+	return types[t]
+}
 
 type Manifest struct {
 	ID          string `json:"id"`
@@ -138,7 +147,7 @@ func (m *Manifest) Validate() error {
 		fail("version %q is not a semantic version like 1.2.0", m.Version)
 	}
 	if !types[m.Type] {
-		fail("type %q is not one the node knows; it knows %q", m.Type, TypeTorrentProvider)
+		fail("type %q is not one the node knows; it knows %q and %q", m.Type, TypeTorrentProvider, TypeMangaProvider)
 	}
 	if text := strings.TrimSpace(m.Author); text == "" || len(text) > maxAuthor {
 		fail("author: 1–%d characters", maxAuthor)

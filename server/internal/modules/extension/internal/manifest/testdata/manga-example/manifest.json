@@ -1,0 +1,22 @@
+{
+	"id": "example-comics",
+	"name": "Example comics",
+	"version": "1.0.0",
+	"type": "manga-provider",
+	"author": "Mediary tests",
+	"description": "Reads series, chapters and pages from a made-up comics site. Used by the node's tests only.",
+	"lang": "multi",
+	"homepage": "https://comics.example.org",
+	"network": ["comics.example.org", "img.comics.example.org"],
+	"config": [
+		{
+			"name": "language",
+			"label": "Language",
+			"type": "select",
+			"options": ["en", "uk", "any"],
+			"default": "en"
+		}
+	],
+	"payload": "https://plugins.example.org/example-comics/1.0.0/plugin.js",
+	"sha256": "e69c29d529dc0931dece87f35909fa8d9ae8653bf4328eef11b50e6a381a07de"
+}

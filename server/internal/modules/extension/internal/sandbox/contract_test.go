@@ -165,6 +165,26 @@ func TestExamplePluginCompiles(t *testing.T) {
 	}
 }
 
+// The manga example defines a Provider with every method a manga provider has.
+func TestMangaExamplePluginCompiles(t *testing.T) {
+	code, err := os.ReadFile(filepath.Join("..", "manifest", "testdata", "manga-example", "plugin.js"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	vm := goja.New()
+	if _, runErr := vm.RunScript("plugin.js", string(code)); runErr != nil {
+		t.Fatalf("goja cannot run the manga example: %v", runErr)
+	}
+
+	for _, method := range []string{"search", "chapters", "pages"} {
+		kind, err := vm.RunString("typeof Provider.prototype." + method)
+		if err != nil || kind.String() != "function" {
+			t.Fatalf("Provider.%s is %v (%v)", method, kind, err)
+		}
+	}
+}
+
 // goja gives a bare runtime none of what a script could reach the machine
 // with; the sandbox only adds what it means to.
 func TestBareRuntimeHasNoWayOut(t *testing.T) {

@@ -599,6 +599,7 @@ components:
         type:
           enum:
             - torrent-provider
+            - manga-provider
           type: string
         update:
           description: Installed from here, and the repository lists a newer version.
@@ -1486,6 +1487,7 @@ components:
         type:
           enum:
             - torrent-provider
+            - manga-provider
           type: string
         update:
           $ref: "#/components/schemas/ExtensionUpdate"
@@ -1587,6 +1589,7 @@ components:
         type:
           enum:
             - torrent-provider
+            - manga-provider
           type: string
         version:
           type: string

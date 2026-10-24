@@ -1,10 +1,14 @@
 # Writing a plugin
 
-A Mediary plugin adds a place to search for torrents. It is two files: a
-`manifest.json` that says what the plugin is and which sites it reaches, and a
-`plugin.js` that does the searching. [`plugin.d.ts`](plugin.d.ts) has the
-types; the node's tests run a
-[complete example](../../server/internal/modules/extension/internal/manifest/testdata/example).
+A Mediary plugin adds a place to search for torrents (`torrent-provider`) or
+to read manga from (`manga-provider`). It is two files: a `manifest.json` that
+says what the plugin is and which sites it reaches, and a `plugin.js` that does
+the work. [`plugin.d.ts`](plugin.d.ts) has the types; the node's tests run a
+complete [torrent provider](../../server/internal/modules/extension/internal/manifest/testdata/example)
+and [manga provider](../../server/internal/modules/extension/internal/manifest/testdata/manga-example).
+
+Mediary ships no plugins and recommends none; a user adds the repositories they
+choose and agrees to each plugin's sites before it installs.
 
 ## What the node does and what the plugin does
 
@@ -15,6 +19,14 @@ group from the title, telling an episode from a batch, ranking by the user's
 profile, marking what a debrid service holds, downloading, streaming, and
 grabbing new episodes by the user's rules. A plugin does not need to do any of
 it.
+
+A manga provider has three methods: `search` finds series for the user to link
+a title to, `chapters` lists a series' chapters, and `pages` names each page's
+image. The node keeps the link, merges the chapters with the user's files and
+other sources, and fetches the images itself — from the manifest's hosts only,
+with the `referer` the plugin gives — for the reader and for saving chapters as
+CBZ. Series and chapter ids are the site's own strings; the node hands them
+back as they were.
 
 ## The manifest
 

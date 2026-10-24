@@ -1,9 +1,11 @@
-// Types for a Mediary torrent-provider plugin.
+// Types for a Mediary plugin: a torrent provider or a manga provider.
 //
-// A plugin is one JavaScript file that defines `class Provider` with an async
-// `search` method. The node calls it with a search and expects releases back;
-// parsing their names, matching episodes, ranking by the user's profile,
-// downloading and streaming are the node's job, not the plugin's.
+// A plugin is one JavaScript file that defines `class Provider`. A torrent
+// provider has an async `search` method: the node calls it with a search and
+// expects releases back; parsing their names, matching episodes, ranking by the
+// user's profile, downloading and streaming are the node's job, not the
+// plugin's. A manga provider has `search`, `chapters` and `pages` (see
+// MangaProvider below); the node fetches the pages' images itself.
 //
 // The script runs in a sandbox. These globals are all it has: no `require`,
 // no files, no processes, no timers. `fetch` reaches only the hosts listed in
@@ -48,6 +50,55 @@ interface Release {
 
 interface Provider {
 	search(request: SearchRequest): Promise<Release[]>
+}
+
+/** What a manga provider is asked to find, to link a title to a series. */
+interface MangaSearchRequest {
+	/** The text to search for: one of the title's names, or what the user typed. */
+	query: string
+	/** Every name the title is known by, the main one first. */
+	titles: string[]
+	anilistId?: number
+}
+
+/** A series on the site. */
+interface Series {
+	/** The site's own id, as `chapters` takes it back. Up to 512 characters. */
+	id: string
+	title: string
+	/** Tells similar names apart: a year, a kind. */
+	detail?: string
+}
+
+/** A chapter of a series. */
+interface MangaChapter {
+	/** The site's own id, as `pages` takes it back. Up to 512 characters. */
+	id: string
+	/** As the site numbers it: "13", "13.5", "" for an extra. A whole number
+	 * moves the reading progress on AniList; anything else does not. */
+	number: string
+	title?: string
+	volume?: string
+	/** BCP 47, e.g. "en", "uk". */
+	language?: string
+	/** Who translated it, shown beside the chapter. */
+	groups?: string[]
+	/** ISO 8601. */
+	publishedAt?: string
+}
+
+/** One page's image. The node fetches it, never the plugin. */
+interface MangaPage {
+	/** On one of the manifest's hosts. */
+	url: string
+	/** Sent as the Referer, for sites that check it; also on the manifest's hosts. */
+	referer?: string
+}
+
+interface MangaProvider {
+	search(request: MangaSearchRequest): Promise<Series[]>
+	chapters(seriesId: string): Promise<MangaChapter[]>
+	pages(chapterId: string): Promise<MangaPage[]>
 }
 
 interface RequestInit {

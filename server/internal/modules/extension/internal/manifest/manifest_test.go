@@ -41,6 +41,32 @@ func TestExampleIsValid(t *testing.T) {
 	}
 }
 
+// The manga example too: a valid manga provider whose code matches its sum.
+func TestMangaExampleIsValid(t *testing.T) {
+	raw, err := os.ReadFile(filepath.Join("testdata", "manga-example", "manifest.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	m, err := Parse(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if m.Type != TypeMangaProvider {
+		t.Fatalf("type = %q", m.Type)
+	}
+
+	code, err := os.ReadFile(filepath.Join("testdata", "manga-example", "plugin.js"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	sum := sha256.Sum256(code)
+	if got := hex.EncodeToString(sum[:]); got != m.SHA256 {
+		t.Fatalf("plugin.js hashes to %s, the manifest pins %s", got, m.SHA256)
+	}
+}
+
 // edit parses the example, changes it and validates it again.
 func edit(t *testing.T, change func(m map[string]any)) error {
 	t.Helper()

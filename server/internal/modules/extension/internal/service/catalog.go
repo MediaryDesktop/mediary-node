@@ -41,7 +41,7 @@ type CatalogPlugin struct {
 	ID             string `json:"id"`
 	Name           string `json:"name"`
 	Version        string `json:"version"`
-	Type           string `json:"type" enum:"torrent-provider"`
+	Type           string `json:"type" enum:"torrent-provider,manga-provider"`
 	Author         string `json:"author"`
 	Description    string `json:"description,omitempty"`
 	Lang           string `json:"lang,omitempty"`

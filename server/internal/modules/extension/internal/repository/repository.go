@@ -100,7 +100,7 @@ func check(e Entry) (Entry, bool) {
 	if !httpsURL(e.Manifest) || !idPattern.MatchString(e.ID) || !semverPattern.MatchString(e.Version) {
 		return Entry{}, false
 	}
-	if manifest.Type(e.Type) != manifest.TypeTorrentProvider {
+	if !manifest.Known(manifest.Type(e.Type)) {
 		return Entry{}, false
 	}
 

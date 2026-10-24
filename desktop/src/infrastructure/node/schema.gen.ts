@@ -2555,7 +2555,7 @@ export interface components {
 			repository_id: number
 			repository_name: string
 			/** @enum {string} */
-			type: 'torrent-provider'
+			type: 'torrent-provider' | 'manga-provider'
 			/** @description Installed from here, and the repository lists a newer version. */
 			update: boolean
 			version: string
@@ -3043,7 +3043,7 @@ export interface components {
 			/** @description Every host the plugin may reach. Nothing else is reachable to it. */
 			network: string[] | null
 			/** @enum {string} */
-			type: 'torrent-provider'
+			type: 'torrent-provider' | 'manga-provider'
 			/** @description What the last update check found. */
 			update?: components['schemas']['ExtensionUpdate']
 			/** Format: date-time */
@@ -3085,7 +3085,7 @@ export interface components {
 			/** @description Every host the plugin may reach. Nothing else is reachable to it. */
 			network: string[] | null
 			/** @enum {string} */
-			type: 'torrent-provider'
+			type: 'torrent-provider' | 'manga-provider'
 			version: string
 		}
 		ExtensionRepository: {
