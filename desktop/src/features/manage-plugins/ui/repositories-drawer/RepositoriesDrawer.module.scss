@@ -1,10 +1,11 @@
+// The drawer is too narrow for an address and the button side by side.
 .add {
 	display: flex;
+	flex-direction: column;
 	gap: 0.5rem;
 
-	> :first-child {
-		flex: 1;
-		min-width: 0;
+	> button {
+		align-self: flex-end;
 	}
 }
 
