@@ -71,6 +71,10 @@ type pluginKey struct {
 	Number  string `json:"n,omitempty"`
 	// Title names a saved chapter that has no number.
 	Title string `json:"t,omitempty"`
+	// Groups credits the chapter's translators in the reader, as for OPDS and
+	// MangaDex chapters; carried here so opening the chapter needs no extra
+	// call for it.
+	Groups []string `json:"g,omitempty"`
 }
 
 func encodePluginKey(key pluginKey) (string, error) {
@@ -197,7 +201,7 @@ func (s *Service) pluginChapters(ctx context.Context, source, seriesID string) (
 
 	chapters := make([]ChapterInfo, 0, len(found))
 	for _, c := range found {
-		key, err := encodePluginKey(pluginKey{Series: seriesID, Chapter: c.ID, Number: c.Number, Title: c.Title})
+		key, err := encodePluginKey(pluginKey{Series: seriesID, Chapter: c.ID, Number: c.Number, Title: c.Title, Groups: c.Groups})
 		if err != nil {
 			return nil, err
 		}
@@ -229,7 +233,7 @@ func (s *Service) PluginChapter(ctx context.Context, id, rawKey string) (*ReadCh
 		return nil, err
 	}
 
-	out := &ReadChapter{Number: key.Number, Pages: len(pages), SourceName: p.Name}
+	out := &ReadChapter{Number: key.Number, Pages: len(pages), SourceName: p.Name, Groups: key.Groups}
 
 	link, err := s.store.LinkBySeries(ctx, SourcePrefixPlugin+id, key.Series)
 	if err != nil {

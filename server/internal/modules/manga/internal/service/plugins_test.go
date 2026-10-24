@@ -237,6 +237,13 @@ func TestAPluginsChapterReadsPageByPage(t *testing.T) {
 	if _, err = h.svc.PluginChapter(ctx, "comics", "not-a-key!"); apperr.KindOf(err) != apperr.KindInvalid {
 		t.Fatalf("a forged key: %v", err)
 	}
+
+	// Chapter 2's translators, carried in its reference, credited without
+	// asking the plugin again.
+	withGroups, err := h.svc.PluginChapter(ctx, "comics", strings.TrimPrefix(chapters[1].Ref, "plugin:comics:"))
+	if err != nil || len(withGroups.Groups) != 1 || withGroups.Groups[0] != "Scans" {
+		t.Fatalf("chapter 2 = %+v, %v", withGroups, err)
+	}
 }
 
 // A plugin's chapter is saved page by page, under the title the user linked.
