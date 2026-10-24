@@ -11,9 +11,14 @@ import (
 )
 
 // The service is the download queue's source: it knows how to reach a chapter by
-// its reference. Only chapters on the user's OPDS servers for now.
+// its reference. Chapters on the user's OPDS servers and from manga plugins;
+// MangaDex says nothing of keeping its pages, so its chapters are read only.
 
 func (s *Service) Describe(ctx context.Context, ref string) (*download.Chapter, error) {
+	if id, key, ok := pluginRef(ref); ok {
+		return s.describePlugin(ctx, id, key)
+	}
+
 	serverID, key, err := opdsRef(ref)
 	if err != nil {
 		return nil, err
@@ -56,6 +61,10 @@ func (s *Service) Describe(ctx context.Context, ref string) (*download.Chapter, 
 }
 
 func (s *Service) DownloadPage(ctx context.Context, ref string, index int) (data []byte, contentType string, err error) {
+	if id, key, ok := pluginRef(ref); ok {
+		return s.PluginPage(ctx, id, key, index)
+	}
+
 	serverID, key, err := opdsRef(ref)
 	if err != nil {
 		return nil, "", err
@@ -65,6 +74,10 @@ func (s *Service) DownloadPage(ctx context.Context, ref string, index int) (data
 }
 
 func (s *Service) Archive(ctx context.Context, ref string) (io.ReadCloser, error) {
+	if _, _, ok := pluginRef(ref); ok {
+		return nil, apperr.New(apperr.KindPrecondition, "a plugin gives a chapter page by page only")
+	}
+
 	serverID, key, err := opdsRef(ref)
 	if err != nil {
 		return nil, err
@@ -89,6 +102,45 @@ func (s *Service) Archive(ctx context.Context, ref string) (io.ReadCloser, error
 	}
 
 	return body, nil
+}
+
+// describePlugin is a plugin's chapter as the queue saves it: its pages counted
+// now, its title the one the user linked.
+func (s *Service) describePlugin(ctx context.Context, id, rawKey string) (*download.Chapter, error) {
+	key, err := decodePluginKey(rawKey)
+	if err != nil {
+		return nil, err
+	}
+
+	p, pages, err := s.pluginPages(ctx, id, key.Chapter)
+	if err != nil {
+		return nil, err
+	}
+
+	chapter := &download.Chapter{Number: key.Number, Title: key.Title, SourceName: p.Name, Pages: len(pages)}
+
+	link, err := s.store.LinkBySeries(ctx, SourcePrefixPlugin+id, key.Series)
+	if err != nil {
+		return nil, err
+	}
+	if link != nil {
+		chapter.MediaRef = link.MediaRef
+		chapter.Series = link.SeriesTitle
+	}
+
+	return chapter, nil
+}
+
+// pluginRef reads plugin:<id>:<key>.
+func pluginRef(ref string) (id, key string, ok bool) {
+	rest, ok := strings.CutPrefix(ref, SourcePrefixPlugin)
+	if !ok {
+		return "", "", false
+	}
+
+	id, key, ok = strings.Cut(rest, ":")
+
+	return id, key, ok && id != "" && key != ""
 }
 
 // opdsRef reads opds:<server>:<key>; every other source is refused here.

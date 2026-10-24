@@ -239,6 +239,46 @@ func TestAPluginsChapterReadsPageByPage(t *testing.T) {
 	}
 }
 
+// A plugin's chapter is saved page by page, under the title the user linked.
+func TestAPluginsChapterIsADownloadSource(t *testing.T) {
+	h, _, _ := withPlugins(t)
+	ctx := context.Background()
+
+	if err := h.svc.SetLink(ctx, "anilist:118586", "plugin:comics", "frieren/1", "Sousou no Frieren"); err != nil {
+		t.Fatal(err)
+	}
+	chapters, _, err := h.svc.Chapters(ctx, "anilist:118586")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	source := h.svc.DownloadSource()
+
+	chapter, err := source.Describe(ctx, chapters[0].Ref)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if chapter.MediaRef != "anilist:118586" || chapter.Series != "Sousou no Frieren" || chapter.Number != "1" ||
+		chapter.Pages != 2 || chapter.SourceName != "Comics" || chapter.Archive {
+		t.Fatalf("chapter = %+v", chapter)
+	}
+
+	// The extra has no number; its own title names its file.
+	extra, err := source.Describe(ctx, chapters[2].Ref)
+	if err != nil || extra.Title != "Extra" {
+		t.Fatalf("extra = %+v, %v", extra, err)
+	}
+
+	data, contentType, err := source.Page(ctx, chapters[0].Ref, 1)
+	if err != nil || contentType != "image/png" || !strings.Contains(string(data), "2.png") {
+		t.Fatalf("page: %q %s %v", data, contentType, err)
+	}
+
+	if _, err = source.Archive(ctx, chapters[0].Ref); apperr.KindOf(err) != apperr.KindPrecondition {
+		t.Fatalf("archive: %v, want page by page only", err)
+	}
+}
+
 func TestPluginPagesAreAskedAgainInTime(t *testing.T) {
 	h, plugins, now := withPlugins(t)
 	ctx := context.Background()

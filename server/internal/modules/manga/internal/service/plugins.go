@@ -69,6 +69,8 @@ type pluginKey struct {
 	Series  string `json:"s"`
 	Chapter string `json:"c"`
 	Number  string `json:"n,omitempty"`
+	// Title names a saved chapter that has no number.
+	Title string `json:"t,omitempty"`
 }
 
 func encodePluginKey(key pluginKey) (string, error) {
@@ -195,7 +197,7 @@ func (s *Service) pluginChapters(ctx context.Context, source, seriesID string) (
 
 	chapters := make([]ChapterInfo, 0, len(found))
 	for _, c := range found {
-		key, err := encodePluginKey(pluginKey{Series: seriesID, Chapter: c.ID, Number: c.Number})
+		key, err := encodePluginKey(pluginKey{Series: seriesID, Chapter: c.ID, Number: c.Number, Title: c.Title})
 		if err != nil {
 			return nil, err
 		}
