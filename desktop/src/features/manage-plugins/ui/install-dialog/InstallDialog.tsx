@@ -277,6 +277,8 @@ function Consent({ preview: p, before, alreadyInstalled }: ConsentProps) {
 
 	const hosts = p.network ?? []
 	const settings = p.config ?? []
+	// A manga plugin shows its sites' pages in the reader; say so before it installs.
+	const manga = p.type === 'manga-provider'
 
 	return (
 		<div className={styles.consent}>
@@ -336,7 +338,9 @@ function Consent({ preview: p, before, alreadyInstalled }: ConsentProps) {
 				</Fact>
 
 				<Fact icon={<LuTag size={18} />} tone='warning' title={t('plugins.dialog.receivesTitle')}>
-					<p className={styles.text}>{t('plugins.dialog.receives')}</p>
+					<p className={styles.text}>
+						{manga ? t('plugins.dialog.receivesManga') : t('plugins.dialog.receives')}
+					</p>
 					<p className={styles.private}>
 						<LuCheck size={14} />
 						{t('plugins.dialog.receivesPrivate')}
@@ -383,7 +387,9 @@ function Consent({ preview: p, before, alreadyInstalled }: ConsentProps) {
 						</li>
 					))}
 				</ul>
-				<p className={styles.sandboxNote}>{t('plugins.dialog.sandboxNote')}</p>
+				<p className={styles.sandboxNote}>
+					{manga ? t('plugins.dialog.sandboxNoteManga') : t('plugins.dialog.sandboxNote')}
+				</p>
 			</div>
 
 			{!p.compatible && (

@@ -47,14 +47,17 @@ export function activeDownload(
 	return undefined
 }
 
-// A chapter the library does not hold can be saved from its first online copy,
-// unless that is already under way.
+// A chapter the library does not hold can be saved from its first copy on the
+// user's server or from a manga plugin, unless that is already under way.
+// MangaDex says nothing of keeping its pages.
+const SAVABLE = ['opds:', 'plugin:']
+
 export function savableOption(row: ChapterRow, downloads: Map<string, MangaDownload>): ChapterOption | null {
 	if (row.options.some(option => option.source === LOCAL_SOURCE)) {
 		return null
 	}
 
-	const online = row.options.find(option => option.source.startsWith('opds:'))
+	const online = row.options.find(option => SAVABLE.some(prefix => option.source.startsWith(prefix)))
 	const pending = activeDownload(row, downloads) !== undefined
 
 	return online && !pending ? online : null

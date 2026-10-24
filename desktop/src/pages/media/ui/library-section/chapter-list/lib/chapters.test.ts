@@ -47,4 +47,12 @@ describe('chapter list helpers', () => {
 		expect(savableOption(row(online), running)).toBeNull()
 		expect(activeDownload(row(online), running)?.state).toBe('queued')
 	})
+
+	it("saves a manga plugin's chapter, never a MangaDex one", () => {
+		const plugin = option('p', 'plugin:comics')
+		const dex = option('d', 'mangadex')
+
+		expect(savableOption(row(dex, plugin), new Map())).toBe(plugin)
+		expect(savableOption(row(dex), new Map())).toBeNull()
+	})
 })

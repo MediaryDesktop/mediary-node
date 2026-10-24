@@ -1473,7 +1473,8 @@ export const uk: Translation = {
 	plugins: {
 		types: {
 			all: 'Усі типи',
-			'torrent-provider': 'Пошук роздач'
+			'torrent-provider': 'Пошук роздач',
+			'manga-provider': 'Джерела манги'
 		},
 		addByUrl: 'Додати за адресою',
 		checkUpdates: 'Перевірити оновлення',
@@ -1533,6 +1534,7 @@ export const uk: Translation = {
 			hostsNew: 'новий',
 			receivesTitle: 'Отримує лише дані тайтлу',
 			receives: 'Назви, сезон і серію та id AniList або TMDB.',
+			receivesManga: 'Те, що ви шукаєте, id AniList і серії та розділи, які ви відкриваєте.',
 			receivesPrivate: 'Нічого з ваших акаунтів',
 			settings_one: 'Просить {{count}} налаштування',
 			settings_few: 'Просить {{count}} налаштування',
@@ -1545,6 +1547,8 @@ export const uk: Translation = {
 			sandboxPrograms: 'Не запускає програм',
 			sandboxNetwork: 'Без локальної мережі',
 			sandboxNote: 'Він лише знаходить роздачі — качає їх Mediary.',
+			sandboxNoteManga:
+				'Він лише перелічує розділи й називає їхні сторінки — зображення бере із сайтів вище й показує в рідері Mediary.',
 			source: 'Маніфест',
 			copy: 'Скопіювати адресу',
 			copied: 'Адресу скопійовано',

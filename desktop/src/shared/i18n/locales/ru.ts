@@ -1473,7 +1473,8 @@ export const ru: Translation = {
 	plugins: {
 		types: {
 			all: 'Все типы',
-			'torrent-provider': 'Поиск раздач'
+			'torrent-provider': 'Поиск раздач',
+			'manga-provider': 'Источники манги'
 		},
 		addByUrl: 'Добавить по адресу',
 		checkUpdates: 'Проверить обновления',
@@ -1533,6 +1534,7 @@ export const ru: Translation = {
 			hostsNew: 'новый',
 			receivesTitle: 'Получает только данные тайтла',
 			receives: 'Названия, сезон и серию и id AniList или TMDB.',
+			receivesManga: 'То, что вы ищете, id AniList и серии и главы, которые вы открываете.',
 			receivesPrivate: 'Ничего из ваших аккаунтов',
 			settings_one: 'Просит {{count}} настройку',
 			settings_few: 'Просит {{count}} настройки',
@@ -1545,6 +1547,8 @@ export const ru: Translation = {
 			sandboxPrograms: 'Не запускает программ',
 			sandboxNetwork: 'Без локальной сети',
 			sandboxNote: 'Он только находит раздачи — качает их Mediary.',
+			sandboxNoteManga:
+				'Он только перечисляет главы и называет их страницы — изображения берёт с сайтов выше и показывает в читалке Mediary.',
 			source: 'Манифест',
 			copy: 'Скопировать адрес',
 			copied: 'Адрес скопирован',

@@ -1471,7 +1471,8 @@ export const en = {
 	plugins: {
 		types: {
 			all: 'All types',
-			'torrent-provider': 'Torrent search'
+			'torrent-provider': 'Torrent search',
+			'manga-provider': 'Manga sources'
 		},
 		addByUrl: 'Add by address',
 		checkUpdates: 'Check for updates',
@@ -1530,6 +1531,7 @@ export const en = {
 			hostsNew: 'new',
 			receivesTitle: 'Receives title info only',
 			receives: 'Names, season and episode, and the AniList or TMDB id.',
+			receivesManga: 'What you search for, the AniList id, and the series and chapters you open.',
 			receivesPrivate: 'Nothing from your accounts',
 			settings_one: 'Asks for {{count}} setting',
 			settings_few: 'Asks for {{count}} settings',
@@ -1542,6 +1544,8 @@ export const en = {
 			sandboxPrograms: "Can't run programs",
 			sandboxNetwork: 'No local network',
 			sandboxNote: 'It only finds releases — Mediary does the downloading.',
+			sandboxNoteManga:
+				'It lists chapters and names their pages — Mediary fetches the images from the sites above and shows them in the reader.',
 			source: 'Manifest',
 			copy: 'Copy address',
 			copied: 'Address copied',

@@ -32,8 +32,7 @@ export interface PluginsTabProps {
 	onRepositories: () => void
 }
 
-// One kind of plugin so far: the types are there for the ones to come.
-const TYPES = ['all', 'torrent-provider'] as const
+const TYPES = ['all', 'torrent-provider', 'manga-provider'] as const
 type TypeFilter = (typeof TYPES)[number]
 
 // The plugins the user installed, or the ones their repositories offer: two
