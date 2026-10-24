@@ -30,9 +30,9 @@ var workingSuffixes = []string{".part", ".!qB"}
 
 // stillUnfinished reports whether a file the client calls done is only waiting
 // to be renamed from its working name, a moment after the last piece.
-func stillUnfinished(path string) bool {
+func stillUnfinished(file string) bool {
 	for _, suffix := range workingSuffixes {
-		if _, err := os.Stat(path + suffix); err == nil {
+		if _, err := os.Stat(file + suffix); err == nil {
 			return true
 		}
 	}

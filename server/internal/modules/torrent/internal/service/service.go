@@ -184,14 +184,14 @@ func New(st *store.Store, secretFile *secrets.Store, library Library, hub *event
 	}
 
 	return &Service{
-		store:   st,
-		secrets: secretFile,
-		library: library,
-		hub:     hub,
-		logger:  logger,
-		opts:    opts,
-		wake:    make(chan struct{}, 1),
-		live:    map[string]qbittorrent.Torrent{},
+		store:      st,
+		secrets:    secretFile,
+		library:    library,
+		hub:        hub,
+		logger:     logger,
+		opts:       opts,
+		wake:       make(chan struct{}, 1),
+		live:       map[string]qbittorrent.Torrent{},
 		missing:    map[string]int{},
 		unfinished: map[string]time.Time{},
 		search: searchCache{
