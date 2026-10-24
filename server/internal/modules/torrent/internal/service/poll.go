@@ -20,6 +20,26 @@ import (
 // download is given up.
 const missingPolls = 3
 
+// How long a finished torrent's file may keep its working name before the
+// import gives up on it.
+const unfinishedWait = 2 * time.Minute
+
+// The names clients write a file under until it is whole: the built-in
+// client's, and qBittorrent's when "append .!qB" is on.
+var workingSuffixes = []string{".part", ".!qB"}
+
+// stillUnfinished reports whether a file the client calls done is only waiting
+// to be renamed from its working name, a moment after the last piece.
+func stillUnfinished(path string) bool {
+	for _, suffix := range workingSuffixes {
+		if _, err := os.Stat(path + suffix); err == nil {
+			return true
+		}
+	}
+
+	return false
+}
+
 // Start follows the downloads until ctx ends. A node that stopped mid-download
 // picks up where it was: the client kept downloading, and the table says what
 // for.
@@ -213,8 +233,14 @@ func (s *Service) importFiles(ctx context.Context, client Client, download store
 		}
 
 		rel := relPath(download, file)
+		full := filepath.Join(rootPath, filepath.FromSlash(rel))
 
-		if _, err := os.Stat(filepath.Join(rootPath, filepath.FromSlash(rel))); errors.Is(err, fs.ErrNotExist) {
+		if _, err := os.Stat(full); errors.Is(err, fs.ErrNotExist) {
+			if stillUnfinished(full) {
+				s.waitUnfinished(ctx, download, rel)
+				return
+			}
+
 			s.fail(ctx, download, "the downloaded files are not where the node expects them; check the path mapping in the torrent settings")
 			return
 		}
@@ -244,10 +270,38 @@ func (s *Service) importFiles(ctx context.Context, client Client, download store
 		return
 	}
 
+	s.mu.Lock()
+	delete(s.unfinished, download.InfoHash)
+	s.mu.Unlock()
+
 	s.publish("done", download.ID)
 }
 
+// waitUnfinished leaves the import for the next poll while the client renames
+// the file, and fails it once that has taken far longer than it does.
+func (s *Service) waitUnfinished(ctx context.Context, download store.Download, rel string) {
+	now := s.opts.Now()
+
+	s.mu.Lock()
+	since, waiting := s.unfinished[download.InfoHash]
+	if !waiting {
+		since = now
+		s.unfinished[download.InfoHash] = now
+	}
+	s.mu.Unlock()
+
+	if now.Sub(since) < unfinishedWait {
+		return
+	}
+
+	s.fail(ctx, download, "the torrent client finished "+path.Base(rel)+" but never gave it its name")
+}
+
 func (s *Service) fail(ctx context.Context, download store.Download, reason string) {
+	s.mu.Lock()
+	delete(s.unfinished, download.InfoHash)
+	s.mu.Unlock()
+
 	if err := s.store.SetState(ctx, download.ID, store.StateFailed, reason, s.opts.Now()); err != nil {
 		s.logger.Error().Err(err).Int64("id", download.ID).Msg("mark torrent download failed")
 		return

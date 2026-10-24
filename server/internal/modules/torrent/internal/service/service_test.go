@@ -404,6 +404,65 @@ func TestAFinishedTorrentJoinsTheLibrary(t *testing.T) {
 	}
 }
 
+// The built-in client renames a finished file from "….part" a moment after it
+// says it is done: the import waits for the name instead of failing.
+func TestAFileStillUnderItsWorkingNameIsWaitedFor(t *testing.T) {
+	h := newHarness(t)
+	h.configure(t)
+	h.add(t)
+
+	now := time.Date(2026, 10, 24, 12, 0, 0, 0, time.UTC)
+	h.svc.opts.Now = func() time.Time { return now }
+
+	h.writeVideo(t, "Sousou no Frieren/Frieren/Frieren - 01.mkv.part")
+	h.client.set(
+		qbittorrent.Torrent{Hash: frierenHash, State: "stalledUP", Progress: 1},
+		qbittorrent.File{Name: "Frieren/Frieren - 01.mkv", Progress: 1, Priority: 1},
+	)
+
+	h.svc.Poll(context.Background())
+	if got := h.only(t); got.State != store.StateImporting {
+		t.Fatalf("download = %+v, want it waiting for the file's name", got)
+	}
+
+	if err := os.Rename(
+		filepath.Join(h.root, "Sousou no Frieren", "Frieren", "Frieren - 01.mkv.part"),
+		filepath.Join(h.root, "Sousou no Frieren", "Frieren", "Frieren - 01.mkv"),
+	); err != nil {
+		t.Fatal(err)
+	}
+	now = now.Add(5 * time.Second)
+
+	h.svc.Poll(context.Background())
+	if got := h.only(t); got.State != store.StateDone || got.Imported != 1 {
+		t.Fatalf("download = %+v, want it imported once the file has its name", got)
+	}
+}
+
+func TestAFileNeverRenamedFailsInTime(t *testing.T) {
+	h := newHarness(t)
+	h.configure(t)
+	h.add(t)
+
+	now := time.Date(2026, 10, 24, 12, 0, 0, 0, time.UTC)
+	h.svc.opts.Now = func() time.Time { return now }
+
+	h.writeVideo(t, "Sousou no Frieren/Frieren/Frieren - 01.mkv.part")
+	h.client.set(
+		qbittorrent.Torrent{Hash: frierenHash, State: "stalledUP", Progress: 1},
+		qbittorrent.File{Name: "Frieren/Frieren - 01.mkv", Progress: 1, Priority: 1},
+	)
+
+	h.svc.Poll(context.Background())
+	now = now.Add(unfinishedWait + time.Second)
+	h.svc.Poll(context.Background())
+
+	got := h.only(t)
+	if got.State != store.StateFailed || !strings.Contains(got.Error, "Frieren - 01.mkv") {
+		t.Fatalf("download = %+v, want it failed naming the file", got)
+	}
+}
+
 func TestATorrentStillBeingCheckedIsNotFinished(t *testing.T) {
 	h := newHarness(t)
 	h.configure(t)

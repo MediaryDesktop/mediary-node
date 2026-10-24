@@ -149,6 +149,9 @@ type Service struct {
 	polled      bool
 	// How many polls in a row a torrent was missing from the client, by hash.
 	missing map[string]int
+	// Since when a finished torrent's file is still under its working name, by
+	// hash.
+	unfinished map[string]time.Time
 
 	search searchCache
 
@@ -189,7 +192,8 @@ func New(st *store.Store, secretFile *secrets.Store, library Library, hub *event
 		opts:    opts,
 		wake:    make(chan struct{}, 1),
 		live:    map[string]qbittorrent.Torrent{},
-		missing: map[string]int{},
+		missing:    map[string]int{},
+		unfinished: map[string]time.Time{},
 		search: searchCache{
 			answers:  map[string]cachedAnswer{},
 			plugins:  map[string]cachedPluginAnswer{},
