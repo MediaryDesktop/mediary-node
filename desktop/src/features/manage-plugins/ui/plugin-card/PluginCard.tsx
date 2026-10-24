@@ -1,6 +1,7 @@
 import { useUnit } from 'effector-react'
 import { useState } from 'react'
 import { LuDownload, LuEllipsisVertical, LuRefreshCw, LuSettings2 } from 'react-icons/lu'
+import { TbBraces, TbBracesOff } from 'react-icons/tb'
 
 import { useTranslation } from '@shared/i18n'
 import { Button, DropdownMenu, Icon, ItemCard, ItemCardAction, ItemCardMark, Modal } from '@shared/ui'
@@ -58,14 +59,22 @@ export function InstalledPluginCard({ extension, onUpdate, onSettings }: Install
 			? {
 					id: 'disable',
 					label: t('plugins.disable'),
+					icon: <TbBracesOff size={20} />,
 					onSelect: () => configure({ id: extension.id, enabled: false })
 				}
 			: {
 					id: 'enable',
 					label: t('plugins.enable'),
+					icon: <TbBraces size={20} />,
 					onSelect: () => configure({ id: extension.id, enabled: true })
 				},
-		{ id: 'remove', label: t('plugins.remove'), danger: true, onSelect: () => setConfirming(true) }
+		{
+			id: 'remove',
+			label: t('plugins.remove'),
+			icon: 'common/trash',
+			danger: true,
+			onSelect: () => setConfirming(true)
+		}
 	]
 
 	return (
