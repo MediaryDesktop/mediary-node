@@ -4,48 +4,74 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { readStored, writeStored } from '@shared/lib'
-import { Button, Icon } from '@shared/ui'
+import { Button, Checkbox, Icon, Pagination } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
 
+import { extensionsQuery } from '@entities/extension'
 import {
 	deleteMangaLinkMutation,
 	mangaDownloadSettingsQuery,
 	mangaDownloadsQuery
 } from '@entities/manga-source'
-import { filterChapters, isChapterRead } from '@entities/reader'
+import { filterChapters } from '@entities/reader'
 import type { ChapterOption } from '@entities/reader'
 
 import { downloadRequested } from '@features/download-chapters'
 import { LinkSourceDrawer } from '@features/link-manga-source'
 import { useTitleChapters } from '@features/title-chapters'
 
+import { ChapterFilters } from './chapter-filters/ChapterFilters'
 import { ChapterRow } from './chapter-row/ChapterRow'
-import { ChapterToolbar } from './chapter-toolbar/ChapterToolbar'
 import styles from './ChapterList.module.scss'
-import { activeDownload, latestDownloads, presentSources, savableOption } from './lib/chapters'
+import {
+	activeDownload,
+	chapterState,
+	latestDownloads,
+	matchesSearch,
+	matchesStatus,
+	pageCount,
+	pageOf,
+	presentSources,
+	savableOption,
+	sortRows,
+	sourceCounts
+} from './lib/chapters'
+import type { SortOrder, StatusFilter } from './lib/chapters'
+import { SourceChips } from './source-chips/SourceChips'
 
 export interface ChapterListProps {
 	mediaRef: string
 	title: string
 	progress: number
-	coverColor: string | null
 }
 
 const ALL = 'all'
 const FILTER_KEY = 'mediary.chapterSource'
+const ORDER_KEY = 'mediary.chapterOrder'
 
 // Every chapter of the title, from the library and from the user's servers, as one
 // list. A chapter held in several places is one row that opens the nearest copy.
-export function ChapterList({ mediaRef, title, progress, coverColor }: ChapterListProps) {
+export function ChapterList({ mediaRef, title, progress }: ChapterListProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
-	const [unlink, downloadsData, loadDownloads, loadDownloadSettings, save, nodeReady] = useUnit([
+	const [
+		unlink,
+		downloadsData,
+		loadDownloads,
+		loadDownloadSettings,
+		save,
+		extensions,
+		loadExtensions,
+		nodeReady
+	] = useUnit([
 		deleteMangaLinkMutation.start,
 		mangaDownloadsQuery.$data,
 		mangaDownloadsQuery.start,
 		mangaDownloadSettingsQuery.start,
 		downloadRequested,
+		extensionsQuery.$data,
+		extensionsQuery.start,
 		$nodeReady
 	])
 
@@ -53,12 +79,20 @@ export function ChapterList({ mediaRef, title, progress, coverColor }: ChapterLi
 		if (nodeReady) {
 			loadDownloads()
 			loadDownloadSettings()
+			loadExtensions()
 		}
-	}, [loadDownloads, loadDownloadSettings, nodeReady])
+	}, [loadDownloads, loadDownloadSettings, loadExtensions, nodeReady])
 
 	const { rows, sources, links, problems, loadingOnline } = useTitleChapters(mediaRef)
 
 	const [filter, setFilter] = useState(() => readStored(FILTER_KEY) ?? ALL)
+	const [order, setOrder] = useState<SortOrder>(() =>
+		readStored(ORDER_KEY) === 'oldest' ? 'oldest' : 'newest'
+	)
+	const [status, setStatus] = useState<StatusFilter>('all')
+	const [query, setQuery] = useState('')
+	const [page, setPage] = useState(1)
+	const [selected, setSelected] = useState<ReadonlySet<string>>(() => new Set())
 
 	// undefined: closed; otherwise the source to start the search on.
 	const [linking, setLinking] = useState<string | null | undefined>(undefined)
@@ -69,21 +103,70 @@ export function ChapterList({ mediaRef, title, progress, coverColor }: ChapterLi
 	}
 
 	const present = presentSources(rows)
+	const counts = sourceCounts(rows)
+	const icons = new Map(
+		(extensions?.extensions ?? []).flatMap(ext =>
+			ext.icon ? [[`plugin:${ext.id}`, ext.icon] as const] : []
+		)
+	)
 
 	// A remembered source this title does not have shows everything instead.
 	const active = present.has(filter) ? filter : ALL
-	const shown = active === ALL ? rows : filterChapters(rows, active)
+	const shown = sortRows(
+		(active === ALL ? rows : filterChapters(rows, active)).filter(
+			row => matchesStatus(row, status, progress) && matchesSearch(row, query)
+		),
+		order
+	)
 	const unlinked = sources.filter(source => !links.some(link => link.source === source.id))
 
-	const changeFilter = (value: string) => {
-		setFilter(value)
-		writeStored(FILTER_KEY, value)
-	}
+	const pages = pageCount(shown.length)
+	const current = Math.min(page, pages)
+	const visible = pageOf(shown, current)
 
 	const downloads = latestDownloads(downloadsData?.downloads ?? [])
-	const unsaved = shown
-		.map(row => savableOption(row, downloads))
-		.filter((option): option is ChapterOption => option !== null)
+	const savable = new Map<string, ChapterOption>()
+	for (const row of shown) {
+		const option = savableOption(row, downloads)
+		if (option) {
+			savable.set(row.key, option)
+		}
+	}
+
+	// A selection outlives a filter, but only what is shown and still savable counts.
+	const picked = [...savable].filter(([key]) => selected.has(key)).map(([, option]) => option)
+	const pageKeys = visible.filter(row => savable.has(row.key)).map(row => row.key)
+	const pagePicked = pageKeys.filter(key => selected.has(key)).length
+
+	const startOver =
+		<T,>(set: (value: T) => void) =>
+		(value: T) => {
+			set(value)
+			setPage(1)
+		}
+
+	const changeFilter = startOver((value: string) => {
+		setFilter(value)
+		writeStored(FILTER_KEY, value)
+	})
+
+	const changeOrder = startOver((value: SortOrder) => {
+		setOrder(value)
+		writeStored(ORDER_KEY, value)
+	})
+
+	const toggle = (keys: string[], on: boolean) =>
+		setSelected(previous => {
+			const next = new Set(previous)
+			keys.forEach(key => (on ? next.add(key) : next.delete(key)))
+
+			return next
+		})
+
+	const saveAll = (options: ChapterOption[]) => {
+		save(options.map(option => option.ref))
+		setSelected(new Set())
+	}
 
 	const open = (option: ChapterOption) => {
 		if (option.externalUrl) {
@@ -95,17 +178,32 @@ export function ChapterList({ mediaRef, title, progress, coverColor }: ChapterLi
 		void navigate({ to: '/read/$ref', params: { ref: option.ref } })
 	}
 
+	const linked = links.map(link =>
+		t('mangaSources.chapters.linkedSeries', {
+			series: link.series_title || link.series_id,
+			name: link.source_name
+		})
+	)
+
 	return (
-		<section className={styles.section}>
-			<div className={styles.header}>
-				<h2 className={styles.title}>{t('media.chapters.title', { count: shown.length })}</h2>
+		<section className={styles.card}>
+			<header className={styles.header}>
+				<div className={styles.heading}>
+					<h2 className={styles.title}>
+						{t('mangaSources.chapters.heading')}
+						<span className={styles.total}>{rows.length}</span>
+					</h2>
+					<p className={styles.subtitle}>
+						{linked.length > 0 ? linked.join(' · ') : t('mangaSources.chapters.subtitle')}
+					</p>
+				</div>
 
 				<div className={styles.actions}>
-					{unsaved.length > 1 && (
+					{savable.size > 1 && (
 						<Button
 							size='small'
 							startIcon={<Icon name='common/download' size={16} />}
-							onClick={() => save(unsaved.map(option => option.ref))}
+							onClick={() => saveAll([...savable.values()])}
 						>
 							{t('mangaSources.downloads.saveAll')}
 						</Button>
@@ -121,17 +219,31 @@ export function ChapterList({ mediaRef, title, progress, coverColor }: ChapterLi
 						</Button>
 					)}
 				</div>
-			</div>
+			</header>
 
-			<ChapterToolbar
-				sources={present}
-				allValue={ALL}
-				active={active}
-				onFilter={changeFilter}
-				links={links}
-				onRelink={setLinking}
-				onUnlink={source => unlink({ mediaRef, source })}
-			/>
+			<div className={styles.controls}>
+				<SourceChips
+					sources={present}
+					counts={counts}
+					total={rows.length}
+					icons={icons}
+					allValue={ALL}
+					active={active}
+					onFilter={changeFilter}
+					links={links}
+					onRelink={setLinking}
+					onUnlink={source => unlink({ mediaRef, source })}
+				/>
+
+				<ChapterFilters
+					query={query}
+					onQueryChange={startOver(setQuery)}
+					status={status}
+					onStatusChange={startOver(setStatus)}
+					order={order}
+					onOrderChange={changeOrder}
+				/>
+			</div>
 
 			{problems.map(problem => (
 				<p key={problem.source} className={styles.problem}>
@@ -143,27 +255,96 @@ export function ChapterList({ mediaRef, title, progress, coverColor }: ChapterLi
 				!loadingOnline &&
 				problems.length === 0 &&
 				!links.some(link => present.has(link.source)) && (
-					<p className={styles.empty}>{t('mangaSources.chapters.empty')}</p>
+					<p className={styles.message}>{t('mangaSources.chapters.empty')}</p>
 				)}
 
-			{shown.length > 0 && (
-				<ul className={styles.list}>
-					{shown.map(row => {
-						const from = savableOption(row, downloads)
+			{rows.length > 0 && shown.length === 0 && (
+				<p className={styles.message}>{t('mangaSources.chapters.nothingFound')}</p>
+			)}
+
+			{visible.length > 0 && (
+				<div role='table' className={styles.table} aria-label={t('mangaSources.chapters.heading')}>
+					<div role='row' className={styles.head}>
+						<span role='columnheader' className={styles.check}>
+							{pageKeys.length > 0 && (
+								<Checkbox
+									checked={
+										pagePicked === 0
+											? false
+											: pagePicked === pageKeys.length
+												? true
+												: 'mixed'
+									}
+									onCheckedChange={on => toggle(pageKeys, on)}
+									label={t('mangaSources.chapters.selectPage')}
+								/>
+							)}
+						</span>
+						<span role='columnheader'>{t('mangaSources.chapters.columns.chapter')}</span>
+						<span role='columnheader' className={styles.source}>
+							{t('mangaSources.chapters.columns.source')}
+						</span>
+						<span role='columnheader' className={styles.narrow}>
+							{t('mangaSources.chapters.columns.language')}
+						</span>
+						<span role='columnheader' className={styles.narrow}>
+							{t('mangaSources.chapters.columns.pages')}
+						</span>
+						<span role='columnheader'>{t('mangaSources.chapters.columns.status')}</span>
+						<span role='columnheader' className={styles.end}>
+							{t('mangaSources.chapters.columns.actions')}
+						</span>
+					</div>
+
+					{visible.map(row => {
+						const from = savable.get(row.key)
+						const download = activeDownload(row, downloads)
 
 						return (
 							<ChapterRow
 								key={row.key}
 								row={row}
-								read={isChapterRead(row.number, progress)}
-								accent={coverColor}
+								state={chapterState(row, download, progress)}
+								icons={icons}
+								selected={from ? selected.has(row.key) : undefined}
+								onSelect={on => toggle([row.key], on)}
 								onOpen={open}
-								download={activeDownload(row, downloads)}
 								onSave={from ? () => save([from.ref]) : undefined}
 							/>
 						)
 					})}
-				</ul>
+				</div>
+			)}
+
+			{(savable.size > 0 || pages > 1) && (
+				<footer className={styles.footer}>
+					{savable.size > 0 && (
+						<div className={styles.selection}>
+							<span className={styles.picked}>
+								{t('mangaSources.chapters.selected', {
+									picked: picked.length,
+									total: savable.size
+								})}
+							</span>
+							<Button
+								size='small'
+								variant='primary'
+								disabled={picked.length === 0}
+								startIcon={<Icon name='common/download' size={16} />}
+								onClick={() => saveAll(picked)}
+							>
+								{t('mangaSources.chapters.saveSelected')}
+							</Button>
+						</div>
+					)}
+
+					<Pagination
+						className={styles.pagination}
+						page={current}
+						pages={pages}
+						onPageChange={setPage}
+					/>
+				</footer>
 			)}
 
 			<LinkSourceDrawer

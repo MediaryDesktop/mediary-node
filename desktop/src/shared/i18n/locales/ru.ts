@@ -953,6 +953,39 @@ export const ru: Translation = {
 			}
 		},
 		chapters: {
+			heading: 'Главы',
+			subtitle: 'Читайте онлайн или сохраните главы в библиотеку',
+			linkedSeries: '{{series}} из {{name}}',
+			links: 'Привязанные серии',
+			relinkFrom: 'Сменить серию в {{name}}',
+			unlinkFrom: 'Отвязать {{name}}',
+			search: 'Найти главу по номеру или названию',
+			nothingFound: 'Ни одна глава не подходит под фильтры',
+			select: 'Выбрать {{label}}',
+			selectPage: 'Выбрать главы на этой странице',
+			selected: 'Выбрано {{picked}} из {{total}}',
+			saveSelected: 'Сохранить выбранные',
+			open: 'Открыть {{label}}',
+			status: {
+				label: 'Состояние',
+				all: 'Все',
+				saved: 'Сохранённые',
+				read: 'Прочитанные',
+				unread: 'Непрочитанные',
+				online: 'Онлайн'
+			},
+			sort: {
+				newest: 'Сначала новые',
+				oldest: 'Сначала старые'
+			},
+			columns: {
+				chapter: 'Глава',
+				source: 'Источник',
+				language: 'Язык',
+				pages: 'Страницы',
+				status: 'Состояние',
+				actions: 'Действия'
+			},
 			external: 'На сайте издателя',
 			library: 'Библиотека',
 			all: 'Все источники',
@@ -1854,6 +1887,12 @@ export const ru: Translation = {
 			name: 'Нода',
 			hint: 'Версия и сборка локальной ноды'
 		}
+	},
+	pagination: {
+		label: 'Страницы',
+		previous: 'Предыдущая страница',
+		next: 'Следующая страница',
+		page: 'Страница {{page}}'
 	},
 	select: {
 		placeholder: 'Выберите…',

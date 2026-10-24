@@ -135,3 +135,6 @@ export type { ManagedListProps } from './managed-list/ManagedList'
 
 export { ConnectionCheck } from './connection-check/ConnectionCheck'
 export type { ConnectionCheckProps, ConnectionCheckStatus } from './connection-check/ConnectionCheck'
+
+export { Pagination } from './pagination/Pagination'
+export type { PaginationProps } from './pagination/Pagination'

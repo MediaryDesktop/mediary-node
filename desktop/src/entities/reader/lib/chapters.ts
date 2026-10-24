@@ -12,6 +12,11 @@ export interface ChapterOption {
 	sourceName: string
 	// What tells this copy apart: a file name, a page count, who translated it.
 	detail: string
+	// The same, field by field, for a list that shows them in columns.
+	language?: string
+	groups?: string[]
+	// 0 or absent: the source does not say until the chapter is opened.
+	pages?: number
 	// The publisher's page, for a chapter the source only links to: it opens in the
 	// browser rather than in the reader.
 	externalUrl?: string

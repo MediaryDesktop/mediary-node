@@ -951,6 +951,39 @@ export const uk: Translation = {
 			}
 		},
 		chapters: {
+			heading: 'Розділи',
+			subtitle: 'Читайте онлайн або збережіть розділи в бібліотеку',
+			linkedSeries: '{{series}} з {{name}}',
+			links: 'Прив’язані серії',
+			relinkFrom: 'Змінити серію на {{name}}',
+			unlinkFrom: 'Відв’язати {{name}}',
+			search: 'Знайти розділ за номером або назвою',
+			nothingFound: 'Жоден розділ не відповідає фільтрам',
+			select: 'Вибрати {{label}}',
+			selectPage: 'Вибрати розділи на цій сторінці',
+			selected: 'Вибрано {{picked}} з {{total}}',
+			saveSelected: 'Зберегти вибрані',
+			open: 'Відкрити {{label}}',
+			status: {
+				label: 'Стан',
+				all: 'Усі',
+				saved: 'Збережені',
+				read: 'Прочитані',
+				unread: 'Непрочитані',
+				online: 'Онлайн'
+			},
+			sort: {
+				newest: 'Спочатку нові',
+				oldest: 'Спочатку старі'
+			},
+			columns: {
+				chapter: 'Розділ',
+				source: 'Джерело',
+				language: 'Мова',
+				pages: 'Сторінки',
+				status: 'Стан',
+				actions: 'Дії'
+			},
 			external: 'На сайті видавця',
 			library: 'Бібліотека',
 			all: 'Усі джерела',
@@ -1853,6 +1886,12 @@ export const uk: Translation = {
 			name: 'Нода',
 			hint: 'Версія та збірка локальної ноди'
 		}
+	},
+	pagination: {
+		label: 'Сторінки',
+		previous: 'Попередня сторінка',
+		next: 'Наступна сторінка',
+		page: 'Сторінка {{page}}'
 	},
 	select: {
 		placeholder: 'Оберіть…',

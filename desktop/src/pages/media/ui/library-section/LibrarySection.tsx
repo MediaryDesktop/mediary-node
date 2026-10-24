@@ -22,14 +22,7 @@ export interface LibrarySectionProps {
 // manga, files for a book, episodes for anything watched.
 export function LibrarySection({ mediaType, ...props }: LibrarySectionProps) {
 	if (mediaType === 'manga') {
-		return (
-			<ChapterList
-				mediaRef={props.mediaRef}
-				title={props.title}
-				progress={props.progress}
-				coverColor={props.coverColor}
-			/>
-		)
+		return <ChapterList mediaRef={props.mediaRef} title={props.title} progress={props.progress} />
 	}
 
 	// The copies the library has, then the free ones a source could add to it.

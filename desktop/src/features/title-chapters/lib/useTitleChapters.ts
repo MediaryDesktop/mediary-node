@@ -114,6 +114,9 @@ export function useTitleChapters(mediaRef: string | undefined): TitleChapters {
 				source: chapter.source,
 				sourceName: chapter.source_name,
 				detail: [credit, size].filter(Boolean).join(' · '),
+				language: chapter.language,
+				groups: chapter.groups ?? undefined,
+				pages: chapter.pages,
 				externalUrl: chapter.external_url
 			})
 		}

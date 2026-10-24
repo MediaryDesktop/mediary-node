@@ -952,6 +952,39 @@ export const en = {
 			}
 		},
 		chapters: {
+			heading: 'Chapters',
+			subtitle: 'Read online or save chapters to the library',
+			linkedSeries: '{{series}} from {{name}}',
+			links: 'Linked series',
+			relinkFrom: 'Change series on {{name}}',
+			unlinkFrom: 'Unlink {{name}}',
+			search: 'Find a chapter by number or title',
+			nothingFound: 'No chapters match the filters',
+			select: 'Select {{label}}',
+			selectPage: 'Select the chapters on this page',
+			selected: '{{picked}} of {{total}} selected',
+			saveSelected: 'Save selected',
+			open: 'Open {{label}}',
+			status: {
+				label: 'Status',
+				all: 'All',
+				saved: 'Saved',
+				read: 'Read',
+				unread: 'Unread',
+				online: 'Online'
+			},
+			sort: {
+				newest: 'Newest first',
+				oldest: 'Oldest first'
+			},
+			columns: {
+				chapter: 'Chapter',
+				source: 'Source',
+				language: 'Language',
+				pages: 'Pages',
+				status: 'Status',
+				actions: 'Actions'
+			},
 			external: 'On the publisher’s site',
 			library: 'Library',
 			all: 'All sources',
@@ -1850,6 +1883,12 @@ export const en = {
 			name: 'Node',
 			hint: 'Version and build of the local node'
 		}
+	},
+	pagination: {
+		label: 'Pages',
+		previous: 'Previous page',
+		next: 'Next page',
+		page: 'Page {{page}}'
 	},
 	select: {
 		placeholder: 'Select…',
