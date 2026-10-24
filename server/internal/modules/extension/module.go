@@ -1,7 +1,7 @@
 // Package extension installs and runs plugins: scripts from the community
-// that add places to search for torrents. Each runs in a sandbox that reaches
-// only the hosts its manifest lists, and is installed and updated only with
-// the user's consent to exactly that manifest.
+// that add places to search for torrents or to read manga from. Each runs in a
+// sandbox that reaches only the hosts its manifest lists, and is installed and
+// updated only with the user's consent to exactly that manifest.
 package extension
 
 import (
@@ -24,11 +24,15 @@ import (
 // How long reading a manifest or a plugin's code may take.
 const fetchTimeout = 20 * time.Second
 
-// What the torrent module asks of plugins, through internal/app.
+// What the torrent and manga modules ask of plugins, through internal/app.
 type (
-	TorrentProvider = service.TorrentProvider
-	SearchRequest   = sandbox.SearchRequest
-	Release         = sandbox.Release
+	Provider           = service.Provider
+	SearchRequest      = sandbox.SearchRequest
+	Release            = sandbox.Release
+	MangaSearchRequest = sandbox.MangaSearchRequest
+	Series             = sandbox.Series
+	Chapter            = sandbox.Chapter
+	Page               = sandbox.Page
 )
 
 type Deps struct {
@@ -66,8 +70,34 @@ type Module struct {
 }
 
 // TorrentProviders are the plugins on now that search for torrents.
-func (m *Module) TorrentProviders(ctx context.Context) ([]TorrentProvider, error) {
+func (m *Module) TorrentProviders(ctx context.Context) ([]Provider, error) {
 	return m.svc.TorrentProviders(ctx)
+}
+
+// MangaProviders are the plugins on now that read manga.
+func (m *Module) MangaProviders(ctx context.Context) ([]Provider, error) {
+	return m.svc.MangaProviders(ctx)
+}
+
+// MangaSearch finds series in one manga provider.
+func (m *Module) MangaSearch(ctx context.Context, id string, req MangaSearchRequest) ([]Series, error) {
+	return m.svc.MangaSearch(ctx, id, req)
+}
+
+// MangaChapters lists a series' chapters in one manga provider.
+func (m *Module) MangaChapters(ctx context.Context, id, seriesID string) ([]Chapter, error) {
+	return m.svc.MangaChapters(ctx, id, seriesID)
+}
+
+// MangaPages says where a chapter's pages are in one manga provider.
+func (m *Module) MangaPages(ctx context.Context, id, chapterID string) ([]Page, error) {
+	return m.svc.MangaPages(ctx, id, chapterID)
+}
+
+// FetchImage downloads a page's image under the manga provider's own hosts and
+// at public addresses only.
+func (m *Module) FetchImage(ctx context.Context, id string, page Page) (data []byte, contentType string, err error) {
+	return m.svc.FetchImage(ctx, id, page)
 }
 
 // SearchTorrents runs one plugin's search in its sandbox.

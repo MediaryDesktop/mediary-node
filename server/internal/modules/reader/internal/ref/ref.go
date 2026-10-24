@@ -14,7 +14,18 @@ const (
 	SourceLocal    = "local"
 	SourceOPDS     = "opds"
 	SourceMangaDex = "mangadex"
+	SourcePlugin   = "plugin"
 )
+
+var (
+	// A plugin's id, as its manifest has it.
+	pluginIDPattern = regexp.MustCompile(`^[a-z0-9][a-z0-9-]{1,47}$`)
+	// The key the manga module writes for a plugin's chapter: base64url.
+	pluginKeyPattern = regexp.MustCompile(`^[A-Za-z0-9_-]+$`)
+)
+
+// maxPluginKey bounds that key: two ids of up to 512 bytes and a number.
+const maxPluginKey = 4096
 
 // ChapterRef is a chapter's address. Key is whatever the source needs to find the
 // chapter again: a file id, a server id and entry id, a chapter uuid.
@@ -51,6 +62,12 @@ func Parse(raw string) (ChapterRef, error) {
 	case SourceMangaDex:
 		if !uuidPattern.MatchString(key) {
 			return ChapterRef{}, fmt.Errorf("chapter reference %q: not a MangaDex chapter id", raw)
+		}
+
+	case SourcePlugin:
+		plugin, chapter, ok := strings.Cut(key, ":")
+		if !ok || !pluginIDPattern.MatchString(plugin) || len(chapter) > maxPluginKey || !pluginKeyPattern.MatchString(chapter) {
+			return ChapterRef{}, fmt.Errorf("chapter reference %q: want plugin:<id>:<key>", raw)
 		}
 
 	default:

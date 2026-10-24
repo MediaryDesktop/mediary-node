@@ -32,6 +32,7 @@ type (
 const (
 	SourceOPDS     = ref.SourceOPDS
 	SourceMangaDex = ref.SourceMangaDex
+	SourcePlugin   = ref.SourcePlugin
 )
 
 type Deps struct {

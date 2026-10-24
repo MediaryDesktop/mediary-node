@@ -36,7 +36,12 @@ func (s *Service) Sources(ctx context.Context) ([]SourceInfo, error) {
 		sources = append(sources, SourceInfo{ID: SourceMangaDex, Name: mangaDexName, Kind: SourceMangaDex})
 	}
 
-	return sources, nil
+	plugins, err := s.pluginSources(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return append(sources, plugins...), nil
 }
 
 type SeriesHit struct {
@@ -59,6 +64,9 @@ func (s *Service) Search(ctx context.Context, source, query, mediaRef string) ([
 
 	if source == SourceMangaDex {
 		return s.searchMangaDex(ctx, query, mediaRef)
+	}
+	if id, ok := pluginOf(source); ok {
+		return s.searchPlugin(ctx, id, query, mediaRef)
 	}
 
 	serverID, ok := serverOf(source)
@@ -127,6 +135,17 @@ func (s *Service) SetLink(ctx context.Context, mediaRef, source, seriesID, serie
 	if source == SourceMangaDex {
 		if !uuidPattern.MatchString(seriesID) {
 			return apperr.Invalid("series_id", "a MangaDex series is named by its id, as the search returns it")
+		}
+
+		return s.putLink(ctx, mediaRef, source, seriesID, seriesTitle)
+	}
+
+	if id, ok := pluginOf(source); ok {
+		if !pluginIDOK(seriesID) {
+			return apperr.Invalid("series_id", "a series is named by its id in the plugin, as the search returns it")
+		}
+		if _, err := s.provider(ctx, id); err != nil {
+			return err
 		}
 
 		return s.putLink(ctx, mediaRef, source, seriesID, seriesTitle)
@@ -213,6 +232,22 @@ func (s *Service) Chapters(ctx context.Context, mediaRef string) ([]ChapterInfo,
 					return nil, nil, ctx.Err()
 				}
 				problems = append(problems, SourceProblem{Source: link.Source, SourceName: mangaDexName, Detail: err.Error()})
+
+				continue
+			}
+
+			chapters = append(chapters, found...)
+
+			continue
+		}
+
+		if _, ok := pluginOf(link.Source); ok {
+			found, err := s.pluginChapters(ctx, link.Source, link.SeriesID)
+			if err != nil {
+				if ctx.Err() != nil {
+					return nil, nil, ctx.Err()
+				}
+				problems = append(problems, SourceProblem{Source: link.Source, SourceName: s.pluginName(ctx, link.Source), Detail: err.Error()})
 
 				continue
 			}

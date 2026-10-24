@@ -17,8 +17,8 @@ import (
 // several queries, and the site behind a plugin is not ours to hammer.
 const perPlugin = 2
 
-// TorrentProvider is a plugin on now that searches for torrents.
-type TorrentProvider struct {
+// Provider is a plugin on now, in the one role its type gives it.
+type Provider struct {
 	ID   string
 	Name string
 	// Revision changes whenever the plugin could answer differently — other
@@ -26,16 +26,26 @@ type TorrentProvider struct {
 	Revision string
 }
 
-func (s *Service) TorrentProviders(ctx context.Context) ([]TorrentProvider, error) {
+// TorrentProviders are the plugins on now that search for torrents.
+func (s *Service) TorrentProviders(ctx context.Context) ([]Provider, error) {
+	return s.providers(ctx, manifest.TypeTorrentProvider)
+}
+
+// MangaProviders are the plugins on now that read manga.
+func (s *Service) MangaProviders(ctx context.Context) ([]Provider, error) {
+	return s.providers(ctx, manifest.TypeMangaProvider)
+}
+
+func (s *Service) providers(ctx context.Context, kind manifest.Type) ([]Provider, error) {
 	exts, err := s.store.List(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("list plugins: %w", err)
 	}
 
-	var out []TorrentProvider
+	var out []Provider
 	for i := range exts {
 		ext := &exts[i]
-		if !ext.Enabled || ext.Manifest.Type != manifest.TypeTorrentProvider {
+		if !ext.Enabled || ext.Manifest.Type != kind {
 			continue
 		}
 
@@ -43,7 +53,7 @@ func (s *Service) TorrentProviders(ctx context.Context) ([]TorrentProvider, erro
 		if revErr != nil {
 			return nil, revErr
 		}
-		out = append(out, TorrentProvider{ID: ext.ID, Name: ext.Manifest.Name, Revision: revision})
+		out = append(out, Provider{ID: ext.ID, Name: ext.Manifest.Name, Revision: revision})
 	}
 
 	return out, nil
@@ -73,12 +83,7 @@ func (s *Service) revision(ext *store.Extension) (string, error) {
 
 // SearchTorrents runs one plugin's search in the sandbox.
 func (s *Service) SearchTorrents(ctx context.Context, id string, req sandbox.SearchRequest) ([]sandbox.Release, error) {
-	plugin, err := s.runnable(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-
-	release, err := s.slot(ctx, id)
+	plugin, release, err := s.runSlot(ctx, id, manifest.TypeTorrentProvider)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +95,7 @@ func (s *Service) SearchTorrents(ctx context.Context, id string, req sandbox.Sea
 // FetchTorrent downloads the .torrent a plugin's release links to, under that
 // plugin's hosts.
 func (s *Service) FetchTorrent(ctx context.Context, id, link string) (data []byte, magnet string, err error) {
-	plugin, err := s.runnable(ctx, id)
+	plugin, err := s.runnable(ctx, id, manifest.TypeTorrentProvider)
 	if err != nil {
 		return nil, "", err
 	}
@@ -98,9 +103,66 @@ func (s *Service) FetchTorrent(ctx context.Context, id, link string) (data []byt
 	return s.opts.Runner.FetchTorrent(ctx, plugin, link)
 }
 
-// runnable is the plugin as the sandbox runs it: on, a torrent provider, its
+// MangaSearch finds series in one manga provider, for the user to link a title.
+func (s *Service) MangaSearch(ctx context.Context, id string, req sandbox.MangaSearchRequest) ([]sandbox.Series, error) {
+	plugin, release, err := s.runSlot(ctx, id, manifest.TypeMangaProvider)
+	if err != nil {
+		return nil, err
+	}
+	defer release()
+
+	return s.opts.Runner.MangaSearch(ctx, plugin, req)
+}
+
+// MangaChapters lists a series' chapters in one manga provider.
+func (s *Service) MangaChapters(ctx context.Context, id, seriesID string) ([]sandbox.Chapter, error) {
+	plugin, release, err := s.runSlot(ctx, id, manifest.TypeMangaProvider)
+	if err != nil {
+		return nil, err
+	}
+	defer release()
+
+	return s.opts.Runner.MangaChapters(ctx, plugin, seriesID)
+}
+
+// MangaPages says where a chapter's pages are in one manga provider.
+func (s *Service) MangaPages(ctx context.Context, id, chapterID string) ([]sandbox.Page, error) {
+	plugin, release, err := s.runSlot(ctx, id, manifest.TypeMangaProvider)
+	if err != nil {
+		return nil, err
+	}
+	defer release()
+
+	return s.opts.Runner.MangaPages(ctx, plugin, chapterID)
+}
+
+// FetchImage downloads a page's image under the manga provider's hosts. No
+// script runs, so it takes none of the plugin's places.
+func (s *Service) FetchImage(ctx context.Context, id string, page sandbox.Page) (data []byte, contentType string, err error) {
+	plugin, err := s.runnable(ctx, id, manifest.TypeMangaProvider)
+	if err != nil {
+		return nil, "", err
+	}
+
+	return s.opts.Runner.FetchImage(ctx, plugin, page)
+}
+
+// runSlot is a runnable plugin and one of its places to run in.
+func (s *Service) runSlot(ctx context.Context, id string, kind manifest.Type) (plugin sandbox.Plugin, release func(), err error) {
+	if plugin, err = s.runnable(ctx, id, kind); err != nil {
+		return sandbox.Plugin{}, nil, err
+	}
+
+	if release, err = s.slot(ctx, id); err != nil {
+		return sandbox.Plugin{}, nil, err
+	}
+
+	return plugin, release, nil
+}
+
+// runnable is the plugin as the sandbox runs it: on, of the type asked, its
 // code matching the manifest the user agreed to, its settings filled in.
-func (s *Service) runnable(ctx context.Context, id string) (sandbox.Plugin, error) {
+func (s *Service) runnable(ctx context.Context, id string, kind manifest.Type) (sandbox.Plugin, error) {
 	if s.opts.Runner == nil {
 		return sandbox.Plugin{}, apperr.New(apperr.KindUnavailable, "plugins do not run on this node")
 	}
@@ -112,8 +174,8 @@ func (s *Service) runnable(ctx context.Context, id string) (sandbox.Plugin, erro
 	if !ext.Enabled {
 		return sandbox.Plugin{}, apperr.New(apperr.KindPrecondition, "%s is turned off", ext.Manifest.Name)
 	}
-	if ext.Manifest.Type != manifest.TypeTorrentProvider {
-		return sandbox.Plugin{}, apperr.New(apperr.KindPrecondition, "%s does not search for torrents", ext.Manifest.Name)
+	if ext.Manifest.Type != kind {
+		return sandbox.Plugin{}, apperr.New(apperr.KindPrecondition, "%s is not a %s", ext.Manifest.Name, kind)
 	}
 
 	return s.sandboxed(ext)

@@ -29,7 +29,9 @@ type Options struct {
 	Client *opds.Client
 	// MangaDex is nil when the node is configured without it.
 	MangaDex *mangadex.Client
-	Now      func() time.Time
+	// Plugins is nil when the node runs no plugins.
+	Plugins Plugins
+	Now     func() time.Time
 }
 
 type Service struct {
@@ -38,6 +40,7 @@ type Service struct {
 	logger    zerolog.Logger
 	opts      Options
 	dex       *dexCache
+	plugins   *pluginCache
 }
 
 func New(st *store.Store, passwords Passwords, logger zerolog.Logger, opts Options) *Service {
@@ -45,7 +48,7 @@ func New(st *store.Store, passwords Passwords, logger zerolog.Logger, opts Optio
 		opts.Now = time.Now
 	}
 
-	return &Service{store: st, passwords: passwords, logger: logger, opts: opts, dex: newDexCache()}
+	return &Service{store: st, passwords: passwords, logger: logger, opts: opts, dex: newDexCache(), plugins: newPluginCache()}
 }
 
 // Server is an OPDS server as the API shows it: never with its password.

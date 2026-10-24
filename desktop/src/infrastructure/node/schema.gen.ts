@@ -3543,7 +3543,7 @@ export interface components {
 			/** @example opds:3 */
 			id: string
 			/** @enum {string} */
-			kind: 'opds'
+			kind: 'opds' | 'mangadex' | 'plugin'
 			name: string
 		}
 		MangaSourceProblemBody: {

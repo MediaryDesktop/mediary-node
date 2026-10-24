@@ -80,7 +80,7 @@ type CheckOPDSServerOutput struct {
 type MangaSourceBody struct {
 	ID   string `json:"id" example:"opds:3"`
 	Name string `json:"name"`
-	Kind string `json:"kind" enum:"opds"`
+	Kind string `json:"kind" enum:"opds,mangadex,plugin"`
 }
 
 type MangaSourcesOutput struct {

@@ -34,10 +34,22 @@ type Deps struct {
 	MangaDexEndpoint       string
 	MangaDexReportEndpoint string
 	MangaDexTimeout        time.Duration
+
+	Plugins Plugins
 }
 
 // Library is the library module as downloads need it, wired by internal/app.
 type Library = download.Library
+
+// Plugins are the user's manga plugins, joined in internal/app; nil when the
+// node runs none.
+type (
+	Plugins        = service.Plugins
+	PluginProvider = service.PluginProvider
+	PluginSeries   = service.PluginSeries
+	PluginChapter  = service.PluginChapter
+	PluginPage     = service.PluginPage
+)
 
 func New(deps Deps) *Module {
 	st := store.New(deps.DB)
@@ -55,6 +67,7 @@ func New(deps Deps) *Module {
 	svc := service.New(st, secrets.New(deps.SecretsPath), deps.Logger, service.Options{
 		Client:   opds.New(30*time.Second, deps.UserAgent),
 		MangaDex: dex,
+		Plugins:  deps.Plugins,
 	})
 
 	queue := download.New(st, svc.DownloadSource(), deps.Library, deps.Events, deps.Logger)
@@ -98,4 +111,14 @@ func (m *Module) MangaDexChapter(ctx context.Context, chapterID string) (*OPDSCh
 // MangaDexPage fetches one page of a MangaDex chapter, through the node.
 func (m *Module) MangaDexPage(ctx context.Context, chapterID string, index int) (data []byte, contentType string, err error) {
 	return m.svc.MangaDexPage(ctx, chapterID, index)
+}
+
+// PluginChapter describes a manga plugin's chapter for the reader.
+func (m *Module) PluginChapter(ctx context.Context, pluginID, key string) (*OPDSChapter, error) {
+	return m.svc.PluginChapter(ctx, pluginID, key)
+}
+
+// PluginPage fetches a page of a manga plugin's chapter through the node.
+func (m *Module) PluginPage(ctx context.Context, pluginID, key string, index int) (data []byte, contentType string, err error) {
+	return m.svc.PluginPage(ctx, pluginID, key, index)
 }
