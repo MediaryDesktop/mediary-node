@@ -124,8 +124,8 @@ func New(opts Options) *Runner {
 var (
 	// ErrTimeout is a search that ran past Limits.Call.
 	ErrTimeout = errors.New("the plugin took too long")
-	// ErrNoProvider is code that defines no Provider class with a search method.
-	ErrNoProvider = errors.New("the plugin defines no Provider with a search method")
+	// ErrNoProvider is code that defines no Provider class with the method asked.
+	ErrNoProvider = errors.New("the plugin defines no Provider with this method")
 )
 
 // Error is a plugin failing in its own code: what it threw, or what it
@@ -139,15 +139,29 @@ func (e *Error) Error() string {
 	return fmt.Sprintf("plugin %s: %s", e.Plugin, e.Message)
 }
 
-// Search runs the plugin's search in a fresh runtime: nothing a plugin builds
-// up survives to its next call.
-func (r *Runner) Search(ctx context.Context, plugin Plugin, request SearchRequest) (releases []Release, err error) {
+// Search runs a torrent provider's search.
+func (r *Runner) Search(ctx context.Context, plugin Plugin, request SearchRequest) ([]Release, error) {
+	var releases []Release
+
+	err := r.call(ctx, plugin, "search",
+		func(s *session) goja.Value { return s.requestValue(request) },
+		func(s *session, result goja.Value) (readErr error) {
+			releases, readErr = s.releases(result)
+			return readErr
+		})
+
+	return releases, err
+}
+
+// call runs one method of the plugin's Provider in a fresh runtime — nothing a
+// plugin builds up survives to its next call — and reads what it returned.
+func (r *Runner) call(ctx context.Context, plugin Plugin, method string, arg func(*session) goja.Value, read func(*session, goja.Value) error) (err error) {
 	ctx, cancel := context.WithTimeout(ctx, r.limits.Call)
 	defer cancel()
 
 	program, err := goja.Compile(plugin.ID+".js", plugin.Code, false)
 	if err != nil {
-		return nil, &Error{Plugin: plugin.ID, Message: "the code does not compile: " + err.Error()}
+		return &Error{Plugin: plugin.ID, Message: "the code does not compile: " + err.Error()}
 	}
 
 	vm := goja.New()
@@ -161,7 +175,7 @@ func (r *Runner) Search(ctx context.Context, plugin Plugin, request SearchReques
 	// with it.
 	defer func() {
 		if recovered := recover(); recovered != nil {
-			releases, err = nil, &Error{Plugin: plugin.ID, Message: fmt.Sprintf("the runtime failed: %v", recovered)}
+			err = &Error{Plugin: plugin.ID, Message: fmt.Sprintf("the runtime failed: %v", recovered)}
 		}
 	}()
 
@@ -177,24 +191,24 @@ func (r *Runner) Search(ctx context.Context, plugin Plugin, request SearchReques
 	}
 
 	if bindErr := s.bind(); bindErr != nil {
-		return nil, bindErr
+		return bindErr
 	}
 
 	if _, err = vm.RunProgram(program); err != nil {
-		return nil, s.failure(ctx, err)
+		return s.failure(ctx, err)
 	}
 
-	value, err := s.callSearch(request)
+	value, err := s.callMethod(method, arg(s))
 	if err != nil {
-		return nil, s.failure(ctx, err)
+		return s.failure(ctx, err)
 	}
 
 	result, err := s.settle(value)
 	if err != nil {
-		return nil, s.failure(ctx, err)
+		return s.failure(ctx, err)
 	}
 
-	return s.releases(result)
+	return read(s, result)
 }
 
 // session is one call's runtime and what its bindings share.
@@ -216,7 +230,7 @@ type session struct {
 	logLines int
 }
 
-func (s *session) callSearch(request SearchRequest) (goja.Value, error) {
+func (s *session) callMethod(method string, arg goja.Value) (goja.Value, error) {
 	// A class declaration is not a property of the global object; it is
 	// reached by name from the global scope.
 	ctor, err := s.vm.RunString(`typeof Provider === 'function' ? Provider : undefined`)
@@ -224,7 +238,7 @@ func (s *session) callSearch(request SearchRequest) (goja.Value, error) {
 		return nil, err
 	}
 	if goja.IsUndefined(ctor) {
-		return nil, ErrNoProvider
+		return nil, fmt.Errorf("%w: %s", ErrNoProvider, method)
 	}
 
 	instance, err := s.vm.New(ctor)
@@ -232,12 +246,12 @@ func (s *session) callSearch(request SearchRequest) (goja.Value, error) {
 		return nil, err
 	}
 
-	search, ok := goja.AssertFunction(instance.Get("search"))
+	fn, ok := goja.AssertFunction(instance.Get(method))
 	if !ok {
-		return nil, ErrNoProvider
+		return nil, fmt.Errorf("%w: %s", ErrNoProvider, method)
 	}
 
-	return search(instance, s.requestValue(request))
+	return fn(instance, arg)
 }
 
 func (s *session) requestValue(request SearchRequest) goja.Value {
@@ -280,7 +294,7 @@ func (s *session) settle(value goja.Value) (goja.Value, error) {
 	case goja.PromiseStateRejected:
 		return nil, &thrown{value: promise.Result()}
 	default:
-		return nil, &Error{Plugin: s.plugin.ID, Message: "the search waits on something that never finishes"}
+		return nil, &Error{Plugin: s.plugin.ID, Message: "the call waits on something that never finishes"}
 	}
 }
 
@@ -299,7 +313,7 @@ func (s *session) failure(ctx context.Context, err error) error {
 		return fmt.Errorf("plugin %s: %w (over %s)", s.plugin.ID, ErrTimeout, s.limits.Call)
 	}
 	if errors.Is(err, ErrNoProvider) {
-		return fmt.Errorf("plugin %s: %w", s.plugin.ID, ErrNoProvider)
+		return fmt.Errorf("plugin %s: %w", s.plugin.ID, err)
 	}
 
 	var pluginErr *Error
