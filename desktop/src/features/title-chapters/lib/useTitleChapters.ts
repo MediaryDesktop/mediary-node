@@ -100,9 +100,12 @@ export function useTitleChapters(mediaRef: string | undefined): TitleChapters {
 			const credit = [chapter.language?.toUpperCase(), ...(chapter.groups ?? [])]
 				.filter(Boolean)
 				.join(' · ')
+			// A plugin learns a chapter's pages only when it is opened: 0 is unknown.
 			const size = chapter.external_url
 				? t('mangaSources.chapters.external')
-				: t('mangaSources.chapters.pages', { count: chapter.pages })
+				: chapter.pages > 0
+					? t('mangaSources.chapters.pages', { count: chapter.pages })
+					: ''
 
 			options.push({
 				ref: chapter.ref,
@@ -110,7 +113,7 @@ export function useTitleChapters(mediaRef: string | undefined): TitleChapters {
 				title: chapter.title,
 				source: chapter.source,
 				sourceName: chapter.source_name,
-				detail: credit ? `${credit} · ${size}` : size,
+				detail: [credit, size].filter(Boolean).join(' · '),
 				externalUrl: chapter.external_url
 			})
 		}
