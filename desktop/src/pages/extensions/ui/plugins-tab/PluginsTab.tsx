@@ -1,7 +1,15 @@
 import { useUnit } from 'effector-react'
 import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
-import { LuBlocks, LuDatabase, LuPuzzle, LuSearchX, LuShoppingBasket } from 'react-icons/lu'
+import {
+	LuBlocks,
+	LuBookOpen,
+	LuDatabase,
+	LuMagnet,
+	LuPuzzle,
+	LuSearchX,
+	LuShoppingBasket
+} from 'react-icons/lu'
 
 import { useTranslation } from '@shared/i18n'
 import { Button, Skeleton } from '@shared/ui'
@@ -34,6 +42,28 @@ export interface PluginsTabProps {
 
 const TYPES = ['all', 'torrent-provider', 'manga-provider'] as const
 type TypeFilter = (typeof TYPES)[number]
+
+// Plugins of one type are one section, in this order, as the catalog of
+// Seanime keeps anime torrents apart from manga.
+const SECTION_ICONS: Record<string, ReactNode> = {
+	'torrent-provider': <LuMagnet size={20} />,
+	'manga-provider': <LuBookOpen size={20} />
+}
+
+function byType<T extends { type: string }>(items: T[]): [string, T[]][] {
+	const order = TYPES.filter(type => type !== 'all') as string[]
+	const groups = new Map<string, T[]>()
+
+	for (const item of items) {
+		groups.set(item.type, [...(groups.get(item.type) ?? []), item])
+	}
+
+	return [...groups.entries()].sort(([a], [b]) => {
+		const left = order.indexOf(a)
+		const right = order.indexOf(b)
+		return (left < 0 ? order.length : left) - (right < 0 ? order.length : right)
+	})
+}
 
 // The plugins the user installed, or the ones their repositories offer: two
 // tabs of the page, which owns the dialogs they open.
@@ -87,6 +117,9 @@ export function PluginsTab({
 		}
 	}
 
+	const typeLabel = (kind: string) =>
+		(TYPES as readonly string[]).includes(kind) ? t(`plugins.types.${kind as TypeFilter}`) : kind
+
 	const notFound = <CatalogEmpty icon={<LuSearchX size={28} />} title={t('extensions.notFound')} />
 
 	const body = () => {
@@ -124,18 +157,26 @@ export function PluginsTab({
 				)
 			}
 
-			return section(
-				shownInstalled.length === 0
-					? notFound
-					: shownInstalled.map(ext => (
-							<InstalledPluginCard
-								key={ext.id}
-								extension={ext}
-								onUpdate={target => onInstall({ kind: 'update', extension: target })}
-								onSettings={onSettings}
-							/>
-						))
-			)
+			if (shownInstalled.length === 0) {
+				return section(notFound)
+			}
+
+			return byType(shownInstalled).map(([kind, items]) => (
+				<CatalogSection
+					key={kind}
+					icon={SECTION_ICONS[kind] ?? <LuBlocks size={20} />}
+					title={typeLabel(kind)}
+				>
+					{items.map(ext => (
+						<InstalledPluginCard
+							key={ext.id}
+							extension={ext}
+							onUpdate={target => onInstall({ kind: 'update', extension: target })}
+							onSettings={onSettings}
+						/>
+					))}
+				</CatalogSection>
+			))
 		}
 
 		if (offered === null) {
@@ -158,20 +199,30 @@ export function PluginsTab({
 			)
 		}
 
-		return (
-			<CatalogSection icon={<LuBlocks size={20} />} title={t('extensions.catalog.section')}>
-				{shownCatalog.length === 0
-					? notFound
-					: shownCatalog.map((plugin: CatalogPlugin) => (
-							<CatalogPluginCard
-								key={plugin.manifest_url}
-								plugin={plugin}
-								onInstall={url => onInstall({ kind: 'install', url })}
-								onUpdate={updateFromCatalog}
-							/>
-						))}
+		if (shownCatalog.length === 0) {
+			return (
+				<CatalogSection icon={<LuBlocks size={20} />} title={t('extensions.catalog.section')}>
+					{notFound}
+				</CatalogSection>
+			)
+		}
+
+		return byType(shownCatalog).map(([kind, items]) => (
+			<CatalogSection
+				key={kind}
+				icon={SECTION_ICONS[kind] ?? <LuBlocks size={20} />}
+				title={typeLabel(kind)}
+			>
+				{items.map((plugin: CatalogPlugin) => (
+					<CatalogPluginCard
+						key={plugin.manifest_url}
+						plugin={plugin}
+						onInstall={url => onInstall({ kind: 'install', url })}
+						onUpdate={updateFromCatalog}
+					/>
+				))}
 			</CatalogSection>
-		)
+		))
 	}
 
 	return (
