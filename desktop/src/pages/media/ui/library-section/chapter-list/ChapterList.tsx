@@ -178,30 +178,24 @@ export function ChapterList({ mediaRef, title, progress }: ChapterListProps) {
 		void navigate({ to: '/read/$ref', params: { ref: option.ref } })
 	}
 
-	const linked = links.map(link =>
-		t('mangaSources.chapters.linkedSeries', {
-			series: link.series_title || link.series_id,
-			name: link.source_name
-		})
-	)
-
 	return (
 		<section className={styles.card}>
 			<header className={styles.header}>
 				<div className={styles.heading}>
-					<h2 className={styles.title}>
-						{t('mangaSources.chapters.heading')}
-						<span className={styles.total}>{rows.length}</span>
-					</h2>
-					<p className={styles.subtitle}>
-						{linked.length > 0 ? linked.join(' · ') : t('mangaSources.chapters.subtitle')}
-					</p>
+					<Icon name='common/book-open' size={40} className={styles.bookIcon} />
+					<div className={styles.headingText}>
+						<h2 className={styles.title}>
+							{t('mangaSources.chapters.heading')} ⋅ {rows.length}
+						</h2>
+						<p className={styles.subtitle}>{t('mangaSources.chapters.subtitle')}</p>
+					</div>
 				</div>
 
 				<div className={styles.actions}>
 					{savable.size > 1 && (
 						<Button
 							size='small'
+							variant='primary'
 							startIcon={<Icon name='common/download' size={16} />}
 							onClick={() => saveAll([...savable.values()])}
 						>

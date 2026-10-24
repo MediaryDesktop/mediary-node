@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import type { ReactNode } from 'react'
+import { useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { DropdownMenu, Icon, RippleButton } from '@shared/ui'
@@ -25,7 +26,8 @@ export interface SourceChipsProps {
 	onUnlink: (source: string) => void
 }
 
-// Which source the list shows, and a menu for the series each one is linked to.
+// Which source the list shows. A linked source's own chip widens on hover to
+// offer the menu for the series it is linked to, instead of a separate button.
 export function SourceChips({
 	sources,
 	counts,
@@ -39,35 +41,75 @@ export function SourceChips({
 	onUnlink
 }: SourceChipsProps) {
 	const { t } = useTranslation()
+	// Open in a portal, so hover/focus-within on the chip cannot see it; kept
+	// expanded by hand so the trigger does not vanish under an open menu.
+	const [menuOpenFor, setMenuOpenFor] = useState<string | null>(null)
 
-	const linkItems: DropdownMenuItem[] = links.flatMap(link => [
-		{
-			id: `relink:${link.source}`,
-			label: t('mangaSources.chapters.relinkFrom', { name: link.source_name }),
-			icon: 'common/search',
-			onSelect: () => onRelink(link.source)
-		},
-		{
-			id: `unlink:${link.source}`,
-			label: t('mangaSources.chapters.unlinkFrom', { name: link.source_name }),
-			icon: 'common/trash',
-			danger: true,
-			onSelect: () => onUnlink(link.source)
-		}
-	])
+	const linkBySource = new Map(links.map(link => [link.source, link]))
 
-	const chip = (value: string, label: string, count: number, icon?: ReactNode) => (
-		<RippleButton
-			key={value}
-			className={clsx(styles.chip, value === active && styles.active)}
-			aria-pressed={value === active}
-			onClick={() => onFilter(value)}
-		>
-			{icon}
-			<span className={styles.label}>{label}</span>
-			<span className={styles.count}>{count}</span>
-		</RippleButton>
-	)
+	const chip = (value: string, label: string, count: number, icon?: ReactNode) => {
+		const link = linkBySource.get(value)
+		const menu: DropdownMenuItem[] | undefined = link && [
+			{
+				id: `relink:${link.source}`,
+				label: t('mangaSources.chapters.relinkFrom', { name: link.source_name }),
+				icon: 'common/search',
+				onSelect: () => onRelink(link.source)
+			},
+			{
+				id: `unlink:${link.source}`,
+				label: t('mangaSources.chapters.unlinkFrom', { name: link.source_name }),
+				icon: 'common/trash',
+				danger: true,
+				onSelect: () => onUnlink(link.source)
+			}
+		]
+
+		return (
+			<div
+				key={value}
+				role='button'
+				tabIndex={0}
+				aria-pressed={value === active}
+				className={clsx(
+					styles.chip,
+					value === active && styles.active,
+					menuOpenFor === value && styles.menuOpen
+				)}
+				onClick={() => onFilter(value)}
+				onKeyDown={event => {
+					if (event.key === 'Enter' || event.key === ' ') {
+						event.preventDefault()
+						onFilter(value)
+					}
+				}}
+			>
+				{icon}
+				<span className={styles.text}>
+					<span className={styles.label}>{label}</span>
+					<span className={styles.count}>{count}</span>
+				</span>
+
+				{menu && (
+					<DropdownMenu
+						items={menu}
+						align='end'
+						onOpenChange={open => setMenuOpenFor(open ? value : null)}
+						trigger={
+							<RippleButton
+								className={styles.more}
+								aria-label={t('mangaSources.chapters.links')}
+								title={t('mangaSources.chapters.links')}
+								onClick={event => event.stopPropagation()}
+							>
+								<Icon name='common/more-vertical' size={16} />
+							</RippleButton>
+						}
+					/>
+				)}
+			</div>
+		)
+	}
 
 	return (
 		<div className={styles.chips} role='group' aria-label={t('mangaSources.chapters.filter')}>
@@ -80,22 +122,6 @@ export function SourceChips({
 					counts.get(value) ?? 0,
 					<SourceIcon source={value} name={name} image={icons.get(value)} />
 				)
-			)}
-
-			{linkItems.length > 0 && (
-				<DropdownMenu
-					items={linkItems}
-					align='end'
-					trigger={
-						<RippleButton
-							className={styles.links}
-							aria-label={t('mangaSources.chapters.links')}
-							title={t('mangaSources.chapters.links')}
-						>
-							<Icon name='common/link' size={16} />
-						</RippleButton>
-					}
-				/>
 			)}
 		</div>
 	)

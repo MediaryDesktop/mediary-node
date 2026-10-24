@@ -953,7 +953,7 @@ export const en = {
 		},
 		chapters: {
 			heading: 'Chapters',
-			subtitle: 'Read online or save chapters to the library',
+			subtitle: 'Chapters from all available sources',
 			linkedSeries: '{{series}} from {{name}}',
 			links: 'Linked series',
 			relinkFrom: 'Change series on {{name}}',

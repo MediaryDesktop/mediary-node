@@ -4,43 +4,38 @@
 
 	display: flex;
 	flex-direction: column;
-	overflow: hidden;
-	border: 1px solid var(--border);
-	border-radius: var(--radius-lg);
-	background: var(--bg-subtle);
+	gap: 1.25rem;
 	container: chapters / inline-size;
 
 	.header {
 		display: flex;
 		flex-wrap: wrap;
-		align-items: flex-start;
+		align-items: center;
 		justify-content: space-between;
 		gap: 1rem;
-		padding: 1.25rem 1.25rem 0;
 
 		.heading {
 			display: flex;
-			flex-direction: column;
-			gap: 0.25rem;
+			align-items: center;
+			gap: 0.75rem;
 			min-width: 0;
 
-			.title {
+			.bookIcon {
+				flex-shrink: 0;
+				color: var(--text-secondary);
+			}
+
+			.headingText {
 				display: flex;
-				align-items: center;
-				gap: 0.625rem;
+				flex-direction: column;
+				gap: 0.25rem;
+				min-width: 0;
+			}
+
+			.title {
 				margin: 0;
 				font-size: 1.25rem;
 				font-weight: 650;
-
-				.total {
-					padding: 0.125rem 0.5rem;
-					border-radius: 999px;
-					background: var(--accent-muted);
-					color: var(--accent-text);
-					font-size: 0.8125rem;
-					font-weight: 600;
-					font-variant-numeric: tabular-nums;
-				}
 			}
 
 			.subtitle {
@@ -53,6 +48,7 @@
 		.actions {
 			display: flex;
 			flex-wrap: wrap;
+			align-items: center;
 			gap: 0.5rem;
 		}
 	}
@@ -61,12 +57,11 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.875rem;
-		padding: 1rem 1.25rem;
 	}
 
 	.problem,
 	.message {
-		margin: 0 1.25rem 1rem;
+		margin: 0;
 		font-size: 0.875rem;
 	}
 
@@ -81,15 +76,14 @@
 	.table {
 		display: flex;
 		flex-direction: column;
+		gap: 0.5rem;
 
 		.head {
 			display: grid;
 			grid-template-columns: var(--chapter-columns);
 			align-items: center;
 			gap: var(--chapter-gap);
-			padding: 0.625rem 1rem;
-			border-top: 1px solid var(--border);
-			background: var(--surface);
+			padding: 0 1rem;
 			color: var(--text-muted);
 			font-size: 0.75rem;
 			font-weight: 600;
@@ -112,8 +106,6 @@
 		align-items: center;
 		justify-content: space-between;
 		gap: 0.75rem;
-		padding: 0.875rem 1.25rem;
-		border-top: 1px solid var(--border);
 
 		.selection {
 			display: flex;

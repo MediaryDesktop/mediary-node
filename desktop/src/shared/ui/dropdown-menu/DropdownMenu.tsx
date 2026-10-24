@@ -23,6 +23,7 @@ export interface DropdownMenuProps {
 	trigger: ReactNode
 	items: DropdownMenuItem[]
 	align?: 'start' | 'center' | 'end'
+	onOpenChange?: (open: boolean) => void
 }
 
 interface MenuItemProps {
@@ -52,7 +53,7 @@ function MenuItem({ item, index }: MenuItemProps) {
 	)
 }
 
-export function DropdownMenu({ trigger, items, align = 'end' }: DropdownMenuProps) {
+export function DropdownMenu({ trigger, items, align = 'end', onOpenChange }: DropdownMenuProps) {
 	const [open, setOpen] = useState(false)
 
 	useEffect(() => {
@@ -71,8 +72,13 @@ export function DropdownMenu({ trigger, items, align = 'end' }: DropdownMenuProp
 		}
 	}, [open])
 
+	const changeOpen = (value: boolean) => {
+		setOpen(value)
+		onOpenChange?.(value)
+	}
+
 	return (
-		<Primitive.Root modal={false} open={open} onOpenChange={setOpen}>
+		<Primitive.Root modal={false} open={open} onOpenChange={changeOpen}>
 			<Primitive.Trigger asChild>{trigger}</Primitive.Trigger>
 
 			<Primitive.Portal>
