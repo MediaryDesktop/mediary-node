@@ -7,6 +7,16 @@
 	color: #fff;
 	overflow: hidden;
 
+	// Matches the book reader's and the video player's own slide, so every
+	// full-screen surface in the app opens and closes the same way.
+	&.enter {
+		animation: reader-in 340ms cubic-bezier(0.32, 0.72, 0, 1) both;
+	}
+
+	&.leave {
+		animation: reader-out 240ms ease-in forwards;
+	}
+
 	.stage {
 		position: absolute;
 		inset: 0;
@@ -126,5 +136,24 @@
 				flex: 1;
 			}
 		}
+	}
+}
+
+@keyframes reader-in {
+	from {
+		transform: translateY(100%);
+	}
+}
+
+@keyframes reader-out {
+	to {
+		transform: translateY(100%);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.root.enter,
+	.root.leave {
+		animation-duration: 1ms;
 	}
 }

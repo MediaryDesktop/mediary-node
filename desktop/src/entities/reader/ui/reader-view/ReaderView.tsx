@@ -4,19 +4,28 @@ import { useCallback, useEffect, useState } from 'react'
 import type { MouseEvent } from 'react'
 
 import { useTranslation } from '@shared/i18n'
+import { useAfterDelay } from '@shared/lib'
 import { Button, Icon, WindowControls } from '@shared/ui'
 
 import type { ReaderChapter } from '../../api/api'
 import { clampPage, isLastPage, prefetchIndexes } from '../../lib/pages'
 import { pageUrl } from '../../lib/urls'
 import { readerModel } from '../../model/model'
+import { useBookEntrance } from '../book-reader/lib/useBookEntrance'
 
 import styles from './ReaderView.module.scss'
+
+// Matches the book reader's and the video player's own slide, so every full-screen
+// surface in the app opens and closes the same way.
+const LEAVE_MS = 240
 
 export interface ReaderViewProps {
 	chapter: ReaderChapter
 	page: number
 	onPageChange: (page: number) => void
+	// When the page first asked to open this chapter — continues the loading panel's
+	// own opening slide instead of starting a new one.
+	openedAt: number
 	onClose: () => void
 	previous: { ref: string } | null
 	next: { ref: string } | null
@@ -27,6 +36,7 @@ export function ReaderView({
 	chapter,
 	page,
 	onPageChange,
+	openedAt,
 	onClose,
 	previous,
 	next,
@@ -38,6 +48,12 @@ export function ReaderView({
 	const total = chapter.pages?.length ?? 0
 	const current = clampPage(page, total)
 	const [controlsVisible, setControlsVisible] = useState(true)
+	const [leaving, setLeaving] = useState(false)
+	const entrance = useBookEntrance(openedAt)
+
+	const requestClose = useCallback(() => setLeaving(true), [])
+
+	useAfterDelay(leaving, LEAVE_MS, onClose)
 
 	const ref = chapter.ref
 
@@ -99,7 +115,7 @@ export function ReaderView({
 					goTo(total - 1)
 					break
 				case 'Escape':
-					onClose()
+					requestClose()
 					break
 				default:
 					return
@@ -111,7 +127,7 @@ export function ReaderView({
 		window.addEventListener('keydown', onKey)
 
 		return () => window.removeEventListener('keydown', onKey)
-	}, [current, total, goTo, onClose])
+	}, [current, total, goTo, requestClose])
 
 	const onStageClick = (event: MouseEvent<HTMLDivElement>) => {
 		const rect = event.currentTarget.getBoundingClientRect()
@@ -129,7 +145,10 @@ export function ReaderView({
 	const label = chapter.number ? t('reader.chapterNumber', { number: chapter.number }) : null
 
 	return (
-		<div className={styles.root}>
+		<div
+			className={clsx(styles.root, entrance.entering && styles.enter, leaving && styles.leave)}
+			style={entrance.entering && !leaving ? entrance.style : undefined}
+		>
 			<div
 				className={clsx(styles.stage, total === 0 && styles.empty)}
 				onClick={onStageClick}
@@ -154,7 +173,7 @@ export function ReaderView({
 					size='small'
 					aria-label={t('reader.close')}
 					startIcon={<Icon name='common/arrow-left' size={18} />}
-					onClick={onClose}
+					onClick={requestClose}
 				/>
 
 				<div className={styles.heading}>

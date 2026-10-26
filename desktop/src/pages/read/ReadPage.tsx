@@ -32,6 +32,9 @@ export function ReadPage({ chapterRef, onOpenChapter }: ReadPageProps) {
 	])
 
 	const [page, setPage] = useState(0)
+	// When the page first asked to open this chapter; the loading panel and the reader
+	// that replaces it both continue this one opening slide.
+	const [openedAt] = useState(() => performance.now())
 
 	// A query sent before the node is up fails, and a reload of this page gets there first.
 	useEffect(() => {
@@ -52,7 +55,7 @@ export function ReadPage({ chapterRef, onOpenChapter }: ReadPageProps) {
 	if (!chapter) {
 		if (chapterError && !chapterPending) {
 			return (
-				<Panel onClose={close}>
+				<Panel onClose={close} openedAt={openedAt}>
 					<p>{problemDetail(chapterError, t('reader.loadFailed'))}</p>
 					<Button onClick={() => loadChapter(chapterRef)}>{t('media.retry')}</Button>
 				</Panel>
@@ -60,7 +63,7 @@ export function ReadPage({ chapterRef, onOpenChapter }: ReadPageProps) {
 		}
 
 		return (
-			<Panel onClose={close}>
+			<Panel onClose={close} openedAt={openedAt}>
 				<ReelLoader spinning />
 			</Panel>
 		)
@@ -72,6 +75,7 @@ export function ReadPage({ chapterRef, onOpenChapter }: ReadPageProps) {
 			chapter={chapter}
 			page={page}
 			onPageChange={setPage}
+			openedAt={openedAt}
 			onClose={close}
 			previous={neighbours.previous}
 			next={neighbours.next}
