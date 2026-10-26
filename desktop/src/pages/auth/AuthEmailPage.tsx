@@ -28,9 +28,18 @@ export function AuthEmailPage({ mode }: AuthEmailPageProps) {
 		>
 			<AuthEmailPanel
 				mode={mode}
-				onUseProviders={useCallback(() => navigate({ to: copy.providersRoute }), [navigate, copy])}
-				onSwitch={useCallback(() => navigate({ to: copy.otherEmailRoute }), [navigate, copy])}
-				onForgotPassword={useCallback(() => navigate({ to: '/reset-password' }), [navigate])}
+				onUseProviders={useCallback(
+					() => navigate({ to: copy.providersRoute, replace: true }),
+					[navigate, copy]
+				)}
+				onSwitch={useCallback(
+					() => navigate({ to: copy.otherEmailRoute, replace: true }),
+					[navigate, copy]
+				)}
+				onForgotPassword={useCallback(
+					() => navigate({ to: '/reset-password', replace: true }),
+					[navigate]
+				)}
 			/>
 		</AuthFormWrapper>
 	)

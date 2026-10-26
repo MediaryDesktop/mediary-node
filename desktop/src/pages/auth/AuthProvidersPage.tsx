@@ -24,8 +24,11 @@ export function AuthProvidersPage({ mode }: AuthProvidersPageProps) {
 		<AuthFormWrapper eyebrow={t(copy.eyebrow)} title={t(copy.title)} description={t(copy.subtitle)}>
 			<AuthProvidersPanel
 				mode={mode}
-				onUseEmail={useCallback(() => navigate({ to: copy.emailRoute }), [navigate, copy])}
-				onSwitch={useCallback(() => navigate({ to: copy.otherRoute }), [navigate, copy])}
+				onUseEmail={useCallback(
+					() => navigate({ to: copy.emailRoute, replace: true }),
+					[navigate, copy]
+				)}
+				onSwitch={useCallback(() => navigate({ to: copy.otherRoute, replace: true }), [navigate, copy])}
 			/>
 		</AuthFormWrapper>
 	)

@@ -25,8 +25,14 @@ export function NewPasswordPage({ email }: NewPasswordPageProps) {
 		>
 			<AuthNewPasswordPanel
 				email={email}
-				onRequestAnother={useCallback(() => navigate({ to: '/reset-password' }), [navigate])}
-				onBackToSignIn={useCallback(() => navigate({ to: '/sign-in/email' }), [navigate])}
+				onRequestAnother={useCallback(
+					() => navigate({ to: '/reset-password', replace: true }),
+					[navigate]
+				)}
+				onBackToSignIn={useCallback(
+					() => navigate({ to: '/sign-in/email', replace: true }),
+					[navigate]
+				)}
 			/>
 		</AuthFormWrapper>
 	)

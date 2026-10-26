@@ -20,7 +20,10 @@ export function ResetPasswordPage() {
 			description={t('auth.reset.description')}
 		>
 			<AuthResetPasswordPanel
-				onBackToSignIn={useCallback(() => navigate({ to: '/sign-in/email' }), [navigate])}
+				onBackToSignIn={useCallback(
+					() => navigate({ to: '/sign-in/email', replace: true }),
+					[navigate]
+				)}
 			/>
 		</AuthFormWrapper>
 	)

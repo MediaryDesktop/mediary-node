@@ -49,7 +49,9 @@ export function SettingsPage({ section }: SettingsPageProps) {
 									className={clsx(styles.item, item.id === current.id && styles.active)}
 									aria-current={item.id === current.id ? 'page' : undefined}
 									onClick={() =>
-										navigate({ to: '/settings', search: { section: item.id } })
+										// Replaces: switching sections should not pile up history entries
+										// that "back" would have to walk through one at a time.
+										navigate({ to: '/settings', search: { section: item.id }, replace: true })
 									}
 								>
 									{renderIcon(item.icon, 18)}

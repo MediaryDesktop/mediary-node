@@ -19,7 +19,11 @@ export const readRoute = createRoute({
 			<ReadPage
 				key={chapterRef}
 				chapterRef={chapterRef}
-				onOpenChapter={next => void router.navigate({ to: '/read/$ref', params: { ref: next } })}
+				// Replaces, not pushes: turning ten pages and leaving should take one
+				// "back", not ten — to wherever the reader was opened from.
+				onOpenChapter={next =>
+					void router.navigate({ to: '/read/$ref', params: { ref: next }, replace: true })
+				}
 			/>
 		)
 	}
