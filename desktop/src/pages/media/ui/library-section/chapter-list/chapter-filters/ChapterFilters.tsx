@@ -1,10 +1,23 @@
+import clsx from 'clsx'
+import type { ReactNode } from 'react'
+import { CiBoxList } from 'react-icons/ci'
+import { FaEye } from 'react-icons/fa'
+import { MdBookmarkAdded } from 'react-icons/md'
+
 import { useTranslation } from '@shared/i18n'
-import { Button, Icon, Input, SegmentedControl } from '@shared/ui'
+import { Button, Icon, Input, RippleButton } from '@shared/ui'
 
 import { STATUS_FILTERS } from '../lib/chapters'
 import type { SortOrder, StatusFilter } from '../lib/chapters'
 
 import styles from './ChapterFilters.module.scss'
+
+const STATUS_ICONS: Record<StatusFilter, ReactNode> = {
+	all: <CiBoxList size={18} />,
+	saved: <MdBookmarkAdded size={18} />,
+	read: <Icon name='common/check' size={18} />,
+	unread: <FaEye size={18} />
+}
 
 export interface ChapterFiltersProps {
 	query: string
@@ -36,16 +49,19 @@ export function ChapterFilters({
 				startIcon={<Icon name='common/search' size={16} />}
 			/>
 
-			<SegmentedControl<StatusFilter>
-				size='large'
-				label={t('mangaSources.chapters.status.label')}
-				value={status}
-				onValueChange={onStatusChange}
-				items={STATUS_FILTERS.map(value => ({
-					value,
-					label: t(`mangaSources.chapters.status.${value}`)
-				}))}
-			/>
+			<div className={styles.status} role='group' aria-label={t('mangaSources.chapters.status.label')}>
+				{STATUS_FILTERS.map(value => (
+					<RippleButton
+						key={value}
+						className={clsx(styles.chip, value === status && styles.active)}
+						aria-pressed={value === status}
+						onClick={() => onStatusChange(value)}
+					>
+						{STATUS_ICONS[value]}
+						{t(`mangaSources.chapters.status.${value}`)}
+					</RippleButton>
+				))}
+			</div>
 
 			<Button
 				className={styles.sort}

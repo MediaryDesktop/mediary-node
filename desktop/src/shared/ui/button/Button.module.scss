@@ -37,10 +37,6 @@
 	&.primary {
 		background: var(--accent);
 		color: var(--text-on-accent);
-
-		&:not(:disabled):hover {
-			background: var(--accent-hover);
-		}
 	}
 
 	&.secondary {

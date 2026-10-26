@@ -36,6 +36,8 @@
 		}
 
 		&.active {
+			--source-icon-color: var(--accent-text);
+
 			border-color: var(--accent-border);
 			background: var(--accent-muted);
 			color: var(--accent-text);

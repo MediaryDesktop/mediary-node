@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { readStored, writeStored } from '@shared/lib'
-import { Button, Checkbox, EmptyState, Icon, Pagination } from '@shared/ui'
+import { Button, EmptyState, Icon, Pagination } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
 
@@ -141,8 +141,6 @@ export function ChapterList({ mediaRef, title, progress, listed }: ChapterListPr
 
 	// A selection outlives a filter, but only what is shown and still savable counts.
 	const picked = [...savable].filter(([key]) => selected.has(key)).map(([, option]) => option)
-	const pageKeys = visible.filter(row => savable.has(row.key)).map(row => row.key)
-	const pagePicked = pageKeys.filter(key => selected.has(key)).length
 
 	const startOver =
 		<T,>(set: (value: T) => void) =>
@@ -278,43 +276,11 @@ export function ChapterList({ mediaRef, title, progress, listed }: ChapterListPr
 				)}
 
 			{rows.length > 0 && shown.length === 0 && (
-				<p className={styles.message}>{t('mangaSources.chapters.nothingFound')}</p>
+				<EmptyState title={t('mangaSources.chapters.nothingFound')} />
 			)}
 
 			{visible.length > 0 && (
 				<div role='table' className={styles.table} aria-label={t('mangaSources.chapters.heading')}>
-					<div role='row' className={styles.head}>
-						<span role='columnheader' className={styles.check}>
-							{pageKeys.length > 0 && (
-								<Checkbox
-									checked={
-										pagePicked === 0
-											? false
-											: pagePicked === pageKeys.length
-												? true
-												: 'mixed'
-									}
-									onCheckedChange={on => toggle(pageKeys, on)}
-									label={t('mangaSources.chapters.selectPage')}
-								/>
-							)}
-						</span>
-						<span role='columnheader'>{t('mangaSources.chapters.columns.chapter')}</span>
-						<span role='columnheader' className={styles.source}>
-							{t('mangaSources.chapters.columns.source')}
-						</span>
-						<span role='columnheader' className={styles.narrow}>
-							{t('mangaSources.chapters.columns.language')}
-						</span>
-						<span role='columnheader' className={styles.narrow}>
-							{t('mangaSources.chapters.columns.pages')}
-						</span>
-						<span role='columnheader'>{t('mangaSources.chapters.columns.status')}</span>
-						<span role='columnheader' className={styles.end}>
-							{t('mangaSources.chapters.columns.actions')}
-						</span>
-					</div>
-
 					{visible.map(row => {
 						const from = savable.get(row.key)
 						const download = activeDownload(row, downloads)

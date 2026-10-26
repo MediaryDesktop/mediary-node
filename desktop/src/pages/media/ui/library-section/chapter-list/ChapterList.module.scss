@@ -1,5 +1,5 @@
 .card {
-	--chapter-columns: 1.25rem minmax(0, 1fr) minmax(0, 11rem) 4.5rem 4rem 8.5rem 8.75rem;
+	--chapter-columns: minmax(0, 1fr) minmax(0, 11rem) 4.5rem 4rem 8.5rem 8.75rem;
 	--chapter-gap: 1rem;
 
 	display: flex;
@@ -77,27 +77,6 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.5rem;
-
-		.head {
-			display: grid;
-			grid-template-columns: var(--chapter-columns);
-			align-items: center;
-			gap: var(--chapter-gap);
-			padding: 0 1rem;
-			color: var(--text-muted);
-			font-size: 0.75rem;
-			font-weight: 600;
-			letter-spacing: 0.04em;
-			text-transform: uppercase;
-
-			.check {
-				display: flex;
-			}
-
-			.end {
-				text-align: right;
-			}
-		}
 	}
 
 	.footer {
@@ -126,21 +105,13 @@
 
 	@container chapters (width < 46rem) {
 		.table {
-			--chapter-columns: 1.25rem minmax(0, 1fr) minmax(0, 9rem) 8.5rem 8.75rem;
-
-			.head .narrow {
-				display: none;
-			}
+			--chapter-columns: minmax(0, 1fr) minmax(0, 9rem) 8.5rem 8.75rem;
 		}
 	}
 
 	@container chapters (width < 34rem) {
 		.table {
-			--chapter-columns: 1.25rem minmax(0, 1fr) 7.5rem 8.75rem;
-
-			.head .source {
-				display: none;
-			}
+			--chapter-columns: minmax(0, 1fr) 7.5rem 8.75rem;
 		}
 	}
 }

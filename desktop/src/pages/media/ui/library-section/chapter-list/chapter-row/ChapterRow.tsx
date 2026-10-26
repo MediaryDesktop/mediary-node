@@ -31,28 +31,28 @@ function StateBadge({ state }: { state: ChapterState }) {
 	switch (state.kind) {
 		case 'saving':
 			return (
-				<Badge tone='info' icon='common/download'>
+				<Badge tone='info' size='md' icon='common/download'>
 					{state.total > 0
 						? t('mangaSources.downloads.progress', { done: state.done, total: state.total })
 						: t('mangaSources.downloads.states.running')}
 				</Badge>
 			)
 		case 'queued':
-			return <Badge>{t('mangaSources.downloads.states.queued')}</Badge>
+			return <Badge size='md'>{t('mangaSources.downloads.states.queued')}</Badge>
 		case 'read':
 			return (
-				<Badge tone='success' icon='common/check'>
+				<Badge tone='success' size='md'>
 					{t('mangaSources.chapters.status.read')}
 				</Badge>
 			)
 		case 'saved':
 			return (
-				<Badge tone='accent' icon='common/folder'>
+				<Badge tone='accent' size='md'>
 					{t('mangaSources.chapters.status.saved')}
 				</Badge>
 			)
 		default:
-			return <Badge>{t('mangaSources.chapters.status.online')}</Badge>
+			return <Badge size='md'>{t('mangaSources.chapters.status.online')}</Badge>
 	}
 }
 
@@ -82,7 +82,7 @@ export function ChapterRow({
 
 	return (
 		<div role='row' className={clsx(styles.row, read && styles.read, selected && styles.selected)}>
-			<span role='cell' className={styles.check}>
+			<span role='cell' className={styles.chapter}>
 				{selected !== undefined && (
 					<Checkbox
 						checked={selected}
@@ -90,9 +90,7 @@ export function ChapterRow({
 						label={t('mangaSources.chapters.select', { label })}
 					/>
 				)}
-			</span>
 
-			<span role='cell' className={styles.chapter}>
 				<button type='button' className={styles.open} onClick={() => onOpen(first)}>
 					<span className={styles.number}>{label}</span>
 					{subtitle && <span className={styles.subtitle}>{subtitle}</span>}
@@ -103,15 +101,7 @@ export function ChapterRow({
 				<SourceIcon source={first.source} name={first.sourceName} image={icons.get(first.source)} />
 				<span className={styles.sourceText}>
 					<span className={styles.sourceName}>{first.sourceName}</span>
-					{first.groups && first.groups.length > 0 && (
-						<span className={styles.groups}>{first.groups.join(', ')}</span>
-					)}
 				</span>
-				{others.length > 0 && (
-					<span className={styles.more} title={others.map(option => option.sourceName).join(', ')}>
-						+{others.length}
-					</span>
-				)}
 			</span>
 
 			<span role='cell' className={styles.language}>
@@ -138,15 +128,6 @@ export function ChapterRow({
 						<Icon name='common/check' size={16} />
 					</RippleButton>
 				)}
-
-				<RippleButton
-					className={styles.action}
-					aria-label={t('mangaSources.chapters.open', { label })}
-					title={t('reader.read')}
-					onClick={() => onOpen(first)}
-				>
-					<Icon name={first.externalUrl ? 'common/external-link' : 'common/book-open'} size={16} />
-				</RippleButton>
 
 				{onSave && (
 					<RippleButton

@@ -1,6 +1,6 @@
 .icon {
 	flex: none;
-	color: var(--text-secondary);
+	color: var(--source-icon-color, var(--text-secondary));
 }
 
 .image {
