@@ -80,7 +80,7 @@ type CheckOPDSServerOutput struct {
 type MangaSourceBody struct {
 	ID   string `json:"id" example:"opds:3"`
 	Name string `json:"name"`
-	Kind string `json:"kind" enum:"opds,mangadex,plugin"`
+	Kind string `json:"kind" enum:"opds,plugin"`
 }
 
 type MangaSourcesOutput struct {
@@ -96,7 +96,7 @@ type MangaSearchInput struct {
 }
 
 type MangaSeriesBody struct {
-	ID      string `json:"id" doc:"The series' id in its source: a path on an OPDS server, a MangaDex id."`
+	ID      string `json:"id" doc:"The series' id in its source: a path on an OPDS server, a plugin's own id."`
 	Title   string `json:"title"`
 	Detail  string `json:"detail,omitempty" doc:"What tells similar names apart, such as a year."`
 	Matched bool   `json:"matched" doc:"True when the source itself links this series to the title being linked."`
@@ -169,57 +169,6 @@ func (h *Handler) Register(api huma.API) {
 	h.registerServers(api)
 	h.registerTitles(api)
 	h.registerDownloads(api)
-	h.registerMangaDex(api)
-}
-
-type MangaDexSettingsBody struct {
-	Available bool     `json:"available" doc:"False when the node is configured without MangaDex."`
-	Enabled   bool     `json:"enabled" doc:"Whether chapters are read from MangaDex. Off until the user turns it on."`
-	Languages []string `json:"languages" doc:"Translations to list, in order of preference."`
-}
-
-type MangaDexSettingsOutput struct {
-	Body MangaDexSettingsBody
-}
-
-type PutMangaDexSettingsInput struct {
-	Body struct {
-		Enabled   bool     `json:"enabled"`
-		Languages []string `json:"languages" minItems:"1" maxItems:"10" doc:"Language codes such as en, uk or pt-br."`
-	}
-}
-
-func (h *Handler) registerMangaDex(api huma.API) {
-	huma.Register(api, huma.Operation{
-		OperationID: "getMangaDexSettings",
-		Method:      http.MethodGet,
-		Path:        "/v1/manga/mangadex/settings",
-		Summary:     "Reading from MangaDex",
-		Tags:        []string{"manga"},
-	}, func(ctx context.Context, _ *struct{}) (*MangaDexSettingsOutput, error) {
-		settings, err := h.svc.MangaDexSettings(ctx)
-		if err != nil {
-			return nil, httpapi.ToHTTP(err)
-		}
-
-		return &MangaDexSettingsOutput{Body: MangaDexSettingsBody(*settings)}, nil
-	})
-
-	huma.Register(api, huma.Operation{
-		OperationID: "putMangaDexSettings",
-		Method:      http.MethodPut,
-		Path:        "/v1/manga/mangadex/settings",
-		Summary:     "Turn MangaDex on or off, and choose languages",
-		Description: "Chapters from MangaDex are read online only: pages pass through the node and are not saved.",
-		Tags:        []string{"manga"},
-	}, func(ctx context.Context, in *PutMangaDexSettingsInput) (*MangaDexSettingsOutput, error) {
-		settings, err := h.svc.SetMangaDexSettings(ctx, in.Body.Enabled, in.Body.Languages)
-		if err != nil {
-			return nil, httpapi.ToHTTP(err)
-		}
-
-		return &MangaDexSettingsOutput{Body: MangaDexSettingsBody(*settings)}, nil
-	})
 }
 
 func (h *Handler) registerServers(api huma.API) {

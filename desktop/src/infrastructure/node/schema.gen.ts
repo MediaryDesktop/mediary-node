@@ -846,27 +846,6 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
-	'/v1/manga/mangadex/settings': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		/** Reading from MangaDex */
-		get: operations['getMangaDexSettings']
-		/**
-		 * Turn MangaDex on or off, and choose languages
-		 * @description Chapters from MangaDex are read online only: pages pass through the node and are not saved.
-		 */
-		put: operations['putMangaDexSettings']
-		post?: never
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
 	'/v1/manga/opds/check': {
 		parameters: {
 			query?: never
@@ -1364,7 +1343,7 @@ export interface paths {
 		}
 		/**
 		 * Pages of a chapter
-		 * @description The chapter's pages in reading order, from whichever source the reference names. Chapter reference: local:<file id>, opds:<server id>:<entry id> or mangadex:<chapter id>.
+		 * @description The chapter's pages in reading order, from whichever source the reference names. Chapter reference: local:<file id>, opds:<server id>:<entry id> or plugin:<plugin id>:<key>.
 		 */
 		get: operations['getReaderChapterByRef']
 		put?: never
@@ -3449,20 +3428,6 @@ export interface components {
 			/** @description Linked sources that could not be read this time; the others are listed. */
 			problems: components['schemas']['MangaSourceProblemBody'][] | null
 		}
-		MangaDexSettingsBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/MangaDexSettingsBody.json
-			 */
-			readonly $schema?: string
-			/** @description False when the node is configured without MangaDex. */
-			available: boolean
-			/** @description Whether chapters are read from MangaDex. Off until the user turns it on. */
-			enabled: boolean
-			/** @description Translations to list, in order of preference. */
-			languages: string[] | null
-		}
 		MangaDownloadBody: {
 			chapter_ref: string
 			error?: string
@@ -3533,7 +3498,7 @@ export interface components {
 		MangaSeriesBody: {
 			/** @description What tells similar names apart, such as a year. */
 			detail?: string
-			/** @description The series' id in its source: a path on an OPDS server, a MangaDex id. */
+			/** @description The series' id in its source: a path on an OPDS server, a plugin's own id. */
 			id: string
 			/** @description True when the source itself links this series to the title being linked. */
 			matched: boolean
@@ -3543,7 +3508,7 @@ export interface components {
 			/** @example opds:3 */
 			id: string
 			/** @enum {string} */
-			kind: 'opds' | 'mangadex' | 'plugin'
+			kind: 'opds' | 'plugin'
 			name: string
 		}
 		MangaSourceProblemBody: {
@@ -3954,17 +3919,6 @@ export interface components {
 			 */
 			readonly $schema?: string
 			enabled: boolean
-		}
-		PutMangaDexSettingsInputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/PutMangaDexSettingsInputBody.json
-			 */
-			readonly $schema?: string
-			enabled: boolean
-			/** @description Language codes such as en, uk or pt-br. */
-			languages: string[] | null
 		}
 		PutMangaDownloadSettingsInputBody: {
 			/**
@@ -5654,7 +5608,6 @@ export type SchemaList = components['schemas']['List']
 export type SchemaListsOutputBody = components['schemas']['ListsOutputBody']
 export type SchemaMangaChapterBody = components['schemas']['MangaChapterBody']
 export type SchemaMangaChaptersOutputBody = components['schemas']['MangaChaptersOutputBody']
-export type SchemaMangaDexSettingsBody = components['schemas']['MangaDexSettingsBody']
 export type SchemaMangaDownloadBody = components['schemas']['MangaDownloadBody']
 export type SchemaMangaDownloadSettingsBody = components['schemas']['MangaDownloadSettingsBody']
 export type SchemaMangaDownloadsOutputBody = components['schemas']['MangaDownloadsOutputBody']
@@ -5685,7 +5638,6 @@ export type SchemaProgressInputBody = components['schemas']['ProgressInputBody']
 export type SchemaProgressOutputBody = components['schemas']['ProgressOutputBody']
 export type SchemaPutBookDownloadSettingsInputBody = components['schemas']['PutBookDownloadSettingsInputBody']
 export type SchemaPutGutenbergSettingsInputBody = components['schemas']['PutGutenbergSettingsInputBody']
-export type SchemaPutMangaDexSettingsInputBody = components['schemas']['PutMangaDexSettingsInputBody']
 export type SchemaPutMangaDownloadSettingsInputBody =
 	components['schemas']['PutMangaDownloadSettingsInputBody']
 export type SchemaPutMangaLinkInputBody = components['schemas']['PutMangaLinkInputBody']
@@ -7564,68 +7516,6 @@ export interface operations {
 			}
 		}
 	}
-	getMangaDexSettings: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['MangaDexSettingsBody']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	putMangaDexSettings: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['PutMangaDexSettingsInputBody']
-			}
-		}
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['MangaDexSettingsBody']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
 	checkOPDSServer: {
 		parameters: {
 			query?: never
@@ -8607,7 +8497,7 @@ export interface operations {
 			query?: never
 			header?: never
 			path: {
-				/** @description Chapter reference: local:<file id>, opds:<server id>:<entry id> or mangadex:<chapter id>. */
+				/** @description Chapter reference: local:<file id>, opds:<server id>:<entry id> or plugin:<plugin id>:<key>. */
 				ref: string
 			}
 			cookie?: never

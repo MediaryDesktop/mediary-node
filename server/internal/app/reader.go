@@ -133,39 +133,3 @@ func (d downloadFolders) NameSeason(relPath string) *int {
 func (d downloadFolders) Episodes(ctx context.Context, mediaRef string) ([]int, error) {
 	return d.library.Episodes(ctx, mediaRef)
 }
-
-// mangaDexChapters lets the reader open MangaDex chapters through the manga module.
-type mangaDexChapters struct {
-	manga *manga.Module
-}
-
-func (m mangaDexChapters) Chapter(ctx context.Context, chapter reader.ChapterRef) (*reader.Chapter, error) {
-	found, err := m.manga.MangaDexChapter(ctx, chapter.Key)
-	if err != nil {
-		return nil, err
-	}
-
-	pages := make([]reader.Page, found.Pages)
-	for i := range pages {
-		pages[i] = reader.Page{Index: i}
-	}
-
-	return &reader.Chapter{
-		Ref:        chapter,
-		Title:      found.Title,
-		MediaRef:   found.MediaRef,
-		Number:     found.Number,
-		Pages:      pages,
-		SourceName: found.SourceName,
-		Groups:     found.Groups,
-	}, nil
-}
-
-func (m mangaDexChapters) Page(ctx context.Context, chapter reader.ChapterRef, index int) (reader.Image, error) {
-	data, contentType, err := m.manga.MangaDexPage(ctx, chapter.Key, index)
-	if err != nil {
-		return reader.Image{}, err
-	}
-
-	return reader.Image{Data: data, ContentType: contentType}, nil
-}

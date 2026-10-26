@@ -21,10 +21,10 @@ func New(svc *service.Service) *Handler {
 	return &Handler{svc: svc}
 }
 
-const refDoc = "Chapter reference: local:<file id>, opds:<server id>:<entry id> or mangadex:<chapter id>."
+const refDoc = "Chapter reference: local:<file id>, opds:<server id>:<entry id> or plugin:<plugin id>:<key>."
 
 type ChapterInput struct {
-	Ref string `path:"ref" doc:"Chapter reference: local:<file id>, opds:<server id>:<entry id> or mangadex:<chapter id>."`
+	Ref string `path:"ref" doc:"Chapter reference: local:<file id>, opds:<server id>:<entry id> or plugin:<plugin id>:<key>."`
 }
 
 type ChapterPageInput struct {

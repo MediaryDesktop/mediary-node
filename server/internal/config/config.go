@@ -33,7 +33,6 @@ type Config struct {
 	OpenLibrary OpenLibrary
 	GoogleBooks GoogleBooks
 	Gutenberg   Gutenberg
-	MangaDex    MangaDex
 	Log         Log
 }
 
@@ -105,15 +104,6 @@ type Gutenberg struct {
 	Endpoint string        `env:"NODE_GUTENBERG_ENDPOINT" envDefault:"https://www.gutenberg.org"`
 	Contact  string        `env:"NODE_GUTENBERG_CONTACT"`
 	Timeout  time.Duration `env:"NODE_GUTENBERG_TIMEOUT"  envDefault:"10m"`
-}
-
-// MangaDex is the online manga source. An empty endpoint turns it off on this node;
-// with it on, the user still has to turn MangaDex on in the app before anything is
-// asked of it.
-type MangaDex struct {
-	Endpoint       string        `env:"NODE_MANGADEX_ENDPOINT"        envDefault:"https://api.mangadex.org"`
-	ReportEndpoint string        `env:"NODE_MANGADEX_REPORT_ENDPOINT" envDefault:"https://api.mangadex.network/report"`
-	Timeout        time.Duration `env:"NODE_MANGADEX_TIMEOUT"         envDefault:"20s"`
 }
 
 type Library struct {

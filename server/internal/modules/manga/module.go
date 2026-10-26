@@ -10,7 +10,6 @@ import (
 
 	"github.com/mediaryorg/mediary-node/server/internal/modules/manga/internal/download"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/manga/internal/handler"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/manga/internal/mangadex"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/manga/internal/secrets"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/manga/internal/service"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/manga/internal/store"
@@ -29,11 +28,6 @@ type Deps struct {
 	// SecretsPath is the file that holds the OPDS servers' passwords.
 	SecretsPath string
 	UserAgent   string
-
-	// An empty MangaDex endpoint leaves MangaDex off on this node.
-	MangaDexEndpoint       string
-	MangaDexReportEndpoint string
-	MangaDexTimeout        time.Duration
 
 	Plugins Plugins
 }
@@ -54,20 +48,9 @@ type (
 func New(deps Deps) *Module {
 	st := store.New(deps.DB)
 
-	var dex *mangadex.Client
-	if deps.MangaDexEndpoint != "" {
-		dex = mangadex.New(mangadex.Options{
-			Endpoint:       deps.MangaDexEndpoint,
-			ReportEndpoint: deps.MangaDexReportEndpoint,
-			Timeout:        deps.MangaDexTimeout,
-			UserAgent:      deps.UserAgent,
-		})
-	}
-
 	svc := service.New(st, secrets.New(deps.SecretsPath), deps.Logger, service.Options{
-		Client:   opds.New(30*time.Second, deps.UserAgent),
-		MangaDex: dex,
-		Plugins:  deps.Plugins,
+		Client:  opds.New(30*time.Second, deps.UserAgent),
+		Plugins: deps.Plugins,
 	})
 
 	queue := download.New(st, svc.DownloadSource(), deps.Library, deps.Events, deps.Logger)
@@ -101,16 +84,6 @@ func (m *Module) OPDSChapter(ctx context.Context, serverID int64, key string) (*
 // OPDSPage fetches one page of such a chapter from its server.
 func (m *Module) OPDSPage(ctx context.Context, serverID int64, key string, index int) (data []byte, contentType string, err error) {
 	return m.svc.Page(ctx, serverID, key, index)
-}
-
-// MangaDexChapter describes a MangaDex chapter for the reader.
-func (m *Module) MangaDexChapter(ctx context.Context, chapterID string) (*OPDSChapter, error) {
-	return m.svc.MangaDexChapter(ctx, chapterID)
-}
-
-// MangaDexPage fetches one page of a MangaDex chapter, through the node.
-func (m *Module) MangaDexPage(ctx context.Context, chapterID string, index int) (data []byte, contentType string, err error) {
-	return m.svc.MangaDexPage(ctx, chapterID, index)
 }
 
 // PluginChapter describes a manga plugin's chapter for the reader.

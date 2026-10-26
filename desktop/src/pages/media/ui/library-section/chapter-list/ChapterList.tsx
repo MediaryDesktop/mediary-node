@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { readStored, writeStored } from '@shared/lib'
-import { Button, Checkbox, Icon, Pagination } from '@shared/ui'
+import { Button, Checkbox, EmptyState, Icon, Pagination } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
 
@@ -14,8 +14,9 @@ import {
 	mangaDownloadSettingsQuery,
 	mangaDownloadsQuery
 } from '@entities/manga-source'
-import { filterChapters } from '@entities/reader'
-import type { ChapterOption } from '@entities/reader'
+import { filterChapters, isChapterRead } from '@entities/reader'
+import type { ChapterOption, ChapterRow as Row } from '@entities/reader'
+import { updateTrackerEntryMutation } from '@entities/tracker'
 
 import { downloadRequested } from '@features/download-chapters'
 import { LinkSourceDrawer } from '@features/link-manga-source'
@@ -33,6 +34,7 @@ import {
 	pageCount,
 	pageOf,
 	presentSources,
+	readProgress,
 	savableOption,
 	sortRows,
 	sourceCounts
@@ -44,6 +46,8 @@ export interface ChapterListProps {
 	mediaRef: string
 	title: string
 	progress: number
+	// Whether the title is on the user's list; marking a chapter read adds it.
+	listed: boolean
 }
 
 const ALL = 'all'
@@ -52,11 +56,12 @@ const ORDER_KEY = 'mediary.chapterOrder'
 
 // Every chapter of the title, from the library and from the user's servers, as one
 // list. A chapter held in several places is one row that opens the nearest copy.
-export function ChapterList({ mediaRef, title, progress }: ChapterListProps) {
+export function ChapterList({ mediaRef, title, progress, listed }: ChapterListProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
 	const [
 		unlink,
+		updateEntry,
 		downloadsData,
 		loadDownloads,
 		loadDownloadSettings,
@@ -66,6 +71,7 @@ export function ChapterList({ mediaRef, title, progress }: ChapterListProps) {
 		nodeReady
 	] = useUnit([
 		deleteMangaLinkMutation.start,
+		updateTrackerEntryMutation.start,
 		mangaDownloadsQuery.$data,
 		mangaDownloadsQuery.start,
 		mangaDownloadSettingsQuery.start,
@@ -178,6 +184,18 @@ export function ChapterList({ mediaRef, title, progress }: ChapterListProps) {
 		void navigate({ to: '/read/$ref', params: { ref: option.ref } })
 	}
 
+	const markRead = (row: Row, read: boolean) => {
+		const next = readProgress(row.number, read, progress)
+		if (next === null) {
+			return
+		}
+
+		updateEntry({
+			mediaRef,
+			patch: listed ? { progress: next } : { status: 'CURRENT', progress: next }
+		})
+	}
+
 	return (
 		<section className={styles.card}>
 			<header className={styles.header}>
@@ -194,7 +212,6 @@ export function ChapterList({ mediaRef, title, progress }: ChapterListProps) {
 				<div className={styles.actions}>
 					{savable.size > 1 && (
 						<Button
-							size='small'
 							variant='primary'
 							startIcon={<Icon name='common/download' size={16} />}
 							onClick={() => saveAll([...savable.values()])}
@@ -205,7 +222,6 @@ export function ChapterList({ mediaRef, title, progress }: ChapterListProps) {
 
 					{unlinked.length > 0 && (
 						<Button
-							size='small'
 							startIcon={<Icon name='common/link' size={16} />}
 							onClick={() => setLinking(unlinked[0]?.id ?? null)}
 						>
@@ -215,29 +231,38 @@ export function ChapterList({ mediaRef, title, progress }: ChapterListProps) {
 				</div>
 			</header>
 
-			<div className={styles.controls}>
-				<SourceChips
-					sources={present}
-					counts={counts}
-					total={rows.length}
-					icons={icons}
-					allValue={ALL}
-					active={active}
-					onFilter={changeFilter}
-					links={links}
-					onRelink={setLinking}
-					onUnlink={source => unlink({ mediaRef, source })}
-				/>
+			{rows.length > 0 && (
+				<div className={styles.controls}>
+					<SourceChips
+						sources={present}
+						counts={counts}
+						total={rows.length}
+						icons={icons}
+						allValue={ALL}
+						active={active}
+						onFilter={changeFilter}
+						links={links}
+						onRelink={setLinking}
+						onUnlink={source => unlink({ mediaRef, source })}
+					/>
 
-				<ChapterFilters
-					query={query}
-					onQueryChange={startOver(setQuery)}
-					status={status}
-					onStatusChange={startOver(setStatus)}
-					order={order}
-					onOrderChange={changeOrder}
+					<ChapterFilters
+						query={query}
+						onQueryChange={startOver(setQuery)}
+						status={status}
+						onStatusChange={startOver(setStatus)}
+						order={order}
+						onOrderChange={changeOrder}
+					/>
+				</div>
+			)}
+
+			{rows.length === 0 && links.length === 0 && (
+				<EmptyState
+					title={t('mangaSources.chapters.noChapters.title')}
+					description={t('mangaSources.chapters.noChapters.description')}
 				/>
-			</div>
+			)}
 
 			{problems.map(problem => (
 				<p key={problem.source} className={styles.problem}>
@@ -293,17 +318,21 @@ export function ChapterList({ mediaRef, title, progress }: ChapterListProps) {
 					{visible.map(row => {
 						const from = savable.get(row.key)
 						const download = activeDownload(row, downloads)
+						const read = isChapterRead(row.number, progress)
+						const markable = readProgress(row.number, !read, progress) !== null
 
 						return (
 							<ChapterRow
 								key={row.key}
 								row={row}
 								state={chapterState(row, download, progress)}
+								read={read}
 								icons={icons}
 								selected={from ? selected.has(row.key) : undefined}
 								onSelect={on => toggle([row.key], on)}
 								onOpen={open}
 								onSave={from ? () => save([from.ref]) : undefined}
+								onToggleRead={markable ? () => markRead(row, !read) : undefined}
 							/>
 						)
 					})}

@@ -959,11 +959,17 @@ export const uk: Translation = {
 			unlinkFrom: 'Відв’язати {{name}}',
 			search: 'Знайти розділ за номером або назвою',
 			nothingFound: 'Жоден розділ не відповідає фільтрам',
+			noChapters: {
+				title: 'Поки немає розділів',
+				description: 'Привʼяжіть джерело, щоб знайти розділи цього тайтлу.'
+			},
 			select: 'Вибрати {{label}}',
 			selectPage: 'Вибрати розділи на цій сторінці',
 			selected: 'Вибрано {{picked}} з {{total}}',
 			saveSelected: 'Зберегти вибрані',
 			open: 'Відкрити {{label}}',
+			markRead: 'Позначити {{label}} прочитаним',
+			markUnread: 'Позначити {{label}} непрочитаним',
 			status: {
 				label: 'Стан',
 				all: 'Усі',
@@ -999,14 +1005,6 @@ export const uk: Translation = {
 			pages_few: '{{count}} сторінки',
 			pages_many: '{{count}} сторінок',
 			pages_other: '{{count}} сторінки'
-		},
-		mangadex: {
-			enable: 'Читати розділи з MangaDex',
-			languages: 'Мови, за пріоритетом',
-			languagesPlaceholder: 'Виберіть мови',
-			note: 'Сторінки читаються онлайн через ноду й не зберігаються. MangaDex і перекладачі вказані біля кожного розділу.',
-			unavailable: 'MangaDex вимкнено на цій ноді',
-			saveFailed: 'Не вдалося зберегти налаштування MangaDex'
 		},
 		downloads: {
 			save: 'Зберегти на диск',
@@ -1779,10 +1777,6 @@ export const uk: Translation = {
 				title: 'Google Books',
 				subtitle: 'Книжки, яких не знає Open Library'
 			},
-			mangaDex: {
-				title: 'MangaDex',
-				subtitle: 'Читання розділів онлайн'
-			},
 			mangaDownloads: {
 				title: 'Завантаження манги',
 				subtitle: 'Де зберігаються завантажені розділи'
@@ -1803,10 +1797,6 @@ export const uk: Translation = {
 		googleBooks: {
 			name: 'Ключ Google Books',
 			hint: 'Де шукати книжки, яких не знає Open Library'
-		},
-		mangaDex: {
-			name: 'MangaDex',
-			hint: 'Читати розділи онлайн з MangaDex'
 		},
 		mangaDownloads: {
 			name: 'Завантаження манги',

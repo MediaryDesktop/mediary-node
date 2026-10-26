@@ -22,9 +22,6 @@ function builtIn(source: string): IconName | null {
 	if (source.startsWith('opds:')) {
 		return 'common/database'
 	}
-	if (source === 'mangadex') {
-		return 'common/book-open'
-	}
 
 	return null
 }

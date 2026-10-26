@@ -198,6 +198,7 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 							total={total}
 							mediaType={mediaType}
 							progress={entry?.progress ?? 0}
+							listed={entry !== null}
 						/>
 					)}
 				</PhaseTransition>

@@ -6,7 +6,6 @@ func TestParseRoundTrip(t *testing.T) {
 	for _, raw := range []string{
 		"local:42",
 		"opds:3:urn:uuid:7d1c9a0e-0000-4000-8000-000000000000",
-		"mangadex:a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
 		"plugin:example-comics:eyJzIjoiZnJpZXJlbi8xIiwiYyI6ImM6MSJ9",
 	} {
 		got, err := Parse(raw)
@@ -31,8 +30,7 @@ func TestParseRefuses(t *testing.T) {
 		"opds:3",
 		"opds:3:",
 		"opds:x:entry",
-		"mangadex:not-a-uuid",
-		"mangadex:A1B2C3D4-E5F6-4A7B-8C9D-0E1F2A3B4C5D",
+		"mangadex:a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
 		"comick:123",
 		"plugin:example-comics",
 		"plugin:example-comics:",
@@ -52,8 +50,8 @@ func TestFileID(t *testing.T) {
 		t.Errorf("Local(7).FileID() = %d, %v", id, ok)
 	}
 
-	other, _ := Parse("mangadex:a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d")
+	other, _ := Parse("plugin:example-comics:eyJzIjoiZnJpZXJlbi8xIiwiYyI6ImM6MSJ9")
 	if _, ok := other.FileID(); ok {
-		t.Error("a MangaDex chapter has no library file")
+		t.Error("a plugin's chapter has no library file")
 	}
 }

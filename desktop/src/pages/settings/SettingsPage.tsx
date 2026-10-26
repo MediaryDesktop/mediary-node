@@ -15,7 +15,6 @@ import { BookFolderSetting } from '@features/download-free-book'
 import { BookServersSettings, GutenbergSettings } from '@features/manage-book-sources'
 import { DebridServiceSettings } from '@features/manage-debrid-service'
 import { LibraryRootsSettings } from '@features/manage-library-roots'
-import { MangaDexSettings } from '@features/manage-mangadex'
 import { OPDSServersSettings } from '@features/manage-opds-servers'
 import { GoogleBooksSettings, TMDBSettings } from '@features/manage-source-keys'
 import { TorrentClientSettings } from '@features/manage-torrent-client'
@@ -196,14 +195,6 @@ function SectionContent({ section }: { section: SectionInfo }) {
 				<Card>
 					<Row name={t('settings.mangaSources.name')} hint={t('settings.mangaSources.hint')} block>
 						<OPDSServersSettings />
-					</Row>
-				</Card>
-			)
-		case 'mangadex':
-			return (
-				<Card>
-					<Row name={t('settings.mangaDex.name')} hint={t('settings.mangaDex.hint')} block>
-						<MangaDexSettings />
 					</Row>
 				</Card>
 			)

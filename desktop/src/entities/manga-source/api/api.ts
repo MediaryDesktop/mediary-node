@@ -154,22 +154,3 @@ export const putMangaDownloadSettingsFx = createNodeRequestFx<
 	number,
 	NodeSchemas['MangaDownloadSettingsBody']
 >(rootId => ({ url: '/v1/manga/downloads/settings', method: 'PUT', body: { root_id: rootId } }))
-
-export type MangaDexSettings = NodeSchemas['MangaDexSettingsBody']
-
-export const fetchMangaDexSettingsFx = createNodeRequestFx<void, MangaDexSettings>(() => ({
-	url: '/v1/manga/mangadex/settings'
-}))
-
-export interface PutMangaDexSettingsParams {
-	enabled: boolean
-	languages: string[]
-}
-
-export const putMangaDexSettingsFx = createNodeRequestFx<PutMangaDexSettingsParams, MangaDexSettings>(
-	body => ({
-		url: '/v1/manga/mangadex/settings',
-		method: 'PUT',
-		body
-	})
-)

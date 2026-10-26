@@ -23,17 +23,9 @@ func (s *Service) Sources(ctx context.Context) ([]SourceInfo, error) {
 		return nil, err
 	}
 
-	sources := make([]SourceInfo, 0, len(servers)+1)
+	sources := make([]SourceInfo, 0, len(servers))
 	for _, server := range servers {
 		sources = append(sources, SourceInfo{ID: sourceID(server.ID), Name: server.Name, Kind: "opds"})
-	}
-
-	dex, err := s.MangaDexSettings(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if dex.Enabled {
-		sources = append(sources, SourceInfo{ID: SourceMangaDex, Name: mangaDexName, Kind: SourceMangaDex})
 	}
 
 	plugins, err := s.pluginSources(ctx)
@@ -47,10 +39,10 @@ func (s *Service) Sources(ctx context.Context) ([]SourceInfo, error) {
 type SeriesHit struct {
 	ID    string
 	Title string
-	// Detail tells similar names apart: a year, for MangaDex.
+	// Detail tells similar names apart, such as a year.
 	Detail string
 	// Matched is true when the source itself links the series to the title being
-	// linked, as MangaDex does with AniList ids.
+	// linked, by its AniList id.
 	Matched bool
 }
 
@@ -62,9 +54,6 @@ func (s *Service) Search(ctx context.Context, source, query, mediaRef string) ([
 		return nil, apperr.Invalid("q", "the search is empty")
 	}
 
-	if source == SourceMangaDex {
-		return s.searchMangaDex(ctx, query, mediaRef)
-	}
 	if id, ok := pluginOf(source); ok {
 		return s.searchPlugin(ctx, id, query, mediaRef)
 	}
@@ -130,14 +119,6 @@ func (s *Service) Links(ctx context.Context, mediaRef string) ([]Link, error) {
 func (s *Service) SetLink(ctx context.Context, mediaRef, source, seriesID, seriesTitle string) error {
 	if strings.TrimSpace(mediaRef) == "" {
 		return apperr.Invalid("media_ref", "the title is missing")
-	}
-
-	if source == SourceMangaDex {
-		if !uuidPattern.MatchString(seriesID) {
-			return apperr.Invalid("series_id", "a MangaDex series is named by its id, as the search returns it")
-		}
-
-		return s.putLink(ctx, mediaRef, source, seriesID, seriesTitle)
 	}
 
 	if id, ok := pluginOf(source); ok {
@@ -225,22 +206,6 @@ func (s *Service) Chapters(ctx context.Context, mediaRef string) ([]ChapterInfo,
 	problems := []SourceProblem{}
 
 	for _, link := range links {
-		if link.Source == SourceMangaDex {
-			found, err := s.mangaDexChapters(ctx, link.SeriesID, link.SeriesTitle)
-			if err != nil {
-				if ctx.Err() != nil {
-					return nil, nil, ctx.Err()
-				}
-				problems = append(problems, SourceProblem{Source: link.Source, SourceName: mangaDexName, Detail: err.Error()})
-
-				continue
-			}
-
-			chapters = append(chapters, found...)
-
-			continue
-		}
-
 		if _, ok := pluginOf(link.Source); ok {
 			found, err := s.pluginChapters(ctx, link.Source, link.SeriesID)
 			if err != nil {

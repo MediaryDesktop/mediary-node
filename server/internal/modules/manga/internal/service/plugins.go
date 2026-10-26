@@ -71,9 +71,8 @@ type pluginKey struct {
 	Number  string `json:"n,omitempty"`
 	// Title names a saved chapter that has no number.
 	Title string `json:"t,omitempty"`
-	// Groups credits the chapter's translators in the reader, as for OPDS and
-	// MangaDex chapters; carried here so opening the chapter needs no extra
-	// call for it.
+	// Groups credits the chapter's translators in the reader; carried here so
+	// opening the chapter needs no extra call for it.
 	Groups []string `json:"g,omitempty"`
 }
 

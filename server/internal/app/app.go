@@ -165,7 +165,6 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 		OpenLibrary:         openLibrary,
 		GoogleBooks:         googleBooks,
 		Gutenberg:           gutenbergClient,
-		MangaDex:            cfg.MangaDex,
 		AniListClientID:     cfg.AniList.ClientID,
 		AniListAuthorizeURL: cfg.AniList.AuthorizeURL,
 		AniListRefresh:      cfg.AniList.RefreshInterval,

@@ -9,7 +9,6 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/rs/zerolog"
 
-	"github.com/mediaryorg/mediary-node/server/internal/config"
 	"github.com/mediaryorg/mediary-node/server/internal/httpapi"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/extension"
@@ -47,7 +46,6 @@ type Deps struct {
 	OpenLibrary         *openlibrary.Client
 	GoogleBooks         *googlebooks.Client
 	Gutenberg           *gutenberg.Client
-	MangaDex            config.MangaDex
 	AniListClientID     string
 	AniListAuthorizeURL string
 	AniListRefresh      time.Duration
@@ -198,10 +196,6 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 		SecretsPath: filepath.Join(deps.DataDir, "opds-secrets.json"),
 		UserAgent:   "mediary-node/" + deps.Build.Version,
 
-		MangaDexEndpoint:       deps.MangaDex.Endpoint,
-		MangaDexReportEndpoint: deps.MangaDex.ReportEndpoint,
-		MangaDexTimeout:        deps.MangaDex.Timeout,
-
 		Plugins: mangaPlugins{extension: extensionModule},
 	})
 	mangaModule.Register(api)
@@ -232,7 +226,7 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 	}
 
 	// The reader reads the library's files and, through the manga module, chapters
-	// on the user's OPDS servers, MangaDex and manga plugins. Every edge is a port
+	// on the user's OPDS servers and from manga plugins. Every edge is a port
 	// joined here.
 	reader.New(reader.Deps{
 		DB:       deps.DB,
@@ -240,9 +234,8 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 		Library:  readableFiles{library: libraryModule},
 		Progress: readChapters{tracker: trackerModule},
 		Sources: map[string]reader.ChapterSource{
-			reader.SourceOPDS:     opdsChapters{manga: mangaModule},
-			reader.SourceMangaDex: mangaDexChapters{manga: mangaModule},
-			reader.SourcePlugin:   pluginChapters{manga: mangaModule},
+			reader.SourceOPDS:   opdsChapters{manga: mangaModule},
+			reader.SourcePlugin: pluginChapters{manga: mangaModule},
 		},
 	}).Register(api)
 

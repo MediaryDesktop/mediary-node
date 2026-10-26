@@ -12,6 +12,7 @@ import {
 	pageCount,
 	pageOf,
 	presentSources,
+	readProgress,
 	savableOption,
 	sortRows,
 	sourceCounts
@@ -129,11 +130,17 @@ describe('chapter list helpers', () => {
 		expect(pageOf(items, 0, 50)).toEqual(items.slice(0, 50))
 	})
 
-	it("saves a manga plugin's chapter, never a MangaDex one", () => {
-		const plugin = option('p', 'plugin:comics')
-		const dex = option('d', 'mangadex')
+	it('marks a chapter read by moving progress up to it, and unread by moving it below', () => {
+		expect(readProgress('7', true, 3)).toBe(7)
+		expect(readProgress('7', false, 10)).toBe(6)
+		expect(readProgress('1', false, 1)).toBe(0)
+	})
 
-		expect(savableOption(row(dex, plugin), new Map())).toBe(plugin)
-		expect(savableOption(row(dex), new Map())).toBeNull()
+	it('changes nothing for a chapter already where it is marked, or an extra', () => {
+		expect(readProgress('7', true, 10)).toBeNull()
+		expect(readProgress('7', false, 3)).toBeNull()
+		expect(readProgress('12.5', true, 3)).toBeNull()
+		expect(readProgress('0', true, 3)).toBeNull()
+		expect(readProgress(null, true, 3)).toBeNull()
 	})
 })

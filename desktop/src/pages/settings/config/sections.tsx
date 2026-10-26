@@ -17,7 +17,6 @@ export const SETTINGS_SECTIONS = [
 	'torrent-search',
 	'torrent-preferences',
 	'manga-sources',
-	'mangadex',
 	'manga-downloads',
 	'book-sources',
 	'book-downloads'
@@ -46,7 +45,6 @@ export interface SectionInfo {
 		| 'torrentSearch'
 		| 'torrentPreferences'
 		| 'mangaSources'
-		| 'mangaDex'
 		| 'mangaDownloads'
 		| 'bookSources'
 		| 'bookDownloads'
@@ -75,7 +73,6 @@ export const SECTION_GROUPS: readonly (readonly SectionInfo[])[] = [
 	],
 	[
 		{ id: 'manga-sources', icon: 'common/database', key: 'mangaSources' },
-		{ id: 'mangadex', icon: 'common/book-open', key: 'mangaDex' },
 		{ id: 'manga-downloads', icon: 'common/folder', key: 'mangaDownloads' }
 	],
 	[

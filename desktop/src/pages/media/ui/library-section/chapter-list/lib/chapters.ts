@@ -49,6 +49,25 @@ export function matchesStatus(row: ChapterRow, filter: StatusFilter, progress: n
 	}
 }
 
+// The list's progress once a chapter is marked read or unread. AniList keeps one
+// number, so reading chapter 7 reads every chapter before it, and unreading it
+// unreads every one after. Null for an extra such as 12.5, which never moves
+// progress, and when nothing would change.
+export function readProgress(number: string | null, read: boolean, progress: number): number | null {
+	if (number === null || !/^\d+$/.test(number)) {
+		return null
+	}
+
+	const value = Number(number)
+	if (value <= 0) {
+		return null
+	}
+
+	const next = read ? Math.max(progress, value) : Math.min(progress, value - 1)
+
+	return next === progress ? null : next
+}
+
 // A search finds a chapter by its number or by any copy's title.
 export function matchesSearch(row: ChapterRow, query: string): boolean {
 	const wanted = query.trim().toLowerCase()
@@ -155,7 +174,6 @@ export function activeDownload(
 
 // A chapter the library does not hold can be saved from its first copy on the
 // user's server or from a manga plugin, unless that is already under way.
-// MangaDex says nothing of keeping its pages.
 const SAVABLE = ['opds:', 'plugin:']
 
 export function savableOption(row: ChapterRow, downloads: Map<string, MangaDownload>): ChapterOption | null {

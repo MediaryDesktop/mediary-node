@@ -37,6 +37,7 @@ export function ChapterFilters({
 			/>
 
 			<SegmentedControl<StatusFilter>
+				size='large'
 				label={t('mangaSources.chapters.status.label')}
 				value={status}
 				onValueChange={onStatusChange}

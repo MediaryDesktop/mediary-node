@@ -1,6 +1,6 @@
 // Package ref names a chapter wherever it comes from: a library file, a chapter on
-// the user's OPDS server, a chapter on MangaDex. The name is one string, because it
-// travels in a route of the desktop and in the address of a page image.
+// the user's OPDS server, a manga plugin's chapter. The name is one string, because
+// it travels in a route of the desktop and in the address of a page image.
 package ref
 
 import (
@@ -11,10 +11,9 @@ import (
 )
 
 const (
-	SourceLocal    = "local"
-	SourceOPDS     = "opds"
-	SourceMangaDex = "mangadex"
-	SourcePlugin   = "plugin"
+	SourceLocal  = "local"
+	SourceOPDS   = "opds"
+	SourcePlugin = "plugin"
 )
 
 var (
@@ -28,15 +27,13 @@ var (
 const maxPluginKey = 4096
 
 // ChapterRef is a chapter's address. Key is whatever the source needs to find the
-// chapter again: a file id, a server id and entry id, a chapter uuid.
+// chapter again: a file id, a server id and entry id, a plugin id and its key.
 type ChapterRef struct {
 	Source string
 	Key    string
 }
 
-var uuidPattern = regexp.MustCompile(`^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`)
-
-// Parse reads "local:42", "opds:3:<entry id>" or "mangadex:<uuid>". Everything
+// Parse reads "local:42", "opds:3:<entry id>" or "plugin:<id>:<key>". Everything
 // else is refused here, so no source ever sees a key it did not make.
 func Parse(raw string) (ChapterRef, error) {
 	source, key, ok := strings.Cut(raw, ":")
@@ -57,11 +54,6 @@ func Parse(raw string) (ChapterRef, error) {
 		}
 		if _, err := parsePositive(server); err != nil {
 			return ChapterRef{}, fmt.Errorf("chapter reference %q: server id %w", raw, err)
-		}
-
-	case SourceMangaDex:
-		if !uuidPattern.MatchString(key) {
-			return ChapterRef{}, fmt.Errorf("chapter reference %q: not a MangaDex chapter id", raw)
 		}
 
 	case SourcePlugin:

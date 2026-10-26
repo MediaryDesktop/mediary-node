@@ -2261,34 +2261,6 @@ components:
         - chapters
         - problems
       type: object
-    MangaDexSettingsBody:
-      additionalProperties: false
-      properties:
-        $schema:
-          description: A URL to the JSON Schema for this object.
-          examples:
-            - https://example.com/schemas/MangaDexSettingsBody.json
-          format: uri
-          readOnly: true
-          type: string
-        available:
-          description: False when the node is configured without MangaDex.
-          type: boolean
-        enabled:
-          description: Whether chapters are read from MangaDex. Off until the user turns it on.
-          type: boolean
-        languages:
-          description: Translations to list, in order of preference.
-          items:
-            type: string
-          type:
-            - array
-            - "null"
-      required:
-        - available
-        - enabled
-        - languages
-      type: object
     MangaDownloadBody:
       additionalProperties: false
       properties:
@@ -2440,7 +2412,7 @@ components:
           description: What tells similar names apart, such as a year.
           type: string
         id:
-          description: "The series' id in its source: a path on an OPDS server, a MangaDex id."
+          description: "The series' id in its source: a path on an OPDS server, a plugin's own id."
           type: string
         matched:
           description: True when the source itself links this series to the title being linked.
@@ -2462,7 +2434,6 @@ components:
         kind:
           enum:
             - opds
-            - mangadex
             - plugin
           type: string
         name:
@@ -3332,31 +3303,6 @@ components:
           type: boolean
       required:
         - enabled
-      type: object
-    PutMangaDexSettingsInputBody:
-      additionalProperties: false
-      properties:
-        $schema:
-          description: A URL to the JSON Schema for this object.
-          examples:
-            - https://example.com/schemas/PutMangaDexSettingsInputBody.json
-          format: uri
-          readOnly: true
-          type: string
-        enabled:
-          type: boolean
-        languages:
-          description: Language codes such as en, uk or pt-br.
-          items:
-            type: string
-          maxItems: 10
-          minItems: 1
-          type:
-            - array
-            - "null"
-      required:
-        - enabled
-        - languages
       type: object
     PutMangaDownloadSettingsInputBody:
       additionalProperties: false
@@ -7494,50 +7440,6 @@ paths:
       summary: Try a failed download again
       tags:
         - manga
-  /v1/manga/mangadex/settings:
-    get:
-      operationId: getMangaDexSettings
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/MangaDexSettingsBody"
-          description: OK
-        default:
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ErrorModel"
-          description: Error
-      summary: Reading from MangaDex
-      tags:
-        - manga
-    put:
-      description: "Chapters from MangaDex are read online only: pages pass through the node and are not saved."
-      operationId: putMangaDexSettings
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/PutMangaDexSettingsInputBody"
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/MangaDexSettingsBody"
-          description: OK
-        default:
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ErrorModel"
-          description: Error
-      summary: Turn MangaDex on or off, and choose languages
-      tags:
-        - manga
   /v1/manga/opds/check:
     post:
       description: "Reads the catalogue's root with the given credentials and says what is wrong, if anything. Answers 200 either way: a failed check is a result, not an error."
@@ -8550,15 +8452,15 @@ paths:
         - playback
   /v1/reader/chapters/{ref}:
     get:
-      description: "The chapter's pages in reading order, from whichever source the reference names. Chapter reference: local:<file id>, opds:<server id>:<entry id> or mangadex:<chapter id>."
+      description: "The chapter's pages in reading order, from whichever source the reference names. Chapter reference: local:<file id>, opds:<server id>:<entry id> or plugin:<plugin id>:<key>."
       operationId: getReaderChapterByRef
       parameters:
-        - description: "Chapter reference: local:<file id>, opds:<server id>:<entry id> or mangadex:<chapter id>."
+        - description: "Chapter reference: local:<file id>, opds:<server id>:<entry id> or plugin:<plugin id>:<key>."
           in: path
           name: ref
           required: true
           schema:
-            description: "Chapter reference: local:<file id>, opds:<server id>:<entry id> or mangadex:<chapter id>."
+            description: "Chapter reference: local:<file id>, opds:<server id>:<entry id> or plugin:<plugin id>:<key>."
             type: string
       responses:
         "200":

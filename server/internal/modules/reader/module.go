@@ -28,11 +28,10 @@ type (
 	Image         = archive.Image
 )
 
-// SourceOPDS is the reference prefix of chapters on the user's OPDS servers.
+// The reference prefixes of chapters on the user's OPDS servers and from manga plugins.
 const (
-	SourceOPDS     = ref.SourceOPDS
-	SourceMangaDex = ref.SourceMangaDex
-	SourcePlugin   = ref.SourcePlugin
+	SourceOPDS   = ref.SourceOPDS
+	SourcePlugin = ref.SourcePlugin
 )
 
 type Deps struct {

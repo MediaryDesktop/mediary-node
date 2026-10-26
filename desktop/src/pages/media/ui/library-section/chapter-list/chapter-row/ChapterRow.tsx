@@ -14,12 +14,15 @@ import styles from './ChapterRow.module.scss'
 export interface ChapterRowProps {
 	row: Row
 	state: ChapterState
+	read: boolean
 	icons: Map<string, string>
 	// Absent when the chapter cannot be saved, so there is nothing to select.
 	selected?: boolean
 	onSelect: (selected: boolean) => void
 	onOpen: (option: ChapterOption) => void
 	onSave?: () => void
+	// Absent for an extra such as 12.5, which progress cannot mark.
+	onToggleRead?: () => void
 }
 
 function StateBadge({ state }: { state: ChapterState }) {
@@ -54,7 +57,17 @@ function StateBadge({ state }: { state: ChapterState }) {
 }
 
 // A chapter opens its nearest copy; the other copies wait behind the menu.
-export function ChapterRow({ row, state, icons, selected, onSelect, onOpen, onSave }: ChapterRowProps) {
+export function ChapterRow({
+	row,
+	state,
+	read,
+	icons,
+	selected,
+	onSelect,
+	onOpen,
+	onSave,
+	onToggleRead
+}: ChapterRowProps) {
 	const { t } = useTranslation()
 	const [first, ...others] = row.options
 
@@ -65,12 +78,10 @@ export function ChapterRow({ row, state, icons, selected, onSelect, onOpen, onSa
 	const label = row.number === null ? first.title : t('reader.chapterNumber', { number: row.number })
 	// The file name says more of a library copy than a title that repeats the number.
 	const subtitle = first.title !== label ? first.title : first.source === LOCAL_SOURCE ? first.detail : ''
+	const readLabel = t(read ? 'mangaSources.chapters.markUnread' : 'mangaSources.chapters.markRead', { label })
 
 	return (
-		<div
-			role='row'
-			className={clsx(styles.row, state.kind === 'read' && styles.read, selected && styles.selected)}
-		>
+		<div role='row' className={clsx(styles.row, read && styles.read, selected && styles.selected)}>
 			<span role='cell' className={styles.check}>
 				{selected !== undefined && (
 					<Checkbox
@@ -116,6 +127,18 @@ export function ChapterRow({ row, state, icons, selected, onSelect, onOpen, onSa
 			</span>
 
 			<span role='cell' className={styles.actions}>
+				{onToggleRead && (
+					<RippleButton
+						className={clsx(styles.action, read && styles.on)}
+						aria-pressed={read}
+						aria-label={readLabel}
+						title={readLabel}
+						onClick={onToggleRead}
+					>
+						<Icon name='common/check' size={16} />
+					</RippleButton>
+				)}
+
 				<RippleButton
 					className={styles.action}
 					aria-label={t('mangaSources.chapters.open', { label })}

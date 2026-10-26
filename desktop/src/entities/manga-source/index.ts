@@ -7,14 +7,12 @@ export {
 	enqueueMangaDownloadsMutation,
 	forgetMangaDownloadMutation,
 	mangaChaptersQuery,
-	mangaDexSettingsQuery,
 	mangaDownloadSettingsQuery,
 	mangaDownloadsQuery,
 	mangaLinksQuery,
 	mangaSearchQuery,
 	mangaSourcesQuery,
 	opdsServersQuery,
-	putMangaDexSettingsMutation,
 	putMangaDownloadSettingsMutation,
 	putMangaLinkMutation,
 	retryMangaDownloadMutation,
@@ -26,7 +24,6 @@ export { enqueueMangaDownloadsFx, fetchMangaDownloadSettingsFx, putMangaDownload
 
 export type {
 	MangaChapter,
-	MangaDexSettings,
 	MangaDownload,
 	MangaLink,
 	MangaSeries,

@@ -960,11 +960,17 @@ export const en = {
 			unlinkFrom: 'Unlink {{name}}',
 			search: 'Find a chapter by number or title',
 			nothingFound: 'No chapters match the filters',
+			noChapters: {
+				title: 'No chapters yet',
+				description: 'Link a source to find chapters for this title.'
+			},
 			select: 'Select {{label}}',
 			selectPage: 'Select the chapters on this page',
 			selected: '{{picked}} of {{total}} selected',
 			saveSelected: 'Save selected',
 			open: 'Open {{label}}',
+			markRead: 'Mark {{label}} as read',
+			markUnread: 'Mark {{label}} as unread',
 			status: {
 				label: 'Status',
 				all: 'All',
@@ -1000,14 +1006,6 @@ export const en = {
 			pages_few: '{{count}} pages',
 			pages_many: '{{count}} pages',
 			pages_other: '{{count}} pages'
-		},
-		mangadex: {
-			enable: 'Read chapters from MangaDex',
-			languages: 'Languages, in order of preference',
-			languagesPlaceholder: 'Choose languages',
-			note: 'Pages are read online through the node and are not saved. MangaDex and the translators are named next to every chapter.',
-			unavailable: 'MangaDex is turned off on this node',
-			saveFailed: 'Could not save the MangaDex settings'
 		},
 		downloads: {
 			save: 'Save to disk',
@@ -1776,10 +1774,6 @@ export const en = {
 				title: 'Google Books',
 				subtitle: 'Books Open Library does not know'
 			},
-			mangaDex: {
-				title: 'MangaDex',
-				subtitle: 'Reading chapters online'
-			},
 			mangaDownloads: {
 				title: 'Manga downloads',
 				subtitle: 'Where downloaded chapters are kept'
@@ -1800,10 +1794,6 @@ export const en = {
 		googleBooks: {
 			name: 'Google Books key',
 			hint: 'Where books Open Library does not know are looked up'
-		},
-		mangaDex: {
-			name: 'MangaDex',
-			hint: 'Read chapters online from MangaDex'
 		},
 		mangaDownloads: {
 			name: 'Manga downloads',

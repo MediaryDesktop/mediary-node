@@ -1,26 +1,86 @@
 .row {
+	position: relative;
+	isolation: isolate;
 	display: grid;
 	grid-template-columns: var(--chapter-columns);
 	align-items: center;
 	gap: var(--chapter-gap);
 	min-height: 3.25rem;
-	padding: 0.25rem 1rem;
+	padding: 1rem 1rem;
+	overflow: hidden;
 	border-radius: var(--radius-md);
 	background: var(--surface);
-	transition: background 160ms;
+	transition:
+		background 160ms,
+		border-color 160ms;
 
 	&:hover {
 		background: var(--surface-hover);
 	}
 
-	&.selected {
-		background: var(--accent-muted);
+	&::before {
+		content: '';
+		position: absolute;
+		top: -20%;
+		bottom: -20%;
+		left: -12%;
+		pointer-events: none;
+		width: 42%;
+		background-color: var(--row-glow, transparent);
+		mask-image: url('/illustrations/mask.png');
+		mask-repeat: no-repeat;
+		mask-size: 100% 100%;
+		-webkit-mask-image: url('/illustrations/mask.png');
+		-webkit-mask-repeat: no-repeat;
+		-webkit-mask-size: 100% 100%;
+		backdrop-filter: blur(50px);
+		opacity: 0;
+		transition:
+			opacity 350ms ease,
+			background-color 350ms ease;
 	}
 
+	> * {
+		position: relative;
+		z-index: 1;
+	}
+
+	// The full path outweighs .open's own subtitle colour below.
 	&.read {
-		.number,
-		.subtitle {
-			color: var(--text-muted);
+		--row-glow: rgba(42, 249, 35, 0.5);
+		--checkbox-accent: var(--success);
+
+		&::before {
+			opacity: 1;
+		}
+
+		.chapter .open {
+			.number {
+				color: var(--success-text);
+			}
+
+			.subtitle {
+				color: color-mix(in srgb, var(--success-text) 45%, var(--text-secondary));
+			}
+		}
+	}
+
+	&.selected {
+		--row-glow: rgba(249, 35, 45, 0.5);
+		--checkbox-accent: var(--accent);
+
+		&::before {
+			opacity: 1;
+		}
+
+		.chapter .open {
+			.number {
+				color: var(--accent-text);
+			}
+
+			.subtitle {
+				color: color-mix(in srgb, var(--accent-text) 45%, var(--text-secondary));
+			}
 		}
 	}
 
@@ -46,9 +106,6 @@
 			text-align: left;
 			cursor: pointer;
 
-			&:hover .number {
-				color: var(--accent-text);
-			}
 
 			&:focus-visible {
 				outline: none;
@@ -68,6 +125,7 @@
 				font-size: 0.8125rem;
 				text-overflow: ellipsis;
 				white-space: nowrap;
+				transition: color 160ms;
 			}
 		}
 	}
@@ -151,6 +209,16 @@
 			&:focus-visible {
 				outline: none;
 				box-shadow: var(--focus-shadow);
+			}
+
+			&.on {
+				color: var(--success-text);
+
+				&:hover {
+					border-color: var(--success-muted);
+					background: var(--success-muted);
+					color: var(--success-text);
+				}
 			}
 		}
 	}

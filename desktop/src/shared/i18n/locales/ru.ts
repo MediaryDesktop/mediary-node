@@ -961,11 +961,17 @@ export const ru: Translation = {
 			unlinkFrom: 'Отвязать {{name}}',
 			search: 'Найти главу по номеру или названию',
 			nothingFound: 'Ни одна глава не подходит под фильтры',
+			noChapters: {
+				title: 'Пока нет глав',
+				description: 'Привяжите источник, чтобы найти главы этого тайтла.'
+			},
 			select: 'Выбрать {{label}}',
 			selectPage: 'Выбрать главы на этой странице',
 			selected: 'Выбрано {{picked}} из {{total}}',
 			saveSelected: 'Сохранить выбранные',
 			open: 'Открыть {{label}}',
+			markRead: 'Отметить {{label}} прочитанным',
+			markUnread: 'Отметить {{label}} непрочитанным',
 			status: {
 				label: 'Состояние',
 				all: 'Все',
@@ -1001,14 +1007,6 @@ export const ru: Translation = {
 			pages_few: '{{count}} страницы',
 			pages_many: '{{count}} страниц',
 			pages_other: '{{count}} страницы'
-		},
-		mangadex: {
-			enable: 'Читать главы с MangaDex',
-			languages: 'Языки, по приоритету',
-			languagesPlaceholder: 'Выберите языки',
-			note: 'Страницы читаются онлайн через ноду и не сохраняются. MangaDex и переводчики указаны рядом с каждой главой.',
-			unavailable: 'MangaDex выключен на этой ноде',
-			saveFailed: 'Не удалось сохранить настройки MangaDex'
 		},
 		downloads: {
 			save: 'Сохранить на диск',
@@ -1780,10 +1778,6 @@ export const ru: Translation = {
 				title: 'Google Books',
 				subtitle: 'Книги, которых не знает Open Library'
 			},
-			mangaDex: {
-				title: 'MangaDex',
-				subtitle: 'Чтение глав онлайн'
-			},
 			mangaDownloads: {
 				title: 'Загрузка манги',
 				subtitle: 'Где хранятся загруженные главы'
@@ -1804,10 +1798,6 @@ export const ru: Translation = {
 		googleBooks: {
 			name: 'Ключ Google Books',
 			hint: 'Где искать книги, которых не знает Open Library'
-		},
-		mangaDex: {
-			name: 'MangaDex',
-			hint: 'Читать главы онлайн с MangaDex'
 		},
 		mangaDownloads: {
 			name: 'Загрузки манги',

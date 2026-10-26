@@ -11,8 +11,7 @@ import (
 )
 
 // The service is the download queue's source: it knows how to reach a chapter by
-// its reference. Chapters on the user's OPDS servers and from manga plugins;
-// MangaDex says nothing of keeping its pages, so its chapters are read only.
+// its reference: chapters on the user's OPDS servers and from manga plugins.
 
 func (s *Service) Describe(ctx context.Context, ref string) (*download.Chapter, error) {
 	if id, key, ok := pluginRef(ref); ok {

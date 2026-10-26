@@ -203,7 +203,7 @@ func (f fakeSource) Page(context.Context, ref.ChapterRef, int) (archive.Image, e
 }
 
 func TestAnExtraChapterIsReadButDoesNotMoveProgress(t *testing.T) {
-	chapterRef, err := ref.Parse("mangadex:a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d")
+	chapterRef, err := ref.Parse("plugin:example-comics:eyJzIjoiZnJpZXJlbi8xIiwiYyI6ImM6MSJ9")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -212,12 +212,12 @@ func TestAnExtraChapterIsReadButDoesNotMoveProgress(t *testing.T) {
 	svc := New(Options{Progress: progress})
 	pages := []archive.Page{{Index: 0}, {Index: 1}}
 
-	svc.sources[ref.SourceMangaDex] = fakeSource{chapter: &Chapter{Ref: chapterRef, MediaRef: "anilist:9", Number: "12.5", Pages: pages}}
+	svc.sources[ref.SourcePlugin] = fakeSource{chapter: &Chapter{Ref: chapterRef, MediaRef: "anilist:9", Number: "12.5", Pages: pages}}
 	if counted, err := svc.ReportPage(context.Background(), chapterRef, 1); err != nil || counted || len(progress.marked) != 0 {
 		t.Errorf("extra: counted=%v err=%v marked=%v", counted, err, progress.marked)
 	}
 
-	svc.sources[ref.SourceMangaDex] = fakeSource{chapter: &Chapter{Ref: chapterRef, MediaRef: "anilist:9", Number: "13", Pages: pages}}
+	svc.sources[ref.SourcePlugin] = fakeSource{chapter: &Chapter{Ref: chapterRef, MediaRef: "anilist:9", Number: "13", Pages: pages}}
 	if counted, err := svc.ReportPage(context.Background(), chapterRef, 1); err != nil || !counted || len(progress.marked) != 1 || progress.marked[0] != 13 {
 		t.Errorf("whole chapter: counted=%v err=%v marked=%v", counted, err, progress.marked)
 	}
