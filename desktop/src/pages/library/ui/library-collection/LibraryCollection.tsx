@@ -12,6 +12,7 @@ import { canTrack, entryTracking, useTrackedEntries } from '@entities/tracker'
 
 import { EntryMenu } from '@features/track-media'
 
+import { useResolveUnmatched } from './lib/useResolveUnmatched'
 import styles from './LibraryCollection.module.scss'
 
 export interface LibraryCollectionProps {
@@ -25,10 +26,12 @@ export function LibraryCollection({ entries }: LibraryCollectionProps) {
 	const connected = useUnit(aniListAccountModel.$connected)
 	const tracked = useTrackedEntries(connected)
 	const trackedByRef = useMemo(() => new Map(tracked.map(entry => [entry.media_ref, entry])), [tracked])
+	const resolvedByRef = useResolveUnmatched(entries)
 
 	return (
 		<ul className={styles.grid}>
-			{entries.map(entry => {
+			{entries.map(rawEntry => {
+				const entry = rawEntry.title ? rawEntry : { ...rawEntry, title: resolvedByRef[rawEntry.media_ref] }
 				const trackedEntry = trackedByRef.get(entry.media_ref)
 				const mediaType = trackedEntry?.media_type ?? entry.title?.media_type
 
