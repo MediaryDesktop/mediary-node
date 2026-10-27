@@ -57,6 +57,33 @@ export function useTrackedEntries(enabled: boolean): TrackerEntry[] {
 	return useMemo(() => TRACKER_MEDIA_TYPES.flatMap(mediaType => data[mediaType]?.entries ?? []), [data])
 }
 
+// Whether every type a page showing `entries` cares about has answered at least
+// once — not merely non-empty, since an empty list and one still in flight look
+// the same to `.length`. A page that tells the two apart can hold its first paint
+// for the second instead of flashing an empty state in between.
+export function useTrackedEntriesReady(enabled: boolean): boolean {
+	const nodeReady = useUnit($nodeReady)
+	const status = useUnit({
+		anime: trackerQueries.anime.$status,
+		manga: trackerQueries.manga.$status,
+		movie: trackerQueries.movie.$status,
+		series: trackerQueries.series.$status,
+		dorama: trackerQueries.dorama.$status,
+		book: trackerQueries.book.$status
+	})
+
+	return (
+		nodeReady &&
+		TRACKER_MEDIA_TYPES.every(mediaType => {
+			if (!enabled && !isLocalTrackerType(mediaType)) {
+				return true
+			}
+
+			return status[mediaType] !== 'initial' && status[mediaType] !== 'pending'
+		})
+	)
+}
+
 export function useTrackedEntry(mediaRef: string, enabled: boolean): TrackerEntry | null {
 	const entries = useTrackedEntries(enabled)
 

@@ -19,7 +19,7 @@ export type { ListIconProps } from './ui/list-icon/ListIcon'
 export { MediaTypeIcon } from './ui/media-type-icon/MediaTypeIcon'
 export type { MediaTypeIconProps } from './ui/media-type-icon/MediaTypeIcon'
 
-export { useTrackedEntries, useTrackedEntry } from './lib/useTrackedEntries'
+export { useTrackedEntries, useTrackedEntry, useTrackedEntriesReady } from './lib/useTrackedEntries'
 
 export { entryTracking } from './lib/tracking'
 export type { EntryTracking } from './lib/tracking'

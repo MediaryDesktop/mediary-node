@@ -25,12 +25,15 @@ interface Slide extends FeaturedMedia {
 export interface HomeBannerProps {
 	entries: TrackerEntry[]
 	watching: ContinueWatchingState
+	// Still waiting on the tracker's first answer: a title to show may yet arrive,
+	// so the banner holds its place with a skeleton rather than vanishing.
+	loading: boolean
 	onOpen: (mediaRef: string) => void
 }
 
 // The anime the user is in the middle of, one at a time, with how far they got
 // and — when the library has the next episode — a button that plays it.
-export function HomeBanner({ entries, watching, onOpen }: HomeBannerProps) {
+export function HomeBanner({ entries, watching, loading, onOpen }: HomeBannerProps) {
 	const { t } = useTranslation()
 	const { play, starting } = usePlayFile()
 	const labelOf = useUpNextLabel()
@@ -66,7 +69,7 @@ export function HomeBanner({ entries, watching, onOpen }: HomeBannerProps) {
 		[current, details]
 	)
 
-	if (slides.length === 0) {
+	if (slides.length === 0 && !loading) {
 		return null
 	}
 
@@ -74,7 +77,7 @@ export function HomeBanner({ entries, watching, onOpen }: HomeBannerProps) {
 		<FeaturedBanner
 			className={styles.banner}
 			items={slides}
-			loading={false}
+			loading={loading}
 			onOpen={slide => onOpen(slide.media_ref)}
 			label={t('home.banner.label')}
 			openLabel={t('home.banner.open')}

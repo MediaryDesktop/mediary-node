@@ -7,7 +7,7 @@ import { EmptyState, Icon, PageTransition } from '@shared/ui'
 import type { IconName } from '@shared/ui'
 
 import { aniListAccountModel } from '@entities/anilist-account'
-import { useTrackedEntries } from '@entities/tracker'
+import { useTrackedEntries, useTrackedEntriesReady } from '@entities/tracker'
 import type { TrackerEntry, TrackerStatus } from '@entities/tracker'
 
 import { ConnectAniList } from '@features/connect-anilist'
@@ -35,6 +35,10 @@ export function HomePage() {
 	const [connected, sessionLoaded] = useUnit([aniListAccountModel.$connected, aniListAccountModel.$loaded])
 
 	const entries = useTrackedEntries(connected)
+	const entriesReady = useTrackedEntriesReady(connected)
+	// Until this is true, an empty `entries` means "not answered yet", not "nothing
+	// to show" — the empty state and the rows below wait for it, same as the hero.
+	const ready = sessionLoaded && entriesReady
 	const watching = useContinueWatching(entries)
 	const stats = useMemo(() => trackerStats(entries), [entries])
 
@@ -56,7 +60,7 @@ export function HomePage() {
 
 	return (
 		<PageTransition className={styles.root}>
-			<HomeBanner entries={entries} watching={watching} onOpen={openMedia} />
+			<HomeBanner entries={entries} watching={watching} loading={!ready} onOpen={openMedia} />
 
 			{sessionLoaded && !connected && (
 				<section className={styles.connect}>
@@ -67,29 +71,30 @@ export function HomePage() {
 
 			<ContinueWatching state={watching} />
 
-			{entries.length === 0 ? (
-				<EmptyState title={t('home.empty')} />
-			) : (
-				<>
-					{ROWS.map(row => (
-						<TrackerRow
-							key={row.status}
-							title={t(`home.rows.${row.key}`)}
-							icon={row.icon}
-							status={row.status}
-							entries={byStatus.get(row.status) ?? []}
-						/>
-					))}
+			{ready &&
+				(entries.length === 0 ? (
+					<EmptyState title={t('home.empty')} />
+				) : (
+					<>
+						{ROWS.map(row => (
+							<TrackerRow
+								key={row.status}
+								title={t(`home.rows.${row.key}`)}
+								icon={row.icon}
+								status={row.status}
+								entries={byStatus.get(row.status) ?? []}
+							/>
+						))}
 
-					<section className={styles.section}>
-						<h2 className={styles.sectionTitle}>
-							<Icon name='common/chart-no-axes-combined' size={20} />
-							{t('home.stats.title')}
-						</h2>
-						<TrackerStats stats={stats} entries={entries} />
-					</section>
-				</>
-			)}
+						<section className={styles.section}>
+							<h2 className={styles.sectionTitle}>
+								<Icon name='common/chart-no-axes-combined' size={20} />
+								{t('home.stats.title')}
+							</h2>
+							<TrackerStats stats={stats} entries={entries} />
+						</section>
+					</>
+				))}
 		</PageTransition>
 	)
 }
