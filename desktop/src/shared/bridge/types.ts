@@ -30,6 +30,10 @@ export interface MediaryBridge {
 	}
 	app: {
 		version: () => Promise<string>
+		booted: () => Promise<void>
+	}
+	splash: {
+		dismiss: () => Promise<void>
 	}
 	dialog: {
 		pickFolder: () => Promise<string | null>

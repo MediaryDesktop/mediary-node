@@ -25,6 +25,11 @@ export const en = {
 		}
 	},
 
+	splash: {
+		failed: 'The node failed to start. Check Settings for details.',
+		continue: 'Continue anyway'
+	},
+
 	input: {
 		showPassword: 'Show password',
 		hidePassword: 'Hide password'

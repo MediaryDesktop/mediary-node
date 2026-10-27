@@ -23,6 +23,11 @@ export const ru: Translation = {
 		}
 	},
 
+	splash: {
+		failed: 'Не удалось запустить ноду. Подробности — в настройках.',
+		continue: 'Всё равно продолжить'
+	},
+
 	input: {
 		showPassword: 'Показать пароль',
 		hidePassword: 'Скрыть пароль'

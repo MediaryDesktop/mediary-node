@@ -23,6 +23,11 @@ export const uk: Translation = {
 		}
 	},
 
+	splash: {
+		failed: 'Не вдалося запустити ноду. Деталі — в налаштуваннях.',
+		continue: 'Все одно продовжити'
+	},
+
 	input: {
 		showPassword: 'Показати пароль',
 		hidePassword: 'Сховати пароль'

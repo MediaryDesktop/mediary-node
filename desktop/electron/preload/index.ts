@@ -20,7 +20,16 @@ const api = {
 	},
 
 	app: {
-		version: (): Promise<string> => ipcRenderer.invoke(IPC.appVersion)
+		version: (): Promise<string> => ipcRenderer.invoke(IPC.appVersion),
+
+		// Tells the main process the app has actually booted (node ready, session
+		// restored) — it's what the splash window waits on before handing off.
+		booted: (): Promise<void> => ipcRenderer.invoke(IPC.appBooted)
+	},
+
+	splash: {
+		// The splash window's own way out of a boot that never finishes.
+		dismiss: (): Promise<void> => ipcRenderer.invoke(IPC.splashDismiss)
 	},
 
 	dialog: {

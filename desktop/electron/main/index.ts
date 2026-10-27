@@ -11,6 +11,7 @@ import {
 	readStoredSession,
 	writeStoredSession
 } from './session-store.js'
+import { runSplash, type SplashHandoff } from './splash.js'
 import { stopTrailerHost, trailerHostOrigin } from './trailer-host.js'
 
 app.commandLine.appendSwitch('disable-quic')
@@ -27,6 +28,18 @@ const supervisor = new NodeSupervisor({
 })
 
 let mainWindow: BrowserWindow | null = null
+let splashHandoff: SplashHandoff | null = null
+
+// electron-builder's own `icon:` config (see electron-builder.yml) only bakes
+// the icon into the packaged exe/app bundle — an unpackaged dev run still
+// shows Electron's own icon in the taskbar/dock unless a window sets this too.
+// The dev server serves the renderer from memory, so out/renderer/ won't have
+// a fresh copy of the public assets; read straight from the source tree then.
+function appIconPath(): string {
+	return process.env.ELECTRON_RENDERER_URL
+		? join(__dirname, '../../src/public/logo/web-app-manifest-512x512.png')
+		: join(__dirname, '../renderer/logo/web-app-manifest-512x512.png')
+}
 
 function createWindow(): BrowserWindow {
 	const window = new BrowserWindow({
@@ -34,9 +47,13 @@ function createWindow(): BrowserWindow {
 		height: 900,
 		minWidth: 1024,
 		minHeight: 640,
+		// Stays hidden until the splash window hands off (see splash.ts) — showing
+		// it early would mean fading in an empty frame before React has painted
+		// anything, trading the splash's flicker for the app window's own.
 		show: false,
 		autoHideMenuBar: true,
 		backgroundColor: '#0d0d10',
+		icon: appIconPath(),
 
 		frame: false,
 		webPreferences: {
@@ -52,8 +69,6 @@ function createWindow(): BrowserWindow {
 			enableBlinkFeatures: 'AudioVideoTracks'
 		}
 	})
-
-	window.once('ready-to-show', () => window.show())
 
 	window.on('maximize', () => window.webContents.send(IPC.windowIsMaximized, true))
 	window.on('unmaximize', () => window.webContents.send(IPC.windowIsMaximized, false))
@@ -164,6 +179,9 @@ function registerIpc(): void {
 		IPC.windowIsMaximized,
 		event => BrowserWindow.fromWebContents(event.sender)?.isMaximized() ?? false
 	)
+
+	ipcMain.handle(IPC.appBooted, () => splashHandoff?.reportBooted())
+	ipcMain.handle(IPC.splashDismiss, () => splashHandoff?.reportDismissed())
 }
 
 if (!app.requestSingleInstanceLock()) {
@@ -185,13 +203,23 @@ if (!app.requestSingleInstanceLock()) {
 
 		mainWindow = createWindow()
 
+		splashHandoff = runSplash({
+			preloadPath: join(__dirname, '../preload/index.js'),
+			devServerUrl: process.env.ELECTRON_RENDERER_URL,
+			rendererDir: join(__dirname, '../renderer'),
+			iconPath: appIconPath(),
+			mainWindow
+		})
+
 		supervisor.start().catch((error: unknown) => {
 			process.stderr.write(`[shell] node failed to start: ${String(error)}\n`)
 		})
 
 		app.on('activate', () => {
 			if (BrowserWindow.getAllWindows().length === 0) {
+				// No splash on a reopen — the app has already booted once this run.
 				mainWindow = createWindow()
+				mainWindow.once('ready-to-show', () => mainWindow?.show())
 			}
 		})
 	})

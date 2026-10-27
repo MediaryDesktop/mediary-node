@@ -25,7 +25,10 @@ export const IPC = {
 	windowToggleMaximize: 'window:toggle-maximize',
 	windowClose: 'window:close',
 
-	windowIsMaximized: 'window:is-maximized'
+	windowIsMaximized: 'window:is-maximized',
+
+	appBooted: 'app:booted',
+	splashDismiss: 'splash:dismiss'
 } as const
 
 export type IpcChannel = (typeof IPC)[keyof typeof IPC]

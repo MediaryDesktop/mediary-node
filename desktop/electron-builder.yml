@@ -1,6 +1,7 @@
 appId: org.mediary.desktop
 productName: Mediary
 copyright: Copyright © 2026 Mediary
+icon: resources/icon.png
 
 directories:
   output: release
