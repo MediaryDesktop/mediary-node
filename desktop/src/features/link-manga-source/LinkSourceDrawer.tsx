@@ -16,9 +16,11 @@ import {
 	toast
 } from '@shared/ui'
 
+import { extensionsQuery } from '@entities/extension'
 import { mangaSearchQuery, putMangaLinkMutation } from '@entities/manga-source'
 import type { MangaSource } from '@entities/manga-source'
 
+import { SourceOptionIcon } from './source-option-icon/SourceOptionIcon'
 import styles from './LinkSourceDrawer.module.scss'
 
 export interface LinkSourceDrawerProps {
@@ -64,14 +66,16 @@ interface LinkFormProps extends Omit<LinkSourceDrawerProps, 'open' | 'onClose'> 
 function LinkForm({ mediaRef, title, sources, initialSource, onDone }: LinkFormProps) {
 	const { t } = useTranslation()
 
-	const [search, reset, data, error, pending, link, linking] = useUnit([
+	const [search, reset, data, error, pending, link, linking, loadExtensions, extensions] = useUnit([
 		mangaSearchQuery.start,
 		mangaSearchQuery.reset,
 		mangaSearchQuery.$data,
 		mangaSearchQuery.$error,
 		mangaSearchQuery.$pending,
 		putMangaLinkMutation.start,
-		putMangaLinkMutation.$pending
+		putMangaLinkMutation.$pending,
+		extensionsQuery.start,
+		extensionsQuery.$data
 	])
 
 	const [source, setSource] = useState(initialSource ?? sources[0]?.id ?? '')
@@ -85,6 +89,14 @@ function LinkForm({ mediaRef, title, sources, initialSource, onDone }: LinkFormP
 			search({ source, query: title.trim(), mediaRef })
 		}
 	}, [reset, search, source, title, mediaRef])
+
+	useEffect(() => {
+		loadExtensions()
+	}, [loadExtensions])
+
+	const icons = new Map<string, string>(
+		(extensions?.extensions ?? []).flatMap(ext => (ext.icon ? [[`plugin:${ext.id}`, ext.icon]] : []))
+	)
 
 	useUnitWatch(putMangaLinkMutation.finished.success, () => onDone())
 	useUnitWatch(putMangaLinkMutation.finished.failure, ({ error }) =>
@@ -102,9 +114,17 @@ function LinkForm({ mediaRef, title, sources, initialSource, onDone }: LinkFormP
 	return (
 		<div className={styles.root}>
 			{sources.length > 1 && (
-				<DrawerSection title={t('mangaSources.link.sourceLabel')}>
+				<DrawerSection
+					title={t('mangaSources.link.sourceLabel')}
+					description={t('mangaSources.link.sourceDescription')}
+					className={styles.sourceSection}
+				>
 					<SelectionGroup
-						options={sources.map(item => ({ value: item.id, label: item.name }))}
+						options={sources.map(item => ({
+							value: item.id,
+							label: item.name,
+							icon: <SourceOptionIcon source={item.id} name={item.name} image={icons.get(item.id)} />
+						}))}
 						value={source}
 						onValueChange={setSource}
 						label={t('mangaSources.link.sourceLabel')}
@@ -112,7 +132,11 @@ function LinkForm({ mediaRef, title, sources, initialSource, onDone }: LinkFormP
 				</DrawerSection>
 			)}
 
-			<DrawerSection title={t('mangaSources.link.searchLabel')}>
+			<DrawerSection
+				title={t('mangaSources.link.searchLabel')}
+				description={t('mangaSources.link.searchDescription')}
+				className={styles.searchSection}
+			>
 				<form
 					className={styles.search}
 					onSubmit={event => {
@@ -157,6 +181,7 @@ function LinkForm({ mediaRef, title, sources, initialSource, onDone }: LinkFormP
 							<Button
 								size='small'
 								variant='primary'
+								className={styles.use}
 								disabled={linking}
 								onClick={() =>
 									link({ mediaRef, source, seriesId: series.id, seriesTitle: series.title })

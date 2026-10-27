@@ -1,0 +1,24 @@
+.icon {
+	flex: none;
+	color: var(--text-secondary);
+}
+
+.image {
+	flex: none;
+	border-radius: var(--radius-sm);
+	object-fit: cover;
+}
+
+.letter {
+	display: inline-grid;
+	flex: none;
+	width: 16px;
+	height: 16px;
+	place-items: center;
+	border-radius: var(--radius-sm);
+	background: var(--surface-hover);
+	color: var(--text-secondary);
+	font-size: 0.625rem;
+	font-weight: 700;
+	line-height: 1;
+}

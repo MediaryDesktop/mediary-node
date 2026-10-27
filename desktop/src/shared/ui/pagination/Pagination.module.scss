@@ -11,7 +11,7 @@
 		height: var(--control-height-sm);
 		padding: 0 0.5rem;
 		border: 1px solid transparent;
-		border-radius: var(--radius-sm);
+		border-radius: var(--radius-md);
 		background: transparent;
 		color: var(--text-secondary);
 		font: inherit;
@@ -48,6 +48,11 @@
 			border-color: var(--accent-border);
 			background: var(--accent-muted);
 			color: var(--accent-text);
+
+			&:hover:not(:disabled) {
+				background: var(--accent-muted-hover);
+				color: var(--accent-text);
+			}
 		}
 	}
 
