@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { IoIosRefresh } from 'react-icons/io'
 
 import { useTranslation } from '@shared/i18n'
+import { useUnitWatch } from '@shared/lib'
 import { Button, EmptyState, Icon, PageTransition, PhaseTransition } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
@@ -11,6 +12,8 @@ import { $nodeReady } from '@infra/node'
 import { aniListAccountModel } from '@entities/anilist-account'
 import { mediaDetailsModel, mediaPreviewModel } from '@entities/media'
 import { useTrackedEntry } from '@entities/tracker'
+
+import { manualMediaModel } from '@features/manage-manual-media'
 
 import styles from './MediaPage.module.scss'
 import { MediaHeroSkeleton } from './ui/media-hero/MediaHeroSkeleton'
@@ -38,6 +41,12 @@ export function MediaPage({ mediaRef }: MediaPageProps) {
 	useEffect(() => {
 		window.scrollTo({ top: 0 })
 	}, [mediaRef])
+
+	useUnitWatch(manualMediaModel.deleted, deletedRef => {
+		if (deletedRef === mediaRef) {
+			router.history.back()
+		}
+	})
 
 	// A reload of this page asks before the node is up, and that request fails.
 	useEffect(() => {

@@ -2475,6 +2475,154 @@ components:
       required:
         - sources
       type: object
+    ManualDraft:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/ManualDraft.json
+          format: uri
+          readOnly: true
+          type: string
+        authors:
+          description: Who wrote it; manga and books.
+          items:
+            type: string
+          maxItems: 30
+          type:
+            - array
+            - "null"
+        chapters:
+          description: Chapters; manga only.
+          format: int64
+          minimum: 0
+          type: integer
+        country_of_origin:
+          description: ISO 3166-1 alpha-2 code of where it comes from.
+          pattern: ^[A-Z]{2}$
+          type: string
+        description:
+          description: Plain-text synopsis.
+          maxLength: 10000
+          type: string
+        duration:
+          description: Minutes per episode, or the runtime of a movie.
+          format: int64
+          maximum: 1000
+          minimum: 0
+          type: integer
+        episodes:
+          description: Episodes it has. A movie always has one.
+          format: int64
+          minimum: 0
+          type: integer
+        format:
+          description: "The source vocabulary's format for this kind of title: TV, MOVIE, OVA… for anime, MANGA, NOVEL, ONE_SHOT for manga, BOOK for a book. Left out it is the kind's usual one."
+          enum:
+            - TV
+            - TV_SHORT
+            - MOVIE
+            - SPECIAL
+            - OVA
+            - ONA
+            - MUSIC
+            - MANGA
+            - NOVEL
+            - ONE_SHOT
+            - BOOK
+          type: string
+        genres:
+          description: Genres, in whatever words the user chose.
+          items:
+            type: string
+          maxItems: 30
+          type:
+            - array
+            - "null"
+        is_adult:
+          description: Adult content.
+          type: boolean
+        media_type:
+          description: Which kind of title this is. It decides the list it is tracked on and what its progress counts.
+          enum:
+            - anime
+            - manga
+            - movie
+            - series
+            - dorama
+            - book
+          type: string
+        original_title:
+          description: The name in the original language, when it differs.
+          maxLength: 300
+          type: string
+        pages:
+          description: Pages; a book only, whose progress counts them.
+          format: int64
+          minimum: 0
+          type: integer
+        status:
+          description: Release status.
+          enum:
+            - FINISHED
+            - RELEASING
+            - NOT_YET_RELEASED
+            - CANCELLED
+            - HIATUS
+          type: string
+        studios:
+          description: Who made it.
+          items:
+            type: string
+          maxItems: 30
+          type:
+            - array
+            - "null"
+        synonyms:
+          description: Other names the title goes by. Library files are matched against these too.
+          items:
+            type: string
+          maxItems: 30
+          type:
+            - array
+            - "null"
+        title:
+          description: The name shown everywhere in the app.
+          maxLength: 300
+          minLength: 1
+          type: string
+        volumes:
+          description: Volumes; manga only.
+          format: int64
+          minimum: 0
+          type: integer
+        year:
+          description: Year it came out.
+          format: int64
+          maximum: 2100
+          minimum: 1800
+          type: integer
+      required:
+        - media_type
+        - title
+      type: object
+    ManualOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/ManualOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        media:
+          $ref: "#/components/schemas/MediaDetails"
+          description: The title as its page shows it, under its manual:<id> reference.
+      required:
+        - media
+      type: object
     Match:
       additionalProperties: false
       properties:
@@ -2672,6 +2820,9 @@ components:
           type:
             - integer
             - "null"
+        editable:
+          description: The user described this title themselves, so they may edit or delete it. Only manual:<id> titles; every other one belongs to its source.
+          type: boolean
         end_date:
           $ref: "#/components/schemas/FuzzyDate"
         episodes:
@@ -2819,6 +2970,7 @@ components:
         - relations
         - recommendations
         - similar
+        - editable
         - fetched_at
       type: object
     MediaInfo:
@@ -2925,6 +3077,9 @@ components:
         description:
           description: Plain-text synopsis, when the source's search carries one. Open Library's does not.
           type: string
+        editable:
+          description: A title the user described themselves; see MediaDetails.editable.
+          type: boolean
         episodes:
           format: int64
           type:
@@ -7775,6 +7930,91 @@ paths:
       summary: Genres and tags to filter by
       tags:
         - media
+  /v1/media/manual:
+    post:
+      description: Keeps a title the user describes themselves, for anything AniList, TMDB and the book sources do not have. It is the user's own data and never ages out. It gets a manual:<id> reference that every other endpoint takes — the tracker's, the library's — like a source's.
+      operationId: createManualMedia
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ManualDraft"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ManualOutputBody"
+          description: Created
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Describe a title no source knows
+      tags:
+        - media
+  /v1/media/manual/{id}:
+    delete:
+      description: Removes the title and takes it off the user's list. Library files matched to it stay where they are and can be matched again.
+      operationId: deleteManualMedia
+      parameters:
+        - description: "The manual title's id: its media reference without the manual: prefix."
+          in: path
+          name: id
+          required: true
+          schema:
+            description: "The manual title's id: its media reference without the manual: prefix."
+            pattern: ^[0-9a-f]{20}$
+            type: string
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Delete a title the user described
+      tags:
+        - media
+    put:
+      description: "Replaces everything about the title with the body. Its kind cannot change: the title stays on the list of its kind."
+      operationId: updateManualMedia
+      parameters:
+        - description: "The manual title's id: its media reference without the manual: prefix."
+          in: path
+          name: id
+          required: true
+          schema:
+            description: "The manual title's id: its media reference without the manual: prefix."
+            pattern: ^[0-9a-f]{20}$
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ManualDraft"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ManualOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Edit a title the user described
+      tags:
+        - media
   /v1/media/search:
     get:
       description: "Asks the source that owns this kind of media, on demand and never in the background. Results are not stored: only a title the user opens is cached, and only for as long as the source's terms allow."
@@ -7969,7 +8209,7 @@ paths:
         - media
   /v1/media/{media_ref}:
     get:
-      description: Fetched from the source on demand and kept for at most a day, as the source's terms allow. Past that the node asks again; while the source is unreachable the request fails, and clients fall back to what the user's own list already knows about the title. A reference is anilist:<id>, tmdb:movie:<id>, tmdb:tv:<id>, openlibrary:<work id> or googlebooks:<volume id>.
+      description: Fetched from the source on demand and kept for at most a day, as the source's terms allow. Past that the node asks again; while the source is unreachable the request fails, and clients fall back to what the user's own list already knows about the title. A reference is anilist:<id>, tmdb:movie:<id>, tmdb:tv:<id>, openlibrary:<work id>, googlebooks:<volume id> or manual:<id> — a title the user described, read from the node itself and never out of date.
       operationId: getMediaDetails
       parameters:
         - description: The title's media reference.

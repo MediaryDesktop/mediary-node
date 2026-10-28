@@ -26,7 +26,15 @@ type Deps struct {
 
 	OpenLibrary *openlibrary.Client
 	GoogleBooks *googlebooks.Client
+
+	// Forget clears what other modules keep under a deleted manual title's
+	// reference — its entry on the user's list. Wired by internal/app.
+	Forget Forgetter
 }
+
+// Forgetter is the port through which deleting a manual title reaches the modules
+// that keep data under its reference, without the media module knowing them.
+type Forgetter = service.Forgetter
 
 // MediaDetails is the module's read-only port onto a title the node has already
 // fetched, for the parts of the app that decorate a list with posters and names.
@@ -45,6 +53,7 @@ func New(deps Deps) *Module {
 		TMDB:        deps.TMDB,
 		OpenLibrary: deps.OpenLibrary,
 		GoogleBooks: deps.GoogleBooks,
+		Forget:      deps.Forget,
 	})
 
 	return &Module{handler: handler.New(svc), svc: svc}
@@ -75,4 +84,10 @@ func (m *Module) Episodes(ctx context.Context, mediaRef string) (*EpisodeList, e
 // answer and not an error.
 func (m *Module) Cached(ctx context.Context, mediaRef string) (*MediaDetails, error) {
 	return m.svc.CachedDetails(ctx, mediaRef)
+}
+
+// ManualTitles lists the titles of one kind the user described themselves. They
+// live on the node, so this never reaches a source.
+func (m *Module) ManualTitles(ctx context.Context, mediaType string) ([]MediaDetails, error) {
+	return m.svc.ManualTitles(ctx, mediaType)
 }

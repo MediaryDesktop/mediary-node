@@ -50,6 +50,7 @@ type Querier interface {
 	DeleteMangaDownload(ctx context.Context, id int64) (int64, error)
 	DeleteMangaSourceLink(ctx context.Context, arg DeleteMangaSourceLinkParams) (int64, error)
 	DeleteMangaSourceLinksBySource(ctx context.Context, source string) error
+	DeleteManualTitle(ctx context.Context, id string) (int64, error)
 	DeleteOPDSServer(ctx context.Context, id int64) (int64, error)
 	DeleteSourceCacheOlderThan(ctx context.Context, arg DeleteSourceCacheOlderThanParams) error
 	DeleteTorrentDownload(ctx context.Context, id int64) (int64, error)
@@ -74,6 +75,7 @@ type Querier interface {
 	GetLibraryRoot(ctx context.Context, id int64) (GetLibraryRootRow, error)
 	GetMangaDownload(ctx context.Context, id int64) (MangaDownload, error)
 	GetMangaSourceLinkBySeries(ctx context.Context, arg GetMangaSourceLinkBySeriesParams) (MangaSourceLink, error)
+	GetManualTitle(ctx context.Context, id string) (ManualTitle, error)
 	// Phase 0 queries, proving `task sqlc` produces compiling Go. Module queries
 	// go in db/queries/<module>.sql.
 	GetNodeMeta(ctx context.Context, key string) (NodeMetum, error)
@@ -92,6 +94,7 @@ type Querier interface {
 	InsertGutenbergBook(ctx context.Context, arg InsertGutenbergBookParams) error
 	InsertLibraryFile(ctx context.Context, arg InsertLibraryFileParams) (int64, error)
 	InsertLibraryRoot(ctx context.Context, arg InsertLibraryRootParams) (InsertLibraryRootRow, error)
+	InsertManualTitle(ctx context.Context, arg InsertManualTitleParams) error
 	InsertScanRun(ctx context.Context, arg InsertScanRunParams) (int64, error)
 	InsertScanRunFileLog(ctx context.Context, arg InsertScanRunFileLogParams) error
 	InsertScanRunGroup(ctx context.Context, arg InsertScanRunGroupParams) error
@@ -121,6 +124,7 @@ type Querier interface {
 	ListListIcons(ctx context.Context) ([]ListIcon, error)
 	ListMangaDownloads(ctx context.Context, limit int64) ([]MangaDownload, error)
 	ListMangaSourceLinks(ctx context.Context, mediaRef string) ([]MangaSourceLink, error)
+	ListManualTitles(ctx context.Context, mediaType string) ([]ManualTitle, error)
 	ListNodeMeta(ctx context.Context) ([]NodeMetum, error)
 	ListOPDSServers(ctx context.Context) ([]OpdsServer, error)
 	ListScanRunFileLogs(ctx context.Context, scanRunID int64) ([]ScanRunFileLog, error)
@@ -191,6 +195,7 @@ type Querier interface {
 	UpdateLibraryFileParse(ctx context.Context, arg UpdateLibraryFileParseParams) error
 	// The file itself did not change; a newer prober reads its container again.
 	UpdateLibraryFileProbe(ctx context.Context, arg UpdateLibraryFileProbeParams) error
+	UpdateManualTitle(ctx context.Context, arg UpdateManualTitleParams) (int64, error)
 	UpdateOPDSServer(ctx context.Context, arg UpdateOPDSServerParams) (OpdsServer, error)
 	UpdateTorznabSource(ctx context.Context, arg UpdateTorznabSourceParams) (TorznabSource, error)
 	UpsertAniListMirror(ctx context.Context, arg UpsertAniListMirrorParams) error

@@ -48,7 +48,15 @@ type Options struct {
 	// know then cannot be found.
 	GoogleBooks *googlebooks.Client
 
+	// Forget clears what the rest of the node keeps under a deleted manual
+	// title's reference. Nil leaves it to the caller.
+	Forget Forgetter
+
 	Now func() time.Time
+}
+
+type Forgetter interface {
+	Forget(ctx context.Context, mediaRef string) error
 }
 
 type Service struct {
@@ -85,6 +93,18 @@ func (s *Service) Details(ctx context.Context, mediaRef string) (*MediaDetails, 
 	ref, err := parseRef(mediaRef)
 	if err != nil {
 		return nil, err
+	}
+
+	if ref.provider == ProviderManual {
+		details, manualErr := s.manualTitle(ctx, ref.work)
+		if manualErr != nil {
+			return nil, manualErr
+		}
+		if details == nil {
+			return nil, apperr.New(apperr.KindNotFound, "no manual title %q", ref.work)
+		}
+
+		return details, nil
 	}
 
 	if ref.provider == ProviderOpenLibrary {
@@ -178,6 +198,10 @@ func (s *Service) CachedDetails(ctx context.Context, mediaRef string) (*MediaDet
 		return nil, err
 	}
 
+	if ref.provider == ProviderManual {
+		return s.manualTitle(ctx, ref.work)
+	}
+
 	if ref.provider == ProviderOpenLibrary || ref.provider == ProviderGoogleBooks {
 		key := "work:" + ref.work
 		if ref.provider == ProviderGoogleBooks {
@@ -268,7 +292,37 @@ func searchSort(params SearchParams) []string {
 	return []string{browseSort}
 }
 
+// Search asks the source and puts the user's own titles that match the query
+// ahead of its first page.
 func (s *Service) Search(ctx context.Context, params SearchParams) (*SearchPage, error) {
+	page, err := s.searchSource(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+
+	if page.Page > 1 {
+		return page, nil
+	}
+
+	// Every dorama is a series too, as in the source's own search.
+	kinds := []string{params.MediaType}
+	if params.MediaType == MediaTypeSeries {
+		kinds = append(kinds, MediaTypeDorama)
+	}
+
+	var manual []MediaSummary
+	for _, kind := range kinds {
+		manual = append(manual, s.searchManual(ctx, kind, params.Query)...)
+	}
+
+	if len(manual) > 0 {
+		page.Items = append(manual, page.Items...)
+	}
+
+	return page, nil
+}
+
+func (s *Service) searchSource(ctx context.Context, params SearchParams) (*SearchPage, error) {
 	if isTMDBType(params.MediaType) {
 		return s.searchTMDB(ctx, params)
 	}

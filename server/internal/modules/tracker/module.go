@@ -71,6 +71,11 @@ func (m *Module) TrackedTitles(ctx context.Context, mediaType string) ([]Tracked
 	return m.svc.TrackedTitles(ctx, service.MediaType(mediaType))
 }
 
+// DeleteEntry takes a title off the node's own list.
+func (m *Module) DeleteEntry(ctx context.Context, mediaRef string) error {
+	return m.svc.DeleteEntry(ctx, mediaRef)
+}
+
 // MarkReadFraction records how far through a book the reader is, for the reader.
 func (m *Module) MarkReadFraction(ctx context.Context, mediaRef string, fraction float64) error {
 	return m.svc.MarkReadFraction(ctx, mediaRef, fraction)

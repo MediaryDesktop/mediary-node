@@ -103,6 +103,41 @@ export const fetchMediaFilterOptionsFx = createNodeRequestFx<MediaSearchType, Me
 	})
 )
 
+// A title no source knows, described by the user. The node keeps it as given and
+// builds its page from it under a manual:<id> reference.
+export type ManualMediaDraft = Omit<NodeSchemas['ManualDraft'], '$schema'>
+export type ManualMediaType = ManualMediaDraft['media_type']
+export type ManualMediaFormat = NonNullable<ManualMediaDraft['format']>
+export type ManualMediaStatus = NonNullable<ManualMediaDraft['status']>
+
+export interface ManualMediaResponse {
+	media: MediaDetails
+}
+
+export interface UpdateManualMediaParams {
+	id: string
+	draft: ManualMediaDraft
+}
+
+export const createManualMediaFx = createNodeRequestFx<ManualMediaDraft, ManualMediaResponse>(draft => ({
+	url: '/v1/media/manual',
+	method: 'POST',
+	body: draft
+}))
+
+export const updateManualMediaFx = createNodeRequestFx<UpdateManualMediaParams, ManualMediaResponse>(
+	({ id, draft }) => ({
+		url: `/v1/media/manual/${encodeURIComponent(id)}`,
+		method: 'PUT',
+		body: draft
+	})
+)
+
+export const deleteManualMediaFx = createNodeRequestFx<string, void>(id => ({
+	url: `/v1/media/manual/${encodeURIComponent(id)}`,
+	method: 'DELETE'
+}))
+
 // Whether movies and shows can be looked up, and with whose key. The key itself
 // never comes back from the node.
 export type TMDBSettings = Omit<NodeSchemas['TMDBSettings'], '$schema'>

@@ -92,7 +92,85 @@ type FilterOptionsOutput struct {
 	}
 }
 
+type ManualInput struct {
+	Body service.ManualDraft
+}
+
+type ManualUpdateInput struct {
+	ID   string `path:"id" pattern:"^[0-9a-f]{20}$" doc:"The manual title's id: its media reference without the manual: prefix."`
+	Body service.ManualDraft
+}
+
+type ManualIDInput struct {
+	ID string `path:"id" pattern:"^[0-9a-f]{20}$" doc:"The manual title's id: its media reference without the manual: prefix."`
+}
+
+type ManualOutput struct {
+	Body struct {
+		Media *service.MediaDetails `json:"media" doc:"The title as its page shows it, under its manual:<id> reference."`
+	}
+}
+
+func (h *Handler) registerManual(api huma.API) {
+	huma.Register(api, huma.Operation{
+		OperationID:   "createManualMedia",
+		Method:        http.MethodPost,
+		Path:          "/v1/media/manual",
+		Summary:       "Describe a title no source knows",
+		Description:   "Keeps a title the user describes themselves, for anything AniList, TMDB and the book sources do not have. It is the user's own data and never ages out. It gets a manual:<id> reference that every other endpoint takes — the tracker's, the library's — like a source's.",
+		Tags:          []string{"media"},
+		DefaultStatus: http.StatusCreated,
+	}, func(ctx context.Context, in *ManualInput) (*ManualOutput, error) {
+		details, err := h.svc.CreateManual(ctx, in.Body)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		out := &ManualOutput{}
+		out.Body.Media = details
+
+		return out, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "updateManualMedia",
+		Method:      http.MethodPut,
+		Path:        "/v1/media/manual/{id}",
+		Summary:     "Edit a title the user described",
+		Description: "Replaces everything about the title with the body. Its kind cannot change: the title stays on the list of its kind.",
+		Tags:        []string{"media"},
+	}, func(ctx context.Context, in *ManualUpdateInput) (*ManualOutput, error) {
+		details, err := h.svc.UpdateManual(ctx, in.ID, in.Body)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		out := &ManualOutput{}
+		out.Body.Media = details
+
+		return out, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID:   "deleteManualMedia",
+		Method:        http.MethodDelete,
+		Path:          "/v1/media/manual/{id}",
+		Summary:       "Delete a title the user described",
+		Description:   "Removes the title and takes it off the user's list. Library files matched to it stay where they are and can be matched again.",
+		Tags:          []string{"media"},
+		DefaultStatus: http.StatusNoContent,
+	}, func(ctx context.Context, in *ManualIDInput) (*struct{}, error) {
+		if err := h.svc.DeleteManual(ctx, in.ID); err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return nil, nil
+	})
+}
+
 func (h *Handler) Register(api huma.API) {
+	h.registerManual(api)
+
 	huma.Register(api, huma.Operation{
 		OperationID: "searchMedia",
 		Method:      http.MethodGet,
@@ -220,7 +298,7 @@ func (h *Handler) Register(api huma.API) {
 		Method:      http.MethodGet,
 		Path:        "/v1/media/{media_ref}",
 		Summary:     "Title details",
-		Description: "Fetched from the source on demand and kept for at most a day, as the source's terms allow. Past that the node asks again; while the source is unreachable the request fails, and clients fall back to what the user's own list already knows about the title. A reference is anilist:<id>, tmdb:movie:<id>, tmdb:tv:<id>, openlibrary:<work id> or googlebooks:<volume id>.",
+		Description: "Fetched from the source on demand and kept for at most a day, as the source's terms allow. Past that the node asks again; while the source is unreachable the request fails, and clients fall back to what the user's own list already knows about the title. A reference is anilist:<id>, tmdb:movie:<id>, tmdb:tv:<id>, openlibrary:<work id>, googlebooks:<volume id> or manual:<id> — a title the user described, read from the node itself and never out of date.",
 		Tags:        []string{"media"},
 	}, func(ctx context.Context, in *DetailsInput) (*DetailsOutput, error) {
 		details, err := h.svc.Details(ctx, in.MediaRef)
@@ -230,7 +308,12 @@ func (h *Handler) Register(api huma.API) {
 
 		out := &DetailsOutput{}
 		out.Body.Media = details
-		out.Body.Sources = []httpapi.Source{sourceOfRef(in.MediaRef)}
+		out.Body.Sources = []httpapi.Source{}
+
+		// A title the user described has no source to credit.
+		if !strings.HasPrefix(in.MediaRef, service.ProviderManual+":") {
+			out.Body.Sources = append(out.Body.Sources, sourceOfRef(in.MediaRef))
+		}
 
 		return out, nil
 	})

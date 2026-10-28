@@ -76,6 +76,8 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 		return deps.Cloud != nil && deps.Cloud.Linked()
 	})
 
+	forget := &forgetManual{}
+
 	mediaModule := media.New(media.Deps{
 		DB:      deps.DB,
 		Logger:  moduleLogger(deps.Logger, "media"),
@@ -85,6 +87,7 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 
 		OpenLibrary: deps.OpenLibrary,
 		GoogleBooks: deps.GoogleBooks,
+		Forget:      forget,
 	})
 	mediaModule.Register(api)
 
@@ -101,6 +104,8 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 		Titles:              localTitles{media: mediaModule},
 	})
 	trackerModule.Register(api)
+
+	forget.tracker = trackerModule
 
 	// The library matches files against titles; the tracker knows which titles the
 	// user follows. Joining them is this file's job, so that neither module has to

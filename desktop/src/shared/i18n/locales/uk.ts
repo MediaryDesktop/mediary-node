@@ -623,6 +623,67 @@ export const uk: Translation = {
 		}
 	},
 
+	manualMedia: {
+		action: 'Додати вручну',
+		notFound: 'Цього тайтлу вже немає',
+		notFoundHint: 'Немає в каталозі? Додайте самі',
+		createTitle: 'Додати тайтл вручну',
+		createSubtitle:
+			'Для того, чого не знає жоден каталог. Зберігається на цьому комп’ютері й працює як будь-який інший тайтл',
+		editTitle: 'Редагувати тайтл',
+		edit: 'Редагувати',
+		create: 'Додати',
+		save: 'Зберегти',
+		badge: 'Додано вручну',
+		delete: 'Видалити',
+		deleteAction: 'Видалити тайтл',
+		deleteTitle: 'Видалити «{{title}}»?',
+		deleteHint: 'Тайтл зникне із застосунку й зі списку. Зіставлені з ним файли лишаться в бібліотеці',
+		deleted: 'Тайтл видалено',
+		failed: 'Не вдалося зберегти тайтл',
+		sections: {
+			kind: 'Тип',
+			kindLocked: 'Тип не змінюється: тайтл лишається в списку свого типу',
+			name: 'Назва',
+			release: 'Вихід',
+			about: 'Опис'
+		},
+		fields: {
+			title: 'Назва',
+			titlePlaceholder: 'Як показувати тайтл усюди',
+			originalTitle: 'Оригінальна назва',
+			synonyms: 'Інші назви',
+			synonymsPlaceholder: 'По одній у рядку. За ними теж зіставляються файли бібліотеки',
+			year: 'Рік',
+			status: 'Статус',
+			statusNone: 'Невідомо',
+			format: 'Формат',
+			episodes: 'Епізоди',
+			chapters: 'Розділи',
+			volumes: 'Томи',
+			pages: 'Сторінки',
+			duration: 'Хвилин в епізоді',
+			genres: 'Жанри',
+			studios: 'Студії',
+			authors: 'Автори',
+			listPlaceholder: 'Через кому',
+			description: 'Опис'
+		},
+		type: {
+			anime: 'Аніме',
+			manga: 'Манґа',
+			movie: 'Фільм',
+			series: 'Серіал',
+			dorama: 'Дорама',
+			book: 'Книга'
+		},
+		errors: {
+			year: 'Рік від 1800 до 2100',
+			count: 'Ціле число',
+			duration: 'Ціле число хвилин, до 1000'
+		}
+	},
+
 	media: {
 		searchTorrents: 'Шукати торенти',
 		downloadMissing_one: 'Завантажити · бракує {{count}}',

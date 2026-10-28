@@ -1,5 +1,6 @@
 import { fileNumber, isIgnored, isMatched, isTrackable } from '@entities/library-item'
 import type { LibraryContent, LibraryFile, LibraryRoot } from '@entities/library-item'
+import type { ManualMediaType } from '@entities/media'
 
 export interface UnmatchedGroup {
 	key: string
@@ -9,6 +10,35 @@ export interface UnmatchedGroup {
 	// Only an AniList id is something people know by heart; TMDB needs movie or
 	// show on top of the number, and book ids are opaque strings from two sources.
 	typedId: boolean
+
+	// What a title made by hand for the folder most likely is, as a starting point
+	// for the user to correct.
+	mediaType: ManualMediaType
+	title: string
+}
+
+// The folder's kind of library says most of it; a single video without an episode
+// number in a folder of movies and shows is a movie.
+function guessMediaType(files: LibraryFile[], content: LibraryContent | undefined): ManualMediaType {
+	const first = files[0]
+
+	if (first?.kind === 'book') {
+		return 'book'
+	}
+
+	if (first?.kind === 'manga') {
+		return 'manga'
+	}
+
+	if (content === 'anime') {
+		return 'anime'
+	}
+
+	if (content === 'doramas') {
+		return 'dorama'
+	}
+
+	return files.length === 1 && first?.parsed.episode == null ? 'movie' : 'series'
 }
 
 // Mirrors the node's choice of source: comics go to AniList anywhere, videos
@@ -54,11 +84,18 @@ export function unmatchedGroups(files: LibraryFile[], roots: LibraryRoot[]): Unm
 	}
 
 	return [...byFolder.entries()]
-		.map(([folder, list]) => ({
-			key: folder,
-			folder,
-			files: list.sort((left, right) => (fileNumber(left) ?? 0) - (fileNumber(right) ?? 0)),
-			typedId: list.every(file => matchesOnAniList(file, contentOf.get(file.root_id)))
-		}))
+		.map(([folder, list]) => {
+			const files = list.sort((left, right) => (fileNumber(left) ?? 0) - (fileNumber(right) ?? 0))
+			const content = contentOf.get(files[0]?.root_id ?? -1)
+
+			return {
+				key: folder,
+				folder,
+				files,
+				typedId: files.every(file => matchesOnAniList(file, contentOf.get(file.root_id))),
+				mediaType: guessMediaType(files, content),
+				title: files.find(file => file.parsed.title)?.parsed.title ?? ''
+			}
+		})
 		.sort((left, right) => left.folder.localeCompare(right.folder))
 }

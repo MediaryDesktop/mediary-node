@@ -21,7 +21,7 @@ type titleRef struct {
 	id       int
 
 	// work is a book's identifier at its source: an Open Library work, OL893414W,
-	// or a Google Books volume, JXRKDwAAQBAJ.
+	// or a Google Books volume, JXRKDwAAQBAJ — or a manual title's own id.
 	work string
 }
 
@@ -68,6 +68,13 @@ func parseRef(mediaRef string) (titleRef, error) {
 		}
 
 		return titleRef{provider: ProviderGoogleBooks, work: rest}, nil
+
+	case ProviderManual:
+		if !manualID.MatchString(rest) {
+			return titleRef{}, malformed
+		}
+
+		return titleRef{provider: ProviderManual, work: rest}, nil
 
 	default:
 		return titleRef{}, apperr.Invalid("media_ref", "no source for media reference %q", mediaRef)

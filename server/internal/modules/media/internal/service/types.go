@@ -75,6 +75,7 @@ type MediaDetails struct {
 	Relations         []RelatedMedia `json:"relations"`
 	Recommendations   []RelatedMedia `json:"recommendations" doc:"Titles suggested to people who liked this one: AniList users' recommendations, or TMDB's own picks."`
 	Similar           []RelatedMedia `json:"similar" doc:"Titles alike in genre and keywords. TMDB only; empty for an AniList title."`
+	Editable          bool           `json:"editable" doc:"The user described this title themselves, so they may edit or delete it. Only manual:<id> titles; every other one belongs to its source."`
 	FetchedAt         time.Time      `json:"fetched_at"`
 }
 
@@ -102,6 +103,7 @@ type MediaSummary struct {
 	SiteURL           string         `json:"site_url"`
 	NextAiringEpisode *AiringEpisode `json:"next_airing_episode"`
 	Description       string         `json:"description,omitempty" doc:"Plain-text synopsis, when the source's search carries one. Open Library's does not."`
+	Editable          bool           `json:"editable,omitempty" doc:"A title the user described themselves; see MediaDetails.editable."`
 }
 
 type SearchParams struct {

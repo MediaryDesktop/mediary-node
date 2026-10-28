@@ -5,7 +5,16 @@ import { translate } from '@shared/i18n'
 import { toast } from '@shared/ui'
 
 import { setLibraryFilesIgnoredMutation, setLibraryMatchesMutation } from '@entities/library-item'
-import type { BulkOutcome } from '@entities/library-item'
+import type { BulkOutcome, SetLibraryMatchParams } from '@entities/library-item'
+import type { ManualMediaType } from '@entities/media'
+
+// Files waiting for a title the user is about to describe themselves; they are
+// matched to it once it exists.
+export interface ManualTitleRequest {
+	mediaType: ManualMediaType
+	title: string
+	files: Omit<SetLibraryMatchParams, 'mediaRef'>[]
+}
 
 // The id matches the one the match drawer uses for the same failure, so a group
 // matched from either place raises one toast, not two.
@@ -23,6 +32,8 @@ export const unmatchedFilesModel = atom(() => {
 
 	const ignoredRequested = createEvent()
 	const ignoredClosed = createEvent()
+
+	const manualTitleRequested = createEvent<ManualTitleRequest>()
 
 	const $unmatchedOpen = createStore(false)
 		.on(unmatchedRequested, () => true)
@@ -54,6 +65,7 @@ export const unmatchedFilesModel = atom(() => {
 		unmatchedRequested,
 		unmatchedClosed,
 		ignoredRequested,
-		ignoredClosed
+		ignoredClosed,
+		manualTitleRequested
 	}
 })

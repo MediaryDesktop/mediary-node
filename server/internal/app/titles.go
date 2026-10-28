@@ -45,7 +45,11 @@ func (s titleSource) Tracked(ctx context.Context, mediaType string) ([]library.T
 	}
 
 	candidates := make([]library.TitleCandidate, 0, len(tracked))
+	seen := map[string]bool{}
+
 	for i := range tracked {
+		seen[tracked[i].MediaRef] = true
+
 		candidates = append(candidates, library.TitleCandidate{
 			MediaRef:     tracked[i].MediaRef,
 			Titles:       tracked[i].Titles,
@@ -57,6 +61,58 @@ func (s titleSource) Tracked(ctx context.Context, mediaType string) ([]library.T
 			SpansSeasons: strings.HasPrefix(tracked[i].MediaRef, "tmdb:tv:"),
 			Authors:      tracked[i].Authors,
 		})
+	}
+
+	manual, err := s.manualCandidates(ctx, mediaType)
+	if err != nil {
+		return nil, err
+	}
+
+	for i := range manual {
+		if !seen[manual[i].MediaRef] {
+			candidates = append(candidates, manual[i])
+		}
+	}
+
+	return candidates, nil
+}
+
+// manualCandidates offers every title the user described of this kind, on their
+// list or not: no source can find them, so the user's own word is all there is,
+// and they described the title for their files more often than not.
+func (s titleSource) manualCandidates(ctx context.Context, mediaType string) ([]library.TitleCandidate, error) {
+	kinds := []string{mediaType}
+	if mediaType == "series" {
+		kinds = append(kinds, "dorama")
+	}
+
+	var candidates []library.TitleCandidate
+
+	for _, kind := range kinds {
+		titles, err := s.media.ManualTitles(ctx, kind)
+		if err != nil {
+			return nil, fmt.Errorf("read manual %s titles: %w", kind, err)
+		}
+
+		for i := range titles {
+			details := &titles[i]
+
+			count := details.Episodes
+			if details.MediaType == "manga" {
+				count = details.Chapters
+			}
+
+			candidates = append(candidates, library.TitleCandidate{
+				MediaRef:   details.MediaRef,
+				Titles:     append(spellings(anilist.Titles(details.Title)), details.Synonyms...),
+				Format:     value(details.Format),
+				Year:       details.SeasonYear,
+				Episodes:   count,
+				CoverImage: details.CoverImage,
+				CoverColor: details.CoverColor,
+				Authors:    details.Authors,
+			})
+		}
 	}
 
 	return candidates, nil

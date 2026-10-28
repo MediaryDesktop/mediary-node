@@ -625,6 +625,67 @@ export const en = {
 		}
 	},
 
+	manualMedia: {
+		action: 'Add manually',
+		notFound: 'This title no longer exists',
+		notFoundHint: 'Not in the catalog? Add it yourself',
+		createTitle: 'Add a title manually',
+		createSubtitle:
+			'For something no catalog knows. It is kept on this computer and works like any other title',
+		editTitle: 'Edit title',
+		edit: 'Edit',
+		create: 'Add',
+		save: 'Save',
+		badge: 'Added manually',
+		delete: 'Delete',
+		deleteAction: 'Delete title',
+		deleteTitle: 'Delete “{{title}}”?',
+		deleteHint: 'It is removed from the app and from your list. Files matched to it stay in the library',
+		deleted: 'The title is deleted',
+		failed: 'Could not save the title',
+		sections: {
+			kind: 'Kind',
+			kindLocked: 'The kind cannot change: the title stays on the list of its kind',
+			name: 'Name',
+			release: 'Release',
+			about: 'About'
+		},
+		fields: {
+			title: 'Title',
+			titlePlaceholder: 'The name to show everywhere',
+			originalTitle: 'Original title',
+			synonyms: 'Other names',
+			synonymsPlaceholder: 'One per line. Library files are matched against these too',
+			year: 'Year',
+			status: 'Status',
+			statusNone: 'Unknown',
+			format: 'Format',
+			episodes: 'Episodes',
+			chapters: 'Chapters',
+			volumes: 'Volumes',
+			pages: 'Pages',
+			duration: 'Minutes per episode',
+			genres: 'Genres',
+			studios: 'Studios',
+			authors: 'Authors',
+			listPlaceholder: 'Separated by commas',
+			description: 'Description'
+		},
+		type: {
+			anime: 'Anime',
+			manga: 'Manga',
+			movie: 'Movie',
+			series: 'Series',
+			dorama: 'Dorama',
+			book: 'Book'
+		},
+		errors: {
+			year: 'A year between 1800 and 2100',
+			count: 'A whole number',
+			duration: 'Whole minutes, up to 1000'
+		}
+	},
+
 	media: {
 		searchTorrents: 'Search torrents',
 		downloadMissing_one: 'Download · {{count}} missing',

@@ -1,9 +1,13 @@
 export {
 	alternativeTitles,
+	createManualMediaMutation,
+	deleteManualMediaMutation,
 	enumLabel,
 	episodeTitle,
 	formatMediaDate,
 	googleBooksSettingsQuery,
+	isManualMediaRef,
+	manualMediaID,
 	mediaDetailsModel,
 	mediaDetailsQuery,
 	mediaEpisodesQuery,
@@ -14,7 +18,8 @@ export {
 	scoreTone,
 	setGoogleBooksKeyMutation,
 	setTMDBKeyMutation,
-	tmdbSettingsQuery
+	tmdbSettingsQuery,
+	updateManualMediaMutation
 } from './model/model'
 export type { MediaEnumGroup, ScoreTone } from './model/model'
 
@@ -32,6 +37,10 @@ export {
 } from './api/api'
 export type {
 	GoogleBooksSettings,
+	ManualMediaDraft,
+	ManualMediaFormat,
+	ManualMediaStatus,
+	ManualMediaType,
 	MediaAiringEpisode,
 	MediaDate,
 	MediaDetails,
@@ -51,5 +60,6 @@ export type {
 	MediaSummary,
 	MediaTitle,
 	RelatedMedia,
-	TMDBSettings
+	TMDBSettings,
+	UpdateManualMediaParams
 } from './api/api'

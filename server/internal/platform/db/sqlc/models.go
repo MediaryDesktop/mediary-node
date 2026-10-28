@@ -182,6 +182,14 @@ type MangaSourceLink struct {
 	CreatedAt   string `json:"created_at"`
 }
 
+type ManualTitle struct {
+	ID        string `json:"id"`
+	MediaType string `json:"media_type"`
+	Details   string `json:"details"`
+	CreatedAt int64  `json:"created_at"`
+	UpdatedAt int64  `json:"updated_at"`
+}
+
 type NodeMetum struct {
 	Key       string `json:"key"`
 	Value     string `json:"value"`

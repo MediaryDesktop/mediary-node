@@ -13,6 +13,7 @@ import {
 import type { LibrarySuggestion } from '@entities/library-item'
 
 import type { UnmatchedGroup } from '../../../lib/groups'
+import { unmatchedFilesModel } from '../../../model/model'
 import { CheckRow } from '../../check-row/CheckRow'
 
 import styles from './GroupPage.module.scss'
@@ -31,11 +32,12 @@ export function GroupPage({ group }: { group: UnmatchedGroup }) {
 		libraryCandidatesQuery.start
 	])
 
-	const [matchFiles, matching, ignoreFiles, ignoring] = useUnit([
+	const [matchFiles, matching, ignoreFiles, ignoring, manualTitleRequested] = useUnit([
 		setLibraryMatchesMutation.start,
 		setLibraryMatchesMutation.$pending,
 		setLibraryFilesIgnoredMutation.start,
-		setLibraryFilesIgnoredMutation.$pending
+		setLibraryFilesIgnoredMutation.$pending,
+		unmatchedFilesModel.manualTitleRequested
 	])
 
 	const [selected, setSelected] = useState<Set<number>>(() => new Set(group.files.map(file => file.id)))
@@ -121,6 +123,25 @@ export function GroupPage({ group }: { group: UnmatchedGroup }) {
 					}}
 				>
 					{t('library.unmatched.fetchSuggestions')}
+				</Button>
+
+				<Button
+					variant='ghost'
+					startIcon={<Icon name='common/plus' size={16} />}
+					disabled={picked.length === 0 || busy}
+					onClick={() =>
+						manualTitleRequested({
+							mediaType: group.mediaType,
+							title: group.title,
+							files: picked.map(file => ({
+								fileId: file.id,
+								season: file.parsed.season ?? undefined,
+								episode: file.parsed.episode ?? file.parsed.chapter ?? undefined
+							}))
+						})
+					}
+				>
+					{t('manualMedia.action')}
 				</Button>
 
 				<span className={styles.spacer} />

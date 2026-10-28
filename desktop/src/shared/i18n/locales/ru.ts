@@ -625,6 +625,68 @@ export const ru: Translation = {
 		}
 	},
 
+	manualMedia: {
+		action: 'Добавить вручную',
+		notFound: 'Этого тайтла больше нет',
+		notFoundHint: 'Нет в каталоге? Добавьте сами',
+		createTitle: 'Добавить тайтл вручную',
+		createSubtitle:
+			'Для того, чего не знает ни один каталог. Хранится на этом компьютере и работает как любой другой тайтл',
+		editTitle: 'Редактировать тайтл',
+		edit: 'Редактировать',
+		create: 'Добавить',
+		save: 'Сохранить',
+		badge: 'Добавлено вручную',
+		delete: 'Удалить',
+		deleteAction: 'Удалить тайтл',
+		deleteTitle: 'Удалить «{{title}}»?',
+		deleteHint:
+			'Тайтл исчезнет из приложения и из списка. Сопоставленные с ним файлы останутся в библиотеке',
+		deleted: 'Тайтл удалён',
+		failed: 'Не удалось сохранить тайтл',
+		sections: {
+			kind: 'Тип',
+			kindLocked: 'Тип не меняется: тайтл остаётся в списке своего типа',
+			name: 'Название',
+			release: 'Выход',
+			about: 'Описание'
+		},
+		fields: {
+			title: 'Название',
+			titlePlaceholder: 'Как показывать тайтл везде',
+			originalTitle: 'Оригинальное название',
+			synonyms: 'Другие названия',
+			synonymsPlaceholder: 'По одному в строке. По ним тоже сопоставляются файлы библиотеки',
+			year: 'Год',
+			status: 'Статус',
+			statusNone: 'Неизвестно',
+			format: 'Формат',
+			episodes: 'Эпизоды',
+			chapters: 'Главы',
+			volumes: 'Тома',
+			pages: 'Страницы',
+			duration: 'Минут в эпизоде',
+			genres: 'Жанры',
+			studios: 'Студии',
+			authors: 'Авторы',
+			listPlaceholder: 'Через запятую',
+			description: 'Описание'
+		},
+		type: {
+			anime: 'Аниме',
+			manga: 'Манга',
+			movie: 'Фильм',
+			series: 'Сериал',
+			dorama: 'Дорама',
+			book: 'Книга'
+		},
+		errors: {
+			year: 'Год от 1800 до 2100',
+			count: 'Целое число',
+			duration: 'Целое число минут, до 1000'
+		}
+	},
+
 	media: {
 		searchTorrents: 'Искать торренты',
 		downloadMissing_one: 'Загрузить · не хватает {{count}}',

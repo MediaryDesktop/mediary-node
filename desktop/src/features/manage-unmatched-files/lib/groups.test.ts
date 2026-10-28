@@ -79,4 +79,25 @@ describe('unmatchedGroups', () => {
 		).toBe(false)
 		expect(typed([file('D:\\Anime\\Show\\ep 1.mkv')], [])).toBe(false)
 	})
+
+	it('guesses what a title made by hand for the folder would be', () => {
+		const guess = (files: LibraryFile[]) => {
+			const group = unmatchedGroups(files, ROOTS)[0]
+			return group ? [group.mediaType, group.title] : null
+		}
+
+		expect(
+			guess([file('D:\\Anime\\Show\\ep 1.mkv', { parsed: { form: 'series', title: 'Rare OVA' } })])
+		).toEqual(['anime', 'Rare OVA'])
+		expect(
+			guess([file('D:\\Movies\\Film.mkv', { root_id: 2, parsed: { form: 'movie', title: 'Film' } })])
+		).toEqual(['movie', 'Film'])
+		expect(
+			guess([
+				file('D:\\Movies\\Show\\e1.mkv', { root_id: 2, parsed: { form: 'series', episode: 1 } }),
+				file('D:\\Movies\\Show\\e2.mkv', { root_id: 2, parsed: { form: 'series', episode: 2 } })
+			])
+		).toEqual(['series', ''])
+		expect(guess([file('D:\\Books\\Book.epub', { kind: 'book', root_id: 3 })])?.[0]).toBe('book')
+	})
 })

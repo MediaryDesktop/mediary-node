@@ -199,7 +199,7 @@ func (s *Service) Entries(ctx context.Context, mediaType MediaType) (*Collection
 		s.scheduleFlush(ctx)
 	}
 
-	return cached, nil
+	return s.withManual(ctx, cached)
 }
 
 func (s *Service) RequestRefresh(ctx context.Context, mediaType MediaType) error {

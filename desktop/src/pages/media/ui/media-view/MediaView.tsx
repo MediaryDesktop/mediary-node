@@ -148,6 +148,7 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 						: undefined
 				}
 				onOpenDetails={() => setDetailsOpen(true)}
+				manual={media?.editable ? media : null}
 			/>
 
 			{torrents && (

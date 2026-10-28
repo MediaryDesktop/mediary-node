@@ -44,15 +44,19 @@ func (s *Service) TrackedTitles(ctx context.Context, mediaType MediaType) ([]Tra
 		return s.localTracked(ctx, types)
 	}
 
+	// The user's own anime and manga are kept on the node, not on AniList.
+	titles, err := s.localTracked(ctx, []MediaType{mediaType})
+	if err != nil {
+		return nil, err
+	}
+
 	collection, err := s.mirroredCollection(ctx, mediaType)
 	if err != nil {
 		return nil, err
 	}
 	if collection == nil {
-		return nil, nil
+		return titles, nil
 	}
-
-	titles := make([]TrackedTitle, 0, len(collection.Entries))
 
 	for i := range collection.Entries {
 		entry := &collection.Entries[i]
@@ -107,12 +111,17 @@ func (s *Service) localTracked(ctx context.Context, types []MediaType) ([]Tracke
 
 			media := &title.Media
 
+			count := media.Episodes
+			if mediaType == MediaTypeManga {
+				count = media.Chapters
+			}
+
 			titles = append(titles, TrackedTitle{
 				MediaRef:   ref,
 				Titles:     append(spellings(media.Title), media.Synonyms...),
 				Format:     value(media.Format),
 				Year:       media.SeasonYear,
-				Episodes:   media.Episodes,
+				Episodes:   count,
 				Authors:    media.Authors,
 				Display:    displayTitle(media.Title),
 				CoverImage: media.CoverImage,

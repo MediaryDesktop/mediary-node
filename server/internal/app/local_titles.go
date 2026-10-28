@@ -5,7 +5,27 @@ import (
 
 	"github.com/mediaryorg/mediary-node/server/internal/modules/media"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/tracker"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
 )
+
+// forgetManual takes a deleted manual title off the user's list. The media module
+// is built before the tracker, so the tracker is set once it exists.
+type forgetManual struct {
+	tracker *tracker.Module
+}
+
+func (f *forgetManual) Forget(ctx context.Context, mediaRef string) error {
+	if f.tracker == nil {
+		return nil
+	}
+
+	err := f.tracker.DeleteEntry(ctx, mediaRef)
+	if err != nil && apperr.KindOf(err) != apperr.KindNotFound {
+		return err
+	}
+
+	return nil
+}
 
 // localTitles names the titles on the node's own lists — movies and shows — from
 // what the media module caches. The tracker stores only the user's data.

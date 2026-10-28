@@ -56,6 +56,18 @@ func (s *Service) Episodes(ctx context.Context, mediaRef string) (*EpisodeList, 
 		return s.tmdbEpisodes(ctx, ref)
 	}
 
+	if ref.provider == ProviderManual {
+		details, manualErr := s.manualTitle(ctx, ref.work)
+		if manualErr != nil {
+			return nil, manualErr
+		}
+		if details == nil {
+			return nil, apperr.New(apperr.KindNotFound, "no manual title %q", ref.work)
+		}
+
+		return manualEpisodes(details)
+	}
+
 	if ref.provider == ProviderOpenLibrary || ref.provider == ProviderGoogleBooks {
 		return nil, apperr.Invalid("media_ref", "a book has no episodes")
 	}

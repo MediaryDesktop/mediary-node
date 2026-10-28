@@ -29,13 +29,19 @@ func (t MediaType) local() bool {
 	return t == MediaTypeMovie || t == MediaTypeSeries || t == MediaTypeDorama || t == MediaTypeBook
 }
 
-var localRef = regexp.MustCompile(`^(tmdb:(movie|tv):[1-9]\d*|openlibrary:OL[1-9]\d*W|googlebooks:[A-Za-z0-9_-]{8,24})$`)
+var localRef = regexp.MustCompile(`^(tmdb:(movie|tv):[1-9]\d*|openlibrary:OL[1-9]\d*W|googlebooks:[A-Za-z0-9_-]{8,24}|manual:[0-9a-f]{20})$`)
 
-// isLocalRef is a title from a source whose list the node keeps: TMDB's movies
-// and shows, Open Library's and Google's books.
+// isLocalRef is a title whose list the node keeps: TMDB's movies and shows, Open
+// Library's and Google's books, and the titles the user described themselves.
 func isLocalRef(mediaRef string) bool {
 	return strings.HasPrefix(mediaRef, "tmdb:") || strings.HasPrefix(mediaRef, "openlibrary:") ||
-		strings.HasPrefix(mediaRef, "googlebooks:")
+		strings.HasPrefix(mediaRef, "googlebooks:") || isManualRef(mediaRef)
+}
+
+// isManualRef is a title the user described themselves. One of an AniList kind is
+// still kept on the node: it is not on AniList, so the node's is the only list.
+func isManualRef(mediaRef string) bool {
+	return strings.HasPrefix(mediaRef, "manual:")
 }
 
 func validateLocalRef(mediaRef string) error {
@@ -105,6 +111,43 @@ func (s *Service) localCollection(ctx context.Context, mediaType MediaType) (*Co
 	}
 
 	return collection, nil
+}
+
+// withManual adds the user's own anime or manga to the collection mirrored from
+// AniList. Those titles are not on AniList, so the node's list is the only one
+// they can be on; the status lists they fall under are counted in.
+func (s *Service) withManual(ctx context.Context, collection *Collection) (*Collection, error) {
+	manual, err := s.localCollection(ctx, collection.MediaType)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(manual.Entries) == 0 {
+		return collection, nil
+	}
+
+	merged := *collection
+	merged.Entries = append(slices.Clone(collection.Entries), manual.Entries...)
+	merged.Lists = slices.Clone(collection.Lists)
+
+	for _, list := range manual.Lists {
+		if list.Status == nil {
+			continue
+		}
+
+		at := slices.IndexFunc(merged.Lists, func(existing List) bool {
+			return !existing.Custom && existing.Status != nil && *existing.Status == *list.Status
+		})
+
+		if at < 0 {
+			merged.Lists = append(merged.Lists, list)
+			continue
+		}
+
+		merged.Lists[at].Count += list.Count
+	}
+
+	return &merged, nil
 }
 
 // localTitles describes the titles on a list from the cache, and asks the source
@@ -203,6 +246,10 @@ func (s *Service) updateLocalEntry(ctx context.Context, mediaRef string, patch E
 
 	var listIDs []int64
 	if patch.CustomLists != nil {
+		if !MediaType(entry.MediaType).local() && len(*patch.CustomLists) > 0 {
+			return nil, apperr.Invalid("custom_lists", "a manual %s cannot be put on a custom list: those are AniList's", entry.MediaType)
+		}
+
 		listIDs, err = s.localListIDs(ctx, MediaType(entry.MediaType), *patch.CustomLists)
 		if err != nil {
 			return nil, err
@@ -248,20 +295,24 @@ func (s *Service) localTitle(ctx context.Context, mediaRef string, adding bool) 
 		}
 	}
 
-	if adding && !title.MediaType.local() {
+	if adding && !title.MediaType.local() && !isManualRef(mediaRef) {
 		return nil, apperr.Invalid("media_ref", "%q is tracked on AniList, not on this node", mediaRef)
 	}
 
 	return title, nil
 }
 
-// length is what progress counts up to: episodes, or pages for a book.
+// length is what progress counts up to: episodes, chapters for a manga, or pages
+// for a book.
 func (m *Media) length(mediaType MediaType) *int {
-	if mediaType == MediaTypeBook {
+	switch mediaType {
+	case MediaTypeBook:
 		return m.Pages
+	case MediaTypeManga:
+		return m.Chapters
+	default:
+		return m.Episodes
 	}
-
-	return m.Episodes
 }
 
 // applyLocalPatch applies the change and does what AniList's own site does around
