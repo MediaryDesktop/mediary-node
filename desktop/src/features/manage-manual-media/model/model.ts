@@ -1,6 +1,6 @@
 import { combine, createEvent, createStore, sample } from 'effector'
 
-import { HttpRequestError } from '@shared/api'
+import { HttpRequestError, problemDetail } from '@shared/api'
 import { atom } from '@shared/factory'
 import { translate } from '@shared/i18n'
 import { toast } from '@shared/ui'
@@ -9,13 +9,22 @@ import {
 	createManualMediaMutation,
 	deleteManualMediaMutation,
 	manualMediaID,
+	suggestManualMediaMutation,
 	updateManualMediaMutation
 } from '@entities/media'
 import type { ManualMediaType, MediaDetails, UpdateManualMediaParams } from '@entities/media'
 import { TRACKER_MEDIA_TYPES, trackerQueries } from '@entities/tracker'
 
-import { canSubmitForm, draftFromForm, emptyForm, formErrors, formFromMedia } from '../lib/draft'
-import type { ManualMediaForm } from '../lib/draft'
+import {
+	canSubmitForm,
+	draftFromForm,
+	emptyForm,
+	formErrors,
+	formFromMedia,
+	hintFromForm,
+	mergeSuggestion
+} from '../lib/draft'
+import type { ManualMediaField, ManualMediaForm } from '../lib/draft'
 
 export interface ManualMediaRequest {
 	mediaType?: ManualMediaType
@@ -43,6 +52,22 @@ function failureMessage(error: unknown): string {
 	return translate('manualMedia.failed')
 }
 
+// A missing or refused key is the one failure the user can fix themselves, and
+// the node's own sentence about it would be in English.
+function suggestionFailure(error: HttpRequestError): string {
+	if (error.status === 428) {
+		return translate('manualMedia.ai.needsKey')
+	}
+
+	return problemDetail(error, translate('manualMedia.ai.failed'))
+}
+
+interface AppliedSuggestion {
+	form: ManualMediaForm
+	filled: ManualMediaField[]
+	recognized: boolean
+}
+
 export const manualMediaModel = atom(() => {
 	const createRequested = createEvent<ManualMediaRequest | void>()
 	const editRequested = createEvent<MediaDetails>()
@@ -53,6 +78,9 @@ export const manualMediaModel = atom(() => {
 	const deleteRequested = createEvent<ManualMediaTarget>()
 	const deleteCancelled = createEvent()
 	const deleteConfirmed = createEvent()
+	// Carries the app's language: the description comes back written in it.
+	const suggestRequested = createEvent<string>()
+	const suggestionApplied = createEvent<AppliedSuggestion>()
 
 	const $editingRef = createStore<string | null>(null)
 		.on(createRequested, () => null)
@@ -75,6 +103,14 @@ export const manualMediaModel = atom(() => {
 		// A format belongs to one kind of title; the one picked for the last kind
 		// would be refused for the next.
 		.on(mediaTypeChanged, (form, mediaType) => ({ ...form, mediaType, format: null }))
+		.on(suggestionApplied, (_, { form }) => form)
+
+	// What Claude filled in, marked until the user has looked at it: a field
+	// they change is theirs again.
+	const $suggested = createStore<ManualMediaField[]>([])
+		.on(suggestionApplied, (current, { filled }) => [...new Set([...current, ...filled])])
+		.on(fieldsChanged, (current, patch) => current.filter(field => !(field in patch)))
+		.reset(createRequested, editRequested, mediaTypeChanged)
 
 	const $errors = $form.map(formErrors)
 
@@ -83,6 +119,51 @@ export const manualMediaModel = atom(() => {
 		updateManualMediaMutation.$pending,
 		(creating, updating) => creating || updating
 	)
+
+	const $suggesting = suggestManualMediaMutation.$pending
+
+	const $canSuggest = combine(
+		$form,
+		$submitting,
+		$suggesting,
+		(form, submitting, suggesting) => form.title.trim() !== '' && !submitting && !suggesting
+	)
+
+	sample({
+		clock: suggestRequested,
+		source: $form,
+		filter: $canSuggest,
+		fn: (form, language) => hintFromForm(form, language),
+		target: suggestManualMediaMutation.start
+	})
+
+	// An answer that arrives after the drawer closed belongs to nothing on screen.
+	sample({
+		clock: suggestManualMediaMutation.finished.success,
+		source: { form: $form, open: $open },
+		filter: ({ open }) => open,
+		fn: ({ form }, { result }): AppliedSuggestion => ({
+			...mergeSuggestion(form, result.draft),
+			recognized: result.recognized
+		}),
+		target: suggestionApplied
+	})
+
+	suggestionApplied.watch(({ filled, recognized }) => {
+		if (!recognized) {
+			toast.info(translate('manualMedia.ai.unknown'), { id: 'manual-media-suggest' })
+		} else if (filled.length === 0) {
+			toast.info(translate('manualMedia.ai.nothingNew'), { id: 'manual-media-suggest' })
+		} else {
+			toast.success(translate('manualMedia.ai.filled', { count: filled.length }), {
+				id: 'manual-media-suggest'
+			})
+		}
+	})
+
+	suggestManualMediaMutation.finished.failure.watch(({ error }) => {
+		toast.error(suggestionFailure(error), { id: 'manual-media-suggest' })
+	})
 
 	const $canSubmit = combine($form, $submitting, (form, submitting) => !submitting && canSubmitForm(form))
 
@@ -166,6 +247,9 @@ export const manualMediaModel = atom(() => {
 	return {
 		$open,
 		$form,
+		$suggested,
+		$suggesting,
+		$canSuggest,
 		$errors,
 		$editingRef,
 		$canSubmit,
@@ -182,6 +266,7 @@ export const manualMediaModel = atom(() => {
 		deleteRequested,
 		deleteCancelled,
 		deleteConfirmed,
+		suggestRequested,
 		created,
 		deleted
 	}

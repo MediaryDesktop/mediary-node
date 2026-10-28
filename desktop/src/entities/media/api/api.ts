@@ -138,6 +138,36 @@ export const deleteManualMediaFx = createNodeRequestFx<string, void>(id => ({
 	method: 'DELETE'
 }))
 
+// What the user knows of a title before Claude fills in the rest, and the draft
+// it comes back with. Nothing is stored until the user saves the draft.
+export type ManualMediaHint = Omit<NodeSchemas['ManualHint'], '$schema'>
+export type ManualMediaSuggestion = Omit<NodeSchemas['ManualSuggestion'], '$schema'>
+
+// Claude can take a while on an obscure title, and the node retries a busy one.
+export const suggestManualMediaFx = createNodeRequestFx<ManualMediaHint, ManualMediaSuggestion>(hint => ({
+	url: '/v1/media/manual/suggest',
+	method: 'POST',
+	body: hint,
+	timeout: 180_000
+}))
+
+// Whether Claude can fill in titles, with which model, and whether the user saved
+// a key. The key itself never comes back from the node.
+export type AISettings = Omit<NodeSchemas['AISettings'], '$schema'>
+export type AISettingsPatch = Omit<NodeSchemas['AISettingsInputBody'], '$schema'>
+
+export const fetchAISettingsFx = createNodeRequestFx<void, AISettings>({
+	url: '/v1/ai/settings'
+})
+
+// A key is checked with Anthropic before the node keeps it.
+export const setAISettingsFx = createNodeRequestFx<AISettingsPatch, AISettings>(patch => ({
+	url: '/v1/ai/settings',
+	method: 'PUT',
+	body: patch,
+	timeout: 30_000
+}))
+
 // Whether movies and shows can be looked up, and with whose key. The key itself
 // never comes back from the node.
 export type TMDBSettings = Omit<NodeSchemas['TMDBSettings'], '$schema'>

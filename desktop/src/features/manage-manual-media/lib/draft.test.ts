@@ -2,7 +2,68 @@ import { describe, expect, it } from 'vitest'
 
 import type { MediaDetails } from '@entities/media'
 
-import { canSubmitForm, draftFromForm, emptyForm, formErrors, formFromMedia } from './draft'
+import {
+	canSubmitForm,
+	draftFromForm,
+	emptyForm,
+	formErrors,
+	formFromMedia,
+	hintFromForm,
+	mergeSuggestion
+} from './draft'
+
+describe('hintFromForm', () => {
+	it('tells Claude what the form already knows beyond the name', () => {
+		const form = {
+			...emptyForm('anime', ' Rare OVA '),
+			year: '1994',
+			originalTitle: 'レアOVA',
+			studios: 'Studio X, Studio Y',
+			authors: 'ignored for an anime'
+		}
+
+		expect(hintFromForm(form, 'uk')).toEqual({
+			media_type: 'anime',
+			title: 'Rare OVA',
+			year: 1994,
+			language: 'uk',
+			note: 'Original title: レアOVA. Studios: Studio X, Studio Y'
+		})
+		expect(hintFromForm(emptyForm('movie', 'x'), 'de')).toEqual({
+			media_type: 'movie',
+			title: 'x',
+			language: 'en'
+		})
+	})
+})
+
+describe('mergeSuggestion', () => {
+	it('fills only what the user left empty', () => {
+		const form = { ...emptyForm('series', 'Show'), year: '2001', genres: 'Mine' }
+
+		const { form: merged, filled } = mergeSuggestion(form, {
+			media_type: 'series',
+			title: 'Renamed by Claude',
+			year: 1999,
+			episodes: 6,
+			duration: 45,
+			genres: ['Drama'],
+			description: 'About',
+			status: 'FINISHED'
+		})
+
+		expect(merged).toMatchObject({
+			title: 'Show',
+			year: '2001',
+			genres: 'Mine',
+			episodes: '6',
+			duration: '45',
+			description: 'About',
+			status: 'FINISHED'
+		})
+		expect(filled.sort()).toEqual(['description', 'duration', 'episodes', 'status'])
+	})
+})
 
 describe('draftFromForm', () => {
 	it('sends only what the kind of title has and what was filled in', () => {

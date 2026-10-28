@@ -683,6 +683,19 @@ export const en = {
 			year: 'A year between 1800 and 2100',
 			count: 'A whole number',
 			duration: 'Whole minutes, up to 1000'
+		},
+		ai: {
+			fill: 'Fill in with Claude',
+			hint: 'Claude fills only the empty fields. Check what it writes before saving',
+			suggested: 'Claude',
+			needsKey: 'Claude needs your Anthropic API key: add or check it in Settings → Claude',
+			failed: 'Claude could not fill in the title',
+			unknown: 'Claude does not know this title, so nothing was filled in',
+			nothingNew: 'Claude had nothing to add to what you filled in',
+			filled_one: 'Claude filled in {{count}} field. Check it before saving',
+			filled_few: 'Claude filled in {{count}} fields. Check them before saving',
+			filled_many: 'Claude filled in {{count}} fields. Check them before saving',
+			filled_other: 'Claude filled in {{count}} fields. Check them before saving'
 		}
 	},
 
@@ -1731,6 +1744,28 @@ export const en = {
 		note: 'The key stays in a file only you can read on this computer — not in backups. This product uses the TMDB API but is not endorsed or certified by TMDB.',
 		openSettings: 'Open TMDB settings'
 	},
+	claude: {
+		source: {
+			user: 'Using your own key.',
+			none: 'No key yet: titles you add by hand are filled in by you alone.'
+		},
+		keyPlaceholder: 'Anthropic API key',
+		save: 'Check and save',
+		getKey: 'Get a key in the Claude Console',
+		forget: 'Forget the key',
+		saved: 'Anthropic accepted the key',
+		cleared: 'The key is forgotten',
+		saveFailed: 'Could not save the settings',
+		disabled: 'Claude is turned off on this node.',
+		model: 'Model',
+		modelSaved: 'The model is changed',
+		models: {
+			'claude-opus-5-5': 'Claude Opus 5.5 · most accurate',
+			'claude-sonnet-5-5': 'Claude Sonnet 5.5 · faster and cheaper',
+			'claude-haiku-5-5': 'Claude Haiku 5.5 · fastest and cheapest'
+		},
+		note: 'Requests are paid for by the Anthropic account the key belongs to. Only the kind, the name, the year and what you typed about the title are sent. The key stays in a file only you can read on this computer — not in backups.'
+	},
 	googleBooks: {
 		source: {
 			user: 'Using your own key.',
@@ -1842,6 +1877,10 @@ export const en = {
 				title: 'Google Books',
 				subtitle: 'Books Open Library does not know'
 			},
+			ai: {
+				title: 'Claude',
+				subtitle: 'Fills in titles you add by hand'
+			},
 			mangaDownloads: {
 				title: 'Manga downloads',
 				subtitle: 'Where downloaded chapters are kept'
@@ -1862,6 +1901,10 @@ export const en = {
 		googleBooks: {
 			name: 'Google Books key',
 			hint: 'Where books Open Library does not know are looked up'
+		},
+		ai: {
+			name: 'Claude',
+			hint: 'Fills in the details of a title you add by hand'
 		},
 		mangaDownloads: {
 			name: 'Manga downloads',

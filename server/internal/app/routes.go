@@ -25,6 +25,7 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anizip"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/claude"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/googlebooks"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/gutenberg"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/openlibrary"
@@ -46,6 +47,7 @@ type Deps struct {
 	OpenLibrary         *openlibrary.Client
 	GoogleBooks         *googlebooks.Client
 	Gutenberg           *gutenberg.Client
+	Claude              *claude.Client
 	AniListClientID     string
 	AniListAuthorizeURL string
 	AniListRefresh      time.Duration
@@ -88,6 +90,7 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 		OpenLibrary: deps.OpenLibrary,
 		GoogleBooks: deps.GoogleBooks,
 		Forget:      forget,
+		Claude:      deps.Claude,
 	})
 	mediaModule.Register(api)
 

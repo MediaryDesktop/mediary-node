@@ -3,9 +3,11 @@ import { useEffect, useRef } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import {
+	Button,
 	Drawer,
 	DrawerForm,
 	DrawerSection,
+	Icon,
 	Input,
 	SelectDropdown,
 	SelectionGroup,
@@ -23,13 +25,14 @@ import {
 	MANUAL_MEDIA_TYPES,
 	MANUAL_STATUSES
 } from '../../lib/draft'
+import type { ManualMediaField } from '../../lib/draft'
 import { manualMediaModel } from '../../model/model'
 
 import { ManualField } from './manual-field/ManualField'
 import styles from './ManualMediaDrawer.module.scss'
 
 export function ManualMediaDrawer() {
-	const { t } = useTranslation()
+	const { t, i18n } = useTranslation()
 	const titleRef = useRef<HTMLInputElement>(null)
 
 	const [
@@ -55,6 +58,16 @@ export function ManualMediaDrawer() {
 		manualMediaModel.mediaTypeChanged,
 		manualMediaModel.submitted
 	])
+
+	const [suggested, suggesting, canSuggest, suggestRequested] = useUnit([
+		manualMediaModel.$suggested,
+		manualMediaModel.$suggesting,
+		manualMediaModel.$canSuggest,
+		manualMediaModel.suggestRequested
+	])
+
+	const badge = (field: ManualMediaField) =>
+		suggested.includes(field) ? t('manualMedia.ai.suggested') : undefined
 
 	useEffect(() => {
 		if (open) {
@@ -117,7 +130,22 @@ export function ManualMediaDrawer() {
 					/>
 				</DrawerSection>
 
-				<DrawerSection title={t('manualMedia.sections.name')}>
+				<DrawerSection
+					title={t('manualMedia.sections.name')}
+					description={t('manualMedia.ai.hint')}
+					action={
+						<Button
+							variant='secondary'
+							size='small'
+							startIcon={<Icon name='common/sparkles' size={16} />}
+							disabled={!canSuggest}
+							loading={suggesting}
+							onClick={() => suggestRequested(i18n.language)}
+						>
+							{t('manualMedia.ai.fill')}
+						</Button>
+					}
+				>
 					<div className={styles.grid}>
 						<ManualField label={t('manualMedia.fields.title')} wide>
 							<Input
@@ -131,7 +159,11 @@ export function ManualMediaDrawer() {
 							/>
 						</ManualField>
 
-						<ManualField label={t('manualMedia.fields.originalTitle')} wide>
+						<ManualField
+							label={t('manualMedia.fields.originalTitle')}
+							badge={badge('originalTitle')}
+							wide
+						>
 							<Input
 								value={form.originalTitle}
 								onChange={event => fieldsChanged({ originalTitle: event.target.value })}
@@ -141,7 +173,7 @@ export function ManualMediaDrawer() {
 							/>
 						</ManualField>
 
-						<ManualField label={t('manualMedia.fields.synonyms')} wide>
+						<ManualField label={t('manualMedia.fields.synonyms')} badge={badge('synonyms')} wide>
 							<Textarea
 								value={form.synonyms}
 								onChange={event => fieldsChanged({ synonyms: event.target.value })}
@@ -155,7 +187,7 @@ export function ManualMediaDrawer() {
 
 				<DrawerSection title={t('manualMedia.sections.release')}>
 					<div className={styles.grid}>
-						<ManualField label={t('manualMedia.fields.year')}>
+						<ManualField label={t('manualMedia.fields.year')} badge={badge('year')}>
 							<Input
 								value={form.year}
 								onChange={event => fieldsChanged({ year: event.target.value })}
@@ -167,7 +199,7 @@ export function ManualMediaDrawer() {
 							/>
 						</ManualField>
 
-						<ManualField label={t('manualMedia.fields.status')}>
+						<ManualField label={t('manualMedia.fields.status')} badge={badge('status')}>
 							<SelectDropdown
 								options={statusOptions}
 								value={form.status}
@@ -181,7 +213,7 @@ export function ManualMediaDrawer() {
 						</ManualField>
 
 						{formats.length > 1 && (
-							<ManualField label={t('manualMedia.fields.format')} wide>
+							<ManualField label={t('manualMedia.fields.format')} badge={badge('format')} wide>
 								<SelectDropdown
 									options={formatOptions}
 									value={form.format}
@@ -196,7 +228,11 @@ export function ManualMediaDrawer() {
 						)}
 
 						{MANUAL_COUNTS[form.mediaType].map(field => (
-							<ManualField key={field} label={t(`manualMedia.fields.${field}`)}>
+							<ManualField
+								key={field}
+								label={t(`manualMedia.fields.${field}`)}
+								badge={badge(field)}
+							>
 								<Input
 									value={form[field]}
 									onChange={event => fieldsChanged({ [field]: event.target.value })}
@@ -213,7 +249,7 @@ export function ManualMediaDrawer() {
 
 				<DrawerSection title={t('manualMedia.sections.about')}>
 					<div className={styles.grid}>
-						<ManualField label={t('manualMedia.fields.genres')} wide>
+						<ManualField label={t('manualMedia.fields.genres')} badge={badge('genres')} wide>
 							<Input
 								value={form.genres}
 								onChange={event => fieldsChanged({ genres: event.target.value })}
@@ -227,6 +263,7 @@ export function ManualMediaDrawer() {
 							label={
 								writers ? t('manualMedia.fields.authors') : t('manualMedia.fields.studios')
 							}
+							badge={badge(writers ? 'authors' : 'studios')}
 							wide
 						>
 							<Input
@@ -244,7 +281,11 @@ export function ManualMediaDrawer() {
 							/>
 						</ManualField>
 
-						<ManualField label={t('manualMedia.fields.description')} wide>
+						<ManualField
+							label={t('manualMedia.fields.description')}
+							badge={badge('description')}
+							wide
+						>
 							<Textarea
 								value={form.description}
 								onChange={event => fieldsChanged({ description: event.target.value })}

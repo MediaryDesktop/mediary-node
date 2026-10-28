@@ -8,14 +8,17 @@ import { firstPresent } from '@shared/lib'
 import {
 	createManualMediaFx,
 	deleteManualMediaFx,
+	fetchAISettingsFx,
 	fetchGoogleBooksSettingsFx,
 	fetchMediaDetailsFx,
 	fetchMediaEpisodesFx,
 	fetchMediaFilterOptionsFx,
 	fetchTMDBSettingsFx,
 	searchMediaFx,
+	setAISettingsFx,
 	setGoogleBooksKeyFx,
 	setTMDBKeyFx,
+	suggestManualMediaFx,
 	updateManualMediaFx
 } from '../api/api'
 import type { MediaDate, MediaDetails, MediaEpisode, MediaTitle } from '../api/api'
@@ -78,6 +81,23 @@ export const deleteManualMediaMutation = createMutation({
 	effect: deleteManualMediaFx,
 	name: 'deleteManualMedia'
 })
+
+export const suggestManualMediaMutation = createMutation({
+	effect: suggestManualMediaFx,
+	name: 'suggestManualMedia'
+})
+
+export const aiSettingsQuery = createQuery({
+	effect: fetchAISettingsFx,
+	name: 'aiSettings'
+})
+
+export const setAISettingsMutation = createMutation({
+	effect: setAISettingsFx,
+	name: 'setAISettings'
+})
+
+keepFresh(aiSettingsQuery, { triggers: [setAISettingsMutation.finished.success] })
 
 // The edit answers with the whole title, so the open page takes it as is
 // instead of asking the node again.

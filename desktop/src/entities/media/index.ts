@@ -1,4 +1,5 @@
 export {
+	aiSettingsQuery,
 	alternativeTitles,
 	createManualMediaMutation,
 	deleteManualMediaMutation,
@@ -16,8 +17,10 @@ export {
 	mediaSearchQuery,
 	mediaTitle,
 	scoreTone,
+	setAISettingsMutation,
 	setGoogleBooksKeyMutation,
 	setTMDBKeyMutation,
+	suggestManualMediaMutation,
 	tmdbSettingsQuery,
 	updateManualMediaMutation
 } from './model/model'
@@ -36,9 +39,13 @@ export {
 	searchMediaFx
 } from './api/api'
 export type {
+	AISettings,
+	AISettingsPatch,
 	GoogleBooksSettings,
 	ManualMediaDraft,
 	ManualMediaFormat,
+	ManualMediaHint,
+	ManualMediaSuggestion,
 	ManualMediaStatus,
 	ManualMediaType,
 	MediaAiringEpisode,

@@ -12,6 +12,7 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/modules/media/internal/store"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anizip"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/claude"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/googlebooks"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/openlibrary"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/tmdb"
@@ -30,6 +31,9 @@ type Deps struct {
 	// Forget clears what other modules keep under a deleted manual title's
 	// reference — its entry on the user's list. Wired by internal/app.
 	Forget Forgetter
+
+	// Claude fills in a title the user describes by hand; nil turns that off.
+	Claude *claude.Client
 }
 
 // Forgetter is the port through which deleting a manual title reaches the modules
@@ -54,6 +58,7 @@ func New(deps Deps) *Module {
 		OpenLibrary: deps.OpenLibrary,
 		GoogleBooks: deps.GoogleBooks,
 		Forget:      deps.Forget,
+		Claude:      deps.Claude,
 	})
 
 	return &Module{handler: handler.New(svc), svc: svc}

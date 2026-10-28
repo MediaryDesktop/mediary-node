@@ -1,6 +1,7 @@
 import type {
 	ManualMediaDraft,
 	ManualMediaFormat,
+	ManualMediaHint,
 	ManualMediaStatus,
 	ManualMediaType,
 	MediaDetails
@@ -241,6 +242,99 @@ export function draftFromForm(form: ManualMediaForm): ManualMediaDraft {
 	}
 
 	return draft
+}
+
+export function formFromDraft(draft: ManualMediaDraft): ManualMediaForm {
+	const formats = MANUAL_FORMATS[draft.media_type]
+
+	return {
+		mediaType: draft.media_type,
+		title: draft.title,
+		originalTitle: draft.original_title ?? '',
+		synonyms: (draft.synonyms ?? []).join('\n'),
+		description: draft.description ?? '',
+		format: formats.find(candidate => candidate === draft.format) ?? null,
+		status: draft.status ?? null,
+		year: countText(draft.year),
+		episodes: draft.media_type === 'movie' ? '' : countText(draft.episodes),
+		chapters: countText(draft.chapters),
+		volumes: countText(draft.volumes),
+		pages: countText(draft.pages),
+		duration: countText(draft.duration),
+		genres: (draft.genres ?? []).join(', '),
+		studios: (draft.studios ?? []).join(', '),
+		authors: (draft.authors ?? []).join(', ')
+	}
+}
+
+// What the form already says beyond the name, for Claude to tell apart titles
+// that share one.
+export function hintNote(form: ManualMediaForm): string {
+	const parts: string[] = []
+
+	if (form.originalTitle.trim()) {
+		parts.push(`Original title: ${form.originalTitle.trim()}`)
+	}
+
+	const names = lines(form.synonyms)
+	if (names.length > 0) {
+		parts.push(`Also known as: ${names.join('; ')}`)
+	}
+
+	const people = commaList(hasAuthors(form.mediaType) ? form.authors : form.studios)
+	if (people.length > 0) {
+		parts.push(`${hasAuthors(form.mediaType) ? 'Authors' : 'Studios'}: ${people.join(', ')}`)
+	}
+
+	return parts.join('. ').slice(0, 1000)
+}
+
+export function hintFromForm(form: ManualMediaForm, language: string): ManualMediaHint {
+	const hint: ManualMediaHint = {
+		media_type: form.mediaType,
+		title: form.title.trim(),
+		language: language === 'uk' || language === 'ru' ? language : 'en'
+	}
+
+	const year = wholeNumber(form.year)
+	if (year !== null) {
+		hint.year = year
+	}
+
+	const note = hintNote(form)
+	if (note) {
+		hint.note = note
+	}
+
+	return hint
+}
+
+function filled(value: string | null): boolean {
+	return value !== null && value.trim() !== ''
+}
+
+// Claude fills only what the user left empty: a field they typed is theirs, and
+// clearing it is how they ask for Claude's answer instead.
+export function mergeSuggestion(
+	form: ManualMediaForm,
+	draft: ManualMediaDraft
+): { form: ManualMediaForm; filled: ManualMediaField[] } {
+	const suggested = formFromDraft({ ...draft, media_type: form.mediaType })
+	const next = { ...form }
+	const taken: ManualMediaField[] = []
+
+	for (const field of Object.keys(form) as ManualMediaField[]) {
+		if (field === 'mediaType' || field === 'title') {
+			continue
+		}
+
+		if (!filled(form[field]) && filled(suggested[field])) {
+			Object.assign(next, { [field]: suggested[field] })
+			taken.push(field)
+		}
+	}
+
+	return { form: next, filled: taken }
 }
 
 export function hasAuthors(mediaType: ManualMediaType): boolean {

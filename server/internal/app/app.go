@@ -22,6 +22,7 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/platform/secrets"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anizip"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/claude"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/googlebooks"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/gutenberg"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/openlibrary"
@@ -130,6 +131,15 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 		})
 	}
 
+	var claudeClient *claude.Client
+	if cfg.Claude.Endpoint != "" {
+		claudeClient = claude.New(claude.Options{
+			Endpoint: cfg.Claude.Endpoint,
+			Timeout:  cfg.Claude.Timeout,
+			Store:    secrets.New(filepath.Join(cfg.DataDir, "claude-secrets.json")),
+		})
+	}
+
 	var gutenbergClient *gutenberg.Client
 	if cfg.Gutenberg.Endpoint != "" {
 		gutenbergClient, err = gutenberg.New(gutenberg.Options{
@@ -165,6 +175,7 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 		OpenLibrary:         openLibrary,
 		GoogleBooks:         googleBooks,
 		Gutenberg:           gutenbergClient,
+		Claude:              claudeClient,
 		AniListClientID:     cfg.AniList.ClientID,
 		AniListAuthorizeURL: cfg.AniList.AuthorizeURL,
 		AniListRefresh:      cfg.AniList.RefreshInterval,

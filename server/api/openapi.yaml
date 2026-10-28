@@ -1,5 +1,58 @@
 components:
   schemas:
+    AISettings:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/AISettings.json
+          format: uri
+          readOnly: true
+          type: string
+        enabled:
+          description: Whether this node can ask Claude at all. Off when the node was started with an empty Claude endpoint.
+          type: boolean
+        key_source:
+          description: "Whether the user saved their own key. There is no key the build ships with: every request is paid for by the account whose key it is."
+          enum:
+            - user
+            - none
+          type: string
+        model:
+          description: The model that answers.
+          type: string
+        models:
+          description: The models the user may choose from, most capable first.
+          items:
+            type: string
+          type:
+            - array
+            - "null"
+      required:
+        - enabled
+        - key_source
+        - model
+        - models
+      type: object
+    AISettingsInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/AISettingsInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        api_key:
+          description: The user's own Anthropic API key. Anthropic is asked to accept it before it is stored. Empty forgets it; left out keeps the one stored.
+          maxLength: 1024
+          type: string
+        model:
+          description: The model to answer with, one of the settings' models. Left out keeps the one chosen.
+          type: string
+      type: object
     AcceptedOutputBody:
       additionalProperties: false
       properties:
@@ -2607,6 +2660,53 @@ components:
         - media_type
         - title
       type: object
+    ManualHint:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/ManualHint.json
+          format: uri
+          readOnly: true
+          type: string
+        language:
+          default: en
+          description: "The language to write the description in: the app's own."
+          enum:
+            - en
+            - uk
+            - ru
+          type: string
+        media_type:
+          description: The kind of title, as the user chose it. Claude does not change it.
+          enum:
+            - anime
+            - manga
+            - movie
+            - series
+            - dorama
+            - book
+          type: string
+        note:
+          description: Anything else the user knows — the studio, the country, the original name — to tell Claude which title is meant.
+          maxLength: 1000
+          type: string
+        title:
+          description: The name as the user knows it. Claude does not change it either.
+          maxLength: 300
+          minLength: 1
+          type: string
+        year:
+          description: "Year it came out, when the user knows it: it tells apart titles of the same name."
+          format: int64
+          maximum: 2100
+          minimum: 1800
+          type: integer
+      required:
+        - media_type
+        - title
+      type: object
     ManualOutputBody:
       additionalProperties: false
       properties:
@@ -2622,6 +2722,30 @@ components:
           description: The title as its page shows it, under its manual:<id> reference.
       required:
         - media
+      type: object
+    ManualSuggestion:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/ManualSuggestion.json
+          format: uri
+          readOnly: true
+          type: string
+        draft:
+          $ref: "#/components/schemas/ManualDraft"
+          description: "The title as Claude knows it, cleaned the way a draft the user typed is. Nothing is stored: the client shows it for the user to check and saves it like any other draft."
+        model:
+          description: The model that answered.
+          type: string
+        recognized:
+          description: "Whether Claude knew this title at all. When it did not, the draft carries little beyond the hint, by design: an unknown title gets no invented details."
+          type: boolean
+      required:
+        - draft
+        - recognized
+        - model
       type: object
     Match:
       additionalProperties: false
@@ -6122,6 +6246,51 @@ info:
   version: 0.0.0-dev
 openapi: 3.1.0
 paths:
+  /v1/ai/settings:
+    get:
+      description: Whether titles can be filled in by Claude, with which model, and whether the user saved a key. The key itself is never returned.
+      operationId: getAISettings
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AISettings"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Claude connection
+      tags:
+        - media
+    put:
+      description: Stores the user's own Anthropic key after Anthropic has accepted it, in a file only the user can read, never in the database or a backup, and the model to answer with. A key Anthropic refuses is not stored and answers 428.
+      operationId: setAISettings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AISettingsInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AISettings"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Set up Claude
+      tags:
+        - media
   /v1/anilist/session:
     delete:
       description: Forgets the token and deletes the mirrored collections.
@@ -7954,6 +8123,32 @@ paths:
                 $ref: "#/components/schemas/ErrorModel"
           description: Error
       summary: Describe a title no source knows
+      tags:
+        - media
+  /v1/media/manual/suggest:
+    post:
+      description: "Asks Claude, with the user's own Anthropic key, what it knows about a title from its kind and name. The answer is a draft and nothing is stored: the client shows it for the user to check, then creates or updates the title as usual. A title Claude does not know comes back with recognized false and little else. Without a key the node answers 428."
+      operationId: suggestManualMedia
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ManualHint"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ManualSuggestion"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Ask Claude to fill in a title
       tags:
         - media
   /v1/media/manual/{id}:

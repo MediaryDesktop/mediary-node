@@ -111,6 +111,25 @@ type ManualOutput struct {
 	}
 }
 
+type SuggestInput struct {
+	Body service.ManualHint
+}
+
+type SuggestOutput struct {
+	Body *service.ManualSuggestion
+}
+
+type AISettingsOutput struct {
+	Body *service.AISettings
+}
+
+type AISettingsInput struct {
+	Body struct {
+		APIKey *string `json:"api_key,omitempty" maxLength:"1024" doc:"The user's own Anthropic API key. Anthropic is asked to accept it before it is stored. Empty forgets it; left out keeps the one stored."`
+		Model  *string `json:"model,omitempty" doc:"The model to answer with, one of the settings' models. Left out keeps the one chosen."`
+	}
+}
+
 func (h *Handler) registerManual(api huma.API) {
 	huma.Register(api, huma.Operation{
 		OperationID:   "createManualMedia",
@@ -149,6 +168,54 @@ func (h *Handler) registerManual(api huma.API) {
 		out.Body.Media = details
 
 		return out, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "suggestManualMedia",
+		Method:      http.MethodPost,
+		Path:        "/v1/media/manual/suggest",
+		Summary:     "Ask Claude to fill in a title",
+		Description: "Asks Claude, with the user's own Anthropic key, what it knows about a title from its kind and name. The answer is a draft and nothing is stored: the client shows it for the user to check, then creates or updates the title as usual. A title Claude does not know comes back with recognized false and little else. Without a key the node answers 428.",
+		Tags:        []string{"media"},
+	}, func(ctx context.Context, in *SuggestInput) (*SuggestOutput, error) {
+		suggestion, err := h.svc.SuggestManual(ctx, in.Body)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return &SuggestOutput{Body: suggestion}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "getAISettings",
+		Method:      http.MethodGet,
+		Path:        "/v1/ai/settings",
+		Summary:     "Claude connection",
+		Description: "Whether titles can be filled in by Claude, with which model, and whether the user saved a key. The key itself is never returned.",
+		Tags:        []string{"media"},
+	}, func(_ context.Context, _ *struct{}) (*AISettingsOutput, error) {
+		settings, err := h.svc.AISettings()
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return &AISettingsOutput{Body: settings}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "setAISettings",
+		Method:      http.MethodPut,
+		Path:        "/v1/ai/settings",
+		Summary:     "Set up Claude",
+		Description: "Stores the user's own Anthropic key after Anthropic has accepted it, in a file only the user can read, never in the database or a backup, and the model to answer with. A key Anthropic refuses is not stored and answers 428.",
+		Tags:        []string{"media"},
+	}, func(ctx context.Context, in *AISettingsInput) (*AISettingsOutput, error) {
+		settings, err := h.svc.SetAISettings(ctx, in.Body.APIKey, in.Body.Model)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return &AISettingsOutput{Body: settings}, nil
 	})
 
 	huma.Register(api, huma.Operation{

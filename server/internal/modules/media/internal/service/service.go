@@ -14,6 +14,7 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anizip"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/claude"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/googlebooks"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/openlibrary"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/tmdb"
@@ -51,6 +52,10 @@ type Options struct {
 	// Forget clears what the rest of the node keeps under a deleted manual
 	// title's reference. Nil leaves it to the caller.
 	Forget Forgetter
+
+	// Claude fills in a title the user describes by hand. Nil when the node
+	// turned it off; the user can still describe the title themselves.
+	Claude *claude.Client
 
 	Now func() time.Time
 }

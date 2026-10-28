@@ -4,6 +4,30 @@
  */
 
 export interface paths {
+    "/v1/ai/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Claude connection
+         * @description Whether titles can be filled in by Claude, with which model, and whether the user saved a key. The key itself is never returned.
+         */
+        get: operations["getAISettings"];
+        /**
+         * Set up Claude
+         * @description Stores the user's own Anthropic key after Anthropic has accepted it, in a file only the user can read, never in the database or a backup, and the model to answer with. A key Anthropic refuses is not stored and answers 428.
+         */
+        put: operations["setAISettings"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/anilist/session": {
         parameters: {
             query?: never;
@@ -1040,6 +1064,26 @@ export interface paths {
          * @description Keeps a title the user describes themselves, for anything AniList, TMDB and the book sources do not have. It is the user's own data and never ages out. It gets a manual:<id> reference that every other endpoint takes — the tracker's, the library's — like a source's.
          */
         post: operations["createManualMedia"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/media/manual/suggest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Ask Claude to fill in a title
+         * @description Asks Claude, with the user's own Anthropic key, what it knows about a title from its kind and name. The answer is a draft and nothing is stored: the client shows it for the user to check, then creates or updates the title as usual. A title Claude does not know comes back with recognized false and little else. Without a key the node answers 428.
+         */
+        post: operations["suggestManualMedia"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2252,6 +2296,37 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AISettings: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/AISettings.json
+             */
+            readonly $schema?: string;
+            /** @description Whether this node can ask Claude at all. Off when the node was started with an empty Claude endpoint. */
+            enabled: boolean;
+            /**
+             * @description Whether the user saved their own key. There is no key the build ships with: every request is paid for by the account whose key it is.
+             * @enum {string}
+             */
+            key_source: "user" | "none";
+            /** @description The model that answers. */
+            model: string;
+            /** @description The models the user may choose from, most capable first. */
+            models: string[] | null;
+        };
+        AISettingsInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/AISettingsInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description The user's own Anthropic API key. Anthropic is asked to accept it before it is stored. Empty forgets it; left out keeps the one stored. */
+            api_key?: string;
+            /** @description The model to answer with, one of the settings' models. Left out keeps the one chosen. */
+            model?: string;
+        };
         AcceptedOutputBody: {
             /**
              * Format: uri
@@ -3640,6 +3715,34 @@ export interface components {
              */
             year?: number;
         };
+        ManualHint: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/ManualHint.json
+             */
+            readonly $schema?: string;
+            /**
+             * @description The language to write the description in: the app's own.
+             * @default en
+             * @enum {string}
+             */
+            language: "en" | "uk" | "ru";
+            /**
+             * @description The kind of title, as the user chose it. Claude does not change it.
+             * @enum {string}
+             */
+            media_type: "anime" | "manga" | "movie" | "series" | "dorama" | "book";
+            /** @description Anything else the user knows — the studio, the country, the original name — to tell Claude which title is meant. */
+            note?: string;
+            /** @description The name as the user knows it. Claude does not change it either. */
+            title: string;
+            /**
+             * Format: int64
+             * @description Year it came out, when the user knows it: it tells apart titles of the same name.
+             */
+            year?: number;
+        };
         ManualOutputBody: {
             /**
              * Format: uri
@@ -3649,6 +3752,20 @@ export interface components {
             readonly $schema?: string;
             /** @description The title as its page shows it, under its manual:<id> reference. */
             media: components["schemas"]["MediaDetails"];
+        };
+        ManualSuggestion: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/ManualSuggestion.json
+             */
+            readonly $schema?: string;
+            /** @description The title as Claude knows it, cleaned the way a draft the user typed is. Nothing is stored: the client shows it for the user to check and saves it like any other draft. */
+            draft: components["schemas"]["ManualDraft"];
+            /** @description The model that answered. */
+            model: string;
+            /** @description Whether Claude knew this title at all. When it did not, the draft carries little beyond the hint, by design: an unknown title gets no invented details. */
+            recognized: boolean;
         };
         Match: {
             /**
@@ -5658,6 +5775,8 @@ export interface components {
     headers: never;
     pathItems: never;
 }
+export type SchemaAiSettings = components['schemas']['AISettings'];
+export type SchemaAiSettingsInputBody = components['schemas']['AISettingsInputBody'];
 export type SchemaAcceptedOutputBody = components['schemas']['AcceptedOutputBody'];
 export type SchemaAccount = components['schemas']['Account'];
 export type SchemaAddRepositoryInputBody = components['schemas']['AddRepositoryInputBody'];
@@ -5748,7 +5867,9 @@ export type SchemaMangaSourceBody = components['schemas']['MangaSourceBody'];
 export type SchemaMangaSourceProblemBody = components['schemas']['MangaSourceProblemBody'];
 export type SchemaMangaSourcesOutputBody = components['schemas']['MangaSourcesOutputBody'];
 export type SchemaManualDraft = components['schemas']['ManualDraft'];
+export type SchemaManualHint = components['schemas']['ManualHint'];
 export type SchemaManualOutputBody = components['schemas']['ManualOutputBody'];
+export type SchemaManualSuggestion = components['schemas']['ManualSuggestion'];
 export type SchemaMatch = components['schemas']['Match'];
 export type SchemaMatchedTitle = components['schemas']['MatchedTitle'];
 export type SchemaMedia = components['schemas']['Media'];
@@ -5857,6 +5978,68 @@ export type SchemaUpdateRootInputBody = components['schemas']['UpdateRootInputBo
 export type SchemaVideo = components['schemas']['Video'];
 export type $defs = Record<string, never>;
 export interface operations {
+    getAISettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AISettings"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    setAISettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AISettingsInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AISettings"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
     getAniListSession: {
         parameters: {
             query?: never;
@@ -8047,6 +8230,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ManualOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    suggestManualMedia: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ManualHint"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManualSuggestion"];
                 };
             };
             /** @description Error */

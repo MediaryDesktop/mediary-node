@@ -8,9 +8,27 @@
 		grid-column: 1 / -1;
 	}
 
+	&.suggested {
+		:is(input, textarea) {
+			border-color: var(--accent-border);
+		}
+	}
+
 	.label {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
 		font-size: 0.85rem;
 		font-weight: 550;
 		color: var(--text-secondary);
+
+		.badge {
+			padding: 0.0625rem 0.4375rem;
+			border-radius: 999px;
+			background: var(--accent-muted);
+			color: var(--accent-text);
+			font-size: 0.7rem;
+			font-weight: 600;
+		}
 	}
 }

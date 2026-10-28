@@ -33,7 +33,16 @@ type Config struct {
 	OpenLibrary OpenLibrary
 	GoogleBooks GoogleBooks
 	Gutenberg   Gutenberg
+	Claude      Claude
 	Log         Log
+}
+
+// Claude fills in the details of a title the user describes by hand. An empty
+// endpoint turns it off. There is no key the build ships with: every request is
+// paid for, so only the user's own key, saved in the app, is ever sent.
+type Claude struct {
+	Endpoint string        `env:"NODE_CLAUDE_ENDPOINT" envDefault:"https://api.anthropic.com"`
+	Timeout  time.Duration `env:"NODE_CLAUDE_TIMEOUT"  envDefault:"90s"`
 }
 
 type AniList struct {
