@@ -113,10 +113,51 @@ func TestManualTitleDefaultsAndKindRules(t *testing.T) {
 		"bad status":   {MediaType: "anime", Title: "x", Status: stringOf("AIRING")},
 		"bad year":     {MediaType: "anime", Title: "x", Year: intOf(1066)},
 		"negative":     {MediaType: "anime", Title: "x", Episodes: intOf(-1)},
+		"month alone":  {MediaType: "anime", Title: "x", StartMonth: intOf(4)},
+		"day alone":    {MediaType: "anime", Title: "x", Year: intOf(2020), StartDay: intOf(4)},
+		"bad month":    {MediaType: "anime", Title: "x", Year: intOf(2020), StartMonth: intOf(13)},
+		"no feb 30":    {MediaType: "anime", Title: "x", Year: intOf(2021), StartMonth: intOf(2), StartDay: intOf(30)},
+		"end first":    {MediaType: "anime", Title: "x", Year: intOf(2020), EndYear: intOf(2019)},
+		"end day first": {
+			MediaType: "anime", Title: "x",
+			Year: intOf(2020), StartMonth: intOf(5), StartDay: intOf(10),
+			EndYear: intOf(2020), EndMonth: intOf(5), EndDay: intOf(9),
+		},
+		"high score": {MediaType: "anime", Title: "x", Score: intOf(101)},
 	} {
 		if _, err := h.svc.CreateManual(ctx, draft); apperr.KindOf(err) != apperr.KindInvalid {
 			t.Errorf("%s: want invalid, got %v", name, err)
 		}
+	}
+}
+
+func TestManualTitleDatesScoreAndSeasons(t *testing.T) {
+	h := newDetailsHarness(t)
+	ctx := context.Background()
+
+	series, err := h.svc.CreateManual(ctx, ManualDraft{
+		MediaType: "series", Title: "Long Runner",
+		Year: intOf(2024), StartMonth: intOf(2), StartDay: intOf(29),
+		EndYear: intOf(2025), EndMonth: intOf(3),
+		Score: intOf(85), Seasons: intOf(3),
+	})
+	if err != nil {
+		t.Fatalf("create series: %v", err)
+	}
+	if *series.StartDate.Month != 2 || *series.StartDate.Day != 29 || *series.EndDate.Year != 2025 ||
+		*series.EndDate.Month != 3 || series.EndDate.Day != nil {
+		t.Fatalf("dates are shown as given, got %+v / %+v", series.StartDate, series.EndDate)
+	}
+	if *series.AverageScore != 85 || *series.Seasons != 3 {
+		t.Fatalf("score and seasons are shown, got %v / %v", series.AverageScore, series.Seasons)
+	}
+
+	book, err := h.svc.CreateManual(ctx, ManualDraft{MediaType: "book", Title: "Tome", Seasons: intOf(2), Score: intOf(0)})
+	if err != nil {
+		t.Fatalf("create book: %v", err)
+	}
+	if book.Seasons != nil || book.AverageScore != nil {
+		t.Fatalf("a book has no seasons and a zero score is none, got %v / %v", book.Seasons, book.AverageScore)
 	}
 }
 

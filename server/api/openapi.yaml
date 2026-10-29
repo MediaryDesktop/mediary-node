@@ -620,6 +620,51 @@ components:
       required:
         - sources
       type: object
+    BraveKeyInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/BraveKeyInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        api_key:
+          description: The user's own Brave Search API key. Brave is asked to accept it before it is stored. Empty forgets it.
+          maxLength: 1024
+          type: string
+      required:
+        - api_key
+      type: object
+    CandidatesOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/CandidatesOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        images:
+          description: Pictures that could be the poster, posters first. Nothing is downloaded until one is picked.
+          items:
+            $ref: "#/components/schemas/Image"
+          type:
+            - array
+            - "null"
+        sources:
+          description: Where the pictures were found.
+          items:
+            $ref: "#/components/schemas/Source"
+          type:
+            - array
+            - "null"
+      required:
+        - images
+        - sources
+      type: object
     CatalogPlugin:
       additionalProperties: false
       properties:
@@ -1013,6 +1058,25 @@ components:
         - unmatched
         - missing
         - ignored
+      type: object
+    CoverSource:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/CoverSource.json
+          format: uri
+          readOnly: true
+          type: string
+        data:
+          contentEncoding: base64
+          description: The picture itself, base64-encoded, at most 10 MB.
+          type: string
+        url:
+          description: An http or https address of the picture. The node downloads it itself and refuses addresses on this computer or the local network.
+          maxLength: 2048
+          type: string
       type: object
     CreateListInputBody:
       additionalProperties: false
@@ -2129,6 +2193,58 @@ components:
         - built
         - linked
       type: object
+    Image:
+      additionalProperties: false
+      properties:
+        height:
+          format: int64
+          type: integer
+        source:
+          description: Which search found it.
+          enum:
+            - brave
+            - wikimedia
+          type: string
+        source_page:
+          description: The page the picture was found on.
+          type: string
+        thumbnail:
+          description: A small copy to show in the list of candidates.
+          type: string
+        url:
+          description: The picture itself, as the source links it. The node downloads it only when the user picks it.
+          type: string
+        width:
+          format: int64
+          type: integer
+      required:
+        - url
+        - thumbnail
+        - source
+      type: object
+    ImageSearchSettings:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/ImageSearchSettings.json
+          format: uri
+          readOnly: true
+          type: string
+        enabled:
+          description: Whether this node can look for posters at all.
+          type: boolean
+        key_source:
+          description: Whether the user saved their own Brave Search key. Without one only Wikimedia Commons is searched, which rarely has posters.
+          enum:
+            - user
+            - none
+          type: string
+      required:
+        - enabled
+        - key_source
+      type: object
     InstallExtensionInputBody:
       additionalProperties: false
       properties:
@@ -2565,6 +2681,24 @@ components:
           maximum: 1000
           minimum: 0
           type: integer
+        end_day:
+          description: Day it finished; needs the end month.
+          format: int64
+          maximum: 31
+          minimum: 1
+          type: integer
+        end_month:
+          description: Month it finished; needs the end year.
+          format: int64
+          maximum: 12
+          minimum: 1
+          type: integer
+        end_year:
+          description: Year it finished; not before it came out.
+          format: int64
+          maximum: 2100
+          minimum: 1800
+          type: integer
         episodes:
           description: Episodes it has. A movie always has one.
           format: int64
@@ -2614,6 +2748,29 @@ components:
           description: Pages; a book only, whose progress counts them.
           format: int64
           minimum: 0
+          type: integer
+        score:
+          description: How good it is, out of 100, shown where a source's average score would be. Zero is no score.
+          format: int64
+          maximum: 100
+          minimum: 0
+          type: integer
+        seasons:
+          description: Seasons it has; anime, series and dorama only.
+          format: int64
+          minimum: 0
+          type: integer
+        start_day:
+          description: Day it came out; needs the month.
+          format: int64
+          maximum: 31
+          minimum: 1
+          type: integer
+        start_month:
+          description: Month it came out; needs the year.
+          format: int64
+          maximum: 12
+          minimum: 1
           type: integer
         status:
           description: Release status.
@@ -3018,6 +3175,10 @@ components:
           type:
             - integer
             - "null"
+        seasons:
+          description: Seasons it has; only a manual title says.
+          format: int64
+          type: integer
         similar:
           description: Titles alike in genre and keywords. TMDB only; empty for an AniList title.
           items:
@@ -7088,6 +7249,51 @@ paths:
       summary: Node health
       tags:
         - health
+  /v1/image-search/settings:
+    get:
+      description: Whether posters can be searched for, and whether the user saved a Brave Search key. The key itself is never returned.
+      operationId: getImageSearchSettings
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImageSearchSettings"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Poster search
+      tags:
+        - media
+    put:
+      description: Checks the key with one small Brave search, then keeps it in a file only the user can read, never in the database or a backup. A key Brave refuses is not stored and answers 428.
+      operationId: setBraveKey
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BraveKeyInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImageSearchSettings"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Use your own Brave Search key
+      tags:
+        - media
   /v1/library/collection:
     get:
       description: "Every title the library holds files of, by name, with how many files each has. This is what the library shelf is drawn from: grouping a page of files into titles on the client would both cost a page of files and miss everything past it."
@@ -8125,6 +8331,62 @@ paths:
       summary: Describe a title no source knows
       tags:
         - media
+  /v1/media/manual/cover/search:
+    get:
+      description: Searches Brave Images with the user's own key, when there is one, and Wikimedia Commons, by the title's kind, name and year as the form has them, so a poster can be picked before the title is saved. Pictures wider than tall are left out. Nothing is downloaded.
+      operationId: searchManualCovers
+      parameters:
+        - description: The kind of title.
+          explode: false
+          in: query
+          name: type
+          required: true
+          schema:
+            description: The kind of title.
+            enum:
+              - anime
+              - manga
+              - movie
+              - series
+              - dorama
+              - book
+            type: string
+        - description: The name to look for.
+          explode: false
+          in: query
+          name: title
+          required: true
+          schema:
+            description: The name to look for.
+            maxLength: 300
+            minLength: 1
+            type: string
+        - description: Year it came out; left out when unknown.
+          explode: false
+          in: query
+          name: year
+          schema:
+            description: Year it came out; left out when unknown.
+            format: int64
+            maximum: 2100
+            minimum: 0
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CandidatesOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Pictures that could be a manual title's poster
+      tags:
+        - media
   /v1/media/manual/suggest:
     post:
       description: "Asks Claude, with the user's own Anthropic key, what it knows about a title from its kind and name. The answer is a draft and nothing is stored: the client shows it for the user to check, then creates or updates the title as usual. A title Claude does not know comes back with recognized false and little else. Without a key the node answers 428."
@@ -8208,6 +8470,100 @@ paths:
                 $ref: "#/components/schemas/ErrorModel"
           description: Error
       summary: Edit a title the user described
+      tags:
+        - media
+  /v1/media/manual/{id}/cover:
+    delete:
+      operationId: deleteManualCover
+      parameters:
+        - description: "The manual title's id: its media reference without the manual: prefix."
+          in: path
+          name: id
+          required: true
+          schema:
+            description: "The manual title's id: its media reference without the manual: prefix."
+            pattern: ^[0-9a-f]{20}$
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ManualOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Remove a manual title's poster
+      tags:
+        - media
+    get:
+      description: "The node's own copy, as JPEG. The address the title's cover_image gives carries the version, so it can be cached for good: a new poster gets a new address. Accepts ?token=."
+      operationId: getManualCover
+      parameters:
+        - description: The manual title's id.
+          in: path
+          name: id
+          required: true
+          schema:
+            description: The manual title's id.
+            pattern: ^[0-9a-f]{20}$
+            type: string
+        - description: The poster's version, as the title's cover_image carries it. It only keeps caches honest; any value serves the current poster.
+          explode: false
+          in: query
+          name: v
+          schema:
+            description: The poster's version, as the title's cover_image carries it. It only keeps caches honest; any value serves the current poster.
+            format: int64
+            type: integer
+      responses:
+        "200":
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: A manual title's poster
+      tags:
+        - media
+    put:
+      description: "Takes the picture at an address — a candidate or one the user pasted — or a file the user picked, and keeps the node's own copy: scaled to 600 pixels wide and re-encoded as JPEG, so it stays when the page it came from goes. An address on this computer or the local network is refused. Only titles the user described have a poster to change."
+      operationId: setManualCover
+      parameters:
+        - description: The manual title's id.
+          in: path
+          name: id
+          required: true
+          schema:
+            description: The manual title's id.
+            pattern: ^[0-9a-f]{20}$
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CoverSource"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ManualOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Change a manual title's poster
       tags:
         - media
   /v1/media/search:

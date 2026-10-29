@@ -625,81 +625,6 @@ export const ru: Translation = {
 		}
 	},
 
-	manualMedia: {
-		action: 'Добавить вручную',
-		notFound: 'Этого тайтла больше нет',
-		notFoundHint: 'Нет в каталоге? Добавьте сами',
-		createTitle: 'Добавить тайтл вручную',
-		createSubtitle:
-			'Для того, чего не знает ни один каталог. Хранится на этом компьютере и работает как любой другой тайтл',
-		editTitle: 'Редактировать тайтл',
-		edit: 'Редактировать',
-		create: 'Добавить',
-		save: 'Сохранить',
-		badge: 'Добавлено вручную',
-		delete: 'Удалить',
-		deleteAction: 'Удалить тайтл',
-		deleteTitle: 'Удалить «{{title}}»?',
-		deleteHint:
-			'Тайтл исчезнет из приложения и из списка. Сопоставленные с ним файлы останутся в библиотеке',
-		deleted: 'Тайтл удалён',
-		failed: 'Не удалось сохранить тайтл',
-		sections: {
-			kind: 'Тип',
-			kindLocked: 'Тип не меняется: тайтл остаётся в списке своего типа',
-			name: 'Название',
-			release: 'Выход',
-			about: 'Описание'
-		},
-		fields: {
-			title: 'Название',
-			titlePlaceholder: 'Как показывать тайтл везде',
-			originalTitle: 'Оригинальное название',
-			synonyms: 'Другие названия',
-			synonymsPlaceholder: 'По одному в строке. По ним тоже сопоставляются файлы библиотеки',
-			year: 'Год',
-			status: 'Статус',
-			statusNone: 'Неизвестно',
-			format: 'Формат',
-			episodes: 'Эпизоды',
-			chapters: 'Главы',
-			volumes: 'Тома',
-			pages: 'Страницы',
-			duration: 'Минут в эпизоде',
-			genres: 'Жанры',
-			studios: 'Студии',
-			authors: 'Авторы',
-			listPlaceholder: 'Через запятую',
-			description: 'Описание'
-		},
-		type: {
-			anime: 'Аниме',
-			manga: 'Манга',
-			movie: 'Фильм',
-			series: 'Сериал',
-			dorama: 'Дорама',
-			book: 'Книга'
-		},
-		errors: {
-			year: 'Год от 1800 до 2100',
-			count: 'Целое число',
-			duration: 'Целое число минут, до 1000'
-		},
-		ai: {
-			fill: 'Заполнить с Claude',
-			hint: 'Claude заполняет только пустые поля. Проверьте написанное перед сохранением',
-			suggested: 'Claude',
-			needsKey: 'Claude нужен ваш ключ Anthropic API: добавьте или проверьте его в Настройках → Claude',
-			failed: 'Claude не удалось заполнить тайтл',
-			unknown: 'Claude не знает этот тайтл, поэтому ничего не заполнено',
-			nothingNew: 'Claude ничего не добавил к тому, что вы уже заполнили',
-			filled_one: 'Claude заполнил {{count}} поле. Проверьте его перед сохранением',
-			filled_few: 'Claude заполнил {{count}} поля. Проверьте их перед сохранением',
-			filled_many: 'Claude заполнил {{count}} полей. Проверьте их перед сохранением',
-			filled_other: 'Claude заполнил {{count}} поля. Проверьте их перед сохранением'
-		}
-	},
-
 	media: {
 		searchTorrents: 'Искать торренты',
 		downloadMissing_one: 'Загрузить · не хватает {{count}}',
@@ -789,6 +714,7 @@ export const ru: Translation = {
 		fields: {
 			format: 'Формат',
 			status: 'Статус',
+			seasons: 'Сезоны',
 			episodes: 'Эпизоды',
 			chapters: 'Главы',
 			volumes: 'Тома',
@@ -1749,28 +1675,6 @@ export const ru: Translation = {
 		note: 'Ключ хранится в файле, который можете прочитать только вы на этом компьютере, — не в бэкапах. This product uses the TMDB API but is not endorsed or certified by TMDB.',
 		openSettings: 'Открыть настройки TMDB'
 	},
-	claude: {
-		source: {
-			user: 'Используется ваш собственный ключ.',
-			none: 'Ключа ещё нет: тайтлы, добавленные вручную, заполняете только вы.'
-		},
-		keyPlaceholder: 'Ключ Anthropic API',
-		save: 'Проверить и сохранить',
-		getKey: 'Получить ключ в Claude Console',
-		forget: 'Забыть ключ',
-		saved: 'Anthropic принял ключ',
-		cleared: 'Ключ забыт',
-		saveFailed: 'Не удалось сохранить настройки',
-		disabled: 'Claude выключен на этой ноде.',
-		model: 'Модель',
-		modelSaved: 'Модель изменена',
-		models: {
-			'claude-opus-5-5': 'Claude Opus 5.5 · самая точная',
-			'claude-sonnet-5-5': 'Claude Sonnet 5.5 · быстрее и дешевле',
-			'claude-haiku-5-5': 'Claude Haiku 5.5 · самая быстрая и дешёвая'
-		},
-		note: 'За запросы платит аккаунт Anthropic, которому принадлежит ключ. Отправляются только тип, название, год и то, что вы написали о тайтле. Ключ хранится в файле, который можете прочитать только вы, на этом компьютере — не в бэкапах.'
-	},
 	googleBooks: {
 		source: {
 			user: 'Используется ваш собственный ключ.',
@@ -1882,10 +1786,6 @@ export const ru: Translation = {
 				title: 'Google Books',
 				subtitle: 'Книги, которых не знает Open Library'
 			},
-			ai: {
-				title: 'Claude',
-				subtitle: 'Заполняет тайтлы, добавленные вручную'
-			},
 			mangaDownloads: {
 				title: 'Загрузка манги',
 				subtitle: 'Где хранятся загруженные главы'
@@ -1906,10 +1806,6 @@ export const ru: Translation = {
 		googleBooks: {
 			name: 'Ключ Google Books',
 			hint: 'Где искать книги, которых не знает Open Library'
-		},
-		ai: {
-			name: 'Claude',
-			hint: 'Заполняет детали тайтла, добавленного вручную'
 		},
 		mangaDownloads: {
 			name: 'Загрузки манги',

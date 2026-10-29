@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"net/http"
 	"strconv"
 	"strings"
 	"sync"
@@ -16,6 +17,7 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anizip"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/claude"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/googlebooks"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/imagesearch"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/openlibrary"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/tmdb"
 )
@@ -56,6 +58,25 @@ type Options struct {
 	// Claude fills in a title the user describes by hand. Nil when the node
 	// turned it off; the user can still describe the title themselves.
 	Claude *claude.Client
+
+	// Images finds posters for a manual title; nil leaves the user to paste an
+	// address or pick a file.
+	Images *imagesearch.Client
+
+	// Fetch downloads a poster from an address someone else chose, so it must
+	// refuse the node itself and the local network; see platform/safehttp.
+	Fetch *http.Client
+
+	// UserAgent names the node to the sites posters are downloaded from; some,
+	// Wikimedia among them, refuse a client that does not say who it is.
+	UserAgent string
+
+	// CoverDir is where manual titles' posters are kept; empty turns posters off.
+	CoverDir string
+
+	// CoverURL is where a client loads a manual title's poster from: the node's
+	// own address, with the version so a replaced poster is not served stale.
+	CoverURL func(id string, version int64) string
 
 	Now func() time.Time
 }

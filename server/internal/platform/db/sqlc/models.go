@@ -183,11 +183,14 @@ type MangaSourceLink struct {
 }
 
 type ManualTitle struct {
-	ID        string `json:"id"`
-	MediaType string `json:"media_type"`
-	Details   string `json:"details"`
-	CreatedAt int64  `json:"created_at"`
-	UpdatedAt int64  `json:"updated_at"`
+	ID           string         `json:"id"`
+	MediaType    string         `json:"media_type"`
+	Details      string         `json:"details"`
+	CreatedAt    int64          `json:"created_at"`
+	UpdatedAt    int64          `json:"updated_at"`
+	CoverFile    sql.NullString `json:"cover_file"`
+	CoverColor   sql.NullString `json:"cover_color"`
+	CoverVersion int64          `json:"cover_version"`
 }
 
 type NodeMetum struct {

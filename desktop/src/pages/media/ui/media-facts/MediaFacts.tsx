@@ -34,6 +34,7 @@ export function MediaFacts({ media, mediaType, locale }: MediaFactsProps) {
 		addFact(t('media.fields.authors'), media.authors?.join(', '))
 		addFact(t('media.fields.pages'), media.pages)
 	} else {
+		addFact(t('media.fields.seasons'), media.seasons)
 		addFact(t('media.fields.episodes'), media.episodes)
 		addFact(
 			t('media.fields.duration'),

@@ -182,31 +182,22 @@ export function MediaHero({
 						)}
 
 						<div className={clsx(styles.links, styles.line)} style={lineStyle(line++)}>
-							{base.site_url && (
-								<a
-									className={styles.iconLink}
-									href={base.site_url}
-									target='_blank'
-									rel='noreferrer'
-									aria-label={t('media.openOn', { name: sources[0]?.name ?? 'AniList' })}
-								>
-									<Icon
-										name={
-											sources[0]?.id === 'anilist'
-												? 'social/anilist'
-												: 'common/external-link'
-										}
-										size={18}
-									/>
-								</a>
-							)}
-
-							{media?.editable && (
-								<span className={styles.manualBadge}>
-									<Icon name='common/pencil' size={14} />
-									{t('manualMedia.badge')}
-								</span>
-							)}
+							<a
+								className={styles.iconLink}
+								href={base.site_url}
+								target='_blank'
+								rel='noreferrer'
+								aria-label={t('media.openOn', { name: sources[0]?.name ?? 'AniList' })}
+							>
+								<Icon
+									name={
+										sources[0]?.id === 'anilist'
+											? 'social/anilist'
+											: 'common/external-link'
+									}
+									size={18}
+								/>
+							</a>
 
 							{mediaType !== 'manga' && mediaType !== 'book' && (
 								<Tooltip content={t('media.comingSoon')}>

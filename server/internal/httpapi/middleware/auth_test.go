@@ -25,6 +25,10 @@ func TestQueryTokenIsAcceptedOnlyWhereHeadersCannotBeSent(t *testing.T) {
 		{http.MethodPost, "/v1/reader/files/7/progress?token=secret", http.StatusUnauthorized},
 		{http.MethodGet, "/v1/reader/chapters/local:7/pages/0?token=secret", http.StatusNoContent},
 		{http.MethodPost, "/v1/reader/chapters/local:7/progress?token=secret", http.StatusUnauthorized},
+		{http.MethodGet, "/v1/media/manual/0123456789abcdef0123/cover?v=2&token=secret", http.StatusNoContent},
+		{http.MethodPut, "/v1/media/manual/0123456789abcdef0123/cover?token=secret", http.StatusUnauthorized},
+		{http.MethodGet, "/v1/media/manual/0123456789abcdef0123/cover/candidates?token=secret", http.StatusUnauthorized},
+		{http.MethodGet, "/v1/media/manual/suggest?token=secret", http.StatusUnauthorized},
 	}
 
 	for _, tt := range tests {

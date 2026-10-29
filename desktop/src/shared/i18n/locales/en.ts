@@ -625,80 +625,6 @@ export const en = {
 		}
 	},
 
-	manualMedia: {
-		action: 'Add manually',
-		notFound: 'This title no longer exists',
-		notFoundHint: 'Not in the catalog? Add it yourself',
-		createTitle: 'Add a title manually',
-		createSubtitle:
-			'For something no catalog knows. It is kept on this computer and works like any other title',
-		editTitle: 'Edit title',
-		edit: 'Edit',
-		create: 'Add',
-		save: 'Save',
-		badge: 'Added manually',
-		delete: 'Delete',
-		deleteAction: 'Delete title',
-		deleteTitle: 'Delete “{{title}}”?',
-		deleteHint: 'It is removed from the app and from your list. Files matched to it stay in the library',
-		deleted: 'The title is deleted',
-		failed: 'Could not save the title',
-		sections: {
-			kind: 'Kind',
-			kindLocked: 'The kind cannot change: the title stays on the list of its kind',
-			name: 'Name',
-			release: 'Release',
-			about: 'About'
-		},
-		fields: {
-			title: 'Title',
-			titlePlaceholder: 'The name to show everywhere',
-			originalTitle: 'Original title',
-			synonyms: 'Other names',
-			synonymsPlaceholder: 'One per line. Library files are matched against these too',
-			year: 'Year',
-			status: 'Status',
-			statusNone: 'Unknown',
-			format: 'Format',
-			episodes: 'Episodes',
-			chapters: 'Chapters',
-			volumes: 'Volumes',
-			pages: 'Pages',
-			duration: 'Minutes per episode',
-			genres: 'Genres',
-			studios: 'Studios',
-			authors: 'Authors',
-			listPlaceholder: 'Separated by commas',
-			description: 'Description'
-		},
-		type: {
-			anime: 'Anime',
-			manga: 'Manga',
-			movie: 'Movie',
-			series: 'Series',
-			dorama: 'Dorama',
-			book: 'Book'
-		},
-		errors: {
-			year: 'A year between 1800 and 2100',
-			count: 'A whole number',
-			duration: 'Whole minutes, up to 1000'
-		},
-		ai: {
-			fill: 'Fill in with Claude',
-			hint: 'Claude fills only the empty fields. Check what it writes before saving',
-			suggested: 'Claude',
-			needsKey: 'Claude needs your Anthropic API key: add or check it in Settings → Claude',
-			failed: 'Claude could not fill in the title',
-			unknown: 'Claude does not know this title, so nothing was filled in',
-			nothingNew: 'Claude had nothing to add to what you filled in',
-			filled_one: 'Claude filled in {{count}} field. Check it before saving',
-			filled_few: 'Claude filled in {{count}} fields. Check them before saving',
-			filled_many: 'Claude filled in {{count}} fields. Check them before saving',
-			filled_other: 'Claude filled in {{count}} fields. Check them before saving'
-		}
-	},
-
 	media: {
 		searchTorrents: 'Search torrents',
 		downloadMissing_one: 'Download · {{count}} missing',
@@ -788,6 +714,7 @@ export const en = {
 		fields: {
 			format: 'Format',
 			status: 'Status',
+			seasons: 'Seasons',
 			episodes: 'Episodes',
 			chapters: 'Chapters',
 			volumes: 'Volumes',
@@ -1744,28 +1671,6 @@ export const en = {
 		note: 'The key stays in a file only you can read on this computer — not in backups. This product uses the TMDB API but is not endorsed or certified by TMDB.',
 		openSettings: 'Open TMDB settings'
 	},
-	claude: {
-		source: {
-			user: 'Using your own key.',
-			none: 'No key yet: titles you add by hand are filled in by you alone.'
-		},
-		keyPlaceholder: 'Anthropic API key',
-		save: 'Check and save',
-		getKey: 'Get a key in the Claude Console',
-		forget: 'Forget the key',
-		saved: 'Anthropic accepted the key',
-		cleared: 'The key is forgotten',
-		saveFailed: 'Could not save the settings',
-		disabled: 'Claude is turned off on this node.',
-		model: 'Model',
-		modelSaved: 'The model is changed',
-		models: {
-			'claude-opus-5-5': 'Claude Opus 5.5 · most accurate',
-			'claude-sonnet-5-5': 'Claude Sonnet 5.5 · faster and cheaper',
-			'claude-haiku-5-5': 'Claude Haiku 5.5 · fastest and cheapest'
-		},
-		note: 'Requests are paid for by the Anthropic account the key belongs to. Only the kind, the name, the year and what you typed about the title are sent. The key stays in a file only you can read on this computer — not in backups.'
-	},
 	googleBooks: {
 		source: {
 			user: 'Using your own key.',
@@ -1877,10 +1782,6 @@ export const en = {
 				title: 'Google Books',
 				subtitle: 'Books Open Library does not know'
 			},
-			ai: {
-				title: 'Claude',
-				subtitle: 'Fills in titles you add by hand'
-			},
 			mangaDownloads: {
 				title: 'Manga downloads',
 				subtitle: 'Where downloaded chapters are kept'
@@ -1901,10 +1802,6 @@ export const en = {
 		googleBooks: {
 			name: 'Google Books key',
 			hint: 'Where books Open Library does not know are looked up'
-		},
-		ai: {
-			name: 'Claude',
-			hint: 'Fills in the details of a title you add by hand'
 		},
 		mangaDownloads: {
 			name: 'Manga downloads',

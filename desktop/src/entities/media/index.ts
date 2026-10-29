@@ -1,14 +1,9 @@
 export {
-	aiSettingsQuery,
 	alternativeTitles,
-	createManualMediaMutation,
-	deleteManualMediaMutation,
 	enumLabel,
 	episodeTitle,
 	formatMediaDate,
 	googleBooksSettingsQuery,
-	isManualMediaRef,
-	manualMediaID,
 	mediaDetailsModel,
 	mediaDetailsQuery,
 	mediaEpisodesQuery,
@@ -17,12 +12,9 @@ export {
 	mediaSearchQuery,
 	mediaTitle,
 	scoreTone,
-	setAISettingsMutation,
 	setGoogleBooksKeyMutation,
 	setTMDBKeyMutation,
-	suggestManualMediaMutation,
-	tmdbSettingsQuery,
-	updateManualMediaMutation
+	tmdbSettingsQuery
 } from './model/model'
 export type { MediaEnumGroup, ScoreTone } from './model/model'
 
@@ -39,15 +31,7 @@ export {
 	searchMediaFx
 } from './api/api'
 export type {
-	AISettings,
-	AISettingsPatch,
 	GoogleBooksSettings,
-	ManualMediaDraft,
-	ManualMediaFormat,
-	ManualMediaHint,
-	ManualMediaSuggestion,
-	ManualMediaStatus,
-	ManualMediaType,
 	MediaAiringEpisode,
 	MediaDate,
 	MediaDetails,
@@ -67,6 +51,5 @@ export type {
 	MediaSummary,
 	MediaTitle,
 	RelatedMedia,
-	TMDBSettings,
-	UpdateManualMediaParams
+	TMDBSettings
 } from './api/api'

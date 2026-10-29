@@ -25,6 +25,7 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/claude"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/googlebooks"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/gutenberg"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/imagesearch"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/openlibrary"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/tmdb"
 	"github.com/mediaryorg/mediary-node/server/internal/wsapi"
@@ -131,6 +132,17 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 		})
 	}
 
+	var imageSearch *imagesearch.Client
+	if cfg.ImageSearch.BraveEndpoint != "" || cfg.ImageSearch.WikimediaEndpoint != "" {
+		imageSearch = imagesearch.New(imagesearch.Options{
+			BraveEndpoint:     cfg.ImageSearch.BraveEndpoint,
+			WikimediaEndpoint: cfg.ImageSearch.WikimediaEndpoint,
+			UserAgent:         "mediary-node/" + build.Version,
+			Timeout:           cfg.ImageSearch.Timeout,
+			Store:             secrets.New(filepath.Join(cfg.DataDir, "imagesearch-secrets.json")),
+		})
+	}
+
 	var claudeClient *claude.Client
 	if cfg.Claude.Endpoint != "" {
 		claudeClient = claude.New(claude.Options{
@@ -176,6 +188,8 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 		GoogleBooks:         googleBooks,
 		Gutenberg:           gutenbergClient,
 		Claude:              claudeClient,
+		ImageSearch:         imageSearch,
+		CoverURL:            localCoverURL(cfg.HTTP, token),
 		AniListClientID:     cfg.AniList.ClientID,
 		AniListAuthorizeURL: cfg.AniList.AuthorizeURL,
 		AniListRefresh:      cfg.AniList.RefreshInterval,

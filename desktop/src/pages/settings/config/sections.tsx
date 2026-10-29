@@ -12,7 +12,6 @@ export const SETTINGS_SECTIONS = [
 	'player',
 	'tmdb',
 	'google-books',
-	'ai',
 	'torrent-client',
 	'debrid',
 	'torrent-search',
@@ -41,7 +40,6 @@ export interface SectionInfo {
 		| 'player'
 		| 'tmdb'
 		| 'googleBooks'
-		| 'ai'
 		| 'torrentClient'
 		| 'debrid'
 		| 'torrentSearch'
@@ -65,8 +63,7 @@ export const SECTION_GROUPS: readonly (readonly SectionInfo[])[] = [
 	],
 	[
 		{ id: 'tmdb', icon: 'categories/movie', key: 'tmdb' },
-		{ id: 'google-books', icon: 'categories/book', key: 'googleBooks' },
-		{ id: 'ai', icon: 'common/sparkles', key: 'ai' }
+		{ id: 'google-books', icon: 'categories/book', key: 'googleBooks' }
 	],
 	[
 		{ id: 'torrent-client', icon: 'common/download', key: 'torrentClient' },

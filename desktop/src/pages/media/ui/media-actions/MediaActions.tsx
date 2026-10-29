@@ -8,11 +8,10 @@ import { Button, DropdownMenu, Icon, Tooltip } from '@shared/ui'
 import type { DropdownMenuItem } from '@shared/ui'
 
 import { aniListAccountModel } from '@entities/anilist-account'
-import type { MediaDetails, MediaSource } from '@entities/media'
+import type { MediaSource } from '@entities/media'
 import { canTrack, isTrackerMediaType } from '@entities/tracker'
 import type { TrackerEntry } from '@entities/tracker'
 
-import { manualMediaModel } from '@features/manage-manual-media'
 import { manageEntryModel, rateEntryModel } from '@features/track-media'
 
 import styles from './MediaActions.module.scss'
@@ -36,8 +35,6 @@ export interface MediaActionsProps {
 	// Opens the torrent search; absent where there are no torrents.
 	onDownload?: () => void
 	onOpenDetails: () => void
-	// The title as the user described it; only for one they added themselves.
-	manual?: MediaDetails | null
 }
 
 export function MediaActions({
@@ -52,18 +49,15 @@ export function MediaActions({
 	streamable = false,
 	missingCount,
 	onDownload,
-	onOpenDetails,
-	manual = null
+	onOpenDetails
 }: MediaActionsProps) {
 	const { t } = useTranslation()
 
-	const [connected, manageOpened, addOpened, rateOpened, editRequested, deleteRequested] = useUnit([
+	const [connected, manageOpened, addOpened, rateOpened] = useUnit([
 		aniListAccountModel.$connected,
 		manageEntryModel.opened,
 		manageEntryModel.addOpened,
-		rateEntryModel.opened,
-		manualMediaModel.editRequested,
-		manualMediaModel.deleteRequested
+		rateEntryModel.opened
 	])
 
 	const trackerType = isTrackerMediaType(mediaType) ? mediaType : null
@@ -75,43 +69,21 @@ export function MediaActions({
 			label: t('media.menu.details'),
 			icon: 'common/info',
 			onSelect: onOpenDetails
-		}
-	]
-
-	if (siteUrl) {
-		items.push({
+		},
+		{
 			id: 'anilist',
 			label: t('media.openOn', { name: sources[0]?.name ?? 'AniList' }),
 			icon: 'common/external-link',
 			onSelect: () => window.open(siteUrl, '_blank', 'noreferrer')
-		})
-	}
-
-	items.push({
-		id: 'library',
-		label: t('media.menu.addToLibrary'),
-		icon: <IoLibraryOutline size={20} />,
-		disabled: true,
-		onSelect: () => {}
-	})
-
-	if (manual) {
-		items.push(
-			{
-				id: 'edit',
-				label: t('manualMedia.edit'),
-				icon: 'common/pencil',
-				onSelect: () => editRequested(manual)
-			},
-			{
-				id: 'delete',
-				label: t('manualMedia.deleteAction'),
-				icon: 'common/trash',
-				danger: true,
-				onSelect: () => deleteRequested({ mediaRef, title })
-			}
-		)
-	}
+		},
+		{
+			id: 'library',
+			label: t('media.menu.addToLibrary'),
+			icon: <IoLibraryOutline size={20} />,
+			disabled: true,
+			onSelect: () => {}
+		}
+	]
 
 	if (target) {
 		items.unshift({

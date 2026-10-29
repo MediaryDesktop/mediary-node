@@ -57,6 +57,13 @@ type ManualDraft struct {
 	Format          *string  `json:"format,omitempty" enum:"TV,TV_SHORT,MOVIE,SPECIAL,OVA,ONA,MUSIC,MANGA,NOVEL,ONE_SHOT,BOOK" doc:"The source vocabulary's format for this kind of title: TV, MOVIE, OVA… for anime, MANGA, NOVEL, ONE_SHOT for manga, BOOK for a book. Left out it is the kind's usual one."`
 	Status          *string  `json:"status,omitempty" enum:"FINISHED,RELEASING,NOT_YET_RELEASED,CANCELLED,HIATUS" doc:"Release status."`
 	Year            *int     `json:"year,omitempty" minimum:"1800" maximum:"2100" doc:"Year it came out."`
+	StartMonth      *int     `json:"start_month,omitempty" minimum:"1" maximum:"12" doc:"Month it came out; needs the year."`
+	StartDay        *int     `json:"start_day,omitempty" minimum:"1" maximum:"31" doc:"Day it came out; needs the month."`
+	EndYear         *int     `json:"end_year,omitempty" minimum:"1800" maximum:"2100" doc:"Year it finished; not before it came out."`
+	EndMonth        *int     `json:"end_month,omitempty" minimum:"1" maximum:"12" doc:"Month it finished; needs the end year."`
+	EndDay          *int     `json:"end_day,omitempty" minimum:"1" maximum:"31" doc:"Day it finished; needs the end month."`
+	Score           *int     `json:"score,omitempty" minimum:"0" maximum:"100" doc:"How good it is, out of 100, shown where a source's average score would be. Zero is no score."`
+	Seasons         *int     `json:"seasons,omitempty" minimum:"0" doc:"Seasons it has; anime, series and dorama only."`
 	Episodes        *int     `json:"episodes,omitempty" minimum:"0" doc:"Episodes it has. A movie always has one."`
 	Chapters        *int     `json:"chapters,omitempty" minimum:"0" doc:"Chapters; manga only."`
 	Volumes         *int     `json:"volumes,omitempty" minimum:"0" doc:"Volumes; manga only."`
@@ -114,7 +121,7 @@ func (s *Service) CreateManual(ctx context.Context, draft ManualDraft) (*MediaDe
 		return nil, apperr.Wrap(err, apperr.KindInternal, "store manual title")
 	}
 
-	details := manualDetails(id, draft, now)
+	details := s.manualDetails(id, draft, now, store.ManualCover{})
 
 	return &details, nil
 }
@@ -160,7 +167,7 @@ func (s *Service) UpdateManual(ctx context.Context, id string, draft ManualDraft
 		return nil, apperr.New(apperr.KindNotFound, "no manual title %q", id)
 	}
 
-	details := manualDetails(id, draft, now)
+	details := s.manualDetails(id, draft, now, existing.Cover)
 
 	return &details, nil
 }
@@ -172,13 +179,20 @@ func (s *Service) DeleteManual(ctx context.Context, id string) error {
 		return apperr.Invalid("id", "malformed manual title id %q", id)
 	}
 
+	existing, err := s.store.ManualTitle(ctx, id)
+	if err != nil {
+		return apperr.Wrap(err, apperr.KindInternal, "read manual title")
+	}
+
 	deleted, err := s.store.DeleteManualTitle(ctx, id)
 	if err != nil {
 		return apperr.Wrap(err, apperr.KindInternal, "delete manual title")
 	}
-	if !deleted {
+	if !deleted || existing == nil {
 		return apperr.New(apperr.KindNotFound, "no manual title %q", id)
 	}
+
+	s.removeCoverFile(existing.Cover.File)
 
 	if s.opts.Forget != nil {
 		if forgetErr := s.opts.Forget.Forget(ctx, manualMediaRef(id)); forgetErr != nil {
@@ -205,7 +219,7 @@ func (s *Service) ManualTitles(ctx context.Context, mediaType string) ([]MediaDe
 			continue
 		}
 
-		titles = append(titles, manualDetails(rows[i].ID, draft, rows[i].UpdatedAt))
+		titles = append(titles, s.manualDetails(rows[i].ID, draft, rows[i].UpdatedAt, rows[i].Cover))
 	}
 
 	return titles, nil
@@ -226,7 +240,7 @@ func (s *Service) manualTitle(ctx context.Context, id string) (*MediaDetails, er
 		return nil, apperr.Wrap(err, apperr.KindInternal, "decode manual title %s", row.ID)
 	}
 
-	details := manualDetails(row.ID, draft, row.UpdatedAt)
+	details := s.manualDetails(row.ID, draft, row.UpdatedAt, row.Cover)
 
 	return &details, nil
 }
@@ -318,7 +332,7 @@ func manualEpisodes(details *MediaDetails) (*EpisodeList, error) {
 	return list, nil
 }
 
-func manualDetails(id string, draft ManualDraft, updatedAt time.Time) MediaDetails {
+func (s *Service) manualDetails(id string, draft ManualDraft, updatedAt time.Time, cover store.ManualCover) MediaDetails {
 	title := draft.Title
 
 	details := MediaDetails{
@@ -335,7 +349,9 @@ func manualDetails(id string, draft ManualDraft, updatedAt time.Time) MediaDetai
 		Description:     draft.Description,
 		Duration:        draft.Duration,
 		SeasonYear:      draft.Year,
-		StartDate:       FuzzyDate{Year: draft.Year},
+		StartDate:       FuzzyDate{Year: draft.Year, Month: draft.StartMonth, Day: draft.StartDay},
+		EndDate:         FuzzyDate{Year: draft.EndYear, Month: draft.EndMonth, Day: draft.EndDay},
+		AverageScore:    draft.Score,
 		Genres:          nonNilStrings(draft.Genres),
 		Studios:         nonNilStrings(draft.Studios),
 		Authors:         nonNilStrings(draft.Authors),
@@ -348,6 +364,16 @@ func manualDetails(id string, draft ManualDraft, updatedAt time.Time) MediaDetai
 		FetchedAt:       updatedAt.UTC(),
 	}
 
+	if cover.File != "" && s.opts.CoverURL != nil {
+		address := s.opts.CoverURL(id, cover.Version)
+		details.CoverImage = &address
+
+		if cover.Color != "" {
+			color := cover.Color
+			details.CoverColor = &color
+		}
+	}
+
 	switch draft.MediaType {
 	case mediaTypeManga:
 		details.Chapters = draft.Chapters
@@ -356,6 +382,7 @@ func manualDetails(id string, draft ManualDraft, updatedAt time.Time) MediaDetai
 		details.Pages = draft.Pages
 	default:
 		details.Episodes = draft.Episodes
+		details.Seasons = draft.Seasons
 	}
 
 	return details
@@ -417,12 +444,23 @@ func normalizeManual(draft ManualDraft) (ManualDraft, error) {
 		return draft, apperr.Invalid("status", "unknown status %q", *draft.Status)
 	}
 
-	if draft.Year != nil && (*draft.Year < 1800 || *draft.Year > 2100) {
-		return draft, apperr.Invalid("year", "a year is between 1800 and 2100")
+	if err := checkManualDate("year", "start_month", "start_day", draft.Year, draft.StartMonth, draft.StartDay); err != nil {
+		return draft, err
+	}
+	if err := checkManualDate("end_year", "end_month", "end_day", draft.EndYear, draft.EndMonth, draft.EndDay); err != nil {
+		return draft, err
+	}
+	if draft.EndYear != nil && draft.Year != nil && manualDateBefore(draft) {
+		return draft, apperr.Invalid("end_year", "a title cannot finish before it came out")
+	}
+
+	if draft.Score != nil && (*draft.Score < 0 || *draft.Score > 100) {
+		return draft, apperr.Invalid("score", "a score is between 0 and 100")
 	}
 
 	for field, count := range map[string]*int{
 		"episodes": draft.Episodes, "chapters": draft.Chapters, "volumes": draft.Volumes, "pages": draft.Pages,
+		"seasons": draft.Seasons,
 	} {
 		if count != nil && (*count < 0 || *count > maxManualCount) {
 			return draft, apperr.Invalid(field, "%s is between 0 and %d", field, maxManualCount)
@@ -438,20 +476,69 @@ func normalizeManual(draft ManualDraft) (ManualDraft, error) {
 	draft.Volumes = positive(draft.Volumes)
 	draft.Pages = positive(draft.Pages)
 	draft.Duration = positive(draft.Duration)
+	draft.Score = positive(draft.Score)
+	draft.Seasons = positive(draft.Seasons)
 
 	switch draft.MediaType {
 	case MediaTypeMovie:
 		one := 1
-		draft.Episodes, draft.Chapters, draft.Volumes, draft.Pages = &one, nil, nil, nil
+		draft.Episodes, draft.Chapters, draft.Volumes, draft.Pages, draft.Seasons = &one, nil, nil, nil, nil
 	case mediaTypeManga:
-		draft.Episodes, draft.Pages, draft.Duration = nil, nil, nil
+		draft.Episodes, draft.Pages, draft.Duration, draft.Seasons = nil, nil, nil, nil
 	case MediaTypeBook:
-		draft.Episodes, draft.Chapters, draft.Volumes, draft.Duration = nil, nil, nil, nil
+		draft.Episodes, draft.Chapters, draft.Volumes, draft.Duration, draft.Seasons = nil, nil, nil, nil, nil
 	default:
 		draft.Chapters, draft.Volumes, draft.Pages = nil, nil, nil
 	}
 
 	return draft, nil
+}
+
+// checkManualDate accepts a date known down to the year, month or day, but not a
+// day without its month or a month without its year.
+func checkManualDate(yearField, monthField, dayField string, year, month, day *int) error {
+	if year != nil && (*year < 1800 || *year > 2100) {
+		return apperr.Invalid(yearField, "a year is between 1800 and 2100")
+	}
+
+	if month != nil {
+		if year == nil {
+			return apperr.Invalid(monthField, "a month needs its year")
+		}
+		if *month < 1 || *month > 12 {
+			return apperr.Invalid(monthField, "a month is between 1 and 12")
+		}
+	}
+
+	if day != nil {
+		if month == nil {
+			return apperr.Invalid(dayField, "a day needs its month")
+		}
+
+		last := time.Date(*year, time.Month(*month)+1, 0, 0, 0, 0, 0, time.UTC).Day()
+		if *day < 1 || *day > last {
+			return apperr.Invalid(dayField, "a day of that month is between 1 and %d", last)
+		}
+	}
+
+	return nil
+}
+
+// manualDateBefore compares only as far as both dates are known.
+func manualDateBefore(draft ManualDraft) bool {
+	end := []*int{draft.EndYear, draft.EndMonth, draft.EndDay}
+	start := []*int{draft.Year, draft.StartMonth, draft.StartDay}
+
+	for i := range end {
+		if end[i] == nil || start[i] == nil {
+			return false
+		}
+		if *end[i] != *start[i] {
+			return *end[i] < *start[i]
+		}
+	}
+
+	return false
 }
 
 func manualList(field string, values []string) ([]string, error) {

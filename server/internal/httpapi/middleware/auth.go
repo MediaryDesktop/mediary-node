@@ -76,5 +76,11 @@ func acceptsQueryToken(r *http.Request) bool {
 		}
 	}
 
+	// A manual title's poster, and nothing else under that title.
+	if rest, ok := strings.CutPrefix(r.URL.Path, "/v1/media/manual/"); ok {
+		id, tail, found := strings.Cut(rest, "/")
+		return found && id != "" && tail == "cover"
+	}
+
 	return false
 }

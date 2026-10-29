@@ -7,6 +7,7 @@ package sqlc
 
 import (
 	"context"
+	"database/sql"
 )
 
 const deleteManualTitle = `-- name: DeleteManualTitle :execrows
@@ -23,7 +24,7 @@ func (q *Queries) DeleteManualTitle(ctx context.Context, id string) (int64, erro
 }
 
 const getManualTitle = `-- name: GetManualTitle :one
-SELECT id, media_type, details, created_at, updated_at
+SELECT id, media_type, details, created_at, updated_at, cover_file, cover_color, cover_version
 FROM manual_title
 WHERE id = ?
 `
@@ -37,6 +38,9 @@ func (q *Queries) GetManualTitle(ctx context.Context, id string) (ManualTitle, e
 		&i.Details,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.CoverFile,
+		&i.CoverColor,
+		&i.CoverVersion,
 	)
 	return i, err
 }
@@ -66,7 +70,7 @@ func (q *Queries) InsertManualTitle(ctx context.Context, arg InsertManualTitlePa
 }
 
 const listManualTitles = `-- name: ListManualTitles :many
-SELECT id, media_type, details, created_at, updated_at
+SELECT id, media_type, details, created_at, updated_at, cover_file, cover_color, cover_version
 FROM manual_title
 WHERE media_type = ?
 ORDER BY updated_at DESC, id
@@ -87,6 +91,9 @@ func (q *Queries) ListManualTitles(ctx context.Context, mediaType string) ([]Man
 			&i.Details,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.CoverFile,
+			&i.CoverColor,
+			&i.CoverVersion,
 		); err != nil {
 			return nil, err
 		}
@@ -99,6 +106,32 @@ func (q *Queries) ListManualTitles(ctx context.Context, mediaType string) ([]Man
 		return nil, err
 	}
 	return items, nil
+}
+
+const setManualTitleCover = `-- name: SetManualTitleCover :execrows
+UPDATE manual_title
+SET cover_file = ?, cover_color = ?, cover_version = cover_version + 1, updated_at = ?
+WHERE id = ?
+`
+
+type SetManualTitleCoverParams struct {
+	CoverFile  sql.NullString `json:"cover_file"`
+	CoverColor sql.NullString `json:"cover_color"`
+	UpdatedAt  int64          `json:"updated_at"`
+	ID         string         `json:"id"`
+}
+
+func (q *Queries) SetManualTitleCover(ctx context.Context, arg SetManualTitleCoverParams) (int64, error) {
+	result, err := q.db.ExecContext(ctx, setManualTitleCover,
+		arg.CoverFile,
+		arg.CoverColor,
+		arg.UpdatedAt,
+		arg.ID,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
 }
 
 const updateManualTitle = `-- name: UpdateManualTitle :execrows

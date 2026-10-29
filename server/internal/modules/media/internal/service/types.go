@@ -54,6 +54,7 @@ type MediaDetails struct {
 	Chapters          *int           `json:"chapters"`
 	Volumes           *int           `json:"volumes"`
 	Duration          *int           `json:"duration"`
+	Seasons           *int           `json:"seasons,omitempty" doc:"Seasons it has; only a manual title says."`
 	Season            *string        `json:"season"`
 	SeasonYear        *int           `json:"season_year"`
 	StartDate         FuzzyDate      `json:"start_date"`

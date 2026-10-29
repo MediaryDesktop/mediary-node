@@ -1,4 +1,4 @@
-import { createMutation, createQuery, keepFresh, update } from '@farfetched/core'
+import { createMutation, createQuery, keepFresh } from '@farfetched/core'
 import { createEffect, createEvent, createStore, sample } from 'effector'
 import type { TFunction } from 'i18next'
 
@@ -6,20 +6,14 @@ import { atom } from '@shared/factory'
 import { firstPresent } from '@shared/lib'
 
 import {
-	createManualMediaFx,
-	deleteManualMediaFx,
-	fetchAISettingsFx,
 	fetchGoogleBooksSettingsFx,
 	fetchMediaDetailsFx,
 	fetchMediaEpisodesFx,
 	fetchMediaFilterOptionsFx,
 	fetchTMDBSettingsFx,
 	searchMediaFx,
-	setAISettingsFx,
 	setGoogleBooksKeyFx,
-	setTMDBKeyFx,
-	suggestManualMediaFx,
-	updateManualMediaFx
+	setTMDBKeyFx
 } from '../api/api'
 import type { MediaDate, MediaDetails, MediaEpisode, MediaTitle } from '../api/api'
 
@@ -67,67 +61,6 @@ export const setGoogleBooksKeyMutation = createMutation({
 
 keepFresh(googleBooksSettingsQuery, { triggers: [setGoogleBooksKeyMutation.finished.success] })
 
-export const createManualMediaMutation = createMutation({
-	effect: createManualMediaFx,
-	name: 'createManualMedia'
-})
-
-export const updateManualMediaMutation = createMutation({
-	effect: updateManualMediaFx,
-	name: 'updateManualMedia'
-})
-
-export const deleteManualMediaMutation = createMutation({
-	effect: deleteManualMediaFx,
-	name: 'deleteManualMedia'
-})
-
-export const suggestManualMediaMutation = createMutation({
-	effect: suggestManualMediaFx,
-	name: 'suggestManualMedia'
-})
-
-export const aiSettingsQuery = createQuery({
-	effect: fetchAISettingsFx,
-	name: 'aiSettings'
-})
-
-export const setAISettingsMutation = createMutation({
-	effect: setAISettingsFx,
-	name: 'setAISettings'
-})
-
-keepFresh(aiSettingsQuery, { triggers: [setAISettingsMutation.finished.success] })
-
-// The edit answers with the whole title, so the open page takes it as is
-// instead of asking the node again.
-update(mediaDetailsQuery, {
-	on: updateManualMediaMutation,
-	by: {
-		success: ({ query: state, mutation }) => {
-			if (state && 'error' in state) {
-				return { error: state.error }
-			}
-
-			const current = state?.result ?? null
-
-			if (!current || current.media.media_ref !== mutation.result.media.media_ref) {
-				return { result: current }
-			}
-
-			return { result: { ...current, media: mutation.result.media } }
-		}
-	}
-})
-
-export function isManualMediaRef(mediaRef: string): boolean {
-	return mediaRef.startsWith('manual:')
-}
-
-export function manualMediaID(mediaRef: string): string {
-	return mediaRef.slice('manual:'.length)
-}
-
 export const mediaDetailsModel = atom(() => {
 	const $failedMediaRef = createStore<string | null>(null)
 		.on(mediaDetailsQuery.finished.failure, (_, { params }) => params)
@@ -146,19 +79,10 @@ const fetchTrailerHostFx = createEffect<void, string>(() => window.mediary.trail
 export const mediaPreviewModel = atom(() => {
 	const previewRequested = createEvent<string>()
 
-	const $previews = createStore<Record<string, MediaDetails>>({})
-		.on(fetchMediaDetailsFx.done, (previews, { params, result }) => ({
-			...previews,
-			[params]: result.media
-		}))
-		.on([createManualMediaFx.doneData, updateManualMediaFx.doneData], (previews, { media }) => ({
-			...previews,
-			[media.media_ref]: media
-		}))
-		.on(deleteManualMediaFx.done, (previews, { params }) => {
-			const { [`manual:${params}`]: _dropped, ...rest } = previews
-			return rest
-		})
+	const $previews = createStore<Record<string, MediaDetails>>({}).on(
+		fetchMediaDetailsFx.done,
+		(previews, { params, result }) => ({ ...previews, [params]: result.media })
+	)
 
 	const $inFlight = createStore<Record<string, true>>({})
 		.on(fetchMediaDetailsFx, (refs, mediaRef) => ({ ...refs, [mediaRef]: true }))

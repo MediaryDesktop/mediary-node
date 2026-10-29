@@ -4,7 +4,6 @@ import { useMemo } from 'react'
 import { useTranslation } from '@shared/i18n'
 import { Button, Drawer, DrawerForm, DrawerSection, Icon, SelectionGroup } from '@shared/ui'
 
-import { isManualMediaRef } from '@entities/media'
 import { isLocalTrackerType, TRACKER_STATUSES, trackerListsQuery } from '@entities/tracker'
 
 import { manageEntryModel } from '../../model/manage-entry'
@@ -44,7 +43,6 @@ export function ManageEntryDrawer() {
 
 	const collection = useUnit(trackerListsQuery.$data)
 	const mediaType = target?.mediaType ?? 'anime'
-	const listsAvailable = !(target && isManualMediaRef(target.mediaRef) && !isLocalTrackerType(mediaType))
 
 	const options = useMemo(
 		() =>
@@ -93,36 +91,34 @@ export function ManageEntryDrawer() {
 					/>
 				</DrawerSection>
 
-				{listsAvailable && (
-					<DrawerSection
-						title={t('lists.manageEntry.lists')}
-						action={
-							<Button
-								size='small'
-								variant='ghost'
-								startIcon={<Icon name='common/plus' size={16} />}
-								disabled={saving}
-								onClick={() => createListRequested()}
-							>
-								{t('lists.manageEntry.newList')}
-							</Button>
-						}
-						description={
-							options.length > 0
-								? t('lists.manageEntry.listsHint')
-								: t('lists.manageEntry.listsEmpty')
-						}
-					>
-						{options.length > 0 && (
-							<EntryListPicker
-								options={options}
-								selected={lists}
-								disabled={saving}
-								onChange={listsChanged}
-							/>
-						)}
-					</DrawerSection>
-				)}
+				<DrawerSection
+					title={t('lists.manageEntry.lists')}
+					action={
+						<Button
+							size='small'
+							variant='ghost'
+							startIcon={<Icon name='common/plus' size={16} />}
+							disabled={saving}
+							onClick={() => createListRequested()}
+						>
+							{t('lists.manageEntry.newList')}
+						</Button>
+					}
+					description={
+						options.length > 0
+							? t('lists.manageEntry.listsHint')
+							: t('lists.manageEntry.listsEmpty')
+					}
+				>
+					{options.length > 0 && (
+						<EntryListPicker
+							options={options}
+							selected={lists}
+							disabled={saving}
+							onChange={listsChanged}
+						/>
+					)}
+				</DrawerSection>
 			</DrawerForm>
 		</Drawer>
 	)

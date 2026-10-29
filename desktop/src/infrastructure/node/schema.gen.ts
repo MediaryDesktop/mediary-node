@@ -515,6 +515,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/image-search/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Poster search
+         * @description Whether posters can be searched for, and whether the user saved a Brave Search key. The key itself is never returned.
+         */
+        get: operations["getImageSearchSettings"];
+        /**
+         * Use your own Brave Search key
+         * @description Checks the key with one small Brave search, then keeps it in a file only the user can read, never in the database or a backup. A key Brave refuses is not stored and answers 428.
+         */
+        put: operations["setBraveKey"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/library/collection": {
         parameters: {
             query?: never;
@@ -1070,6 +1094,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/media/manual/cover/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pictures that could be a manual title's poster
+         * @description Searches Brave Images with the user's own key, when there is one, and Wikimedia Commons, by the title's kind, name and year as the form has them, so a poster can be picked before the title is saved. Pictures wider than tall are left out. Nothing is downloaded.
+         */
+        get: operations["searchManualCovers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/media/manual/suggest": {
         parameters: {
             query?: never;
@@ -1109,6 +1153,31 @@ export interface paths {
          * @description Removes the title and takes it off the user's list. Library files matched to it stay where they are and can be matched again.
          */
         delete: operations["deleteManualMedia"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/media/manual/{id}/cover": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A manual title's poster
+         * @description The node's own copy, as JPEG. The address the title's cover_image gives carries the version, so it can be cached for good: a new poster gets a new address. Accepts ?token=.
+         */
+        get: operations["getManualCover"];
+        /**
+         * Change a manual title's poster
+         * @description Takes the picture at an address — a candidate or one the user pasted — or a file the user picked, and keeps the node's own copy: scaled to 600 pixels wide and re-encoded as JPEG, so it stays when the page it came from goes. An address on this computer or the local network is refused. Only titles the user described have a poster to change.
+         */
+        put: operations["setManualCover"];
+        post?: never;
+        /** Remove a manual title's poster */
+        delete: operations["deleteManualCover"];
         options?: never;
         head?: never;
         patch?: never;
@@ -2636,6 +2705,28 @@ export interface components {
             /** @description The sources the node searches; empty while none is set up. */
             sources: components["schemas"]["BookSource"][] | null;
         };
+        BraveKeyInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/BraveKeyInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description The user's own Brave Search API key. Brave is asked to accept it before it is stored. Empty forgets it. */
+            api_key: string;
+        };
+        CandidatesOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/CandidatesOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Pictures that could be the poster, posters first. Nothing is downloaded until one is picked. */
+            images: components["schemas"]["Image"][] | null;
+            /** @description Where the pictures were found. */
+            sources: components["schemas"]["Source"][] | null;
+        };
         CatalogPlugin: {
             author: string;
             description?: string;
@@ -2865,6 +2956,18 @@ export interface components {
              * @description Of those, files that belong to no title yet.
              */
             unmatched: number;
+        };
+        CoverSource: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/CoverSource.json
+             */
+            readonly $schema?: string;
+            /** @description The picture itself, base64-encoded, at most 10 MB. */
+            data?: string;
+            /** @description An http or https address of the picture. The node downloads it itself and refuses addresses on this computer or the local network. */
+            url?: string;
         };
         CreateListInputBody: {
             /**
@@ -3453,6 +3556,38 @@ export interface components {
              */
             version: string;
         };
+        Image: {
+            /** Format: int64 */
+            height?: number;
+            /**
+             * @description Which search found it.
+             * @enum {string}
+             */
+            source: "brave" | "wikimedia";
+            /** @description The page the picture was found on. */
+            source_page?: string;
+            /** @description A small copy to show in the list of candidates. */
+            thumbnail: string;
+            /** @description The picture itself, as the source links it. The node downloads it only when the user picks it. */
+            url: string;
+            /** Format: int64 */
+            width?: number;
+        };
+        ImageSearchSettings: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://example.com/schemas/ImageSearchSettings.json
+             */
+            readonly $schema?: string;
+            /** @description Whether this node can look for posters at all. */
+            enabled: boolean;
+            /**
+             * @description Whether the user saved their own Brave Search key. Without one only Wikimedia Commons is searched, which rarely has posters.
+             * @enum {string}
+             */
+            key_source: "user" | "none";
+        };
         InstallExtensionInputBody: {
             /**
              * Format: uri
@@ -3669,6 +3804,21 @@ export interface components {
             duration?: number;
             /**
              * Format: int64
+             * @description Day it finished; needs the end month.
+             */
+            end_day?: number;
+            /**
+             * Format: int64
+             * @description Month it finished; needs the end year.
+             */
+            end_month?: number;
+            /**
+             * Format: int64
+             * @description Year it finished; not before it came out.
+             */
+            end_year?: number;
+            /**
+             * Format: int64
              * @description Episodes it has. A movie always has one.
              */
             episodes?: number;
@@ -3693,6 +3843,26 @@ export interface components {
              * @description Pages; a book only, whose progress counts them.
              */
             pages?: number;
+            /**
+             * Format: int64
+             * @description How good it is, out of 100, shown where a source's average score would be. Zero is no score.
+             */
+            score?: number;
+            /**
+             * Format: int64
+             * @description Seasons it has; anime, series and dorama only.
+             */
+            seasons?: number;
+            /**
+             * Format: int64
+             * @description Day it came out; needs the month.
+             */
+            start_day?: number;
+            /**
+             * Format: int64
+             * @description Month it came out; needs the year.
+             */
+            start_month?: number;
             /**
              * @description Release status.
              * @enum {string}
@@ -3886,6 +4056,11 @@ export interface components {
             season: string | null;
             /** Format: int64 */
             season_year: number | null;
+            /**
+             * Format: int64
+             * @description Seasons it has; only a manual title says.
+             */
+            seasons?: number;
             /** @description Titles alike in genre and keywords. TMDB only; empty for an AniList title. */
             similar: components["schemas"]["RelatedMedia"][] | null;
             site_url: string;
@@ -5800,6 +5975,8 @@ export type SchemaBookPositionOutputBody = components['schemas']['BookPositionOu
 export type SchemaBookSource = components['schemas']['BookSource'];
 export type SchemaBookSourceOutcome = components['schemas']['BookSourceOutcome'];
 export type SchemaBookSourcesOutputBody = components['schemas']['BookSourcesOutputBody'];
+export type SchemaBraveKeyInputBody = components['schemas']['BraveKeyInputBody'];
+export type SchemaCandidatesOutputBody = components['schemas']['CandidatesOutputBody'];
 export type SchemaCatalogPlugin = components['schemas']['CatalogPlugin'];
 export type SchemaChapter = components['schemas']['Chapter'];
 export type SchemaChapterBody = components['schemas']['ChapterBody'];
@@ -5815,6 +5992,7 @@ export type SchemaCollectionOutputBody = components['schemas']['CollectionOutput
 export type SchemaConfigureExtensionInputBody = components['schemas']['ConfigureExtensionInputBody'];
 export type SchemaControlInputBody = components['schemas']['ControlInputBody'];
 export type SchemaCounts = components['schemas']['Counts'];
+export type SchemaCoverSource = components['schemas']['CoverSource'];
 export type SchemaCreateListInputBody = components['schemas']['CreateListInputBody'];
 export type SchemaCustomList = components['schemas']['CustomList'];
 export type SchemaDate = components['schemas']['Date'];
@@ -5849,6 +6027,8 @@ export type SchemaGoogleBooksKeyInputBody = components['schemas']['GoogleBooksKe
 export type SchemaGoogleBooksSettings = components['schemas']['GoogleBooksSettings'];
 export type SchemaGutenbergSettingsBody = components['schemas']['GutenbergSettingsBody'];
 export type SchemaHealthOutputBody = components['schemas']['HealthOutputBody'];
+export type SchemaImage = components['schemas']['Image'];
+export type SchemaImageSearchSettings = components['schemas']['ImageSearchSettings'];
 export type SchemaInstallExtensionInputBody = components['schemas']['InstallExtensionInputBody'];
 export type SchemaLibraryCollection = components['schemas']['LibraryCollection'];
 export type SchemaLibraryCollectionEntry = components['schemas']['LibraryCollectionEntry'];
@@ -7090,6 +7270,68 @@ export interface operations {
             };
         };
     };
+    getImageSearchSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImageSearchSettings"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    setBraveKey: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BraveKeyInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImageSearchSettings"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
     getLibraryCollection: {
         parameters: {
             query?: never;
@@ -8243,6 +8485,42 @@ export interface operations {
             };
         };
     };
+    searchManualCovers: {
+        parameters: {
+            query: {
+                /** @description The kind of title. */
+                type: "anime" | "manga" | "movie" | "series" | "dorama" | "book";
+                /** @description The name to look for. */
+                title: string;
+                /** @description Year it came out; left out when unknown. */
+                year?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CandidatesOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
     suggestManualMedia: {
         parameters: {
             query?: never;
@@ -8330,6 +8608,107 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getManualCover: {
+        parameters: {
+            query?: {
+                /** @description The poster's version, as the title's cover_image carries it. It only keeps caches honest; any value serves the current poster. */
+                v?: number;
+            };
+            header?: never;
+            path: {
+                /** @description The manual title's id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    setManualCover: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The manual title's id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CoverSource"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManualOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    deleteManualCover: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The manual title's id: its media reference without the manual: prefix. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManualOutputBody"];
+                };
             };
             /** @description Error */
             default: {

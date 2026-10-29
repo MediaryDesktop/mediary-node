@@ -30,6 +30,7 @@ require (
 	github.com/go-chi/cors v1.2.2
 	github.com/pressly/goose/v3 v3.27.3
 	github.com/rs/zerolog v1.35.1
+	golang.org/x/image v0.40.0
 	golang.org/x/mod v0.41.0
 	golang.org/x/net v0.58.0
 	golang.org/x/sync v0.23.0

@@ -20,10 +20,9 @@ const SKELETON_COUNT = 12
 
 export interface SearchResultsProps {
 	renderMenu?: (media: MediaSummary, entry: TrackerEntry | null) => ReactNode
-	manualAction?: ReactNode
 }
 
-export function SearchResults({ renderMenu, manualAction }: SearchResultsProps) {
+export function SearchResults({ renderMenu }: SearchResultsProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
 
@@ -96,7 +95,7 @@ export function SearchResults({ renderMenu, manualAction }: SearchResultsProps) 
 			/>
 		),
 
-		empty: <EmptyState title={t('search.empty')} action={manualAction} />,
+		empty: <EmptyState title={t('search.empty')} />,
 
 		results: (
 			<div className={styles.results}>
@@ -137,8 +136,6 @@ export function SearchResults({ renderMenu, manualAction }: SearchResultsProps) 
 						</Button>
 					</div>
 				)}
-
-				{manualAction && !hasNextPage && <div className={styles.manual}>{manualAction}</div>}
 			</div>
 		)
 	}[phase]

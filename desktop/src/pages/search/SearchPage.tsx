@@ -3,13 +3,12 @@ import { useUnit } from 'effector-react'
 import { useEffect } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, Icon, PageHeader, PageTransition } from '@shared/ui'
+import { Icon, PageHeader, PageTransition } from '@shared/ui'
 
 import { aniListAccountModel } from '@entities/anilist-account'
 import { mediaTitle } from '@entities/media'
 import { canTrack } from '@entities/tracker'
 
-import { manualMediaModel } from '@features/manage-manual-media'
 import { SearchFilters, searchMediaModel, SearchResults, SearchToolbar } from '@features/search-media'
 import { EntryMenu } from '@features/track-media'
 
@@ -18,13 +17,10 @@ import styles from './SearchPage.module.scss'
 export function SearchPage() {
 	const { t } = useTranslation()
 
-	const [filtersOpen, title, filters, pageOpened, connected, manualRequested] = useUnit([
+	const [filtersOpen, pageOpened, connected] = useUnit([
 		searchMediaModel.$filtersOpen,
-		searchMediaModel.$title,
-		searchMediaModel.$filters,
 		searchMediaModel.pageOpened,
-		aniListAccountModel.$connected,
-		manualMediaModel.createRequested
+		aniListAccountModel.$connected
 	])
 
 	useEffect(() => {
@@ -58,18 +54,6 @@ export function SearchPage() {
 									entry={entry}
 								/>
 							) : null
-						}
-						manualAction={
-							title.trim() !== '' ? (
-								<Button
-									variant='secondary'
-									size='small'
-									startIcon={<Icon name='common/plus' size={16} />}
-									onClick={() => manualRequested({ mediaType: filters.type, title })}
-								>
-									{t('manualMedia.notFoundHint')}
-								</Button>
-							) : undefined
 						}
 					/>
 				</div>

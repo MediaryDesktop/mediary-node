@@ -23,11 +23,13 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/modules/tracker"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/cloud"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/safehttp"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anizip"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/claude"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/googlebooks"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/gutenberg"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/imagesearch"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/openlibrary"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/tmdb"
 )
@@ -48,6 +50,7 @@ type Deps struct {
 	GoogleBooks         *googlebooks.Client
 	Gutenberg           *gutenberg.Client
 	Claude              *claude.Client
+	ImageSearch         *imagesearch.Client
 	AniListClientID     string
 	AniListAuthorizeURL string
 	AniListRefresh      time.Duration
@@ -70,6 +73,9 @@ type Deps struct {
 	// LocalURL is the node's own address of a file's direct endpoint, which the
 	// player's tools read streams through.
 	LocalURL func(fileID int64) string
+
+	// CoverURL is the node's own address of a manual title's poster.
+	CoverURL func(id string, version int64) string
 }
 
 // Register mounts every module and returns what has to run on shutdown.
@@ -91,6 +97,15 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 		GoogleBooks: deps.GoogleBooks,
 		Forget:      forget,
 		Claude:      deps.Claude,
+
+		// Posters are kept beside the data; with no data dir — the OpenAPI export
+		// — there is nowhere to keep them, and the routes still register.
+		Images:   deps.ImageSearch,
+		Fetch:    safehttp.NewClient(30 * time.Second),
+		CoverDir: coverDir(deps.DataDir),
+		CoverURL: deps.CoverURL,
+
+		UserAgent: "mediary-node/" + deps.Build.Version,
 	})
 	mediaModule.Register(api)
 

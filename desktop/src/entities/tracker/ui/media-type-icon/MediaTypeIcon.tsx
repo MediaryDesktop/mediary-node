@@ -3,7 +3,7 @@ import type { IconName } from '@shared/ui'
 
 import type { ListMediaType } from '../../api/api'
 
-const MEDIA_TYPE_ICONS: Record<ListMediaType, IconName> = {
+export const MEDIA_TYPE_ICONS: Record<ListMediaType, IconName> = {
 	movie: 'categories/movie',
 	series: 'categories/series',
 	dorama: 'categories/series',

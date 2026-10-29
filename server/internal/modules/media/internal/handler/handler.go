@@ -3,12 +3,16 @@ package handler
 import (
 	"context"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/danielgtaylor/huma/v2"
+	"github.com/danielgtaylor/huma/v2/adapters/humachi"
 
 	"github.com/mediaryorg/mediary-node/server/internal/httpapi"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/media/internal/service"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/imagesearch"
 )
 
 type Handler struct {
@@ -123,6 +127,39 @@ type AISettingsOutput struct {
 	Body *service.AISettings
 }
 
+type CoverInput struct {
+	ID   string `path:"id" pattern:"^[0-9a-f]{20}$" doc:"The manual title's id."`
+	Body service.CoverSource
+}
+
+type CoverSearchInput struct {
+	Type  string `query:"type" enum:"anime,manga,movie,series,dorama,book" required:"true" doc:"The kind of title."`
+	Title string `query:"title" minLength:"1" maxLength:"300" required:"true" doc:"The name to look for."`
+	Year  int    `query:"year" minimum:"0" maximum:"2100" doc:"Year it came out; left out when unknown."`
+}
+
+type CoverFileInput struct {
+	ID      string `path:"id" pattern:"^[0-9a-f]{20}$" doc:"The manual title's id."`
+	Version int64  `query:"v" doc:"The poster's version, as the title's cover_image carries it. It only keeps caches honest; any value serves the current poster."`
+}
+
+type CandidatesOutput struct {
+	Body struct {
+		Images  []imagesearch.Image `json:"images" doc:"Pictures that could be the poster, posters first. Nothing is downloaded until one is picked."`
+		Sources []httpapi.Source    `json:"sources" doc:"Where the pictures were found."`
+	}
+}
+
+type ImageSearchSettingsOutput struct {
+	Body *service.ImageSearchSettings
+}
+
+type BraveKeyInput struct {
+	Body struct {
+		APIKey string `json:"api_key" maxLength:"1024" doc:"The user's own Brave Search API key. Brave is asked to accept it before it is stored. Empty forgets it."`
+	}
+}
+
 type AISettingsInput struct {
 	Body struct {
 		APIKey *string `json:"api_key,omitempty" maxLength:"1024" doc:"The user's own Anthropic API key. Anthropic is asked to accept it before it is stored. Empty forgets it; left out keeps the one stored."`
@@ -218,6 +255,8 @@ func (h *Handler) registerManual(api huma.API) {
 		return &AISettingsOutput{Body: settings}, nil
 	})
 
+	h.registerCover(api)
+
 	huma.Register(api, huma.Operation{
 		OperationID:   "deleteManualMedia",
 		Method:        http.MethodDelete,
@@ -232,6 +271,140 @@ func (h *Handler) registerManual(api huma.API) {
 		}
 
 		return nil, nil
+	})
+}
+
+func (h *Handler) registerCover(api huma.API) {
+	huma.Register(api, huma.Operation{
+		OperationID: "searchManualCovers",
+		Method:      http.MethodGet,
+		Path:        "/v1/media/manual/cover/search",
+		Summary:     "Pictures that could be a manual title's poster",
+		Description: "Searches Brave Images with the user's own key, when there is one, and Wikimedia Commons, by the title's kind, name and year as the form has them, so a poster can be picked before the title is saved. Pictures wider than tall are left out. Nothing is downloaded.",
+		Tags:        []string{"media"},
+	}, func(ctx context.Context, in *CoverSearchInput) (*CandidatesOutput, error) {
+		search := service.CoverSearch{MediaType: in.Type, Title: in.Title}
+		if in.Year > 0 {
+			search.Year = &in.Year
+		}
+
+		images, err := h.svc.SearchCovers(ctx, search)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		out := &CandidatesOutput{}
+		out.Body.Images = images
+		out.Body.Sources = []httpapi.Source{
+			{ID: "brave", Name: "Brave Search", URL: "https://search.brave.com"},
+			{ID: "wikimedia", Name: "Wikimedia Commons", URL: "https://commons.wikimedia.org"},
+		}
+
+		return out, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "setManualCover",
+		Method:      http.MethodPut,
+		Path:        "/v1/media/manual/{id}/cover",
+		Summary:     "Change a manual title's poster",
+		Description: "Takes the picture at an address — a candidate or one the user pasted — or a file the user picked, and keeps the node's own copy: scaled to 600 pixels wide and re-encoded as JPEG, so it stays when the page it came from goes. An address on this computer or the local network is refused. Only titles the user described have a poster to change.",
+		Tags:        []string{"media"},
+	}, func(ctx context.Context, in *CoverInput) (*ManualOutput, error) {
+		details, err := h.svc.SetManualCover(ctx, in.ID, in.Body)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		out := &ManualOutput{}
+		out.Body.Media = details
+
+		return out, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "deleteManualCover",
+		Method:      http.MethodDelete,
+		Path:        "/v1/media/manual/{id}/cover",
+		Summary:     "Remove a manual title's poster",
+		Tags:        []string{"media"},
+	}, func(ctx context.Context, in *ManualIDInput) (*ManualOutput, error) {
+		details, err := h.svc.RemoveManualCover(ctx, in.ID)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		out := &ManualOutput{}
+		out.Body.Media = details
+
+		return out, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "getManualCover",
+		Method:      http.MethodGet,
+		Path:        "/v1/media/manual/{id}/cover",
+		Summary:     "A manual title's poster",
+		Description: "The node's own copy, as JPEG. The address the title's cover_image gives carries the version, so it can be cached for good: a new poster gets a new address. Accepts ?token=.",
+		Tags:        []string{"media"},
+	}, func(ctx context.Context, in *CoverFileInput) (*huma.StreamResponse, error) {
+		path, err := h.svc.ManualCoverPath(ctx, in.ID)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return &huma.StreamResponse{Body: func(hctx huma.Context) {
+			r, w := humachi.Unwrap(hctx)
+
+			file, openErr := os.Open(path) //nolint:gosec // the node's own poster file, named by the database
+			if openErr != nil {
+				http.Error(w, "the poster cannot be opened", http.StatusNotFound)
+				return
+			}
+			defer func() { _ = file.Close() }()
+
+			stat, statErr := file.Stat()
+			if statErr != nil {
+				http.Error(w, "the poster cannot be read", http.StatusInternalServerError)
+				return
+			}
+
+			w.Header().Set("Content-Type", "image/jpeg")
+			w.Header().Set("Cache-Control", "private, max-age=31536000, immutable")
+			http.ServeContent(w, r, filepath.Base(path), stat.ModTime(), file)
+		}}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "getImageSearchSettings",
+		Method:      http.MethodGet,
+		Path:        "/v1/image-search/settings",
+		Summary:     "Poster search",
+		Description: "Whether posters can be searched for, and whether the user saved a Brave Search key. The key itself is never returned.",
+		Tags:        []string{"media"},
+	}, func(_ context.Context, _ *struct{}) (*ImageSearchSettingsOutput, error) {
+		settings, err := h.svc.ImageSearchSettings()
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return &ImageSearchSettingsOutput{Body: settings}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "setBraveKey",
+		Method:      http.MethodPut,
+		Path:        "/v1/image-search/settings",
+		Summary:     "Use your own Brave Search key",
+		Description: "Checks the key with one small Brave search, then keeps it in a file only the user can read, never in the database or a backup. A key Brave refuses is not stored and answers 428.",
+		Tags:        []string{"media"},
+	}, func(ctx context.Context, in *BraveKeyInput) (*ImageSearchSettingsOutput, error) {
+		settings, err := h.svc.SetBraveKey(ctx, in.Body.APIKey)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return &ImageSearchSettingsOutput{Body: settings}, nil
 	})
 }
 

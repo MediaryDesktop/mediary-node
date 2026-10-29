@@ -45,6 +45,8 @@ type suggestionAnswer struct {
 	Format          *string  `json:"format"`
 	Status          *string  `json:"status"`
 	Year            *int     `json:"year"`
+	EndYear         *int     `json:"end_year"`
+	Seasons         *int     `json:"seasons"`
 	Episodes        *int     `json:"episodes"`
 	Chapters        *int     `json:"chapters"`
 	Volumes         *int     `json:"volumes"`
@@ -65,7 +67,7 @@ Answer only from what you actually know about this specific title. A wrong detai
 
 If you do not recognise the title from the name and the hints, set recognized to false and leave every field empty except what the person's own words state directly.
 
-The description is a plain-text synopsis of two to four sentences, without spoilers, in the language you are asked for. Genres are short, common English names such as Drama, Comedy, Romance, Slice of Life, Science Fiction. Synonyms are other names the title is really known by, in any script — not translations you make up. Duration is minutes per episode, or the runtime of a movie.`
+The description is a plain-text synopsis of two to four sentences, without spoilers, in the language you are asked for. Genres are short, common English names such as Drama, Comedy, Romance, Slice of Life, Science Fiction. Synonyms are other names the title is really known by, in any script — not translations you make up. Duration is minutes per episode, or the runtime of a movie. End year is the year the last episode or volume came out, for a finished title only. Seasons counts the seasons of a series.`
 
 func (s *Service) SuggestManual(ctx context.Context, hint ManualHint) (*ManualSuggestion, error) {
 	if s.opts.Claude == nil {
@@ -169,6 +171,8 @@ func suggestionSchema(formats []string) map[string]any {
 		"format":            nullableEnum(formats),
 		"status":            nullableEnum(manualStatuses),
 		"year":              nullable("integer"),
+		"end_year":          nullable("integer"),
+		"seasons":           nullable("integer"),
 		"episodes":          nullable("integer"),
 		"chapters":          nullable("integer"),
 		"volumes":           nullable("integer"),
@@ -205,6 +209,13 @@ func draftFromSuggestion(hint ManualHint, answer suggestionAnswer) ManualDraft {
 		year = answer.Year
 	}
 
+	// The user's year outranks Claude's, so an end Claude put before it is the
+	// part to drop.
+	endYear := answer.EndYear
+	if endYear != nil && year != nil && *endYear < *year {
+		endYear = nil
+	}
+
 	country := answer.CountryOfOrigin
 	if country != nil {
 		upper := strings.ToUpper(strings.TrimSpace(*country))
@@ -224,6 +235,8 @@ func draftFromSuggestion(hint ManualHint, answer suggestionAnswer) ManualDraft {
 		Format:          answer.Format,
 		Status:          answer.Status,
 		Year:            year,
+		EndYear:         endYear,
+		Seasons:         answer.Seasons,
 		Episodes:        answer.Episodes,
 		Chapters:        answer.Chapters,
 		Volumes:         answer.Volumes,

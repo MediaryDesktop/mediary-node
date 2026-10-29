@@ -3,6 +3,7 @@ package media
 import (
 	"context"
 	"database/sql"
+	"net/http"
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/rs/zerolog"
@@ -14,6 +15,7 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anizip"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/claude"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/googlebooks"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/imagesearch"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/openlibrary"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/tmdb"
 )
@@ -34,6 +36,17 @@ type Deps struct {
 
 	// Claude fills in a title the user describes by hand; nil turns that off.
 	Claude *claude.Client
+
+	// Images finds posters for manual titles; Fetch downloads the one picked and
+	// must refuse the local network. CoverDir keeps them, and CoverURL is where a
+	// client loads one from. An empty CoverDir turns posters off.
+	Images   *imagesearch.Client
+	Fetch    *http.Client
+	CoverDir string
+	CoverURL func(id string, version int64) string
+
+	// UserAgent names the node to the sites it downloads posters from.
+	UserAgent string
 }
 
 // Forgetter is the port through which deleting a manual title reaches the modules
@@ -59,6 +72,11 @@ func New(deps Deps) *Module {
 		GoogleBooks: deps.GoogleBooks,
 		Forget:      deps.Forget,
 		Claude:      deps.Claude,
+		Images:      deps.Images,
+		Fetch:       deps.Fetch,
+		CoverDir:    deps.CoverDir,
+		CoverURL:    deps.CoverURL,
+		UserAgent:   deps.UserAgent,
 	})
 
 	return &Module{handler: handler.New(svc), svc: svc}
