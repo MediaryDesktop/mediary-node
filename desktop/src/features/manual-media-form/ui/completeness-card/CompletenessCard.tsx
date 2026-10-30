@@ -9,7 +9,7 @@ export interface CompletenessCardProps {
 	completeness: Completeness
 }
 
-const RADIUS = 38
+const RADIUS = 40
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS
 
 export function CompletenessCard({ completeness }: CompletenessCardProps) {
@@ -22,43 +22,47 @@ export function CompletenessCard({ completeness }: CompletenessCardProps) {
 	const remaining = total - filled
 
 	return (
-		<div className={styles.card}>
-			<div className={styles.head}>
-				<h3 className={styles.title}>
-					{t('manualMedia.completeness.title')}
+		<section className={styles.card}>
+			<h3 className={styles.title}>
+				{t('manualMedia.completeness.title')}
 
-					<Tooltip content={t('manualMedia.completeness.hint')}>
-						<span className={styles.infoDot} tabIndex={0}>
-							<Icon name='common/info' size={14} />
-						</span>
-					</Tooltip>
-				</h3>
-			</div>
+				<Tooltip content={t('manualMedia.completeness.hint')}>
+					<span className={styles.infoDot} tabIndex={0}>
+						<Icon name='common/info' size={14} />
+					</span>
+				</Tooltip>
+			</h3>
 
-			<div className={styles.ring}>
-				<svg width='96' height='96' viewBox='0 0 96 96'>
-					<circle className={styles.track} cx='48' cy='48' r={RADIUS} />
-					<circle
-						className={styles.progress}
-						cx='48'
-						cy='48'
-						r={RADIUS}
-						strokeDasharray={CIRCUMFERENCE}
-						strokeDashoffset={CIRCUMFERENCE * (1 - ratio)}
-					/>
-				</svg>
+			<div className={styles.summary}>
+				<div className={styles.ring}>
+					<svg viewBox='0 0 96 96' aria-hidden>
+						<circle className={styles.track} cx='48' cy='48' r={RADIUS} />
+						<circle
+							className={styles.progress}
+							cx='48'
+							cy='48'
+							r={RADIUS}
+							strokeDasharray={CIRCUMFERENCE}
+							strokeDashoffset={CIRCUMFERENCE * (1 - ratio)}
+						/>
+					</svg>
 
-				<div className={styles.ringLabel}>
-					<span className={styles.ringValue}>{filled}</span>
-					<span className={styles.ringTotal}>/{total}</span>
+					<span className={styles.ringLabel}>{Math.round(ratio * 100)}%</span>
+				</div>
+
+				<div className={styles.summaryText}>
+					<span className={styles.count}>
+						{filled}
+						<span className={styles.total}> / {total}</span>
+					</span>
+
+					<span className={styles.caption}>
+						{remaining > 0
+							? t('manualMedia.completeness.remaining', { count: remaining })
+							: t('manualMedia.completeness.done')}
+					</span>
 				</div>
 			</div>
-
-			<p className={styles.caption}>
-				{remaining > 0
-					? t('manualMedia.completeness.remaining', { count: remaining })
-					: t('manualMedia.completeness.done')}
-			</p>
 
 			<ul className={styles.breakdown}>
 				<Row tone='required' label={t('manualMedia.completeness.required')} tier={required} />
@@ -69,7 +73,7 @@ export function CompletenessCard({ completeness }: CompletenessCardProps) {
 				/>
 				<Row tone='additional' label={t('manualMedia.completeness.additional')} tier={additional} />
 			</ul>
-		</div>
+		</section>
 	)
 }
 

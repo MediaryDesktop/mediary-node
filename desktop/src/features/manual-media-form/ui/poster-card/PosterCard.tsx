@@ -83,7 +83,7 @@ export function PosterCard({
 	}
 
 	return (
-		<div className={styles.card}>
+		<section className={styles.card}>
 			<h3 className={styles.title}>
 				{t('manualMedia.cover.title')}
 
@@ -117,12 +117,18 @@ export function PosterCard({
 							value={query}
 							onChange={event => setQuery(event.target.value)}
 							placeholder={title || t('manualMedia.cover.searchPlaceholder')}
-							startIcon={<Icon name='common/search' size={16} />}
 							disabled={disabled}
 						/>
 
-						<Button type='submit' size='small' loading={searching} disabled={disabled}>
-							{t('manualMedia.cover.tabSearch')}
+						<Button
+							type='submit'
+							variant='secondary'
+							iconOnly
+							aria-label={t('manualMedia.cover.search')}
+							loading={searching}
+							disabled={disabled}
+						>
+							<Icon name='common/search' size={18} />
 						</Button>
 					</form>
 
@@ -185,7 +191,12 @@ export function PosterCard({
 						autoComplete='off'
 						disabled={disabled}
 					/>
-					<Button type='submit' size='small' fullWidth disabled={disabled || url.trim() === ''}>
+					<Button
+						type='submit'
+						variant='secondary'
+						fullWidth
+						disabled={disabled || url.trim() === ''}
+					>
 						{t('manualMedia.cover.useUrl')}
 					</Button>
 				</form>
@@ -195,7 +206,6 @@ export function PosterCard({
 				<div className={styles.panel}>
 					<Button
 						type='button'
-						size='small'
 						variant='secondary'
 						fullWidth
 						disabled={disabled}
@@ -258,6 +268,6 @@ export function PosterCard({
 					</div>
 				</div>
 			)}
-		</div>
+		</section>
 	)
 }

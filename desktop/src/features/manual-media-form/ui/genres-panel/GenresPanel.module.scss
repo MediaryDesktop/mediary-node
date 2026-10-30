@@ -1,81 +1,88 @@
-.stack {
+.root {
+	display: flex;
+	flex-direction: column;
+	gap: 2rem;
+	min-width: 0;
+}
+
+.section {
 	display: flex;
 	flex-direction: column;
 	gap: 1rem;
 }
 
-.card {
-	display: flex;
-	flex-direction: column;
-	gap: 0.75rem;
-	padding: 1.125rem;
-	border-radius: var(--radius-md);
-	background: var(--field);
-}
-
 .title {
 	display: flex;
 	align-items: center;
-	gap: 0.375rem;
+	gap: 0.5rem;
+	min-height: 0.75rem;
 	margin: 0;
-	color: var(--text-secondary);
-	font-size: 0.8125rem;
+	color: var(--text-muted);
+	font-size: 0.75rem;
 	font-weight: 700;
-	letter-spacing: 0.02em;
+	letter-spacing: 0.06em;
+	line-height: 1;
 	text-transform: uppercase;
 }
 
-.aiDot {
-	color: var(--accent);
+.suggestions {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
 }
 
 .pills {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 0.4375rem;
+	gap: 0.5rem;
 }
 
-.pill,
-.pillActive {
-	padding: 0.3125rem 0.75rem;
-	border: 1px solid var(--border);
+.pill {
+	height: 2rem;
+	padding: 0 0.875rem;
+	border: 1px solid transparent;
 	border-radius: 999px;
-	background: var(--surface);
+	background: var(--field);
 	color: var(--text-secondary);
-	font-size: 0.75rem;
+	font: inherit;
+	font-size: 0.8125rem;
 	font-weight: 600;
 	cursor: pointer;
-	transition:
-		border-color 140ms,
-		background-color 140ms,
-		color 140ms;
 
-	&:hover:not(:disabled) {
-		border-color: var(--border-strong);
-		color: var(--text);
+	&:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 2px;
 	}
-}
 
-.pillActive {
-	border-color: var(--accent);
-	background: var(--accent-muted);
-	color: var(--accent-text);
+	&:disabled {
+		cursor: not-allowed;
+		opacity: var(--opacity-inactive);
+	}
+
+	&.active {
+		border-color: var(--accent-border);
+		background: var(--accent-muted);
+		color: var(--accent-on-muted);
+	}
 }
 
 .score {
 	display: flex;
 	align-items: center;
-	gap: 0.625rem;
+	gap: 0.75rem;
+}
+
+.scoreInput {
+	flex: 1;
+	max-width: 10rem;
 }
 
 .starIcon {
-	flex: none;
 	color: var(--warning);
 }
 
 .scoreMax {
-	flex: none;
 	color: var(--text-muted);
-	font-size: 0.8125rem;
+	font-size: 0.875rem;
 	font-weight: 600;
 }

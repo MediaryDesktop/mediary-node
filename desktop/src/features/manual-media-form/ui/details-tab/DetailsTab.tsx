@@ -23,6 +23,7 @@ export function DetailsTab({ draft, onChange, aiFilled, disabled }: DetailsTabPr
 	return (
 		<div className={styles.root}>
 			<Field
+				as='div'
 				label={bookish ? t('manualMedia.fields.authors') : t('manualMedia.fields.studios')}
 				ai={aiFilled.has(bookish ? 'authors' : 'studios')}
 			>

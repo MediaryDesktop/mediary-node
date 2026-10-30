@@ -15,6 +15,7 @@
 	margin: 0;
 	font-size: 0.9375rem;
 	font-weight: 700;
+	line-height: 1.25rem;
 }
 
 .infoDot {
@@ -35,13 +36,20 @@
 
 	> :first-child {
 		flex: 1;
+		min-width: 0;
+	}
+
+	> button {
+		flex: none;
+		width: var(--control-height);
 	}
 }
 
 .hint {
 	margin: 0;
-	color: var(--text-secondary);
+	color: var(--text-muted);
 	font-size: 0.8125rem;
+	text-align: center;
 }
 
 .filePicker {
@@ -65,23 +73,20 @@
 	display: block;
 	width: 100%;
 	padding: 0;
-	border: 2px solid transparent;
+	overflow: hidden;
+	border: 0;
 	border-radius: var(--radius-md);
 	background: var(--field);
-	box-shadow: var(--shadow-sm);
 	cursor: pointer;
-	overflow: hidden;
 	aspect-ratio: 2 / 3;
-	transition:
-		border-color 160ms,
-		transform 160ms;
 
-	&:hover:not(:disabled) {
-		border-color: var(--accent);
-		transform: translateY(-2px);
+	&:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 2px;
 	}
 
 	img {
+		display: block;
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
@@ -91,30 +96,31 @@
 .current {
 	display: flex;
 	flex-direction: column;
-	gap: 0.5rem;
-	padding-top: 0.875rem;
+	gap: 0.625rem;
+	padding-top: 1rem;
 	border-top: 1px solid var(--border);
 }
 
 .currentLabel {
 	color: var(--text-muted);
 	font-size: 0.75rem;
-	font-weight: 600;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	line-height: 1;
 	text-transform: uppercase;
-	letter-spacing: 0.02em;
 }
 
 .currentRow {
 	display: flex;
 	align-items: center;
-	gap: 0.625rem;
+	gap: 0.75rem;
 }
 
 .currentThumb {
 	flex: none;
 	width: 2.5rem;
 	height: 3.75rem;
-	border-radius: var(--radius-xs);
+	border-radius: var(--radius-sm);
 	object-fit: cover;
 }
 

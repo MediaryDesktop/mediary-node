@@ -1,8 +1,9 @@
+import clsx from 'clsx'
 import { useUnit } from 'effector-react'
 import { useEffect, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Icon, Input } from '@shared/ui'
+import { Badge, Icon, Input } from '@shared/ui'
 
 import { mediaFilterOptionsQuery } from '@entities/media'
 
@@ -47,36 +48,17 @@ export function GenresPanel({
 		onGenresChange(genres.includes(genre) ? genres.filter(item => item !== genre) : [...genres, genre])
 
 	return (
-		<div className={styles.stack}>
-			<div className={styles.card}>
+		<div className={styles.root}>
+			<section className={styles.section}>
 				<h3 className={styles.title}>
-					{t('manualMedia.sections.genres')}
-					{aiGenres && <Icon name='common/wand-sparkles' size={12} className={styles.aiDot} />}
+					{t('manualMedia.fields.genres')}
+
+					{aiGenres && (
+						<Badge tone='accent' size='sm'>
+							{t('manualMedia.ai.filledBadge')}
+						</Badge>
+					)}
 				</h3>
-
-				<Input
-					value={query}
-					onChange={event => setQuery(event.target.value)}
-					placeholder={t('manualMedia.genreSearchPlaceholder')}
-					startIcon={<Icon name='common/search' size={16} />}
-					disabled={disabled}
-				/>
-
-				{suggestions.length > 0 && (
-					<div className={styles.pills}>
-						{suggestions.slice(0, 18).map(genre => (
-							<button
-								key={genre}
-								type='button'
-								className={genres.includes(genre) ? styles.pillActive : styles.pill}
-								disabled={disabled}
-								onClick={() => toggle(genre)}
-							>
-								{genre}
-							</button>
-						))}
-					</div>
-				)}
 
 				<TagField
 					value={genres}
@@ -84,14 +66,41 @@ export function GenresPanel({
 					placeholder={t('manualMedia.tagPlaceholder')}
 					disabled={disabled}
 				/>
-			</div>
 
-			<div className={styles.card}>
+				<div className={styles.suggestions}>
+					<Input
+						value={query}
+						onChange={event => setQuery(event.target.value)}
+						placeholder={t('manualMedia.genreSearchPlaceholder')}
+						startIcon={<Icon name='common/search' size={16} />}
+						disabled={disabled}
+					/>
+
+					{suggestions.length > 0 && (
+						<div className={styles.pills}>
+							{suggestions.slice(0, 18).map(genre => (
+								<button
+									key={genre}
+									type='button'
+									className={clsx(styles.pill, genres.includes(genre) && styles.active)}
+									aria-pressed={genres.includes(genre)}
+									disabled={disabled}
+									onClick={() => toggle(genre)}
+								>
+									{genre}
+								</button>
+							))}
+						</div>
+					)}
+				</div>
+			</section>
+
+			<section className={styles.section}>
 				<h3 className={styles.title}>{t('manualMedia.fields.score')}</h3>
 
 				<div className={styles.score}>
-					<Icon name='common/star' size={18} className={styles.starIcon} />
 					<Input
+						className={styles.scoreInput}
 						type='number'
 						min={0}
 						max={100}
@@ -99,11 +108,14 @@ export function GenresPanel({
 						onChange={event =>
 							onScoreChange(event.target.value === '' ? undefined : Number(event.target.value))
 						}
+						placeholder='—'
+						startIcon={<Icon name='common/star' size={16} className={styles.starIcon} />}
+						aria-label={t('manualMedia.fields.score')}
 						disabled={disabled}
 					/>
-					<span className={styles.scoreMax}>/100</span>
+					<span className={styles.scoreMax}>/ 100</span>
 				</div>
-			</div>
+			</section>
 		</div>
 	)
 }

@@ -1,5 +1,5 @@
 import { useTranslation } from '@shared/i18n'
-import { Icon, Input, SelectDropdown, Stepper } from '@shared/ui'
+import { Input, SelectDropdown, Stepper } from '@shared/ui'
 import type { SelectDropdownOption } from '@shared/ui'
 
 import { enumLabel } from '@entities/media'
@@ -55,6 +55,7 @@ export function BasicsTab({ draft, onChange, aiFilled, errors, disabled }: Basic
 							onChange={value =>
 								onChange({ format: (value as ManualDraft['format']) ?? undefined })
 							}
+							placeholder={t('manualMedia.notSpecified')}
 							disabled={disabled}
 							clearable
 						/>
@@ -72,17 +73,12 @@ export function BasicsTab({ draft, onChange, aiFilled, errors, disabled }: Basic
 											event.target.value === '' ? undefined : Number(event.target.value)
 									})
 								}
+								placeholder='—'
 								disabled={disabled}
 							/>
 						</Field>
 					)}
-				</div>
-			</section>
 
-			<section className={styles.section}>
-				<h3 className={styles.title}>{t('manualMedia.sections.counts')}</h3>
-
-				<div className={styles.steppers}>
 					{seasonal && (
 						<CountStepper
 							label={t('manualMedia.fields.seasons')}
@@ -141,27 +137,9 @@ export function BasicsTab({ draft, onChange, aiFilled, errors, disabled }: Basic
 			</section>
 
 			<section className={styles.section}>
-				<h3 className={styles.title}>
-					{t('manualMedia.fields.synonyms')}
-					{aiFilled.has('synonyms') && (
-						<Icon name='common/wand-sparkles' size={12} className={styles.aiDot} />
-					)}
-				</h3>
-
-				<TagField
-					value={draft.synonyms ?? []}
-					onChange={next => onChange({ synonyms: next })}
-					placeholder={t('manualMedia.tagPlaceholder')}
-					disabled={disabled}
-				/>
-
-				<p className={styles.hint}>{t('manualMedia.fields.synonymsHint')}</p>
-			</section>
-
-			<section className={styles.section}>
 				<h3 className={styles.title}>{t('manualMedia.sections.releaseHistory')}</h3>
 
-				<div className={styles.releaseRow}>
+				<div className={styles.grid}>
 					<DatePickerField
 						label={t('manualMedia.fields.startDate')}
 						value={dateFromParts(draft.year, draft.start_month, draft.start_day)}
@@ -196,6 +174,22 @@ export function BasicsTab({ draft, onChange, aiFilled, errors, disabled }: Basic
 
 				{errors.year && <p className={styles.error}>{errors.year}</p>}
 			</section>
+
+			<section className={styles.section}>
+				<Field
+					as='div'
+					label={t('manualMedia.fields.synonyms')}
+					hint={t('manualMedia.fields.synonymsHint')}
+					ai={aiFilled.has('synonyms')}
+				>
+					<TagField
+						value={draft.synonyms ?? []}
+						onChange={next => onChange({ synonyms: next })}
+						placeholder={t('manualMedia.tagPlaceholder')}
+						disabled={disabled}
+					/>
+				</Field>
+			</section>
 		</div>
 	)
 }
@@ -211,18 +205,17 @@ interface CountStepperProps {
 
 function CountStepper({ label, value, ai, disabled, onDecrement, onIncrement }: CountStepperProps) {
 	return (
-		<div className={styles.stepperField}>
-			<Stepper
-				value={String(value ?? 0)}
-				onDecrement={onDecrement}
-				onIncrement={onIncrement}
-				disabled={disabled}
-				decrementDisabled={!value}
-			/>
-			<span className={styles.stepperLabel}>
-				{label}
-				{ai && <Icon name='common/wand-sparkles' size={12} className={styles.aiDot} />}
-			</span>
-		</div>
+		<Field as='div' label={label} ai={ai}>
+			<div className={styles.counter}>
+				<Stepper
+					className={styles.stepper}
+					value={String(value ?? 0)}
+					onDecrement={onDecrement}
+					onIncrement={onIncrement}
+					disabled={disabled}
+					decrementDisabled={!value}
+				/>
+			</div>
+		</Field>
 	)
 }

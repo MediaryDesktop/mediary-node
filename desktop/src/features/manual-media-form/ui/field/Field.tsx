@@ -11,15 +11,27 @@ export interface FieldProps {
 	error?: string
 	ai?: boolean
 	required?: boolean
+	// A <label> would forward clicks on its text to the first button inside, so
+	// fields that hold buttons rather than one input render as a plain div.
+	as?: 'label' | 'div'
 	children: ReactNode
 	className?: string
 }
 
-export function Field({ label, hint, error, ai, required, children, className }: FieldProps) {
+export function Field({
+	label,
+	hint,
+	error,
+	ai,
+	required,
+	as: Tag = 'label',
+	children,
+	className
+}: FieldProps) {
 	const { t } = useTranslation()
 
 	return (
-		<label className={[styles.field, className].filter(Boolean).join(' ')}>
+		<Tag className={[styles.field, className].filter(Boolean).join(' ')}>
 			<span className={styles.labelRow}>
 				<span className={styles.label}>
 					{label}
@@ -37,6 +49,6 @@ export function Field({ label, hint, error, ai, required, children, className }:
 
 			{hint && !error && <span className={styles.hint}>{hint}</span>}
 			{error && <span className={styles.error}>{error}</span>}
-		</label>
+		</Tag>
 	)
 }

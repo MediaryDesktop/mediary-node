@@ -1,3 +1,4 @@
+import clsx from 'clsx'
 import { useRef } from 'react'
 import { IoImageOutline } from 'react-icons/io5'
 
@@ -11,6 +12,7 @@ import type { ManualDraft } from '@entities/media'
 import { COMMON_COUNTRIES, flagEmoji, MANUAL_MEDIA_TYPES, MANUAL_STATUSES } from '../../lib/draft'
 import type { ManualMediaType } from '../../lib/draft'
 import { readImageFile } from '../../lib/read-image-file'
+import { Field } from '../field/Field'
 import type { CoverSelection } from '../poster-card/PosterCard'
 
 import styles from './IdentityCard.module.scss'
@@ -82,18 +84,19 @@ export function IdentityCard({
 	}
 
 	return (
-		<div className={styles.card}>
+		<section className={styles.card}>
 			<button
 				type='button'
-				className={styles.thumb}
+				className={clsx(styles.thumb, coverUrl && styles.filled)}
 				disabled={disabled}
+				aria-label={t('manualMedia.cover.add')}
 				onClick={() => picker.current?.click()}
 			>
 				{coverUrl ? (
 					<img src={coverUrl} alt='' draggable={false} />
 				) : (
 					<>
-						<IoImageOutline size={28} />
+						<IoImageOutline size={26} />
 						<span className={styles.thumbLabel}>
 							{t('manualMedia.cover.add')}
 							<small>{t('manualMedia.cover.addHint')}</small>
@@ -114,49 +117,42 @@ export function IdentityCard({
 			/>
 
 			<div className={styles.fields}>
-				<div className={styles.typeRow}>
-					<SelectDropdown
-						className={styles.typeSelect}
-						options={typeOptions}
-						value={draft.media_type}
-						onChange={value =>
-							!lockType && value && onChange({ media_type: value as ManualMediaType })
-						}
-						disabled={disabled || lockType}
-						accentWhenSelected
+				<Field label={t('manualMedia.fields.title')} required>
+					<Input
+						className={styles.titleInput}
+						value={draft.title}
+						onChange={event => onChange({ title: event.target.value })}
+						placeholder={t('manualMedia.fields.titlePlaceholder')}
+						error={titleError}
+						disabled={disabled}
+						maxLength={300}
 					/>
+				</Field>
 
-					{lockType && (
-						<span className={styles.lockHint}>
-							<Icon name='common/lock' size={14} />
-							{t('manualMedia.typeLocked')}
-						</span>
-					)}
-				</div>
-
-				<Input
-					className={styles.titleInput}
-					value={draft.title}
-					onChange={event => onChange({ title: event.target.value })}
-					placeholder={t('manualMedia.fields.titlePlaceholder')}
-					aria-label={t('manualMedia.fields.title')}
-					error={titleError}
-					disabled={disabled}
-					maxLength={300}
-				/>
-
-				<Input
-					value={draft.original_title ?? ''}
-					onChange={event => onChange({ original_title: event.target.value })}
-					placeholder={t('manualMedia.fields.originalTitlePlaceholder')}
-					aria-label={t('manualMedia.fields.originalTitle')}
-					disabled={disabled}
-					maxLength={300}
-				/>
+				<Field label={t('manualMedia.fields.originalTitle')}>
+					<Input
+						value={draft.original_title ?? ''}
+						onChange={event => onChange({ original_title: event.target.value })}
+						placeholder={t('manualMedia.fields.originalTitlePlaceholder')}
+						disabled={disabled}
+						maxLength={300}
+					/>
+				</Field>
 
 				<div className={styles.row}>
-					<label className={styles.subfield}>
-						<span>{t('manualMedia.fields.year')}</span>
+					<Field label={t('manualMedia.type')}>
+						<SelectDropdown
+							options={typeOptions}
+							value={draft.media_type}
+							onChange={value =>
+								!lockType && value && onChange({ media_type: value as ManualMediaType })
+							}
+							disabled={disabled || lockType}
+							accentWhenSelected
+						/>
+					</Field>
+
+					<Field label={t('manualMedia.fields.year')}>
 						<Input
 							type='number'
 							min={1800}
@@ -167,12 +163,12 @@ export function IdentityCard({
 									year: event.target.value === '' ? undefined : Number(event.target.value)
 								})
 							}
+							placeholder='—'
 							disabled={disabled}
 						/>
-					</label>
+					</Field>
 
-					<label className={styles.subfield}>
-						<span>{t('manualMedia.fields.country')}</span>
+					<Field label={t('manualMedia.fields.country')}>
 						<SelectDropdown
 							options={countryOptions}
 							value={draft.country_of_origin ?? null}
@@ -182,22 +178,29 @@ export function IdentityCard({
 							searchable
 							disabled={disabled}
 						/>
-					</label>
+					</Field>
 
-					<label className={styles.subfield}>
-						<span>{t('manualMedia.fields.status')}</span>
+					<Field label={t('manualMedia.fields.status')}>
 						<SelectDropdown
 							options={statusOptions}
 							value={draft.status ?? null}
 							onChange={value =>
 								onChange({ status: (value as ManualDraft['status']) ?? undefined })
 							}
+							placeholder={t('manualMedia.notSpecified')}
 							clearable
 							disabled={disabled}
 						/>
-					</label>
+					</Field>
 				</div>
+
+				{lockType && (
+					<span className={styles.lockHint}>
+						<Icon name='common/lock' size={13} />
+						{t('manualMedia.typeLocked')}
+					</span>
+				)}
 			</div>
-		</div>
+		</section>
 	)
 }

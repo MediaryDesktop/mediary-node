@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { getApiProblems, HttpRequestError, problemDetail } from '@shared/api'
 import { isLanguage, useTranslation } from '@shared/i18n'
 import { useGoBack } from '@shared/lib'
-import { Button, Icon, Modal, Tabs, Textarea, toast } from '@shared/ui'
+import { Button, Icon, Modal, PageHeader, Tabs, Textarea, toast } from '@shared/ui'
 
 import {
 	createManualMediaFx,
@@ -24,7 +24,6 @@ import { CompletenessCard } from '../completeness-card/CompletenessCard'
 import { DetailsTab } from '../details-tab/DetailsTab'
 import { Field } from '../field/Field'
 import type { FillModeValue } from '../fill-mode/FillMode'
-import { FillMode } from '../fill-mode/FillMode'
 import { GenresPanel } from '../genres-panel/GenresPanel'
 import { IdentityCard } from '../identity-card/IdentityCard'
 import type { CoverSelection } from '../poster-card/PosterCard'
@@ -247,9 +246,11 @@ export function ManualMediaForm({ mode, id, initialDraft, initialCoverUrl, cance
 
 	return (
 		<div className={styles.root}>
-			<p className={styles.intro}>
-				{t(mode === 'create' ? 'manualMedia.createSubtitle' : 'manualMedia.editSubtitle')}
-			</p>
+			<PageHeader
+				title={t(mode === 'create' ? 'manualMedia.createTitle' : 'manualMedia.editTitle')}
+				icon={<Icon name={mode === 'create' ? 'common/plus' : 'common/pencil'} size={28} />}
+				subtitle={t(mode === 'create' ? 'manualMedia.createSubtitle' : 'manualMedia.editSubtitle')}
+			/>
 
 			<div className={styles.layout}>
 				<div className={styles.main}>
@@ -263,21 +264,19 @@ export function ManualMediaForm({ mode, id, initialDraft, initialCoverUrl, cance
 						onPickCover={setCover}
 					/>
 
-					<Tabs
-						value={tab}
-						onValueChange={setTab}
-						items={[
-							{ value: 'basic', label: t('manualMedia.tabs.basic') },
-							{ value: 'details', label: t('manualMedia.tabs.details') },
-							{ value: 'description', label: t('manualMedia.tabs.description') }
-						]}
-					/>
+					<section className={styles.panel}>
+						<Tabs
+							value={tab}
+							onValueChange={setTab}
+							items={[
+								{ value: 'basic', label: t('manualMedia.tabs.basic') },
+								{ value: 'details', label: t('manualMedia.tabs.details') },
+								{ value: 'description', label: t('manualMedia.tabs.description') }
+							]}
+						/>
 
-					{tab === 'basic' && (
-						<div className={styles.basicGrid}>
-							<div className={styles.basicMain}>
-								<FillMode value={fillMode} onChange={setFillMode} disabled={saving} />
-
+						{tab === 'basic' && (
+							<div className={styles.basicGrid}>
 								<BasicsTab
 									draft={draft}
 									onChange={patch}
@@ -285,40 +284,57 @@ export function ManualMediaForm({ mode, id, initialDraft, initialCoverUrl, cance
 									errors={errors}
 									disabled={saving}
 								/>
+
+								<GenresPanel
+									mediaType={draft.media_type}
+									genres={draft.genres ?? []}
+									onGenresChange={genres => patch({ genres })}
+									score={draft.score}
+									onScoreChange={score => patch({ score })}
+									aiGenres={aiFilled.has('genres')}
+									disabled={saving}
+								/>
 							</div>
+						)}
 
-							<GenresPanel
-								mediaType={draft.media_type}
-								genres={draft.genres ?? []}
-								onGenresChange={genres => patch({ genres })}
-								score={draft.score}
-								onScoreChange={score => patch({ score })}
-								aiGenres={aiFilled.has('genres')}
+						{tab === 'details' && (
+							<DetailsTab
+								draft={draft}
+								onChange={patch}
+								aiFilled={aiFilled}
 								disabled={saving}
 							/>
-						</div>
-					)}
+						)}
 
-					{tab === 'details' && (
-						<DetailsTab draft={draft} onChange={patch} aiFilled={aiFilled} disabled={saving} />
-					)}
-
-					{tab === 'description' && (
-						<Field label={t('manualMedia.fields.description')} ai={aiFilled.has('description')}>
-							<Textarea
-								value={draft.description ?? ''}
-								onChange={event => patch({ description: event.target.value })}
-								placeholder={t('manualMedia.fields.descriptionPlaceholder')}
-								rows={10}
-								maxLength={10000}
-								disabled={saving}
-							/>
-						</Field>
-					)}
+						{tab === 'description' && (
+							<Field
+								label={t('manualMedia.fields.description')}
+								ai={aiFilled.has('description')}
+							>
+								<Textarea
+									value={draft.description ?? ''}
+									onChange={event => patch({ description: event.target.value })}
+									placeholder={t('manualMedia.fields.descriptionPlaceholder')}
+									rows={12}
+									maxLength={10000}
+									disabled={saving}
+								/>
+							</Field>
+						)}
+					</section>
 				</div>
 
 				<aside className={styles.sidebar}>
 					<CompletenessCard completeness={completeness(draft, previewCoverUrl !== null)} />
+
+					<AIAssistantCard
+						mode={mode}
+						fillMode={fillMode}
+						onFillModeChange={setFillMode}
+						onGenerate={() => void suggest()}
+						pending={suggesting}
+						disabled={saving}
+					/>
 
 					<PosterCard
 						mediaType={draft.media_type}
@@ -329,15 +345,6 @@ export function ManualMediaForm({ mode, id, initialDraft, initialCoverUrl, cance
 						onChange={setCover}
 						disabled={saving}
 					/>
-
-					{fillMode === 'ai' && (
-						<AIAssistantCard
-							mode={mode}
-							onGenerate={() => void suggest()}
-							pending={suggesting}
-							disabled={saving}
-						/>
-					)}
 				</aside>
 			</div>
 
