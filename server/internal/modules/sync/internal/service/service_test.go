@@ -374,6 +374,36 @@ func TestPairBackUpAndRestoreOnAnotherNode(t *testing.T) {
 	}
 }
 
+func TestPairingAnEmptyNodeRestoresTheNewestBackup(t *testing.T) {
+	ctx := context.Background()
+	_, url := newCloud(t)
+
+	home := newNode(t, url)
+	home.seed(t)
+
+	if _, err := home.svc.Pair(ctx, pairingCode); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := home.svc.BackupNow(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	fresh := newNode(t, url)
+
+	if _, err := fresh.svc.Pair(ctx, pairingCode); err != nil {
+		t.Fatal(err)
+	}
+
+	for table, want := range map[string]int{
+		"tracker_entry": 2, "custom_list": 1, "custom_list_item": 1, "list_icon": 1,
+	} {
+		if got := fresh.count(t, table); got != want {
+			t.Errorf("%s after pairing an empty node: %d rows, want %d", table, got, want)
+		}
+	}
+}
+
 func TestRestoreRefusesANewerFormatAndKeepsTheState(t *testing.T) {
 	ctx := context.Background()
 	fake, url := newCloud(t)

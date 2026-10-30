@@ -1,7 +1,9 @@
 import { createMutation, createQuery, keepFresh } from '@farfetched/core'
-import { combine, createEvent, createStore, sample } from 'effector'
+import { combine, createEffect, createEvent, createStore, sample } from 'effector'
 
 import { nodeTopic } from '@infra/node'
+
+import { sessionModel } from '@entities/session'
 
 import {
 	backUpNowFx,
@@ -49,6 +51,20 @@ keepFresh(backupsQuery, {
 keepFresh(devicesQuery, {
 	triggers: [pairMutation.finished.success, revokeDeviceMutation.finished.success]
 })
+
+// Signing in turns backups on for this computer, so a new one picks the user's
+// lists up by itself: the node restores the newest snapshot when it holds
+// nothing yet. Only an explicit sign-in does this — a session restored at start
+// keeps whatever the user last chose, "off" included.
+const linkedFx = createEffect(async () => (await fetchSyncStatusFx()).linked)
+
+sample({
+	clock: [sessionModel.authenticated, sessionModel.emailVerified],
+	filter: account => account.email_verified,
+	target: linkedFx
+})
+
+sample({ clock: linkedFx.doneData, filter: linked => !linked, target: pairMutation.start })
 
 export const cloudHealthQuery = createQuery({ effect: fetchCloudHealthFx, name: 'cloudHealth' })
 

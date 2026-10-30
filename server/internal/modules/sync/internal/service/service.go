@@ -166,6 +166,12 @@ func (s *Service) Pair(ctx context.Context, code string) (*Paired, error) {
 
 	token := resp.JSON201.DeviceToken
 
+	// Held from before the token is set: the automatic loop must not upload this
+	// node's empty state ahead of the restore below, or that empty snapshot would
+	// become the newest one.
+	s.busy.Lock()
+	defer s.busy.Unlock()
+
 	if err := s.secrets.Set(DeviceTokenSecret, token); err != nil {
 		return nil, apperr.Wrap(err, apperr.KindInternal, "save device token")
 	}
@@ -185,6 +191,10 @@ func (s *Service) Pair(ctx context.Context, code string) (*Paired, error) {
 	s.mu.Unlock()
 
 	s.publish("paired")
+
+	if err := s.restoreLatestIfEmpty(ctx); err != nil {
+		s.logger.Warn().Err(err).Msg("automatic restore after pairing")
+	}
 
 	return &Paired{DeviceID: resp.JSON201.Device.Id.String(), Label: resp.JSON201.Device.Label}, nil
 }
@@ -305,6 +315,42 @@ func (s *Service) Restore(ctx context.Context, id uuid.UUID) error {
 	s.busy.Lock()
 	defer s.busy.Unlock()
 
+	return s.restore(ctx, id)
+}
+
+// restoreLatestIfEmpty brings the account's newest snapshot onto a node that
+// holds nothing yet — a new computer. A node with any data of its own is left
+// alone: overwriting it is the user's call, through Restore.
+func (s *Service) restoreLatestIfEmpty(ctx context.Context) error {
+	doc, err := s.store.Read(ctx)
+	if err != nil {
+		return err
+	}
+
+	if len(doc.TrackerEntries) > 0 || len(doc.CustomLists) > 0 {
+		return nil
+	}
+
+	backups, err := s.List(ctx)
+	if err != nil {
+		return err
+	}
+
+	if len(backups) == 0 {
+		return nil
+	}
+
+	latest := backups[0]
+	for _, backup := range backups[1:] {
+		if backup.CreatedAt.After(latest.CreatedAt) {
+			latest = backup
+		}
+	}
+
+	return s.restore(ctx, latest.Id)
+}
+
+func (s *Service) restore(ctx context.Context, id uuid.UUID) error {
 	resp, err := s.cloud.API().DownloadBackupWithResponse(ctx, id)
 	if err != nil {
 		return apperr.Wrap(err, apperr.KindUpstream, "cloud is unreachable")
