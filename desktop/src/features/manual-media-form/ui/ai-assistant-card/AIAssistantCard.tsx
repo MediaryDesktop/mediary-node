@@ -20,6 +20,9 @@ export interface AIAssistantCardProps {
 	onFillModeChange: (value: FillModeValue) => void
 	onGenerate: () => void
 	pending: boolean
+	// The AI is asked about a kind of title; without one it would answer for the
+	// wrong one, so the button waits.
+	typeMissing?: boolean
 	disabled?: boolean
 }
 
@@ -29,6 +32,7 @@ export function AIAssistantCard({
 	onFillModeChange,
 	onGenerate,
 	pending,
+	typeMissing = false,
 	disabled
 }: AIAssistantCardProps) {
 	const { t } = useTranslation()
@@ -41,7 +45,21 @@ export function AIAssistantCard({
 		}
 	}, [load, nodeReady])
 
-	const ready = settings?.enabled && settings.key_source === 'user'
+	const ready = settings?.ready ?? false
+
+	// The free AI shows what is left of today's allowance; an own key, the model.
+	const detail = !settings
+		? null
+		: settings.provider === 'cloud'
+			? settings.cloud.known && settings.cloud.enabled
+				? t('manualMedia.assistant.remaining', {
+						remaining: settings.cloud.remaining,
+						limit: settings.cloud.limit
+					})
+				: null
+			: settings.provider === 'openai'
+				? settings.openai.model || null
+				: settings[settings.provider].model
 
 	return (
 		<section className={styles.card}>
@@ -58,7 +76,7 @@ export function AIAssistantCard({
 					aria-label={t('manualMedia.assistant.settings')}
 					title={t('manualMedia.assistant.settings')}
 				>
-					{settings?.model && <span className={styles.model}>{settings.model}</span>}
+					{detail && <span className={styles.model}>{detail}</span>}
 					<Icon name='common/settings' size={15} />
 				</Link>
 			</div>
@@ -101,12 +119,14 @@ export function AIAssistantCard({
 							fullWidth
 							startIcon={<Icon name='common/wand-sparkles' size={18} />}
 							loading={pending}
-							disabled={disabled || !settings}
+							disabled={disabled || !settings || typeMissing}
 							onClick={onGenerate}
 						>
 							{t(mode === 'create' ? 'manualMedia.ai.action' : 'manualMedia.ai.regenerate')}
 						</Button>
 					)}
+
+					{typeMissing && <p className={styles.typeHint}>{t('manualMedia.assistant.needsType')}</p>}
 				</>
 			)}
 		</section>

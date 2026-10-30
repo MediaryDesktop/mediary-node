@@ -31,6 +31,10 @@ export interface IdentityCardProps {
 	onChange: (patch: Partial<ManualDraft>) => void
 	coverUrl: string | null
 	lockType: boolean
+	// False while the draft only holds a placeholder kind: no tile is selected,
+	// so nothing looks chosen that the user never chose.
+	typePicked: boolean
+	typeError?: string
 	titleError?: string
 	disabled?: boolean
 	onPickCover: (selection: CoverSelection & { kind: 'data' }) => void
@@ -41,6 +45,8 @@ export function IdentityCard({
 	onChange,
 	coverUrl,
 	lockType,
+	typePicked,
+	typeError,
 	titleError,
 	disabled,
 	onPickCover
@@ -117,17 +123,33 @@ export function IdentityCard({
 			/>
 
 			<div className={styles.fields}>
-				<Field label={t('manualMedia.fields.title')} required>
-					<Input
-						className={styles.titleInput}
-						value={draft.title}
-						onChange={event => onChange({ title: event.target.value })}
-						placeholder={t('manualMedia.fields.titlePlaceholder')}
-						error={titleError}
-						disabled={disabled}
-						maxLength={300}
-					/>
-				</Field>
+				<div className={styles.titleRow}>
+					<Field label={t('manualMedia.type')} required>
+						<SelectDropdown
+							options={typeOptions}
+							value={typePicked ? draft.media_type : null}
+							onChange={value =>
+								!lockType && value && onChange({ media_type: value as ManualMediaType })
+							}
+							placeholder={t('manualMedia.typePlaceholder')}
+							error={typeError}
+							disabled={disabled || lockType}
+							accentWhenSelected
+						/>
+					</Field>
+
+					<Field label={t('manualMedia.fields.title')} required>
+						<Input
+							className={styles.titleInput}
+							value={draft.title}
+							onChange={event => onChange({ title: event.target.value })}
+							placeholder={t('manualMedia.fields.titlePlaceholder')}
+							error={titleError}
+							disabled={disabled}
+							maxLength={300}
+						/>
+					</Field>
+				</div>
 
 				<Field label={t('manualMedia.fields.originalTitle')}>
 					<Input
@@ -140,18 +162,6 @@ export function IdentityCard({
 				</Field>
 
 				<div className={styles.row}>
-					<Field label={t('manualMedia.type')}>
-						<SelectDropdown
-							options={typeOptions}
-							value={draft.media_type}
-							onChange={value =>
-								!lockType && value && onChange({ media_type: value as ManualMediaType })
-							}
-							disabled={disabled || lockType}
-							accentWhenSelected
-						/>
-					</Field>
-
 					<Field label={t('manualMedia.fields.year')}>
 						<Input
 							type='number'

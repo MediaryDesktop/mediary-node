@@ -35,6 +35,22 @@
 	box-shadow: var(--shadow-sm);
 }
 
+.pending {
+	display: flex;
+	align-items: center;
+	gap: 0.875rem;
+	padding: 1.25rem 1.5rem;
+	border: 1.5px dashed var(--border-strong);
+	border-radius: var(--radius-lg);
+	color: var(--text-secondary);
+
+	p {
+		margin: 0;
+		font-size: 0.875rem;
+		font-weight: 600;
+	}
+}
+
 .basicGrid {
 	display: grid;
 	grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);

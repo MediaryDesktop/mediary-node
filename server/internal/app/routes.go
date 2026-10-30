@@ -26,7 +26,6 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/platform/safehttp"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anizip"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/claude"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/googlebooks"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/gutenberg"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/imagesearch"
@@ -49,7 +48,7 @@ type Deps struct {
 	OpenLibrary         *openlibrary.Client
 	GoogleBooks         *googlebooks.Client
 	Gutenberg           *gutenberg.Client
-	Claude              *claude.Client
+	AI                  media.AIProviders
 	ImageSearch         *imagesearch.Client
 	AniListClientID     string
 	AniListAuthorizeURL string
@@ -96,7 +95,7 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 		OpenLibrary: deps.OpenLibrary,
 		GoogleBooks: deps.GoogleBooks,
 		Forget:      forget,
-		Claude:      deps.Claude,
+		AI:          deps.AI,
 
 		// Posters are kept beside the data; with no data dir — the OpenAPI export
 		// — there is nowhere to keep them, and the routes still register.

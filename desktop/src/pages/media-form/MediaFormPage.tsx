@@ -14,15 +14,20 @@ import type { ManualMediaType } from '@features/manual-media-form'
 import styles from './MediaFormPage.module.scss'
 
 export type MediaFormPageProps =
-	{ mode: 'create'; mediaType: ManualMediaType; title: string } | { mode: 'edit'; mediaRef: string }
+	// A create with no kind leaves the choice to the user rather than defaulting
+	// to one, which they would not notice was wrong.
+	{ mode: 'create'; mediaType?: ManualMediaType; title: string } | { mode: 'edit'; mediaRef: string }
 
 export function MediaFormPage(props: MediaFormPageProps) {
 	if (props.mode === 'create') {
 		return (
 			<PageTransition className={styles.root}>
 				<ManualMediaForm
+					// A different kind in the address is a different form, not an edit of this one.
+					key={props.mediaType ?? 'unset'}
 					mode='create'
-					initialDraft={{ media_type: props.mediaType, title: props.title }}
+					typeUnset={props.mediaType === undefined}
+					initialDraft={{ media_type: props.mediaType ?? 'anime', title: props.title }}
 					cancelTo='/search'
 				/>
 			</PageTransition>

@@ -161,10 +161,7 @@ type BraveKeyInput struct {
 }
 
 type AISettingsInput struct {
-	Body struct {
-		APIKey *string `json:"api_key,omitempty" maxLength:"1024" doc:"The user's own Anthropic API key. Anthropic is asked to accept it before it is stored. Empty forgets it; left out keeps the one stored."`
-		Model  *string `json:"model,omitempty" doc:"The model to answer with, one of the settings' models. Left out keeps the one chosen."`
-	}
+	Body service.AISettingsUpdate
 }
 
 func (h *Handler) registerManual(api huma.API) {
@@ -211,8 +208,8 @@ func (h *Handler) registerManual(api huma.API) {
 		OperationID: "suggestManualMedia",
 		Method:      http.MethodPost,
 		Path:        "/v1/media/manual/suggest",
-		Summary:     "Ask Claude to fill in a title",
-		Description: "Asks Claude, with the user's own Anthropic key, what it knows about a title from its kind and name. The answer is a draft and nothing is stored: the client shows it for the user to check, then creates or updates the title as usual. A title Claude does not know comes back with recognized false and little else. Without a key the node answers 428.",
+		Summary:     "Ask the AI to fill in a title",
+		Description: "Asks the AI the user chose — Mediary's free AI through the cloud, or their own Claude, Gemini or OpenAI-compatible endpoint — what it knows about a title from its kind and name. The answer is a draft and nothing is stored: the client shows it for the user to check, then creates or updates the title as usual. A title the AI does not know comes back with recognized false and little else. When the chosen AI is not set up the node answers 428; when the free AI's daily allowance is spent, 429.",
 		Tags:        []string{"media"},
 	}, func(ctx context.Context, in *SuggestInput) (*SuggestOutput, error) {
 		suggestion, err := h.svc.SuggestManual(ctx, in.Body)
@@ -227,11 +224,11 @@ func (h *Handler) registerManual(api huma.API) {
 		OperationID: "getAISettings",
 		Method:      http.MethodGet,
 		Path:        "/v1/ai/settings",
-		Summary:     "Claude connection",
-		Description: "Whether titles can be filled in by Claude, with which model, and whether the user saved a key. The key itself is never returned.",
+		Summary:     "AI connection",
+		Description: "Which AI fills in titles, whether it can answer now, and how each one is set up — the free AI's daily allowance, and for the others whether the user saved a key and which model answers. Keys are never returned.",
 		Tags:        []string{"media"},
-	}, func(_ context.Context, _ *struct{}) (*AISettingsOutput, error) {
-		settings, err := h.svc.AISettings()
+	}, func(ctx context.Context, _ *struct{}) (*AISettingsOutput, error) {
+		settings, err := h.svc.AISettings(ctx)
 		if err != nil {
 			return nil, httpapi.ToHTTP(err)
 		}
@@ -243,11 +240,11 @@ func (h *Handler) registerManual(api huma.API) {
 		OperationID: "setAISettings",
 		Method:      http.MethodPut,
 		Path:        "/v1/ai/settings",
-		Summary:     "Set up Claude",
-		Description: "Stores the user's own Anthropic key after Anthropic has accepted it, in a file only the user can read, never in the database or a backup, and the model to answer with. A key Anthropic refuses is not stored and answers 428.",
+		Summary:     "Set up the AI",
+		Description: "Chooses the AI that fills in titles and stores each provider's key once the provider has accepted it, in a file only the user can read, never in the database or a backup. A key a provider refuses is not stored and answers 428.",
 		Tags:        []string{"media"},
 	}, func(ctx context.Context, in *AISettingsInput) (*AISettingsOutput, error) {
-		settings, err := h.svc.SetAISettings(ctx, in.Body.APIKey, in.Body.Model)
+		settings, err := h.svc.SetAISettings(ctx, in.Body)
 		if err != nil {
 			return nil, httpapi.ToHTTP(err)
 		}

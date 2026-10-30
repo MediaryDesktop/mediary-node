@@ -15,7 +15,6 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anizip"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/claude"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/googlebooks"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/imagesearch"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/openlibrary"
@@ -55,9 +54,9 @@ type Options struct {
 	// title's reference. Nil leaves it to the caller.
 	Forget Forgetter
 
-	// Claude fills in a title the user describes by hand. Nil when the node
-	// turned it off; the user can still describe the title themselves.
-	Claude *claude.Client
+	// AI fills in a title the user describes by hand, with whichever provider
+	// the user chose. Without one the user still describes the title themselves.
+	AI AIProviders
 
 	// Images finds posters for a manual title; nil leaves the user to paste an
 	// address or pick a file.

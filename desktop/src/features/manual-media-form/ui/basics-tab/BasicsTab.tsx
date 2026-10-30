@@ -48,7 +48,11 @@ export function BasicsTab({ draft, onChange, aiFilled, errors, disabled }: Basic
 				<h3 className={styles.title}>{t('manualMedia.sections.params')}</h3>
 
 				<div className={styles.grid}>
-					<Field label={t('manualMedia.fields.format')} ai={aiFilled.has('format')}>
+					<Field
+						label={t('manualMedia.fields.format')}
+						ai={aiFilled.has('format')}
+						error={errors.format}
+					>
 						<SelectDropdown
 							options={formatOptions}
 							value={draft.format ?? null}

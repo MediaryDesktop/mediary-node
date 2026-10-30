@@ -14,6 +14,7 @@ import (
 	"github.com/anthropics/anthropic-sdk-go/v2/option"
 	"github.com/anthropics/anthropic-sdk-go/v2/shared/constant"
 
+	"github.com/mediaryorg/mediary-node/server/internal/platform/ai"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/secrets"
 )
@@ -117,19 +118,10 @@ func (c *Client) Check(ctx context.Context, key string) error {
 	return nil
 }
 
-type Request struct {
-	System string
-	Prompt string
-
-	// Schema is the JSON schema the answer must follow: every object closed with
-	// additionalProperties false and every property required.
-	Schema map[string]any
-}
-
-type Answer struct {
-	JSON  []byte
-	Model string
-}
+type (
+	Request = ai.Request
+	Answer  = ai.Answer
+)
 
 // Structured asks for one answer that follows the request's schema.
 func (c *Client) Structured(ctx context.Context, request Request) (*Answer, error) {

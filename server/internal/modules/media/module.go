@@ -13,7 +13,6 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/modules/media/internal/store"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anizip"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/claude"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/googlebooks"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/imagesearch"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/openlibrary"
@@ -34,8 +33,8 @@ type Deps struct {
 	// reference — its entry on the user's list. Wired by internal/app.
 	Forget Forgetter
 
-	// Claude fills in a title the user describes by hand; nil turns that off.
-	Claude *claude.Client
+	// AI fills in a title the user describes by hand.
+	AI AIProviders
 
 	// Images finds posters for manual titles; Fetch downloads the one picked and
 	// must refuse the local network. CoverDir keeps them, and CoverURL is where a
@@ -60,6 +59,9 @@ type MediaDetails = service.MediaDetails
 
 type EpisodeList = service.EpisodeList
 
+// AIProviders is every model that can fill in a title, wired by internal/app.
+type AIProviders = service.AIProviders
+
 // DoramaCountries are where a live-action show has to come from to be a dorama.
 var DoramaCountries = service.DoramaCountries
 
@@ -71,7 +73,7 @@ func New(deps Deps) *Module {
 		OpenLibrary: deps.OpenLibrary,
 		GoogleBooks: deps.GoogleBooks,
 		Forget:      deps.Forget,
-		Claude:      deps.Claude,
+		AI:          deps.AI,
 		Images:      deps.Images,
 		Fetch:       deps.Fetch,
 		CoverDir:    deps.CoverDir,

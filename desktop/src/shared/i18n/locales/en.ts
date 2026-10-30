@@ -792,11 +792,13 @@ export const en = {
 	manualMedia: {
 		createTitle: 'Add a title',
 		createSubtitle:
-			'Create a title no source knows. Fill in the minimum and let Claude help with the rest.',
+			'Create a title no source knows. Fill in the minimum and let AI help with the rest.',
 		editTitle: 'Edit title',
 		editSubtitle: 'It is your own data — changes save to this title only.',
 		type: 'Kind',
 		typeLocked: 'The kind cannot change once a title is saved.',
+		typePending: 'Choose what kind of title this is to fill in the rest.',
+		typePlaceholder: 'Choose a kind…',
 		save: 'Save',
 		saved: 'Title added',
 		updated: 'Title updated',
@@ -849,7 +851,7 @@ export const en = {
 		},
 		mode: {
 			label: 'How to fill this in',
-			ai: 'Fill with Claude',
+			ai: 'Fill with AI',
 			aiHint: 'Fill the fields in automatically',
 			manual: 'By hand',
 			manualHint: 'Fill everything in yourself'
@@ -872,28 +874,33 @@ export const en = {
 			additional: 'Additional'
 		},
 		validation: {
-			titleRequired: 'A title needs a name'
+			titleRequired: 'A title needs a name',
+			typeRequired: 'Choose a kind first: anime, manga, a book…'
 		},
 		ai: {
-			action: 'Fill with Claude',
+			action: 'Fill with AI',
 			regenerate: 'Regenerate',
-			working: 'Asking Claude…',
-			recognized: 'Claude filled in what it knows',
-			unrecognized: 'Claude does not recognise this title — only your own words were kept',
-			failed: 'Could not reach Claude',
-			needsKey: 'Add your Anthropic key in Settings to use this',
-			openSettings: 'Open Claude settings',
-			filledBadge: 'Claude'
+			working: 'Asking the AI…',
+			recognized: 'The AI filled in what it knows',
+			unrecognized: 'The AI does not recognise this title — only your own words were kept',
+			failed: 'Could not reach the AI',
+			needsKey: 'Set up the AI in Settings to use this',
+			openSettings: 'Open AI settings',
+			limitReached: "Today's free AI requests are used up",
+			addOwn: 'Add your own AI',
+			filledBadge: 'AI'
 		},
 		assistant: {
-			title: 'Claude assistant',
+			title: 'AI assistant',
 			description:
-				'Fill the form automatically. Claude picks metadata, genres, a description and more, from the title and its kind.',
+				'Fill the form automatically. The AI picks metadata, genres, a description and more, from the title and its kind.',
 			checklistBasics: 'Fills in the basic fields',
 			checklistGenres: 'Picks genres and writes a description',
 			checklistCover: 'Suggests posters to pick from',
-			needsKey: 'Add your Claude key to use this',
-			settings: 'Claude settings'
+			needsType: 'Choose a kind first',
+			needsKey: 'Set up the AI to use this',
+			remaining: '{{remaining}} of {{limit}} left today',
+			settings: 'AI settings'
 		},
 		cover: {
 			title: 'Poster',
@@ -918,7 +925,8 @@ export const en = {
 			fromSearch: 'Picked from search',
 			fromUrl: 'Pasted address',
 			add: 'Add a poster',
-			addHint: 'or pick one below'
+			addHint: 'or pick one below',
+			needsType: 'Choose a kind first to search. You can still paste an address or upload a file.'
 		},
 		delete: {
 			action: 'Delete title',
@@ -1829,19 +1837,47 @@ export const en = {
 		note: 'Asked only when Open Library finds nothing: Google counts every request against a daily quota. The key stays in a file only you can read on this computer — not in backups.'
 	},
 	ai: {
-		source: {
-			user: 'Using your own key.',
-			none: "No key yet: titles you add yourself can't be filled in by Claude until you add one."
+		providerLabel: 'The AI that fills in titles',
+		providers: {
+			cloud: 'Mediary AI',
+			claude: 'Claude',
+			gemini: 'Gemini',
+			openai: 'OpenAI-compatible'
 		},
-		keyPlaceholder: 'Anthropic API key',
-		save: 'Check and save',
-		getKey: 'Get a key on the Anthropic console',
-		useBuiltIn: 'Remove the key',
-		saved: 'Anthropic accepted the key',
+		cloud: {
+			remaining: 'Free: {{remaining}} of {{limit}} requests left today',
+			renews: 'Renews at {{time}}',
+			notLinked:
+				'The free AI comes with a Mediary account. Sign in and pair this computer in Backup to use it.',
+			pair: 'Pair this computer',
+			unknown: "Could not reach Mediary Cloud to check today's allowance.",
+			unavailable: 'Mediary Cloud does not offer AI right now. Choose another AI above.',
+			privacy:
+				'What you type about a title goes through Mediary Cloud to Google Gemini to fill it in. Nothing is stored.'
+		},
+		key: {
+			configured: 'Using your own key.',
+			missing: 'No key yet: add one to use {{provider}}.',
+			placeholder: '{{provider}} API key',
+			save: 'Check and save',
+			getKey: 'Get a key',
+			remove: 'Remove the key'
+		},
+		openai: {
+			configured: 'Requests go to {{endpoint}}.',
+			missing:
+				'Add the address and the model of any OpenAI-compatible server: OpenAI, OpenRouter, or Ollama and LM Studio on this computer.',
+			endpoint: 'Address',
+			modelPlaceholder: 'gpt-4.1-mini, llama3.1…',
+			key: 'API key',
+			keySaved: 'API key (saved)',
+			keyPlaceholder: 'Not needed for a local server'
+		},
+		saved: 'Saved',
 		cleared: 'Key removed',
-		saveFailed: 'Could not save the key',
-		disabled: 'Claude is turned off on this node.',
-		note: 'The key stays in a file only you can read on this computer — not in backups. Every request is paid for by this key’s own account; there is no key the build ships with.',
+		saveFailed: 'Could not save the AI settings',
+		disabled: '{{provider}} is turned off on this node.',
+		note: 'Keys stay in a file only you can read on this computer — not in backups. Requests on your own key are paid for by that key’s account.',
 		model: 'Model'
 	},
 	brave: {
@@ -1960,7 +1996,7 @@ export const en = {
 			},
 			manualMedia: {
 				title: 'Titles you add yourself',
-				subtitle: 'Claude filling in details, and posters'
+				subtitle: 'AI filling in details, and posters'
 			},
 			mangaDownloads: {
 				title: 'Manga downloads',
@@ -1984,8 +2020,8 @@ export const en = {
 			hint: 'Where books Open Library does not know are looked up'
 		},
 		ai: {
-			name: 'Claude key',
-			hint: 'Fills in a title you add yourself, with your own Anthropic key'
+			name: 'AI',
+			hint: 'Fills in a title you add yourself: free with a Mediary account, or with your own key'
 		},
 		brave: {
 			name: 'Brave Search key',

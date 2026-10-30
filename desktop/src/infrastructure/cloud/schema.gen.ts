@@ -308,6 +308,46 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/v1/ai/quota': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Read the daily AI allowance
+		 * @description How many AI requests the account has left today. Reading it spends nothing.
+		 */
+		get: operations['getAIQuota']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/ai/structured': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Ask the AI for a structured answer
+		 * @description Answers with one JSON document that follows the given schema, on the deployment's own key. Each account has a daily allowance; a request that fails is not counted against it. Nothing sent here is stored.
+		 */
+		post: operations['structuredCompletion']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/v1/backups': {
 		parameters: {
 			query?: never
@@ -763,6 +803,36 @@ export interface components {
 			 */
 			expires_at: string
 		}
+		QuotaBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/QuotaBody.json
+			 */
+			readonly $schema?: string
+			/** @description Whether this deployment offers AI at all. */
+			enabled: boolean
+			/**
+			 * Format: int64
+			 * @description Requests the account may make per day (UTC).
+			 */
+			limit: number
+			/**
+			 * Format: int64
+			 * @description Requests left today.
+			 */
+			remaining: number
+			/**
+			 * Format: date-time
+			 * @description When the count starts over: the next midnight UTC.
+			 */
+			resets_at: string
+			/**
+			 * Format: int64
+			 * @description Requests made today. Failed ones are not counted.
+			 */
+			used: number
+		}
 		RegisterInputBody: {
 			/**
 			 * Format: uri
@@ -823,6 +893,36 @@ export interface components {
 			/** @description The signed-in account. */
 			user: components['schemas']['Body']
 		}
+		StructuredInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/StructuredInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description JSON Schema the answer must follow. */
+			json_schema: {
+				[key: string]: unknown
+			}
+			/** @description The request itself. */
+			prompt: string
+			/** @description Instructions that frame the request. */
+			system?: string
+		}
+		StructuredOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/StructuredOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The answer: a JSON document that follows the schema. */
+			json: string
+			/** @description The model that answered. */
+			model: string
+			/** @description The account's allowance after this request. */
+			quota: components['schemas']['QuotaBody']
+		}
 	}
 	responses: never
 	parameters: never
@@ -851,10 +951,13 @@ export type SchemaOAuthProvidersOutputBody = components['schemas']['OAuthProvide
 export type SchemaOAuthStartInputBody = components['schemas']['OAuthStartInputBody']
 export type SchemaOAuthStartOutputBody = components['schemas']['OAuthStartOutputBody']
 export type SchemaPairingCodeOutputBody = components['schemas']['PairingCodeOutputBody']
+export type SchemaQuotaBody = components['schemas']['QuotaBody']
 export type SchemaRegisterInputBody = components['schemas']['RegisterInputBody']
 export type SchemaRequestPasswordResetInputBody = components['schemas']['RequestPasswordResetInputBody']
 export type SchemaRevokedOutputBody = components['schemas']['RevokedOutputBody']
 export type SchemaSessionBody = components['schemas']['SessionBody']
+export type SchemaStructuredInputBody = components['schemas']['StructuredInputBody']
+export type SchemaStructuredOutputBody = components['schemas']['StructuredOutputBody']
 export type $defs = Record<string, never>
 export interface operations {
 	listDevices: {
@@ -1723,6 +1826,131 @@ export interface operations {
 			}
 			/** @description Internal Server Error */
 			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getAIQuota: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['QuotaBody']
+				}
+			}
+			/** @description Unauthorized */
+			401: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Forbidden */
+			403: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	structuredCompletion: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['StructuredInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['StructuredOutputBody']
+				}
+			}
+			/** @description Unauthorized */
+			401: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Forbidden */
+			403: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Unprocessable Entity */
+			422: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Too Many Requests */
+			429: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Bad Gateway */
+			502: {
 				headers: {
 					[name: string]: unknown
 				}

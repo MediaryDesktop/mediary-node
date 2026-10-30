@@ -22,10 +22,15 @@ type Options struct {
 	DeviceToken string
 	Timeout     time.Duration
 	UserAgent   string
+
+	// AITimeout bounds an AI request, which waits on a model and takes far
+	// longer than anything else the node asks the cloud.
+	AITimeout time.Duration
 }
 
 type Client struct {
-	api *contracts.ClientWithResponses
+	api   *contracts.ClientWithResponses
+	aiAPI *contracts.ClientWithResponses
 
 	mu          sync.RWMutex
 	deviceToken string
@@ -37,6 +42,11 @@ func New(opts Options) (*Client, error) {
 		timeout = 20 * time.Second
 	}
 
+	aiTimeout := opts.AITimeout
+	if aiTimeout <= 0 {
+		aiTimeout = 90 * time.Second
+	}
+
 	userAgent := opts.UserAgent
 	if userAgent == "" {
 		userAgent = "mediary-node"
@@ -44,22 +54,34 @@ func New(opts Options) (*Client, error) {
 
 	client := &Client{deviceToken: opts.DeviceToken}
 
-	api, err := contracts.NewClientWithResponses(
-		opts.BaseURL,
-		contracts.WithHTTPClient(&http.Client{Timeout: timeout}),
-		contracts.WithRequestEditorFn(func(_ context.Context, req *http.Request) error {
-			req.Header.Set("User-Agent", userAgent)
-			if token := client.DeviceToken(); token != "" {
-				req.Header.Set(DeviceTokenHeader, token)
-			}
-			return nil
-		}),
-	)
-	if err != nil {
-		return nil, fmt.Errorf("build cloud client: %w", err)
+	build := func(timeout time.Duration) (*contracts.ClientWithResponses, error) {
+		api, err := contracts.NewClientWithResponses(
+			opts.BaseURL,
+			contracts.WithHTTPClient(&http.Client{Timeout: timeout}),
+			contracts.WithRequestEditorFn(func(_ context.Context, req *http.Request) error {
+				req.Header.Set("User-Agent", userAgent)
+				if token := client.DeviceToken(); token != "" {
+					req.Header.Set(DeviceTokenHeader, token)
+				}
+				return nil
+			}),
+		)
+		if err != nil {
+			return nil, fmt.Errorf("build cloud client: %w", err)
+		}
+
+		return api, nil
 	}
 
-	client.api = api
+	var err error
+
+	if client.api, err = build(timeout); err != nil {
+		return nil, err
+	}
+
+	if client.aiAPI, err = build(aiTimeout); err != nil {
+		return nil, err
+	}
 
 	return client, nil
 }

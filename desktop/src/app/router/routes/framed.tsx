@@ -99,7 +99,7 @@ const createManualMediaRoute = createRoute({
 	}),
 	component: function CreateManualMediaScreen() {
 		const { type, title } = createManualMediaRoute.useSearch()
-		return <MediaFormPage mode='create' mediaType={type ?? 'anime'} title={title ?? ''} />
+		return <MediaFormPage mode='create' mediaType={type} title={title ?? ''} />
 	}
 })
 

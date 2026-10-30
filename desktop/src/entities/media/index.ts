@@ -48,7 +48,9 @@ export {
 	updateManualMediaFx
 } from './api/api'
 export type {
+	AIProvider,
 	AISettings,
+	SetAISettingsParams,
 	CoverImage,
 	CoverSource,
 	GoogleBooksSettings,

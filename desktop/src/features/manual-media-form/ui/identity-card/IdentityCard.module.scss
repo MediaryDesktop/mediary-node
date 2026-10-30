@@ -104,6 +104,17 @@
 	gap: 1rem;
 }
 
+.titleRow {
+	display: grid;
+	grid-template-columns: minmax(11rem, 14rem) minmax(0, 1fr);
+	align-items: start;
+	gap: 1rem;
+
+	@media (max-width: 760px) {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
 .lockHint {
 	display: inline-flex;
 	align-items: center;

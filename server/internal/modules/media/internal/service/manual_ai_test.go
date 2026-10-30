@@ -14,6 +14,7 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/secrets"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/claude"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/openai"
 )
 
 // withClaude points the harness at a fake Anthropic that answers every message
@@ -48,7 +49,10 @@ func withClaude(t *testing.T, h *detailsHarness, answer string) *[]map[string]an
 		t.Fatalf("store key: %v", err)
 	}
 
-	h.svc.opts.Claude = client
+	h.svc.opts.AI = AIProviders{
+		Store:  secrets.New(filepath.Join(t.TempDir(), "ai-secrets.json")),
+		Claude: client,
+	}
 
 	return asked
 }
@@ -130,16 +134,36 @@ func TestAnAnswerOutOfRangeFallsBackToTheHint(t *testing.T) {
 	}
 }
 
-func TestSuggestingNeedsClaude(t *testing.T) {
+func TestTheFreeAIIsTheDefaultAndNeedsACloudAccount(t *testing.T) {
 	h := newDetailsHarness(t)
 
 	if _, err := h.svc.SuggestManual(context.Background(), ManualHint{MediaType: "movie", Title: "x"}); apperr.KindOf(err) != apperr.KindPrecondition {
-		t.Fatalf("a node with Claude off answers 428, got %v", err)
+		t.Fatalf("a node that cannot reach any AI answers 428, got %v", err)
 	}
 
-	settings, err := h.svc.AISettings()
-	if err != nil || settings.Enabled || settings.KeySource != "none" || len(settings.Models) == 0 {
-		t.Fatalf("settings %+v %v", settings, err)
+	settings, err := h.svc.AISettings(context.Background())
+	if err != nil || settings.Provider != ProviderCloud || settings.Ready || settings.Cloud.Linked {
+		t.Fatalf("with nothing set up the free AI is chosen and not ready: %+v %v", settings, err)
+	}
+	if len(settings.Claude.Models) == 0 || len(settings.Gemini.Models) == 0 {
+		t.Fatalf("the models are listed even before a key is saved: %+v", settings)
+	}
+}
+
+func TestASavedClaudeKeyKeepsClaudeUntilTheUserChoosesAgain(t *testing.T) {
+	h := newDetailsHarness(t)
+	withClaude(t, h, knownTitle)
+
+	settings, err := h.svc.AISettings(context.Background())
+	if err != nil || settings.Provider != ProviderClaude || !settings.Ready {
+		t.Fatalf("someone who already saved a Claude key keeps Claude: %+v %v", settings, err)
+	}
+
+	cloudChoice := ProviderCloud
+
+	settings, err = h.svc.SetAISettings(context.Background(), AISettingsUpdate{Provider: &cloudChoice})
+	if err != nil || settings.Provider != ProviderCloud || !settings.Claude.Configured {
+		t.Fatalf("choosing the free AI keeps the Claude key for later: %+v %v", settings, err)
 	}
 }
 
@@ -149,11 +173,61 @@ func TestSettingsStoreTheModelAndForgetTheKey(t *testing.T) {
 
 	haiku, empty := "claude-haiku-5-5", ""
 
-	settings, err := h.svc.SetAISettings(context.Background(), &empty, &haiku)
+	settings, err := h.svc.SetAISettings(context.Background(), AISettingsUpdate{
+		Claude: &AIKeyUpdate{APIKey: &empty, Model: &haiku},
+	})
 	if err != nil {
 		t.Fatalf("set: %v", err)
 	}
-	if settings.Model != haiku || settings.KeySource != "none" {
-		t.Fatalf("settings %+v", settings)
+	if settings.Claude.Model != haiku || settings.Claude.Configured {
+		t.Fatalf("settings %+v", settings.Claude)
+	}
+	if settings.Provider != ProviderCloud {
+		t.Fatalf("without a Claude key or a choice, the free AI answers: %s", settings.Provider)
+	}
+}
+
+func TestAnOpenAICompatibleEndpointFillsInATitle(t *testing.T) {
+	h := newDetailsHarness(t)
+
+	var asked map[string]any
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		if r.URL.Path == "/v1/models" {
+			_, _ = w.Write([]byte(`{"data":[]}`))
+			return
+		}
+
+		raw, _ := io.ReadAll(r.Body)
+		_ = json.Unmarshal(raw, &asked)
+
+		text, _ := json.Marshal("```json\n" + knownTitle + "\n```")
+		_, _ = w.Write([]byte(`{"model":"llama-test","choices":[{"finish_reason":"stop","message":{"content":` + string(text) + `}}]}`))
+	}))
+	t.Cleanup(server.Close)
+
+	store := secrets.New(filepath.Join(t.TempDir(), "ai-secrets.json"))
+	h.svc.opts.AI = AIProviders{Store: store, OpenAI: openai.New(openai.Options{Timeout: 5 * time.Second, Store: store})}
+
+	choice, endpoint, model := ProviderOpenAI, server.URL+"/v1/", "llama-test"
+
+	settings, err := h.svc.SetAISettings(context.Background(), AISettingsUpdate{
+		Provider: &choice,
+		OpenAI:   &OpenAIUpdate{Endpoint: &endpoint, Model: &model},
+	})
+	if err != nil || !settings.Ready || settings.OpenAI.HasKey || settings.OpenAI.Endpoint != server.URL+"/v1" {
+		t.Fatalf("a local endpoint needs no key: %+v %v", settings, err)
+	}
+
+	suggestion, err := h.svc.SuggestManual(context.Background(), ManualHint{MediaType: "movie", Title: "Home Video"})
+	if err != nil || !suggestion.Recognized || suggestion.Model != "llama-test" {
+		t.Fatalf("suggestion %+v %v", suggestion, err)
+	}
+
+	format, _ := asked["response_format"].(map[string]any)
+	if format["type"] != "json_schema" {
+		t.Fatalf("the schema is asked for: %v", asked["response_format"])
 	}
 }

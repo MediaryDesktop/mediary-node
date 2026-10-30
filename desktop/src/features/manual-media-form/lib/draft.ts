@@ -250,7 +250,7 @@ function filledCount(
 // What the completeness ring counts: a handful of fields no title should miss,
 // a few that make it easier to find and browse, and the rest — each only as
 // useful as the one before it, never required to save.
-export function completeness(draft: ManualDraft, hasCover: boolean): Completeness {
+export function completeness(draft: ManualDraft, hasCover: boolean, typePicked = true): Completeness {
 	const main = mainCountField(draft.media_type) ?? 'duration'
 	const credits = draft.media_type === 'manga' || draft.media_type === 'book' ? 'authors' : 'studios'
 
@@ -269,11 +269,28 @@ export function completeness(draft: ManualDraft, hasCover: boolean): Completenes
 		additionalFields.push('seasons')
 	}
 
+	const required = filledCount(draft, hasCover, ['title', 'media_type', 'year', 'status'])
+
+	// Before the kind is picked the draft carries a placeholder one, which must
+	// not count as the user's answer.
+	if (!typePicked) {
+		required.filled--
+	}
+
 	return {
-		required: filledCount(draft, hasCover, ['title', 'media_type', 'year', 'status']),
+		required,
 		recommended: filledCount(draft, hasCover, ['format', 'genres', 'description', 'cover', main]),
 		additional: filledCount(draft, hasCover, additionalFields)
 	}
+}
+
+// The format a draft keeps after its kind changes: a book cannot stay an OVA,
+// and the node refuses the pair, so the stale one is dropped.
+export function formatAfterTypeChange(
+	type: ManualMediaType,
+	format: ManualDraft['format']
+): ManualDraft['format'] {
+	return format && MANUAL_FORMATS[type].includes(format) ? format : undefined
 }
 
 // What tells Claude apart one same-named title from another, built from

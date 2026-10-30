@@ -20,6 +20,9 @@ const (
 
 	KindUnavailable Kind = "unavailable"
 
+	// An allowance someone else sets — the cloud's daily AI requests — is spent.
+	KindRateLimited Kind = "rate_limited"
+
 	KindUpstream Kind = "upstream"
 
 	KindInternal Kind = "internal"

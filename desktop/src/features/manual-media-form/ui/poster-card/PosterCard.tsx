@@ -25,6 +25,9 @@ export interface PosterCardProps {
 	existingCoverUrl?: string | null
 	selection: CoverSelection
 	onChange: (selection: CoverSelection) => void
+	// Searching looks for posters of one kind; pasting an address or choosing a
+	// file does not, so only the search waits for it.
+	typeMissing?: boolean
 	disabled?: boolean
 }
 
@@ -37,6 +40,7 @@ export function PosterCard({
 	existingCoverUrl,
 	selection,
 	onChange,
+	typeMissing = false,
 	disabled
 }: PosterCardProps) {
 	const { t } = useTranslation()
@@ -110,7 +114,9 @@ export function PosterCard({
 						className={styles.searchForm}
 						onSubmit={event => {
 							event.preventDefault()
-							runSearch()
+							if (!typeMissing) {
+								runSearch()
+							}
 						}}
 					>
 						<Input
@@ -126,11 +132,13 @@ export function PosterCard({
 							iconOnly
 							aria-label={t('manualMedia.cover.search')}
 							loading={searching}
-							disabled={disabled}
+							disabled={disabled || typeMissing}
 						>
 							<Icon name='common/search' size={18} />
 						</Button>
 					</form>
+
+					{typeMissing && <p className={styles.hint}>{t('manualMedia.cover.needsType')}</p>}
 
 					{searching && <p className={styles.hint}>{t('manualMedia.cover.searching')}</p>}
 					{!searching && failed && <p className={styles.hint}>{t('manualMedia.cover.failed')}</p>}

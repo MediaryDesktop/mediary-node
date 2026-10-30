@@ -34,6 +34,7 @@ type Config struct {
 	GoogleBooks GoogleBooks
 	Gutenberg   Gutenberg
 	Claude      Claude
+	AI          AI
 	ImageSearch ImageSearch
 	Log         Log
 }
@@ -53,6 +54,15 @@ type ImageSearch struct {
 type Claude struct {
 	Endpoint string        `env:"NODE_CLAUDE_ENDPOINT" envDefault:"https://api.anthropic.com"`
 	Timeout  time.Duration `env:"NODE_CLAUDE_TIMEOUT"  envDefault:"90s"`
+}
+
+// AI is everything else that can fill in a title: Gemini and any
+// OpenAI-compatible endpoint with the user's own key, and the cloud's free AI
+// on its key. The timeout covers all of them; an empty Gemini endpoint turns
+// the user's own Gemini off.
+type AI struct {
+	GeminiEndpoint string        `env:"NODE_GEMINI_ENDPOINT" envDefault:"https://generativelanguage.googleapis.com"`
+	Timeout        time.Duration `env:"NODE_AI_TIMEOUT"      envDefault:"90s"`
 }
 
 type AniList struct {

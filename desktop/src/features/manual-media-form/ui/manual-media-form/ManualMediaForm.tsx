@@ -1,4 +1,5 @@
 import { useNavigate } from '@tanstack/react-router'
+import { useUnit } from 'effector-react'
 import { useState } from 'react'
 
 import { getApiProblems, HttpRequestError, problemDetail } from '@shared/api'
@@ -7,6 +8,7 @@ import { useGoBack } from '@shared/lib'
 import { Button, Icon, Modal, PageHeader, Tabs, Textarea, toast } from '@shared/ui'
 
 import {
+	aiSettingsQuery,
 	createManualMediaFx,
 	deleteManualCoverFx,
 	deleteManualMediaFx,
@@ -16,7 +18,7 @@ import {
 } from '@entities/media'
 import type { ManualDraft, ManualHint } from '@entities/media'
 
-import { completeness, hintNote, manualId, mergeSuggestion } from '../../lib/draft'
+import { completeness, formatAfterTypeChange, hintNote, manualId, mergeSuggestion } from '../../lib/draft'
 import type { AiMergeField } from '../../lib/draft'
 import { AIAssistantCard } from '../ai-assistant-card/AIAssistantCard'
 import { BasicsTab } from '../basics-tab/BasicsTab'
@@ -39,6 +41,9 @@ export interface ManualMediaFormProps {
 	initialDraft: ManualDraft
 	initialCoverUrl?: string | null
 	cancelTo: string
+	// A new title opened with no kind in mind: the draft holds a placeholder kind
+	// until the user picks one, so a book is never made an anime by default.
+	typeUnset?: boolean
 }
 
 type Tab = 'basic' | 'details' | 'description'
@@ -55,10 +60,18 @@ function coverSource(selection: CoverSelection): { url?: string; data?: string }
 	return null
 }
 
-export function ManualMediaForm({ mode, id, initialDraft, initialCoverUrl, cancelTo }: ManualMediaFormProps) {
+export function ManualMediaForm({
+	mode,
+	id,
+	initialDraft,
+	initialCoverUrl,
+	cancelTo,
+	typeUnset = false
+}: ManualMediaFormProps) {
 	const { t, i18n } = useTranslation()
 	const navigate = useNavigate()
 	const goBack = useGoBack(cancelTo)
+	const refreshAISettings = useUnit(aiSettingsQuery.start)
 
 	const [draft, setDraft] = useState<ManualDraft>(initialDraft)
 	const [aiFilled, setAiFilled] = useState<ReadonlySet<AiMergeField>>(new Set())
@@ -66,13 +79,39 @@ export function ManualMediaForm({ mode, id, initialDraft, initialCoverUrl, cance
 	const [errors, setErrors] = useState<Record<string, string>>({})
 	const [tab, setTab] = useState<Tab>('basic')
 	const [fillMode, setFillMode] = useState<FillModeValue>('ai')
+	const [typePicked, setTypePicked] = useState(!typeUnset)
 	const [saving, setSaving] = useState(false)
 	const [suggesting, setSuggesting] = useState(false)
 	const [deleting, setDeleting] = useState(false)
 	const [deleteOpen, setDeleteOpen] = useState(false)
 
+	const requireType = () => {
+		if (typePicked) {
+			return true
+		}
+
+		setErrors(current => ({ ...current, media_type: t('manualMedia.validation.typeRequired') }))
+
+		return false
+	}
+
 	const patch = (next: Partial<ManualDraft>) => {
-		setDraft(current => ({ ...current, ...next }))
+		if (next.media_type) {
+			setTypePicked(true)
+		}
+
+		setDraft(current => ({
+			...current,
+			...next,
+			...(next.media_type
+				? {
+						format: formatAfterTypeChange(
+							next.media_type,
+							'format' in next ? next.format : current.format
+						)
+					}
+				: {})
+		}))
 
 		const touched = Object.keys(next) as AiMergeField[]
 		if (touched.some(field => aiFilled.has(field))) {
@@ -97,6 +136,10 @@ export function ManualMediaForm({ mode, id, initialDraft, initialCoverUrl, cance
 	}
 
 	const suggest = async () => {
+		if (!requireType()) {
+			return
+		}
+
 		const title = draft.title.trim()
 		if (title === '') {
 			setErrors(current => ({ ...current, title: t('manualMedia.validation.titleRequired') }))
@@ -127,13 +170,17 @@ export function ManualMediaForm({ mode, id, initialDraft, initialCoverUrl, cance
 		} catch (error) {
 			const failure = HttpRequestError.fromUnknown(error)
 
+			const openSettings = () => navigate({ to: '/settings', search: { section: 'manual-media' } })
+
 			if (failure.status === 428) {
-				toast.error(t('manualMedia.ai.needsKey'), {
+				toast.error(problemDetail(failure, t('manualMedia.ai.needsKey')), {
 					id: 'manual-media-ai',
-					action: {
-						label: t('manualMedia.ai.openSettings'),
-						onClick: () => navigate({ to: '/settings', search: { section: 'manual-media' } })
-					}
+					action: { label: t('manualMedia.ai.openSettings'), onClick: openSettings }
+				})
+			} else if (failure.status === 429) {
+				toast.error(problemDetail(failure, t('manualMedia.ai.limitReached')), {
+					id: 'manual-media-ai',
+					action: { label: t('manualMedia.ai.addOwn'), onClick: openSettings }
 				})
 			} else {
 				toast.error(problemDetail(failure, t('manualMedia.ai.failed')), {
@@ -142,6 +189,7 @@ export function ManualMediaForm({ mode, id, initialDraft, initialCoverUrl, cance
 			}
 		} finally {
 			setSuggesting(false)
+			refreshAISettings()
 		}
 	}
 
@@ -158,6 +206,10 @@ export function ManualMediaForm({ mode, id, initialDraft, initialCoverUrl, cance
 	}
 
 	const save = async () => {
+		if (!requireType()) {
+			return
+		}
+
 		const title = draft.title.trim()
 		if (title === '') {
 			setErrors(current => ({ ...current, title: t('manualMedia.validation.titleRequired') }))
@@ -259,73 +311,86 @@ export function ManualMediaForm({ mode, id, initialDraft, initialCoverUrl, cance
 						onChange={patch}
 						coverUrl={previewCoverUrl}
 						lockType={mode === 'edit'}
+						typePicked={typePicked}
+						typeError={errors.media_type}
 						titleError={errors.title}
 						disabled={saving}
 						onPickCover={setCover}
 					/>
 
-					<section className={styles.panel}>
-						<Tabs
-							value={tab}
-							onValueChange={setTab}
-							items={[
-								{ value: 'basic', label: t('manualMedia.tabs.basic') },
-								{ value: 'details', label: t('manualMedia.tabs.details') },
-								{ value: 'description', label: t('manualMedia.tabs.description') }
-							]}
-						/>
+					{!typePicked && (
+						<section className={styles.pending}>
+							<Icon name='common/tag' size={20} />
+							<p>{t('manualMedia.typePending')}</p>
+						</section>
+					)}
 
-						{tab === 'basic' && (
-							<div className={styles.basicGrid}>
-								<BasicsTab
+					{typePicked && (
+						<section className={styles.panel}>
+							<Tabs
+								value={tab}
+								onValueChange={setTab}
+								items={[
+									{ value: 'basic', label: t('manualMedia.tabs.basic') },
+									{ value: 'details', label: t('manualMedia.tabs.details') },
+									{ value: 'description', label: t('manualMedia.tabs.description') }
+								]}
+							/>
+
+							{tab === 'basic' && (
+								<div className={styles.basicGrid}>
+									<BasicsTab
+										draft={draft}
+										onChange={patch}
+										aiFilled={aiFilled}
+										errors={errors}
+										disabled={saving}
+									/>
+
+									<GenresPanel
+										mediaType={draft.media_type}
+										genres={draft.genres ?? []}
+										onGenresChange={genres => patch({ genres })}
+										score={draft.score}
+										onScoreChange={score => patch({ score })}
+										aiGenres={aiFilled.has('genres')}
+										disabled={saving}
+									/>
+								</div>
+							)}
+
+							{tab === 'details' && (
+								<DetailsTab
 									draft={draft}
 									onChange={patch}
 									aiFilled={aiFilled}
-									errors={errors}
 									disabled={saving}
 								/>
+							)}
 
-								<GenresPanel
-									mediaType={draft.media_type}
-									genres={draft.genres ?? []}
-									onGenresChange={genres => patch({ genres })}
-									score={draft.score}
-									onScoreChange={score => patch({ score })}
-									aiGenres={aiFilled.has('genres')}
-									disabled={saving}
-								/>
-							</div>
-						)}
-
-						{tab === 'details' && (
-							<DetailsTab
-								draft={draft}
-								onChange={patch}
-								aiFilled={aiFilled}
-								disabled={saving}
-							/>
-						)}
-
-						{tab === 'description' && (
-							<Field
-								label={t('manualMedia.fields.description')}
-								ai={aiFilled.has('description')}
-							>
-								<Textarea
-									value={draft.description ?? ''}
-									onChange={event => patch({ description: event.target.value })}
-									placeholder={t('manualMedia.fields.descriptionPlaceholder')}
-									rows={12}
-									maxLength={10000}
-									disabled={saving}
-								/>
-							</Field>
-						)}
-					</section>
+							{tab === 'description' && (
+								<Field
+									label={t('manualMedia.fields.description')}
+									ai={aiFilled.has('description')}
+								>
+									<Textarea
+										value={draft.description ?? ''}
+										onChange={event => patch({ description: event.target.value })}
+										placeholder={t('manualMedia.fields.descriptionPlaceholder')}
+										rows={12}
+										maxLength={10000}
+										disabled={saving}
+									/>
+								</Field>
+							)}
+						</section>
+					)}
 				</div>
 
 				<aside className={styles.sidebar}>
-					<CompletenessCard completeness={completeness(draft, previewCoverUrl !== null)} />
+					<CompletenessCard
+						completeness={completeness(draft, previewCoverUrl !== null, typePicked)}
+					/>
 
 					<AIAssistantCard
 						mode={mode}
@@ -333,11 +398,13 @@ export function ManualMediaForm({ mode, id, initialDraft, initialCoverUrl, cance
 						onFillModeChange={setFillMode}
 						onGenerate={() => void suggest()}
 						pending={suggesting}
+						typeMissing={!typePicked}
 						disabled={saving}
 					/>
 
 					<PosterCard
 						mediaType={draft.media_type}
+						typeMissing={!typePicked}
 						title={draft.title}
 						year={draft.year}
 						existingCoverUrl={initialCoverUrl}

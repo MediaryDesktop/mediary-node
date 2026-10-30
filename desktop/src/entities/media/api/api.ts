@@ -173,28 +173,27 @@ export const deleteManualMediaFx = createNodeRequestFx<string, void>(id => ({
 	timeout: 15_000
 }))
 
-// Claude fills in a draft from a hint; nothing is stored until the user saves it.
+// The chosen AI fills in a draft from a hint; nothing is stored until the user
+// saves it. Longer than the node's own 90s AI timeout, so the node's answer —
+// even a timeout — is the one the user sees.
 export const suggestManualMediaFx = createNodeRequestFx<ManualHint, ManualSuggestion>(hint => ({
 	url: '/v1/media/manual/suggest',
 	method: 'POST',
 	body: hint,
-	timeout: 40_000
+	timeout: 100_000
 }))
 
 export type AISettings = Omit<NodeSchemas['AISettings'], '$schema'>
+export type AIProvider = AISettings['provider']
+export type SetAISettingsParams = Omit<NodeSchemas['AISettingsUpdate'], '$schema'>
 
 export const fetchAISettingsFx = createNodeRequestFx<void, AISettings>({ url: '/v1/ai/settings' })
-
-export interface SetAISettingsParams {
-	api_key?: string
-	model?: string
-}
 
 export const setAISettingsFx = createNodeRequestFx<SetAISettingsParams, AISettings>(body => ({
 	url: '/v1/ai/settings',
 	method: 'PUT',
 	body,
-	timeout: 20_000
+	timeout: 30_000
 }))
 
 // Pictures that could be a manual title's poster — looked for by the title as the

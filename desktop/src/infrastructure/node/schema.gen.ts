@@ -4,11273 +4,11376 @@
  */
 
 export interface paths {
-    "/v1/ai/settings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Claude connection
-         * @description Whether titles can be filled in by Claude, with which model, and whether the user saved a key. The key itself is never returned.
-         */
-        get: operations["getAISettings"];
-        /**
-         * Set up Claude
-         * @description Stores the user's own Anthropic key after Anthropic has accepted it, in a file only the user can read, never in the database or a backup, and the model to answer with. A key Anthropic refuses is not stored and answers 428.
-         */
-        put: operations["setAISettings"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/anilist/session": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** AniList connection */
-        get: operations["getAniListSession"];
-        /**
-         * Connect an AniList account
-         * @description Validates the token against AniList before storing it, then starts fetching both collections in the background.
-         */
-        put: operations["connectAniList"];
-        post?: never;
-        /**
-         * Disconnect the AniList account
-         * @description Forgets the token and deletes the mirrored collections.
-         */
-        delete: operations["disconnectAniList"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/books/downloads": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Book downloads
-         * @description The queue and recent downloads, newest first. Changes arrive on the books.download topic.
-         */
-        get: operations["listBookDownloads"];
-        put?: never;
-        /**
-         * Save a free copy of a book
-         * @description Queues the copy into the folder for books, where it joins the library as the book given. A copy already queued or saved is left as it is; a failed one is queued again.
-         */
-        post: operations["enqueueBookDownload"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/books/downloads/settings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Where copies of books are saved */
-        get: operations["getBookDownloadSettings"];
-        /**
-         * Choose where copies of books are saved
-         * @description One of the library folders of books, so a saved copy is part of the library at once.
-         */
-        put: operations["putBookDownloadSettings"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/books/downloads/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /**
-         * Remove a finished book download from the list
-         * @description The saved file stays where it is.
-         */
-        delete: operations["forgetBookDownload"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/books/downloads/{id}/cancel": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Stop a book download */
-        post: operations["cancelBookDownload"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/books/downloads/{id}/retry": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Try a failed book download again */
-        post: operations["retryBookDownload"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/books/editions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Find free copies of a book
-         * @description Searches every source at once, by the book's title and authors or by the text given.
-         */
-        get: operations["searchBookEditions"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/books/opds/check": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Try an OPDS server of books
-         * @description Reads the catalogue and runs a search in it, before or after the server is saved.
-         */
-        post: operations["checkBookOPDSServer"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/books/opds/servers": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * OPDS servers of books
-         * @description The user's own catalogues of books — Calibre-Web, Kavita — and Standard Ebooks for its patrons. Each is searched beside Project Gutenberg.
-         */
-        get: operations["listBookOPDSServers"];
-        put?: never;
-        /** Add an OPDS server of books */
-        post: operations["createBookOPDSServer"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/books/opds/servers/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Change an OPDS server of books */
-        put: operations["updateBookOPDSServer"];
-        post?: never;
-        /**
-         * Remove an OPDS server of books
-         * @description Books saved from it stay in the library.
-         */
-        delete: operations["deleteBookOPDSServer"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/books/sources": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Sources of free copies of books */
-        get: operations["listBookSources"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/books/sources/gutenberg": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Project Gutenberg as a source of books */
-        get: operations["getGutenbergSettings"];
-        /**
-         * Turn Project Gutenberg on or off
-         * @description On, the node downloads Gutenberg's catalogue and searches it locally: the site is asked only for a book the user downloads. Off removes the catalogue.
-         */
-        put: operations["putGutenbergSettings"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/books/sources/gutenberg/refresh": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Check for a newer Project Gutenberg catalogue now */
-        post: operations["refreshGutenbergCatalog"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/extension/status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Extension module status */
-        get: operations["getExtensionStatus"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/extensions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Installed plugins
-         * @description Each with the hosts it may reach, its settings — secrets only as set or not — and what the last update check found. Changes arrive on the extension topic.
-         */
-        get: operations["listExtensions"];
-        put?: never;
-        /**
-         * Install a plugin
-         * @description Reads the manifest again and installs it only if it is the one the consent was given for. The code is downloaded once, refused unless it matches the manifest's sum, and run only from the saved copy.
-         */
-        post: operations["installExtension"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/extensions/catalog": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Plugins the user's repositories offer
-         * @description What a repository says about a plugin is shown as it says it; installing previews the plugin's own manifest and asks for consent to that. Reads are reused for an hour. A repository that fails keeps the plugins of its last good read, with the error beside it. There is no repository until the user adds one.
-         */
-        get: operations["getExtensionCatalog"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/extensions/preview": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Read a plugin before installing it
-         * @description Reads the manifest and says what installing it means: the hosts the plugin will reach and the settings it asks for. Nothing is downloaded but the manifest, nothing is saved. Install with the consent it returns.
-         */
-        post: operations["previewExtension"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/extensions/repositories": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Add a plugin repository
-         * @description Read first: an address that is not a repository is refused rather than saved.
-         */
-        post: operations["addExtensionRepository"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/extensions/repositories/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /**
-         * Remove a plugin repository
-         * @description Plugins installed from it stay installed and keep updating from their own addresses.
-         */
-        delete: operations["removeExtensionRepository"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/extensions/updates": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Look for newer versions of the plugins
-         * @description Reads each plugin's manifest at the address it was installed from. Nothing is installed. A newer version that reaches new hosts or plays another role needs the user's consent again.
-         */
-        post: operations["checkExtensionUpdates"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/extensions/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /**
-         * Remove a plugin
-         * @description Its code, settings and secrets go with it.
-         */
-        delete: operations["removeExtension"];
-        options?: never;
-        head?: never;
-        /** Turn a plugin on or off, or change its settings */
-        patch: operations["configureExtension"];
-        trace?: never;
-    };
-    "/v1/extensions/{id}/update": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Install a plugin's newer version
-         * @description Only from the address it was installed from, only newer, only the manifest the consent was given for. Settings that still fit carry over.
-         */
-        post: operations["updateExtension"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/google-books/settings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Google Books connection
-         * @description Whether books Open Library does not know can be looked up on Google Books, and with whose key. The key itself is never returned.
-         */
-        get: operations["getGoogleBooksSettings"];
-        /**
-         * Use your own Google Books key
-         * @description Checks the key with Google, then keeps it in a file only the user can read, never in the database or a backup. A key Google refuses is not stored and answers 428.
-         */
-        put: operations["setGoogleBooksKey"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/health": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Node health
-         * @description Reports liveness, the running build and whether a cloud account is paired.
-         */
-        get: operations["getNodeHealth"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/image-search/settings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Poster search
-         * @description Whether posters can be searched for, and whether the user saved a Brave Search key. The key itself is never returned.
-         */
-        get: operations["getImageSearchSettings"];
-        /**
-         * Use your own Brave Search key
-         * @description Checks the key with one small Brave search, then keeps it in a file only the user can read, never in the database or a backup. A key Brave refuses is not stored and answers 428.
-         */
-        put: operations["setBraveKey"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/library/collection": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * The library as titles
-         * @description Every title the library holds files of, by name, with how many files each has. This is what the library shelf is drawn from: grouping a page of files into titles on the client would both cost a page of files and miss everything past it.
-         */
-        get: operations["getLibraryCollection"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/library/files": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Scanned files
-         * @description Files the last scan recorded, with the title each was matched to. A file the scan no longer finds is kept and reported as missing, so an unplugged drive does not take the user's manual matches with it.
-         */
-        get: operations["listLibraryFiles"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/library/files/tree": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Every scanned file
-         * @description The whole library in one read, for a view that draws all of it at once. A tree is every file by definition, so paging it would only mean asking page after page before anything can be drawn.
-         */
-        get: operations["listAllLibraryFiles"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/library/files/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /**
-         * Delete a file
-         * @description Removes the file from disk and then from the library. A file the node could not delete keeps its row, so nothing is quietly forgotten while it is still there.
-         */
-        delete: operations["deleteLibraryFile"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/library/files/{id}/candidates": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * What this file could be
-         * @description Titles the file's name could refer to, best first, each with how well it fits. This is the other half of the automatic match: what the node would not decide on its own it offers here, for the user to confirm with setLibraryFileMatch. Entries already on the user's own list are marked and come from the node's mirror, so they are offered even while the source is unreachable.
-         */
-        get: operations["listLibraryFileCandidates"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/library/files/{id}/ignore": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Leave a file alone
-         * @description Sets a file aside so no scan offers it for matching again. A sample, a trailer the parser could not place, a file that belongs to nothing — without this it comes back as unmatched after every scan and the count never reaches zero. Nothing on disk is touched.
-         */
-        put: operations["setLibraryFileIgnored"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/library/files/{id}/match": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Match a file by hand
-         * @description Ties the file to a title the user picked. A manual match outranks anything a later scan works out on its own, so a correction is made once and not after every scan.
-         */
-        put: operations["setLibraryFileMatch"];
-        post?: never;
-        /**
-         * Forget a file's match
-         * @description Leaves the file unmatched so the next scan can work it out again.
-         */
-        delete: operations["deleteLibraryFileMatch"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/library/roots": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Library folders
-         * @description The folders the node scans, with how many files each holds and when it was last walked.
-         */
-        get: operations["listLibraryRoots"];
-        put?: never;
-        /**
-         * Add a library folder
-         * @description The folder has to exist and must not sit inside — or contain — a folder already watched, which would record the same file twice.
-         */
-        post: operations["addLibraryRoot"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/library/roots/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /**
-         * Stop watching a folder
-         * @description Forgets the folder and everything the node recorded about the files in it, including their matches. Nothing on disk is touched.
-         */
-        delete: operations["deleteLibraryRoot"];
-        options?: never;
-        head?: never;
-        /**
-         * Say what a library folder holds
-         * @description Switching between anime and movies and shows drops the automatic matches of the folder's videos — they point at the other source — and scans it again to redo them. Matches the user made by hand stay.
-         */
-        patch: operations["updateLibraryRoot"];
-        trace?: never;
-    };
-    "/v1/library/scan": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Scan status
-         * @description What the running scan has found so far, or the outcome of the last one.
-         */
-        get: operations["getLibraryScan"];
-        put?: never;
-        /**
-         * Scan the library
-         * @description Starts a scan and returns at once: walking a large library takes minutes. Progress arrives as library.scan events on the socket. Only one scan runs at a time. Files whose size and modification time did not change are not touched, so a rescan is cheap, and a folder that cannot be read right now is skipped rather than emptied.
-         */
-        post: operations["startLibraryScan"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/library/scan/history": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Past scans
-         * @description Every scan the node has run, newest first, kept independently of the single current-scan slot so a scan from days ago is still readable.
-         */
-        get: operations["listLibraryScanHistory"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/library/scan/history/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * One past scan
-         * @description What one scan matched, grouped by title, and every file it looked at but could not match.
-         */
-        get: operations["getLibraryScanHistoryRun"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/manga/downloads": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Chapter downloads
-         * @description The queue and recent downloads, newest first. Changes arrive on the manga.download topic.
-         */
-        get: operations["listMangaDownloads"];
-        put?: never;
-        /**
-         * Save chapters to disk
-         * @description Queues the chapters as CBZ files in the download folder. A chapter already queued or saved is left as it is; a failed one is queued again.
-         */
-        post: operations["enqueueMangaDownloads"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/manga/downloads/settings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Where chapters are saved */
-        get: operations["getMangaDownloadSettings"];
-        /**
-         * Choose where chapters are saved
-         * @description One of the library folders, so a saved chapter is part of the library at once.
-         */
-        put: operations["putMangaDownloadSettings"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/manga/downloads/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /**
-         * Remove a finished download from the list
-         * @description The saved file stays where it is.
-         */
-        delete: operations["forgetMangaDownload"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/manga/downloads/{id}/cancel": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Stop a download */
-        post: operations["cancelMangaDownload"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/manga/downloads/{id}/retry": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Try a failed download again */
-        post: operations["retryMangaDownload"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/manga/opds/check": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Try an OPDS server
-         * @description Reads the catalogue's root with the given credentials and says what is wrong, if anything. Answers 200 either way: a failed check is a result, not an error.
-         */
-        post: operations["checkOPDSServer"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/manga/opds/servers": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * OPDS servers
-         * @description The user's own catalogues: Komga, Kavita, Calibre-Web.
-         */
-        get: operations["listOPDSServers"];
-        put?: never;
-        /**
-         * Add an OPDS server
-         * @description Saves the server. The password is kept outside the database and never returned.
-         */
-        post: operations["createOPDSServer"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/manga/opds/servers/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Change an OPDS server */
-        put: operations["updateOPDSServer"];
-        post?: never;
-        /**
-         * Remove an OPDS server
-         * @description Removes the server, its password and every title's link to it.
-         */
-        delete: operations["deleteOPDSServer"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/manga/sources": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Sources of chapters */
-        get: operations["listMangaSources"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/manga/sources/{source}/search": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Find a series in a source
-         * @description For linking a title to the series that holds its chapters.
-         */
-        get: operations["searchMangaSource"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/manga/titles/{mediaRef}/chapters": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Chapters of a title from its linked sources
-         * @description Every chapter the linked series hold, in chapter order. Chapters in the library are listed by the library, not here.
-         */
-        get: operations["listMangaChapters"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/manga/titles/{mediaRef}/links": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Series a title is read from */
-        get: operations["listMangaLinks"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/manga/titles/{mediaRef}/links/{source}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Read a title from a series
-         * @description Links the title to a series in the source, replacing any earlier link to the same source.
-         */
-        put: operations["putMangaLink"];
-        post?: never;
-        /** Stop reading a title from a source */
-        delete: operations["deleteMangaLink"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/media/filter-options": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Genres and tags to filter by
-         * @description The source's own vocabulary, kept for at most a day. Formats, statuses and seasons are fixed enums of searchMedia and are not repeated here. TMDB has genres and no tags.
-         */
-        get: operations["getMediaFilterOptions"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/media/manual": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Describe a title no source knows
-         * @description Keeps a title the user describes themselves, for anything AniList, TMDB and the book sources do not have. It is the user's own data and never ages out. It gets a manual:<id> reference that every other endpoint takes — the tracker's, the library's — like a source's.
-         */
-        post: operations["createManualMedia"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/media/manual/cover/search": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Pictures that could be a manual title's poster
-         * @description Searches Brave Images with the user's own key, when there is one, and Wikimedia Commons, by the title's kind, name and year as the form has them, so a poster can be picked before the title is saved. Pictures wider than tall are left out. Nothing is downloaded.
-         */
-        get: operations["searchManualCovers"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/media/manual/suggest": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Ask Claude to fill in a title
-         * @description Asks Claude, with the user's own Anthropic key, what it knows about a title from its kind and name. The answer is a draft and nothing is stored: the client shows it for the user to check, then creates or updates the title as usual. A title Claude does not know comes back with recognized false and little else. Without a key the node answers 428.
-         */
-        post: operations["suggestManualMedia"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/media/manual/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Edit a title the user described
-         * @description Replaces everything about the title with the body. Its kind cannot change: the title stays on the list of its kind.
-         */
-        put: operations["updateManualMedia"];
-        post?: never;
-        /**
-         * Delete a title the user described
-         * @description Removes the title and takes it off the user's list. Library files matched to it stay where they are and can be matched again.
-         */
-        delete: operations["deleteManualMedia"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/media/manual/{id}/cover": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * A manual title's poster
-         * @description The node's own copy, as JPEG. The address the title's cover_image gives carries the version, so it can be cached for good: a new poster gets a new address. Accepts ?token=.
-         */
-        get: operations["getManualCover"];
-        /**
-         * Change a manual title's poster
-         * @description Takes the picture at an address — a candidate or one the user pasted — or a file the user picked, and keeps the node's own copy: scaled to 600 pixels wide and re-encoded as JPEG, so it stays when the page it came from goes. An address on this computer or the local network is refused. Only titles the user described have a poster to change.
-         */
-        put: operations["setManualCover"];
-        post?: never;
-        /** Remove a manual title's poster */
-        delete: operations["deleteManualCover"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/media/search": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Search titles
-         * @description Asks the source that owns this kind of media, on demand and never in the background. Results are not stored: only a title the user opens is cached, and only for as long as the source's terms allow.
-         */
-        get: operations["searchMedia"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/media/{media_ref}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Title details
-         * @description Fetched from the source on demand and kept for at most a day, as the source's terms allow. Past that the node asks again; while the source is unreachable the request fails, and clients fall back to what the user's own list already knows about the title. A reference is anilist:<id>, tmdb:movie:<id>, tmdb:tv:<id>, openlibrary:<work id>, googlebooks:<volume id> or manual:<id> — a title the user described, read from the node itself and never out of date.
-         */
-        get: operations["getMediaDetails"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/media/{media_ref}/episodes": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Episodes of a title
-         * @description Titles, synopses and stills per episode, gathered on demand from ani.zip and from the streaming listings AniList carries, each kept for at most a day. A source that fails or knows nothing only leaves its fields empty: the list always has one entry per episode the title is known to have. A TMDB show lists its regular seasons, numbered within each and specials left out; a movie is one episode.
-         */
-        get: operations["getMediaEpisodes"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/playback": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * What is playing
-         * @description The node plays one file at a time. Position and duration come from the player itself and arrive as playback events on the socket; this is the state to start from.
-         */
-        get: operations["getPlayback"];
-        put?: never;
-        /**
-         * Play a library file
-         * @description Opens the player on a scanned file. Starting a second file replaces the first — the node keeps one window. A matched file is marked watched once it is far enough through, and the tracker decides what that means for the user's list.
-         */
-        post: operations["startPlayback"];
-        /**
-         * Close the player
-         * @description Ends the session. Whatever was already recorded as watched stays recorded.
-         */
-        delete: operations["stopPlayback"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/playback/command": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Steer the open player
-         * @description Pause, resume or jump. Deliberately small: the player's own window is in front of the user, and duplicating its controls would only add ways for the two to disagree.
-         */
-        post: operations["controlPlayback"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/playback/files/{id}/direct": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Serve a file as it is
-         * @description The file's bytes with range support, for a video element to play directly. For a stream (a negative ID) the node passes the request on to the debrid service, so the client never holds the service's link and the link can be renewed behind the same address. Accepts the node token as ?token=, because a video element cannot send headers.
-         */
-        get: operations["getPlaybackDirect"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/playback/files/{id}/fonts/{index}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * One font attached to the file
-         * @description Fonts the subtitles were typeset with, as the file carries them. Accepts ?token=.
-         */
-        get: operations["getPlaybackFont"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/playback/files/{id}/hls": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /**
-         * Stop transcoding a file
-         * @description Called when the player closes, so encoders stop at once instead of when the idle reaper notices.
-         */
-        delete: operations["stopPlaybackHLS"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/playback/files/{id}/hls/audio/{index}/{name}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Playlist or segment of one audio track
-         * @description AAC is copied, anything else is encoded to AAC. Accepts ?token=.
-         */
-        get: operations["getPlaybackHLSAudio"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/playback/files/{id}/hls/master.m3u8": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * HLS master playlist of a transcoded file
-         * @description For a file the renderer cannot play directly. Video the renderer can decode is copied; only what it cannot is re-encoded, segment by segment as the player asks. Accepts ?token=.
-         */
-        get: operations["getPlaybackHLSMaster"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/playback/files/{id}/hls/{quality}/{name}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Playlist or segment of one video rendition
-         * @description A segment request waits until the encoder has written it. Accepts ?token=.
-         */
-        get: operations["getPlaybackHLSVideo"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/playback/files/{id}/progress": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Report where the built-in player is
-         * @description The built-in player's counterpart of mpv's position events. The node applies the same rule — 85 % or played to the end — and tells the tracker once.
-         */
-        post: operations["reportPlaybackProgress"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/playback/files/{id}/stream": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Describe a file for the built-in player
-         * @description Runs ffprobe on the file, once per version of it, and reports its streams together with an RFC 6381 type. The renderer asks its own video element whether it can play that type, which decides between direct play and transcoding.
-         */
-        get: operations["getPlaybackStream"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/playback/files/{id}/subtitles/{index}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * One subtitle track as ASS
-         * @description Text tracks are pulled out of the file with ffmpeg on first request, all at once, and converted to ASS so one renderer draws every format. Accepts ?token=.
-         */
-        get: operations["getPlaybackSubtitle"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/playback/files/{id}/thumbnail": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * A still from the file
-         * @description One frame from the middle of the file, cut with ffmpeg on first request and kept until the file changes. The frame is picked per file, so a season does not show the same moment twice, and stays the same between requests. Stands in for an episode image no source has. Accepts ?token=.
-         */
-        get: operations["getPlaybackThumbnail"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/reader/chapters/{ref}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Pages of a chapter
-         * @description The chapter's pages in reading order, from whichever source the reference names. Chapter reference: local:<file id>, opds:<server id>:<entry id> or plugin:<plugin id>:<key>.
-         */
-        get: operations["getReaderChapterByRef"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/reader/chapters/{ref}/pages/{index}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * One page of a chapter
-         * @description The page's image, served by the node whichever source it comes from. Accepts ?token=, because an image element cannot send headers.
-         */
-        get: operations["getReaderPageByRef"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/reader/chapters/{ref}/progress": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Report the page the reader is on
-         * @description Reaching the last page counts the chapter as read. Only a whole chapter number moves the user's list; an extra such as 12.5 is read without moving it. The tracker never lowers progress.
-         */
-        post: operations["reportReaderPageByRef"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/reader/files/{id}/book": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * The bytes of a book
-         * @description A library book as it is on disk — EPUB, FB2, MOBI, AZW3 or PDF — with range support, for the renderer to lay out itself. Its type tells the renderer which viewer to open it in.
-         */
-        get: operations["getReaderBook"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/reader/files/{id}/book/position": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * The book to open, and where it was left
-         * @description What the reader needs before the bytes: the book's name and type, and the place to open it at — kept per file, since a locator from one file means nothing in another edition.
-         */
-        get: operations["getReaderBookPosition"];
-        /**
-         * Keep the reader's place in a book
-         * @description Stores the place and, for a matched book, moves the user's list to the share of the work's pages read; the last pages finish it. Progress is never lowered.
-         */
-        put: operations["saveReaderBookPosition"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/reader/files/{id}/chapter": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Pages of a comic chapter
-         * @description The same as getReaderChapterByRef with local:<id>.
-         */
-        get: operations["getReaderChapter"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/reader/files/{id}/pages/{index}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * One page of a comic chapter
-         * @description The same as getReaderPageByRef with local:<id>. Accepts ?token=, because an image element cannot send headers.
-         */
-        get: operations["getReaderPage"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/reader/files/{id}/progress": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Report the page the reader is on
-         * @description The same as reportReaderPageByRef with local:<id>.
-         */
-        post: operations["reportReaderPage"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/reader/status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Reader module status
-         * @description Reports whether the reader module is wired.
-         */
-        get: operations["getReaderStatus"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/sync/backups": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Backups in the account
-         * @description The account's snapshots, read from the cloud with this node's token.
-         */
-        get: operations["listSyncBackups"];
-        put?: never;
-        /**
-         * Back up now
-         * @description Uploads the current state at once. An unchanged state is not stored twice.
-         */
-        post: operations["backUpNow"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/sync/backups/{id}/restore": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Restore a backup
-         * @description Replaces the local tracker and lists with the snapshot's, as a whole and without merging. A copy of the current state is kept in the data folder first, so a mistaken restore can be undone by hand.
-         */
-        post: operations["restoreSyncBackup"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/sync/pairing": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Pair with an account
-         * @description Trades a pairing code from the cloud for this node's device token and keeps it in a file only the user can read. Takes effect at once; the first backup follows within minutes.
-         */
-        post: operations["pairNode"];
-        /**
-         * Forget the pairing
-         * @description Deletes this node's device token. It does not revoke it in the cloud — that is done from the account's device list.
-         */
-        delete: operations["unpairNode"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/sync/status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Backup status
-         * @description Whether this node is paired with a Mediary account, and how its last backup went.
-         */
-        get: operations["getSyncStatus"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/tmdb/settings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * TMDB connection
-         * @description Whether movies and shows can be looked up, and with whose key. The key itself is never returned.
-         */
-        get: operations["getTMDBSettings"];
-        /**
-         * Use your own TMDB key
-         * @description Checks the key with TMDB, then keeps it in a file only the user can read, never in the database or a backup. A key TMDB refuses is not stored and answers 428.
-         */
-        put: operations["setTMDBKey"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/tools": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * The programs the node runs
-         * @description mpv plays files in its own window; FFmpeg transcodes, cuts stills and pulls out tracks. Each is found at the path set by hand, else the node's own copy, else on PATH. Changes arrive on the tools topic.
-         */
-        get: operations["listTools"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/tools/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /**
-         * Remove the node's copy of a program
-         * @description The program comes from PATH again, if it is there.
-         */
-        delete: operations["removeTool"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/tools/{id}/install": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Install or update a program
-         * @description Downloads the official build the node names, at the version it pins, and refuses it unless its SHA-256 matches. It returns at once; the install goes on in the background. Refused where a path is set by hand.
-         */
-        post: operations["installTool"];
-        /**
-         * Stop installing a program
-         * @description Nothing of the install stays on disk; the version in use, if any, stays as it was.
-         */
-        delete: operations["cancelToolInstall"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/torrent/check": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Try a torrent client connection
-         * @description Signs in to qBittorrent with the given address and credentials, saved or not, and reports its version; for the debrid client, tries the debrid service's saved key and names the account.
-         */
-        post: operations["checkTorrentClient"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/torrent/debrid": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * The debrid service
-         * @description Set up apart from the torrent client. With a key it plays torrents without downloading them and marks the releases it holds in search, whatever the client; the library downloads through it only when the client is debrid. Keys are never returned.
-         */
-        get: operations["getTorrentDebrid"];
-        /**
-         * Set up the debrid service
-         * @description Each service keeps its own key in the node's secrets file, so switching back needs no key typed again. Turning the service off is refused while the torrent client downloads through it.
-         */
-        put: operations["putTorrentDebrid"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/torrent/debrid/check": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Try a debrid service's key
-         * @description Signs in with the given key, or the saved one, and names the account and its plan. A free Real-Debrid, AllDebrid or Premiumize account is refused: those services play and download torrents only with premium.
-         */
-        post: operations["checkTorrentDebrid"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/torrent/downloads": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Torrent downloads
-         * @description Downloads the node added to the torrent client, newest first, each with what the client last said about it. Changes arrive on the torrent topic.
-         */
-        get: operations["listTorrentDownloads"];
-        put?: never;
-        /**
-         * TorrentDownload a torrent for a title
-         * @description Adds a magnet link or a .torrent file to the torrent client, saving into the title's folder inside the download folder. When it finishes, its videos join the library matched to the title, each with the episode its name gives.
-         */
-        post: operations["addTorrentDownload"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/torrent/downloads/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /**
-         * Remove a torrent download
-         * @description Takes the torrent out of the client and the download off the list. Needs the client reachable, so no torrent is left running that the node no longer knows. Files already in the library stay there unless with_files.
-         */
-        delete: operations["removeTorrentDownload"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/torrent/downloads/{id}/files": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Files of a torrent
-         * @description Every file in the torrent with the episode the library reads from its name, and whether the client downloads it.
-         */
-        get: operations["listTorrentFiles"];
-        /**
-         * Choose which files to download
-         * @description The client downloads only these files. A torrent added with choose_files starts once the choice is made.
-         */
-        put: operations["selectTorrentFiles"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/torrent/downloads/{id}/pause": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Pause a torrent download */
-        post: operations["pauseTorrentDownload"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/torrent/downloads/{id}/resume": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Resume a torrent download */
-        post: operations["resumeTorrentDownload"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/torrent/profile": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Release profile
-         * @description What the user likes in a release. Search scores every result by it and marks the best.
-         */
-        get: operations["getTorrentProfile"];
-        /** Save the release profile */
-        put: operations["putTorrentProfile"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/torrent/rules": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Auto-download rules
-         * @description Titles whose new episodes the node downloads by itself. Every 30 minutes each enabled rule searches the sources for releases named after the title and adds the best release of every episode it is missing; an episode no single release holds comes from a batch, of which only the missing episodes' files are downloaded.
-         */
-        get: operations["listTorrentRules"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/torrent/rules/{media_ref}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** A title's auto-download rule */
-        get: operations["getTorrentRule"];
-        /** Create or change a title's auto-download rule */
-        put: operations["putTorrentRule"];
-        post?: never;
-        /**
-         * Remove a title's auto-download rule
-         * @description Downloads the rule already added stay.
-         */
-        delete: operations["deleteTorrentRule"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/torrent/rules/{media_ref}/check": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Look for a title's missing episodes now
-         * @description Runs the rule at once, enabled or not. With preview, nothing is added: the answer is what would be.
-         */
-        post: operations["checkTorrentRule"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/torrent/search": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Search for releases
-         * @description Asks every source for the title's names, or for q, merges what they find by info hash, and reads episodes, quality and group from each name. With an episode, releases that cannot hold it are left out and the rest come in order: the episode alone, batches that hold it, names without episodes. A source that fails is reported in sources, and the others still answer.
-         */
-        get: operations["searchTorrents"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/torrent/settings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Torrent client settings
-         * @description The password is never returned; has_password says whether one is saved. The debrid service has settings of its own, under /v1/torrent/debrid.
-         */
-        get: operations["getTorrentSettings"];
-        /**
-         * Save torrent client settings
-         * @description The password goes to the node's secrets file, not the database.
-         */
-        put: operations["putTorrentSettings"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/torrent/sources": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Release search sources
-         * @description The user's Torznab endpoints — Jackett, Prowlarr — and how many search plugins are on. The node ships no indexers of its own.
-         */
-        get: operations["listTorrentSources"];
-        put?: never;
-        /**
-         * Add a release search source
-         * @description The API key goes to the node's secrets file, not the database.
-         */
-        post: operations["createTorrentSource"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/torrent/sources/check": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Try a release search source
-         * @description Asks the endpoint for its capabilities, before or after it is saved.
-         */
-        post: operations["checkTorrentSource"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/torrent/sources/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Change a release search source */
-        put: operations["updateTorrentSource"];
-        post?: never;
-        /**
-         * Remove a release search source
-         * @description Forgets the source and its key.
-         */
-        delete: operations["deleteTorrentSource"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/torrent/streams": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Play a torrent without downloading it
-         * @description Gives the torrent to the debrid service set up, or to the node's own client, without adding it to the downloads, and reports how far it is; ask GET .../streams/{id} until the state is ready, then play file_id like a library file. A torrent the service already holds is ready at once; the built-in client is ready once it has the file's start and end, and keeps one stream at a time.
-         */
-        post: operations["startTorrentStream"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/torrent/streams/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * How far a stream is
-         * @description Streams live in the node's memory: after a restart, start the stream again.
-         */
-        get: operations["getTorrentStream"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/tracker/entries": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Tracker entries
-         * @description Served from the node's mirror, so it works offline. A stale mirror is returned immediately while a refresh runs; a `tracker` event announces the result. Movies, series and doramas are the node's own list: always current, no AniList account needed.
-         */
-        get: operations["listTrackerEntries"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/tracker/entries/{media_ref}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Update a tracker entry
-         * @description An anime or manga entry is applied locally and queued for AniList, so it works offline. The returned entry already carries the change with `sync_pending: true`; a `tracker` event with reason `synced` follows once AniList has it. A progress lower than what AniList already holds is only sent when it is lower than what the user saw — so an older offline edit never rolls back progress made on another device. A title not in the lists yet is added instead: that goes straight to AniList and needs it reachable, lands in `PLANNING` unless a status is given, and comes back already synced. A movie, series or dorama (tmdb:…) is the node's own and saved at once; adding one the node has never fetched needs TMDB reachable. Progress on those starts the title and, at the last episode, completes it, as AniList's site does.
-         */
-        put: operations["updateTrackerEntry"];
-        post?: never;
-        /**
-         * Remove a title from the list
-         * @description Takes the title off the node's own list and out of its custom lists. AniList entries are edited on AniList for now and answer 428.
-         */
-        delete: operations["deleteTrackerEntry"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/tracker/lists": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Custom lists
-         * @description Every list the user made, in one response. Anime and manga lists are read from the node's AniList mirror, so they work offline; the other media types are the node's own. Status lists are not included — those are an entry's status, not a list.
-         */
-        get: operations["listTrackerLists"];
-        put?: never;
-        /**
-         * Create a custom list
-         * @description An anime or manga list is created in the user's AniList account and needs AniList reachable; the other media types are stored in this node and work offline.
-         */
-        post: operations["createTrackerList"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/tracker/lists/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /**
-         * Delete a custom list
-         * @description Removes the list. Titles in it keep their entry and their status; they only lose this list's label.
-         */
-        delete: operations["deleteTrackerList"];
-        options?: never;
-        head?: never;
-        /**
-         * Rename a custom list or change its icon
-         * @description The icon is the node's own: an AniList list keeps its name in AniList and its icon here, and the icon follows the list when it is renamed.
-         */
-        patch: operations["renameTrackerList"];
-        trace?: never;
-    };
-    "/v1/tracker/refresh": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Refresh tracker entries
-         * @description Starts a background refresh; the result arrives as a `tracker` event.
-         */
-        post: operations["refreshTrackerEntries"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
+	'/v1/ai/settings': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * AI connection
+		 * @description Which AI fills in titles, whether it can answer now, and how each one is set up — the free AI's daily allowance, and for the others whether the user saved a key and which model answers. Keys are never returned.
+		 */
+		get: operations['getAISettings']
+		/**
+		 * Set up the AI
+		 * @description Chooses the AI that fills in titles and stores each provider's key once the provider has accepted it, in a file only the user can read, never in the database or a backup. A key a provider refuses is not stored and answers 428.
+		 */
+		put: operations['setAISettings']
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/anilist/session': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/** AniList connection */
+		get: operations['getAniListSession']
+		/**
+		 * Connect an AniList account
+		 * @description Validates the token against AniList before storing it, then starts fetching both collections in the background.
+		 */
+		put: operations['connectAniList']
+		post?: never
+		/**
+		 * Disconnect the AniList account
+		 * @description Forgets the token and deletes the mirrored collections.
+		 */
+		delete: operations['disconnectAniList']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/books/downloads': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Book downloads
+		 * @description The queue and recent downloads, newest first. Changes arrive on the books.download topic.
+		 */
+		get: operations['listBookDownloads']
+		put?: never
+		/**
+		 * Save a free copy of a book
+		 * @description Queues the copy into the folder for books, where it joins the library as the book given. A copy already queued or saved is left as it is; a failed one is queued again.
+		 */
+		post: operations['enqueueBookDownload']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/books/downloads/settings': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/** Where copies of books are saved */
+		get: operations['getBookDownloadSettings']
+		/**
+		 * Choose where copies of books are saved
+		 * @description One of the library folders of books, so a saved copy is part of the library at once.
+		 */
+		put: operations['putBookDownloadSettings']
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/books/downloads/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		post?: never
+		/**
+		 * Remove a finished book download from the list
+		 * @description The saved file stays where it is.
+		 */
+		delete: operations['forgetBookDownload']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/books/downloads/{id}/cancel': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/** Stop a book download */
+		post: operations['cancelBookDownload']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/books/downloads/{id}/retry': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/** Try a failed book download again */
+		post: operations['retryBookDownload']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/books/editions': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Find free copies of a book
+		 * @description Searches every source at once, by the book's title and authors or by the text given.
+		 */
+		get: operations['searchBookEditions']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/books/opds/check': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Try an OPDS server of books
+		 * @description Reads the catalogue and runs a search in it, before or after the server is saved.
+		 */
+		post: operations['checkBookOPDSServer']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/books/opds/servers': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * OPDS servers of books
+		 * @description The user's own catalogues of books — Calibre-Web, Kavita — and Standard Ebooks for its patrons. Each is searched beside Project Gutenberg.
+		 */
+		get: operations['listBookOPDSServers']
+		put?: never
+		/** Add an OPDS server of books */
+		post: operations['createBookOPDSServer']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/books/opds/servers/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		/** Change an OPDS server of books */
+		put: operations['updateBookOPDSServer']
+		post?: never
+		/**
+		 * Remove an OPDS server of books
+		 * @description Books saved from it stay in the library.
+		 */
+		delete: operations['deleteBookOPDSServer']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/books/sources': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/** Sources of free copies of books */
+		get: operations['listBookSources']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/books/sources/gutenberg': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/** Project Gutenberg as a source of books */
+		get: operations['getGutenbergSettings']
+		/**
+		 * Turn Project Gutenberg on or off
+		 * @description On, the node downloads Gutenberg's catalogue and searches it locally: the site is asked only for a book the user downloads. Off removes the catalogue.
+		 */
+		put: operations['putGutenbergSettings']
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/books/sources/gutenberg/refresh': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/** Check for a newer Project Gutenberg catalogue now */
+		post: operations['refreshGutenbergCatalog']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/extension/status': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/** Extension module status */
+		get: operations['getExtensionStatus']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/extensions': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Installed plugins
+		 * @description Each with the hosts it may reach, its settings — secrets only as set or not — and what the last update check found. Changes arrive on the extension topic.
+		 */
+		get: operations['listExtensions']
+		put?: never
+		/**
+		 * Install a plugin
+		 * @description Reads the manifest again and installs it only if it is the one the consent was given for. The code is downloaded once, refused unless it matches the manifest's sum, and run only from the saved copy.
+		 */
+		post: operations['installExtension']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/extensions/catalog': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Plugins the user's repositories offer
+		 * @description What a repository says about a plugin is shown as it says it; installing previews the plugin's own manifest and asks for consent to that. Reads are reused for an hour. A repository that fails keeps the plugins of its last good read, with the error beside it. There is no repository until the user adds one.
+		 */
+		get: operations['getExtensionCatalog']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/extensions/preview': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Read a plugin before installing it
+		 * @description Reads the manifest and says what installing it means: the hosts the plugin will reach and the settings it asks for. Nothing is downloaded but the manifest, nothing is saved. Install with the consent it returns.
+		 */
+		post: operations['previewExtension']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/extensions/repositories': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Add a plugin repository
+		 * @description Read first: an address that is not a repository is refused rather than saved.
+		 */
+		post: operations['addExtensionRepository']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/extensions/repositories/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		post?: never
+		/**
+		 * Remove a plugin repository
+		 * @description Plugins installed from it stay installed and keep updating from their own addresses.
+		 */
+		delete: operations['removeExtensionRepository']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/extensions/updates': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Look for newer versions of the plugins
+		 * @description Reads each plugin's manifest at the address it was installed from. Nothing is installed. A newer version that reaches new hosts or plays another role needs the user's consent again.
+		 */
+		post: operations['checkExtensionUpdates']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/extensions/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		post?: never
+		/**
+		 * Remove a plugin
+		 * @description Its code, settings and secrets go with it.
+		 */
+		delete: operations['removeExtension']
+		options?: never
+		head?: never
+		/** Turn a plugin on or off, or change its settings */
+		patch: operations['configureExtension']
+		trace?: never
+	}
+	'/v1/extensions/{id}/update': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Install a plugin's newer version
+		 * @description Only from the address it was installed from, only newer, only the manifest the consent was given for. Settings that still fit carry over.
+		 */
+		post: operations['updateExtension']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/google-books/settings': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Google Books connection
+		 * @description Whether books Open Library does not know can be looked up on Google Books, and with whose key. The key itself is never returned.
+		 */
+		get: operations['getGoogleBooksSettings']
+		/**
+		 * Use your own Google Books key
+		 * @description Checks the key with Google, then keeps it in a file only the user can read, never in the database or a backup. A key Google refuses is not stored and answers 428.
+		 */
+		put: operations['setGoogleBooksKey']
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/health': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Node health
+		 * @description Reports liveness, the running build and whether a cloud account is paired.
+		 */
+		get: operations['getNodeHealth']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/image-search/settings': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Poster search
+		 * @description Whether posters can be searched for, and whether the user saved a Brave Search key. The key itself is never returned.
+		 */
+		get: operations['getImageSearchSettings']
+		/**
+		 * Use your own Brave Search key
+		 * @description Checks the key with one small Brave search, then keeps it in a file only the user can read, never in the database or a backup. A key Brave refuses is not stored and answers 428.
+		 */
+		put: operations['setBraveKey']
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/library/collection': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * The library as titles
+		 * @description Every title the library holds files of, by name, with how many files each has. This is what the library shelf is drawn from: grouping a page of files into titles on the client would both cost a page of files and miss everything past it.
+		 */
+		get: operations['getLibraryCollection']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/library/files': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Scanned files
+		 * @description Files the last scan recorded, with the title each was matched to. A file the scan no longer finds is kept and reported as missing, so an unplugged drive does not take the user's manual matches with it.
+		 */
+		get: operations['listLibraryFiles']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/library/files/tree': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Every scanned file
+		 * @description The whole library in one read, for a view that draws all of it at once. A tree is every file by definition, so paging it would only mean asking page after page before anything can be drawn.
+		 */
+		get: operations['listAllLibraryFiles']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/library/files/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		post?: never
+		/**
+		 * Delete a file
+		 * @description Removes the file from disk and then from the library. A file the node could not delete keeps its row, so nothing is quietly forgotten while it is still there.
+		 */
+		delete: operations['deleteLibraryFile']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/library/files/{id}/candidates': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * What this file could be
+		 * @description Titles the file's name could refer to, best first, each with how well it fits. This is the other half of the automatic match: what the node would not decide on its own it offers here, for the user to confirm with setLibraryFileMatch. Entries already on the user's own list are marked and come from the node's mirror, so they are offered even while the source is unreachable.
+		 */
+		get: operations['listLibraryFileCandidates']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/library/files/{id}/ignore': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		/**
+		 * Leave a file alone
+		 * @description Sets a file aside so no scan offers it for matching again. A sample, a trailer the parser could not place, a file that belongs to nothing — without this it comes back as unmatched after every scan and the count never reaches zero. Nothing on disk is touched.
+		 */
+		put: operations['setLibraryFileIgnored']
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/library/files/{id}/match': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		/**
+		 * Match a file by hand
+		 * @description Ties the file to a title the user picked. A manual match outranks anything a later scan works out on its own, so a correction is made once and not after every scan.
+		 */
+		put: operations['setLibraryFileMatch']
+		post?: never
+		/**
+		 * Forget a file's match
+		 * @description Leaves the file unmatched so the next scan can work it out again.
+		 */
+		delete: operations['deleteLibraryFileMatch']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/library/roots': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Library folders
+		 * @description The folders the node scans, with how many files each holds and when it was last walked.
+		 */
+		get: operations['listLibraryRoots']
+		put?: never
+		/**
+		 * Add a library folder
+		 * @description The folder has to exist and must not sit inside — or contain — a folder already watched, which would record the same file twice.
+		 */
+		post: operations['addLibraryRoot']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/library/roots/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		post?: never
+		/**
+		 * Stop watching a folder
+		 * @description Forgets the folder and everything the node recorded about the files in it, including their matches. Nothing on disk is touched.
+		 */
+		delete: operations['deleteLibraryRoot']
+		options?: never
+		head?: never
+		/**
+		 * Say what a library folder holds
+		 * @description Switching between anime and movies and shows drops the automatic matches of the folder's videos — they point at the other source — and scans it again to redo them. Matches the user made by hand stay.
+		 */
+		patch: operations['updateLibraryRoot']
+		trace?: never
+	}
+	'/v1/library/scan': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Scan status
+		 * @description What the running scan has found so far, or the outcome of the last one.
+		 */
+		get: operations['getLibraryScan']
+		put?: never
+		/**
+		 * Scan the library
+		 * @description Starts a scan and returns at once: walking a large library takes minutes. Progress arrives as library.scan events on the socket. Only one scan runs at a time. Files whose size and modification time did not change are not touched, so a rescan is cheap, and a folder that cannot be read right now is skipped rather than emptied.
+		 */
+		post: operations['startLibraryScan']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/library/scan/history': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Past scans
+		 * @description Every scan the node has run, newest first, kept independently of the single current-scan slot so a scan from days ago is still readable.
+		 */
+		get: operations['listLibraryScanHistory']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/library/scan/history/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * One past scan
+		 * @description What one scan matched, grouped by title, and every file it looked at but could not match.
+		 */
+		get: operations['getLibraryScanHistoryRun']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/manga/downloads': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Chapter downloads
+		 * @description The queue and recent downloads, newest first. Changes arrive on the manga.download topic.
+		 */
+		get: operations['listMangaDownloads']
+		put?: never
+		/**
+		 * Save chapters to disk
+		 * @description Queues the chapters as CBZ files in the download folder. A chapter already queued or saved is left as it is; a failed one is queued again.
+		 */
+		post: operations['enqueueMangaDownloads']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/manga/downloads/settings': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/** Where chapters are saved */
+		get: operations['getMangaDownloadSettings']
+		/**
+		 * Choose where chapters are saved
+		 * @description One of the library folders, so a saved chapter is part of the library at once.
+		 */
+		put: operations['putMangaDownloadSettings']
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/manga/downloads/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		post?: never
+		/**
+		 * Remove a finished download from the list
+		 * @description The saved file stays where it is.
+		 */
+		delete: operations['forgetMangaDownload']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/manga/downloads/{id}/cancel': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/** Stop a download */
+		post: operations['cancelMangaDownload']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/manga/downloads/{id}/retry': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/** Try a failed download again */
+		post: operations['retryMangaDownload']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/manga/opds/check': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Try an OPDS server
+		 * @description Reads the catalogue's root with the given credentials and says what is wrong, if anything. Answers 200 either way: a failed check is a result, not an error.
+		 */
+		post: operations['checkOPDSServer']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/manga/opds/servers': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * OPDS servers
+		 * @description The user's own catalogues: Komga, Kavita, Calibre-Web.
+		 */
+		get: operations['listOPDSServers']
+		put?: never
+		/**
+		 * Add an OPDS server
+		 * @description Saves the server. The password is kept outside the database and never returned.
+		 */
+		post: operations['createOPDSServer']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/manga/opds/servers/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		/** Change an OPDS server */
+		put: operations['updateOPDSServer']
+		post?: never
+		/**
+		 * Remove an OPDS server
+		 * @description Removes the server, its password and every title's link to it.
+		 */
+		delete: operations['deleteOPDSServer']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/manga/sources': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/** Sources of chapters */
+		get: operations['listMangaSources']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/manga/sources/{source}/search': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Find a series in a source
+		 * @description For linking a title to the series that holds its chapters.
+		 */
+		get: operations['searchMangaSource']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/manga/titles/{mediaRef}/chapters': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Chapters of a title from its linked sources
+		 * @description Every chapter the linked series hold, in chapter order. Chapters in the library are listed by the library, not here.
+		 */
+		get: operations['listMangaChapters']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/manga/titles/{mediaRef}/links': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/** Series a title is read from */
+		get: operations['listMangaLinks']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/manga/titles/{mediaRef}/links/{source}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		/**
+		 * Read a title from a series
+		 * @description Links the title to a series in the source, replacing any earlier link to the same source.
+		 */
+		put: operations['putMangaLink']
+		post?: never
+		/** Stop reading a title from a source */
+		delete: operations['deleteMangaLink']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/media/filter-options': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Genres and tags to filter by
+		 * @description The source's own vocabulary, kept for at most a day. Formats, statuses and seasons are fixed enums of searchMedia and are not repeated here. TMDB has genres and no tags.
+		 */
+		get: operations['getMediaFilterOptions']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/media/manual': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Describe a title no source knows
+		 * @description Keeps a title the user describes themselves, for anything AniList, TMDB and the book sources do not have. It is the user's own data and never ages out. It gets a manual:<id> reference that every other endpoint takes — the tracker's, the library's — like a source's.
+		 */
+		post: operations['createManualMedia']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/media/manual/cover/search': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Pictures that could be a manual title's poster
+		 * @description Searches Brave Images with the user's own key, when there is one, and Wikimedia Commons, by the title's kind, name and year as the form has them, so a poster can be picked before the title is saved. Pictures wider than tall are left out. Nothing is downloaded.
+		 */
+		get: operations['searchManualCovers']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/media/manual/suggest': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Ask the AI to fill in a title
+		 * @description Asks the AI the user chose — Mediary's free AI through the cloud, or their own Claude, Gemini or OpenAI-compatible endpoint — what it knows about a title from its kind and name. The answer is a draft and nothing is stored: the client shows it for the user to check, then creates or updates the title as usual. A title the AI does not know comes back with recognized false and little else. When the chosen AI is not set up the node answers 428; when the free AI's daily allowance is spent, 429.
+		 */
+		post: operations['suggestManualMedia']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/media/manual/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		/**
+		 * Edit a title the user described
+		 * @description Replaces everything about the title with the body. Its kind cannot change: the title stays on the list of its kind.
+		 */
+		put: operations['updateManualMedia']
+		post?: never
+		/**
+		 * Delete a title the user described
+		 * @description Removes the title and takes it off the user's list. Library files matched to it stay where they are and can be matched again.
+		 */
+		delete: operations['deleteManualMedia']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/media/manual/{id}/cover': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * A manual title's poster
+		 * @description The node's own copy, as JPEG. The address the title's cover_image gives carries the version, so it can be cached for good: a new poster gets a new address. Accepts ?token=.
+		 */
+		get: operations['getManualCover']
+		/**
+		 * Change a manual title's poster
+		 * @description Takes the picture at an address — a candidate or one the user pasted — or a file the user picked, and keeps the node's own copy: scaled to 600 pixels wide and re-encoded as JPEG, so it stays when the page it came from goes. An address on this computer or the local network is refused. Only titles the user described have a poster to change.
+		 */
+		put: operations['setManualCover']
+		post?: never
+		/** Remove a manual title's poster */
+		delete: operations['deleteManualCover']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/media/search': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Search titles
+		 * @description Asks the source that owns this kind of media, on demand and never in the background. Results are not stored: only a title the user opens is cached, and only for as long as the source's terms allow.
+		 */
+		get: operations['searchMedia']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/media/{media_ref}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Title details
+		 * @description Fetched from the source on demand and kept for at most a day, as the source's terms allow. Past that the node asks again; while the source is unreachable the request fails, and clients fall back to what the user's own list already knows about the title. A reference is anilist:<id>, tmdb:movie:<id>, tmdb:tv:<id>, openlibrary:<work id>, googlebooks:<volume id> or manual:<id> — a title the user described, read from the node itself and never out of date.
+		 */
+		get: operations['getMediaDetails']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/media/{media_ref}/episodes': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Episodes of a title
+		 * @description Titles, synopses and stills per episode, gathered on demand from ani.zip and from the streaming listings AniList carries, each kept for at most a day. A source that fails or knows nothing only leaves its fields empty: the list always has one entry per episode the title is known to have. A TMDB show lists its regular seasons, numbered within each and specials left out; a movie is one episode.
+		 */
+		get: operations['getMediaEpisodes']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/playback': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * What is playing
+		 * @description The node plays one file at a time. Position and duration come from the player itself and arrive as playback events on the socket; this is the state to start from.
+		 */
+		get: operations['getPlayback']
+		put?: never
+		/**
+		 * Play a library file
+		 * @description Opens the player on a scanned file. Starting a second file replaces the first — the node keeps one window. A matched file is marked watched once it is far enough through, and the tracker decides what that means for the user's list.
+		 */
+		post: operations['startPlayback']
+		/**
+		 * Close the player
+		 * @description Ends the session. Whatever was already recorded as watched stays recorded.
+		 */
+		delete: operations['stopPlayback']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/playback/command': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Steer the open player
+		 * @description Pause, resume or jump. Deliberately small: the player's own window is in front of the user, and duplicating its controls would only add ways for the two to disagree.
+		 */
+		post: operations['controlPlayback']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/playback/files/{id}/direct': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Serve a file as it is
+		 * @description The file's bytes with range support, for a video element to play directly. For a stream (a negative ID) the node passes the request on to the debrid service, so the client never holds the service's link and the link can be renewed behind the same address. Accepts the node token as ?token=, because a video element cannot send headers.
+		 */
+		get: operations['getPlaybackDirect']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/playback/files/{id}/fonts/{index}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * One font attached to the file
+		 * @description Fonts the subtitles were typeset with, as the file carries them. Accepts ?token=.
+		 */
+		get: operations['getPlaybackFont']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/playback/files/{id}/hls': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		post?: never
+		/**
+		 * Stop transcoding a file
+		 * @description Called when the player closes, so encoders stop at once instead of when the idle reaper notices.
+		 */
+		delete: operations['stopPlaybackHLS']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/playback/files/{id}/hls/audio/{index}/{name}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Playlist or segment of one audio track
+		 * @description AAC is copied, anything else is encoded to AAC. Accepts ?token=.
+		 */
+		get: operations['getPlaybackHLSAudio']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/playback/files/{id}/hls/master.m3u8': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * HLS master playlist of a transcoded file
+		 * @description For a file the renderer cannot play directly. Video the renderer can decode is copied; only what it cannot is re-encoded, segment by segment as the player asks. Accepts ?token=.
+		 */
+		get: operations['getPlaybackHLSMaster']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/playback/files/{id}/hls/{quality}/{name}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Playlist or segment of one video rendition
+		 * @description A segment request waits until the encoder has written it. Accepts ?token=.
+		 */
+		get: operations['getPlaybackHLSVideo']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/playback/files/{id}/progress': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Report where the built-in player is
+		 * @description The built-in player's counterpart of mpv's position events. The node applies the same rule — 85 % or played to the end — and tells the tracker once.
+		 */
+		post: operations['reportPlaybackProgress']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/playback/files/{id}/stream': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Describe a file for the built-in player
+		 * @description Runs ffprobe on the file, once per version of it, and reports its streams together with an RFC 6381 type. The renderer asks its own video element whether it can play that type, which decides between direct play and transcoding.
+		 */
+		get: operations['getPlaybackStream']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/playback/files/{id}/subtitles/{index}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * One subtitle track as ASS
+		 * @description Text tracks are pulled out of the file with ffmpeg on first request, all at once, and converted to ASS so one renderer draws every format. Accepts ?token=.
+		 */
+		get: operations['getPlaybackSubtitle']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/playback/files/{id}/thumbnail': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * A still from the file
+		 * @description One frame from the middle of the file, cut with ffmpeg on first request and kept until the file changes. The frame is picked per file, so a season does not show the same moment twice, and stays the same between requests. Stands in for an episode image no source has. Accepts ?token=.
+		 */
+		get: operations['getPlaybackThumbnail']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/reader/chapters/{ref}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Pages of a chapter
+		 * @description The chapter's pages in reading order, from whichever source the reference names. Chapter reference: local:<file id>, opds:<server id>:<entry id> or plugin:<plugin id>:<key>.
+		 */
+		get: operations['getReaderChapterByRef']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/reader/chapters/{ref}/pages/{index}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * One page of a chapter
+		 * @description The page's image, served by the node whichever source it comes from. Accepts ?token=, because an image element cannot send headers.
+		 */
+		get: operations['getReaderPageByRef']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/reader/chapters/{ref}/progress': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Report the page the reader is on
+		 * @description Reaching the last page counts the chapter as read. Only a whole chapter number moves the user's list; an extra such as 12.5 is read without moving it. The tracker never lowers progress.
+		 */
+		post: operations['reportReaderPageByRef']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/reader/files/{id}/book': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * The bytes of a book
+		 * @description A library book as it is on disk — EPUB, FB2, MOBI, AZW3 or PDF — with range support, for the renderer to lay out itself. Its type tells the renderer which viewer to open it in.
+		 */
+		get: operations['getReaderBook']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/reader/files/{id}/book/position': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * The book to open, and where it was left
+		 * @description What the reader needs before the bytes: the book's name and type, and the place to open it at — kept per file, since a locator from one file means nothing in another edition.
+		 */
+		get: operations['getReaderBookPosition']
+		/**
+		 * Keep the reader's place in a book
+		 * @description Stores the place and, for a matched book, moves the user's list to the share of the work's pages read; the last pages finish it. Progress is never lowered.
+		 */
+		put: operations['saveReaderBookPosition']
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/reader/files/{id}/chapter': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Pages of a comic chapter
+		 * @description The same as getReaderChapterByRef with local:<id>.
+		 */
+		get: operations['getReaderChapter']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/reader/files/{id}/pages/{index}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * One page of a comic chapter
+		 * @description The same as getReaderPageByRef with local:<id>. Accepts ?token=, because an image element cannot send headers.
+		 */
+		get: operations['getReaderPage']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/reader/files/{id}/progress': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Report the page the reader is on
+		 * @description The same as reportReaderPageByRef with local:<id>.
+		 */
+		post: operations['reportReaderPage']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/reader/status': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Reader module status
+		 * @description Reports whether the reader module is wired.
+		 */
+		get: operations['getReaderStatus']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/sync/backups': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Backups in the account
+		 * @description The account's snapshots, read from the cloud with this node's token.
+		 */
+		get: operations['listSyncBackups']
+		put?: never
+		/**
+		 * Back up now
+		 * @description Uploads the current state at once. An unchanged state is not stored twice.
+		 */
+		post: operations['backUpNow']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/sync/backups/{id}/restore': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Restore a backup
+		 * @description Replaces the local tracker and lists with the snapshot's, as a whole and without merging. A copy of the current state is kept in the data folder first, so a mistaken restore can be undone by hand.
+		 */
+		post: operations['restoreSyncBackup']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/sync/pairing': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Pair with an account
+		 * @description Trades a pairing code from the cloud for this node's device token and keeps it in a file only the user can read. Takes effect at once; the first backup follows within minutes.
+		 */
+		post: operations['pairNode']
+		/**
+		 * Forget the pairing
+		 * @description Deletes this node's device token. It does not revoke it in the cloud — that is done from the account's device list.
+		 */
+		delete: operations['unpairNode']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/sync/status': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Backup status
+		 * @description Whether this node is paired with a Mediary account, and how its last backup went.
+		 */
+		get: operations['getSyncStatus']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/tmdb/settings': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * TMDB connection
+		 * @description Whether movies and shows can be looked up, and with whose key. The key itself is never returned.
+		 */
+		get: operations['getTMDBSettings']
+		/**
+		 * Use your own TMDB key
+		 * @description Checks the key with TMDB, then keeps it in a file only the user can read, never in the database or a backup. A key TMDB refuses is not stored and answers 428.
+		 */
+		put: operations['setTMDBKey']
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/tools': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * The programs the node runs
+		 * @description mpv plays files in its own window; FFmpeg transcodes, cuts stills and pulls out tracks. Each is found at the path set by hand, else the node's own copy, else on PATH. Changes arrive on the tools topic.
+		 */
+		get: operations['listTools']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/tools/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		post?: never
+		/**
+		 * Remove the node's copy of a program
+		 * @description The program comes from PATH again, if it is there.
+		 */
+		delete: operations['removeTool']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/tools/{id}/install': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Install or update a program
+		 * @description Downloads the official build the node names, at the version it pins, and refuses it unless its SHA-256 matches. It returns at once; the install goes on in the background. Refused where a path is set by hand.
+		 */
+		post: operations['installTool']
+		/**
+		 * Stop installing a program
+		 * @description Nothing of the install stays on disk; the version in use, if any, stays as it was.
+		 */
+		delete: operations['cancelToolInstall']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/torrent/check': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Try a torrent client connection
+		 * @description Signs in to qBittorrent with the given address and credentials, saved or not, and reports its version; for the debrid client, tries the debrid service's saved key and names the account.
+		 */
+		post: operations['checkTorrentClient']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/torrent/debrid': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * The debrid service
+		 * @description Set up apart from the torrent client. With a key it plays torrents without downloading them and marks the releases it holds in search, whatever the client; the library downloads through it only when the client is debrid. Keys are never returned.
+		 */
+		get: operations['getTorrentDebrid']
+		/**
+		 * Set up the debrid service
+		 * @description Each service keeps its own key in the node's secrets file, so switching back needs no key typed again. Turning the service off is refused while the torrent client downloads through it.
+		 */
+		put: operations['putTorrentDebrid']
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/torrent/debrid/check': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Try a debrid service's key
+		 * @description Signs in with the given key, or the saved one, and names the account and its plan. A free Real-Debrid, AllDebrid or Premiumize account is refused: those services play and download torrents only with premium.
+		 */
+		post: operations['checkTorrentDebrid']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/torrent/downloads': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Torrent downloads
+		 * @description Downloads the node added to the torrent client, newest first, each with what the client last said about it. Changes arrive on the torrent topic.
+		 */
+		get: operations['listTorrentDownloads']
+		put?: never
+		/**
+		 * TorrentDownload a torrent for a title
+		 * @description Adds a magnet link or a .torrent file to the torrent client, saving into the title's folder inside the download folder. When it finishes, its videos join the library matched to the title, each with the episode its name gives.
+		 */
+		post: operations['addTorrentDownload']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/torrent/downloads/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		post?: never
+		/**
+		 * Remove a torrent download
+		 * @description Takes the torrent out of the client and the download off the list. Needs the client reachable, so no torrent is left running that the node no longer knows. Files already in the library stay there unless with_files.
+		 */
+		delete: operations['removeTorrentDownload']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/torrent/downloads/{id}/files': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Files of a torrent
+		 * @description Every file in the torrent with the episode the library reads from its name, and whether the client downloads it.
+		 */
+		get: operations['listTorrentFiles']
+		/**
+		 * Choose which files to download
+		 * @description The client downloads only these files. A torrent added with choose_files starts once the choice is made.
+		 */
+		put: operations['selectTorrentFiles']
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/torrent/downloads/{id}/pause': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/** Pause a torrent download */
+		post: operations['pauseTorrentDownload']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/torrent/downloads/{id}/resume': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/** Resume a torrent download */
+		post: operations['resumeTorrentDownload']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/torrent/profile': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Release profile
+		 * @description What the user likes in a release. Search scores every result by it and marks the best.
+		 */
+		get: operations['getTorrentProfile']
+		/** Save the release profile */
+		put: operations['putTorrentProfile']
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/torrent/rules': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Auto-download rules
+		 * @description Titles whose new episodes the node downloads by itself. Every 30 minutes each enabled rule searches the sources for releases named after the title and adds the best release of every episode it is missing; an episode no single release holds comes from a batch, of which only the missing episodes' files are downloaded.
+		 */
+		get: operations['listTorrentRules']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/torrent/rules/{media_ref}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/** A title's auto-download rule */
+		get: operations['getTorrentRule']
+		/** Create or change a title's auto-download rule */
+		put: operations['putTorrentRule']
+		post?: never
+		/**
+		 * Remove a title's auto-download rule
+		 * @description Downloads the rule already added stay.
+		 */
+		delete: operations['deleteTorrentRule']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/torrent/rules/{media_ref}/check': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Look for a title's missing episodes now
+		 * @description Runs the rule at once, enabled or not. With preview, nothing is added: the answer is what would be.
+		 */
+		post: operations['checkTorrentRule']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/torrent/search': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Search for releases
+		 * @description Asks every source for the title's names, or for q, merges what they find by info hash, and reads episodes, quality and group from each name. With an episode, releases that cannot hold it are left out and the rest come in order: the episode alone, batches that hold it, names without episodes. A source that fails is reported in sources, and the others still answer.
+		 */
+		get: operations['searchTorrents']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/torrent/settings': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Torrent client settings
+		 * @description The password is never returned; has_password says whether one is saved. The debrid service has settings of its own, under /v1/torrent/debrid.
+		 */
+		get: operations['getTorrentSettings']
+		/**
+		 * Save torrent client settings
+		 * @description The password goes to the node's secrets file, not the database.
+		 */
+		put: operations['putTorrentSettings']
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/torrent/sources': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Release search sources
+		 * @description The user's Torznab endpoints — Jackett, Prowlarr — and how many search plugins are on. The node ships no indexers of its own.
+		 */
+		get: operations['listTorrentSources']
+		put?: never
+		/**
+		 * Add a release search source
+		 * @description The API key goes to the node's secrets file, not the database.
+		 */
+		post: operations['createTorrentSource']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/torrent/sources/check': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Try a release search source
+		 * @description Asks the endpoint for its capabilities, before or after it is saved.
+		 */
+		post: operations['checkTorrentSource']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/torrent/sources/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		/** Change a release search source */
+		put: operations['updateTorrentSource']
+		post?: never
+		/**
+		 * Remove a release search source
+		 * @description Forgets the source and its key.
+		 */
+		delete: operations['deleteTorrentSource']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/torrent/streams': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Play a torrent without downloading it
+		 * @description Gives the torrent to the debrid service set up, or to the node's own client, without adding it to the downloads, and reports how far it is; ask GET .../streams/{id} until the state is ready, then play file_id like a library file. A torrent the service already holds is ready at once; the built-in client is ready once it has the file's start and end, and keeps one stream at a time.
+		 */
+		post: operations['startTorrentStream']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/torrent/streams/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * How far a stream is
+		 * @description Streams live in the node's memory: after a restart, start the stream again.
+		 */
+		get: operations['getTorrentStream']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/tracker/entries': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Tracker entries
+		 * @description Served from the node's mirror, so it works offline. A stale mirror is returned immediately while a refresh runs; a `tracker` event announces the result. Movies, series and doramas are the node's own list: always current, no AniList account needed.
+		 */
+		get: operations['listTrackerEntries']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/tracker/entries/{media_ref}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		/**
+		 * Update a tracker entry
+		 * @description An anime or manga entry is applied locally and queued for AniList, so it works offline. The returned entry already carries the change with `sync_pending: true`; a `tracker` event with reason `synced` follows once AniList has it. A progress lower than what AniList already holds is only sent when it is lower than what the user saw — so an older offline edit never rolls back progress made on another device. A title not in the lists yet is added instead: that goes straight to AniList and needs it reachable, lands in `PLANNING` unless a status is given, and comes back already synced. A movie, series or dorama (tmdb:…) is the node's own and saved at once; adding one the node has never fetched needs TMDB reachable. Progress on those starts the title and, at the last episode, completes it, as AniList's site does.
+		 */
+		put: operations['updateTrackerEntry']
+		post?: never
+		/**
+		 * Remove a title from the list
+		 * @description Takes the title off the node's own list and out of its custom lists. AniList entries are edited on AniList for now and answer 428.
+		 */
+		delete: operations['deleteTrackerEntry']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/tracker/lists': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Custom lists
+		 * @description Every list the user made, in one response. Anime and manga lists are read from the node's AniList mirror, so they work offline; the other media types are the node's own. Status lists are not included — those are an entry's status, not a list.
+		 */
+		get: operations['listTrackerLists']
+		put?: never
+		/**
+		 * Create a custom list
+		 * @description An anime or manga list is created in the user's AniList account and needs AniList reachable; the other media types are stored in this node and work offline.
+		 */
+		post: operations['createTrackerList']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/tracker/lists/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		post?: never
+		/**
+		 * Delete a custom list
+		 * @description Removes the list. Titles in it keep their entry and their status; they only lose this list's label.
+		 */
+		delete: operations['deleteTrackerList']
+		options?: never
+		head?: never
+		/**
+		 * Rename a custom list or change its icon
+		 * @description The icon is the node's own: an AniList list keeps its name in AniList and its icon here, and the icon follows the list when it is renamed.
+		 */
+		patch: operations['renameTrackerList']
+		trace?: never
+	}
+	'/v1/tracker/refresh': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Refresh tracker entries
+		 * @description Starts a background refresh; the result arrives as a `tracker` event.
+		 */
+		post: operations['refreshTrackerEntries']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 }
-export type webhooks = Record<string, never>;
+export type webhooks = Record<string, never>
 export interface components {
-    schemas: {
-        AISettings: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/AISettings.json
-             */
-            readonly $schema?: string;
-            /** @description Whether this node can ask Claude at all. Off when the node was started with an empty Claude endpoint. */
-            enabled: boolean;
-            /**
-             * @description Whether the user saved their own key. There is no key the build ships with: every request is paid for by the account whose key it is.
-             * @enum {string}
-             */
-            key_source: "user" | "none";
-            /** @description The model that answers. */
-            model: string;
-            /** @description The models the user may choose from, most capable first. */
-            models: string[] | null;
-        };
-        AISettingsInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/AISettingsInputBody.json
-             */
-            readonly $schema?: string;
-            /** @description The user's own Anthropic API key. Anthropic is asked to accept it before it is stored. Empty forgets it; left out keeps the one stored. */
-            api_key?: string;
-            /** @description The model to answer with, one of the settings' models. Left out keeps the one chosen. */
-            model?: string;
-        };
-        AcceptedOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/AcceptedOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description The refresh was started or is already running. */
-            accepted: boolean;
-        };
-        Account: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/Account.json
-             */
-            readonly $schema?: string;
-            avatar_url: string | null;
-            display_adult_content: boolean;
-            /** Format: int64 */
-            id: number;
-            name: string;
-            score_format: string;
-            site_url: string;
-        };
-        AddRepositoryInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/AddRepositoryInputBody.json
-             */
-            readonly $schema?: string;
-            /**
-             * Format: uri
-             * @description The repository's JSON, at an https:// address.
-             */
-            url: string;
-        };
-        AddRootInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/AddRootInputBody.json
-             */
-            readonly $schema?: string;
-            /**
-             * @description What the folder holds, as in listLibraryRoots. Left out means anime.
-             * @enum {string}
-             */
-            content?: "anime" | "movies_and_shows" | "doramas" | "manga" | "books";
-            /**
-             * @description Absolute path to an existing folder on this machine.
-             * @example D:\Anime
-             */
-            path: string;
-        };
-        AddTorrentDownloadInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/AddTorrentDownloadInputBody.json
-             */
-            readonly $schema?: string;
-            /** @description Hold the torrent in the client until its files are chosen with PUT .../files. */
-            choose_files?: boolean;
-            /** @description The episodes the download is for. With choose_files, the node itself takes only their files once the file list arrives. */
-            episodes?: number[] | null;
-            /** @description A magnet link with a BitTorrent v1 hash. Give this or torrent. */
-            magnet?: string;
-            /** @description The title the download is for; its files are matched to it. */
-            media_ref: string;
-            /** @description A search result to download. Give this, magnet or torrent. */
-            release_id?: string;
-            /** @description The title's name, which names the folder the torrent is saved into. */
-            title?: string;
-            /** @description A .torrent file, base64-encoded. Give this or magnet. */
-            torrent?: string;
-        };
-        AiringEpisode: {
-            /** Format: date-time */
-            airing_at: string;
-            /** Format: int64 */
-            episode: number;
-            /**
-             * Format: int64
-             * @description Season the episode belongs to, for a show numbered by season. Absent for an anime, whose seasons are titles of their own.
-             */
-            season?: number;
-        };
-        Audio: {
-            /** Format: int32 */
-            channels: number;
-            codec: string;
-            /** Format: int32 */
-            index: number;
-            is_default: boolean;
-            is_forced: boolean;
-            language?: string;
-            mime_codec?: string;
-            title?: string;
-        };
-        BookDownload: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/BookDownload.json
-             */
-            readonly $schema?: string;
-            authors?: string;
-            /** Format: int64 */
-            bytes_done: number;
-            /**
-             * Format: int64
-             * @description 0 while the size is unknown.
-             */
-            bytes_total: number;
-            edition_ref: string;
-            error?: string;
-            /**
-             * Format: int64
-             * @description The library file, once the book is saved; open it in the reader.
-             */
-            file_id?: number;
-            format: string;
-            /** Format: int64 */
-            id: number;
-            media_ref: string;
-            /** @description Where the book is saved, inside the folder for books. */
-            rel_path?: string;
-            source_name: string;
-            /** @enum {string} */
-            state: "queued" | "running" | "done" | "failed" | "cancelled";
-            title: string;
-        };
-        BookDownloadSettings: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/BookDownloadSettings.json
-             */
-            readonly $schema?: string;
-            /**
-             * Format: int64
-             * @description Library folder of books copies are saved to; 0 while none is chosen.
-             */
-            root_id: number;
-        };
-        BookDownloadsOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/BookDownloadsOutputBody.json
-             */
-            readonly $schema?: string;
-            downloads: components["schemas"]["BookDownload"][] | null;
-        };
-        BookEdition: {
-            authors: string[] | null;
-            /** @description Only the formats the library keeps. */
-            formats: components["schemas"]["BookFormat"][] | null;
-            language?: string;
-            /**
-             * @description Pass as edition_ref to download it, within 30 minutes of the search.
-             * @example gutenberg:84
-             */
-            ref: string;
-            /** @description The source's name. */
-            source: string;
-            title: string;
-            /** Format: int64 */
-            year?: number;
-        };
-        BookFormat: {
-            /** @example .epub */
-            ext: string;
-            /**
-             * Format: int64
-             * @description Bytes, when the source says.
-             */
-            size?: number;
-            /**
-             * @description Pass as format to download the copy in it.
-             * @example application/epub+zip
-             */
-            type: string;
-        };
-        BookInfo: {
-            /** @description The type getReaderBook serves the bytes as, which picks the viewer. */
-            content_type: string;
-            /**
-             * Format: int64
-             * @description Library file the book is.
-             */
-            file_id: number;
-            /** @description Title the book is matched to; absent while unmatched, and then reading moves no list. */
-            media_ref?: string;
-            /** @description The book's name as the library knows it. */
-            title: string;
-        };
-        BookOPDSServerBody: {
-            /** @description Whether a password is stored. The password itself is never sent back. */
-            has_password: boolean;
-            /** Format: int64 */
-            id: number;
-            name: string;
-            /** @description Address of the catalogue's root feed. */
-            url: string;
-            username?: string;
-        };
-        BookOPDSServerInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/BookOPDSServerInputBody.json
-             */
-            readonly $schema?: string;
-            name: string;
-            /** @description Absent keeps the stored password; an empty string removes it. */
-            password?: string;
-            /** @description Address of the catalogue's root feed: http://nas:8083/opds for Calibre-Web, https://standardebooks.org/feeds/opds for Standard Ebooks. */
-            url: string;
-            /** @description For Standard Ebooks, the e-mail of a Patrons Circle member, with no password. */
-            username?: string;
-        };
-        BookOPDSServerOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/BookOPDSServerOutputBody.json
-             */
-            readonly $schema?: string;
-            server: components["schemas"]["BookOPDSServerBody"];
-        };
-        BookOPDSServersOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/BookOPDSServersOutputBody.json
-             */
-            readonly $schema?: string;
-            servers: components["schemas"]["BookOPDSServerBody"][] | null;
-        };
-        BookPosition: {
-            /**
-             * Format: double
-             * @description How far through the book that is, from 0 to 1.
-             */
-            fraction: number;
-            /** @description Where the reader is, in the renderer's own terms: an EPUB CFI, or a PDF page. */
-            locator: string;
-            /**
-             * Format: date-time
-             * @description When the reader was last there.
-             */
-            updated_at: string;
-        };
-        BookPositionInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/BookPositionInputBody.json
-             */
-            readonly $schema?: string;
-            /**
-             * Format: double
-             * @description How far through the book that is, from 0 to 1.
-             */
-            fraction: number;
-            /** @description Where the reader is, in the renderer's own terms. */
-            locator: string;
-        };
-        BookPositionOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/BookPositionOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description The book being read. */
-            book: components["schemas"]["BookInfo"];
-            /** @description Where the reader left the book; null for a book never opened. */
-            position: components["schemas"]["BookPosition"];
-        };
-        BookSource: {
-            /**
-             * @description The prefix of the source's edition references.
-             * @example gutenberg
-             */
-            id: string;
-            /** @example Project Gutenberg */
-            name: string;
-        };
-        BookSourceOutcome: {
-            error?: string;
-            id: string;
-            name: string;
-            /** Format: int64 */
-            results: number;
-        };
-        BookSourcesOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/BookSourcesOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description The sources the node searches; empty while none is set up. */
-            sources: components["schemas"]["BookSource"][] | null;
-        };
-        BraveKeyInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/BraveKeyInputBody.json
-             */
-            readonly $schema?: string;
-            /** @description The user's own Brave Search API key. Brave is asked to accept it before it is stored. Empty forgets it. */
-            api_key: string;
-        };
-        CandidatesOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/CandidatesOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description Pictures that could be the poster, posters first. Nothing is downloaded until one is picked. */
-            images: components["schemas"]["Image"][] | null;
-            /** @description Where the pictures were found. */
-            sources: components["schemas"]["Source"][] | null;
-        };
-        CatalogPlugin: {
-            author: string;
-            description?: string;
-            icon?: string;
-            id: string;
-            /** @description The version installed under this plugin's id, if any. */
-            installed?: string;
-            /** @description Installed from this very manifest address. */
-            installed_here: boolean;
-            lang?: string;
-            /** @description Preview and install from here. */
-            manifest_url: string;
-            name: string;
-            /** Format: int64 */
-            repository_id: number;
-            repository_name: string;
-            /** @enum {string} */
-            type: "torrent-provider" | "manga-provider";
-            /** @description Installed from here, and the repository lists a newer version. */
-            update: boolean;
-            version: string;
-        };
-        Chapter: {
-            /** Format: float */
-            end_time: number;
-            name: string;
-            /** Format: float */
-            start_time: number;
-        };
-        ChapterBody: {
-            /**
-             * Format: int64
-             * @description Library file this chapter is. Absent for a chapter from any other source.
-             */
-            file_id?: number;
-            /** @description Who translated it, to credit them. */
-            groups?: string[] | null;
-            /** @description Title this chapter is matched to. Absent while unmatched. */
-            media_ref?: string;
-            /** @description Chapter number as the source writes it, such as 12 or 12.5. Absent for an unnumbered chapter. */
-            number?: string;
-            /** @description Every page, in reading order. */
-            pages: components["schemas"]["Page"][] | null;
-            /** @description Chapter reference, for the page and progress endpoints. */
-            ref: string;
-            /** @description Where an online chapter comes from, to credit it. */
-            source_name?: string;
-            /** @description Title as the source names it, for the UI. */
-            title: string;
-        };
-        ChapterOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ChapterOutputBody.json
-             */
-            readonly $schema?: string;
-            chapter: components["schemas"]["ChapterBody"];
-        };
-        CheckBookOPDSServerInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/CheckBookOPDSServerInputBody.json
-             */
-            readonly $schema?: string;
-            password?: string;
-            /**
-             * Format: int64
-             * @description A saved server, whose stored password is used when none is given.
-             */
-            server_id?: number;
-            url: string;
-            username?: string;
-        };
-        CheckBookOPDSServerOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/CheckBookOPDSServerOutputBody.json
-             */
-            readonly $schema?: string;
-            detail?: string;
-            ok: boolean;
-            /**
-             * @description What is wrong, when something is. no_search: the catalogue is listed but cannot be searched, so it takes no part in finding books.
-             * @enum {string}
-             */
-            problem?: "unauthorized" | "not_opds" | "no_search" | "unreachable" | "other_host";
-        };
-        CheckOPDSServerInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/CheckOPDSServerInputBody.json
-             */
-            readonly $schema?: string;
-            password?: string;
-            /**
-             * Format: int64
-             * @description A saved server, whose stored password is used when none is given.
-             */
-            server_id?: number;
-            url: string;
-            username?: string;
-        };
-        CheckOPDSServerOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/CheckOPDSServerOutputBody.json
-             */
-            readonly $schema?: string;
-            detail?: string;
-            ok: boolean;
-            /**
-             * @description What is wrong, when something is.
-             * @enum {string}
-             */
-            problem?: "unauthorized" | "not_opds" | "unreachable" | "other_host";
-        };
-        CheckTorrentClientInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/CheckTorrentClientInputBody.json
-             */
-            readonly $schema?: string;
-            /**
-             * @description embedded checks the node's own client, debrid the debrid service's saved key; anything else, qBittorrent at url.
-             * @enum {string}
-             */
-            client?: "" | "qbittorrent" | "embedded" | "debrid";
-            /** @description Left out uses the saved password. */
-            password?: string;
-            url?: string;
-            username: string;
-        };
-        CheckTorrentDebridInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/CheckTorrentDebridInputBody.json
-             */
-            readonly $schema?: string;
-            /** @description A key to try; left out uses the saved one. */
-            api_key?: string;
-            /** @enum {string} */
-            service: "torbox" | "realdebrid" | "alldebrid" | "premiumize";
-        };
-        CheckTorrentSourceInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/CheckTorrentSourceInputBody.json
-             */
-            readonly $schema?: string;
-            api_key?: string;
-            /**
-             * Format: int64
-             * @description A saved source whose key to use when api_key is left out.
-             */
-            source_id?: number;
-            url: string;
-        };
-        CollectionOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/CollectionOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description The library seen as titles rather than as files. */
-            collection: components["schemas"]["LibraryCollection"];
-            /** @description Attribution for every field that came from an external source. */
-            sources: components["schemas"]["Source"][] | null;
-        };
-        ConfigureExtensionInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ConfigureExtensionInputBody.json
-             */
-            readonly $schema?: string;
-            /** @description Only the settings to change. Empty goes back to the default; for a secret, removes it. */
-            config?: {
-                [key: string]: string;
-            };
-            enabled?: boolean;
-        };
-        ControlInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ControlInputBody.json
-             */
-            readonly $schema?: string;
-            /**
-             * @description What to do with the open player.
-             * @enum {string}
-             */
-            action: "pause" | "resume" | "seek";
-            /**
-             * Format: double
-             * @description Seconds from the start, for a seek.
-             */
-            position?: number;
-        };
-        Counts: {
-            /**
-             * Format: int64
-             * @description Of those, files the user told the node to leave alone.
-             */
-            ignored: number;
-            /**
-             * Format: int64
-             * @description Of those, files the last scan did not find.
-             */
-            missing: number;
-            /**
-             * Format: int64
-             * @description Files the filter matches.
-             */
-            total: number;
-            /**
-             * Format: int64
-             * @description Of those, files that belong to no title yet.
-             */
-            unmatched: number;
-        };
-        CoverSource: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/CoverSource.json
-             */
-            readonly $schema?: string;
-            /** @description The picture itself, base64-encoded, at most 10 MB. */
-            data?: string;
-            /** @description An http or https address of the picture. The node downloads it itself and refuses addresses on this computer or the local network. */
-            url?: string;
-        };
-        CreateListInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/CreateListInputBody.json
-             */
-            readonly $schema?: string;
-            /** @description Icon for the list, by name from the client's icon set. Leave it out for the default. */
-            icon?: string;
-            /**
-             * @description The one media type this list holds. A list never mixes types: anime and manga lists are created in the user's AniList account, the rest in this node.
-             * @enum {string}
-             */
-            media_type: "anime" | "manga" | "movie" | "series" | "dorama" | "book";
-            /** @description What to call the list. */
-            name: string;
-        };
-        CustomList: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/CustomList.json
-             */
-            readonly $schema?: string;
-            /**
-             * Format: int64
-             * @description How many titles are in the list.
-             */
-            count: number;
-            /** @description Up to four cover images, for the list's thumbnail. */
-            covers: string[] | null;
-            /** @description Icon the user chose, by name. Absent means the default; a name the client does not know means the default too. */
-            icon?: string;
-            /** @description Opaque identifier; pass it back URL-encoded to rename or delete the list. */
-            id: string;
-            /**
-             * @description The one media type this list holds.
-             * @enum {string}
-             */
-            media_type: "anime" | "manga" | "movie" | "series" | "dorama" | "book";
-            name: string;
-            /**
-             * @description Where the list lives: anilist or local.
-             * @enum {string}
-             */
-            provider: "anilist" | "local";
-            /**
-             * Format: date-time
-             * @description When a title in the list last changed. Absent for an empty list.
-             */
-            updated_at?: string;
-        };
-        Date: {
-            /** Format: int64 */
-            day: number | null;
-            /** Format: int64 */
-            month: number | null;
-            /** Format: int64 */
-            year: number | null;
-        };
-        DetailsOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/DetailsOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description Everything a title page shows about the title itself. */
-            media: components["schemas"]["MediaDetails"];
-            /** @description Attribution for every field that came from an external source. */
-            sources: components["schemas"]["Source"][] | null;
-        };
-        EnqueueBookDownloadInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/EnqueueBookDownloadInputBody.json
-             */
-            readonly $schema?: string;
-            /** @description A copy from a search in the last 30 minutes. */
-            edition_ref: string;
-            /** @description One of the copy's formats, by type. */
-            format: string;
-            /** @description The book the file belongs to in the library. */
-            media_ref: string;
-        };
-        EnqueueMangaDownloadsInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/EnqueueMangaDownloadsInputBody.json
-             */
-            readonly $schema?: string;
-            /** @description Chapter references, as the chapter listing gives them. */
-            refs: string[] | null;
-        };
-        EntriesOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/EntriesOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description One entry per title, in AniList's list order. */
-            entries: components["schemas"]["Entry"][] | null;
-            /**
-             * Format: date-time
-             * @description When AniList last answered for this collection.
-             */
-            fetched_at: string;
-            /** @description Status and custom lists with their sizes. */
-            lists: components["schemas"]["List"][] | null;
-            /** @description The collection this response describes. */
-            media_type: string;
-            /** @description Attribution for every field that came from an external source. */
-            sources: components["schemas"]["Source"][] | null;
-            /** @description True when the data is older than the refresh interval; a refresh is already running. */
-            stale: boolean;
-        };
-        Entry: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/Entry.json
-             */
-            readonly $schema?: string;
-            completed_at: components["schemas"]["Date"];
-            custom_lists: string[] | null;
-            media: components["schemas"]["Media"];
-            media_ref: string;
-            media_type: string;
-            notes: string;
-            private: boolean;
-            /** Format: int64 */
-            progress: number;
-            /** Format: int64 */
-            progress_volumes: number | null;
-            provider: string;
-            /** Format: int64 */
-            repeat: number;
-            /** Format: int64 */
-            score: number;
-            started_at: components["schemas"]["Date"];
-            status: string;
-            sync_pending: boolean;
-            /** Format: date-time */
-            updated_at: string;
-        };
-        Episode: {
-            /** @description First broadcast, as YYYY-MM-DD. */
-            air_date: string | null;
-            /** @description Still for the episode. Absent when no source has one; a client with the file can cut its own from it. */
-            image: string | null;
-            /**
-             * Format: int64
-             * @description Episode number within the title, from 1, or within the season when one is given.
-             */
-            number: number;
-            /** @description Synopsis, in English. */
-            overview: string | null;
-            /**
-             * Format: int64
-             * @description Length in minutes, from the episode or, failing that, the title's typical length.
-             */
-            runtime_minutes: number | null;
-            /**
-             * Format: int64
-             * @description Season of a show numbered by season, from 1; the number then counts within it. Absent for an anime, whose seasons are titles of their own.
-             */
-            season?: number;
-            /** @description Episode title in the first language a source had it in, English first. */
-            title: string | null;
-            /** @description The title per language, keyed by BCP 47 tag (x-jat is romanised Japanese), for the client to pick the user's own. */
-            titles?: {
-                [key: string]: string;
-            };
-        };
-        EpisodeList: {
-            /** @description One entry per episode, in order, whether or not anything is known about it beyond its number. */
-            episodes: components["schemas"]["Episode"][] | null;
-            /** @description The title, as provider:id. */
-            media_ref: string;
-            /**
-             * Format: int64
-             * @description Episodes the title has, or that have aired while the final count is unknown. Absent when no source can say.
-             */
-            total: number | null;
-        };
-        Episodes: {
-            /** Format: int64 */
-            from: number;
-            /** Format: int64 */
-            to: number;
-        };
-        EpisodesOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/EpisodesOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description The title's episodes with whatever the sources know of each. */
-            episodes: components["schemas"]["EpisodeList"];
-            /** @description Attribution for every field that came from an external source. */
-            sources: components["schemas"]["Source"][] | null;
-        };
-        ErrorDetail: {
-            /** @description Where the error occurred, e.g. 'body.items[3].tags' or 'path.thing-id' */
-            location?: string;
-            /** @description Error message text */
-            message?: string;
-            /** @description The value at the given location */
-            value?: unknown;
-        };
-        ErrorModel: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ErrorModel.json
-             */
-            readonly $schema?: string;
-            /**
-             * @description A human-readable explanation specific to this occurrence of the problem.
-             * @example Property foo is required but is missing.
-             */
-            detail?: string;
-            /** @description Optional list of individual error details */
-            errors?: components["schemas"]["ErrorDetail"][] | null;
-            /**
-             * Format: uri
-             * @description A URI reference that identifies the specific occurrence of the problem.
-             * @example https://example.com/error-log/abc123
-             */
-            instance?: string;
-            /**
-             * Format: int64
-             * @description HTTP status code
-             * @example 400
-             */
-            status?: number;
-            /**
-             * @description A short, human-readable summary of the problem type. This value should not change between occurrences of the error.
-             * @example Bad Request
-             */
-            title?: string;
-            /**
-             * Format: uri
-             * @description A URI reference to human-readable documentation for the error.
-             * @default about:blank
-             * @example https://example.com/errors/example
-             */
-            type: string;
-        };
-        Extension: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/Extension.json
-             */
-            readonly $schema?: string;
-            author: string;
-            config: components["schemas"]["ExtensionSetting"][] | null;
-            description?: string;
-            enabled: boolean;
-            homepage?: string;
-            icon?: string;
-            id: string;
-            /** Format: date-time */
-            installed_at: string;
-            lang: string;
-            manifest_url: string;
-            name: string;
-            /** @description Every host the plugin may reach. Nothing else is reachable to it. */
-            network: string[] | null;
-            /** @enum {string} */
-            type: "torrent-provider" | "manga-provider";
-            /** @description What the last update check found. */
-            update?: components["schemas"]["ExtensionUpdate"];
-            /** Format: date-time */
-            updated_at: string;
-            version: string;
-        };
-        ExtensionCatalog: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ExtensionCatalog.json
-             */
-            readonly $schema?: string;
-            plugins: components["schemas"]["CatalogPlugin"][] | null;
-            repositories: components["schemas"]["ExtensionRepository"][] | null;
-        };
-        ExtensionPreview: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ExtensionPreview.json
-             */
-            readonly $schema?: string;
-            author: string;
-            compatible: boolean;
-            config: components["schemas"]["ExtensionSetting"][] | null;
-            /** @description Pass back to install exactly this; a manifest that changed in between is refused. */
-            consent: string;
-            description?: string;
-            homepage?: string;
-            icon?: string;
-            id: string;
-            /** @description The version already installed, if any. */
-            installed?: string;
-            lang: string;
-            manifest_url: string;
-            min_node_version?: string;
-            name: string;
-            /** @description Every host the plugin may reach. Nothing else is reachable to it. */
-            network: string[] | null;
-            /** @enum {string} */
-            type: "torrent-provider" | "manga-provider";
-            version: string;
-        };
-        ExtensionRepository: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ExtensionRepository.json
-             */
-            readonly $schema?: string;
-            /** Format: date-time */
-            added_at: string;
-            /** Format: date-time */
-            checked_at?: string;
-            /** @description Why the last read failed; the plugins shown are from the read before. */
-            error?: string;
-            /** Format: int64 */
-            id: number;
-            name: string;
-            /**
-             * Format: int64
-             * @description How many plugins it lists that this node can run.
-             */
-            plugins: number;
-            /**
-             * Format: int64
-             * @description Entries left out: another type of plugin, or not well formed.
-             */
-            skipped: number;
-            url: string;
-        };
-        ExtensionSetting: {
-            default?: string;
-            label: string;
-            name: string;
-            options?: string[] | null;
-            secret: boolean;
-            set: boolean;
-            /** @enum {string} */
-            type: "text" | "select" | "switch";
-            value?: string;
-        };
-        ExtensionUpdate: {
-            /** @description Hosts the new version reaches that this one does not. */
-            added_hosts?: string[] | null;
-            compatible: boolean;
-            consent?: string;
-            /** @description Why the check could not tell. */
-            error?: string;
-            needs_consent: boolean;
-            version?: string;
-        };
-        ExtensionsOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ExtensionsOutputBody.json
-             */
-            readonly $schema?: string;
-            extensions: components["schemas"]["Extension"][] | null;
-        };
-        File: {
-            /**
-             * Format: int64
-             * @description How long the file runs, read out of its container during the scan. Absent for a container the node cannot read and for everything that is not video.
-             */
-            duration_seconds?: number;
-            /**
-             * Format: int64
-             * @description Identifier of the file, stable while its path does not change.
-             */
-            id: number;
-            /** @description True when the user told the node to leave this file alone. An ignored file is never offered to the matcher again. */
-            ignored: boolean;
-            /**
-             * @description Form of media the extension points at.
-             * @enum {string}
-             */
-            kind: "video" | "manga" | "book";
-            /** @description What the file was matched to. Absent while unmatched. */
-            match?: components["schemas"]["Match"];
-            /** @description True when the last scan did not find the file where it used to be. */
-            missing: boolean;
-            /**
-             * Format: date-time
-             * @description Modification time the last scan saw.
-             */
-            modified_at: string;
-            /** @description What the file's name says. Present whether or not the file is matched. */
-            parsed: components["schemas"]["Parsed"];
-            /** @description Absolute path, for the player and for revealing the file. */
-            path: string;
-            /** @description Path relative to the root, with forward slashes. */
-            rel_path: string;
-            /**
-             * Format: int64
-             * @description Root the file was found under.
-             */
-            root_id: number;
-            /**
-             * Format: int64
-             * @description Size on disk.
-             */
-            size_bytes: number;
-        };
-        FileOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/FileOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description The file with its match applied. */
-            file: components["schemas"]["File"];
-        };
-        FilePage: {
-            /** @description Totals for the whole library behind the filters over the list. */
-            counts: components["schemas"]["Counts"];
-            /** @description One page of files. */
-            items: components["schemas"]["File"][] | null;
-            /**
-             * Format: int64
-             * @description Page size that was applied.
-             */
-            limit: number;
-            /**
-             * Format: int64
-             * @description Offset that was applied.
-             */
-            offset: number;
-            /** @description Every title the files on this page are matched to, once each. */
-            titles: components["schemas"]["MatchedTitle"][] | null;
-            /**
-             * Format: int64
-             * @description How many files match the filter in total.
-             */
-            total: number;
-        };
-        FilesOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/FilesOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description One page of scanned files with their matches. */
-            files: components["schemas"]["FilePage"];
-        };
-        FilterOptions: {
-            /** Format: date-time */
-            fetched_at: string;
-            genres: string[] | null;
-            tags: components["schemas"]["FilterTag"][] | null;
-        };
-        FilterOptionsOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/FilterOptionsOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description The vocabulary the filter panel offers. */
-            options: components["schemas"]["FilterOptions"];
-            /** @description Attribution for every field that came from an external source. */
-            sources: components["schemas"]["Source"][] | null;
-        };
-        FilterTag: {
-            category: string;
-            is_adult: boolean;
-            name: string;
-        };
-        Font: {
-            /** Format: int32 */
-            index: number;
-            name: string;
-        };
-        FuzzyDate: {
-            /** Format: int64 */
-            day: number | null;
-            /** Format: int64 */
-            month: number | null;
-            /** Format: int64 */
-            year: number | null;
-        };
-        GoogleBooksKeyInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/GoogleBooksKeyInputBody.json
-             */
-            readonly $schema?: string;
-            /** @description The user's own Google API key with the Books API enabled. Google is asked to accept it before it is stored. Empty forgets it and goes back to the key this build ships with. */
-            api_key: string;
-        };
-        GoogleBooksSettings: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/GoogleBooksSettings.json
-             */
-            readonly $schema?: string;
-            /** @description Whether this node reads Google Books at all. Off when the node was started with an empty Google Books endpoint. */
-            enabled: boolean;
-            /**
-             * @description Which key the node sends: the user's own, the one this build ships with, or none — then books Open Library does not know cannot be found.
-             * @enum {string}
-             */
-            key_source: "user" | "build" | "none";
-        };
-        GutenbergSettingsBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/GutenbergSettingsBody.json
-             */
-            readonly $schema?: string;
-            /** @description False when the node is configured without Project Gutenberg. */
-            available: boolean;
-            /**
-             * Format: int64
-             * @description Books in the node's copy of the catalogue; 0 until it is downloaded.
-             */
-            books: number;
-            /**
-             * Format: date-time
-             * @description When the node last asked for a newer one; it asks once a week.
-             */
-            checked_at?: string;
-            /** @description Off until the user turns it on; turning it on downloads the catalogue (about 6 MB, mostly books in English). */
-            enabled: boolean;
-            /** @description Why the last download or check failed. */
-            error?: string;
-            /** @description The catalogue is being downloaded or checked. Changes arrive on the books.catalog topic. */
-            syncing: boolean;
-            /**
-             * Format: date-time
-             * @description When the node took the catalogue it has.
-             */
-            updated_at?: string;
-        };
-        HealthOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/HealthOutputBody.json
-             */
-            readonly $schema?: string;
-            /**
-             * @description Build timestamp.
-             * @example 2026-08-27T12:00:00Z
-             */
-            built: string;
-            /**
-             * @description Git commit the build came from.
-             * @example abc1234
-             */
-            commit: string;
-            /** @description True when the node is paired with a cloud account. */
-            linked: boolean;
-            /**
-             * @description Node status.
-             * @example ok
-             */
-            status: string;
-            /**
-             * @description Semantic version of the running build.
-             * @example 0.1.0
-             */
-            version: string;
-        };
-        Image: {
-            /** Format: int64 */
-            height?: number;
-            /**
-             * @description Which search found it.
-             * @enum {string}
-             */
-            source: "brave" | "wikimedia";
-            /** @description The page the picture was found on. */
-            source_page?: string;
-            /** @description A small copy to show in the list of candidates. */
-            thumbnail: string;
-            /** @description The picture itself, as the source links it. The node downloads it only when the user picks it. */
-            url: string;
-            /** Format: int64 */
-            width?: number;
-        };
-        ImageSearchSettings: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ImageSearchSettings.json
-             */
-            readonly $schema?: string;
-            /** @description Whether this node can look for posters at all. */
-            enabled: boolean;
-            /**
-             * @description Whether the user saved their own Brave Search key. Without one only Wikimedia Commons is searched, which rarely has posters.
-             * @enum {string}
-             */
-            key_source: "user" | "none";
-        };
-        InstallExtensionInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/InstallExtensionInputBody.json
-             */
-            readonly $schema?: string;
-            /** @description From the preview the user agreed to. */
-            consent: string;
-            /** Format: uri */
-            url: string;
-        };
-        LibraryCollection: {
-            /** @description Titles the library holds files of, by name. */
-            entries: components["schemas"]["LibraryCollectionEntry"][] | null;
-            /**
-             * Format: int64
-             * @description Files in the library in total.
-             */
-            files: number;
-            /**
-             * Format: int64
-             * @description Files the last scan did not find where they used to be.
-             */
-            missing: number;
-            /**
-             * Format: int64
-             * @description Files that belong to no title yet. Openings and other extras are left out: they belong to none by design.
-             */
-            unmatched: number;
-        };
-        LibraryCollectionEntry: {
-            /**
-             * Format: int64
-             * @description Files matched to this title.
-             */
-            file_count: number;
-            /** @description The title, as provider:id. */
-            media_ref: string;
-            /**
-             * Format: int64
-             * @description Of those, files the last scan did not find.
-             */
-            missing_count: number;
-            /** @description Name and poster, when the node can describe the title. Absent for a title no source has answered for yet. */
-            title?: components["schemas"]["MatchedTitle"];
-        };
-        List: {
-            /** Format: int64 */
-            count: number;
-            custom: boolean;
-            name: string;
-            status: string | null;
-        };
-        ListsOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ListsOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description Every custom list the user made, across all media types. */
-            lists: components["schemas"]["CustomList"][] | null;
-            /** @description Attribution for every field that came from an external source. */
-            sources: components["schemas"]["Source"][] | null;
-        };
-        MangaChapterBody: {
-            /** @description The publisher's page, for a chapter the source only links to. It has no pages to read here. */
-            external_url?: string;
-            /** @description Who translated it. Shown next to the chapter: the source asks for the credit. */
-            groups?: string[] | null;
-            /** @description Language of the translation, where the source says. */
-            language?: string;
-            /** @description Chapter number as the source writes it. Absent for an unnumbered chapter. */
-            number?: string;
-            /** Format: int64 */
-            pages: number;
-            /** @description Chapter reference for the reader's endpoints. */
-            ref: string;
-            source: string;
-            source_name: string;
-            title: string;
-        };
-        MangaChaptersOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/MangaChaptersOutputBody.json
-             */
-            readonly $schema?: string;
-            chapters: components["schemas"]["MangaChapterBody"][] | null;
-            /** @description Linked sources that could not be read this time; the others are listed. */
-            problems: components["schemas"]["MangaSourceProblemBody"][] | null;
-        };
-        MangaDownloadBody: {
-            chapter_ref: string;
-            error?: string;
-            /** Format: int64 */
-            id: number;
-            media_ref: string;
-            number?: string;
-            /** Format: int64 */
-            pages_done: number;
-            /** Format: int64 */
-            pages_total: number;
-            /** @description Where the chapter is saved, inside the download folder. */
-            rel_path?: string;
-            series: string;
-            source_name: string;
-            /** @enum {string} */
-            state: "queued" | "running" | "done" | "failed" | "cancelled";
-            title: string;
-        };
-        MangaDownloadSettingsBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/MangaDownloadSettingsBody.json
-             */
-            readonly $schema?: string;
-            /**
-             * Format: int64
-             * @description Library folder chapters are saved to; 0 while none is chosen.
-             */
-            root_id: number;
-        };
-        MangaDownloadsOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/MangaDownloadsOutputBody.json
-             */
-            readonly $schema?: string;
-            downloads: components["schemas"]["MangaDownloadBody"][] | null;
-        };
-        MangaLinkBody: {
-            /** @enum {string} */
-            chosen_by: "auto" | "user";
-            series_id: string;
-            series_title?: string;
-            source: string;
-            source_name: string;
-        };
-        MangaLinksOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/MangaLinksOutputBody.json
-             */
-            readonly $schema?: string;
-            links: components["schemas"]["MangaLinkBody"][] | null;
-        };
-        MangaSearchOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/MangaSearchOutputBody.json
-             */
-            readonly $schema?: string;
-            series: components["schemas"]["MangaSeriesBody"][] | null;
-        };
-        MangaSeriesBody: {
-            /** @description What tells similar names apart, such as a year. */
-            detail?: string;
-            /** @description The series' id in its source: a path on an OPDS server, a plugin's own id. */
-            id: string;
-            /** @description True when the source itself links this series to the title being linked. */
-            matched: boolean;
-            title: string;
-        };
-        MangaSourceBody: {
-            /** @example opds:3 */
-            id: string;
-            /** @enum {string} */
-            kind: "opds" | "plugin";
-            name: string;
-        };
-        MangaSourceProblemBody: {
-            detail: string;
-            source: string;
-            source_name?: string;
-        };
-        MangaSourcesOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/MangaSourcesOutputBody.json
-             */
-            readonly $schema?: string;
-            sources: components["schemas"]["MangaSourceBody"][] | null;
-        };
-        ManualDraft: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ManualDraft.json
-             */
-            readonly $schema?: string;
-            /** @description Who wrote it; manga and books. */
-            authors?: string[] | null;
-            /**
-             * Format: int64
-             * @description Chapters; manga only.
-             */
-            chapters?: number;
-            /** @description ISO 3166-1 alpha-2 code of where it comes from. */
-            country_of_origin?: string;
-            /** @description Plain-text synopsis. */
-            description?: string;
-            /**
-             * Format: int64
-             * @description Minutes per episode, or the runtime of a movie.
-             */
-            duration?: number;
-            /**
-             * Format: int64
-             * @description Day it finished; needs the end month.
-             */
-            end_day?: number;
-            /**
-             * Format: int64
-             * @description Month it finished; needs the end year.
-             */
-            end_month?: number;
-            /**
-             * Format: int64
-             * @description Year it finished; not before it came out.
-             */
-            end_year?: number;
-            /**
-             * Format: int64
-             * @description Episodes it has. A movie always has one.
-             */
-            episodes?: number;
-            /**
-             * @description The source vocabulary's format for this kind of title: TV, MOVIE, OVA… for anime, MANGA, NOVEL, ONE_SHOT for manga, BOOK for a book. Left out it is the kind's usual one.
-             * @enum {string}
-             */
-            format?: "TV" | "TV_SHORT" | "MOVIE" | "SPECIAL" | "OVA" | "ONA" | "MUSIC" | "MANGA" | "NOVEL" | "ONE_SHOT" | "BOOK";
-            /** @description Genres, in whatever words the user chose. */
-            genres?: string[] | null;
-            /** @description Adult content. */
-            is_adult?: boolean;
-            /**
-             * @description Which kind of title this is. It decides the list it is tracked on and what its progress counts.
-             * @enum {string}
-             */
-            media_type: "anime" | "manga" | "movie" | "series" | "dorama" | "book";
-            /** @description The name in the original language, when it differs. */
-            original_title?: string;
-            /**
-             * Format: int64
-             * @description Pages; a book only, whose progress counts them.
-             */
-            pages?: number;
-            /**
-             * Format: int64
-             * @description How good it is, out of 100, shown where a source's average score would be. Zero is no score.
-             */
-            score?: number;
-            /**
-             * Format: int64
-             * @description Seasons it has; anime, series and dorama only.
-             */
-            seasons?: number;
-            /**
-             * Format: int64
-             * @description Day it came out; needs the month.
-             */
-            start_day?: number;
-            /**
-             * Format: int64
-             * @description Month it came out; needs the year.
-             */
-            start_month?: number;
-            /**
-             * @description Release status.
-             * @enum {string}
-             */
-            status?: "FINISHED" | "RELEASING" | "NOT_YET_RELEASED" | "CANCELLED" | "HIATUS";
-            /** @description Who made it. */
-            studios?: string[] | null;
-            /** @description Other names the title goes by. Library files are matched against these too. */
-            synonyms?: string[] | null;
-            /** @description The name shown everywhere in the app. */
-            title: string;
-            /**
-             * Format: int64
-             * @description Volumes; manga only.
-             */
-            volumes?: number;
-            /**
-             * Format: int64
-             * @description Year it came out.
-             */
-            year?: number;
-        };
-        ManualHint: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ManualHint.json
-             */
-            readonly $schema?: string;
-            /**
-             * @description The language to write the description in: the app's own.
-             * @default en
-             * @enum {string}
-             */
-            language: "en" | "uk" | "ru";
-            /**
-             * @description The kind of title, as the user chose it. Claude does not change it.
-             * @enum {string}
-             */
-            media_type: "anime" | "manga" | "movie" | "series" | "dorama" | "book";
-            /** @description Anything else the user knows — the studio, the country, the original name — to tell Claude which title is meant. */
-            note?: string;
-            /** @description The name as the user knows it. Claude does not change it either. */
-            title: string;
-            /**
-             * Format: int64
-             * @description Year it came out, when the user knows it: it tells apart titles of the same name.
-             */
-            year?: number;
-        };
-        ManualOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ManualOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description The title as its page shows it, under its manual:<id> reference. */
-            media: components["schemas"]["MediaDetails"];
-        };
-        ManualSuggestion: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ManualSuggestion.json
-             */
-            readonly $schema?: string;
-            /** @description The title as Claude knows it, cleaned the way a draft the user typed is. Nothing is stored: the client shows it for the user to check and saves it like any other draft. */
-            draft: components["schemas"]["ManualDraft"];
-            /** @description The model that answered. */
-            model: string;
-            /** @description Whether Claude knew this title at all. When it did not, the draft carries little beyond the hint, by design: an unknown title gets no invented details. */
-            recognized: boolean;
-        };
-        Match: {
-            /**
-             * Format: double
-             * @description How sure the matcher was, from 0 to 1. A manual match is always 1.
-             */
-            confidence: number;
-            /**
-             * Format: int64
-             * @description Episode or chapter number within the title.
-             */
-            episode?: number;
-            /** @description The title this file belongs to, as provider:id. */
-            media_ref: string;
-            /**
-             * Format: int64
-             * @description Season number, when the title has seasons.
-             */
-            season?: number;
-            /**
-             * @description Who decided the match. A manual one is never overwritten by a scan.
-             * @enum {string}
-             */
-            source: "auto" | "manual";
-        };
-        MatchedTitle: {
-            /** @description Dominant colour of the poster, for a placeholder while it loads. */
-            cover_color?: string;
-            /** @description Poster for the title. */
-            cover_image?: string;
-            /**
-             * Format: int64
-             * @description Episodes the title has in total, or chapters for a comic.
-             */
-            episodes?: number;
-            /** @description TV, MOVIE, OVA and so on, as the source names it. */
-            format?: string;
-            /** @description The title, as provider:id. */
-            media_ref: string;
-            /**
-             * @description Which catalog the title comes from.
-             * @enum {string}
-             */
-            media_type?: "anime" | "manga";
-            /** @description The title as the user's source spells it. */
-            title: string;
-        };
-        Media: {
-            /** @description Who wrote it; a book only. */
-            authors?: string[] | null;
-            /** Format: int64 */
-            average_score: number | null;
-            banner_image: string | null;
-            /** Format: int64 */
-            chapters: number | null;
-            cover_color: string | null;
-            cover_image: string | null;
-            /** Format: int64 */
-            episodes: number | null;
-            format: string | null;
-            genres: string[] | null;
-            is_adult: boolean;
-            /**
-             * Format: int64
-             * @description Pages in a typical edition; a book only, whose progress counts them.
-             */
-            pages?: number;
-            /** Format: int64 */
-            season_year: number | null;
-            site_url: string;
-            status: string | null;
-            synonyms?: string[] | null;
-            title: components["schemas"]["Title"];
-            /** Format: int64 */
-            volumes: number | null;
-        };
-        MediaDetails: {
-            /** @description Who wrote it; a book only. */
-            authors: string[] | null;
-            /** Format: int64 */
-            average_score: number | null;
-            banner_image: string | null;
-            /** Format: int64 */
-            chapters: number | null;
-            country_of_origin: string | null;
-            cover_color: string | null;
-            cover_image: string | null;
-            description: string;
-            /** Format: int64 */
-            duration: number | null;
-            /** @description The user described this title themselves, so they may edit or delete it. Only manual:<id> titles; every other one belongs to its source. */
-            editable: boolean;
-            end_date: components["schemas"]["FuzzyDate"];
-            /** Format: int64 */
-            episodes: number | null;
-            /** Format: int64 */
-            favourites: number | null;
-            /** Format: date-time */
-            fetched_at: string;
-            format: string | null;
-            genres: string[] | null;
-            is_adult: boolean;
-            /** Format: int64 */
-            mean_score: number | null;
-            media_ref: string;
-            media_type: string;
-            next_airing_episode: components["schemas"]["AiringEpisode"];
-            /**
-             * Format: int64
-             * @description Pages in a typical edition; a book only.
-             */
-            pages: number | null;
-            /** Format: int64 */
-            popularity: number | null;
-            /** @description Titles suggested to people who liked this one: AniList users' recommendations, or TMDB's own picks. */
-            recommendations: components["schemas"]["RelatedMedia"][] | null;
-            relations: components["schemas"]["RelatedMedia"][] | null;
-            season: string | null;
-            /** Format: int64 */
-            season_year: number | null;
-            /**
-             * Format: int64
-             * @description Seasons it has; only a manual title says.
-             */
-            seasons?: number;
-            /** @description Titles alike in genre and keywords. TMDB only; empty for an AniList title. */
-            similar: components["schemas"]["RelatedMedia"][] | null;
-            site_url: string;
-            source: string | null;
-            start_date: components["schemas"]["FuzzyDate"];
-            status: string | null;
-            studios: string[] | null;
-            synonyms: string[] | null;
-            title: components["schemas"]["TitleNames"];
-            trailer: components["schemas"]["Trailer"];
-            /** Format: int64 */
-            volumes: number | null;
-        };
-        MediaInfo: {
-            audios: components["schemas"]["Audio"][] | null;
-            chapters: components["schemas"]["Chapter"][] | null;
-            /** @description Container format as ffprobe names it. */
-            container?: string;
-            /**
-             * Format: float
-             * @description Length in seconds.
-             */
-            duration: number;
-            /** @description File extension without the dot. */
-            extension: string;
-            /** @description Fonts attached to the file, needed to render its ASS subtitles as authored. */
-            fonts: components["schemas"]["Font"][] | null;
-            /** @description RFC 6381 type with codecs, for canPlayType. Absent when a stream has a codec the node cannot describe — such a file is not a direct-play candidate. */
-            mime_codec?: string;
-            /** @description Absolute path of the file. */
-            path: string;
-            /**
-             * Format: int64
-             * @description Size in bytes.
-             */
-            size: number;
-            subtitles: components["schemas"]["Subtitle"][] | null;
-            /** @description The first video stream. */
-            video?: components["schemas"]["Video"];
-            videos: components["schemas"]["Video"][] | null;
-        };
-        MediaSummary: {
-            /** @description Who wrote it; a book only. */
-            authors?: string[] | null;
-            /** Format: int64 */
-            average_score: number | null;
-            banner_image: string | null;
-            /** Format: int64 */
-            chapters: number | null;
-            cover_color: string | null;
-            cover_image: string | null;
-            /** @description Plain-text synopsis, when the source's search carries one. Open Library's does not. */
-            description?: string;
-            /** @description A title the user described themselves; see MediaDetails.editable. */
-            editable?: boolean;
-            /** Format: int64 */
-            episodes: number | null;
-            format: string | null;
-            genres: string[] | null;
-            is_adult: boolean;
-            media_ref: string;
-            media_type: string;
-            next_airing_episode: components["schemas"]["AiringEpisode"];
-            /**
-             * Format: int64
-             * @description Pages in a typical edition; a book only.
-             */
-            pages?: number;
-            /** Format: int64 */
-            popularity: number | null;
-            season: string | null;
-            /** Format: int64 */
-            season_year: number | null;
-            site_url: string;
-            start_date: components["schemas"]["FuzzyDate"];
-            status: string | null;
-            title: components["schemas"]["TitleNames"];
-            /** Format: int64 */
-            volumes: number | null;
-        };
-        OPDSServerBody: {
-            /** @description Whether a password is stored. The password itself is never sent back. */
-            has_password: boolean;
-            /** Format: int64 */
-            id: number;
-            name: string;
-            /** @description Address of the catalogue's root feed. */
-            url: string;
-            username?: string;
-        };
-        OPDSServerInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/OPDSServerInputBody.json
-             */
-            readonly $schema?: string;
-            name: string;
-            /** @description Absent keeps the stored password; an empty string removes it. */
-            password?: string;
-            /** @description Address of the catalogue's root feed, such as http://nas:25600/opds/v1.2/catalog. */
-            url: string;
-            username?: string;
-        };
-        OPDSServerOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/OPDSServerOutputBody.json
-             */
-            readonly $schema?: string;
-            server: components["schemas"]["OPDSServerBody"];
-        };
-        OPDSServersOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/OPDSServersOutputBody.json
-             */
-            readonly $schema?: string;
-            servers: components["schemas"]["OPDSServerBody"][] | null;
-        };
-        Page: {
-            /**
-             * Format: int64
-             * @description Position in reading order, starting at 0.
-             */
-            index: number;
-            /** @description File name inside the archive. */
-            name: string;
-        };
-        Parsed: {
-            /**
-             * Format: int64
-             * @description Chapter number, for comics.
-             */
-            chapter?: number;
-            /**
-             * Format: int64
-             * @description Episode number found in the name.
-             */
-            episode?: number;
-            /**
-             * @description What the name says the file holds. An extra — an opening, an ending, a trailer — is never tracked as an episode.
-             * @enum {string}
-             */
-            form?: "series" | "movie" | "special" | "extra" | "manga" | "book";
-            /**
-             * Format: int64
-             * @description Season found in the name or on a folder.
-             */
-            season?: number;
-            /** @description Title read from the file name, or from the closest folder that names one. */
-            title?: string;
-            /**
-             * Format: int64
-             * @description Volume number, for comics.
-             */
-            volume?: number;
-            /**
-             * Format: int64
-             * @description Year found in the name.
-             */
-            year?: number;
-        };
-        PlaybackOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/PlaybackOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description What the node's single player slot is doing. */
-            playback: components["schemas"]["PlaybackStatus"];
-        };
-        PlaybackSession: {
-            /**
-             * Format: double
-             * @description Length of the file, in seconds. Zero until the player reports it.
-             */
-            duration: number;
-            /**
-             * Format: int64
-             * @description Episode number within that title.
-             */
-            episode?: number;
-            /**
-             * Format: int64
-             * @description Library file being played.
-             */
-            file_id: number;
-            /** @description Title this file is matched to. Absent while unmatched. */
-            media_ref?: string;
-            /** @description Absolute path mpv was given. */
-            path: string;
-            /** @description True while the player is paused. */
-            paused: boolean;
-            /**
-             * Format: double
-             * @description Where the player is, in seconds.
-             */
-            position: number;
-            /**
-             * Format: date-time
-             * @description When playback started.
-             */
-            started_at: string;
-            /** @description Title as the library reads it, for the UI. */
-            title: string;
-            /** @description True once this session counted as watched and the tracker was told. */
-            watched: boolean;
-        };
-        PlaybackStatus: {
-            /** @description True while a player is open. */
-            playing: boolean;
-            /** @description The open session. Absent when nothing is playing. */
-            session?: components["schemas"]["PlaybackSession"];
-        };
-        PreviewExtensionInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/PreviewExtensionInputBody.json
-             */
-            readonly $schema?: string;
-            /**
-             * Format: uri
-             * @description The plugin's manifest.json, at an https:// address.
-             */
-            url: string;
-        };
-        ProgressInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ProgressInputBody.json
-             */
-            readonly $schema?: string;
-            /**
-             * Format: double
-             * @description Length of the file, in seconds.
-             */
-            duration: number;
-            /** @description True when the file played to its end. */
-            ended?: boolean;
-            /**
-             * Format: double
-             * @description Where the player is, in seconds.
-             */
-            position: number;
-        };
-        ProgressOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ProgressOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description True once this file counts as watched and the tracker was told. */
-            watched: boolean;
-        };
-        PutBookDownloadSettingsInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/PutBookDownloadSettingsInputBody.json
-             */
-            readonly $schema?: string;
-            /** Format: int64 */
-            root_id: number;
-        };
-        PutGutenbergSettingsInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/PutGutenbergSettingsInputBody.json
-             */
-            readonly $schema?: string;
-            enabled: boolean;
-        };
-        PutMangaDownloadSettingsInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/PutMangaDownloadSettingsInputBody.json
-             */
-            readonly $schema?: string;
-            /** Format: int64 */
-            root_id: number;
-        };
-        PutMangaLinkInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/PutMangaLinkInputBody.json
-             */
-            readonly $schema?: string;
-            /** @description As the search returned it. */
-            series_id: string;
-            series_title?: string;
-        };
-        PutTorrentDebridInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/PutTorrentDebridInputBody.json
-             */
-            readonly $schema?: string;
-            /** @description The service's key. Left out keeps the saved key; empty removes it. */
-            api_key?: string;
-            /**
-             * @description The service; empty turns it off.
-             * @enum {string}
-             */
-            service: "" | "torbox" | "realdebrid" | "alldebrid" | "premiumize";
-        };
-        PutTorrentRuleInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/PutTorrentRuleInputBody.json
-             */
-            readonly $schema?: string;
-            enabled: boolean;
-            /**
-             * Format: int64
-             * @description Left out starts after the last episode the library has.
-             */
-            from_episode?: number;
-            /** @description Searched for instead of the title's names. */
-            query?: string;
-            /** @description The title's name; it names the folder downloads go into. */
-            title: string;
-        };
-        PutTorrentSettingsInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/PutTorrentSettingsInputBody.json
-             */
-            readonly $schema?: string;
-            /**
-             * @description Who downloads torrents into the library: the user's qBittorrent, the node's own client, the debrid service set up under /v1/torrent/debrid, or none.
-             * @enum {string}
-             */
-            client: "" | "qbittorrent" | "embedded" | "debrid";
-            /** @description Left out keeps the saved password; empty removes it. */
-            password?: string;
-            /** @description How the client names the node's folders, when it runs in Docker or on another machine. */
-            path_map: components["schemas"]["TorrentPathMap"];
-            /**
-             * Format: int64
-             * @description Library folder torrents are saved into; 0 while none is chosen.
-             */
-            root_id: number;
-            /** @description qBittorrent WebUI address; empty disconnects. */
-            url: string;
-            username: string;
-        };
-        ReadBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ReadBody.json
-             */
-            readonly $schema?: string;
-            /**
-             * Format: int64
-             * @description Page the reader is on, starting at 0.
-             */
-            page: number;
-        };
-        ReadOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ReadOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description True once the chapter counts as read, on this call or an earlier one. */
-            counted: boolean;
-        };
-        RelatedMedia: {
-            cover_color: string | null;
-            cover_image: string | null;
-            format: string | null;
-            media_ref: string;
-            media_type: string;
-            relation_type: string;
-            /** Format: int64 */
-            season_year: number | null;
-            status: string | null;
-            title: components["schemas"]["TitleNames"];
-        };
-        RenameListInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/RenameListInputBody.json
-             */
-            readonly $schema?: string;
-            /** @description New icon, by name. Leave it out to keep the current one; an empty string goes back to the default. */
-            icon?: string;
-            /** @description The new name. */
-            name: string;
-        };
-        Root: {
-            /**
-             * Format: date-time
-             * @description When the user added the root.
-             */
-            added_at: string;
-            /**
-             * @description What the folder holds. For videos it picks the source: anime is matched against AniList, movies and shows against TMDB, doramas against TMDB's East Asian shows; such a folder keeps comics and books as well. A folder of manga keeps only comics, a folder of books only books.
-             * @enum {string}
-             */
-            content: "anime" | "movies_and_shows" | "doramas" | "manga" | "books";
-            /**
-             * Format: int64
-             * @description Media files currently present under the root.
-             */
-            file_count: number;
-            /**
-             * Format: int64
-             * @description Identifier of the root, stable across scans.
-             */
-            id: number;
-            /**
-             * Format: date-time
-             * @description When the root was last walked. Absent until the first scan.
-             */
-            last_scan_at?: string;
-            /**
-             * Format: int64
-             * @description Files the last scan did not find. Their matches are kept in case the drive comes back.
-             */
-            missing_count: number;
-            /** @description Absolute path on this machine. */
-            path: string;
-            /**
-             * Format: int64
-             * @description Files under this root that belong to no title yet. Openings and other extras are left out: they belong to none by design.
-             */
-            unmatched_count: number;
-        };
-        RootOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/RootOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description The root as the node recorded it. */
-            root: components["schemas"]["Root"];
-        };
-        RootsOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/RootsOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description Folders the user gave the node to watch. */
-            roots: components["schemas"]["Root"][] | null;
-        };
-        ScanHistoryOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ScanHistoryOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description One page of past scans, newest first. */
-            history: components["schemas"]["ScanHistoryPage"];
-        };
-        ScanHistoryPage: {
-            /** @description One page of past scans, newest first. */
-            items: components["schemas"]["ScanRunSummary"][] | null;
-            /**
-             * Format: int64
-             * @description Page size that was applied.
-             */
-            limit: number;
-            /**
-             * Format: int64
-             * @description Offset that was applied.
-             */
-            offset: number;
-            /**
-             * Format: int64
-             * @description How many scans match the filter in total.
-             */
-            total: number;
-        };
-        ScanInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ScanInputBody.json
-             */
-            readonly $schema?: string;
-            /**
-             * Format: int64
-             * @description Scan this root alone. Left out or 0 scans every root.
-             */
-            root_id?: number;
-        };
-        ScanOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ScanOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description State of the node's single scan slot. */
-            scan: components["schemas"]["ScanStatus"];
-        };
-        ScanRootResult: {
-            /**
-             * Format: int64
-             * @description Files recorded for the first time.
-             */
-            added: number;
-            /**
-             * Format: int64
-             * @description Known files whose size or modification time moved.
-             */
-            changed: number;
-            /** @description Why this root could not be scanned. The other roots are still scanned. */
-            error?: string;
-            /**
-             * Format: int64
-             * @description Media files seen on disk.
-             */
-            found: number;
-            /**
-             * Format: int64
-             * @description Files that were recorded before and are gone now.
-             */
-            missing: number;
-            /** @description Absolute path of the root. */
-            path: string;
-            /**
-             * Format: int64
-             * @description Files whose container was opened to read how long they run.
-             */
-            probed: number;
-            /**
-             * Format: int64
-             * @description Untouched files whose names a newer parser read again.
-             */
-            reparsed: number;
-            /**
-             * Format: int64
-             * @description Root this result belongs to.
-             */
-            root_id: number;
-        };
-        ScanRunDetail: {
-            /**
-             * Format: int64
-             * @description Files recorded for the first time.
-             */
-            added: number;
-            /**
-             * Format: int64
-             * @description Known files whose size or modification time moved.
-             */
-            changed: number;
-            /**
-             * Format: int64
-             * @description Unmatched files the scan tried to match.
-             */
-            considered: number;
-            /**
-             * Format: date-time
-             * @description When the scan finished.
-             */
-            finished_at: string;
-            /**
-             * Format: int64
-             * @description Media files seen on disk across all scanned roots.
-             */
-            found: number;
-            /** @description Titles this scan matched files to. */
-            groups: components["schemas"]["ScanRunGroupDetail"][] | null;
-            /**
-             * Format: int64
-             * @description Identifier of this scan run.
-             */
-            id: number;
-            /**
-             * Format: int64
-             * @description Files matched to a title without asking the user.
-             */
-            matched: number;
-            /**
-             * Format: int64
-             * @description Files that were recorded before and were gone this time.
-             */
-            missing: number;
-            /** @description Per-root outcome of this scan. */
-            roots: components["schemas"]["ScanRunRootDetail"][] | null;
-            /**
-             * Format: int64
-             * @description Folders this scan covered.
-             */
-            roots_total: number;
-            /**
-             * Format: date-time
-             * @description When the scan started.
-             */
-            started_at: string;
-            /**
-             * @description Partial when the scan was interrupted before it walked every root.
-             * @enum {string}
-             */
-            status: "completed" | "partial";
-            /** @description Files this scan looked at but could not match. */
-            unmatched_files: components["schemas"]["ScanRunFileLogDetail"][] | null;
-        };
-        ScanRunFileLogDetail: {
-            /**
-             * Format: double
-             * @description The best candidate's score, however far short of matching. Absent when there was nothing to compare against.
-             */
-            confidence?: number;
-            /**
-             * Format: int64
-             * @description The file, when it has not since been deleted.
-             */
-            file_id?: number;
-            /** @description Title read from the name at the time of the scan. */
-            parsed_title?: string;
-            /** @description Path relative to its root at the time of the scan. */
-            rel_path: string;
-        };
-        ScanRunGroupDetail: {
-            /**
-             * Format: int64
-             * @description Files this scan matched to the title.
-             */
-            file_count: number;
-            /** @description What the scan made of every file it matched to this title, for the scanner log under the title. */
-            files: components["schemas"]["ScanRunFileLogDetail"][] | null;
-            /** @description The title, as provider:id. */
-            media_ref: string;
-            /** @description The title's name and poster, when the node can still describe it. */
-            title?: components["schemas"]["MatchedTitle"];
-            /** @description False when the match came from a search rather than the user's own list. */
-            tracked: boolean;
-        };
-        ScanRunOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ScanRunOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description The scan run in full. */
-            run: components["schemas"]["ScanRunDetail"];
-            /** @description Attribution for every field that came from an external source. */
-            sources: components["schemas"]["Source"][] | null;
-        };
-        ScanRunRootDetail: {
-            /**
-             * Format: int64
-             * @description Files recorded for the first time.
-             */
-            added: number;
-            /**
-             * Format: int64
-             * @description Known files whose size or modification time moved.
-             */
-            changed: number;
-            /** @description Why this root could not be scanned. */
-            error?: string;
-            /**
-             * Format: int64
-             * @description Media files seen on disk.
-             */
-            found: number;
-            /**
-             * Format: int64
-             * @description Files that were recorded before and were gone this time.
-             */
-            missing: number;
-            /**
-             * Format: int64
-             * @description Files whose container was opened to read how long they run.
-             */
-            probed: number;
-            /**
-             * Format: int64
-             * @description Untouched files whose names a newer parser read again.
-             */
-            reparsed: number;
-            /**
-             * Format: int64
-             * @description The root, when it has not since been removed.
-             */
-            root_id?: number;
-            /** @description Path the scan walked. */
-            root_path: string;
-        };
-        ScanRunSummary: {
-            /**
-             * Format: int64
-             * @description Files recorded for the first time.
-             */
-            added: number;
-            /**
-             * Format: int64
-             * @description Known files whose size or modification time moved.
-             */
-            changed: number;
-            /**
-             * Format: int64
-             * @description Unmatched files the scan tried to match.
-             */
-            considered: number;
-            /**
-             * Format: date-time
-             * @description When the scan finished.
-             */
-            finished_at: string;
-            /**
-             * Format: int64
-             * @description Media files seen on disk across all scanned roots.
-             */
-            found: number;
-            /**
-             * Format: int64
-             * @description Identifier of this scan run.
-             */
-            id: number;
-            /**
-             * Format: int64
-             * @description Files matched to a title without asking the user.
-             */
-            matched: number;
-            /**
-             * Format: int64
-             * @description Files that were recorded before and were gone this time.
-             */
-            missing: number;
-            /**
-             * Format: int64
-             * @description Folders this scan covered.
-             */
-            roots_total: number;
-            /**
-             * Format: date-time
-             * @description When the scan started.
-             */
-            started_at: string;
-            /**
-             * @description Partial when the scan was interrupted before it walked every root.
-             * @enum {string}
-             */
-            status: "completed" | "partial";
-        };
-        ScanStatus: {
-            /**
-             * Format: int64
-             * @description Files recorded for the first time.
-             */
-            added: number;
-            /**
-             * Format: int64
-             * @description Known files whose size or modification time moved.
-             */
-            changed: number;
-            /**
-             * Format: int64
-             * @description Unmatched files the scan tried to match, including ones left over from earlier scans.
-             */
-            considered: number;
-            /**
-             * Format: date-time
-             * @description When the last scan finished. Absent while one is running.
-             */
-            finished_at?: string;
-            /**
-             * Format: int64
-             * @description Media files seen on disk across all scanned roots.
-             */
-            found: number;
-            /**
-             * Format: int64
-             * @description Files matched to a title without asking the user. The rest keep their suggestions for confirmation.
-             */
-            matched: number;
-            /**
-             * Format: int64
-             * @description Files that were recorded before and are gone now.
-             */
-            missing: number;
-            /**
-             * Format: int64
-             * @description Files whose container was opened to read how long they run.
-             */
-            probed: number;
-            /**
-             * Format: int64
-             * @description Untouched files whose names a newer parser read again.
-             */
-            reparsed: number;
-            /** @description Per-root outcome of the current or last scan. */
-            roots: components["schemas"]["ScanRootResult"][] | null;
-            /**
-             * Format: int64
-             * @description Folders it has finished with.
-             */
-            roots_done: number;
-            /**
-             * Format: int64
-             * @description Folders this scan covers.
-             */
-            roots_total: number;
-            /** @description True while a scan is walking the filesystem. */
-            running: boolean;
-            /**
-             * Format: date-time
-             * @description When the current or last scan started.
-             */
-            started_at?: string;
-        };
-        SearchBookEditionsOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/SearchBookEditionsOutputBody.json
-             */
-            readonly $schema?: string;
-            editions: components["schemas"]["BookEdition"][] | null;
-            /** @description How each source answered; a failed one says why. */
-            sources: components["schemas"]["BookSourceOutcome"][] | null;
-        };
-        SearchOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/SearchOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description One page of titles, plus what it takes to ask for the next. */
-            results: components["schemas"]["SearchPage"];
-            /** @description Attribution for every field that came from an external source. */
-            sources: components["schemas"]["Source"][] | null;
-        };
-        SearchPage: {
-            has_next_page: boolean;
-            items: components["schemas"]["MediaSummary"][] | null;
-            /** Format: int64 */
-            page: number;
-            /** Format: int64 */
-            per_page: number;
-            /** Format: int64 */
-            total: number;
-        };
-        SelectTorrentFilesInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/SelectTorrentFilesInputBody.json
-             */
-            readonly $schema?: string;
-            /** @description Indices of the files to download; every other file is skipped. */
-            selected: number[] | null;
-        };
-        SessionOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/SessionOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description The connected account. Absent while AniList is unreachable and the account was never mirrored. */
-            account?: components["schemas"]["Account"];
-            /** @description Where to send the user to grant access. Absent when the node has no AniList client id configured. */
-            authorize_url?: string;
-            /** @description Whether an AniList access token is stored in this node. */
-            connected: boolean;
-        };
-        SetIgnoredInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/SetIgnoredInputBody.json
-             */
-            readonly $schema?: string;
-            /** @description True to leave the file alone from now on, false to take that mark off. */
-            ignored: boolean;
-        };
-        SetMatchInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/SetMatchInputBody.json
-             */
-            readonly $schema?: string;
-            /**
-             * Format: int64
-             * @description Episode or chapter number within the title.
-             */
-            episode?: number;
-            /**
-             * @description The title this file belongs to, as provider:id.
-             * @example anilist:154587
-             */
-            media_ref: string;
-            /**
-             * Format: int64
-             * @description Season number, when the title has seasons.
-             */
-            season?: number;
-        };
-        SignInInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/SignInInputBody.json
-             */
-            readonly $schema?: string;
-            /** @description Token from AniList's implicit grant. */
-            access_token: string;
-        };
-        Source: {
-            /**
-             * @description Stable source identifier.
-             * @example anilist
-             */
-            id: string;
-            /**
-             * @description Name to show next to the data.
-             * @example AniList
-             */
-            name: string;
-            /** @description Text the source's terms require next to its data, word for word. */
-            notice?: string;
-            /**
-             * @description Where the attribution links to.
-             * @example https://anilist.co
-             */
-            url: string;
-        };
-        StartInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/StartInputBody.json
-             */
-            readonly $schema?: string;
-            /**
-             * Format: int64
-             * @description Library file to play, as listed by listLibraryFiles.
-             */
-            file_id: number;
-        };
-        StartTorrentStreamInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/StartTorrentStreamInputBody.json
-             */
-            readonly $schema?: string;
-            /** @description Search for the episode and play the best release: through a debrid service, one it already holds first; then by the release profile and seeders. In place of magnet, torrent or release_id. */
-            auto?: boolean;
-            /**
-             * Format: int64
-             * @description Picks the file from a batch, and is what gets marked watched.
-             */
-            episode?: number;
-            /** @description A magnet link with a BitTorrent v1 hash. Give this, torrent or release_id. */
-            magnet?: string;
-            /** @description The title the stream is for; the player marks its episode watched. */
-            media_ref: string;
-            /** @description A search result to play. */
-            release_id?: string;
-            /**
-             * Format: int64
-             * @description For a show numbered by season: the episode counts within it.
-             */
-            season?: number;
-            title?: string;
-            /** @description A .torrent file, base64-encoded. */
-            torrent?: string;
-            /**
-             * @description Through the debrid service set up, or the node's own client, which downloads the file's start and end first and plays it as it comes. Absent: the debrid service when there is one.
-             * @enum {string}
-             */
-            via?: "debrid" | "embedded";
-        };
-        StatusOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/StatusOutputBody.json
-             */
-            readonly $schema?: string;
-            /**
-             * @description Module name.
-             * @example extension
-             */
-            module: string;
-            /** @description True when the module's dependencies are wired. */
-            ready: boolean;
-        };
-        StatusOutputBody1: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/StatusOutputBody1.json
-             */
-            readonly $schema?: string;
-            /**
-             * @description Module name.
-             * @example reader
-             */
-            module: string;
-            /** @description True when the module's dependencies are wired. */
-            ready: boolean;
-        };
-        Stream: {
-            /** @description Path that serves the file as it is, with range requests. The renderer appends the node token as ?token= because a video element cannot send headers. */
-            direct_url: string;
-            /**
-             * Format: int64
-             * @description Episode number within that title.
-             */
-            episode?: number;
-            /**
-             * Format: int64
-             * @description Library file this describes.
-             */
-            file_id: number;
-            /** @description Master playlist of the file transcoded to HLS, for when the renderer cannot play it directly. Absent while transcoding is turned off. */
-            hls_url?: string;
-            /** @description Streams, codecs and chapters as ffprobe reports them. */
-            info: components["schemas"]["MediaInfo"];
-            /** @description Title this file is matched to. Absent while unmatched. */
-            media_ref?: string;
-            /** @description Title as the library reads it, for the UI. */
-            title: string;
-        };
-        StreamCandidate: {
-            /** @description The debrid service already holds it. */
-            cached?: boolean;
-            error?: string;
-            /** Format: int64 */
-            score: number;
-            /** Format: int64 */
-            seeders: number;
-            /** @description The site or source it was found on. */
-            source?: string;
-            /**
-             * @description trying is the one being readied; failed ones were given up on, error says why.
-             * @enum {string}
-             */
-            state: "trying" | "waiting" | "failed";
-            title: string;
-        };
-        StreamOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/StreamOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description What the file holds and where to fetch it. */
-            stream: components["schemas"]["Stream"];
-        };
-        Subtitle: {
-            codec: string;
-            extension: string;
-            /** Format: int32 */
-            index: number;
-            is_default: boolean;
-            is_forced: boolean;
-            language?: string;
-            title?: string;
-        };
-        Suggestion: {
-            /**
-             * Format: double
-             * @description How well this entry fits the file's name, from 0 to 1.
-             */
-            confidence: number;
-            /** @description Dominant colour of the poster, for a placeholder while it loads. */
-            cover_color?: string;
-            /** @description Poster for the entry. */
-            cover_image?: string;
-            /** @description The source's format: TV, MOVIE, OVA, MANGA and so on. */
-            format?: string;
-            /** @description Reference to pass to setLibraryFileMatch. */
-            media_ref: string;
-            /** @description The title as the source spells it. */
-            title: string;
-            /** @description True when the entry is already on the user's own list. */
-            tracked: boolean;
-            /**
-             * Format: int64
-             * @description Year the entry is listed under.
-             */
-            year?: number;
-        };
-        SuggestionsOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/SuggestionsOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description Attribution for every field that came from an external source. */
-            sources: components["schemas"]["Source"][] | null;
-            /** @description Candidate titles, best first. */
-            suggestions: components["schemas"]["Suggestion"][] | null;
-        };
-        SyncBackupBody: {
-            /**
-             * Format: date-time
-             * @description When it was uploaded.
-             */
-            created_at: string;
-            /** @description The device that uploaded it. */
-            device_id: string;
-            /** @description That device's name. */
-            device_label: string;
-            /**
-             * Format: int64
-             * @description Snapshot format version.
-             */
-            format_version: number;
-            /** @description Snapshot identifier. */
-            id: string;
-            /**
-             * Format: int64
-             * @description Compressed size.
-             */
-            size_bytes: number;
-        };
-        SyncBackupListOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/SyncBackupListOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description The account's snapshots from every device, newest first. */
-            backups: components["schemas"]["SyncBackupBody"][] | null;
-        };
-        SyncBackupNowOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/SyncBackupNowOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description The snapshot the cloud now holds for this node. */
-            backup: components["schemas"]["SyncBackupBody"];
-            /** @description False when the state had not changed since the last backup and nothing new was stored. */
-            created: boolean;
-        };
-        SyncPairInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/SyncPairInputBody.json
-             */
-            readonly $schema?: string;
-            /** @description The pairing code the desktop got from the cloud. */
-            code: string;
-        };
-        SyncPairOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/SyncPairOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description This node's identifier in the account. */
-            device_id: string;
-            /** @description How this node appears in the account's device list. */
-            label: string;
-        };
-        SyncStatusOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/SyncStatusOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description This node's id in the account's device list, when it was paired from the app. */
-            device_id?: string;
-            /**
-             * Format: date-time
-             * @description When this node last tried to back up.
-             */
-            last_attempt_at?: string;
-            /**
-             * Format: date-time
-             * @description When the cloud last confirmed this node's state, whether or not it had changed.
-             */
-            last_backup_at?: string;
-            /** @description Why the last attempt failed; empty when it succeeded. */
-            last_error?: string;
-            /** @description True when this node is paired with a Mediary account and may back up. */
-            linked: boolean;
-            /** @description True when the module's dependencies are wired. */
-            ready: boolean;
-        };
-        TMDBKeyInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/TMDBKeyInputBody.json
-             */
-            readonly $schema?: string;
-            /** @description The user's own TMDB API key (v3) or read access token (v4). TMDB is asked to accept it before it is stored. Empty forgets it and goes back to the key this build ships with. */
-            api_key: string;
-        };
-        TMDBSettings: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/TMDBSettings.json
-             */
-            readonly $schema?: string;
-            /** @description Whether this node reads TMDB at all. Off when the node was started with an empty TMDB endpoint. */
-            enabled: boolean;
-            /**
-             * @description Which key the node sends: the user's own, the one this build ships with, or none — then movies and shows cannot be looked up.
-             * @enum {string}
-             */
-            key_source: "user" | "build" | "none";
-        };
-        Title: {
-            english: string | null;
-            native: string | null;
-            romaji: string | null;
-            user_preferred: string | null;
-        };
-        TitleNames: {
-            english: string | null;
-            native: string | null;
-            romaji: string | null;
-            user_preferred: string | null;
-        };
-        Tool: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/Tool.json
-             */
-            readonly $schema?: string;
-            /** @description Whose build the node installs. */
-            author: string;
-            /** @description The version the node would install. */
-            available?: string;
-            /** @description The settings that point the node at the programs by hand. */
-            env: string[] | null;
-            /** @description Why the last install failed. */
-            error?: string;
-            /** @description The command that installs it by hand, where the node cannot. */
-            hint?: string;
-            /** @enum {string} */
-            id: "mpv" | "ffmpeg";
-            name: string;
-            /** @description Where the node finds the first program now. */
-            path?: string;
-            /** @description What the package gives the node; FFmpeg's has ffprobe too. */
-            programs: string[] | null;
-            progress?: components["schemas"]["ToolProgress"];
-            /**
-             * Format: int64
-             * @description Size of the download in bytes.
-             */
-            size?: number;
-            /**
-             * @description custom: a path is set by hand, which wins; installed: the node's own copy; system: found on PATH.
-             * @enum {string}
-             */
-            state: "missing" | "system" | "installed" | "custom" | "installing";
-            /** @description Whether the node can install the package on this system. */
-            supported: boolean;
-            /** @description The node's copy is older than the one it would install. */
-            update: boolean;
-            /** @description The version the node installed. */
-            version?: string;
-        };
-        ToolProgress: {
-            /**
-             * Format: int64
-             * @description Bytes downloaded.
-             */
-            done: number;
-            /** @enum {string} */
-            stage: "downloading" | "verifying" | "extracting" | "checking";
-            /**
-             * Format: int64
-             * @description Bytes to download.
-             */
-            total: number;
-        };
-        ToolsOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/ToolsOutputBody.json
-             */
-            readonly $schema?: string;
-            tools: components["schemas"]["Tool"][] | null;
-        };
-        TorrentCheckResult: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/TorrentCheckResult.json
-             */
-            readonly $schema?: string;
-            version: string;
-        };
-        TorrentClientStatus: {
-            configured: boolean;
-            error?: string;
-            /** @enum {string} */
-            kind: "" | "qbittorrent" | "embedded" | "debrid";
-            reachable: boolean;
-            /**
-             * @description With the debrid client, the service it downloads through.
-             * @example TorBox
-             */
-            service?: string;
-        };
-        TorrentDebrid: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/TorrentDebrid.json
-             */
-            readonly $schema?: string;
-            /** @description Whether the service has a key saved; keys are never returned. */
-            has_api_key: boolean;
-            in_use: boolean;
-            /** @description The services that have a key saved, chosen or not: switching back needs no key typed again. */
-            keys: string[] | null;
-            ready: boolean;
-            /**
-             * @description The service, or none.
-             * @enum {string}
-             */
-            service: "" | "torbox" | "realdebrid" | "alldebrid" | "premiumize";
-        };
-        TorrentDownload: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/TorrentDownload.json
-             */
-            readonly $schema?: string;
-            /** @description The client holds the torrent until its files are chosen. */
-            choosing: boolean;
-            /** Format: date-time */
-            completed_at?: string;
-            /** Format: date-time */
-            created_at: string;
-            /** @description The episodes it was added for, when it was. */
-            episodes?: number[] | null;
-            error?: string;
-            /** Format: int64 */
-            id: number;
-            /**
-             * Format: int64
-             * @description Files that joined the library.
-             */
-            imported: number;
-            info_hash: string;
-            live?: components["schemas"]["TorrentLive"];
-            media_ref: string;
-            name: string;
-            /** @enum {string} */
-            source: "magnet" | "file";
-            /**
-             * @description The node's state: a done download's files are in the library; the client may still be seeding it.
-             * @enum {string}
-             */
-            state: "downloading" | "importing" | "done" | "failed";
-            title: string;
-        };
-        TorrentDownloadsOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/TorrentDownloadsOutputBody.json
-             */
-            readonly $schema?: string;
-            client: components["schemas"]["TorrentClientStatus"];
-            downloads: components["schemas"]["TorrentDownload"][] | null;
-        };
-        TorrentFile: {
-            /**
-             * Format: int64
-             * @description The episode its name gives; absent for an extra or a name without one.
-             */
-            episode?: number;
-            /** Format: int64 */
-            index: number;
-            /** @description Path inside the torrent, with forward slashes. */
-            name: string;
-            /** Format: double */
-            progress: number;
-            /**
-             * Format: int64
-             * @description The season its name gives, for a show numbered by season; the episode then counts within it.
-             */
-            season?: number;
-            /** @description Whether the client downloads it. */
-            selected: boolean;
-            /** Format: int64 */
-            size: number;
-            /** @description Whether the library keeps it as a video. */
-            video: boolean;
-        };
-        TorrentFilesOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/TorrentFilesOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description Empty until a magnet's metadata has arrived. */
-            files: components["schemas"]["TorrentFile"][] | null;
-        };
-        TorrentLive: {
-            /**
-             * Format: int64
-             * @description Bytes per second.
-             */
-            dl_speed: number;
-            /**
-             * Format: int64
-             * @description Seconds left; absent when the client cannot tell.
-             */
-            eta?: number;
-            paused: boolean;
-            /** Format: int64 */
-            peers: number;
-            /** Format: double */
-            progress: number;
-            /** @description Present while a debrid service is still getting the torrent itself; the fields above are the node's own download, which starts once the service has the files. */
-            remote?: components["schemas"]["TorrentRemote"];
-            /** Format: int64 */
-            seeds: number;
-            /**
-             * Format: int64
-             * @description Bytes the selected files take.
-             */
-            size: number;
-            /** @description qBittorrent's own state name, e.g. downloading, stalledDL, pausedDL, uploading. */
-            state: string;
-            /**
-             * Format: int64
-             * @description Bytes per second.
-             */
-            up_speed: number;
-        };
-        TorrentPathMap: {
-            client: string;
-            node: string;
-        };
-        TorrentPlannedDownload: {
-            episodes: number[] | null;
-            release: components["schemas"]["TorrentRelease"];
-        };
-        TorrentProfile: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/TorrentProfile.json
-             */
-            readonly $schema?: string;
-            /**
-             * @description Preferred codec. Empty for any.
-             * @enum {string}
-             */
-            codec: "" | "HEVC" | "AVC" | "AV1";
-            /** @description Words that keep a release from being the best, e.g. a dub or a codec the TV cannot play. */
-            excluded: string[] | null;
-            /**
-             * Format: int64
-             * @description Fewer seeders keeps a release from being the best.
-             */
-            min_seeders: number;
-            /** @description With a debrid service as the client, rank the releases it already holds higher: they arrive at once. Weighs about one step of resolution. */
-            prefer_cached: boolean;
-            /** @description Words a release name should have — groups, sites, "multi-sub" — best first. */
-            preferred: string[] | null;
-            /**
-             * @description Preferred resolution; lower ones follow in order. Empty for any.
-             * @enum {string}
-             */
-            resolution: "" | "2160p" | "1080p" | "720p" | "480p";
-        };
-        TorrentRelease: {
-            batch: boolean;
-            /** @description The one result the profile would pick. */
-            best: boolean;
-            /** @description With a debrid service as the client, whether it already holds the release, which then arrives at once. Absent with other clients, or when the service could not be asked. */
-            cached?: boolean;
-            /** @description e.g. HEVC */
-            codec?: string;
-            /** @description False when an excluded word or too few seeders keep it from being the best. */
-            eligible: boolean;
-            /** @description Absent when the name gives no episode. */
-            episodes?: components["schemas"]["Episodes"];
-            /** Format: int64 */
-            grabs: number;
-            group?: string;
-            /** @description Pass as release_id to download it. */
-            id: string;
-            /** @description The site behind the source, when the source says. */
-            indexer?: string;
-            info_hash?: string;
-            /**
-             * @description How it fits the episode searched for: the episode alone, a batch that holds it, a name without episodes, or no episode was asked.
-             * @enum {string}
-             */
-            match: "episode" | "batch" | "unknown" | "any";
-            page_url?: string;
-            /** Format: int64 */
-            peers: number;
-            /** @description The search plugin it came from, by id. */
-            plugin?: string;
-            /** Format: date-time */
-            published_at?: string;
-            /** @description e.g. 1080p */
-            resolution?: string;
-            /**
-             * Format: int64
-             * @description How well it fits the release profile; higher is better.
-             */
-            score: number;
-            /**
-             * Format: int64
-             * @description The season, when the name says: S02E05, S02, Season 2. Episodes then count within it.
-             */
-            season?: number;
-            /** Format: int64 */
-            seeders: number;
-            /** Format: int64 */
-            size: number;
-            /**
-             * Format: int64
-             * @description The Torznab source it came from; 0 when a plugin found it.
-             */
-            source_id: number;
-            source_name: string;
-            title: string;
-        };
-        TorrentRemote: {
-            /** @description Why the service gave up on the torrent, in its own words. */
-            error?: string;
-            /** Format: double */
-            progress: number;
-            /** @description Waiting for a free slot on the account. */
-            queued: boolean;
-            /** @example TorBox */
-            service: string;
-            /**
-             * Format: int64
-             * @description The service's download speed, bytes per second.
-             */
-            speed: number;
-        };
-        TorrentRule: {
-            enabled: boolean;
-            /**
-             * Format: int64
-             * @description Episodes before this one are never downloaded by the rule.
-             */
-            from_episode: number;
-            /**
-             * Format: int64
-             * @description Downloads the last check added.
-             */
-            last_added: number;
-            /** Format: date-time */
-            last_checked?: string;
-            last_error?: string;
-            media_ref: string;
-            /** @description Searched for instead of the title's names when not empty. */
-            query: string;
-            title: string;
-        };
-        TorrentRuleCheck: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/TorrentRuleCheck.json
-             */
-            readonly $schema?: string;
-            /**
-             * Format: int64
-             * @description How many of the planned downloads were added; always 0 for a preview.
-             */
-            added: number;
-            error?: string;
-            planned: components["schemas"]["TorrentPlannedDownload"][] | null;
-        };
-        TorrentRuleOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/TorrentRuleOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description Null when the title has no rule. */
-            rule: components["schemas"]["TorrentRule"];
-        };
-        TorrentRulesOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/TorrentRulesOutputBody.json
-             */
-            readonly $schema?: string;
-            rules: components["schemas"]["TorrentRule"][] | null;
-        };
-        TorrentSearchResult: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/TorrentSearchResult.json
-             */
-            readonly $schema?: string;
-            /**
-             * @description The debrid service the releases' cached marks are about; absent when there are none.
-             * @example TorBox
-             */
-            cache_service?: string;
-            queries: string[] | null;
-            releases: components["schemas"]["TorrentRelease"][] | null;
-            sources: components["schemas"]["TorrentSourceOutcome"][] | null;
-        };
-        TorrentSettings: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/TorrentSettings.json
-             */
-            readonly $schema?: string;
-            /**
-             * @description Who downloads torrents into the library: the user's qBittorrent, the node's own client, the debrid service set up under /v1/torrent/debrid, or none.
-             * @enum {string}
-             */
-            client: "" | "qbittorrent" | "embedded" | "debrid";
-            has_password: boolean;
-            path_map: components["schemas"]["TorrentPathMap"];
-            /** Format: int64 */
-            root_id: number;
-            url: string;
-            username: string;
-        };
-        TorrentSource: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/TorrentSource.json
-             */
-            readonly $schema?: string;
-            has_api_key: boolean;
-            /** Format: int64 */
-            id: number;
-            name: string;
-            url: string;
-        };
-        TorrentSourceBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/TorrentSourceBody.json
-             */
-            readonly $schema?: string;
-            /** @description Left out keeps the saved key; empty removes it. */
-            api_key?: string;
-            /** @example Jackett */
-            name: string;
-            /**
-             * @description The Torznab feed address; a pasted query, the key with it, is dropped.
-             * @example http://localhost:9117/api/v2.0/indexers/all/results/torznab/
-             */
-            url: string;
-        };
-        TorrentSourceCaps: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/TorrentSourceCaps.json
-             */
-            readonly $schema?: string;
-            /** @description Whether the endpoint takes a free-text search. */
-            search: boolean;
-            title: string;
-        };
-        TorrentSourceOutcome: {
-            error?: string;
-            /**
-             * Format: int64
-             * @description The Torznab source; 0 for a plugin.
-             */
-            id: number;
-            name: string;
-            /** @description The search plugin, by id. */
-            plugin?: string;
-            /** Format: int64 */
-            results: number;
-        };
-        TorrentSourcesOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/TorrentSourcesOutputBody.json
-             */
-            readonly $schema?: string;
-            /**
-             * Format: int64
-             * @description Search plugins on now. A search needs a source or a plugin.
-             */
-            plugins: number;
-            sources: components["schemas"]["TorrentSource"][] | null;
-        };
-        TorrentStream: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/TorrentStream.json
-             */
-            readonly $schema?: string;
-            /** @description With auto: the releases lined up, best first. When one cannot be played the next is tried. */
-            candidates?: components["schemas"]["StreamCandidate"][] | null;
-            /** Format: int64 */
-            episode?: number;
-            error?: string;
-            /**
-             * Format: int64
-             * @description Once ready: a negative ID the player takes like a library file's — /v1/playback/files/{id}/stream, /direct, /hls and POST /v1/playback all accept it.
-             */
-            file_id?: number;
-            /** Format: int64 */
-            id: number;
-            media_ref: string;
-            /** @description The file that plays, once chosen. */
-            name?: string;
-            /**
-             * Format: int64
-             * @description Peers the built-in client gets the torrent from.
-             */
-            peers?: number;
-            /**
-             * Format: double
-             * @description While preparing: how far the service is with the torrent, or how much of the file's start the built-in client has.
-             */
-            progress: number;
-            /** @description The release the node picked, when it picked one. */
-            release?: string;
-            /**
-             * Format: int64
-             * @description Seeders among the built-in client's peers; through a debrid service, the release's seeders as its source counted them.
-             */
-            seeders?: number;
-            /** @example TorBox */
-            service: string;
-            /**
-             * Format: int64
-             * @description The download speed, bytes per second, while preparing.
-             */
-            speed: number;
-            /**
-             * @description ready once the service holds the file, or the built-in client has its start; failed when it gave up, or the torrent has no fitting video.
-             * @enum {string}
-             */
-            state: "preparing" | "queued" | "ready" | "failed";
-            /**
-             * Format: int64
-             * @description What the built-in client gives back to peers, bytes per second.
-             */
-            upload?: number;
-            /**
-             * @description Whether a debrid service or the node's own client gets the torrent.
-             * @enum {string}
-             */
-            via: "debrid" | "embedded";
-        };
-        Trailer: {
-            /** @description Video id on the hosting site. */
-            id: string;
-            /** @description Where the video lives, e.g. youtube or dailymotion. */
-            site: string;
-            /** @description Preview frame for the trailer. */
-            thumbnail: string | null;
-        };
-        UpdateEntryInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/UpdateEntryInputBody.json
-             */
-            readonly $schema?: string;
-            /** @description When the user finished the title. Send every field empty to clear it. */
-            completed_at?: components["schemas"]["Date"];
-            /** @description The custom lists this title belongs to, by name. The lists left out are the ones it leaves. */
-            custom_lists?: string[];
-            /** @description Private notes only the account owner sees. */
-            notes?: string;
-            /**
-             * Format: int64
-             * @description Episodes watched or chapters read.
-             */
-            progress?: number;
-            /**
-             * Format: int64
-             * @description Volumes read; manga only.
-             */
-            progress_volumes?: number;
-            /**
-             * Format: int64
-             * @description How many times the title was rewatched or reread.
-             */
-            repeat?: number;
-            /**
-             * Format: int64
-             * @description Score on a 0-100 scale; clients convert from the account's score format.
-             */
-            score?: number;
-            /** @description When the user started the title. Send every field empty to clear it. */
-            started_at?: components["schemas"]["Date"];
-            /**
-             * @description New list status.
-             * @enum {string}
-             */
-            status?: "CURRENT" | "PLANNING" | "COMPLETED" | "DROPPED" | "PAUSED" | "REPEATING";
-        };
-        UpdateExtensionInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/UpdateExtensionInputBody.json
-             */
-            readonly $schema?: string;
-            /** @description From the update check the user saw. */
-            consent: string;
-        };
-        UpdateRootInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://example.com/schemas/UpdateRootInputBody.json
-             */
-            readonly $schema?: string;
-            /**
-             * @description What the folder holds, as in listLibraryRoots. A folder turned to manga or books drops the files of other kinds.
-             * @enum {string}
-             */
-            content: "anime" | "movies_and_shows" | "doramas" | "manga" | "books";
-        };
-        Video: {
-            /** Format: int32 */
-            bitrate: number;
-            codec: string;
-            color_primaries: string;
-            color_space: string;
-            color_transfer: string;
-            /** Format: int32 */
-            height: number;
-            language?: string;
-            mime_codec?: string;
-            pix_fmt: string;
-            quality: string;
-            /** Format: int32 */
-            width: number;
-        };
-    };
-    responses: never;
-    parameters: never;
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+	schemas: {
+		AIKeyUpdate: {
+			/** @description The user's own key. The provider is asked to accept it before it is stored. Empty forgets it; left out keeps the one stored. */
+			api_key?: string
+			/** @description The model to answer with. Left out keeps the one chosen. */
+			model?: string
+		}
+		AISettings: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/AISettings.json
+			 */
+			readonly $schema?: string
+			claude: components['schemas']['KeyedAISettings']
+			cloud: components['schemas']['CloudAISettings']
+			gemini: components['schemas']['KeyedAISettings']
+			openai: components['schemas']['OpenAISettings']
+			/**
+			 * @description The AI that answers. cloud is Mediary's free AI, on the cloud's key within a daily allowance; the others use the user's own key.
+			 * @enum {string}
+			 */
+			provider: 'cloud' | 'claude' | 'gemini' | 'openai'
+			/** @description Whether the chosen AI can answer right now. */
+			ready: boolean
+		}
+		AISettingsUpdate: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/AISettingsUpdate.json
+			 */
+			readonly $schema?: string
+			claude?: components['schemas']['AIKeyUpdate']
+			gemini?: components['schemas']['AIKeyUpdate']
+			openai?: components['schemas']['OpenAIUpdate']
+			/**
+			 * @description The AI to answer with. Choosing one that is not set up yet is allowed; ready says so.
+			 * @enum {string}
+			 */
+			provider?: 'cloud' | 'claude' | 'gemini' | 'openai'
+		}
+		AcceptedOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/AcceptedOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The refresh was started or is already running. */
+			accepted: boolean
+		}
+		Account: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/Account.json
+			 */
+			readonly $schema?: string
+			avatar_url: string | null
+			display_adult_content: boolean
+			/** Format: int64 */
+			id: number
+			name: string
+			score_format: string
+			site_url: string
+		}
+		AddRepositoryInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/AddRepositoryInputBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * Format: uri
+			 * @description The repository's JSON, at an https:// address.
+			 */
+			url: string
+		}
+		AddRootInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/AddRootInputBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * @description What the folder holds, as in listLibraryRoots. Left out means anime.
+			 * @enum {string}
+			 */
+			content?: 'anime' | 'movies_and_shows' | 'doramas' | 'manga' | 'books'
+			/**
+			 * @description Absolute path to an existing folder on this machine.
+			 * @example D:\Anime
+			 */
+			path: string
+		}
+		AddTorrentDownloadInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/AddTorrentDownloadInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description Hold the torrent in the client until its files are chosen with PUT .../files. */
+			choose_files?: boolean
+			/** @description The episodes the download is for. With choose_files, the node itself takes only their files once the file list arrives. */
+			episodes?: number[] | null
+			/** @description A magnet link with a BitTorrent v1 hash. Give this or torrent. */
+			magnet?: string
+			/** @description The title the download is for; its files are matched to it. */
+			media_ref: string
+			/** @description A search result to download. Give this, magnet or torrent. */
+			release_id?: string
+			/** @description The title's name, which names the folder the torrent is saved into. */
+			title?: string
+			/** @description A .torrent file, base64-encoded. Give this or magnet. */
+			torrent?: string
+		}
+		AiringEpisode: {
+			/** Format: date-time */
+			airing_at: string
+			/** Format: int64 */
+			episode: number
+			/**
+			 * Format: int64
+			 * @description Season the episode belongs to, for a show numbered by season. Absent for an anime, whose seasons are titles of their own.
+			 */
+			season?: number
+		}
+		Audio: {
+			/** Format: int32 */
+			channels: number
+			codec: string
+			/** Format: int32 */
+			index: number
+			is_default: boolean
+			is_forced: boolean
+			language?: string
+			mime_codec?: string
+			title?: string
+		}
+		BookDownload: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/BookDownload.json
+			 */
+			readonly $schema?: string
+			authors?: string
+			/** Format: int64 */
+			bytes_done: number
+			/**
+			 * Format: int64
+			 * @description 0 while the size is unknown.
+			 */
+			bytes_total: number
+			edition_ref: string
+			error?: string
+			/**
+			 * Format: int64
+			 * @description The library file, once the book is saved; open it in the reader.
+			 */
+			file_id?: number
+			format: string
+			/** Format: int64 */
+			id: number
+			media_ref: string
+			/** @description Where the book is saved, inside the folder for books. */
+			rel_path?: string
+			source_name: string
+			/** @enum {string} */
+			state: 'queued' | 'running' | 'done' | 'failed' | 'cancelled'
+			title: string
+		}
+		BookDownloadSettings: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/BookDownloadSettings.json
+			 */
+			readonly $schema?: string
+			/**
+			 * Format: int64
+			 * @description Library folder of books copies are saved to; 0 while none is chosen.
+			 */
+			root_id: number
+		}
+		BookDownloadsOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/BookDownloadsOutputBody.json
+			 */
+			readonly $schema?: string
+			downloads: components['schemas']['BookDownload'][] | null
+		}
+		BookEdition: {
+			authors: string[] | null
+			/** @description Only the formats the library keeps. */
+			formats: components['schemas']['BookFormat'][] | null
+			language?: string
+			/**
+			 * @description Pass as edition_ref to download it, within 30 minutes of the search.
+			 * @example gutenberg:84
+			 */
+			ref: string
+			/** @description The source's name. */
+			source: string
+			title: string
+			/** Format: int64 */
+			year?: number
+		}
+		BookFormat: {
+			/** @example .epub */
+			ext: string
+			/**
+			 * Format: int64
+			 * @description Bytes, when the source says.
+			 */
+			size?: number
+			/**
+			 * @description Pass as format to download the copy in it.
+			 * @example application/epub+zip
+			 */
+			type: string
+		}
+		BookInfo: {
+			/** @description The type getReaderBook serves the bytes as, which picks the viewer. */
+			content_type: string
+			/**
+			 * Format: int64
+			 * @description Library file the book is.
+			 */
+			file_id: number
+			/** @description Title the book is matched to; absent while unmatched, and then reading moves no list. */
+			media_ref?: string
+			/** @description The book's name as the library knows it. */
+			title: string
+		}
+		BookOPDSServerBody: {
+			/** @description Whether a password is stored. The password itself is never sent back. */
+			has_password: boolean
+			/** Format: int64 */
+			id: number
+			name: string
+			/** @description Address of the catalogue's root feed. */
+			url: string
+			username?: string
+		}
+		BookOPDSServerInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/BookOPDSServerInputBody.json
+			 */
+			readonly $schema?: string
+			name: string
+			/** @description Absent keeps the stored password; an empty string removes it. */
+			password?: string
+			/** @description Address of the catalogue's root feed: http://nas:8083/opds for Calibre-Web, https://standardebooks.org/feeds/opds for Standard Ebooks. */
+			url: string
+			/** @description For Standard Ebooks, the e-mail of a Patrons Circle member, with no password. */
+			username?: string
+		}
+		BookOPDSServerOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/BookOPDSServerOutputBody.json
+			 */
+			readonly $schema?: string
+			server: components['schemas']['BookOPDSServerBody']
+		}
+		BookOPDSServersOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/BookOPDSServersOutputBody.json
+			 */
+			readonly $schema?: string
+			servers: components['schemas']['BookOPDSServerBody'][] | null
+		}
+		BookPosition: {
+			/**
+			 * Format: double
+			 * @description How far through the book that is, from 0 to 1.
+			 */
+			fraction: number
+			/** @description Where the reader is, in the renderer's own terms: an EPUB CFI, or a PDF page. */
+			locator: string
+			/**
+			 * Format: date-time
+			 * @description When the reader was last there.
+			 */
+			updated_at: string
+		}
+		BookPositionInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/BookPositionInputBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * Format: double
+			 * @description How far through the book that is, from 0 to 1.
+			 */
+			fraction: number
+			/** @description Where the reader is, in the renderer's own terms. */
+			locator: string
+		}
+		BookPositionOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/BookPositionOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The book being read. */
+			book: components['schemas']['BookInfo']
+			/** @description Where the reader left the book; null for a book never opened. */
+			position: components['schemas']['BookPosition']
+		}
+		BookSource: {
+			/**
+			 * @description The prefix of the source's edition references.
+			 * @example gutenberg
+			 */
+			id: string
+			/** @example Project Gutenberg */
+			name: string
+		}
+		BookSourceOutcome: {
+			error?: string
+			id: string
+			name: string
+			/** Format: int64 */
+			results: number
+		}
+		BookSourcesOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/BookSourcesOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The sources the node searches; empty while none is set up. */
+			sources: components['schemas']['BookSource'][] | null
+		}
+		BraveKeyInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/BraveKeyInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The user's own Brave Search API key. Brave is asked to accept it before it is stored. Empty forgets it. */
+			api_key: string
+		}
+		CandidatesOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/CandidatesOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description Pictures that could be the poster, posters first. Nothing is downloaded until one is picked. */
+			images: components['schemas']['Image'][] | null
+			/** @description Where the pictures were found. */
+			sources: components['schemas']['Source'][] | null
+		}
+		CatalogPlugin: {
+			author: string
+			description?: string
+			icon?: string
+			id: string
+			/** @description The version installed under this plugin's id, if any. */
+			installed?: string
+			/** @description Installed from this very manifest address. */
+			installed_here: boolean
+			lang?: string
+			/** @description Preview and install from here. */
+			manifest_url: string
+			name: string
+			/** Format: int64 */
+			repository_id: number
+			repository_name: string
+			/** @enum {string} */
+			type: 'torrent-provider' | 'manga-provider'
+			/** @description Installed from here, and the repository lists a newer version. */
+			update: boolean
+			version: string
+		}
+		Chapter: {
+			/** Format: float */
+			end_time: number
+			name: string
+			/** Format: float */
+			start_time: number
+		}
+		ChapterBody: {
+			/**
+			 * Format: int64
+			 * @description Library file this chapter is. Absent for a chapter from any other source.
+			 */
+			file_id?: number
+			/** @description Who translated it, to credit them. */
+			groups?: string[] | null
+			/** @description Title this chapter is matched to. Absent while unmatched. */
+			media_ref?: string
+			/** @description Chapter number as the source writes it, such as 12 or 12.5. Absent for an unnumbered chapter. */
+			number?: string
+			/** @description Every page, in reading order. */
+			pages: components['schemas']['Page'][] | null
+			/** @description Chapter reference, for the page and progress endpoints. */
+			ref: string
+			/** @description Where an online chapter comes from, to credit it. */
+			source_name?: string
+			/** @description Title as the source names it, for the UI. */
+			title: string
+		}
+		ChapterOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ChapterOutputBody.json
+			 */
+			readonly $schema?: string
+			chapter: components['schemas']['ChapterBody']
+		}
+		CheckBookOPDSServerInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/CheckBookOPDSServerInputBody.json
+			 */
+			readonly $schema?: string
+			password?: string
+			/**
+			 * Format: int64
+			 * @description A saved server, whose stored password is used when none is given.
+			 */
+			server_id?: number
+			url: string
+			username?: string
+		}
+		CheckBookOPDSServerOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/CheckBookOPDSServerOutputBody.json
+			 */
+			readonly $schema?: string
+			detail?: string
+			ok: boolean
+			/**
+			 * @description What is wrong, when something is. no_search: the catalogue is listed but cannot be searched, so it takes no part in finding books.
+			 * @enum {string}
+			 */
+			problem?: 'unauthorized' | 'not_opds' | 'no_search' | 'unreachable' | 'other_host'
+		}
+		CheckOPDSServerInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/CheckOPDSServerInputBody.json
+			 */
+			readonly $schema?: string
+			password?: string
+			/**
+			 * Format: int64
+			 * @description A saved server, whose stored password is used when none is given.
+			 */
+			server_id?: number
+			url: string
+			username?: string
+		}
+		CheckOPDSServerOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/CheckOPDSServerOutputBody.json
+			 */
+			readonly $schema?: string
+			detail?: string
+			ok: boolean
+			/**
+			 * @description What is wrong, when something is.
+			 * @enum {string}
+			 */
+			problem?: 'unauthorized' | 'not_opds' | 'unreachable' | 'other_host'
+		}
+		CheckTorrentClientInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/CheckTorrentClientInputBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * @description embedded checks the node's own client, debrid the debrid service's saved key; anything else, qBittorrent at url.
+			 * @enum {string}
+			 */
+			client?: '' | 'qbittorrent' | 'embedded' | 'debrid'
+			/** @description Left out uses the saved password. */
+			password?: string
+			url?: string
+			username: string
+		}
+		CheckTorrentDebridInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/CheckTorrentDebridInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description A key to try; left out uses the saved one. */
+			api_key?: string
+			/** @enum {string} */
+			service: 'torbox' | 'realdebrid' | 'alldebrid' | 'premiumize'
+		}
+		CheckTorrentSourceInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/CheckTorrentSourceInputBody.json
+			 */
+			readonly $schema?: string
+			api_key?: string
+			/**
+			 * Format: int64
+			 * @description A saved source whose key to use when api_key is left out.
+			 */
+			source_id?: number
+			url: string
+		}
+		CloudAISettings: {
+			/** @description Whether the cloud offers AI at all. */
+			enabled: boolean
+			/** @description Whether the cloud told the node its allowance. False when it is not paired or could not be reached. */
+			known: boolean
+			/**
+			 * Format: int64
+			 * @description Requests per day.
+			 */
+			limit: number
+			/** @description Whether the node is paired with a Mediary Cloud account, which the free AI needs. */
+			linked: boolean
+			/**
+			 * Format: int64
+			 * @description Requests left today.
+			 */
+			remaining: number
+			/**
+			 * Format: date-time
+			 * @description When the allowance renews.
+			 */
+			resets_at?: string
+			/**
+			 * Format: int64
+			 * @description Requests made today.
+			 */
+			used: number
+		}
+		CollectionOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/CollectionOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The library seen as titles rather than as files. */
+			collection: components['schemas']['LibraryCollection']
+			/** @description Attribution for every field that came from an external source. */
+			sources: components['schemas']['Source'][] | null
+		}
+		ConfigureExtensionInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ConfigureExtensionInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description Only the settings to change. Empty goes back to the default; for a secret, removes it. */
+			config?: {
+				[key: string]: string
+			}
+			enabled?: boolean
+		}
+		ControlInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ControlInputBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * @description What to do with the open player.
+			 * @enum {string}
+			 */
+			action: 'pause' | 'resume' | 'seek'
+			/**
+			 * Format: double
+			 * @description Seconds from the start, for a seek.
+			 */
+			position?: number
+		}
+		Counts: {
+			/**
+			 * Format: int64
+			 * @description Of those, files the user told the node to leave alone.
+			 */
+			ignored: number
+			/**
+			 * Format: int64
+			 * @description Of those, files the last scan did not find.
+			 */
+			missing: number
+			/**
+			 * Format: int64
+			 * @description Files the filter matches.
+			 */
+			total: number
+			/**
+			 * Format: int64
+			 * @description Of those, files that belong to no title yet.
+			 */
+			unmatched: number
+		}
+		CoverSource: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/CoverSource.json
+			 */
+			readonly $schema?: string
+			/** @description The picture itself, base64-encoded, at most 10 MB. */
+			data?: string
+			/** @description An http or https address of the picture. The node downloads it itself and refuses addresses on this computer or the local network. */
+			url?: string
+		}
+		CreateListInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/CreateListInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description Icon for the list, by name from the client's icon set. Leave it out for the default. */
+			icon?: string
+			/**
+			 * @description The one media type this list holds. A list never mixes types: anime and manga lists are created in the user's AniList account, the rest in this node.
+			 * @enum {string}
+			 */
+			media_type: 'anime' | 'manga' | 'movie' | 'series' | 'dorama' | 'book'
+			/** @description What to call the list. */
+			name: string
+		}
+		CustomList: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/CustomList.json
+			 */
+			readonly $schema?: string
+			/**
+			 * Format: int64
+			 * @description How many titles are in the list.
+			 */
+			count: number
+			/** @description Up to four cover images, for the list's thumbnail. */
+			covers: string[] | null
+			/** @description Icon the user chose, by name. Absent means the default; a name the client does not know means the default too. */
+			icon?: string
+			/** @description Opaque identifier; pass it back URL-encoded to rename or delete the list. */
+			id: string
+			/**
+			 * @description The one media type this list holds.
+			 * @enum {string}
+			 */
+			media_type: 'anime' | 'manga' | 'movie' | 'series' | 'dorama' | 'book'
+			name: string
+			/**
+			 * @description Where the list lives: anilist or local.
+			 * @enum {string}
+			 */
+			provider: 'anilist' | 'local'
+			/**
+			 * Format: date-time
+			 * @description When a title in the list last changed. Absent for an empty list.
+			 */
+			updated_at?: string
+		}
+		Date: {
+			/** Format: int64 */
+			day: number | null
+			/** Format: int64 */
+			month: number | null
+			/** Format: int64 */
+			year: number | null
+		}
+		DetailsOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/DetailsOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description Everything a title page shows about the title itself. */
+			media: components['schemas']['MediaDetails']
+			/** @description Attribution for every field that came from an external source. */
+			sources: components['schemas']['Source'][] | null
+		}
+		EnqueueBookDownloadInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/EnqueueBookDownloadInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description A copy from a search in the last 30 minutes. */
+			edition_ref: string
+			/** @description One of the copy's formats, by type. */
+			format: string
+			/** @description The book the file belongs to in the library. */
+			media_ref: string
+		}
+		EnqueueMangaDownloadsInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/EnqueueMangaDownloadsInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description Chapter references, as the chapter listing gives them. */
+			refs: string[] | null
+		}
+		EntriesOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/EntriesOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description One entry per title, in AniList's list order. */
+			entries: components['schemas']['Entry'][] | null
+			/**
+			 * Format: date-time
+			 * @description When AniList last answered for this collection.
+			 */
+			fetched_at: string
+			/** @description Status and custom lists with their sizes. */
+			lists: components['schemas']['List'][] | null
+			/** @description The collection this response describes. */
+			media_type: string
+			/** @description Attribution for every field that came from an external source. */
+			sources: components['schemas']['Source'][] | null
+			/** @description True when the data is older than the refresh interval; a refresh is already running. */
+			stale: boolean
+		}
+		Entry: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/Entry.json
+			 */
+			readonly $schema?: string
+			completed_at: components['schemas']['Date']
+			custom_lists: string[] | null
+			media: components['schemas']['Media']
+			media_ref: string
+			media_type: string
+			notes: string
+			private: boolean
+			/** Format: int64 */
+			progress: number
+			/** Format: int64 */
+			progress_volumes: number | null
+			provider: string
+			/** Format: int64 */
+			repeat: number
+			/** Format: int64 */
+			score: number
+			started_at: components['schemas']['Date']
+			status: string
+			sync_pending: boolean
+			/** Format: date-time */
+			updated_at: string
+		}
+		Episode: {
+			/** @description First broadcast, as YYYY-MM-DD. */
+			air_date: string | null
+			/** @description Still for the episode. Absent when no source has one; a client with the file can cut its own from it. */
+			image: string | null
+			/**
+			 * Format: int64
+			 * @description Episode number within the title, from 1, or within the season when one is given.
+			 */
+			number: number
+			/** @description Synopsis, in English. */
+			overview: string | null
+			/**
+			 * Format: int64
+			 * @description Length in minutes, from the episode or, failing that, the title's typical length.
+			 */
+			runtime_minutes: number | null
+			/**
+			 * Format: int64
+			 * @description Season of a show numbered by season, from 1; the number then counts within it. Absent for an anime, whose seasons are titles of their own.
+			 */
+			season?: number
+			/** @description Episode title in the first language a source had it in, English first. */
+			title: string | null
+			/** @description The title per language, keyed by BCP 47 tag (x-jat is romanised Japanese), for the client to pick the user's own. */
+			titles?: {
+				[key: string]: string
+			}
+		}
+		EpisodeList: {
+			/** @description One entry per episode, in order, whether or not anything is known about it beyond its number. */
+			episodes: components['schemas']['Episode'][] | null
+			/** @description The title, as provider:id. */
+			media_ref: string
+			/**
+			 * Format: int64
+			 * @description Episodes the title has, or that have aired while the final count is unknown. Absent when no source can say.
+			 */
+			total: number | null
+		}
+		Episodes: {
+			/** Format: int64 */
+			from: number
+			/** Format: int64 */
+			to: number
+		}
+		EpisodesOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/EpisodesOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The title's episodes with whatever the sources know of each. */
+			episodes: components['schemas']['EpisodeList']
+			/** @description Attribution for every field that came from an external source. */
+			sources: components['schemas']['Source'][] | null
+		}
+		ErrorDetail: {
+			/** @description Where the error occurred, e.g. 'body.items[3].tags' or 'path.thing-id' */
+			location?: string
+			/** @description Error message text */
+			message?: string
+			/** @description The value at the given location */
+			value?: unknown
+		}
+		ErrorModel: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ErrorModel.json
+			 */
+			readonly $schema?: string
+			/**
+			 * @description A human-readable explanation specific to this occurrence of the problem.
+			 * @example Property foo is required but is missing.
+			 */
+			detail?: string
+			/** @description Optional list of individual error details */
+			errors?: components['schemas']['ErrorDetail'][] | null
+			/**
+			 * Format: uri
+			 * @description A URI reference that identifies the specific occurrence of the problem.
+			 * @example https://example.com/error-log/abc123
+			 */
+			instance?: string
+			/**
+			 * Format: int64
+			 * @description HTTP status code
+			 * @example 400
+			 */
+			status?: number
+			/**
+			 * @description A short, human-readable summary of the problem type. This value should not change between occurrences of the error.
+			 * @example Bad Request
+			 */
+			title?: string
+			/**
+			 * Format: uri
+			 * @description A URI reference to human-readable documentation for the error.
+			 * @default about:blank
+			 * @example https://example.com/errors/example
+			 */
+			type: string
+		}
+		Extension: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/Extension.json
+			 */
+			readonly $schema?: string
+			author: string
+			config: components['schemas']['ExtensionSetting'][] | null
+			description?: string
+			enabled: boolean
+			homepage?: string
+			icon?: string
+			id: string
+			/** Format: date-time */
+			installed_at: string
+			lang: string
+			manifest_url: string
+			name: string
+			/** @description Every host the plugin may reach. Nothing else is reachable to it. */
+			network: string[] | null
+			/** @enum {string} */
+			type: 'torrent-provider' | 'manga-provider'
+			/** @description What the last update check found. */
+			update?: components['schemas']['ExtensionUpdate']
+			/** Format: date-time */
+			updated_at: string
+			version: string
+		}
+		ExtensionCatalog: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ExtensionCatalog.json
+			 */
+			readonly $schema?: string
+			plugins: components['schemas']['CatalogPlugin'][] | null
+			repositories: components['schemas']['ExtensionRepository'][] | null
+		}
+		ExtensionPreview: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ExtensionPreview.json
+			 */
+			readonly $schema?: string
+			author: string
+			compatible: boolean
+			config: components['schemas']['ExtensionSetting'][] | null
+			/** @description Pass back to install exactly this; a manifest that changed in between is refused. */
+			consent: string
+			description?: string
+			homepage?: string
+			icon?: string
+			id: string
+			/** @description The version already installed, if any. */
+			installed?: string
+			lang: string
+			manifest_url: string
+			min_node_version?: string
+			name: string
+			/** @description Every host the plugin may reach. Nothing else is reachable to it. */
+			network: string[] | null
+			/** @enum {string} */
+			type: 'torrent-provider' | 'manga-provider'
+			version: string
+		}
+		ExtensionRepository: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ExtensionRepository.json
+			 */
+			readonly $schema?: string
+			/** Format: date-time */
+			added_at: string
+			/** Format: date-time */
+			checked_at?: string
+			/** @description Why the last read failed; the plugins shown are from the read before. */
+			error?: string
+			/** Format: int64 */
+			id: number
+			name: string
+			/**
+			 * Format: int64
+			 * @description How many plugins it lists that this node can run.
+			 */
+			plugins: number
+			/**
+			 * Format: int64
+			 * @description Entries left out: another type of plugin, or not well formed.
+			 */
+			skipped: number
+			url: string
+		}
+		ExtensionSetting: {
+			default?: string
+			label: string
+			name: string
+			options?: string[] | null
+			secret: boolean
+			set: boolean
+			/** @enum {string} */
+			type: 'text' | 'select' | 'switch'
+			value?: string
+		}
+		ExtensionUpdate: {
+			/** @description Hosts the new version reaches that this one does not. */
+			added_hosts?: string[] | null
+			compatible: boolean
+			consent?: string
+			/** @description Why the check could not tell. */
+			error?: string
+			needs_consent: boolean
+			version?: string
+		}
+		ExtensionsOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ExtensionsOutputBody.json
+			 */
+			readonly $schema?: string
+			extensions: components['schemas']['Extension'][] | null
+		}
+		File: {
+			/**
+			 * Format: int64
+			 * @description How long the file runs, read out of its container during the scan. Absent for a container the node cannot read and for everything that is not video.
+			 */
+			duration_seconds?: number
+			/**
+			 * Format: int64
+			 * @description Identifier of the file, stable while its path does not change.
+			 */
+			id: number
+			/** @description True when the user told the node to leave this file alone. An ignored file is never offered to the matcher again. */
+			ignored: boolean
+			/**
+			 * @description Form of media the extension points at.
+			 * @enum {string}
+			 */
+			kind: 'video' | 'manga' | 'book'
+			/** @description What the file was matched to. Absent while unmatched. */
+			match?: components['schemas']['Match']
+			/** @description True when the last scan did not find the file where it used to be. */
+			missing: boolean
+			/**
+			 * Format: date-time
+			 * @description Modification time the last scan saw.
+			 */
+			modified_at: string
+			/** @description What the file's name says. Present whether or not the file is matched. */
+			parsed: components['schemas']['Parsed']
+			/** @description Absolute path, for the player and for revealing the file. */
+			path: string
+			/** @description Path relative to the root, with forward slashes. */
+			rel_path: string
+			/**
+			 * Format: int64
+			 * @description Root the file was found under.
+			 */
+			root_id: number
+			/**
+			 * Format: int64
+			 * @description Size on disk.
+			 */
+			size_bytes: number
+		}
+		FileOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/FileOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The file with its match applied. */
+			file: components['schemas']['File']
+		}
+		FilePage: {
+			/** @description Totals for the whole library behind the filters over the list. */
+			counts: components['schemas']['Counts']
+			/** @description One page of files. */
+			items: components['schemas']['File'][] | null
+			/**
+			 * Format: int64
+			 * @description Page size that was applied.
+			 */
+			limit: number
+			/**
+			 * Format: int64
+			 * @description Offset that was applied.
+			 */
+			offset: number
+			/** @description Every title the files on this page are matched to, once each. */
+			titles: components['schemas']['MatchedTitle'][] | null
+			/**
+			 * Format: int64
+			 * @description How many files match the filter in total.
+			 */
+			total: number
+		}
+		FilesOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/FilesOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description One page of scanned files with their matches. */
+			files: components['schemas']['FilePage']
+		}
+		FilterOptions: {
+			/** Format: date-time */
+			fetched_at: string
+			genres: string[] | null
+			tags: components['schemas']['FilterTag'][] | null
+		}
+		FilterOptionsOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/FilterOptionsOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The vocabulary the filter panel offers. */
+			options: components['schemas']['FilterOptions']
+			/** @description Attribution for every field that came from an external source. */
+			sources: components['schemas']['Source'][] | null
+		}
+		FilterTag: {
+			category: string
+			is_adult: boolean
+			name: string
+		}
+		Font: {
+			/** Format: int32 */
+			index: number
+			name: string
+		}
+		FuzzyDate: {
+			/** Format: int64 */
+			day: number | null
+			/** Format: int64 */
+			month: number | null
+			/** Format: int64 */
+			year: number | null
+		}
+		GoogleBooksKeyInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/GoogleBooksKeyInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The user's own Google API key with the Books API enabled. Google is asked to accept it before it is stored. Empty forgets it and goes back to the key this build ships with. */
+			api_key: string
+		}
+		GoogleBooksSettings: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/GoogleBooksSettings.json
+			 */
+			readonly $schema?: string
+			/** @description Whether this node reads Google Books at all. Off when the node was started with an empty Google Books endpoint. */
+			enabled: boolean
+			/**
+			 * @description Which key the node sends: the user's own, the one this build ships with, or none — then books Open Library does not know cannot be found.
+			 * @enum {string}
+			 */
+			key_source: 'user' | 'build' | 'none'
+		}
+		GutenbergSettingsBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/GutenbergSettingsBody.json
+			 */
+			readonly $schema?: string
+			/** @description False when the node is configured without Project Gutenberg. */
+			available: boolean
+			/**
+			 * Format: int64
+			 * @description Books in the node's copy of the catalogue; 0 until it is downloaded.
+			 */
+			books: number
+			/**
+			 * Format: date-time
+			 * @description When the node last asked for a newer one; it asks once a week.
+			 */
+			checked_at?: string
+			/** @description Off until the user turns it on; turning it on downloads the catalogue (about 6 MB, mostly books in English). */
+			enabled: boolean
+			/** @description Why the last download or check failed. */
+			error?: string
+			/** @description The catalogue is being downloaded or checked. Changes arrive on the books.catalog topic. */
+			syncing: boolean
+			/**
+			 * Format: date-time
+			 * @description When the node took the catalogue it has.
+			 */
+			updated_at?: string
+		}
+		HealthOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/HealthOutputBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * @description Build timestamp.
+			 * @example 2026-08-27T12:00:00Z
+			 */
+			built: string
+			/**
+			 * @description Git commit the build came from.
+			 * @example abc1234
+			 */
+			commit: string
+			/** @description True when the node is paired with a cloud account. */
+			linked: boolean
+			/**
+			 * @description Node status.
+			 * @example ok
+			 */
+			status: string
+			/**
+			 * @description Semantic version of the running build.
+			 * @example 0.1.0
+			 */
+			version: string
+		}
+		Image: {
+			/** Format: int64 */
+			height?: number
+			/**
+			 * @description Which search found it.
+			 * @enum {string}
+			 */
+			source: 'brave' | 'wikimedia'
+			/** @description The page the picture was found on. */
+			source_page?: string
+			/** @description A small copy to show in the list of candidates. */
+			thumbnail: string
+			/** @description The picture itself, as the source links it. The node downloads it only when the user picks it. */
+			url: string
+			/** Format: int64 */
+			width?: number
+		}
+		ImageSearchSettings: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ImageSearchSettings.json
+			 */
+			readonly $schema?: string
+			/** @description Whether this node can look for posters at all. */
+			enabled: boolean
+			/**
+			 * @description Whether the user saved their own Brave Search key. Without one only Wikimedia Commons is searched, which rarely has posters.
+			 * @enum {string}
+			 */
+			key_source: 'user' | 'none'
+		}
+		InstallExtensionInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/InstallExtensionInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description From the preview the user agreed to. */
+			consent: string
+			/** Format: uri */
+			url: string
+		}
+		KeyedAISettings: {
+			/** @description Whether this node can reach it at all. Off when the node was started with an empty endpoint. */
+			available: boolean
+			/** @description Whether the user saved a key. */
+			configured: boolean
+			/** @description The model that answers. */
+			model: string
+			/** @description The models the user may choose from, the default first. */
+			models: string[] | null
+		}
+		LibraryCollection: {
+			/** @description Titles the library holds files of, by name. */
+			entries: components['schemas']['LibraryCollectionEntry'][] | null
+			/**
+			 * Format: int64
+			 * @description Files in the library in total.
+			 */
+			files: number
+			/**
+			 * Format: int64
+			 * @description Files the last scan did not find where they used to be.
+			 */
+			missing: number
+			/**
+			 * Format: int64
+			 * @description Files that belong to no title yet. Openings and other extras are left out: they belong to none by design.
+			 */
+			unmatched: number
+		}
+		LibraryCollectionEntry: {
+			/**
+			 * Format: int64
+			 * @description Files matched to this title.
+			 */
+			file_count: number
+			/** @description The title, as provider:id. */
+			media_ref: string
+			/**
+			 * Format: int64
+			 * @description Of those, files the last scan did not find.
+			 */
+			missing_count: number
+			/** @description Name and poster, when the node can describe the title. Absent for a title no source has answered for yet. */
+			title?: components['schemas']['MatchedTitle']
+		}
+		List: {
+			/** Format: int64 */
+			count: number
+			custom: boolean
+			name: string
+			status: string | null
+		}
+		ListsOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ListsOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description Every custom list the user made, across all media types. */
+			lists: components['schemas']['CustomList'][] | null
+			/** @description Attribution for every field that came from an external source. */
+			sources: components['schemas']['Source'][] | null
+		}
+		MangaChapterBody: {
+			/** @description The publisher's page, for a chapter the source only links to. It has no pages to read here. */
+			external_url?: string
+			/** @description Who translated it. Shown next to the chapter: the source asks for the credit. */
+			groups?: string[] | null
+			/** @description Language of the translation, where the source says. */
+			language?: string
+			/** @description Chapter number as the source writes it. Absent for an unnumbered chapter. */
+			number?: string
+			/** Format: int64 */
+			pages: number
+			/** @description Chapter reference for the reader's endpoints. */
+			ref: string
+			source: string
+			source_name: string
+			title: string
+		}
+		MangaChaptersOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/MangaChaptersOutputBody.json
+			 */
+			readonly $schema?: string
+			chapters: components['schemas']['MangaChapterBody'][] | null
+			/** @description Linked sources that could not be read this time; the others are listed. */
+			problems: components['schemas']['MangaSourceProblemBody'][] | null
+		}
+		MangaDownloadBody: {
+			chapter_ref: string
+			error?: string
+			/** Format: int64 */
+			id: number
+			media_ref: string
+			number?: string
+			/** Format: int64 */
+			pages_done: number
+			/** Format: int64 */
+			pages_total: number
+			/** @description Where the chapter is saved, inside the download folder. */
+			rel_path?: string
+			series: string
+			source_name: string
+			/** @enum {string} */
+			state: 'queued' | 'running' | 'done' | 'failed' | 'cancelled'
+			title: string
+		}
+		MangaDownloadSettingsBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/MangaDownloadSettingsBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * Format: int64
+			 * @description Library folder chapters are saved to; 0 while none is chosen.
+			 */
+			root_id: number
+		}
+		MangaDownloadsOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/MangaDownloadsOutputBody.json
+			 */
+			readonly $schema?: string
+			downloads: components['schemas']['MangaDownloadBody'][] | null
+		}
+		MangaLinkBody: {
+			/** @enum {string} */
+			chosen_by: 'auto' | 'user'
+			series_id: string
+			series_title?: string
+			source: string
+			source_name: string
+		}
+		MangaLinksOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/MangaLinksOutputBody.json
+			 */
+			readonly $schema?: string
+			links: components['schemas']['MangaLinkBody'][] | null
+		}
+		MangaSearchOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/MangaSearchOutputBody.json
+			 */
+			readonly $schema?: string
+			series: components['schemas']['MangaSeriesBody'][] | null
+		}
+		MangaSeriesBody: {
+			/** @description What tells similar names apart, such as a year. */
+			detail?: string
+			/** @description The series' id in its source: a path on an OPDS server, a plugin's own id. */
+			id: string
+			/** @description True when the source itself links this series to the title being linked. */
+			matched: boolean
+			title: string
+		}
+		MangaSourceBody: {
+			/** @example opds:3 */
+			id: string
+			/** @enum {string} */
+			kind: 'opds' | 'plugin'
+			name: string
+		}
+		MangaSourceProblemBody: {
+			detail: string
+			source: string
+			source_name?: string
+		}
+		MangaSourcesOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/MangaSourcesOutputBody.json
+			 */
+			readonly $schema?: string
+			sources: components['schemas']['MangaSourceBody'][] | null
+		}
+		ManualDraft: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ManualDraft.json
+			 */
+			readonly $schema?: string
+			/** @description Who wrote it; manga and books. */
+			authors?: string[] | null
+			/**
+			 * Format: int64
+			 * @description Chapters; manga only.
+			 */
+			chapters?: number
+			/** @description ISO 3166-1 alpha-2 code of where it comes from. */
+			country_of_origin?: string
+			/** @description Plain-text synopsis. */
+			description?: string
+			/**
+			 * Format: int64
+			 * @description Minutes per episode, or the runtime of a movie.
+			 */
+			duration?: number
+			/**
+			 * Format: int64
+			 * @description Day it finished; needs the end month.
+			 */
+			end_day?: number
+			/**
+			 * Format: int64
+			 * @description Month it finished; needs the end year.
+			 */
+			end_month?: number
+			/**
+			 * Format: int64
+			 * @description Year it finished; not before it came out.
+			 */
+			end_year?: number
+			/**
+			 * Format: int64
+			 * @description Episodes it has. A movie always has one.
+			 */
+			episodes?: number
+			/**
+			 * @description The source vocabulary's format for this kind of title: TV, MOVIE, OVA… for anime, MANGA, NOVEL, ONE_SHOT for manga, BOOK for a book. Left out it is the kind's usual one.
+			 * @enum {string}
+			 */
+			format?:
+				| 'TV'
+				| 'TV_SHORT'
+				| 'MOVIE'
+				| 'SPECIAL'
+				| 'OVA'
+				| 'ONA'
+				| 'MUSIC'
+				| 'MANGA'
+				| 'NOVEL'
+				| 'ONE_SHOT'
+				| 'BOOK'
+			/** @description Genres, in whatever words the user chose. */
+			genres?: string[] | null
+			/** @description Adult content. */
+			is_adult?: boolean
+			/**
+			 * @description Which kind of title this is. It decides the list it is tracked on and what its progress counts.
+			 * @enum {string}
+			 */
+			media_type: 'anime' | 'manga' | 'movie' | 'series' | 'dorama' | 'book'
+			/** @description The name in the original language, when it differs. */
+			original_title?: string
+			/**
+			 * Format: int64
+			 * @description Pages; a book only, whose progress counts them.
+			 */
+			pages?: number
+			/**
+			 * Format: int64
+			 * @description How good it is, out of 100, shown where a source's average score would be. Zero is no score.
+			 */
+			score?: number
+			/**
+			 * Format: int64
+			 * @description Seasons it has; anime, series and dorama only.
+			 */
+			seasons?: number
+			/**
+			 * Format: int64
+			 * @description Day it came out; needs the month.
+			 */
+			start_day?: number
+			/**
+			 * Format: int64
+			 * @description Month it came out; needs the year.
+			 */
+			start_month?: number
+			/**
+			 * @description Release status.
+			 * @enum {string}
+			 */
+			status?: 'FINISHED' | 'RELEASING' | 'NOT_YET_RELEASED' | 'CANCELLED' | 'HIATUS'
+			/** @description Who made it. */
+			studios?: string[] | null
+			/** @description Other names the title goes by. Library files are matched against these too. */
+			synonyms?: string[] | null
+			/** @description The name shown everywhere in the app. */
+			title: string
+			/**
+			 * Format: int64
+			 * @description Volumes; manga only.
+			 */
+			volumes?: number
+			/**
+			 * Format: int64
+			 * @description Year it came out.
+			 */
+			year?: number
+		}
+		ManualHint: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ManualHint.json
+			 */
+			readonly $schema?: string
+			/**
+			 * @description The language to write the description in: the app's own.
+			 * @default en
+			 * @enum {string}
+			 */
+			language: 'en' | 'uk' | 'ru'
+			/**
+			 * @description The kind of title, as the user chose it. The AI does not change it.
+			 * @enum {string}
+			 */
+			media_type: 'anime' | 'manga' | 'movie' | 'series' | 'dorama' | 'book'
+			/** @description Anything else the user knows — the studio, the country, the original name — to tell the AI which title is meant. */
+			note?: string
+			/** @description The name as the user knows it. The AI does not change it either. */
+			title: string
+			/**
+			 * Format: int64
+			 * @description Year it came out, when the user knows it: it tells apart titles of the same name.
+			 */
+			year?: number
+		}
+		ManualOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ManualOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The title as its page shows it, under its manual:<id> reference. */
+			media: components['schemas']['MediaDetails']
+		}
+		ManualSuggestion: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ManualSuggestion.json
+			 */
+			readonly $schema?: string
+			/** @description The title as the AI knows it, cleaned the way a draft the user typed is. Nothing is stored: the client shows it for the user to check and saves it like any other draft. */
+			draft: components['schemas']['ManualDraft']
+			/** @description The model that answered. */
+			model: string
+			/** @description Whether the AI knew this title at all. When it did not, the draft carries little beyond the hint, by design: an unknown title gets no invented details. */
+			recognized: boolean
+		}
+		Match: {
+			/**
+			 * Format: double
+			 * @description How sure the matcher was, from 0 to 1. A manual match is always 1.
+			 */
+			confidence: number
+			/**
+			 * Format: int64
+			 * @description Episode or chapter number within the title.
+			 */
+			episode?: number
+			/** @description The title this file belongs to, as provider:id. */
+			media_ref: string
+			/**
+			 * Format: int64
+			 * @description Season number, when the title has seasons.
+			 */
+			season?: number
+			/**
+			 * @description Who decided the match. A manual one is never overwritten by a scan.
+			 * @enum {string}
+			 */
+			source: 'auto' | 'manual'
+		}
+		MatchedTitle: {
+			/** @description Dominant colour of the poster, for a placeholder while it loads. */
+			cover_color?: string
+			/** @description Poster for the title. */
+			cover_image?: string
+			/**
+			 * Format: int64
+			 * @description Episodes the title has in total, or chapters for a comic.
+			 */
+			episodes?: number
+			/** @description TV, MOVIE, OVA and so on, as the source names it. */
+			format?: string
+			/** @description The title, as provider:id. */
+			media_ref: string
+			/**
+			 * @description Which catalog the title comes from.
+			 * @enum {string}
+			 */
+			media_type?: 'anime' | 'manga'
+			/** @description The title as the user's source spells it. */
+			title: string
+		}
+		Media: {
+			/** @description Who wrote it; a book only. */
+			authors?: string[] | null
+			/** Format: int64 */
+			average_score: number | null
+			banner_image: string | null
+			/** Format: int64 */
+			chapters: number | null
+			cover_color: string | null
+			cover_image: string | null
+			/** Format: int64 */
+			episodes: number | null
+			format: string | null
+			genres: string[] | null
+			is_adult: boolean
+			/**
+			 * Format: int64
+			 * @description Pages in a typical edition; a book only, whose progress counts them.
+			 */
+			pages?: number
+			/** Format: int64 */
+			season_year: number | null
+			site_url: string
+			status: string | null
+			synonyms?: string[] | null
+			title: components['schemas']['Title']
+			/** Format: int64 */
+			volumes: number | null
+		}
+		MediaDetails: {
+			/** @description Who wrote it; a book only. */
+			authors: string[] | null
+			/** Format: int64 */
+			average_score: number | null
+			banner_image: string | null
+			/** Format: int64 */
+			chapters: number | null
+			country_of_origin: string | null
+			cover_color: string | null
+			cover_image: string | null
+			description: string
+			/** Format: int64 */
+			duration: number | null
+			/** @description The user described this title themselves, so they may edit or delete it. Only manual:<id> titles; every other one belongs to its source. */
+			editable: boolean
+			end_date: components['schemas']['FuzzyDate']
+			/** Format: int64 */
+			episodes: number | null
+			/** Format: int64 */
+			favourites: number | null
+			/** Format: date-time */
+			fetched_at: string
+			format: string | null
+			genres: string[] | null
+			is_adult: boolean
+			/** Format: int64 */
+			mean_score: number | null
+			media_ref: string
+			media_type: string
+			next_airing_episode: components['schemas']['AiringEpisode']
+			/**
+			 * Format: int64
+			 * @description Pages in a typical edition; a book only.
+			 */
+			pages: number | null
+			/** Format: int64 */
+			popularity: number | null
+			/** @description Titles suggested to people who liked this one: AniList users' recommendations, or TMDB's own picks. */
+			recommendations: components['schemas']['RelatedMedia'][] | null
+			relations: components['schemas']['RelatedMedia'][] | null
+			season: string | null
+			/** Format: int64 */
+			season_year: number | null
+			/**
+			 * Format: int64
+			 * @description Seasons it has; only a manual title says.
+			 */
+			seasons?: number
+			/** @description Titles alike in genre and keywords. TMDB only; empty for an AniList title. */
+			similar: components['schemas']['RelatedMedia'][] | null
+			site_url: string
+			source: string | null
+			start_date: components['schemas']['FuzzyDate']
+			status: string | null
+			studios: string[] | null
+			synonyms: string[] | null
+			title: components['schemas']['TitleNames']
+			trailer: components['schemas']['Trailer']
+			/** Format: int64 */
+			volumes: number | null
+		}
+		MediaInfo: {
+			audios: components['schemas']['Audio'][] | null
+			chapters: components['schemas']['Chapter'][] | null
+			/** @description Container format as ffprobe names it. */
+			container?: string
+			/**
+			 * Format: float
+			 * @description Length in seconds.
+			 */
+			duration: number
+			/** @description File extension without the dot. */
+			extension: string
+			/** @description Fonts attached to the file, needed to render its ASS subtitles as authored. */
+			fonts: components['schemas']['Font'][] | null
+			/** @description RFC 6381 type with codecs, for canPlayType. Absent when a stream has a codec the node cannot describe — such a file is not a direct-play candidate. */
+			mime_codec?: string
+			/** @description Absolute path of the file. */
+			path: string
+			/**
+			 * Format: int64
+			 * @description Size in bytes.
+			 */
+			size: number
+			subtitles: components['schemas']['Subtitle'][] | null
+			/** @description The first video stream. */
+			video?: components['schemas']['Video']
+			videos: components['schemas']['Video'][] | null
+		}
+		MediaSummary: {
+			/** @description Who wrote it; a book only. */
+			authors?: string[] | null
+			/** Format: int64 */
+			average_score: number | null
+			banner_image: string | null
+			/** Format: int64 */
+			chapters: number | null
+			cover_color: string | null
+			cover_image: string | null
+			/** @description Plain-text synopsis, when the source's search carries one. Open Library's does not. */
+			description?: string
+			/** @description A title the user described themselves; see MediaDetails.editable. */
+			editable?: boolean
+			/** Format: int64 */
+			episodes: number | null
+			format: string | null
+			genres: string[] | null
+			is_adult: boolean
+			media_ref: string
+			media_type: string
+			next_airing_episode: components['schemas']['AiringEpisode']
+			/**
+			 * Format: int64
+			 * @description Pages in a typical edition; a book only.
+			 */
+			pages?: number
+			/** Format: int64 */
+			popularity: number | null
+			season: string | null
+			/** Format: int64 */
+			season_year: number | null
+			site_url: string
+			start_date: components['schemas']['FuzzyDate']
+			status: string | null
+			title: components['schemas']['TitleNames']
+			/** Format: int64 */
+			volumes: number | null
+		}
+		OPDSServerBody: {
+			/** @description Whether a password is stored. The password itself is never sent back. */
+			has_password: boolean
+			/** Format: int64 */
+			id: number
+			name: string
+			/** @description Address of the catalogue's root feed. */
+			url: string
+			username?: string
+		}
+		OPDSServerInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/OPDSServerInputBody.json
+			 */
+			readonly $schema?: string
+			name: string
+			/** @description Absent keeps the stored password; an empty string removes it. */
+			password?: string
+			/** @description Address of the catalogue's root feed, such as http://nas:25600/opds/v1.2/catalog. */
+			url: string
+			username?: string
+		}
+		OPDSServerOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/OPDSServerOutputBody.json
+			 */
+			readonly $schema?: string
+			server: components['schemas']['OPDSServerBody']
+		}
+		OPDSServersOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/OPDSServersOutputBody.json
+			 */
+			readonly $schema?: string
+			servers: components['schemas']['OPDSServerBody'][] | null
+		}
+		OpenAISettings: {
+			/** @description Whether there is an endpoint and a model to ask. */
+			configured: boolean
+			/** @description The base URL requests go to, such as https://api.openai.com/v1. */
+			endpoint: string
+			/** @description Whether the user saved a key. A local server usually needs none. */
+			has_key: boolean
+			/** @description The model to ask, as the endpoint names it. */
+			model: string
+		}
+		OpenAIUpdate: {
+			/** @description The key, if the endpoint wants one. Empty forgets it. */
+			api_key?: string
+			/** @description The base URL, such as https://api.openai.com/v1 or http://localhost:11434/v1. Empty forgets it. */
+			endpoint?: string
+			/** @description The model, as the endpoint names it. */
+			model?: string
+		}
+		Page: {
+			/**
+			 * Format: int64
+			 * @description Position in reading order, starting at 0.
+			 */
+			index: number
+			/** @description File name inside the archive. */
+			name: string
+		}
+		Parsed: {
+			/**
+			 * Format: int64
+			 * @description Chapter number, for comics.
+			 */
+			chapter?: number
+			/**
+			 * Format: int64
+			 * @description Episode number found in the name.
+			 */
+			episode?: number
+			/**
+			 * @description What the name says the file holds. An extra — an opening, an ending, a trailer — is never tracked as an episode.
+			 * @enum {string}
+			 */
+			form?: 'series' | 'movie' | 'special' | 'extra' | 'manga' | 'book'
+			/**
+			 * Format: int64
+			 * @description Season found in the name or on a folder.
+			 */
+			season?: number
+			/** @description Title read from the file name, or from the closest folder that names one. */
+			title?: string
+			/**
+			 * Format: int64
+			 * @description Volume number, for comics.
+			 */
+			volume?: number
+			/**
+			 * Format: int64
+			 * @description Year found in the name.
+			 */
+			year?: number
+		}
+		PlaybackOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/PlaybackOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description What the node's single player slot is doing. */
+			playback: components['schemas']['PlaybackStatus']
+		}
+		PlaybackSession: {
+			/**
+			 * Format: double
+			 * @description Length of the file, in seconds. Zero until the player reports it.
+			 */
+			duration: number
+			/**
+			 * Format: int64
+			 * @description Episode number within that title.
+			 */
+			episode?: number
+			/**
+			 * Format: int64
+			 * @description Library file being played.
+			 */
+			file_id: number
+			/** @description Title this file is matched to. Absent while unmatched. */
+			media_ref?: string
+			/** @description Absolute path mpv was given. */
+			path: string
+			/** @description True while the player is paused. */
+			paused: boolean
+			/**
+			 * Format: double
+			 * @description Where the player is, in seconds.
+			 */
+			position: number
+			/**
+			 * Format: date-time
+			 * @description When playback started.
+			 */
+			started_at: string
+			/** @description Title as the library reads it, for the UI. */
+			title: string
+			/** @description True once this session counted as watched and the tracker was told. */
+			watched: boolean
+		}
+		PlaybackStatus: {
+			/** @description True while a player is open. */
+			playing: boolean
+			/** @description The open session. Absent when nothing is playing. */
+			session?: components['schemas']['PlaybackSession']
+		}
+		PreviewExtensionInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/PreviewExtensionInputBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * Format: uri
+			 * @description The plugin's manifest.json, at an https:// address.
+			 */
+			url: string
+		}
+		ProgressInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ProgressInputBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * Format: double
+			 * @description Length of the file, in seconds.
+			 */
+			duration: number
+			/** @description True when the file played to its end. */
+			ended?: boolean
+			/**
+			 * Format: double
+			 * @description Where the player is, in seconds.
+			 */
+			position: number
+		}
+		ProgressOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ProgressOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description True once this file counts as watched and the tracker was told. */
+			watched: boolean
+		}
+		PutBookDownloadSettingsInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/PutBookDownloadSettingsInputBody.json
+			 */
+			readonly $schema?: string
+			/** Format: int64 */
+			root_id: number
+		}
+		PutGutenbergSettingsInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/PutGutenbergSettingsInputBody.json
+			 */
+			readonly $schema?: string
+			enabled: boolean
+		}
+		PutMangaDownloadSettingsInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/PutMangaDownloadSettingsInputBody.json
+			 */
+			readonly $schema?: string
+			/** Format: int64 */
+			root_id: number
+		}
+		PutMangaLinkInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/PutMangaLinkInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description As the search returned it. */
+			series_id: string
+			series_title?: string
+		}
+		PutTorrentDebridInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/PutTorrentDebridInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The service's key. Left out keeps the saved key; empty removes it. */
+			api_key?: string
+			/**
+			 * @description The service; empty turns it off.
+			 * @enum {string}
+			 */
+			service: '' | 'torbox' | 'realdebrid' | 'alldebrid' | 'premiumize'
+		}
+		PutTorrentRuleInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/PutTorrentRuleInputBody.json
+			 */
+			readonly $schema?: string
+			enabled: boolean
+			/**
+			 * Format: int64
+			 * @description Left out starts after the last episode the library has.
+			 */
+			from_episode?: number
+			/** @description Searched for instead of the title's names. */
+			query?: string
+			/** @description The title's name; it names the folder downloads go into. */
+			title: string
+		}
+		PutTorrentSettingsInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/PutTorrentSettingsInputBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * @description Who downloads torrents into the library: the user's qBittorrent, the node's own client, the debrid service set up under /v1/torrent/debrid, or none.
+			 * @enum {string}
+			 */
+			client: '' | 'qbittorrent' | 'embedded' | 'debrid'
+			/** @description Left out keeps the saved password; empty removes it. */
+			password?: string
+			/** @description How the client names the node's folders, when it runs in Docker or on another machine. */
+			path_map: components['schemas']['TorrentPathMap']
+			/**
+			 * Format: int64
+			 * @description Library folder torrents are saved into; 0 while none is chosen.
+			 */
+			root_id: number
+			/** @description qBittorrent WebUI address; empty disconnects. */
+			url: string
+			username: string
+		}
+		ReadBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ReadBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * Format: int64
+			 * @description Page the reader is on, starting at 0.
+			 */
+			page: number
+		}
+		ReadOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ReadOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description True once the chapter counts as read, on this call or an earlier one. */
+			counted: boolean
+		}
+		RelatedMedia: {
+			cover_color: string | null
+			cover_image: string | null
+			format: string | null
+			media_ref: string
+			media_type: string
+			relation_type: string
+			/** Format: int64 */
+			season_year: number | null
+			status: string | null
+			title: components['schemas']['TitleNames']
+		}
+		RenameListInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/RenameListInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description New icon, by name. Leave it out to keep the current one; an empty string goes back to the default. */
+			icon?: string
+			/** @description The new name. */
+			name: string
+		}
+		Root: {
+			/**
+			 * Format: date-time
+			 * @description When the user added the root.
+			 */
+			added_at: string
+			/**
+			 * @description What the folder holds. For videos it picks the source: anime is matched against AniList, movies and shows against TMDB, doramas against TMDB's East Asian shows; such a folder keeps comics and books as well. A folder of manga keeps only comics, a folder of books only books.
+			 * @enum {string}
+			 */
+			content: 'anime' | 'movies_and_shows' | 'doramas' | 'manga' | 'books'
+			/**
+			 * Format: int64
+			 * @description Media files currently present under the root.
+			 */
+			file_count: number
+			/**
+			 * Format: int64
+			 * @description Identifier of the root, stable across scans.
+			 */
+			id: number
+			/**
+			 * Format: date-time
+			 * @description When the root was last walked. Absent until the first scan.
+			 */
+			last_scan_at?: string
+			/**
+			 * Format: int64
+			 * @description Files the last scan did not find. Their matches are kept in case the drive comes back.
+			 */
+			missing_count: number
+			/** @description Absolute path on this machine. */
+			path: string
+			/**
+			 * Format: int64
+			 * @description Files under this root that belong to no title yet. Openings and other extras are left out: they belong to none by design.
+			 */
+			unmatched_count: number
+		}
+		RootOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/RootOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The root as the node recorded it. */
+			root: components['schemas']['Root']
+		}
+		RootsOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/RootsOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description Folders the user gave the node to watch. */
+			roots: components['schemas']['Root'][] | null
+		}
+		ScanHistoryOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ScanHistoryOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description One page of past scans, newest first. */
+			history: components['schemas']['ScanHistoryPage']
+		}
+		ScanHistoryPage: {
+			/** @description One page of past scans, newest first. */
+			items: components['schemas']['ScanRunSummary'][] | null
+			/**
+			 * Format: int64
+			 * @description Page size that was applied.
+			 */
+			limit: number
+			/**
+			 * Format: int64
+			 * @description Offset that was applied.
+			 */
+			offset: number
+			/**
+			 * Format: int64
+			 * @description How many scans match the filter in total.
+			 */
+			total: number
+		}
+		ScanInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ScanInputBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * Format: int64
+			 * @description Scan this root alone. Left out or 0 scans every root.
+			 */
+			root_id?: number
+		}
+		ScanOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ScanOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description State of the node's single scan slot. */
+			scan: components['schemas']['ScanStatus']
+		}
+		ScanRootResult: {
+			/**
+			 * Format: int64
+			 * @description Files recorded for the first time.
+			 */
+			added: number
+			/**
+			 * Format: int64
+			 * @description Known files whose size or modification time moved.
+			 */
+			changed: number
+			/** @description Why this root could not be scanned. The other roots are still scanned. */
+			error?: string
+			/**
+			 * Format: int64
+			 * @description Media files seen on disk.
+			 */
+			found: number
+			/**
+			 * Format: int64
+			 * @description Files that were recorded before and are gone now.
+			 */
+			missing: number
+			/** @description Absolute path of the root. */
+			path: string
+			/**
+			 * Format: int64
+			 * @description Files whose container was opened to read how long they run.
+			 */
+			probed: number
+			/**
+			 * Format: int64
+			 * @description Untouched files whose names a newer parser read again.
+			 */
+			reparsed: number
+			/**
+			 * Format: int64
+			 * @description Root this result belongs to.
+			 */
+			root_id: number
+		}
+		ScanRunDetail: {
+			/**
+			 * Format: int64
+			 * @description Files recorded for the first time.
+			 */
+			added: number
+			/**
+			 * Format: int64
+			 * @description Known files whose size or modification time moved.
+			 */
+			changed: number
+			/**
+			 * Format: int64
+			 * @description Unmatched files the scan tried to match.
+			 */
+			considered: number
+			/**
+			 * Format: date-time
+			 * @description When the scan finished.
+			 */
+			finished_at: string
+			/**
+			 * Format: int64
+			 * @description Media files seen on disk across all scanned roots.
+			 */
+			found: number
+			/** @description Titles this scan matched files to. */
+			groups: components['schemas']['ScanRunGroupDetail'][] | null
+			/**
+			 * Format: int64
+			 * @description Identifier of this scan run.
+			 */
+			id: number
+			/**
+			 * Format: int64
+			 * @description Files matched to a title without asking the user.
+			 */
+			matched: number
+			/**
+			 * Format: int64
+			 * @description Files that were recorded before and were gone this time.
+			 */
+			missing: number
+			/** @description Per-root outcome of this scan. */
+			roots: components['schemas']['ScanRunRootDetail'][] | null
+			/**
+			 * Format: int64
+			 * @description Folders this scan covered.
+			 */
+			roots_total: number
+			/**
+			 * Format: date-time
+			 * @description When the scan started.
+			 */
+			started_at: string
+			/**
+			 * @description Partial when the scan was interrupted before it walked every root.
+			 * @enum {string}
+			 */
+			status: 'completed' | 'partial'
+			/** @description Files this scan looked at but could not match. */
+			unmatched_files: components['schemas']['ScanRunFileLogDetail'][] | null
+		}
+		ScanRunFileLogDetail: {
+			/**
+			 * Format: double
+			 * @description The best candidate's score, however far short of matching. Absent when there was nothing to compare against.
+			 */
+			confidence?: number
+			/**
+			 * Format: int64
+			 * @description The file, when it has not since been deleted.
+			 */
+			file_id?: number
+			/** @description Title read from the name at the time of the scan. */
+			parsed_title?: string
+			/** @description Path relative to its root at the time of the scan. */
+			rel_path: string
+		}
+		ScanRunGroupDetail: {
+			/**
+			 * Format: int64
+			 * @description Files this scan matched to the title.
+			 */
+			file_count: number
+			/** @description What the scan made of every file it matched to this title, for the scanner log under the title. */
+			files: components['schemas']['ScanRunFileLogDetail'][] | null
+			/** @description The title, as provider:id. */
+			media_ref: string
+			/** @description The title's name and poster, when the node can still describe it. */
+			title?: components['schemas']['MatchedTitle']
+			/** @description False when the match came from a search rather than the user's own list. */
+			tracked: boolean
+		}
+		ScanRunOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ScanRunOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The scan run in full. */
+			run: components['schemas']['ScanRunDetail']
+			/** @description Attribution for every field that came from an external source. */
+			sources: components['schemas']['Source'][] | null
+		}
+		ScanRunRootDetail: {
+			/**
+			 * Format: int64
+			 * @description Files recorded for the first time.
+			 */
+			added: number
+			/**
+			 * Format: int64
+			 * @description Known files whose size or modification time moved.
+			 */
+			changed: number
+			/** @description Why this root could not be scanned. */
+			error?: string
+			/**
+			 * Format: int64
+			 * @description Media files seen on disk.
+			 */
+			found: number
+			/**
+			 * Format: int64
+			 * @description Files that were recorded before and were gone this time.
+			 */
+			missing: number
+			/**
+			 * Format: int64
+			 * @description Files whose container was opened to read how long they run.
+			 */
+			probed: number
+			/**
+			 * Format: int64
+			 * @description Untouched files whose names a newer parser read again.
+			 */
+			reparsed: number
+			/**
+			 * Format: int64
+			 * @description The root, when it has not since been removed.
+			 */
+			root_id?: number
+			/** @description Path the scan walked. */
+			root_path: string
+		}
+		ScanRunSummary: {
+			/**
+			 * Format: int64
+			 * @description Files recorded for the first time.
+			 */
+			added: number
+			/**
+			 * Format: int64
+			 * @description Known files whose size or modification time moved.
+			 */
+			changed: number
+			/**
+			 * Format: int64
+			 * @description Unmatched files the scan tried to match.
+			 */
+			considered: number
+			/**
+			 * Format: date-time
+			 * @description When the scan finished.
+			 */
+			finished_at: string
+			/**
+			 * Format: int64
+			 * @description Media files seen on disk across all scanned roots.
+			 */
+			found: number
+			/**
+			 * Format: int64
+			 * @description Identifier of this scan run.
+			 */
+			id: number
+			/**
+			 * Format: int64
+			 * @description Files matched to a title without asking the user.
+			 */
+			matched: number
+			/**
+			 * Format: int64
+			 * @description Files that were recorded before and were gone this time.
+			 */
+			missing: number
+			/**
+			 * Format: int64
+			 * @description Folders this scan covered.
+			 */
+			roots_total: number
+			/**
+			 * Format: date-time
+			 * @description When the scan started.
+			 */
+			started_at: string
+			/**
+			 * @description Partial when the scan was interrupted before it walked every root.
+			 * @enum {string}
+			 */
+			status: 'completed' | 'partial'
+		}
+		ScanStatus: {
+			/**
+			 * Format: int64
+			 * @description Files recorded for the first time.
+			 */
+			added: number
+			/**
+			 * Format: int64
+			 * @description Known files whose size or modification time moved.
+			 */
+			changed: number
+			/**
+			 * Format: int64
+			 * @description Unmatched files the scan tried to match, including ones left over from earlier scans.
+			 */
+			considered: number
+			/**
+			 * Format: date-time
+			 * @description When the last scan finished. Absent while one is running.
+			 */
+			finished_at?: string
+			/**
+			 * Format: int64
+			 * @description Media files seen on disk across all scanned roots.
+			 */
+			found: number
+			/**
+			 * Format: int64
+			 * @description Files matched to a title without asking the user. The rest keep their suggestions for confirmation.
+			 */
+			matched: number
+			/**
+			 * Format: int64
+			 * @description Files that were recorded before and are gone now.
+			 */
+			missing: number
+			/**
+			 * Format: int64
+			 * @description Files whose container was opened to read how long they run.
+			 */
+			probed: number
+			/**
+			 * Format: int64
+			 * @description Untouched files whose names a newer parser read again.
+			 */
+			reparsed: number
+			/** @description Per-root outcome of the current or last scan. */
+			roots: components['schemas']['ScanRootResult'][] | null
+			/**
+			 * Format: int64
+			 * @description Folders it has finished with.
+			 */
+			roots_done: number
+			/**
+			 * Format: int64
+			 * @description Folders this scan covers.
+			 */
+			roots_total: number
+			/** @description True while a scan is walking the filesystem. */
+			running: boolean
+			/**
+			 * Format: date-time
+			 * @description When the current or last scan started.
+			 */
+			started_at?: string
+		}
+		SearchBookEditionsOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/SearchBookEditionsOutputBody.json
+			 */
+			readonly $schema?: string
+			editions: components['schemas']['BookEdition'][] | null
+			/** @description How each source answered; a failed one says why. */
+			sources: components['schemas']['BookSourceOutcome'][] | null
+		}
+		SearchOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/SearchOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description One page of titles, plus what it takes to ask for the next. */
+			results: components['schemas']['SearchPage']
+			/** @description Attribution for every field that came from an external source. */
+			sources: components['schemas']['Source'][] | null
+		}
+		SearchPage: {
+			has_next_page: boolean
+			items: components['schemas']['MediaSummary'][] | null
+			/** Format: int64 */
+			page: number
+			/** Format: int64 */
+			per_page: number
+			/** Format: int64 */
+			total: number
+		}
+		SelectTorrentFilesInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/SelectTorrentFilesInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description Indices of the files to download; every other file is skipped. */
+			selected: number[] | null
+		}
+		SessionOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/SessionOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The connected account. Absent while AniList is unreachable and the account was never mirrored. */
+			account?: components['schemas']['Account']
+			/** @description Where to send the user to grant access. Absent when the node has no AniList client id configured. */
+			authorize_url?: string
+			/** @description Whether an AniList access token is stored in this node. */
+			connected: boolean
+		}
+		SetIgnoredInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/SetIgnoredInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description True to leave the file alone from now on, false to take that mark off. */
+			ignored: boolean
+		}
+		SetMatchInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/SetMatchInputBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * Format: int64
+			 * @description Episode or chapter number within the title.
+			 */
+			episode?: number
+			/**
+			 * @description The title this file belongs to, as provider:id.
+			 * @example anilist:154587
+			 */
+			media_ref: string
+			/**
+			 * Format: int64
+			 * @description Season number, when the title has seasons.
+			 */
+			season?: number
+		}
+		SignInInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/SignInInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description Token from AniList's implicit grant. */
+			access_token: string
+		}
+		Source: {
+			/**
+			 * @description Stable source identifier.
+			 * @example anilist
+			 */
+			id: string
+			/**
+			 * @description Name to show next to the data.
+			 * @example AniList
+			 */
+			name: string
+			/** @description Text the source's terms require next to its data, word for word. */
+			notice?: string
+			/**
+			 * @description Where the attribution links to.
+			 * @example https://anilist.co
+			 */
+			url: string
+		}
+		StartInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/StartInputBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * Format: int64
+			 * @description Library file to play, as listed by listLibraryFiles.
+			 */
+			file_id: number
+		}
+		StartTorrentStreamInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/StartTorrentStreamInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description Search for the episode and play the best release: through a debrid service, one it already holds first; then by the release profile and seeders. In place of magnet, torrent or release_id. */
+			auto?: boolean
+			/**
+			 * Format: int64
+			 * @description Picks the file from a batch, and is what gets marked watched.
+			 */
+			episode?: number
+			/** @description A magnet link with a BitTorrent v1 hash. Give this, torrent or release_id. */
+			magnet?: string
+			/** @description The title the stream is for; the player marks its episode watched. */
+			media_ref: string
+			/** @description A search result to play. */
+			release_id?: string
+			/**
+			 * Format: int64
+			 * @description For a show numbered by season: the episode counts within it.
+			 */
+			season?: number
+			title?: string
+			/** @description A .torrent file, base64-encoded. */
+			torrent?: string
+			/**
+			 * @description Through the debrid service set up, or the node's own client, which downloads the file's start and end first and plays it as it comes. Absent: the debrid service when there is one.
+			 * @enum {string}
+			 */
+			via?: 'debrid' | 'embedded'
+		}
+		StatusOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/StatusOutputBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * @description Module name.
+			 * @example extension
+			 */
+			module: string
+			/** @description True when the module's dependencies are wired. */
+			ready: boolean
+		}
+		StatusOutputBody1: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/StatusOutputBody1.json
+			 */
+			readonly $schema?: string
+			/**
+			 * @description Module name.
+			 * @example reader
+			 */
+			module: string
+			/** @description True when the module's dependencies are wired. */
+			ready: boolean
+		}
+		Stream: {
+			/** @description Path that serves the file as it is, with range requests. The renderer appends the node token as ?token= because a video element cannot send headers. */
+			direct_url: string
+			/**
+			 * Format: int64
+			 * @description Episode number within that title.
+			 */
+			episode?: number
+			/**
+			 * Format: int64
+			 * @description Library file this describes.
+			 */
+			file_id: number
+			/** @description Master playlist of the file transcoded to HLS, for when the renderer cannot play it directly. Absent while transcoding is turned off. */
+			hls_url?: string
+			/** @description Streams, codecs and chapters as ffprobe reports them. */
+			info: components['schemas']['MediaInfo']
+			/** @description Title this file is matched to. Absent while unmatched. */
+			media_ref?: string
+			/** @description Title as the library reads it, for the UI. */
+			title: string
+		}
+		StreamCandidate: {
+			/** @description The debrid service already holds it. */
+			cached?: boolean
+			error?: string
+			/** Format: int64 */
+			score: number
+			/** Format: int64 */
+			seeders: number
+			/** @description The site or source it was found on. */
+			source?: string
+			/**
+			 * @description trying is the one being readied; failed ones were given up on, error says why.
+			 * @enum {string}
+			 */
+			state: 'trying' | 'waiting' | 'failed'
+			title: string
+		}
+		StreamOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/StreamOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description What the file holds and where to fetch it. */
+			stream: components['schemas']['Stream']
+		}
+		Subtitle: {
+			codec: string
+			extension: string
+			/** Format: int32 */
+			index: number
+			is_default: boolean
+			is_forced: boolean
+			language?: string
+			title?: string
+		}
+		Suggestion: {
+			/**
+			 * Format: double
+			 * @description How well this entry fits the file's name, from 0 to 1.
+			 */
+			confidence: number
+			/** @description Dominant colour of the poster, for a placeholder while it loads. */
+			cover_color?: string
+			/** @description Poster for the entry. */
+			cover_image?: string
+			/** @description The source's format: TV, MOVIE, OVA, MANGA and so on. */
+			format?: string
+			/** @description Reference to pass to setLibraryFileMatch. */
+			media_ref: string
+			/** @description The title as the source spells it. */
+			title: string
+			/** @description True when the entry is already on the user's own list. */
+			tracked: boolean
+			/**
+			 * Format: int64
+			 * @description Year the entry is listed under.
+			 */
+			year?: number
+		}
+		SuggestionsOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/SuggestionsOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description Attribution for every field that came from an external source. */
+			sources: components['schemas']['Source'][] | null
+			/** @description Candidate titles, best first. */
+			suggestions: components['schemas']['Suggestion'][] | null
+		}
+		SyncBackupBody: {
+			/**
+			 * Format: date-time
+			 * @description When it was uploaded.
+			 */
+			created_at: string
+			/** @description The device that uploaded it. */
+			device_id: string
+			/** @description That device's name. */
+			device_label: string
+			/**
+			 * Format: int64
+			 * @description Snapshot format version.
+			 */
+			format_version: number
+			/** @description Snapshot identifier. */
+			id: string
+			/**
+			 * Format: int64
+			 * @description Compressed size.
+			 */
+			size_bytes: number
+		}
+		SyncBackupListOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/SyncBackupListOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The account's snapshots from every device, newest first. */
+			backups: components['schemas']['SyncBackupBody'][] | null
+		}
+		SyncBackupNowOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/SyncBackupNowOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The snapshot the cloud now holds for this node. */
+			backup: components['schemas']['SyncBackupBody']
+			/** @description False when the state had not changed since the last backup and nothing new was stored. */
+			created: boolean
+		}
+		SyncPairInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/SyncPairInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The pairing code the desktop got from the cloud. */
+			code: string
+		}
+		SyncPairOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/SyncPairOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description This node's identifier in the account. */
+			device_id: string
+			/** @description How this node appears in the account's device list. */
+			label: string
+		}
+		SyncStatusOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/SyncStatusOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description This node's id in the account's device list, when it was paired from the app. */
+			device_id?: string
+			/**
+			 * Format: date-time
+			 * @description When this node last tried to back up.
+			 */
+			last_attempt_at?: string
+			/**
+			 * Format: date-time
+			 * @description When the cloud last confirmed this node's state, whether or not it had changed.
+			 */
+			last_backup_at?: string
+			/** @description Why the last attempt failed; empty when it succeeded. */
+			last_error?: string
+			/** @description True when this node is paired with a Mediary account and may back up. */
+			linked: boolean
+			/** @description True when the module's dependencies are wired. */
+			ready: boolean
+		}
+		TMDBKeyInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TMDBKeyInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The user's own TMDB API key (v3) or read access token (v4). TMDB is asked to accept it before it is stored. Empty forgets it and goes back to the key this build ships with. */
+			api_key: string
+		}
+		TMDBSettings: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TMDBSettings.json
+			 */
+			readonly $schema?: string
+			/** @description Whether this node reads TMDB at all. Off when the node was started with an empty TMDB endpoint. */
+			enabled: boolean
+			/**
+			 * @description Which key the node sends: the user's own, the one this build ships with, or none — then movies and shows cannot be looked up.
+			 * @enum {string}
+			 */
+			key_source: 'user' | 'build' | 'none'
+		}
+		Title: {
+			english: string | null
+			native: string | null
+			romaji: string | null
+			user_preferred: string | null
+		}
+		TitleNames: {
+			english: string | null
+			native: string | null
+			romaji: string | null
+			user_preferred: string | null
+		}
+		Tool: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/Tool.json
+			 */
+			readonly $schema?: string
+			/** @description Whose build the node installs. */
+			author: string
+			/** @description The version the node would install. */
+			available?: string
+			/** @description The settings that point the node at the programs by hand. */
+			env: string[] | null
+			/** @description Why the last install failed. */
+			error?: string
+			/** @description The command that installs it by hand, where the node cannot. */
+			hint?: string
+			/** @enum {string} */
+			id: 'mpv' | 'ffmpeg'
+			name: string
+			/** @description Where the node finds the first program now. */
+			path?: string
+			/** @description What the package gives the node; FFmpeg's has ffprobe too. */
+			programs: string[] | null
+			progress?: components['schemas']['ToolProgress']
+			/**
+			 * Format: int64
+			 * @description Size of the download in bytes.
+			 */
+			size?: number
+			/**
+			 * @description custom: a path is set by hand, which wins; installed: the node's own copy; system: found on PATH.
+			 * @enum {string}
+			 */
+			state: 'missing' | 'system' | 'installed' | 'custom' | 'installing'
+			/** @description Whether the node can install the package on this system. */
+			supported: boolean
+			/** @description The node's copy is older than the one it would install. */
+			update: boolean
+			/** @description The version the node installed. */
+			version?: string
+		}
+		ToolProgress: {
+			/**
+			 * Format: int64
+			 * @description Bytes downloaded.
+			 */
+			done: number
+			/** @enum {string} */
+			stage: 'downloading' | 'verifying' | 'extracting' | 'checking'
+			/**
+			 * Format: int64
+			 * @description Bytes to download.
+			 */
+			total: number
+		}
+		ToolsOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ToolsOutputBody.json
+			 */
+			readonly $schema?: string
+			tools: components['schemas']['Tool'][] | null
+		}
+		TorrentCheckResult: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TorrentCheckResult.json
+			 */
+			readonly $schema?: string
+			version: string
+		}
+		TorrentClientStatus: {
+			configured: boolean
+			error?: string
+			/** @enum {string} */
+			kind: '' | 'qbittorrent' | 'embedded' | 'debrid'
+			reachable: boolean
+			/**
+			 * @description With the debrid client, the service it downloads through.
+			 * @example TorBox
+			 */
+			service?: string
+		}
+		TorrentDebrid: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TorrentDebrid.json
+			 */
+			readonly $schema?: string
+			/** @description Whether the service has a key saved; keys are never returned. */
+			has_api_key: boolean
+			in_use: boolean
+			/** @description The services that have a key saved, chosen or not: switching back needs no key typed again. */
+			keys: string[] | null
+			ready: boolean
+			/**
+			 * @description The service, or none.
+			 * @enum {string}
+			 */
+			service: '' | 'torbox' | 'realdebrid' | 'alldebrid' | 'premiumize'
+		}
+		TorrentDownload: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TorrentDownload.json
+			 */
+			readonly $schema?: string
+			/** @description The client holds the torrent until its files are chosen. */
+			choosing: boolean
+			/** Format: date-time */
+			completed_at?: string
+			/** Format: date-time */
+			created_at: string
+			/** @description The episodes it was added for, when it was. */
+			episodes?: number[] | null
+			error?: string
+			/** Format: int64 */
+			id: number
+			/**
+			 * Format: int64
+			 * @description Files that joined the library.
+			 */
+			imported: number
+			info_hash: string
+			live?: components['schemas']['TorrentLive']
+			media_ref: string
+			name: string
+			/** @enum {string} */
+			source: 'magnet' | 'file'
+			/**
+			 * @description The node's state: a done download's files are in the library; the client may still be seeding it.
+			 * @enum {string}
+			 */
+			state: 'downloading' | 'importing' | 'done' | 'failed'
+			title: string
+		}
+		TorrentDownloadsOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TorrentDownloadsOutputBody.json
+			 */
+			readonly $schema?: string
+			client: components['schemas']['TorrentClientStatus']
+			downloads: components['schemas']['TorrentDownload'][] | null
+		}
+		TorrentFile: {
+			/**
+			 * Format: int64
+			 * @description The episode its name gives; absent for an extra or a name without one.
+			 */
+			episode?: number
+			/** Format: int64 */
+			index: number
+			/** @description Path inside the torrent, with forward slashes. */
+			name: string
+			/** Format: double */
+			progress: number
+			/**
+			 * Format: int64
+			 * @description The season its name gives, for a show numbered by season; the episode then counts within it.
+			 */
+			season?: number
+			/** @description Whether the client downloads it. */
+			selected: boolean
+			/** Format: int64 */
+			size: number
+			/** @description Whether the library keeps it as a video. */
+			video: boolean
+		}
+		TorrentFilesOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TorrentFilesOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description Empty until a magnet's metadata has arrived. */
+			files: components['schemas']['TorrentFile'][] | null
+		}
+		TorrentLive: {
+			/**
+			 * Format: int64
+			 * @description Bytes per second.
+			 */
+			dl_speed: number
+			/**
+			 * Format: int64
+			 * @description Seconds left; absent when the client cannot tell.
+			 */
+			eta?: number
+			paused: boolean
+			/** Format: int64 */
+			peers: number
+			/** Format: double */
+			progress: number
+			/** @description Present while a debrid service is still getting the torrent itself; the fields above are the node's own download, which starts once the service has the files. */
+			remote?: components['schemas']['TorrentRemote']
+			/** Format: int64 */
+			seeds: number
+			/**
+			 * Format: int64
+			 * @description Bytes the selected files take.
+			 */
+			size: number
+			/** @description qBittorrent's own state name, e.g. downloading, stalledDL, pausedDL, uploading. */
+			state: string
+			/**
+			 * Format: int64
+			 * @description Bytes per second.
+			 */
+			up_speed: number
+		}
+		TorrentPathMap: {
+			client: string
+			node: string
+		}
+		TorrentPlannedDownload: {
+			episodes: number[] | null
+			release: components['schemas']['TorrentRelease']
+		}
+		TorrentProfile: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TorrentProfile.json
+			 */
+			readonly $schema?: string
+			/**
+			 * @description Preferred codec. Empty for any.
+			 * @enum {string}
+			 */
+			codec: '' | 'HEVC' | 'AVC' | 'AV1'
+			/** @description Words that keep a release from being the best, e.g. a dub or a codec the TV cannot play. */
+			excluded: string[] | null
+			/**
+			 * Format: int64
+			 * @description Fewer seeders keeps a release from being the best.
+			 */
+			min_seeders: number
+			/** @description With a debrid service as the client, rank the releases it already holds higher: they arrive at once. Weighs about one step of resolution. */
+			prefer_cached: boolean
+			/** @description Words a release name should have — groups, sites, "multi-sub" — best first. */
+			preferred: string[] | null
+			/**
+			 * @description Preferred resolution; lower ones follow in order. Empty for any.
+			 * @enum {string}
+			 */
+			resolution: '' | '2160p' | '1080p' | '720p' | '480p'
+		}
+		TorrentRelease: {
+			batch: boolean
+			/** @description The one result the profile would pick. */
+			best: boolean
+			/** @description With a debrid service as the client, whether it already holds the release, which then arrives at once. Absent with other clients, or when the service could not be asked. */
+			cached?: boolean
+			/** @description e.g. HEVC */
+			codec?: string
+			/** @description False when an excluded word or too few seeders keep it from being the best. */
+			eligible: boolean
+			/** @description Absent when the name gives no episode. */
+			episodes?: components['schemas']['Episodes']
+			/** Format: int64 */
+			grabs: number
+			group?: string
+			/** @description Pass as release_id to download it. */
+			id: string
+			/** @description The site behind the source, when the source says. */
+			indexer?: string
+			info_hash?: string
+			/**
+			 * @description How it fits the episode searched for: the episode alone, a batch that holds it, a name without episodes, or no episode was asked.
+			 * @enum {string}
+			 */
+			match: 'episode' | 'batch' | 'unknown' | 'any'
+			page_url?: string
+			/** Format: int64 */
+			peers: number
+			/** @description The search plugin it came from, by id. */
+			plugin?: string
+			/** Format: date-time */
+			published_at?: string
+			/** @description e.g. 1080p */
+			resolution?: string
+			/**
+			 * Format: int64
+			 * @description How well it fits the release profile; higher is better.
+			 */
+			score: number
+			/**
+			 * Format: int64
+			 * @description The season, when the name says: S02E05, S02, Season 2. Episodes then count within it.
+			 */
+			season?: number
+			/** Format: int64 */
+			seeders: number
+			/** Format: int64 */
+			size: number
+			/**
+			 * Format: int64
+			 * @description The Torznab source it came from; 0 when a plugin found it.
+			 */
+			source_id: number
+			source_name: string
+			title: string
+		}
+		TorrentRemote: {
+			/** @description Why the service gave up on the torrent, in its own words. */
+			error?: string
+			/** Format: double */
+			progress: number
+			/** @description Waiting for a free slot on the account. */
+			queued: boolean
+			/** @example TorBox */
+			service: string
+			/**
+			 * Format: int64
+			 * @description The service's download speed, bytes per second.
+			 */
+			speed: number
+		}
+		TorrentRule: {
+			enabled: boolean
+			/**
+			 * Format: int64
+			 * @description Episodes before this one are never downloaded by the rule.
+			 */
+			from_episode: number
+			/**
+			 * Format: int64
+			 * @description Downloads the last check added.
+			 */
+			last_added: number
+			/** Format: date-time */
+			last_checked?: string
+			last_error?: string
+			media_ref: string
+			/** @description Searched for instead of the title's names when not empty. */
+			query: string
+			title: string
+		}
+		TorrentRuleCheck: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TorrentRuleCheck.json
+			 */
+			readonly $schema?: string
+			/**
+			 * Format: int64
+			 * @description How many of the planned downloads were added; always 0 for a preview.
+			 */
+			added: number
+			error?: string
+			planned: components['schemas']['TorrentPlannedDownload'][] | null
+		}
+		TorrentRuleOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TorrentRuleOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description Null when the title has no rule. */
+			rule: components['schemas']['TorrentRule']
+		}
+		TorrentRulesOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TorrentRulesOutputBody.json
+			 */
+			readonly $schema?: string
+			rules: components['schemas']['TorrentRule'][] | null
+		}
+		TorrentSearchResult: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TorrentSearchResult.json
+			 */
+			readonly $schema?: string
+			/**
+			 * @description The debrid service the releases' cached marks are about; absent when there are none.
+			 * @example TorBox
+			 */
+			cache_service?: string
+			queries: string[] | null
+			releases: components['schemas']['TorrentRelease'][] | null
+			sources: components['schemas']['TorrentSourceOutcome'][] | null
+		}
+		TorrentSettings: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TorrentSettings.json
+			 */
+			readonly $schema?: string
+			/**
+			 * @description Who downloads torrents into the library: the user's qBittorrent, the node's own client, the debrid service set up under /v1/torrent/debrid, or none.
+			 * @enum {string}
+			 */
+			client: '' | 'qbittorrent' | 'embedded' | 'debrid'
+			has_password: boolean
+			path_map: components['schemas']['TorrentPathMap']
+			/** Format: int64 */
+			root_id: number
+			url: string
+			username: string
+		}
+		TorrentSource: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TorrentSource.json
+			 */
+			readonly $schema?: string
+			has_api_key: boolean
+			/** Format: int64 */
+			id: number
+			name: string
+			url: string
+		}
+		TorrentSourceBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TorrentSourceBody.json
+			 */
+			readonly $schema?: string
+			/** @description Left out keeps the saved key; empty removes it. */
+			api_key?: string
+			/** @example Jackett */
+			name: string
+			/**
+			 * @description The Torznab feed address; a pasted query, the key with it, is dropped.
+			 * @example http://localhost:9117/api/v2.0/indexers/all/results/torznab/
+			 */
+			url: string
+		}
+		TorrentSourceCaps: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TorrentSourceCaps.json
+			 */
+			readonly $schema?: string
+			/** @description Whether the endpoint takes a free-text search. */
+			search: boolean
+			title: string
+		}
+		TorrentSourceOutcome: {
+			error?: string
+			/**
+			 * Format: int64
+			 * @description The Torznab source; 0 for a plugin.
+			 */
+			id: number
+			name: string
+			/** @description The search plugin, by id. */
+			plugin?: string
+			/** Format: int64 */
+			results: number
+		}
+		TorrentSourcesOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TorrentSourcesOutputBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * Format: int64
+			 * @description Search plugins on now. A search needs a source or a plugin.
+			 */
+			plugins: number
+			sources: components['schemas']['TorrentSource'][] | null
+		}
+		TorrentStream: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TorrentStream.json
+			 */
+			readonly $schema?: string
+			/** @description With auto: the releases lined up, best first. When one cannot be played the next is tried. */
+			candidates?: components['schemas']['StreamCandidate'][] | null
+			/** Format: int64 */
+			episode?: number
+			error?: string
+			/**
+			 * Format: int64
+			 * @description Once ready: a negative ID the player takes like a library file's — /v1/playback/files/{id}/stream, /direct, /hls and POST /v1/playback all accept it.
+			 */
+			file_id?: number
+			/** Format: int64 */
+			id: number
+			media_ref: string
+			/** @description The file that plays, once chosen. */
+			name?: string
+			/**
+			 * Format: int64
+			 * @description Peers the built-in client gets the torrent from.
+			 */
+			peers?: number
+			/**
+			 * Format: double
+			 * @description While preparing: how far the service is with the torrent, or how much of the file's start the built-in client has.
+			 */
+			progress: number
+			/** @description The release the node picked, when it picked one. */
+			release?: string
+			/**
+			 * Format: int64
+			 * @description Seeders among the built-in client's peers; through a debrid service, the release's seeders as its source counted them.
+			 */
+			seeders?: number
+			/** @example TorBox */
+			service: string
+			/**
+			 * Format: int64
+			 * @description The download speed, bytes per second, while preparing.
+			 */
+			speed: number
+			/**
+			 * @description ready once the service holds the file, or the built-in client has its start; failed when it gave up, or the torrent has no fitting video.
+			 * @enum {string}
+			 */
+			state: 'preparing' | 'queued' | 'ready' | 'failed'
+			/**
+			 * Format: int64
+			 * @description What the built-in client gives back to peers, bytes per second.
+			 */
+			upload?: number
+			/**
+			 * @description Whether a debrid service or the node's own client gets the torrent.
+			 * @enum {string}
+			 */
+			via: 'debrid' | 'embedded'
+		}
+		Trailer: {
+			/** @description Video id on the hosting site. */
+			id: string
+			/** @description Where the video lives, e.g. youtube or dailymotion. */
+			site: string
+			/** @description Preview frame for the trailer. */
+			thumbnail: string | null
+		}
+		UpdateEntryInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/UpdateEntryInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description When the user finished the title. Send every field empty to clear it. */
+			completed_at?: components['schemas']['Date']
+			/** @description The custom lists this title belongs to, by name. The lists left out are the ones it leaves. */
+			custom_lists?: string[]
+			/** @description Private notes only the account owner sees. */
+			notes?: string
+			/**
+			 * Format: int64
+			 * @description Episodes watched or chapters read.
+			 */
+			progress?: number
+			/**
+			 * Format: int64
+			 * @description Volumes read; manga only.
+			 */
+			progress_volumes?: number
+			/**
+			 * Format: int64
+			 * @description How many times the title was rewatched or reread.
+			 */
+			repeat?: number
+			/**
+			 * Format: int64
+			 * @description Score on a 0-100 scale; clients convert from the account's score format.
+			 */
+			score?: number
+			/** @description When the user started the title. Send every field empty to clear it. */
+			started_at?: components['schemas']['Date']
+			/**
+			 * @description New list status.
+			 * @enum {string}
+			 */
+			status?: 'CURRENT' | 'PLANNING' | 'COMPLETED' | 'DROPPED' | 'PAUSED' | 'REPEATING'
+		}
+		UpdateExtensionInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/UpdateExtensionInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description From the update check the user saw. */
+			consent: string
+		}
+		UpdateRootInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/UpdateRootInputBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * @description What the folder holds, as in listLibraryRoots. A folder turned to manga or books drops the files of other kinds.
+			 * @enum {string}
+			 */
+			content: 'anime' | 'movies_and_shows' | 'doramas' | 'manga' | 'books'
+		}
+		Video: {
+			/** Format: int32 */
+			bitrate: number
+			codec: string
+			color_primaries: string
+			color_space: string
+			color_transfer: string
+			/** Format: int32 */
+			height: number
+			language?: string
+			mime_codec?: string
+			pix_fmt: string
+			quality: string
+			/** Format: int32 */
+			width: number
+		}
+	}
+	responses: never
+	parameters: never
+	requestBodies: never
+	headers: never
+	pathItems: never
 }
-export type SchemaAiSettings = components['schemas']['AISettings'];
-export type SchemaAiSettingsInputBody = components['schemas']['AISettingsInputBody'];
-export type SchemaAcceptedOutputBody = components['schemas']['AcceptedOutputBody'];
-export type SchemaAccount = components['schemas']['Account'];
-export type SchemaAddRepositoryInputBody = components['schemas']['AddRepositoryInputBody'];
-export type SchemaAddRootInputBody = components['schemas']['AddRootInputBody'];
-export type SchemaAddTorrentDownloadInputBody = components['schemas']['AddTorrentDownloadInputBody'];
-export type SchemaAiringEpisode = components['schemas']['AiringEpisode'];
-export type SchemaAudio = components['schemas']['Audio'];
-export type SchemaBookDownload = components['schemas']['BookDownload'];
-export type SchemaBookDownloadSettings = components['schemas']['BookDownloadSettings'];
-export type SchemaBookDownloadsOutputBody = components['schemas']['BookDownloadsOutputBody'];
-export type SchemaBookEdition = components['schemas']['BookEdition'];
-export type SchemaBookFormat = components['schemas']['BookFormat'];
-export type SchemaBookInfo = components['schemas']['BookInfo'];
-export type SchemaBookOpdsServerBody = components['schemas']['BookOPDSServerBody'];
-export type SchemaBookOpdsServerInputBody = components['schemas']['BookOPDSServerInputBody'];
-export type SchemaBookOpdsServerOutputBody = components['schemas']['BookOPDSServerOutputBody'];
-export type SchemaBookOpdsServersOutputBody = components['schemas']['BookOPDSServersOutputBody'];
-export type SchemaBookPosition = components['schemas']['BookPosition'];
-export type SchemaBookPositionInputBody = components['schemas']['BookPositionInputBody'];
-export type SchemaBookPositionOutputBody = components['schemas']['BookPositionOutputBody'];
-export type SchemaBookSource = components['schemas']['BookSource'];
-export type SchemaBookSourceOutcome = components['schemas']['BookSourceOutcome'];
-export type SchemaBookSourcesOutputBody = components['schemas']['BookSourcesOutputBody'];
-export type SchemaBraveKeyInputBody = components['schemas']['BraveKeyInputBody'];
-export type SchemaCandidatesOutputBody = components['schemas']['CandidatesOutputBody'];
-export type SchemaCatalogPlugin = components['schemas']['CatalogPlugin'];
-export type SchemaChapter = components['schemas']['Chapter'];
-export type SchemaChapterBody = components['schemas']['ChapterBody'];
-export type SchemaChapterOutputBody = components['schemas']['ChapterOutputBody'];
-export type SchemaCheckBookOpdsServerInputBody = components['schemas']['CheckBookOPDSServerInputBody'];
-export type SchemaCheckBookOpdsServerOutputBody = components['schemas']['CheckBookOPDSServerOutputBody'];
-export type SchemaCheckOpdsServerInputBody = components['schemas']['CheckOPDSServerInputBody'];
-export type SchemaCheckOpdsServerOutputBody = components['schemas']['CheckOPDSServerOutputBody'];
-export type SchemaCheckTorrentClientInputBody = components['schemas']['CheckTorrentClientInputBody'];
-export type SchemaCheckTorrentDebridInputBody = components['schemas']['CheckTorrentDebridInputBody'];
-export type SchemaCheckTorrentSourceInputBody = components['schemas']['CheckTorrentSourceInputBody'];
-export type SchemaCollectionOutputBody = components['schemas']['CollectionOutputBody'];
-export type SchemaConfigureExtensionInputBody = components['schemas']['ConfigureExtensionInputBody'];
-export type SchemaControlInputBody = components['schemas']['ControlInputBody'];
-export type SchemaCounts = components['schemas']['Counts'];
-export type SchemaCoverSource = components['schemas']['CoverSource'];
-export type SchemaCreateListInputBody = components['schemas']['CreateListInputBody'];
-export type SchemaCustomList = components['schemas']['CustomList'];
-export type SchemaDate = components['schemas']['Date'];
-export type SchemaDetailsOutputBody = components['schemas']['DetailsOutputBody'];
-export type SchemaEnqueueBookDownloadInputBody = components['schemas']['EnqueueBookDownloadInputBody'];
-export type SchemaEnqueueMangaDownloadsInputBody = components['schemas']['EnqueueMangaDownloadsInputBody'];
-export type SchemaEntriesOutputBody = components['schemas']['EntriesOutputBody'];
-export type SchemaEntry = components['schemas']['Entry'];
-export type SchemaEpisode = components['schemas']['Episode'];
-export type SchemaEpisodeList = components['schemas']['EpisodeList'];
-export type SchemaEpisodes = components['schemas']['Episodes'];
-export type SchemaEpisodesOutputBody = components['schemas']['EpisodesOutputBody'];
-export type SchemaErrorDetail = components['schemas']['ErrorDetail'];
-export type SchemaErrorModel = components['schemas']['ErrorModel'];
-export type SchemaExtension = components['schemas']['Extension'];
-export type SchemaExtensionCatalog = components['schemas']['ExtensionCatalog'];
-export type SchemaExtensionPreview = components['schemas']['ExtensionPreview'];
-export type SchemaExtensionRepository = components['schemas']['ExtensionRepository'];
-export type SchemaExtensionSetting = components['schemas']['ExtensionSetting'];
-export type SchemaExtensionUpdate = components['schemas']['ExtensionUpdate'];
-export type SchemaExtensionsOutputBody = components['schemas']['ExtensionsOutputBody'];
-export type SchemaFile = components['schemas']['File'];
-export type SchemaFileOutputBody = components['schemas']['FileOutputBody'];
-export type SchemaFilePage = components['schemas']['FilePage'];
-export type SchemaFilesOutputBody = components['schemas']['FilesOutputBody'];
-export type SchemaFilterOptions = components['schemas']['FilterOptions'];
-export type SchemaFilterOptionsOutputBody = components['schemas']['FilterOptionsOutputBody'];
-export type SchemaFilterTag = components['schemas']['FilterTag'];
-export type SchemaFont = components['schemas']['Font'];
-export type SchemaFuzzyDate = components['schemas']['FuzzyDate'];
-export type SchemaGoogleBooksKeyInputBody = components['schemas']['GoogleBooksKeyInputBody'];
-export type SchemaGoogleBooksSettings = components['schemas']['GoogleBooksSettings'];
-export type SchemaGutenbergSettingsBody = components['schemas']['GutenbergSettingsBody'];
-export type SchemaHealthOutputBody = components['schemas']['HealthOutputBody'];
-export type SchemaImage = components['schemas']['Image'];
-export type SchemaImageSearchSettings = components['schemas']['ImageSearchSettings'];
-export type SchemaInstallExtensionInputBody = components['schemas']['InstallExtensionInputBody'];
-export type SchemaLibraryCollection = components['schemas']['LibraryCollection'];
-export type SchemaLibraryCollectionEntry = components['schemas']['LibraryCollectionEntry'];
-export type SchemaList = components['schemas']['List'];
-export type SchemaListsOutputBody = components['schemas']['ListsOutputBody'];
-export type SchemaMangaChapterBody = components['schemas']['MangaChapterBody'];
-export type SchemaMangaChaptersOutputBody = components['schemas']['MangaChaptersOutputBody'];
-export type SchemaMangaDownloadBody = components['schemas']['MangaDownloadBody'];
-export type SchemaMangaDownloadSettingsBody = components['schemas']['MangaDownloadSettingsBody'];
-export type SchemaMangaDownloadsOutputBody = components['schemas']['MangaDownloadsOutputBody'];
-export type SchemaMangaLinkBody = components['schemas']['MangaLinkBody'];
-export type SchemaMangaLinksOutputBody = components['schemas']['MangaLinksOutputBody'];
-export type SchemaMangaSearchOutputBody = components['schemas']['MangaSearchOutputBody'];
-export type SchemaMangaSeriesBody = components['schemas']['MangaSeriesBody'];
-export type SchemaMangaSourceBody = components['schemas']['MangaSourceBody'];
-export type SchemaMangaSourceProblemBody = components['schemas']['MangaSourceProblemBody'];
-export type SchemaMangaSourcesOutputBody = components['schemas']['MangaSourcesOutputBody'];
-export type SchemaManualDraft = components['schemas']['ManualDraft'];
-export type SchemaManualHint = components['schemas']['ManualHint'];
-export type SchemaManualOutputBody = components['schemas']['ManualOutputBody'];
-export type SchemaManualSuggestion = components['schemas']['ManualSuggestion'];
-export type SchemaMatch = components['schemas']['Match'];
-export type SchemaMatchedTitle = components['schemas']['MatchedTitle'];
-export type SchemaMedia = components['schemas']['Media'];
-export type SchemaMediaDetails = components['schemas']['MediaDetails'];
-export type SchemaMediaInfo = components['schemas']['MediaInfo'];
-export type SchemaMediaSummary = components['schemas']['MediaSummary'];
-export type SchemaOpdsServerBody = components['schemas']['OPDSServerBody'];
-export type SchemaOpdsServerInputBody = components['schemas']['OPDSServerInputBody'];
-export type SchemaOpdsServerOutputBody = components['schemas']['OPDSServerOutputBody'];
-export type SchemaOpdsServersOutputBody = components['schemas']['OPDSServersOutputBody'];
-export type SchemaPage = components['schemas']['Page'];
-export type SchemaParsed = components['schemas']['Parsed'];
-export type SchemaPlaybackOutputBody = components['schemas']['PlaybackOutputBody'];
-export type SchemaPlaybackSession = components['schemas']['PlaybackSession'];
-export type SchemaPlaybackStatus = components['schemas']['PlaybackStatus'];
-export type SchemaPreviewExtensionInputBody = components['schemas']['PreviewExtensionInputBody'];
-export type SchemaProgressInputBody = components['schemas']['ProgressInputBody'];
-export type SchemaProgressOutputBody = components['schemas']['ProgressOutputBody'];
-export type SchemaPutBookDownloadSettingsInputBody = components['schemas']['PutBookDownloadSettingsInputBody'];
-export type SchemaPutGutenbergSettingsInputBody = components['schemas']['PutGutenbergSettingsInputBody'];
-export type SchemaPutMangaDownloadSettingsInputBody = components['schemas']['PutMangaDownloadSettingsInputBody'];
-export type SchemaPutMangaLinkInputBody = components['schemas']['PutMangaLinkInputBody'];
-export type SchemaPutTorrentDebridInputBody = components['schemas']['PutTorrentDebridInputBody'];
-export type SchemaPutTorrentRuleInputBody = components['schemas']['PutTorrentRuleInputBody'];
-export type SchemaPutTorrentSettingsInputBody = components['schemas']['PutTorrentSettingsInputBody'];
-export type SchemaReadBody = components['schemas']['ReadBody'];
-export type SchemaReadOutputBody = components['schemas']['ReadOutputBody'];
-export type SchemaRelatedMedia = components['schemas']['RelatedMedia'];
-export type SchemaRenameListInputBody = components['schemas']['RenameListInputBody'];
-export type SchemaRoot = components['schemas']['Root'];
-export type SchemaRootOutputBody = components['schemas']['RootOutputBody'];
-export type SchemaRootsOutputBody = components['schemas']['RootsOutputBody'];
-export type SchemaScanHistoryOutputBody = components['schemas']['ScanHistoryOutputBody'];
-export type SchemaScanHistoryPage = components['schemas']['ScanHistoryPage'];
-export type SchemaScanInputBody = components['schemas']['ScanInputBody'];
-export type SchemaScanOutputBody = components['schemas']['ScanOutputBody'];
-export type SchemaScanRootResult = components['schemas']['ScanRootResult'];
-export type SchemaScanRunDetail = components['schemas']['ScanRunDetail'];
-export type SchemaScanRunFileLogDetail = components['schemas']['ScanRunFileLogDetail'];
-export type SchemaScanRunGroupDetail = components['schemas']['ScanRunGroupDetail'];
-export type SchemaScanRunOutputBody = components['schemas']['ScanRunOutputBody'];
-export type SchemaScanRunRootDetail = components['schemas']['ScanRunRootDetail'];
-export type SchemaScanRunSummary = components['schemas']['ScanRunSummary'];
-export type SchemaScanStatus = components['schemas']['ScanStatus'];
-export type SchemaSearchBookEditionsOutputBody = components['schemas']['SearchBookEditionsOutputBody'];
-export type SchemaSearchOutputBody = components['schemas']['SearchOutputBody'];
-export type SchemaSearchPage = components['schemas']['SearchPage'];
-export type SchemaSelectTorrentFilesInputBody = components['schemas']['SelectTorrentFilesInputBody'];
-export type SchemaSessionOutputBody = components['schemas']['SessionOutputBody'];
-export type SchemaSetIgnoredInputBody = components['schemas']['SetIgnoredInputBody'];
-export type SchemaSetMatchInputBody = components['schemas']['SetMatchInputBody'];
-export type SchemaSignInInputBody = components['schemas']['SignInInputBody'];
-export type SchemaSource = components['schemas']['Source'];
-export type SchemaStartInputBody = components['schemas']['StartInputBody'];
-export type SchemaStartTorrentStreamInputBody = components['schemas']['StartTorrentStreamInputBody'];
-export type SchemaStatusOutputBody = components['schemas']['StatusOutputBody'];
-export type SchemaStatusOutputBody1 = components['schemas']['StatusOutputBody1'];
-export type SchemaStream = components['schemas']['Stream'];
-export type SchemaStreamCandidate = components['schemas']['StreamCandidate'];
-export type SchemaStreamOutputBody = components['schemas']['StreamOutputBody'];
-export type SchemaSubtitle = components['schemas']['Subtitle'];
-export type SchemaSuggestion = components['schemas']['Suggestion'];
-export type SchemaSuggestionsOutputBody = components['schemas']['SuggestionsOutputBody'];
-export type SchemaSyncBackupBody = components['schemas']['SyncBackupBody'];
-export type SchemaSyncBackupListOutputBody = components['schemas']['SyncBackupListOutputBody'];
-export type SchemaSyncBackupNowOutputBody = components['schemas']['SyncBackupNowOutputBody'];
-export type SchemaSyncPairInputBody = components['schemas']['SyncPairInputBody'];
-export type SchemaSyncPairOutputBody = components['schemas']['SyncPairOutputBody'];
-export type SchemaSyncStatusOutputBody = components['schemas']['SyncStatusOutputBody'];
-export type SchemaTmdbKeyInputBody = components['schemas']['TMDBKeyInputBody'];
-export type SchemaTmdbSettings = components['schemas']['TMDBSettings'];
-export type SchemaTitle = components['schemas']['Title'];
-export type SchemaTitleNames = components['schemas']['TitleNames'];
-export type SchemaTool = components['schemas']['Tool'];
-export type SchemaToolProgress = components['schemas']['ToolProgress'];
-export type SchemaToolsOutputBody = components['schemas']['ToolsOutputBody'];
-export type SchemaTorrentCheckResult = components['schemas']['TorrentCheckResult'];
-export type SchemaTorrentClientStatus = components['schemas']['TorrentClientStatus'];
-export type SchemaTorrentDebrid = components['schemas']['TorrentDebrid'];
-export type SchemaTorrentDownload = components['schemas']['TorrentDownload'];
-export type SchemaTorrentDownloadsOutputBody = components['schemas']['TorrentDownloadsOutputBody'];
-export type SchemaTorrentFile = components['schemas']['TorrentFile'];
-export type SchemaTorrentFilesOutputBody = components['schemas']['TorrentFilesOutputBody'];
-export type SchemaTorrentLive = components['schemas']['TorrentLive'];
-export type SchemaTorrentPathMap = components['schemas']['TorrentPathMap'];
-export type SchemaTorrentPlannedDownload = components['schemas']['TorrentPlannedDownload'];
-export type SchemaTorrentProfile = components['schemas']['TorrentProfile'];
-export type SchemaTorrentRelease = components['schemas']['TorrentRelease'];
-export type SchemaTorrentRemote = components['schemas']['TorrentRemote'];
-export type SchemaTorrentRule = components['schemas']['TorrentRule'];
-export type SchemaTorrentRuleCheck = components['schemas']['TorrentRuleCheck'];
-export type SchemaTorrentRuleOutputBody = components['schemas']['TorrentRuleOutputBody'];
-export type SchemaTorrentRulesOutputBody = components['schemas']['TorrentRulesOutputBody'];
-export type SchemaTorrentSearchResult = components['schemas']['TorrentSearchResult'];
-export type SchemaTorrentSettings = components['schemas']['TorrentSettings'];
-export type SchemaTorrentSource = components['schemas']['TorrentSource'];
-export type SchemaTorrentSourceBody = components['schemas']['TorrentSourceBody'];
-export type SchemaTorrentSourceCaps = components['schemas']['TorrentSourceCaps'];
-export type SchemaTorrentSourceOutcome = components['schemas']['TorrentSourceOutcome'];
-export type SchemaTorrentSourcesOutputBody = components['schemas']['TorrentSourcesOutputBody'];
-export type SchemaTorrentStream = components['schemas']['TorrentStream'];
-export type SchemaTrailer = components['schemas']['Trailer'];
-export type SchemaUpdateEntryInputBody = components['schemas']['UpdateEntryInputBody'];
-export type SchemaUpdateExtensionInputBody = components['schemas']['UpdateExtensionInputBody'];
-export type SchemaUpdateRootInputBody = components['schemas']['UpdateRootInputBody'];
-export type SchemaVideo = components['schemas']['Video'];
-export type $defs = Record<string, never>;
+export type SchemaAiKeyUpdate = components['schemas']['AIKeyUpdate']
+export type SchemaAiSettings = components['schemas']['AISettings']
+export type SchemaAiSettingsUpdate = components['schemas']['AISettingsUpdate']
+export type SchemaAcceptedOutputBody = components['schemas']['AcceptedOutputBody']
+export type SchemaAccount = components['schemas']['Account']
+export type SchemaAddRepositoryInputBody = components['schemas']['AddRepositoryInputBody']
+export type SchemaAddRootInputBody = components['schemas']['AddRootInputBody']
+export type SchemaAddTorrentDownloadInputBody = components['schemas']['AddTorrentDownloadInputBody']
+export type SchemaAiringEpisode = components['schemas']['AiringEpisode']
+export type SchemaAudio = components['schemas']['Audio']
+export type SchemaBookDownload = components['schemas']['BookDownload']
+export type SchemaBookDownloadSettings = components['schemas']['BookDownloadSettings']
+export type SchemaBookDownloadsOutputBody = components['schemas']['BookDownloadsOutputBody']
+export type SchemaBookEdition = components['schemas']['BookEdition']
+export type SchemaBookFormat = components['schemas']['BookFormat']
+export type SchemaBookInfo = components['schemas']['BookInfo']
+export type SchemaBookOpdsServerBody = components['schemas']['BookOPDSServerBody']
+export type SchemaBookOpdsServerInputBody = components['schemas']['BookOPDSServerInputBody']
+export type SchemaBookOpdsServerOutputBody = components['schemas']['BookOPDSServerOutputBody']
+export type SchemaBookOpdsServersOutputBody = components['schemas']['BookOPDSServersOutputBody']
+export type SchemaBookPosition = components['schemas']['BookPosition']
+export type SchemaBookPositionInputBody = components['schemas']['BookPositionInputBody']
+export type SchemaBookPositionOutputBody = components['schemas']['BookPositionOutputBody']
+export type SchemaBookSource = components['schemas']['BookSource']
+export type SchemaBookSourceOutcome = components['schemas']['BookSourceOutcome']
+export type SchemaBookSourcesOutputBody = components['schemas']['BookSourcesOutputBody']
+export type SchemaBraveKeyInputBody = components['schemas']['BraveKeyInputBody']
+export type SchemaCandidatesOutputBody = components['schemas']['CandidatesOutputBody']
+export type SchemaCatalogPlugin = components['schemas']['CatalogPlugin']
+export type SchemaChapter = components['schemas']['Chapter']
+export type SchemaChapterBody = components['schemas']['ChapterBody']
+export type SchemaChapterOutputBody = components['schemas']['ChapterOutputBody']
+export type SchemaCheckBookOpdsServerInputBody = components['schemas']['CheckBookOPDSServerInputBody']
+export type SchemaCheckBookOpdsServerOutputBody = components['schemas']['CheckBookOPDSServerOutputBody']
+export type SchemaCheckOpdsServerInputBody = components['schemas']['CheckOPDSServerInputBody']
+export type SchemaCheckOpdsServerOutputBody = components['schemas']['CheckOPDSServerOutputBody']
+export type SchemaCheckTorrentClientInputBody = components['schemas']['CheckTorrentClientInputBody']
+export type SchemaCheckTorrentDebridInputBody = components['schemas']['CheckTorrentDebridInputBody']
+export type SchemaCheckTorrentSourceInputBody = components['schemas']['CheckTorrentSourceInputBody']
+export type SchemaCloudAiSettings = components['schemas']['CloudAISettings']
+export type SchemaCollectionOutputBody = components['schemas']['CollectionOutputBody']
+export type SchemaConfigureExtensionInputBody = components['schemas']['ConfigureExtensionInputBody']
+export type SchemaControlInputBody = components['schemas']['ControlInputBody']
+export type SchemaCounts = components['schemas']['Counts']
+export type SchemaCoverSource = components['schemas']['CoverSource']
+export type SchemaCreateListInputBody = components['schemas']['CreateListInputBody']
+export type SchemaCustomList = components['schemas']['CustomList']
+export type SchemaDate = components['schemas']['Date']
+export type SchemaDetailsOutputBody = components['schemas']['DetailsOutputBody']
+export type SchemaEnqueueBookDownloadInputBody = components['schemas']['EnqueueBookDownloadInputBody']
+export type SchemaEnqueueMangaDownloadsInputBody = components['schemas']['EnqueueMangaDownloadsInputBody']
+export type SchemaEntriesOutputBody = components['schemas']['EntriesOutputBody']
+export type SchemaEntry = components['schemas']['Entry']
+export type SchemaEpisode = components['schemas']['Episode']
+export type SchemaEpisodeList = components['schemas']['EpisodeList']
+export type SchemaEpisodes = components['schemas']['Episodes']
+export type SchemaEpisodesOutputBody = components['schemas']['EpisodesOutputBody']
+export type SchemaErrorDetail = components['schemas']['ErrorDetail']
+export type SchemaErrorModel = components['schemas']['ErrorModel']
+export type SchemaExtension = components['schemas']['Extension']
+export type SchemaExtensionCatalog = components['schemas']['ExtensionCatalog']
+export type SchemaExtensionPreview = components['schemas']['ExtensionPreview']
+export type SchemaExtensionRepository = components['schemas']['ExtensionRepository']
+export type SchemaExtensionSetting = components['schemas']['ExtensionSetting']
+export type SchemaExtensionUpdate = components['schemas']['ExtensionUpdate']
+export type SchemaExtensionsOutputBody = components['schemas']['ExtensionsOutputBody']
+export type SchemaFile = components['schemas']['File']
+export type SchemaFileOutputBody = components['schemas']['FileOutputBody']
+export type SchemaFilePage = components['schemas']['FilePage']
+export type SchemaFilesOutputBody = components['schemas']['FilesOutputBody']
+export type SchemaFilterOptions = components['schemas']['FilterOptions']
+export type SchemaFilterOptionsOutputBody = components['schemas']['FilterOptionsOutputBody']
+export type SchemaFilterTag = components['schemas']['FilterTag']
+export type SchemaFont = components['schemas']['Font']
+export type SchemaFuzzyDate = components['schemas']['FuzzyDate']
+export type SchemaGoogleBooksKeyInputBody = components['schemas']['GoogleBooksKeyInputBody']
+export type SchemaGoogleBooksSettings = components['schemas']['GoogleBooksSettings']
+export type SchemaGutenbergSettingsBody = components['schemas']['GutenbergSettingsBody']
+export type SchemaHealthOutputBody = components['schemas']['HealthOutputBody']
+export type SchemaImage = components['schemas']['Image']
+export type SchemaImageSearchSettings = components['schemas']['ImageSearchSettings']
+export type SchemaInstallExtensionInputBody = components['schemas']['InstallExtensionInputBody']
+export type SchemaKeyedAiSettings = components['schemas']['KeyedAISettings']
+export type SchemaLibraryCollection = components['schemas']['LibraryCollection']
+export type SchemaLibraryCollectionEntry = components['schemas']['LibraryCollectionEntry']
+export type SchemaList = components['schemas']['List']
+export type SchemaListsOutputBody = components['schemas']['ListsOutputBody']
+export type SchemaMangaChapterBody = components['schemas']['MangaChapterBody']
+export type SchemaMangaChaptersOutputBody = components['schemas']['MangaChaptersOutputBody']
+export type SchemaMangaDownloadBody = components['schemas']['MangaDownloadBody']
+export type SchemaMangaDownloadSettingsBody = components['schemas']['MangaDownloadSettingsBody']
+export type SchemaMangaDownloadsOutputBody = components['schemas']['MangaDownloadsOutputBody']
+export type SchemaMangaLinkBody = components['schemas']['MangaLinkBody']
+export type SchemaMangaLinksOutputBody = components['schemas']['MangaLinksOutputBody']
+export type SchemaMangaSearchOutputBody = components['schemas']['MangaSearchOutputBody']
+export type SchemaMangaSeriesBody = components['schemas']['MangaSeriesBody']
+export type SchemaMangaSourceBody = components['schemas']['MangaSourceBody']
+export type SchemaMangaSourceProblemBody = components['schemas']['MangaSourceProblemBody']
+export type SchemaMangaSourcesOutputBody = components['schemas']['MangaSourcesOutputBody']
+export type SchemaManualDraft = components['schemas']['ManualDraft']
+export type SchemaManualHint = components['schemas']['ManualHint']
+export type SchemaManualOutputBody = components['schemas']['ManualOutputBody']
+export type SchemaManualSuggestion = components['schemas']['ManualSuggestion']
+export type SchemaMatch = components['schemas']['Match']
+export type SchemaMatchedTitle = components['schemas']['MatchedTitle']
+export type SchemaMedia = components['schemas']['Media']
+export type SchemaMediaDetails = components['schemas']['MediaDetails']
+export type SchemaMediaInfo = components['schemas']['MediaInfo']
+export type SchemaMediaSummary = components['schemas']['MediaSummary']
+export type SchemaOpdsServerBody = components['schemas']['OPDSServerBody']
+export type SchemaOpdsServerInputBody = components['schemas']['OPDSServerInputBody']
+export type SchemaOpdsServerOutputBody = components['schemas']['OPDSServerOutputBody']
+export type SchemaOpdsServersOutputBody = components['schemas']['OPDSServersOutputBody']
+export type SchemaOpenAiSettings = components['schemas']['OpenAISettings']
+export type SchemaOpenAiUpdate = components['schemas']['OpenAIUpdate']
+export type SchemaPage = components['schemas']['Page']
+export type SchemaParsed = components['schemas']['Parsed']
+export type SchemaPlaybackOutputBody = components['schemas']['PlaybackOutputBody']
+export type SchemaPlaybackSession = components['schemas']['PlaybackSession']
+export type SchemaPlaybackStatus = components['schemas']['PlaybackStatus']
+export type SchemaPreviewExtensionInputBody = components['schemas']['PreviewExtensionInputBody']
+export type SchemaProgressInputBody = components['schemas']['ProgressInputBody']
+export type SchemaProgressOutputBody = components['schemas']['ProgressOutputBody']
+export type SchemaPutBookDownloadSettingsInputBody = components['schemas']['PutBookDownloadSettingsInputBody']
+export type SchemaPutGutenbergSettingsInputBody = components['schemas']['PutGutenbergSettingsInputBody']
+export type SchemaPutMangaDownloadSettingsInputBody =
+	components['schemas']['PutMangaDownloadSettingsInputBody']
+export type SchemaPutMangaLinkInputBody = components['schemas']['PutMangaLinkInputBody']
+export type SchemaPutTorrentDebridInputBody = components['schemas']['PutTorrentDebridInputBody']
+export type SchemaPutTorrentRuleInputBody = components['schemas']['PutTorrentRuleInputBody']
+export type SchemaPutTorrentSettingsInputBody = components['schemas']['PutTorrentSettingsInputBody']
+export type SchemaReadBody = components['schemas']['ReadBody']
+export type SchemaReadOutputBody = components['schemas']['ReadOutputBody']
+export type SchemaRelatedMedia = components['schemas']['RelatedMedia']
+export type SchemaRenameListInputBody = components['schemas']['RenameListInputBody']
+export type SchemaRoot = components['schemas']['Root']
+export type SchemaRootOutputBody = components['schemas']['RootOutputBody']
+export type SchemaRootsOutputBody = components['schemas']['RootsOutputBody']
+export type SchemaScanHistoryOutputBody = components['schemas']['ScanHistoryOutputBody']
+export type SchemaScanHistoryPage = components['schemas']['ScanHistoryPage']
+export type SchemaScanInputBody = components['schemas']['ScanInputBody']
+export type SchemaScanOutputBody = components['schemas']['ScanOutputBody']
+export type SchemaScanRootResult = components['schemas']['ScanRootResult']
+export type SchemaScanRunDetail = components['schemas']['ScanRunDetail']
+export type SchemaScanRunFileLogDetail = components['schemas']['ScanRunFileLogDetail']
+export type SchemaScanRunGroupDetail = components['schemas']['ScanRunGroupDetail']
+export type SchemaScanRunOutputBody = components['schemas']['ScanRunOutputBody']
+export type SchemaScanRunRootDetail = components['schemas']['ScanRunRootDetail']
+export type SchemaScanRunSummary = components['schemas']['ScanRunSummary']
+export type SchemaScanStatus = components['schemas']['ScanStatus']
+export type SchemaSearchBookEditionsOutputBody = components['schemas']['SearchBookEditionsOutputBody']
+export type SchemaSearchOutputBody = components['schemas']['SearchOutputBody']
+export type SchemaSearchPage = components['schemas']['SearchPage']
+export type SchemaSelectTorrentFilesInputBody = components['schemas']['SelectTorrentFilesInputBody']
+export type SchemaSessionOutputBody = components['schemas']['SessionOutputBody']
+export type SchemaSetIgnoredInputBody = components['schemas']['SetIgnoredInputBody']
+export type SchemaSetMatchInputBody = components['schemas']['SetMatchInputBody']
+export type SchemaSignInInputBody = components['schemas']['SignInInputBody']
+export type SchemaSource = components['schemas']['Source']
+export type SchemaStartInputBody = components['schemas']['StartInputBody']
+export type SchemaStartTorrentStreamInputBody = components['schemas']['StartTorrentStreamInputBody']
+export type SchemaStatusOutputBody = components['schemas']['StatusOutputBody']
+export type SchemaStatusOutputBody1 = components['schemas']['StatusOutputBody1']
+export type SchemaStream = components['schemas']['Stream']
+export type SchemaStreamCandidate = components['schemas']['StreamCandidate']
+export type SchemaStreamOutputBody = components['schemas']['StreamOutputBody']
+export type SchemaSubtitle = components['schemas']['Subtitle']
+export type SchemaSuggestion = components['schemas']['Suggestion']
+export type SchemaSuggestionsOutputBody = components['schemas']['SuggestionsOutputBody']
+export type SchemaSyncBackupBody = components['schemas']['SyncBackupBody']
+export type SchemaSyncBackupListOutputBody = components['schemas']['SyncBackupListOutputBody']
+export type SchemaSyncBackupNowOutputBody = components['schemas']['SyncBackupNowOutputBody']
+export type SchemaSyncPairInputBody = components['schemas']['SyncPairInputBody']
+export type SchemaSyncPairOutputBody = components['schemas']['SyncPairOutputBody']
+export type SchemaSyncStatusOutputBody = components['schemas']['SyncStatusOutputBody']
+export type SchemaTmdbKeyInputBody = components['schemas']['TMDBKeyInputBody']
+export type SchemaTmdbSettings = components['schemas']['TMDBSettings']
+export type SchemaTitle = components['schemas']['Title']
+export type SchemaTitleNames = components['schemas']['TitleNames']
+export type SchemaTool = components['schemas']['Tool']
+export type SchemaToolProgress = components['schemas']['ToolProgress']
+export type SchemaToolsOutputBody = components['schemas']['ToolsOutputBody']
+export type SchemaTorrentCheckResult = components['schemas']['TorrentCheckResult']
+export type SchemaTorrentClientStatus = components['schemas']['TorrentClientStatus']
+export type SchemaTorrentDebrid = components['schemas']['TorrentDebrid']
+export type SchemaTorrentDownload = components['schemas']['TorrentDownload']
+export type SchemaTorrentDownloadsOutputBody = components['schemas']['TorrentDownloadsOutputBody']
+export type SchemaTorrentFile = components['schemas']['TorrentFile']
+export type SchemaTorrentFilesOutputBody = components['schemas']['TorrentFilesOutputBody']
+export type SchemaTorrentLive = components['schemas']['TorrentLive']
+export type SchemaTorrentPathMap = components['schemas']['TorrentPathMap']
+export type SchemaTorrentPlannedDownload = components['schemas']['TorrentPlannedDownload']
+export type SchemaTorrentProfile = components['schemas']['TorrentProfile']
+export type SchemaTorrentRelease = components['schemas']['TorrentRelease']
+export type SchemaTorrentRemote = components['schemas']['TorrentRemote']
+export type SchemaTorrentRule = components['schemas']['TorrentRule']
+export type SchemaTorrentRuleCheck = components['schemas']['TorrentRuleCheck']
+export type SchemaTorrentRuleOutputBody = components['schemas']['TorrentRuleOutputBody']
+export type SchemaTorrentRulesOutputBody = components['schemas']['TorrentRulesOutputBody']
+export type SchemaTorrentSearchResult = components['schemas']['TorrentSearchResult']
+export type SchemaTorrentSettings = components['schemas']['TorrentSettings']
+export type SchemaTorrentSource = components['schemas']['TorrentSource']
+export type SchemaTorrentSourceBody = components['schemas']['TorrentSourceBody']
+export type SchemaTorrentSourceCaps = components['schemas']['TorrentSourceCaps']
+export type SchemaTorrentSourceOutcome = components['schemas']['TorrentSourceOutcome']
+export type SchemaTorrentSourcesOutputBody = components['schemas']['TorrentSourcesOutputBody']
+export type SchemaTorrentStream = components['schemas']['TorrentStream']
+export type SchemaTrailer = components['schemas']['Trailer']
+export type SchemaUpdateEntryInputBody = components['schemas']['UpdateEntryInputBody']
+export type SchemaUpdateExtensionInputBody = components['schemas']['UpdateExtensionInputBody']
+export type SchemaUpdateRootInputBody = components['schemas']['UpdateRootInputBody']
+export type SchemaVideo = components['schemas']['Video']
+export type $defs = Record<string, never>
 export interface operations {
-    getAISettings: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AISettings"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    setAISettings: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AISettingsInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AISettings"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getAniListSession: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SessionOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    connectAniList: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SignInInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Account"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    disconnectAniList: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    listBookDownloads: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BookDownloadsOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    enqueueBookDownload: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["EnqueueBookDownloadInputBody"];
-            };
-        };
-        responses: {
-            /** @description Accepted */
-            202: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BookDownload"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getBookDownloadSettings: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BookDownloadSettings"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    putBookDownloadSettings: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PutBookDownloadSettingsInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BookDownloadSettings"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    forgetBookDownload: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    cancelBookDownload: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    retryBookDownload: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    searchBookEditions: {
-        parameters: {
-            query?: {
-                /** @description The book to find copies of, by its title and authors. */
-                media_ref?: string;
-                /** @description Text to search for, in place of or beside media_ref. */
-                q?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SearchBookEditionsOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    checkBookOPDSServer: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CheckBookOPDSServerInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CheckBookOPDSServerOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    listBookOPDSServers: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BookOPDSServersOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    createBookOPDSServer: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["BookOPDSServerInputBody"];
-            };
-        };
-        responses: {
-            /** @description Created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BookOPDSServerOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    updateBookOPDSServer: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["BookOPDSServerInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BookOPDSServerOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    deleteBookOPDSServer: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    listBookSources: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BookSourcesOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getGutenbergSettings: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["GutenbergSettingsBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    putGutenbergSettings: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PutGutenbergSettingsInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["GutenbergSettingsBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    refreshGutenbergCatalog: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Accepted */
-            202: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["GutenbergSettingsBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getExtensionStatus: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["StatusOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    listExtensions: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExtensionsOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    installExtension: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["InstallExtensionInputBody"];
-            };
-        };
-        responses: {
-            /** @description Created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Extension"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getExtensionCatalog: {
-        parameters: {
-            query?: {
-                /** @description Read every repository again instead of reusing reads under an hour old. */
-                refresh?: boolean;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExtensionCatalog"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    previewExtension: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PreviewExtensionInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExtensionPreview"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    addExtensionRepository: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AddRepositoryInputBody"];
-            };
-        };
-        responses: {
-            /** @description Created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExtensionRepository"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    removeExtensionRepository: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    checkExtensionUpdates: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExtensionsOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    removeExtension: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    configureExtension: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ConfigureExtensionInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Extension"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    updateExtension: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateExtensionInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Extension"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getGoogleBooksSettings: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["GoogleBooksSettings"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    setGoogleBooksKey: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["GoogleBooksKeyInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["GoogleBooksSettings"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getNodeHealth: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HealthOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getImageSearchSettings: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ImageSearchSettings"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    setBraveKey: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["BraveKeyInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ImageSearchSettings"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getLibraryCollection: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CollectionOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    listLibraryFiles: {
-        parameters: {
-            query?: {
-                /** @description Only files under this root. */
-                root_id?: number;
-                /** @description Only files whose extension points at this form of media. */
-                kind?: "video" | "manga" | "book";
-                /** @description Only files whose name reads as this. Use it to leave out openings and extras, which are never episodes. */
-                form?: "series" | "movie" | "special" | "extra" | "manga" | "book";
-                /** @description Only files that still need a title. Files the user set aside are left out — they are asking for nothing. */
-                unmatched?: boolean;
-                /** @description Only files the user told the node to leave alone. */
-                ignored?: boolean;
-                /** @description Only files matched to this title — the episodes a title page lists. */
-                media_ref?: string;
-                /** @description Page size. */
-                limit?: number;
-                /** @description How many files to skip. */
-                offset?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FilesOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    listAllLibraryFiles: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FilesOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    deleteLibraryFile: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Identifier of the file to delete. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    listLibraryFileCandidates: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Identifier of the file to find candidates for. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SuggestionsOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    setLibraryFileIgnored: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Identifier of the file to set aside. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SetIgnoredInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FileOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    setLibraryFileMatch: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Identifier of the file to match. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SetMatchInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FileOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    deleteLibraryFileMatch: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Identifier of the file whose match to forget. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    listLibraryRoots: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RootsOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    addLibraryRoot: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AddRootInputBody"];
-            };
-        };
-        responses: {
-            /** @description Created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RootOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    deleteLibraryRoot: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Identifier of the root to stop watching. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    updateLibraryRoot: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Identifier of the root. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateRootInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RootOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getLibraryScan: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ScanOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    startLibraryScan: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ScanInputBody"];
-            };
-        };
-        responses: {
-            /** @description Accepted */
-            202: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ScanOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    listLibraryScanHistory: {
-        parameters: {
-            query?: {
-                /** @description Only scans started at or after this time. Left out for no lower bound. */
-                from?: string;
-                /** @description Only scans started at or before this time. Left out for no upper bound. */
-                to?: string;
-                /** @description Page size. */
-                limit?: number;
-                /** @description How many scans to skip. */
-                offset?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ScanHistoryOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getLibraryScanHistoryRun: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Identifier of the scan run. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ScanRunOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    listMangaDownloads: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MangaDownloadsOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    enqueueMangaDownloads: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["EnqueueMangaDownloadsInputBody"];
-            };
-        };
-        responses: {
-            /** @description Accepted */
-            202: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MangaDownloadsOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getMangaDownloadSettings: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MangaDownloadSettingsBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    putMangaDownloadSettings: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PutMangaDownloadSettingsInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MangaDownloadSettingsBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    forgetMangaDownload: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    cancelMangaDownload: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    retryMangaDownload: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    checkOPDSServer: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CheckOPDSServerInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CheckOPDSServerOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    listOPDSServers: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OPDSServersOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    createOPDSServer: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["OPDSServerInputBody"];
-            };
-        };
-        responses: {
-            /** @description Created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OPDSServerOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    updateOPDSServer: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["OPDSServerInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OPDSServerOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    deleteOPDSServer: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    listMangaSources: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MangaSourcesOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    searchMangaSource: {
-        parameters: {
-            query?: {
-                q?: string;
-                /** @description The title being linked, so a source that knows it can put its series first. */
-                media_ref?: string;
-            };
-            header?: never;
-            path: {
-                source: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MangaSearchOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    listMangaChapters: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                mediaRef: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MangaChaptersOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    listMangaLinks: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                mediaRef: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MangaLinksOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    putMangaLink: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                mediaRef: string;
-                source: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PutMangaLinkInputBody"];
-            };
-        };
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    deleteMangaLink: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                mediaRef: string;
-                source: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getMediaFilterOptions: {
-        parameters: {
-            query?: {
-                /** @description Which catalog's vocabulary to list. */
-                type?: "anime" | "manga" | "movie" | "series" | "dorama" | "book";
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FilterOptionsOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    createManualMedia: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ManualDraft"];
-            };
-        };
-        responses: {
-            /** @description Created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ManualOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    searchManualCovers: {
-        parameters: {
-            query: {
-                /** @description The kind of title. */
-                type: "anime" | "manga" | "movie" | "series" | "dorama" | "book";
-                /** @description The name to look for. */
-                title: string;
-                /** @description Year it came out; left out when unknown. */
-                year?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CandidatesOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    suggestManualMedia: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ManualHint"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ManualSuggestion"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    updateManualMedia: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description The manual title's id: its media reference without the manual: prefix. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ManualDraft"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ManualOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    deleteManualMedia: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description The manual title's id: its media reference without the manual: prefix. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getManualCover: {
-        parameters: {
-            query?: {
-                /** @description The poster's version, as the title's cover_image carries it. It only keeps caches honest; any value serves the current poster. */
-                v?: number;
-            };
-            header?: never;
-            path: {
-                /** @description The manual title's id. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    setManualCover: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description The manual title's id. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CoverSource"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ManualOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    deleteManualCover: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description The manual title's id: its media reference without the manual: prefix. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ManualOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    searchMedia: {
-        parameters: {
-            query?: {
-                /** @description Free text to match against every title the source knows. Empty browses by the filters alone. */
-                q?: string;
-                /** @description Which catalog to search. Every source owns one kind of media, so this also picks the source: AniList for anime and manga, TMDB for movies and shows, Open Library for books — and Google Books for a text search Open Library finds nothing for. A dorama is a live-action show from East Asia, and every dorama is a series too. */
-                type?: "anime" | "manga" | "movie" | "series" | "dorama" | "book";
-                /** @description Order of the results. Left out it means relevance while searching and popularity while browsing. TMDB orders a text search by relevance only. */
-                sort?: "SEARCH_MATCH" | "POPULARITY_DESC" | "TRENDING_DESC" | "SCORE_DESC" | "FAVOURITES_DESC" | "START_DATE_DESC" | "TITLE_ROMAJI";
-                /** @description Genres a title must all have, as listed by getMediaFilterOptions. TMDB applies them while browsing only. */
-                genres?: string[] | null;
-                /** @description Tags a title must all have, as listed by getMediaFilterOptions. AniList only. */
-                tags?: string[] | null;
-                /** @description Any of these formats. AniList only. */
-                formats?: ("TV" | "TV_SHORT" | "MOVIE" | "SPECIAL" | "OVA" | "ONA" | "MUSIC" | "MANGA" | "NOVEL" | "ONE_SHOT")[] | null;
-                /** @description Any of these release statuses. AniList only. */
-                statuses?: ("FINISHED" | "RELEASING" | "NOT_YET_RELEASED" | "CANCELLED" | "HIATUS")[] | null;
-                /** @description Season the title started in. AniList only. */
-                season?: "WINTER" | "SPRING" | "SUMMER" | "FALL";
-                /** @description Year the title started in. */
-                year?: number;
-                /** @description Keep titles scored above this, on a 0-100 scale. */
-                min_score?: number;
-                /** @description Where the title comes from: JP for manga, KR for manhwa, CN and TW for manhua. AniList only. */
-                country?: "JP" | "KR" | "CN" | "TW";
-                /** @description Include adult titles. They are left out unless this is set, and the source hides them entirely from a node with no account connected. */
-                adult?: boolean;
-                /** @description Which page of results to return. */
-                page?: number;
-                /** @description How many titles per page. */
-                per_page?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SearchOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getMediaDetails: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description The title's media reference. */
-                media_ref: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DetailsOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getMediaEpisodes: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description The title's media reference. */
-                media_ref: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EpisodesOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getPlayback: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PlaybackOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    startPlayback: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["StartInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PlaybackOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    stopPlayback: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PlaybackOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    controlPlayback: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ControlInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PlaybackOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getPlaybackDirect: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Library file, as listed by listLibraryFiles. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getPlaybackFont: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Library file, as listed by listLibraryFiles. */
-                id: number;
-                /** @description Track index as the stream description lists it. */
-                index: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    stopPlaybackHLS: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Library file, as listed by listLibraryFiles. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getPlaybackHLSAudio: {
-        parameters: {
-            query?: {
-                /** @description The node token. Repeated into every URL the playlist lists, so the player can follow them. */
-                token?: string;
-            };
-            header?: never;
-            path: {
-                /** @description Library file, as listed by listLibraryFiles. */
-                id: number;
-                /** @description Audio track, as the master playlist names it. */
-                index: number;
-                /** @description index.m3u8, or segment-N.ts. */
-                name: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getPlaybackHLSMaster: {
-        parameters: {
-            query?: {
-                /** @description The node token. Repeated into every URL the playlist lists, so the player can follow them. */
-                token?: string;
-            };
-            header?: never;
-            path: {
-                /** @description Library file, as listed by listLibraryFiles. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getPlaybackHLSVideo: {
-        parameters: {
-            query?: {
-                /** @description The node token. Repeated into every URL the playlist lists, so the player can follow them. */
-                token?: string;
-            };
-            header?: never;
-            path: {
-                /** @description Library file, as listed by listLibraryFiles. */
-                id: number;
-                /** @description Rendition, as the master playlist names it. */
-                quality: string;
-                /** @description index.m3u8, or segment-N.ts. */
-                name: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    reportPlaybackProgress: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Library file being played. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ProgressInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProgressOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getPlaybackStream: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Library file, as listed by listLibraryFiles. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["StreamOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getPlaybackSubtitle: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Library file, as listed by listLibraryFiles. */
-                id: number;
-                /** @description Track index as the stream description lists it. */
-                index: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getPlaybackThumbnail: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Library file, as listed by listLibraryFiles. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getReaderChapterByRef: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Chapter reference: local:<file id>, opds:<server id>:<entry id> or plugin:<plugin id>:<key>. */
-                ref: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ChapterOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getReaderPageByRef: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Chapter reference, as in getReaderChapterByRef. */
-                ref: string;
-                /** @description Position in reading order, from the chapter listing. */
-                index: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    reportReaderPageByRef: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Chapter being read, as in getReaderChapterByRef. */
-                ref: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ReadBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ReadOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getReaderBook: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Library file, as listed by listLibraryFiles. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getReaderBookPosition: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Library file, as listed by listLibraryFiles. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BookPositionOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    saveReaderBookPosition: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Library file being read. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["BookPositionInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BookPositionOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getReaderChapter: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Library file, as listed by listLibraryFiles. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ChapterOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getReaderPage: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Library file, as listed by listLibraryFiles. */
-                id: number;
-                /** @description Position in reading order, from the chapter listing. */
-                index: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    reportReaderPage: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Library file being read. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ReadBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ReadOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getReaderStatus: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["StatusOutputBody1"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    listSyncBackups: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SyncBackupListOutputBody"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-            /** @description Precondition Required */
-            428: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-            /** @description Bad Gateway */
-            502: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    backUpNow: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SyncBackupNowOutputBody"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-            /** @description Precondition Required */
-            428: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-            /** @description Bad Gateway */
-            502: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-            /** @description Service Unavailable */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    restoreSyncBackup: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Snapshot to restore. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-            /** @description Precondition Required */
-            428: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-            /** @description Bad Gateway */
-            502: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    pairNode: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SyncPairInputBody"];
-            };
-        };
-        responses: {
-            /** @description Created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SyncPairOutputBody"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-            /** @description Unprocessable Entity */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-            /** @description Bad Gateway */
-            502: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-            /** @description Service Unavailable */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    unpairNode: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getSyncStatus: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SyncStatusOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getTMDBSettings: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TMDBSettings"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    setTMDBKey: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["TMDBKeyInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TMDBSettings"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    listTools: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ToolsOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    removeTool: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: "mpv" | "ffmpeg";
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Tool"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    installTool: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: "mpv" | "ffmpeg";
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Tool"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    cancelToolInstall: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: "mpv" | "ffmpeg";
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Tool"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    checkTorrentClient: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CheckTorrentClientInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TorrentCheckResult"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getTorrentDebrid: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TorrentDebrid"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    putTorrentDebrid: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PutTorrentDebridInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TorrentDebrid"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    checkTorrentDebrid: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CheckTorrentDebridInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TorrentCheckResult"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    listTorrentDownloads: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TorrentDownloadsOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    addTorrentDownload: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AddTorrentDownloadInputBody"];
-            };
-        };
-        responses: {
-            /** @description Created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TorrentDownload"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    removeTorrentDownload: {
-        parameters: {
-            query?: {
-                /** @description Also delete the downloaded files from disk. */
-                with_files?: boolean;
-            };
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    listTorrentFiles: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TorrentFilesOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    selectTorrentFiles: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SelectTorrentFilesInputBody"];
-            };
-        };
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    pauseTorrentDownload: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    resumeTorrentDownload: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getTorrentProfile: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TorrentProfile"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    putTorrentProfile: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["TorrentProfile"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TorrentProfile"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    listTorrentRules: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TorrentRulesOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getTorrentRule: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                media_ref: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TorrentRuleOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    putTorrentRule: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                media_ref: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PutTorrentRuleInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TorrentRuleOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    deleteTorrentRule: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                media_ref: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    checkTorrentRule: {
-        parameters: {
-            query?: {
-                /** @description Only say what would be downloaded. */
-                preview?: boolean;
-            };
-            header?: never;
-            path: {
-                media_ref: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TorrentRuleCheck"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    searchTorrents: {
-        parameters: {
-            query?: {
-                /** @description The title searched for; its names are the queries unless q is given. */
-                media_ref?: string;
-                /** @description Only releases that hold this episode; 0 for any. */
-                episode?: number;
-                /** @description Only releases of this season, for a show numbered by season; the episode then counts within it. 0 for any. */
-                season?: number;
-                /** @description Search for this instead of the title's names. */
-                q?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TorrentSearchResult"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getTorrentSettings: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TorrentSettings"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    putTorrentSettings: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PutTorrentSettingsInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TorrentSettings"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    listTorrentSources: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TorrentSourcesOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    createTorrentSource: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["TorrentSourceBody"];
-            };
-        };
-        responses: {
-            /** @description Created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TorrentSource"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    checkTorrentSource: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CheckTorrentSourceInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TorrentSourceCaps"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    updateTorrentSource: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["TorrentSourceBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TorrentSource"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    deleteTorrentSource: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    startTorrentStream: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["StartTorrentStreamInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TorrentStream"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getTorrentStream: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TorrentStream"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    listTrackerEntries: {
-        parameters: {
-            query: {
-                /** @description Which collection to read. Anime and manga are the AniList account's; movies, series, doramas and books are this node's own list. */
-                type: "anime" | "manga" | "movie" | "series" | "dorama" | "book";
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EntriesOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    updateTrackerEntry: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description The entry's media reference, as returned by listTrackerEntries. */
-                media_ref: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateEntryInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Entry"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    deleteTrackerEntry: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description The entry's media reference. */
-                media_ref: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    listTrackerLists: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ListsOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    createTrackerList: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateListInputBody"];
-            };
-        };
-        responses: {
-            /** @description Created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CustomList"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    deleteTrackerList: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description The list's identifier, as returned by listTrackerLists. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    renameTrackerList: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description The list's identifier, as returned by listTrackerLists. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RenameListInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CustomList"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    refreshTrackerEntries: {
-        parameters: {
-            query: {
-                /** @description Which collection to read. Anime and manga are the AniList account's; movies, series, doramas and books are this node's own list. */
-                type: "anime" | "manga" | "movie" | "series" | "dorama" | "book";
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Accepted */
-            202: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AcceptedOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
+	getAISettings: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['AISettings']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	setAISettings: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['AISettingsUpdate']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['AISettings']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getAniListSession: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['SessionOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	connectAniList: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['SignInInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['Account']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	disconnectAniList: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listBookDownloads: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['BookDownloadsOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	enqueueBookDownload: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['EnqueueBookDownloadInputBody']
+			}
+		}
+		responses: {
+			/** @description Accepted */
+			202: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['BookDownload']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getBookDownloadSettings: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['BookDownloadSettings']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	putBookDownloadSettings: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['PutBookDownloadSettingsInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['BookDownloadSettings']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	forgetBookDownload: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	cancelBookDownload: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	retryBookDownload: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	searchBookEditions: {
+		parameters: {
+			query?: {
+				/** @description The book to find copies of, by its title and authors. */
+				media_ref?: string
+				/** @description Text to search for, in place of or beside media_ref. */
+				q?: string
+			}
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['SearchBookEditionsOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	checkBookOPDSServer: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['CheckBookOPDSServerInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['CheckBookOPDSServerOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listBookOPDSServers: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['BookOPDSServersOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	createBookOPDSServer: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['BookOPDSServerInputBody']
+			}
+		}
+		responses: {
+			/** @description Created */
+			201: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['BookOPDSServerOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	updateBookOPDSServer: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['BookOPDSServerInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['BookOPDSServerOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	deleteBookOPDSServer: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listBookSources: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['BookSourcesOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getGutenbergSettings: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['GutenbergSettingsBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	putGutenbergSettings: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['PutGutenbergSettingsInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['GutenbergSettingsBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	refreshGutenbergCatalog: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description Accepted */
+			202: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['GutenbergSettingsBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getExtensionStatus: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['StatusOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listExtensions: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ExtensionsOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	installExtension: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['InstallExtensionInputBody']
+			}
+		}
+		responses: {
+			/** @description Created */
+			201: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['Extension']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getExtensionCatalog: {
+		parameters: {
+			query?: {
+				/** @description Read every repository again instead of reusing reads under an hour old. */
+				refresh?: boolean
+			}
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ExtensionCatalog']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	previewExtension: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['PreviewExtensionInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ExtensionPreview']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	addExtensionRepository: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['AddRepositoryInputBody']
+			}
+		}
+		responses: {
+			/** @description Created */
+			201: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ExtensionRepository']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	removeExtensionRepository: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	checkExtensionUpdates: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ExtensionsOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	removeExtension: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	configureExtension: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['ConfigureExtensionInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['Extension']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	updateExtension: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['UpdateExtensionInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['Extension']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getGoogleBooksSettings: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['GoogleBooksSettings']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	setGoogleBooksKey: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['GoogleBooksKeyInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['GoogleBooksSettings']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getNodeHealth: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['HealthOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getImageSearchSettings: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ImageSearchSettings']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	setBraveKey: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['BraveKeyInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ImageSearchSettings']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getLibraryCollection: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['CollectionOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listLibraryFiles: {
+		parameters: {
+			query?: {
+				/** @description Only files under this root. */
+				root_id?: number
+				/** @description Only files whose extension points at this form of media. */
+				kind?: 'video' | 'manga' | 'book'
+				/** @description Only files whose name reads as this. Use it to leave out openings and extras, which are never episodes. */
+				form?: 'series' | 'movie' | 'special' | 'extra' | 'manga' | 'book'
+				/** @description Only files that still need a title. Files the user set aside are left out — they are asking for nothing. */
+				unmatched?: boolean
+				/** @description Only files the user told the node to leave alone. */
+				ignored?: boolean
+				/** @description Only files matched to this title — the episodes a title page lists. */
+				media_ref?: string
+				/** @description Page size. */
+				limit?: number
+				/** @description How many files to skip. */
+				offset?: number
+			}
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['FilesOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listAllLibraryFiles: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['FilesOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	deleteLibraryFile: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Identifier of the file to delete. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listLibraryFileCandidates: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Identifier of the file to find candidates for. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['SuggestionsOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	setLibraryFileIgnored: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Identifier of the file to set aside. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['SetIgnoredInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['FileOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	setLibraryFileMatch: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Identifier of the file to match. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['SetMatchInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['FileOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	deleteLibraryFileMatch: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Identifier of the file whose match to forget. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listLibraryRoots: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['RootsOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	addLibraryRoot: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['AddRootInputBody']
+			}
+		}
+		responses: {
+			/** @description Created */
+			201: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['RootOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	deleteLibraryRoot: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Identifier of the root to stop watching. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	updateLibraryRoot: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Identifier of the root. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['UpdateRootInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['RootOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getLibraryScan: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ScanOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	startLibraryScan: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['ScanInputBody']
+			}
+		}
+		responses: {
+			/** @description Accepted */
+			202: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ScanOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listLibraryScanHistory: {
+		parameters: {
+			query?: {
+				/** @description Only scans started at or after this time. Left out for no lower bound. */
+				from?: string
+				/** @description Only scans started at or before this time. Left out for no upper bound. */
+				to?: string
+				/** @description Page size. */
+				limit?: number
+				/** @description How many scans to skip. */
+				offset?: number
+			}
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ScanHistoryOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getLibraryScanHistoryRun: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Identifier of the scan run. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ScanRunOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listMangaDownloads: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['MangaDownloadsOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	enqueueMangaDownloads: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['EnqueueMangaDownloadsInputBody']
+			}
+		}
+		responses: {
+			/** @description Accepted */
+			202: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['MangaDownloadsOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getMangaDownloadSettings: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['MangaDownloadSettingsBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	putMangaDownloadSettings: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['PutMangaDownloadSettingsInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['MangaDownloadSettingsBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	forgetMangaDownload: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	cancelMangaDownload: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	retryMangaDownload: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	checkOPDSServer: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['CheckOPDSServerInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['CheckOPDSServerOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listOPDSServers: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['OPDSServersOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	createOPDSServer: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['OPDSServerInputBody']
+			}
+		}
+		responses: {
+			/** @description Created */
+			201: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['OPDSServerOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	updateOPDSServer: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['OPDSServerInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['OPDSServerOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	deleteOPDSServer: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listMangaSources: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['MangaSourcesOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	searchMangaSource: {
+		parameters: {
+			query?: {
+				q?: string
+				/** @description The title being linked, so a source that knows it can put its series first. */
+				media_ref?: string
+			}
+			header?: never
+			path: {
+				source: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['MangaSearchOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listMangaChapters: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				mediaRef: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['MangaChaptersOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listMangaLinks: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				mediaRef: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['MangaLinksOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	putMangaLink: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				mediaRef: string
+				source: string
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['PutMangaLinkInputBody']
+			}
+		}
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	deleteMangaLink: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				mediaRef: string
+				source: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getMediaFilterOptions: {
+		parameters: {
+			query?: {
+				/** @description Which catalog's vocabulary to list. */
+				type?: 'anime' | 'manga' | 'movie' | 'series' | 'dorama' | 'book'
+			}
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['FilterOptionsOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	createManualMedia: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['ManualDraft']
+			}
+		}
+		responses: {
+			/** @description Created */
+			201: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ManualOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	searchManualCovers: {
+		parameters: {
+			query: {
+				/** @description The kind of title. */
+				type: 'anime' | 'manga' | 'movie' | 'series' | 'dorama' | 'book'
+				/** @description The name to look for. */
+				title: string
+				/** @description Year it came out; left out when unknown. */
+				year?: number
+			}
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['CandidatesOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	suggestManualMedia: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['ManualHint']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ManualSuggestion']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	updateManualMedia: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description The manual title's id: its media reference without the manual: prefix. */
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['ManualDraft']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ManualOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	deleteManualMedia: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description The manual title's id: its media reference without the manual: prefix. */
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getManualCover: {
+		parameters: {
+			query?: {
+				/** @description The poster's version, as the title's cover_image carries it. It only keeps caches honest; any value serves the current poster. */
+				v?: number
+			}
+			header?: never
+			path: {
+				/** @description The manual title's id. */
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	setManualCover: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description The manual title's id. */
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['CoverSource']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ManualOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	deleteManualCover: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description The manual title's id: its media reference without the manual: prefix. */
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ManualOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	searchMedia: {
+		parameters: {
+			query?: {
+				/** @description Free text to match against every title the source knows. Empty browses by the filters alone. */
+				q?: string
+				/** @description Which catalog to search. Every source owns one kind of media, so this also picks the source: AniList for anime and manga, TMDB for movies and shows, Open Library for books — and Google Books for a text search Open Library finds nothing for. A dorama is a live-action show from East Asia, and every dorama is a series too. */
+				type?: 'anime' | 'manga' | 'movie' | 'series' | 'dorama' | 'book'
+				/** @description Order of the results. Left out it means relevance while searching and popularity while browsing. TMDB orders a text search by relevance only. */
+				sort?:
+					| 'SEARCH_MATCH'
+					| 'POPULARITY_DESC'
+					| 'TRENDING_DESC'
+					| 'SCORE_DESC'
+					| 'FAVOURITES_DESC'
+					| 'START_DATE_DESC'
+					| 'TITLE_ROMAJI'
+				/** @description Genres a title must all have, as listed by getMediaFilterOptions. TMDB applies them while browsing only. */
+				genres?: string[] | null
+				/** @description Tags a title must all have, as listed by getMediaFilterOptions. AniList only. */
+				tags?: string[] | null
+				/** @description Any of these formats. AniList only. */
+				formats?:
+					| (
+							| 'TV'
+							| 'TV_SHORT'
+							| 'MOVIE'
+							| 'SPECIAL'
+							| 'OVA'
+							| 'ONA'
+							| 'MUSIC'
+							| 'MANGA'
+							| 'NOVEL'
+							| 'ONE_SHOT'
+					  )[]
+					| null
+				/** @description Any of these release statuses. AniList only. */
+				statuses?: ('FINISHED' | 'RELEASING' | 'NOT_YET_RELEASED' | 'CANCELLED' | 'HIATUS')[] | null
+				/** @description Season the title started in. AniList only. */
+				season?: 'WINTER' | 'SPRING' | 'SUMMER' | 'FALL'
+				/** @description Year the title started in. */
+				year?: number
+				/** @description Keep titles scored above this, on a 0-100 scale. */
+				min_score?: number
+				/** @description Where the title comes from: JP for manga, KR for manhwa, CN and TW for manhua. AniList only. */
+				country?: 'JP' | 'KR' | 'CN' | 'TW'
+				/** @description Include adult titles. They are left out unless this is set, and the source hides them entirely from a node with no account connected. */
+				adult?: boolean
+				/** @description Which page of results to return. */
+				page?: number
+				/** @description How many titles per page. */
+				per_page?: number
+			}
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['SearchOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getMediaDetails: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description The title's media reference. */
+				media_ref: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['DetailsOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getMediaEpisodes: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description The title's media reference. */
+				media_ref: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['EpisodesOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getPlayback: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['PlaybackOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	startPlayback: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['StartInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['PlaybackOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	stopPlayback: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['PlaybackOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	controlPlayback: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['ControlInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['PlaybackOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getPlaybackDirect: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Library file, as listed by listLibraryFiles. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getPlaybackFont: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Library file, as listed by listLibraryFiles. */
+				id: number
+				/** @description Track index as the stream description lists it. */
+				index: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	stopPlaybackHLS: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Library file, as listed by listLibraryFiles. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getPlaybackHLSAudio: {
+		parameters: {
+			query?: {
+				/** @description The node token. Repeated into every URL the playlist lists, so the player can follow them. */
+				token?: string
+			}
+			header?: never
+			path: {
+				/** @description Library file, as listed by listLibraryFiles. */
+				id: number
+				/** @description Audio track, as the master playlist names it. */
+				index: number
+				/** @description index.m3u8, or segment-N.ts. */
+				name: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getPlaybackHLSMaster: {
+		parameters: {
+			query?: {
+				/** @description The node token. Repeated into every URL the playlist lists, so the player can follow them. */
+				token?: string
+			}
+			header?: never
+			path: {
+				/** @description Library file, as listed by listLibraryFiles. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getPlaybackHLSVideo: {
+		parameters: {
+			query?: {
+				/** @description The node token. Repeated into every URL the playlist lists, so the player can follow them. */
+				token?: string
+			}
+			header?: never
+			path: {
+				/** @description Library file, as listed by listLibraryFiles. */
+				id: number
+				/** @description Rendition, as the master playlist names it. */
+				quality: string
+				/** @description index.m3u8, or segment-N.ts. */
+				name: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	reportPlaybackProgress: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Library file being played. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['ProgressInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ProgressOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getPlaybackStream: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Library file, as listed by listLibraryFiles. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['StreamOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getPlaybackSubtitle: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Library file, as listed by listLibraryFiles. */
+				id: number
+				/** @description Track index as the stream description lists it. */
+				index: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getPlaybackThumbnail: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Library file, as listed by listLibraryFiles. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getReaderChapterByRef: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Chapter reference: local:<file id>, opds:<server id>:<entry id> or plugin:<plugin id>:<key>. */
+				ref: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ChapterOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getReaderPageByRef: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Chapter reference, as in getReaderChapterByRef. */
+				ref: string
+				/** @description Position in reading order, from the chapter listing. */
+				index: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	reportReaderPageByRef: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Chapter being read, as in getReaderChapterByRef. */
+				ref: string
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['ReadBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ReadOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getReaderBook: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Library file, as listed by listLibraryFiles. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getReaderBookPosition: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Library file, as listed by listLibraryFiles. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['BookPositionOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	saveReaderBookPosition: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Library file being read. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['BookPositionInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['BookPositionOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getReaderChapter: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Library file, as listed by listLibraryFiles. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ChapterOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getReaderPage: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Library file, as listed by listLibraryFiles. */
+				id: number
+				/** @description Position in reading order, from the chapter listing. */
+				index: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	reportReaderPage: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Library file being read. */
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['ReadBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ReadOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getReaderStatus: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['StatusOutputBody1']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listSyncBackups: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['SyncBackupListOutputBody']
+				}
+			}
+			/** @description Unauthorized */
+			401: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Precondition Required */
+			428: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Bad Gateway */
+			502: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	backUpNow: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['SyncBackupNowOutputBody']
+				}
+			}
+			/** @description Unauthorized */
+			401: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Precondition Required */
+			428: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Bad Gateway */
+			502: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Service Unavailable */
+			503: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	restoreSyncBackup: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Snapshot to restore. */
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Unauthorized */
+			401: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Not Found */
+			404: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Unprocessable Entity */
+			422: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Precondition Required */
+			428: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Bad Gateway */
+			502: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	pairNode: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['SyncPairInputBody']
+			}
+		}
+		responses: {
+			/** @description Created */
+			201: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['SyncPairOutputBody']
+				}
+			}
+			/** @description Unauthorized */
+			401: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Unprocessable Entity */
+			422: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Bad Gateway */
+			502: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Service Unavailable */
+			503: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	unpairNode: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getSyncStatus: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['SyncStatusOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getTMDBSettings: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TMDBSettings']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	setTMDBKey: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['TMDBKeyInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TMDBSettings']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listTools: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ToolsOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	removeTool: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: 'mpv' | 'ffmpeg'
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['Tool']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	installTool: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: 'mpv' | 'ffmpeg'
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['Tool']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	cancelToolInstall: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: 'mpv' | 'ffmpeg'
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['Tool']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	checkTorrentClient: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['CheckTorrentClientInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentCheckResult']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getTorrentDebrid: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentDebrid']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	putTorrentDebrid: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['PutTorrentDebridInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentDebrid']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	checkTorrentDebrid: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['CheckTorrentDebridInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentCheckResult']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listTorrentDownloads: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentDownloadsOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	addTorrentDownload: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['AddTorrentDownloadInputBody']
+			}
+		}
+		responses: {
+			/** @description Created */
+			201: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentDownload']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	removeTorrentDownload: {
+		parameters: {
+			query?: {
+				/** @description Also delete the downloaded files from disk. */
+				with_files?: boolean
+			}
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listTorrentFiles: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentFilesOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	selectTorrentFiles: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['SelectTorrentFilesInputBody']
+			}
+		}
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	pauseTorrentDownload: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	resumeTorrentDownload: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getTorrentProfile: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentProfile']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	putTorrentProfile: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['TorrentProfile']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentProfile']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listTorrentRules: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentRulesOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getTorrentRule: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				media_ref: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentRuleOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	putTorrentRule: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				media_ref: string
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['PutTorrentRuleInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentRuleOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	deleteTorrentRule: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				media_ref: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	checkTorrentRule: {
+		parameters: {
+			query?: {
+				/** @description Only say what would be downloaded. */
+				preview?: boolean
+			}
+			header?: never
+			path: {
+				media_ref: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentRuleCheck']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	searchTorrents: {
+		parameters: {
+			query?: {
+				/** @description The title searched for; its names are the queries unless q is given. */
+				media_ref?: string
+				/** @description Only releases that hold this episode; 0 for any. */
+				episode?: number
+				/** @description Only releases of this season, for a show numbered by season; the episode then counts within it. 0 for any. */
+				season?: number
+				/** @description Search for this instead of the title's names. */
+				q?: string
+			}
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentSearchResult']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getTorrentSettings: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentSettings']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	putTorrentSettings: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['PutTorrentSettingsInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentSettings']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listTorrentSources: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentSourcesOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	createTorrentSource: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['TorrentSourceBody']
+			}
+		}
+		responses: {
+			/** @description Created */
+			201: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentSource']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	checkTorrentSource: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['CheckTorrentSourceInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentSourceCaps']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	updateTorrentSource: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['TorrentSourceBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentSource']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	deleteTorrentSource: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	startTorrentStream: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['StartTorrentStreamInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentStream']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getTorrentStream: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentStream']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listTrackerEntries: {
+		parameters: {
+			query: {
+				/** @description Which collection to read. Anime and manga are the AniList account's; movies, series, doramas and books are this node's own list. */
+				type: 'anime' | 'manga' | 'movie' | 'series' | 'dorama' | 'book'
+			}
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['EntriesOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	updateTrackerEntry: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description The entry's media reference, as returned by listTrackerEntries. */
+				media_ref: string
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['UpdateEntryInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['Entry']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	deleteTrackerEntry: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description The entry's media reference. */
+				media_ref: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listTrackerLists: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ListsOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	createTrackerList: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['CreateListInputBody']
+			}
+		}
+		responses: {
+			/** @description Created */
+			201: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['CustomList']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	deleteTrackerList: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description The list's identifier, as returned by listTrackerLists. */
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	renameTrackerList: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description The list's identifier, as returned by listTrackerLists. */
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['RenameListInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['CustomList']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	refreshTrackerEntries: {
+		parameters: {
+			query: {
+				/** @description Which collection to read. Anime and manga are the AniList account's; movies, series, doramas and books are this node's own list. */
+				type: 'anime' | 'manga' | 'movie' | 'series' | 'dorama' | 'book'
+			}
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description Accepted */
+			202: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['AcceptedOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
 }

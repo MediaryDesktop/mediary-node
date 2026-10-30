@@ -16,6 +16,7 @@ var statusByKind = map[apperr.Kind]int{
 	apperr.KindConflict:     http.StatusConflict,
 	apperr.KindPrecondition: http.StatusPreconditionRequired,
 	apperr.KindUnavailable:  http.StatusServiceUnavailable,
+	apperr.KindRateLimited:  http.StatusTooManyRequests,
 	apperr.KindUpstream:     http.StatusBadGateway,
 	apperr.KindInternal:     http.StatusInternalServerError,
 }

@@ -14,6 +14,7 @@ import (
 
 	"github.com/mediaryorg/mediary-node/server/internal/config"
 	"github.com/mediaryorg/mediary-node/server/internal/httpapi"
+	"github.com/mediaryorg/mediary-node/server/internal/modules/media"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/cloud"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/db"
@@ -23,9 +24,11 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anizip"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/claude"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/gemini"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/googlebooks"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/gutenberg"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/imagesearch"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/openai"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/openlibrary"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/tmdb"
 	"github.com/mediaryorg/mediary-node/server/internal/wsapi"
@@ -79,6 +82,7 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 		BaseURL:     cfg.Cloud.BaseURL,
 		DeviceToken: cfg.Cloud.DeviceToken,
 		Timeout:     cfg.Cloud.Timeout,
+		AITimeout:   cfg.AI.Timeout,
 		UserAgent:   "mediary-node/" + build.Version,
 	})
 	if err != nil {
@@ -143,12 +147,27 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 		})
 	}
 
-	var claudeClient *claude.Client
+	aiStore := secrets.New(filepath.Join(cfg.DataDir, "ai-secrets.json"))
+
+	aiProviders := media.AIProviders{
+		Store:  aiStore,
+		Cloud:  cloudClient,
+		OpenAI: openai.New(openai.Options{Timeout: cfg.AI.Timeout, Store: aiStore}),
+	}
+
 	if cfg.Claude.Endpoint != "" {
-		claudeClient = claude.New(claude.Options{
+		aiProviders.Claude = claude.New(claude.Options{
 			Endpoint: cfg.Claude.Endpoint,
 			Timeout:  cfg.Claude.Timeout,
 			Store:    secrets.New(filepath.Join(cfg.DataDir, "claude-secrets.json")),
+		})
+	}
+
+	if cfg.AI.GeminiEndpoint != "" {
+		aiProviders.Gemini = gemini.New(gemini.Options{
+			Endpoint: cfg.AI.GeminiEndpoint,
+			Timeout:  cfg.AI.Timeout,
+			Store:    aiStore,
 		})
 	}
 
@@ -187,7 +206,7 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 		OpenLibrary:         openLibrary,
 		GoogleBooks:         googleBooks,
 		Gutenberg:           gutenbergClient,
-		Claude:              claudeClient,
+		AI:                  aiProviders,
 		ImageSearch:         imageSearch,
 		CoverURL:            localCoverURL(cfg.HTTP, token),
 		AniListClientID:     cfg.AniList.ClientID,
