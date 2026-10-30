@@ -2076,6 +2076,11 @@ export const ru: Translation = {
 		node: {
 			name: 'Нода',
 			hint: 'Версия и сборка локальной ноды'
+		},
+		account: {
+			name: 'Аккаунт',
+			hint: 'Вы вошли как {{email}}',
+			signOut: 'Выйти из аккаунта'
 		}
 	},
 	pagination: {

@@ -4,9 +4,11 @@ import { useUnit } from 'effector-react'
 import type { ReactNode } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { PageTransition, renderIcon, RippleButton } from '@shared/ui'
+import { Button, PageTransition, renderIcon, RippleButton } from '@shared/ui'
 
 import { nodeHealthQuery } from '@infra/node'
+
+import { sessionModel } from '@entities/session'
 
 import { BackupSettings, DevicesSettings } from '@features/back-up-node'
 import { MissingPlayerNotice, PlayerModeSwitcher } from '@features/choose-player'
@@ -106,6 +108,7 @@ function SectionContent({ section }: { section: SectionInfo }) {
 					<Row name={t('settings.node.name')} hint={t('settings.node.hint')}>
 						<NodeVersion />
 					</Row>
+					<AccountRow />
 				</Card>
 			)
 		case 'anilist':
@@ -258,6 +261,28 @@ function NodeVersion() {
 	const health = useUnit(nodeHealthQuery.$data)
 
 	return <span className={styles.hint}>{health ? `${health.version} · ${health.commit}` : '—'}</span>
+}
+
+function AccountRow() {
+	const { t } = useTranslation()
+
+	const [account, signOutPending, signOut] = useUnit([
+		sessionModel.$account,
+		sessionModel.$signOutPending,
+		sessionModel.signOutRequested
+	])
+
+	if (!account) {
+		return null
+	}
+
+	return (
+		<Row name={t('settings.account.name')} hint={t('settings.account.hint', { email: account.email })}>
+			<Button variant='ghost' size='small' loading={signOutPending} onClick={() => signOut()}>
+				{t('settings.account.signOut')}
+			</Button>
+		</Row>
+	)
 }
 
 function Card({ children }: { children: ReactNode }) {

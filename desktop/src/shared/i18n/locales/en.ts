@@ -2072,6 +2072,11 @@ export const en = {
 		node: {
 			name: 'Node',
 			hint: 'Version and build of the local node'
+		},
+		account: {
+			name: 'Account',
+			hint: 'Signed in as {{email}}',
+			signOut: 'Sign out'
 		}
 	},
 	pagination: {

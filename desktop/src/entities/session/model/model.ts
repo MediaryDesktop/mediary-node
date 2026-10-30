@@ -252,7 +252,8 @@ export const sessionModel = atom(() => {
 		$oauthProvider,
 		$oauthStarting,
 		$emailConfirmationPending: confirmEmailFx.pending,
-		$emailVerificationPending: sendEmailVerificationFx.pending
+		$emailVerificationPending: sendEmailVerificationFx.pending,
+		$signOutPending: signOutFx.pending
 	}
 })
 

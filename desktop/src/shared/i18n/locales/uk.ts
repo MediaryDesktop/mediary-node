@@ -2075,6 +2075,11 @@ export const uk: Translation = {
 		node: {
 			name: 'Нода',
 			hint: 'Версія та збірка локальної ноди'
+		},
+		account: {
+			name: 'Акаунт',
+			hint: 'Ви увійшли як {{email}}',
+			signOut: 'Вийти з акаунту'
 		}
 	},
 	pagination: {

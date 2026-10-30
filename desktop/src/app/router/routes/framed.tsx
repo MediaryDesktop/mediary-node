@@ -18,6 +18,7 @@ import { isSettingsSection, SettingsPage } from '@pages/settings'
 import type { SettingsSection } from '@pages/settings'
 
 import { AppLayout } from '../../layout/AppLayout'
+import { redirectFirstLaunchToDiscover } from '../guards/first-launch.guard'
 
 import { rootRoute } from './root'
 
@@ -34,6 +35,7 @@ const framedRoute = createRoute({
 const homeRoute = createRoute({
 	getParentRoute: () => framedRoute,
 	path: '/',
+	beforeLoad: redirectFirstLaunchToDiscover,
 	component: HomePage
 })
 

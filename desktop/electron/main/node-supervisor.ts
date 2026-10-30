@@ -1,7 +1,7 @@
 import { app } from 'electron'
 import { type ChildProcess, spawn } from 'node:child_process'
 import { randomBytes } from 'node:crypto'
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { createServer } from 'node:net'
 import { join } from 'node:path'
 import { setTimeout as delay } from 'node:timers/promises'
@@ -159,6 +159,7 @@ export class NodeSupervisor {
 
 		this.child = spawn(binary, [], {
 			env: {
+				...devServerEnv(),
 				...process.env,
 				NODE_HTTP_HOST: this.host,
 				NODE_HTTP_PORT: String(this.port),
@@ -307,6 +308,57 @@ function askOsForPort(host: string): Promise<number> {
 			probe.close(() => resolve(port))
 		})
 	})
+}
+
+// Packaged builds ship no server/.env — keys there (TMDB, AniList…) reach the
+// node only through real environment variables, same as any other secret. In
+// dev, Task's `dotenv: [".env"]` feeds it when the Go binary runs under `task
+// dev`, but Electron spawns the raw binary itself, so it has to read the file
+// the same way.
+function devServerEnv(): NodeJS.ProcessEnv {
+	if (app.isPackaged) {
+		return {}
+	}
+
+	const candidates = [
+		join(app.getAppPath(), '..', 'server', '.env'),
+		join(app.getAppPath(), '..', '..', 'server', '.env')
+	]
+
+	const path = candidates.find(existsSync)
+
+	return path ? parseDotenv(readFileSync(path, 'utf8')) : {}
+}
+
+function parseDotenv(content: string): NodeJS.ProcessEnv {
+	const env: NodeJS.ProcessEnv = {}
+
+	for (const line of content.split('\n')) {
+		const trimmed = line.trim()
+
+		if (!trimmed || trimmed.startsWith('#')) {
+			continue
+		}
+
+		const equals = trimmed.indexOf('=')
+		if (equals === -1) {
+			continue
+		}
+
+		const key = trimmed.slice(0, equals).trim()
+		let value = trimmed.slice(equals + 1).trim()
+
+		const quoted =
+			(value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))
+
+		if (quoted) {
+			value = value.slice(1, -1)
+		}
+
+		env[key] = value
+	}
+
+	return env
 }
 
 function resolveBinaryPath(): string | null {
