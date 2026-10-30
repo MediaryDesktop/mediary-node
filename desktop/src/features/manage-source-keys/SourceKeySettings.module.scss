@@ -25,6 +25,19 @@
 		flex-wrap: wrap;
 		gap: 0.5rem;
 	}
+
+	.modelField {
+		display: flex;
+		flex-direction: column;
+		gap: 0.375rem;
+		max-width: 20rem;
+
+		.modelLabel {
+			color: var(--text-secondary);
+			font-size: 0.8125rem;
+			font-weight: 600;
+		}
+	}
 }
 
 // Shown either as the component's whole output (source disabled) or as the last

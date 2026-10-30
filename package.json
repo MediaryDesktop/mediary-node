@@ -3,7 +3,9 @@
 	"private": true,
 	"type": "module",
 	"description": "Mediary self-hosted node: Go server (server/) and Electron desktop client (desktop/).",
-	"workspaces": ["desktop"],
+	"workspaces": [
+		"desktop"
+	],
 	"scripts": {
 		"dev": "npm run dev -w desktop",
 		"build": "npm run build -w desktop",
@@ -17,5 +19,11 @@
 	},
 	"engines": {
 		"node": ">=22"
+	},
+	"allowScripts": {
+		"@parcel/watcher@2.6.0": true,
+		"electron-winstaller@5.4.0": true,
+		"lfa-ponyfill@1.1.1": true,
+		"esbuild@0.25.12": true
 	}
 }

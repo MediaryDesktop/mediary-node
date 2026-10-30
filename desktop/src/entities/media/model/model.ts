@@ -6,14 +6,25 @@ import { atom } from '@shared/factory'
 import { firstPresent } from '@shared/lib'
 
 import {
+	createManualMediaFx,
+	deleteManualCoverFx,
+	deleteManualMediaFx,
+	fetchAISettingsFx,
 	fetchGoogleBooksSettingsFx,
+	fetchImageSearchSettingsFx,
 	fetchMediaDetailsFx,
 	fetchMediaEpisodesFx,
 	fetchMediaFilterOptionsFx,
 	fetchTMDBSettingsFx,
+	searchManualCoversFx,
 	searchMediaFx,
+	setAISettingsFx,
+	setBraveKeyFx,
 	setGoogleBooksKeyFx,
-	setTMDBKeyFx
+	setManualCoverFx,
+	setTMDBKeyFx,
+	suggestManualMediaFx,
+	updateManualMediaFx
 } from '../api/api'
 import type { MediaDate, MediaDetails, MediaEpisode, MediaTitle } from '../api/api'
 
@@ -60,6 +71,65 @@ export const setGoogleBooksKeyMutation = createMutation({
 })
 
 keepFresh(googleBooksSettingsQuery, { triggers: [setGoogleBooksKeyMutation.finished.success] })
+
+export const aiSettingsQuery = createQuery({
+	effect: fetchAISettingsFx,
+	name: 'aiSettings'
+})
+
+export const setAISettingsMutation = createMutation({
+	effect: setAISettingsFx,
+	name: 'setAISettings'
+})
+
+keepFresh(aiSettingsQuery, { triggers: [setAISettingsMutation.finished.success] })
+
+export const imageSearchSettingsQuery = createQuery({
+	effect: fetchImageSearchSettingsFx,
+	name: 'imageSearchSettings'
+})
+
+export const setBraveKeyMutation = createMutation({
+	effect: setBraveKeyFx,
+	name: 'setBraveKey'
+})
+
+keepFresh(imageSearchSettingsQuery, { triggers: [setBraveKeyMutation.finished.success] })
+
+export const createManualMediaMutation = createMutation({
+	effect: createManualMediaFx,
+	name: 'createManualMedia'
+})
+
+export const updateManualMediaMutation = createMutation({
+	effect: updateManualMediaFx,
+	name: 'updateManualMedia'
+})
+
+export const deleteManualMediaMutation = createMutation({
+	effect: deleteManualMediaFx,
+	name: 'deleteManualMedia'
+})
+
+export const suggestManualMediaMutation = createMutation({
+	effect: suggestManualMediaFx,
+	name: 'suggestManualMedia'
+})
+
+export const manualCoverSearchQuery = createQuery({
+	effect: searchManualCoversFx,
+	name: 'manualCoverSearch'
+})
+
+export const setManualCoverMutation = createMutation({
+	effect: setManualCoverFx,
+	name: 'setManualCover'
+})
+
+export const deleteManualCoverMutation = createMutation({
+	effect: deleteManualCoverFx,
+	name: 'deleteManualCover'
+})
 
 export const mediaDetailsModel = atom(() => {
 	const $failedMediaRef = createStore<string | null>(null)

@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { formatCompact } from '@shared/lib'
-import { Icon, Tooltip } from '@shared/ui'
+import { Badge, Icon, Tooltip } from '@shared/ui'
 
 import { alternativeTitles, enumLabel, formatMediaDate, mediaTitle, scoreTone } from '@entities/media'
 import type { MediaDetails, MediaSource } from '@entities/media'
@@ -95,6 +95,12 @@ export function MediaHero({
 						))}
 
 						<div className={clsx(styles.metaRow, styles.line)} style={lineStyle(line++)}>
+							{media?.editable && (
+								<Badge tone='accent' icon='common/wand-sparkles'>
+									{t('manualMedia.addedManually')}
+								</Badge>
+							)}
+
 							{entry && entry.score > 0 && (
 								<span className={clsx(styles.userScore, styles[scoreTone(entry.score)])}>
 									<Icon name='common/star' size={16} />
@@ -182,22 +188,24 @@ export function MediaHero({
 						)}
 
 						<div className={clsx(styles.links, styles.line)} style={lineStyle(line++)}>
-							<a
-								className={styles.iconLink}
-								href={base.site_url}
-								target='_blank'
-								rel='noreferrer'
-								aria-label={t('media.openOn', { name: sources[0]?.name ?? 'AniList' })}
-							>
-								<Icon
-									name={
-										sources[0]?.id === 'anilist'
-											? 'social/anilist'
-											: 'common/external-link'
-									}
-									size={18}
-								/>
-							</a>
+							{base.site_url && (
+								<a
+									className={styles.iconLink}
+									href={base.site_url}
+									target='_blank'
+									rel='noreferrer'
+									aria-label={t('media.openOn', { name: sources[0]?.name ?? 'AniList' })}
+								>
+									<Icon
+										name={
+											sources[0]?.id === 'anilist'
+												? 'social/anilist'
+												: 'common/external-link'
+										}
+										size={18}
+									/>
+								</a>
+							)}
 
 							{mediaType !== 'manga' && mediaType !== 'book' && (
 								<Tooltip content={t('media.comingSoon')}>

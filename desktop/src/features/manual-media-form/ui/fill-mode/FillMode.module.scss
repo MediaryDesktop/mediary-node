@@ -1,0 +1,58 @@
+.root {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+	gap: 0.75rem;
+}
+
+.option {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0.875rem 1rem;
+	border: 1.5px solid var(--border);
+	border-radius: var(--radius-md);
+	background: var(--field);
+	color: var(--text-secondary);
+	text-align: left;
+	cursor: pointer;
+	transition:
+		border-color 160ms,
+		background-color 160ms,
+		color 160ms;
+
+	&:hover:not(:disabled) {
+		color: var(--text);
+	}
+
+	&:disabled {
+		cursor: not-allowed;
+		opacity: var(--opacity-inactive);
+	}
+
+	&.active {
+		border-color: var(--accent);
+		background: var(--accent-muted);
+		color: var(--accent-text);
+	}
+}
+
+.text {
+	display: flex;
+	flex-direction: column;
+	gap: 0.125rem;
+	min-width: 0;
+}
+
+.label {
+	font-size: 0.875rem;
+	font-weight: 700;
+}
+
+.hint {
+	color: var(--text-muted);
+	font-size: 0.75rem;
+	.active & {
+		color: inherit;
+		opacity: 0.75;
+	}
+}

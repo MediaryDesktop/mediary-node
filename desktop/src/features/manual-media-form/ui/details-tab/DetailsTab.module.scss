@@ -1,0 +1,15 @@
+.root {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+}
+
+.adultRow {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.625rem;
+	color: var(--text-secondary);
+	font-size: 0.875rem;
+	font-weight: 600;
+	cursor: pointer;
+}

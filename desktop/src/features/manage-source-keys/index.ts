@@ -1,1 +1,1 @@
-export { GoogleBooksSettings, TMDBSettings } from './SourceKeySettings'
+export { AISettings, BraveSettings, GoogleBooksSettings, TMDBSettings } from './SourceKeySettings'

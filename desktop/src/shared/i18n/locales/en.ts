@@ -49,6 +49,7 @@ export const en = {
 		search: 'Search',
 		lists: 'My lists',
 		library: 'Local library',
+		addManually: 'Add title',
 		downloads: 'Downloads',
 		extensions: 'Extensions',
 		settings: 'Settings',
@@ -225,7 +226,6 @@ export const en = {
 		failed: 'Could not load your lists',
 		retry: 'Retry',
 		empty: 'Nothing here yet',
-		connect: 'Connect AniList to see your lists',
 		pending: 'Not synced yet',
 		menu: 'Title options',
 		decrement: 'One less',
@@ -789,6 +789,146 @@ export const en = {
 		}
 	},
 
+	manualMedia: {
+		createTitle: 'Add a title',
+		createSubtitle:
+			'Create a title no source knows. Fill in the minimum and let Claude help with the rest.',
+		editTitle: 'Edit title',
+		editSubtitle: 'It is your own data — changes save to this title only.',
+		type: 'Kind',
+		typeLocked: 'The kind cannot change once a title is saved.',
+		save: 'Save',
+		saved: 'Title added',
+		updated: 'Title updated',
+		saveFailed: 'Could not save the title',
+		cancel: 'Cancel',
+		addedManually: 'Added manually',
+		editAction: 'Edit title',
+		notEditable: 'This title cannot be edited.',
+		notSpecified: 'Not specified',
+		tagPlaceholder: 'Type a name and press Enter',
+		genreSearchPlaceholder: 'Search genres…',
+		fields: {
+			title: 'Title',
+			titlePlaceholder: 'e.g. Interstellar',
+			originalTitle: 'Original title',
+			originalTitlePlaceholder: 'If different from the title',
+			synonyms: 'Also known as',
+			synonymsHint: 'Other names — library files are matched against these too.',
+			year: 'Year',
+			startDate: 'Release date',
+			endDate: 'End date',
+			endYear: 'Ended',
+			format: 'Format',
+			status: 'Status',
+			genres: 'Genres',
+			studios: 'Studios',
+			authors: 'Authors',
+			seasons: 'Seasons',
+			episodes: 'Episodes',
+			chapters: 'Chapters',
+			volumes: 'Volumes',
+			pages: 'Pages',
+			duration: 'Episode length (min)',
+			score: 'Score',
+			country: 'Country of origin',
+			isAdult: 'Adult content',
+			description: 'Description',
+			descriptionPlaceholder: 'A short synopsis'
+		},
+		tabs: {
+			basic: 'Basic info',
+			details: 'Credits',
+			description: 'Description'
+		},
+		sections: {
+			params: 'Basic parameters',
+			counts: 'Counts',
+			releaseHistory: 'Release history',
+			genres: 'Popular genres'
+		},
+		mode: {
+			label: 'How to fill this in',
+			ai: 'Fill with Claude',
+			aiHint: 'Fill the fields in automatically',
+			manual: 'By hand',
+			manualHint: 'Fill everything in yourself'
+		},
+		status: {
+			draft: 'Draft · Not saved yet',
+			dirty: 'Draft · Unsaved changes',
+			clean: 'All changes saved'
+		},
+		completeness: {
+			title: 'Completeness',
+			hint: 'How much of the title is filled in, grouped by how much it matters.',
+			remaining_one: '{{count}} field left to fill in',
+			remaining_few: '{{count}} fields left to fill in',
+			remaining_many: '{{count}} fields left to fill in',
+			remaining_other: '{{count}} fields left to fill in',
+			done: 'Everything is filled in',
+			required: 'Required',
+			recommended: 'Recommended',
+			additional: 'Additional'
+		},
+		validation: {
+			titleRequired: 'A title needs a name'
+		},
+		ai: {
+			action: 'Fill with Claude',
+			regenerate: 'Regenerate',
+			working: 'Asking Claude…',
+			recognized: 'Claude filled in what it knows',
+			unrecognized: 'Claude does not recognise this title — only your own words were kept',
+			failed: 'Could not reach Claude',
+			needsKey: 'Add your Anthropic key in Settings to use this',
+			openSettings: 'Open Claude settings',
+			filledBadge: 'Claude'
+		},
+		assistant: {
+			title: 'Claude assistant',
+			description:
+				'Fill the form automatically. Claude picks metadata, genres, a description and more, from the title and its kind.',
+			checklistBasics: 'Fills in the basic fields',
+			checklistGenres: 'Picks genres and writes a description',
+			checklistCover: 'Suggests posters to pick from',
+			needsKey: 'Add your Claude key to use this',
+			settings: 'Claude settings'
+		},
+		cover: {
+			title: 'Poster',
+			hint: 'Picked before the title is even saved — changed any time after, too.',
+			tabSearch: 'Search',
+			tabUrl: 'URL',
+			tabUpload: 'Upload',
+			search: 'Search for a poster',
+			searchPlaceholder: 'Search by title, year or keywords…',
+			searching: 'Looking for pictures…',
+			empty: 'No pictures found',
+			failed: 'Could not search for a poster',
+			pasteUrl: 'Paste a URL',
+			urlPlaceholder: 'https://…',
+			useUrl: 'Use this address',
+			upload: 'Upload a file',
+			chooseFile: 'Choose a file',
+			remove: 'Remove poster',
+			invalidFile: 'That file is not a picture',
+			tooLarge: 'That picture is too large',
+			current: 'Current poster',
+			fromSearch: 'Picked from search',
+			fromUrl: 'Pasted address',
+			add: 'Add a poster',
+			addHint: 'or pick one below'
+		},
+		delete: {
+			action: 'Delete title',
+			title: 'Delete {{title}}?',
+			hint: 'Library files matched to it stay where they are and can be matched again.',
+			confirm: 'Delete',
+			failed: 'Could not delete the title'
+		}
+	},
+
 	search: {
 		subtitle: 'Find anime, manga, dramas, films, series and books',
 		searchPlaceholder: 'Title',
@@ -797,6 +937,7 @@ export const en = {
 		clear: 'Clear filters',
 		adult: 'Show adult content',
 		empty: 'Nothing found. Try a different name or change the filters',
+		addManually: 'Add it manually',
 		failed: 'Could not search right now',
 		loadMoreFailed: 'Could not load more titles',
 		retry: 'Retry',
@@ -1687,6 +1828,37 @@ export const en = {
 		disabled: 'Google Books is turned off on this node.',
 		note: 'Asked only when Open Library finds nothing: Google counts every request against a daily quota. The key stays in a file only you can read on this computer — not in backups.'
 	},
+	ai: {
+		source: {
+			user: 'Using your own key.',
+			none: "No key yet: titles you add yourself can't be filled in by Claude until you add one."
+		},
+		keyPlaceholder: 'Anthropic API key',
+		save: 'Check and save',
+		getKey: 'Get a key on the Anthropic console',
+		useBuiltIn: 'Remove the key',
+		saved: 'Anthropic accepted the key',
+		cleared: 'Key removed',
+		saveFailed: 'Could not save the key',
+		disabled: 'Claude is turned off on this node.',
+		note: 'The key stays in a file only you can read on this computer — not in backups. Every request is paid for by this key’s own account; there is no key the build ships with.',
+		model: 'Model'
+	},
+	brave: {
+		source: {
+			user: 'Using your own key.',
+			none: 'No key yet: only Wikimedia Commons is searched for posters, which rarely has one.'
+		},
+		keyPlaceholder: 'Brave Search API key',
+		save: 'Check and save',
+		getKey: 'Get a free key on Brave Search',
+		useBuiltIn: 'Remove the key',
+		saved: 'Brave accepted the key',
+		cleared: 'Key removed',
+		saveFailed: 'Could not save the key',
+		disabled: 'Poster search is turned off on this node.',
+		note: 'The key stays in a file only you can read on this computer — not in backups.'
+	},
 	backup: {
 		signedOut:
 			'Backups go to your Mediary account. Sign in to turn them on — everything else works without an account.',
@@ -1738,6 +1910,10 @@ export const en = {
 				title: 'App',
 				subtitle: 'Appearance, language and first-time setup'
 			},
+			anilist: {
+				title: 'AniList',
+				subtitle: 'The account your anime and manga lists live in'
+			},
 			backup: {
 				title: 'Backup',
 				subtitle: 'Your lists in your Mediary account'
@@ -1782,6 +1958,10 @@ export const en = {
 				title: 'Google Books',
 				subtitle: 'Books Open Library does not know'
 			},
+			manualMedia: {
+				title: 'Titles you add yourself',
+				subtitle: 'Claude filling in details, and posters'
+			},
 			mangaDownloads: {
 				title: 'Manga downloads',
 				subtitle: 'Where downloaded chapters are kept'
@@ -1802,6 +1982,14 @@ export const en = {
 		googleBooks: {
 			name: 'Google Books key',
 			hint: 'Where books Open Library does not know are looked up'
+		},
+		ai: {
+			name: 'Claude key',
+			hint: 'Fills in a title you add yourself, with your own Anthropic key'
+		},
+		brave: {
+			name: 'Brave Search key',
+			hint: 'Finds posters for titles you add yourself'
 		},
 		mangaDownloads: {
 			name: 'Manga downloads',
@@ -1838,6 +2026,10 @@ export const en = {
 		mangaSources: {
 			name: 'Manga sources',
 			hint: 'Your own OPDS catalogues — Komga, Kavita, Calibre-Web — to read chapters from'
+		},
+		anilist: {
+			name: 'AniList account',
+			hint: 'Connect it to see and update your anime and manga lists'
 		},
 		backup: {
 			name: 'Backups',
@@ -2113,7 +2305,6 @@ export const en = {
 		}
 	},
 	home: {
-		connect: 'Connect AniList to see your anime and manga here',
 		empty: 'Nothing on your lists yet. Find something in Discover or Search and add it',
 		banner: {
 			label: 'Anime in progress',

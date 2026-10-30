@@ -26,6 +26,7 @@ const SECTIONS = [
 	{ to: '/search', icon: 'common/search', labelKey: 'nav.search', size: 26 },
 	{ to: '/lists', icon: 'common/list', labelKey: 'nav.lists', size: 22 },
 	{ to: '/library', icon: 'common/file-tree', labelKey: 'nav.library', size: 22 },
+	{ to: '/media/new', icon: 'common/wand-sparkles', labelKey: 'nav.addManually', size: 22 },
 	{ to: '/downloads', icon: 'common/download', labelKey: 'nav.downloads', size: 22 },
 	{ to: '/extensions', icon: <IoExtensionPuzzleOutline />, labelKey: 'nav.extensions', size: 22 }
 ] as const satisfies readonly { to: string; icon: SectionIcon; labelKey: string; size?: number }[]

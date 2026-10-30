@@ -20,11 +20,9 @@ import {
 } from '@shared/ui'
 import type { IconLike } from '@shared/ui'
 
-import { aniListAccountModel } from '@entities/anilist-account'
 import { LIST_MEDIA_TYPES, listTitleCount, MediaTypeIcon, trackerListsQuery } from '@entities/tracker'
 import type { ListMediaType, TrackerCustomList } from '@entities/tracker'
 
-import { ConnectAniList } from '@features/connect-anilist'
 import { manageListsModel } from '@features/manage-lists'
 
 import styles from './ListsPage.module.scss'
@@ -63,8 +61,6 @@ function sortLists(lists: TrackerCustomList[], key: SortKey): TrackerCustomList[
 export function ListsPage() {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
-
-	const [connected, sessionLoaded] = useUnit([aniListAccountModel.$connected, aniListAccountModel.$loaded])
 
 	const [lists, listsPending, listsError, startLists] = useUnit([
 		trackerListsQuery.$data,
@@ -140,13 +136,6 @@ export function ListsPage() {
 					</Button>
 				}
 			/>
-
-			{sessionLoaded && !connected && (
-				<section className={styles.connect}>
-					<p className={styles.connectText}>{t('lists.connect')}</p>
-					<ConnectAniList />
-				</section>
-			)}
 
 			<section className={styles.section}>
 				<div className={styles.toolbar}>

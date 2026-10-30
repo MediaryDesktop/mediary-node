@@ -35,6 +35,10 @@ export interface MediaActionsProps {
 	// Opens the torrent search; absent where there are no torrents.
 	onDownload?: () => void
 	onOpenDetails: () => void
+	// The user described this title themselves — edit and delete are theirs to do.
+	editable?: boolean
+	onEdit?: () => void
+	onDelete?: () => void
 }
 
 export function MediaActions({
@@ -49,7 +53,10 @@ export function MediaActions({
 	streamable = false,
 	missingCount,
 	onDownload,
-	onOpenDetails
+	onOpenDetails,
+	editable = false,
+	onEdit,
+	onDelete
 }: MediaActionsProps) {
 	const { t } = useTranslation()
 
@@ -70,12 +77,16 @@ export function MediaActions({
 			icon: 'common/info',
 			onSelect: onOpenDetails
 		},
-		{
-			id: 'anilist',
-			label: t('media.openOn', { name: sources[0]?.name ?? 'AniList' }),
-			icon: 'common/external-link',
-			onSelect: () => window.open(siteUrl, '_blank', 'noreferrer')
-		},
+		...(siteUrl
+			? [
+					{
+						id: 'anilist',
+						label: t('media.openOn', { name: sources[0]?.name ?? 'AniList' }),
+						icon: 'common/external-link',
+						onSelect: () => window.open(siteUrl, '_blank', 'noreferrer')
+					} satisfies DropdownMenuItem
+				]
+			: []),
 		{
 			id: 'library',
 			label: t('media.menu.addToLibrary'),
@@ -84,6 +95,27 @@ export function MediaActions({
 			onSelect: () => {}
 		}
 	]
+
+	if (editable) {
+		if (onEdit) {
+			items.push({
+				id: 'edit',
+				label: t('manualMedia.editAction'),
+				icon: 'common/pencil',
+				onSelect: onEdit
+			})
+		}
+
+		if (onDelete) {
+			items.push({
+				id: 'delete',
+				label: t('manualMedia.delete.action'),
+				icon: 'common/trash',
+				danger: true,
+				onSelect: onDelete
+			})
+		}
+	}
 
 	if (target) {
 		items.unshift({

@@ -10,7 +10,6 @@ import { aniListAccountModel } from '@entities/anilist-account'
 import { useTrackedEntries, useTrackedEntriesReady } from '@entities/tracker'
 import type { TrackerEntry, TrackerStatus } from '@entities/tracker'
 
-import { ConnectAniList } from '@features/connect-anilist'
 import { ContinueWatching, useContinueWatching } from '@features/continue-watching'
 
 import styles from './HomePage.module.scss'
@@ -61,13 +60,6 @@ export function HomePage() {
 	return (
 		<PageTransition className={styles.root}>
 			<HomeBanner entries={entries} watching={watching} loading={!ready} onOpen={openMedia} />
-
-			{sessionLoaded && !connected && (
-				<section className={styles.connect}>
-					<p className={styles.connectText}>{t('home.connect')}</p>
-					<ConnectAniList />
-				</section>
-			)}
 
 			<ContinueWatching state={watching} />
 

@@ -1,4 +1,5 @@
 export { Button } from './button/Button'
+export type { ButtonVariant } from './button/Button'
 export { DatePicker } from './date-picker/DatePicker'
 export type { DatePickerProps } from './date-picker/DatePicker'
 export { Input } from './input/Input'

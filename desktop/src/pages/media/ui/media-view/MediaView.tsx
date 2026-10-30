@@ -1,15 +1,18 @@
+import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
 import { useState } from 'react'
 
+import { HttpRequestError, problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
 import { formatRelativeTime, formatWeekday, useUnitWatch } from '@shared/lib'
-import { Icon, Modal, PhaseTransition } from '@shared/ui'
+import { Button, Icon, Modal, PhaseTransition, toast } from '@shared/ui'
 
-import { mediaTitle } from '@entities/media'
+import { deleteManualMediaFx, mediaTitle } from '@entities/media'
 import type { MediaDetails, MediaSource } from '@entities/media'
 import { useTorrentSetup } from '@entities/torrent'
 import type { TrackerEntry } from '@entities/tracker'
 
+import { manualId } from '@features/manual-media-form'
 import {
 	searchClosed,
 	searchOpened,
@@ -44,8 +47,11 @@ export interface MediaViewProps {
 
 export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 	const { t, i18n } = useTranslation()
+	const navigate = useNavigate()
 	const [descriptionOpen, setDescriptionOpen] = useState(false)
 	const [detailsOpen, setDetailsOpen] = useState(false)
+	const [deleteOpen, setDeleteOpen] = useState(false)
+	const [deleting, setDeleting] = useState(false)
 	const [view, setView] = useState<MediaViewKind>('library')
 	const [openSearch, closeSearch, streamTarget, requestStream, cancelStream, chosenVia] = useUnit([
 		searchOpened,
@@ -74,6 +80,22 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 		seasonal ? null : releasedEpisodes(media, subject?.total),
 		torrents
 	)
+
+	const confirmDelete = async () => {
+		setDeleting(true)
+
+		try {
+			await deleteManualMediaFx(manualId(mediaRef))
+			setDeleteOpen(false)
+			void navigate({ to: '/library' })
+		} catch (error) {
+			toast.error(problemDetail(HttpRequestError.fromUnknown(error), t('manualMedia.delete.failed')), {
+				id: 'manual-media-delete'
+			})
+		} finally {
+			setDeleting(false)
+		}
+	}
 
 	if (!subject) {
 		return null
@@ -148,6 +170,13 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 						: undefined
 				}
 				onOpenDetails={() => setDetailsOpen(true)}
+				editable={media?.editable}
+				onEdit={
+					media?.editable
+						? () => navigate({ to: '/media/$mediaRef/edit', params: { mediaRef } })
+						: undefined
+				}
+				onDelete={media?.editable ? () => setDeleteOpen(true) : undefined}
 			/>
 
 			{torrents && (
@@ -230,6 +259,31 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 				>
 					<MediaFacts media={media} mediaType={mediaType} locale={locale} />
 				</Modal>
+			)}
+
+			{media?.editable && (
+				<Modal
+					open={deleteOpen}
+					onOpenChange={setDeleteOpen}
+					size='sm'
+					title={t('manualMedia.delete.title', { title })}
+					description={t('manualMedia.delete.hint')}
+					footer={
+						<>
+							<Button
+								variant='secondary'
+								onClick={() => setDeleteOpen(false)}
+								disabled={deleting}
+							>
+								{t('manualMedia.cancel')}
+							</Button>
+
+							<Button variant='primary' onClick={() => void confirmDelete()} loading={deleting}>
+								{t('manualMedia.delete.confirm')}
+							</Button>
+						</>
+					}
+				/>
 			)}
 		</>
 	)

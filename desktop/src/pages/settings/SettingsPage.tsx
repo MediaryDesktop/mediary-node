@@ -10,13 +10,14 @@ import { nodeHealthQuery } from '@infra/node'
 
 import { BackupSettings, DevicesSettings } from '@features/back-up-node'
 import { MissingPlayerNotice, PlayerModeSwitcher } from '@features/choose-player'
+import { ConnectAniList } from '@features/connect-anilist'
 import { DownloadFolderSetting } from '@features/download-chapters'
 import { BookFolderSetting } from '@features/download-free-book'
 import { BookServersSettings, GutenbergSettings } from '@features/manage-book-sources'
 import { DebridServiceSettings } from '@features/manage-debrid-service'
 import { LibraryRootsSettings } from '@features/manage-library-roots'
 import { OPDSServersSettings } from '@features/manage-opds-servers'
-import { GoogleBooksSettings, TMDBSettings } from '@features/manage-source-keys'
+import { AISettings, BraveSettings, GoogleBooksSettings, TMDBSettings } from '@features/manage-source-keys'
 import { TorrentClientSettings } from '@features/manage-torrent-client'
 import { ReleaseProfileSettings, TorznabSourcesSettings } from '@features/manage-torznab-sources'
 import { LanguageSwitcher } from '@features/switch-language'
@@ -51,7 +52,11 @@ export function SettingsPage({ section }: SettingsPageProps) {
 									onClick={() =>
 										// Replaces: switching sections should not pile up history entries
 										// that "back" would have to walk through one at a time.
-										navigate({ to: '/settings', search: { section: item.id }, replace: true })
+										navigate({
+											to: '/settings',
+											search: { section: item.id },
+											replace: true
+										})
 									}
 								>
 									{renderIcon(item.icon, 18)}
@@ -103,6 +108,14 @@ function SectionContent({ section }: { section: SectionInfo }) {
 					</Row>
 				</Card>
 			)
+		case 'anilist':
+			return (
+				<Card>
+					<Row name={t('settings.anilist.name')} hint={t('settings.anilist.hint')} block>
+						<ConnectAniList showHeader={false} />
+					</Row>
+				</Card>
+			)
 		case 'backup':
 			return (
 				<Card>
@@ -149,6 +162,17 @@ function SectionContent({ section }: { section: SectionInfo }) {
 				<Card>
 					<Row name={t('settings.googleBooks.name')} hint={t('settings.googleBooks.hint')} block>
 						<GoogleBooksSettings />
+					</Row>
+				</Card>
+			)
+		case 'manual-media':
+			return (
+				<Card>
+					<Row name={t('settings.ai.name')} hint={t('settings.ai.hint')} block>
+						<AISettings />
+					</Row>
+					<Row name={t('settings.brave.name')} hint={t('settings.brave.hint')} block>
+						<BraveSettings />
 					</Row>
 				</Card>
 			)

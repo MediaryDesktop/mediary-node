@@ -1,5 +1,6 @@
 import { useTranslation } from '@shared/i18n'
 import { Button, Notice } from '@shared/ui'
+import type { ButtonVariant } from '@shared/ui'
 
 import type { TorrentSetup } from '../../lib/useTorrentSetup'
 
@@ -22,15 +23,15 @@ export function TorrentSetupNotice({ setup, needSearch, onOpenSettings }: Torren
 		return null
 	}
 
-	const action = (missing: TorrentSetupGap) => (
-		<Button size='small' variant='secondary' onClick={() => onOpenSettings(missing)}>
+	const action = (missing: TorrentSetupGap, variant: ButtonVariant = 'secondary') => (
+		<Button size='small' variant={variant} onClick={() => onOpenSettings(missing)}>
 			{t('torrents.setup.openSettings')}
 		</Button>
 	)
 
 	if (!setup.clientConfigured) {
 		return (
-			<Notice tone='warning' title={t('torrents.setup.noClient')} action={action('client')}>
+			<Notice tone='warning' title={t('torrents.setup.noClient')} action={action('client', 'glass-warning')}>
 				{t('torrents.setup.noClientHint')}
 			</Notice>
 		)

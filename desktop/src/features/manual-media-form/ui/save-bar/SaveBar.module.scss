@@ -1,0 +1,40 @@
+.bar {
+	position: sticky;
+	bottom: 1.25rem;
+	z-index: 2;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 1rem 1.5rem;
+	border: 1px solid var(--glass-border);
+	border-radius: var(--radius-lg);
+	background: var(--glass);
+	box-shadow: var(--shadow-lg);
+	backdrop-filter: blur(16px);
+}
+
+.start {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	min-width: 0;
+}
+
+.status {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4375rem;
+	color: var(--text-secondary);
+	font-size: 0.8125rem;
+	font-weight: 600;
+
+	svg {
+		color: var(--success);
+	}
+}
+
+.end {
+	display: flex;
+	gap: 0.75rem;
+}

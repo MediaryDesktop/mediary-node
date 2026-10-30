@@ -13,6 +13,7 @@ import { entryTracking, useTrackedEntries } from '@entities/tracker'
 import type { TrackerEntry } from '@entities/tracker'
 
 import { searchMediaModel } from '../../model/model'
+import { AddManuallyButton } from '../add-manually-button/AddManuallyButton'
 
 import styles from './SearchResults.module.scss'
 
@@ -95,7 +96,7 @@ export function SearchResults({ renderMenu }: SearchResultsProps) {
 			/>
 		),
 
-		empty: <EmptyState title={t('search.empty')} />,
+		empty: <EmptyState title={t('search.empty')} action={<AddManuallyButton />} />,
 
 		results: (
 			<div className={styles.results}>

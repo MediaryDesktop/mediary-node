@@ -47,6 +47,7 @@ export const ru: Translation = {
 		search: 'Поиск',
 		lists: 'Мои списки',
 		library: 'Локальная библиотека',
+		addManually: 'Добавить тайтл',
 		downloads: 'Загрузки',
 		extensions: 'Расширения',
 		settings: 'Настройки',
@@ -224,7 +225,6 @@ export const ru: Translation = {
 		failed: 'Не удалось загрузить списки',
 		retry: 'Повторить',
 		empty: 'Здесь пока пусто',
-		connect: 'Подключите AniList, чтобы увидеть свои списки',
 		pending: 'Ещё не синхронизировано',
 		menu: 'Действия с тайтлом',
 		decrement: 'На один меньше',
@@ -789,6 +789,146 @@ export const ru: Translation = {
 		}
 	},
 
+	manualMedia: {
+		createTitle: 'Добавить тайтл',
+		createSubtitle:
+			'Создайте тайтл, которого нет в AniList, TMDB или книжных источниках. Заполните минимум — остальное поможет Claude.',
+		editTitle: 'Редактирование тайтла',
+		editSubtitle: 'Это ваши собственные данные — изменения касаются только этого тайтла.',
+		type: 'Тип',
+		typeLocked: 'Тип нельзя изменить после сохранения тайтла.',
+		save: 'Сохранить',
+		saved: 'Тайтл добавлен',
+		updated: 'Тайтл обновлён',
+		saveFailed: 'Не удалось сохранить тайтл',
+		cancel: 'Отмена',
+		addedManually: 'Добавлено вручную',
+		editAction: 'Редактировать тайтл',
+		notEditable: 'Этот тайтл нельзя редактировать.',
+		notSpecified: 'Не указано',
+		tagPlaceholder: 'Введите название и нажмите Enter',
+		genreSearchPlaceholder: 'Поиск жанра…',
+		fields: {
+			title: 'Название',
+			titlePlaceholder: 'Например: Interstellar',
+			originalTitle: 'Оригинальное название',
+			originalTitlePlaceholder: 'Если отличается от названия',
+			synonyms: 'Также известен как',
+			synonymsHint: 'Другие названия — по ним тоже сопоставляются файлы библиотеки.',
+			year: 'Год',
+			startDate: 'Дата выхода',
+			endDate: 'Дата завершения',
+			endYear: 'Год завершения',
+			format: 'Формат',
+			status: 'Статус',
+			genres: 'Жанры',
+			studios: 'Студии',
+			authors: 'Авторы',
+			seasons: 'Сезоны',
+			episodes: 'Эпизоды',
+			chapters: 'Главы',
+			volumes: 'Тома',
+			pages: 'Страницы',
+			duration: 'Длительность эпизода (мин)',
+			score: 'Оценка',
+			country: 'Страна происхождения',
+			isAdult: 'Контент для взрослых',
+			description: 'Описание',
+			descriptionPlaceholder: 'Краткий синопсис'
+		},
+		tabs: {
+			basic: 'Основная информация',
+			details: 'Причастные',
+			description: 'Описание'
+		},
+		sections: {
+			params: 'Основные параметры',
+			counts: 'Количество',
+			releaseHistory: 'История выхода',
+			genres: 'Популярные жанры'
+		},
+		mode: {
+			label: 'Как заполнить',
+			ai: 'Заполнить с Claude',
+			aiHint: 'Автоматически заполнить поля',
+			manual: 'Вручную',
+			manualHint: 'Заполнить всё самостоятельно'
+		},
+		status: {
+			draft: 'Черновик · Ещё не сохранено',
+			dirty: 'Черновик · Есть несохранённые изменения',
+			clean: 'Все изменения сохранены'
+		},
+		completeness: {
+			title: 'Заполненность',
+			hint: 'Насколько заполнен тайтл, по тому, насколько важно каждое поле.',
+			remaining_one: 'Осталось заполнить {{count}} поле',
+			remaining_few: 'Осталось заполнить {{count}} поля',
+			remaining_many: 'Осталось заполнить {{count}} полей',
+			remaining_other: 'Осталось заполнить {{count}} поля',
+			done: 'Всё заполнено',
+			required: 'Обязательные',
+			recommended: 'Рекомендованные',
+			additional: 'Дополнительные'
+		},
+		validation: {
+			titleRequired: 'Тайтлу нужно название'
+		},
+		ai: {
+			action: 'Заполнить с помощью Claude',
+			regenerate: 'Перегенерировать',
+			working: 'Спрашиваем Claude…',
+			recognized: 'Claude заполнил то, что знает',
+			unrecognized: 'Claude не узнаёт этот тайтл — оставлены только ваши собственные слова',
+			failed: 'Не удалось связаться с Claude',
+			needsKey: 'Добавьте ваш ключ Anthropic в Настройках, чтобы воспользоваться этим',
+			openSettings: 'Открыть настройки Claude',
+			filledBadge: 'Claude'
+		},
+		assistant: {
+			title: 'ИИ-помощник',
+			description:
+				'Заполнит форму автоматически. Claude подберёт метаданные, жанры, описание и другое на основе названия и типа.',
+			checklistBasics: 'Заполнит основные поля',
+			checklistGenres: 'Подберёт жанры и описание',
+			checklistCover: 'Предложит варианты постера',
+			needsKey: 'Добавьте ваш ключ Claude, чтобы воспользоваться этим',
+			settings: 'Настройки Claude'
+		},
+		cover: {
+			title: 'Постер',
+			hint: 'Можно выбрать ещё до сохранения тайтла — и изменить в любой момент после.',
+			tabSearch: 'Поиск',
+			tabUrl: 'URL',
+			tabUpload: 'Загрузить',
+			search: 'Поиск постера',
+			searchPlaceholder: 'Поиск по названию, году или ключевым словам…',
+			searching: 'Ищем картинки…',
+			empty: 'Ничего не найдено',
+			failed: 'Не удалось найти постер',
+			pasteUrl: 'Вставить URL',
+			urlPlaceholder: 'https://…',
+			useUrl: 'Использовать этот адрес',
+			upload: 'Загрузить файл',
+			chooseFile: 'Выбрать файл',
+			remove: 'Убрать постер',
+			invalidFile: 'Это не картинка',
+			tooLarge: 'Эта картинка слишком большая',
+			current: 'Текущий постер',
+			fromSearch: 'Выбрано из поиска',
+			fromUrl: 'Вставленный адрес',
+			add: 'Добавить постер',
+			addHint: 'или выберите ниже'
+		},
+		delete: {
+			action: 'Удалить тайтл',
+			title: 'Удалить «{{title}}»?',
+			hint: 'Сопоставленные с ним файлы библиотеки останутся сопоставленными — их можно сопоставить снова.',
+			confirm: 'Удалить',
+			failed: 'Не удалось удалить тайтл'
+		}
+	},
+
 	search: {
 		subtitle: 'Находите аниме, мангу, дорамы, фильмы, сериалы и книги',
 		searchPlaceholder: 'Название',
@@ -797,6 +937,7 @@ export const ru: Translation = {
 		clear: 'Сбросить фильтры',
 		adult: 'Показывать контент 18+',
 		empty: 'Ничего не найдено. Попробуйте другое название или измените фильтры',
+		addManually: 'Добавить вручную',
 		failed: 'Не удалось выполнить поиск',
 		loadMoreFailed: 'Не удалось загрузить ещё тайтлы',
 		retry: 'Повторить',
@@ -1691,6 +1832,37 @@ export const ru: Translation = {
 		disabled: 'Google Books выключен на этой ноде.',
 		note: 'Запрашивается только тогда, когда Open Library ничего не нашла: Google считает каждый запрос в дневную квоту. Ключ хранится в файле, который можете прочитать только вы на этом компьютере, — не в бэкапах.'
 	},
+	ai: {
+		source: {
+			user: 'Используется ваш собственный ключ.',
+			none: 'Ключа ещё нет: тайтлы, добавленные вручную, не заполнит Claude, пока он не добавлен.'
+		},
+		keyPlaceholder: 'API-ключ Anthropic',
+		save: 'Проверить и сохранить',
+		getKey: 'Получить ключ в консоли Anthropic',
+		useBuiltIn: 'Убрать ключ',
+		saved: 'Anthropic принял ключ',
+		cleared: 'Ключ убран',
+		saveFailed: 'Не удалось сохранить ключ',
+		disabled: 'Claude выключен на этой ноде.',
+		note: 'Ключ хранится в файле, который можете прочитать только вы на этом компьютере, — не в бэкапах. За каждый запрос платит аккаунт этого ключа; встроенного ключа нет.',
+		model: 'Модель'
+	},
+	brave: {
+		source: {
+			user: 'Используется ваш собственный ключ.',
+			none: 'Ключа ещё нет: постеры ищет только Wikimedia Commons, где они редко есть.'
+		},
+		keyPlaceholder: 'API-ключ Brave Search',
+		save: 'Проверить и сохранить',
+		getKey: 'Получить бесплатный ключ на Brave Search',
+		useBuiltIn: 'Убрать ключ',
+		saved: 'Brave принял ключ',
+		cleared: 'Ключ убран',
+		saveFailed: 'Не удалось сохранить ключ',
+		disabled: 'Поиск постеров выключен на этой ноде.',
+		note: 'Ключ хранится в файле, который можете прочитать только вы на этом компьютере, — не в бэкапах.'
+	},
 	backup: {
 		signedOut:
 			'Бэкапы хранятся в аккаунте Mediary. Войдите, чтобы включить их, — всё остальное работает и без аккаунта.',
@@ -1742,6 +1914,10 @@ export const ru: Translation = {
 				title: 'Приложение',
 				subtitle: 'Внешний вид, язык и первичная настройка'
 			},
+			anilist: {
+				title: 'AniList',
+				subtitle: 'Аккаунт, в котором живут ваши списки аниме и манги'
+			},
 			backup: {
 				title: 'Бэкап',
 				subtitle: 'Ваши списки в аккаунте Mediary'
@@ -1786,6 +1962,10 @@ export const ru: Translation = {
 				title: 'Google Books',
 				subtitle: 'Книги, которых не знает Open Library'
 			},
+			manualMedia: {
+				title: 'Тайтлы, добавленные вручную',
+				subtitle: 'Заполнение деталей Claude и постеры'
+			},
 			mangaDownloads: {
 				title: 'Загрузка манги',
 				subtitle: 'Где хранятся загруженные главы'
@@ -1806,6 +1986,14 @@ export const ru: Translation = {
 		googleBooks: {
 			name: 'Ключ Google Books',
 			hint: 'Где искать книги, которых не знает Open Library'
+		},
+		ai: {
+			name: 'Ключ Claude',
+			hint: 'Заполняет тайтл, добавленный вручную, вашим собственным ключом Anthropic'
+		},
+		brave: {
+			name: 'Ключ Brave Search',
+			hint: 'Ищет постеры для тайтлов, добавленных вручную'
 		},
 		mangaDownloads: {
 			name: 'Загрузки манги',
@@ -1842,6 +2030,10 @@ export const ru: Translation = {
 		mangaSources: {
 			name: 'Источники манги',
 			hint: 'Ваши собственные OPDS-каталоги — Komga, Kavita, Calibre-Web — откуда читать главы'
+		},
+		anilist: {
+			name: 'Аккаунт AniList',
+			hint: 'Подключите, чтобы видеть и обновлять списки аниме и манги'
 		},
 		backup: {
 			name: 'Бэкапы',
@@ -2118,7 +2310,6 @@ export const ru: Translation = {
 		}
 	},
 	home: {
-		connect: 'Подключите AniList, чтобы видеть здесь свои аниме и мангу',
 		empty: 'В ваших списках пока пусто. Найдите что-нибудь в Обзоре или Поиске и добавьте',
 		banner: {
 			label: 'Аниме в процессе',

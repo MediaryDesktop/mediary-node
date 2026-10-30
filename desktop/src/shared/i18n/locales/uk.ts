@@ -47,6 +47,7 @@ export const uk: Translation = {
 		search: 'Пошук',
 		lists: 'Мої списки',
 		library: 'Локальна бібліотека',
+		addManually: 'Додати тайтл',
 		downloads: 'Завантаження',
 		extensions: 'Розширення',
 		settings: 'Налаштування',
@@ -223,7 +224,6 @@ export const uk: Translation = {
 		failed: 'Не вдалося завантажити списки',
 		retry: 'Повторити',
 		empty: 'Тут поки порожньо',
-		connect: 'Підключіть AniList, щоб побачити свої списки',
 		pending: 'Ще не синхронізовано',
 		menu: 'Дії з тайтлом',
 		decrement: 'На один менше',
@@ -787,6 +787,146 @@ export const uk: Translation = {
 		}
 	},
 
+	manualMedia: {
+		createTitle: 'Додати тайтл',
+		createSubtitle:
+			'Створіть тайтл, якого немає в AniList, TMDB чи книжкових джерелах. Заповніть мінімум — решту допоможе Claude.',
+		editTitle: 'Редагування тайтла',
+		editSubtitle: 'Це ваші власні дані — зміни стосуються лише цього тайтла.',
+		type: 'Тип',
+		typeLocked: 'Тип не можна змінити після збереження тайтла.',
+		save: 'Зберегти',
+		saved: 'Тайтл додано',
+		updated: 'Тайтл оновлено',
+		saveFailed: 'Не вдалося зберегти тайтл',
+		cancel: 'Скасувати',
+		addedManually: 'Додано вручну',
+		editAction: 'Редагувати тайтл',
+		notEditable: 'Цей тайтл не можна редагувати.',
+		notSpecified: 'Не вказано',
+		tagPlaceholder: 'Введіть назву та натисніть Enter',
+		genreSearchPlaceholder: 'Пошук жанру…',
+		fields: {
+			title: 'Назва',
+			titlePlaceholder: 'Наприклад: Interstellar',
+			originalTitle: 'Оригінальна назва',
+			originalTitlePlaceholder: 'Якщо відрізняється від назви',
+			synonyms: 'Також відомий як',
+			synonymsHint: 'Інші назви — за ними теж зіставляються файли бібліотеки.',
+			year: 'Рік',
+			startDate: 'Дата виходу',
+			endDate: 'Дата завершення',
+			endYear: 'Рік завершення',
+			format: 'Формат',
+			status: 'Статус',
+			genres: 'Жанри',
+			studios: 'Студії',
+			authors: 'Автори',
+			seasons: 'Сезони',
+			episodes: 'Епізоди',
+			chapters: 'Розділи',
+			volumes: 'Томи',
+			pages: 'Сторінки',
+			duration: 'Тривалість епізоду (хв)',
+			score: 'Оцінка',
+			country: 'Країна походження',
+			isAdult: 'Контент для дорослих',
+			description: 'Опис',
+			descriptionPlaceholder: 'Короткий синопсис'
+		},
+		tabs: {
+			basic: 'Основна інформація',
+			details: 'Причетні',
+			description: 'Опис'
+		},
+		sections: {
+			params: 'Основні параметри',
+			counts: 'Кількість',
+			releaseHistory: 'Історія виходу',
+			genres: 'Популярні жанри'
+		},
+		mode: {
+			label: 'Як заповнити',
+			ai: 'Заповнити з Claude',
+			aiHint: 'Автоматично заповнити поля',
+			manual: 'Вручну',
+			manualHint: 'Заповнити все самостійно'
+		},
+		status: {
+			draft: 'Чернетка · Ще не збережено',
+			dirty: 'Чернетка · Є незбережені зміни',
+			clean: 'Усі зміни збережено'
+		},
+		completeness: {
+			title: 'Заповненість',
+			hint: 'Наскільки заповнений тайтл, за тим, наскільки важливе кожне поле.',
+			remaining_one: 'Залишилося заповнити {{count}} поле',
+			remaining_few: 'Залишилося заповнити {{count}} поля',
+			remaining_many: 'Залишилося заповнити {{count}} полів',
+			remaining_other: 'Залишилося заповнити {{count}} поля',
+			done: 'Усе заповнено',
+			required: 'Обовʼязкові',
+			recommended: 'Рекомендовані',
+			additional: 'Додаткові'
+		},
+		validation: {
+			titleRequired: 'Тайтлу потрібна назва'
+		},
+		ai: {
+			action: 'Заповнити за допомогою Claude',
+			regenerate: 'Перегенерувати',
+			working: 'Питаємо Claude…',
+			recognized: 'Claude заповнив те, що знає',
+			unrecognized: 'Claude не впізнає цей тайтл — залишено лише ваші власні слова',
+			failed: 'Не вдалося звʼязатися з Claude',
+			needsKey: 'Додайте ваш ключ Anthropic у Налаштуваннях, щоб скористатися цим',
+			openSettings: 'Відкрити налаштування Claude',
+			filledBadge: 'Claude'
+		},
+		assistant: {
+			title: 'ШІ-помічник',
+			description:
+				'Заповнить форму автоматично. Claude підбере метадані, жанри, опис та інше на основі назви й типу.',
+			checklistBasics: 'Заповнить основні поля',
+			checklistGenres: 'Підбере жанри та опис',
+			checklistCover: 'Запропонує варіанти постера',
+			needsKey: 'Додайте ваш ключ Claude, щоб скористатися цим',
+			settings: 'Налаштування Claude'
+		},
+		cover: {
+			title: 'Постер',
+			hint: 'Можна обрати ще до збереження тайтла — і змінити будь-коли після.',
+			tabSearch: 'Пошук',
+			tabUrl: 'URL',
+			tabUpload: 'Завантажити',
+			search: 'Пошук постера',
+			searchPlaceholder: 'Пошук за назвою, роком або ключовими словами…',
+			searching: 'Шукаємо картинки…',
+			empty: 'Нічого не знайдено',
+			failed: 'Не вдалося знайти постер',
+			pasteUrl: 'Вставити URL',
+			urlPlaceholder: 'https://…',
+			useUrl: 'Використати цю адресу',
+			upload: 'Завантажити файл',
+			chooseFile: 'Обрати файл',
+			remove: 'Прибрати постер',
+			invalidFile: 'Це не картинка',
+			tooLarge: 'Ця картинка занадто велика',
+			current: 'Поточний постер',
+			fromSearch: 'Обрано з пошуку',
+			fromUrl: 'Вставлена адреса',
+			add: 'Додати постер',
+			addHint: 'або оберіть нижче'
+		},
+		delete: {
+			action: 'Видалити тайтл',
+			title: 'Видалити «{{title}}»?',
+			hint: 'Зіставлені з ним файли бібліотеки лишаться зіставленими — їх можна зіставити знову.',
+			confirm: 'Видалити',
+			failed: 'Не вдалося видалити тайтл'
+		}
+	},
+
 	search: {
 		subtitle: 'Знаходьте аніме, мангу, дорами, фільми, серіали й книги',
 		searchPlaceholder: 'Назва',
@@ -795,6 +935,7 @@ export const uk: Translation = {
 		clear: 'Скинути фільтри',
 		adult: 'Показувати контент 18+',
 		empty: 'Нічого не знайдено. Спробуйте іншу назву або змініть фільтри',
+		addManually: 'Додати вручну',
 		failed: 'Не вдалося виконати пошук',
 		loadMoreFailed: 'Не вдалося завантажити ще тайтли',
 		retry: 'Повторити',
@@ -1690,6 +1831,37 @@ export const uk: Translation = {
 		disabled: 'Google Books вимкнено на цій ноді.',
 		note: 'Запитується лише тоді, коли Open Library нічого не знайшла: Google рахує кожен запит у денну квоту. Ключ зберігається у файлі, який можете прочитати лише ви на цьому компʼютері, — не в бекапах.'
 	},
+	ai: {
+		source: {
+			user: 'Використовується ваш власний ключ.',
+			none: 'Ключа ще немає: тайтли, додані вручну, не заповнить Claude, доки його не додано.'
+		},
+		keyPlaceholder: 'API-ключ Anthropic',
+		save: 'Перевірити й зберегти',
+		getKey: 'Отримати ключ у консолі Anthropic',
+		useBuiltIn: 'Прибрати ключ',
+		saved: 'Anthropic прийняв ключ',
+		cleared: 'Ключ прибрано',
+		saveFailed: 'Не вдалося зберегти ключ',
+		disabled: 'Claude вимкнено на цій ноді.',
+		note: 'Ключ зберігається у файлі, який можете прочитати лише ви на цьому компʼютері, — не в бекапах. За кожен запит платить акаунт цього ключа; вбудованого ключа немає.',
+		model: 'Модель'
+	},
+	brave: {
+		source: {
+			user: 'Використовується ваш власний ключ.',
+			none: 'Ключа ще немає: постери шукає лише Wikimedia Commons, де їх рідко буває.'
+		},
+		keyPlaceholder: 'API-ключ Brave Search',
+		save: 'Перевірити й зберегти',
+		getKey: 'Отримати безкоштовний ключ на Brave Search',
+		useBuiltIn: 'Прибрати ключ',
+		saved: 'Brave прийняв ключ',
+		cleared: 'Ключ прибрано',
+		saveFailed: 'Не вдалося зберегти ключ',
+		disabled: 'Пошук постерів вимкнено на цій ноді.',
+		note: 'Ключ зберігається у файлі, який можете прочитати лише ви на цьому компʼютері, — не в бекапах.'
+	},
 	backup: {
 		signedOut:
 			'Бекапи зберігаються в акаунті Mediary. Увійдіть, щоб їх увімкнути, — усе інше працює і без акаунта.',
@@ -1741,6 +1913,10 @@ export const uk: Translation = {
 				title: 'Застосунок',
 				subtitle: 'Вигляд, мова та первинне налаштування'
 			},
+			anilist: {
+				title: 'AniList',
+				subtitle: 'Акаунт, у якому живуть твої списки аніме та манги'
+			},
 			backup: {
 				title: 'Бекап',
 				subtitle: 'Ваші списки в акаунті Mediary'
@@ -1785,6 +1961,10 @@ export const uk: Translation = {
 				title: 'Google Books',
 				subtitle: 'Книжки, яких не знає Open Library'
 			},
+			manualMedia: {
+				title: 'Тайтли, додані вручну',
+				subtitle: 'Заповнення деталей Claude і постери'
+			},
 			mangaDownloads: {
 				title: 'Завантаження манги',
 				subtitle: 'Де зберігаються завантажені розділи'
@@ -1805,6 +1985,14 @@ export const uk: Translation = {
 		googleBooks: {
 			name: 'Ключ Google Books',
 			hint: 'Де шукати книжки, яких не знає Open Library'
+		},
+		ai: {
+			name: 'Ключ Claude',
+			hint: 'Заповнює тайтл, доданий вручну, вашим власним ключем Anthropic'
+		},
+		brave: {
+			name: 'Ключ Brave Search',
+			hint: 'Шукає постери для тайтлів, доданих вручну'
 		},
 		mangaDownloads: {
 			name: 'Завантаження манги',
@@ -1841,6 +2029,10 @@ export const uk: Translation = {
 		mangaSources: {
 			name: 'Джерела манги',
 			hint: 'Ваші власні OPDS-каталоги — Komga, Kavita, Calibre-Web — звідки читати розділи'
+		},
+		anilist: {
+			name: 'Акаунт AniList',
+			hint: 'Підʼєднай, щоб бачити й оновлювати списки аніме та манги'
 		},
 		backup: {
 			name: 'Бекапи',
@@ -2116,7 +2308,6 @@ export const uk: Translation = {
 		}
 	},
 	home: {
-		connect: 'Підключіть AniList, щоб бачити тут свої аніме й мангу',
 		empty: 'У ваших списках поки порожньо. Знайдіть щось в Огляді чи Пошуку й додайте',
 		banner: {
 			label: 'Аніме в процесі',

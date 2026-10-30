@@ -1,5 +1,8 @@
 import { createRoute, Outlet } from '@tanstack/react-router'
 
+import { isManualMediaType } from '@features/manual-media-form'
+import type { ManualMediaType } from '@features/manual-media-form'
+
 import { DiscoverPage, isDiscoverTab } from '@pages/discover'
 import type { DiscoverTab } from '@pages/discover'
 import { DownloadsPage } from '@pages/downloads'
@@ -9,6 +12,7 @@ import { HomePage } from '@pages/home'
 import { LibraryPage, ScanHistoryPage } from '@pages/library'
 import { ListDetailPage, ListsPage } from '@pages/lists'
 import { MediaPage } from '@pages/media'
+import { MediaFormPage } from '@pages/media-form'
 import { SearchPage } from '@pages/search'
 import { isSettingsSection, SettingsPage } from '@pages/settings'
 import type { SettingsSection } from '@pages/settings'
@@ -82,6 +86,30 @@ const mediaRoute = createRoute({
 	}
 })
 
+// A title no source knows, described by the user — from the empty state of a
+// search that found nothing, carrying what was already typed.
+const createManualMediaRoute = createRoute({
+	getParentRoute: () => framedRoute,
+	path: '/media/new',
+	validateSearch: (search: Record<string, unknown>): { type?: ManualMediaType; title?: string } => ({
+		type: isManualMediaType(search.type) ? search.type : undefined,
+		title: typeof search.title === 'string' ? search.title : undefined
+	}),
+	component: function CreateManualMediaScreen() {
+		const { type, title } = createManualMediaRoute.useSearch()
+		return <MediaFormPage mode='create' mediaType={type ?? 'anime'} title={title ?? ''} />
+	}
+})
+
+const editManualMediaRoute = createRoute({
+	getParentRoute: () => framedRoute,
+	path: '/media/$mediaRef/edit',
+	component: function EditManualMediaRoute() {
+		const { mediaRef } = editManualMediaRoute.useParams()
+		return <MediaFormPage key={mediaRef} mode='edit' mediaRef={mediaRef} />
+	}
+})
+
 const libraryRoute = createRoute({
 	getParentRoute: () => framedRoute,
 	path: '/library',
@@ -137,6 +165,8 @@ export const framedTree = framedRoute.addChildren([
 	listsRoute,
 	listDetailRoute,
 	mediaRoute,
+	createManualMediaRoute,
+	editManualMediaRoute,
 	libraryRoute,
 	scanHistoryRoute,
 	downloadsRoute,

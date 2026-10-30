@@ -1,0 +1,81 @@
+.stack {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.card {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	padding: 1.125rem;
+	border-radius: var(--radius-md);
+	background: var(--field);
+}
+
+.title {
+	display: flex;
+	align-items: center;
+	gap: 0.375rem;
+	margin: 0;
+	color: var(--text-secondary);
+	font-size: 0.8125rem;
+	font-weight: 700;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+}
+
+.aiDot {
+	color: var(--accent);
+}
+
+.pills {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4375rem;
+}
+
+.pill,
+.pillActive {
+	padding: 0.3125rem 0.75rem;
+	border: 1px solid var(--border);
+	border-radius: 999px;
+	background: var(--surface);
+	color: var(--text-secondary);
+	font-size: 0.75rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition:
+		border-color 140ms,
+		background-color 140ms,
+		color 140ms;
+
+	&:hover:not(:disabled) {
+		border-color: var(--border-strong);
+		color: var(--text);
+	}
+}
+
+.pillActive {
+	border-color: var(--accent);
+	background: var(--accent-muted);
+	color: var(--accent-text);
+}
+
+.score {
+	display: flex;
+	align-items: center;
+	gap: 0.625rem;
+}
+
+.starIcon {
+	flex: none;
+	color: var(--warning);
+}
+
+.scoreMax {
+	flex: none;
+	color: var(--text-muted);
+	font-size: 0.8125rem;
+	font-weight: 600;
+}

@@ -133,3 +133,121 @@ export const setGoogleBooksKeyFx = createNodeRequestFx<string, GoogleBooksSettin
 	body: { api_key: apiKey },
 	timeout: 20_000
 }))
+
+// A title no source knows: the user's own data, kept on this node under a
+// manual:<id> reference.
+export type ManualDraft = Omit<NodeSchemas['ManualDraft'], '$schema'>
+export type ManualHint = Omit<NodeSchemas['ManualHint'], '$schema'>
+export type ManualSuggestion = Omit<NodeSchemas['ManualSuggestion'], '$schema'>
+export type CoverSource = Omit<NodeSchemas['CoverSource'], '$schema'>
+export type CoverImage = NodeSchemas['Image']
+
+export interface ManualMediaResponse {
+	media: MediaDetails
+}
+
+export const createManualMediaFx = createNodeRequestFx<ManualDraft, ManualMediaResponse>(draft => ({
+	url: '/v1/media/manual',
+	method: 'POST',
+	body: draft,
+	timeout: 15_000
+}))
+
+export interface UpdateManualMediaParams {
+	id: string
+	draft: ManualDraft
+}
+
+export const updateManualMediaFx = createNodeRequestFx<UpdateManualMediaParams, ManualMediaResponse>(
+	({ id, draft }) => ({
+		url: `/v1/media/manual/${encodeURIComponent(id)}`,
+		method: 'PUT',
+		body: draft,
+		timeout: 15_000
+	})
+)
+
+export const deleteManualMediaFx = createNodeRequestFx<string, void>(id => ({
+	url: `/v1/media/manual/${encodeURIComponent(id)}`,
+	method: 'DELETE',
+	timeout: 15_000
+}))
+
+// Claude fills in a draft from a hint; nothing is stored until the user saves it.
+export const suggestManualMediaFx = createNodeRequestFx<ManualHint, ManualSuggestion>(hint => ({
+	url: '/v1/media/manual/suggest',
+	method: 'POST',
+	body: hint,
+	timeout: 40_000
+}))
+
+export type AISettings = Omit<NodeSchemas['AISettings'], '$schema'>
+
+export const fetchAISettingsFx = createNodeRequestFx<void, AISettings>({ url: '/v1/ai/settings' })
+
+export interface SetAISettingsParams {
+	api_key?: string
+	model?: string
+}
+
+export const setAISettingsFx = createNodeRequestFx<SetAISettingsParams, AISettings>(body => ({
+	url: '/v1/ai/settings',
+	method: 'PUT',
+	body,
+	timeout: 20_000
+}))
+
+// Pictures that could be a manual title's poster — looked for by the title as the
+// form has it, before the title exists.
+export interface ManualCoverSearch {
+	type: MediaSearchType
+	title: string
+	year?: number
+}
+
+export interface ManualCoverCandidatesResponse {
+	images: CoverImage[] | null
+	sources: MediaSource[] | null
+}
+
+export const searchManualCoversFx = createNodeRequestFx<ManualCoverSearch, ManualCoverCandidatesResponse>(
+	({ type, title, year }) => ({
+		url: '/v1/media/manual/cover/search',
+		query: year ? { type, title, year: String(year) } : { type, title },
+		timeout: 15_000
+	})
+)
+
+export interface SetManualCoverParams {
+	id: string
+	source: CoverSource
+}
+
+export const setManualCoverFx = createNodeRequestFx<SetManualCoverParams, ManualMediaResponse>(
+	({ id, source }) => ({
+		url: `/v1/media/manual/${encodeURIComponent(id)}/cover`,
+		method: 'PUT',
+		body: source,
+		timeout: 20_000
+	})
+)
+
+export const deleteManualCoverFx = createNodeRequestFx<string, ManualMediaResponse>(id => ({
+	url: `/v1/media/manual/${encodeURIComponent(id)}/cover`,
+	method: 'DELETE',
+	timeout: 15_000
+}))
+
+// Posters are found with the user's own Brave Search key, when there is one.
+export type ImageSearchSettings = Omit<NodeSchemas['ImageSearchSettings'], '$schema'>
+
+export const fetchImageSearchSettingsFx = createNodeRequestFx<void, ImageSearchSettings>({
+	url: '/v1/image-search/settings'
+})
+
+export const setBraveKeyFx = createNodeRequestFx<string, ImageSearchSettings>(apiKey => ({
+	url: '/v1/image-search/settings',
+	method: 'PUT',
+	body: { api_key: apiKey },
+	timeout: 20_000
+}))

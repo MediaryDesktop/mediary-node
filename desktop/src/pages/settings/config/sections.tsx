@@ -6,12 +6,14 @@ import type { IconLike } from '@shared/ui'
 // address carries, so a notice elsewhere can open the section it is about.
 export const SETTINGS_SECTIONS = [
 	'app',
+	'anilist',
 	'backup',
 	'devices',
 	'library',
 	'player',
 	'tmdb',
 	'google-books',
+	'manual-media',
 	'torrent-client',
 	'debrid',
 	'torrent-search',
@@ -34,12 +36,14 @@ export interface SectionInfo {
 	// The section's keys under settings.sections.
 	key:
 		| 'app'
+		| 'anilist'
 		| 'backup'
 		| 'devices'
 		| 'library'
 		| 'player'
 		| 'tmdb'
 		| 'googleBooks'
+		| 'manualMedia'
 		| 'torrentClient'
 		| 'debrid'
 		| 'torrentSearch'
@@ -53,6 +57,7 @@ export interface SectionInfo {
 // The menu's cards: what belongs together sits in one, as in Seanime.
 export const SECTION_GROUPS: readonly (readonly SectionInfo[])[] = [
 	[{ id: 'app', icon: 'common/settings', key: 'app' }],
+	[{ id: 'anilist', icon: 'common/user', key: 'anilist' }],
 	[
 		{ id: 'backup', icon: 'common/cloud', key: 'backup' },
 		{ id: 'devices', icon: <IoLaptopOutline size={18} />, key: 'devices' }
@@ -65,6 +70,7 @@ export const SECTION_GROUPS: readonly (readonly SectionInfo[])[] = [
 		{ id: 'tmdb', icon: 'categories/movie', key: 'tmdb' },
 		{ id: 'google-books', icon: 'categories/book', key: 'googleBooks' }
 	],
+	[{ id: 'manual-media', icon: 'common/wand-sparkles', key: 'manualMedia' }],
 	[
 		{ id: 'torrent-client', icon: 'common/download', key: 'torrentClient' },
 		{ id: 'debrid', icon: 'common/play', key: 'debrid' },

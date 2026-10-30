@@ -1,9 +1,15 @@
 export {
+	aiSettingsQuery,
 	alternativeTitles,
+	createManualMediaMutation,
+	deleteManualCoverMutation,
+	deleteManualMediaMutation,
 	enumLabel,
 	episodeTitle,
 	formatMediaDate,
 	googleBooksSettingsQuery,
+	imageSearchSettingsQuery,
+	manualCoverSearchQuery,
 	mediaDetailsModel,
 	mediaDetailsQuery,
 	mediaEpisodesQuery,
@@ -12,9 +18,14 @@ export {
 	mediaSearchQuery,
 	mediaTitle,
 	scoreTone,
+	setAISettingsMutation,
+	setBraveKeyMutation,
 	setGoogleBooksKeyMutation,
+	setManualCoverMutation,
 	setTMDBKeyMutation,
-	tmdbSettingsQuery
+	suggestManualMediaMutation,
+	tmdbSettingsQuery,
+	updateManualMediaMutation
 } from './model/model'
 export type { MediaEnumGroup, ScoreTone } from './model/model'
 
@@ -25,13 +36,29 @@ export type { MediaCardMedia, MediaCardProps } from './ui/media-card/MediaCard'
 export type { MediaTracking } from './ui/media-preview/MediaPreview'
 
 export {
+	createManualMediaFx,
+	deleteManualCoverFx,
+	deleteManualMediaFx,
 	fetchMediaDetailsFx,
 	fetchMediaEpisodesFx,
 	fetchMediaFilterOptionsFx,
-	searchMediaFx
+	searchMediaFx,
+	setManualCoverFx,
+	suggestManualMediaFx,
+	updateManualMediaFx
 } from './api/api'
 export type {
+	AISettings,
+	CoverImage,
+	CoverSource,
 	GoogleBooksSettings,
+	ImageSearchSettings,
+	ManualCoverCandidatesResponse,
+	ManualCoverSearch,
+	ManualDraft,
+	ManualHint,
+	ManualMediaResponse,
+	ManualSuggestion,
 	MediaAiringEpisode,
 	MediaDate,
 	MediaDetails,

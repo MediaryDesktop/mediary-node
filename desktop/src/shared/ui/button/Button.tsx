@@ -8,7 +8,15 @@ import { useRipple } from '../ripple/lib/useRipple'
 import styles from './Button.module.scss'
 
 export type ButtonVariant =
-	'primary' | 'secondary' | 'control' | 'glass' | 'glass-accent' | 'ghost' | 'chrome' | 'chrome-close'
+	| 'primary'
+	| 'secondary'
+	| 'control'
+	| 'glass'
+	| 'glass-accent'
+	| 'glass-warning'
+	| 'ghost'
+	| 'chrome'
+	| 'chrome-close'
 
 export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
 	variant?: ButtonVariant
