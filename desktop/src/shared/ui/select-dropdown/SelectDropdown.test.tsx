@@ -131,6 +131,41 @@ describe('single mode', () => {
 	})
 })
 
+describe('inside a label', () => {
+	// A label hands a click on its text or on any non-interactive part of the
+	// field to the first control inside it, which here would toggle the menu a
+	// second time: it opened on the press and shut again on the click.
+	it('stays open after a press on the chevron', () => {
+		const { container } = render(
+			<label>
+				<span>Kind</span>
+				<Single />
+			</label>
+		)
+
+		const chevron = container.querySelector('svg')!
+
+		fireEvent.mouseDown(chevron)
+		fireEvent.mouseUp(chevron)
+		fireEvent.click(chevron)
+
+		expect(screen.getByRole('listbox')).toBeInTheDocument()
+	})
+
+	it('stays closed after a click on the label text', () => {
+		render(
+			<label>
+				<span>Kind</span>
+				<Single />
+			</label>
+		)
+
+		fireEvent.click(screen.getByText('Kind'))
+
+		expect(screen.getByRole('combobox')).toHaveAttribute('aria-expanded', 'true')
+	})
+})
+
 describe('search', () => {
 	it('filters by label and by description', () => {
 		render(<Single searchable />)

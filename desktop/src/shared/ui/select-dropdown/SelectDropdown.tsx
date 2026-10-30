@@ -222,6 +222,10 @@ export function SelectDropdown(props: SelectDropdownProps) {
 					inputRef.current?.focus()
 					setOpen(current => !current)
 				}}
+				// The press above already toggled the menu. Inside a <label> the click
+				// that follows would be passed on to the input, which toggles it again
+				// and shuts the menu it just opened; a cancelled click is not passed on.
+				onClick={event => event.preventDefault()}
 			>
 				{leading && (
 					<span
