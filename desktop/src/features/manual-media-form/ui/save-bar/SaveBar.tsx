@@ -42,7 +42,7 @@ export function SaveBar({
 					{t('manualMedia.cancel')}
 				</Button>
 
-				<Button onClick={onSave} loading={saving} disabled={saveDisabled}>
+				<Button variant='primary' onClick={onSave} loading={saving} disabled={saveDisabled}>
 					{saveLabel}
 				</Button>
 			</div>

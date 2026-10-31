@@ -905,6 +905,8 @@ export const en = {
 			searching: 'Looking for pictures…',
 			empty: 'No pictures found',
 			failed: 'Could not search for a poster',
+			emptyHint: 'Try the title as it is written originally, or paste an address or upload a file.',
+			failedHint: 'Check your connection and try again.',
 			pasteUrl: 'Paste a URL',
 			urlPlaceholder: 'https://…',
 			useUrl: 'Use this address',

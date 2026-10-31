@@ -1,5 +1,7 @@
 import { useUnit } from 'effector-react'
+import type { ReactNode } from 'react'
 import { useEffect, useRef, useState } from 'react'
+import { IoCloudOfflineOutline, IoImagesOutline, IoSearchOutline } from 'react-icons/io5'
 
 import { useTranslation } from '@shared/i18n'
 import { formatBytes } from '@shared/lib'
@@ -17,6 +19,16 @@ export type CoverSelection =
 	| { kind: 'remove' }
 	| { kind: 'url'; value: string; previewUrl: string; source: 'search' | 'url' }
 	| { kind: 'data'; value: string; previewUrl: string; name: string; size: number }
+
+function EmptyState({ icon, title, hint }: { icon: ReactNode; title: string; hint?: string }) {
+	return (
+		<div className={styles.empty}>
+			<span className={styles.emptyIcon}>{icon}</span>
+			<p className={styles.emptyTitle}>{title}</p>
+			{hint && <p className={styles.emptyHint}>{hint}</p>}
+		</div>
+	)
+}
 
 export interface PosterModalProps {
 	open: boolean
@@ -53,9 +65,13 @@ export function PosterModal({
 	const [url, setUrl] = useState('')
 	const picker = useRef<HTMLInputElement>(null)
 	const lastSearch = useRef('')
+	// Whether this window has searched at all: the answers are kept in a store
+	// shared by every form, so what is in it may belong to an earlier title.
+	const [searched, setSearched] = useState(false)
 
-	const [search, candidates, searching, failed] = useUnit([
+	const [search, reset, candidates, searching, failed] = useUnit([
 		manualCoverSearchQuery.start,
+		manualCoverSearchQuery.reset,
 		manualCoverSearchQuery.$data,
 		manualCoverSearchQuery.$pending,
 		manualCoverSearchQuery.$error
@@ -68,6 +84,10 @@ export function PosterModal({
 				? (existingCoverUrl ?? null)
 				: selection.previewUrl
 
+	useEffect(() => {
+		reset()
+	}, [reset])
+
 	const runSearch = () => {
 		const text = (query || title).trim()
 
@@ -76,6 +96,7 @@ export function PosterModal({
 		}
 
 		lastSearch.current = `${mediaType}|${text}|${year ?? ''}`
+		setSearched(true)
 		search({ type: mediaType, title: text, year })
 	}
 
@@ -157,7 +178,7 @@ export function PosterModal({
 						</div>
 					)}
 
-					<Button variant='secondary' onClick={() => onOpenChange(false)}>
+					<Button variant='primary' onClick={() => onOpenChange(false)}>
 						{t('manualMedia.cover.done')}
 					</Button>
 				</>
@@ -204,16 +225,31 @@ export function PosterModal({
 							</Button>
 						</form>
 
-						{typeMissing && <p className={styles.hint}>{t('manualMedia.cover.needsType')}</p>}
-						{searching && <p className={styles.hint}>{t('manualMedia.cover.searching')}</p>}
-						{!searching && failed && (
-							<p className={styles.hint}>{t('manualMedia.cover.failed')}</p>
+						{typeMissing && (
+							<EmptyState
+								icon={<IoSearchOutline size={28} />}
+								title={t('manualMedia.cover.needsType')}
+							/>
+						)}
+						{!typeMissing && searching && (
+							<p className={styles.hint}>{t('manualMedia.cover.searching')}</p>
+						)}
+						{!typeMissing && !searching && failed && (
+							<EmptyState
+								icon={<IoCloudOfflineOutline size={28} />}
+								title={t('manualMedia.cover.failed')}
+								hint={t('manualMedia.cover.failedHint')}
+							/>
 						)}
 
-						{!searching && !failed && candidates && (
+						{!typeMissing && searched && !searching && !failed && candidates && (
 							<>
 								{(candidates.images ?? []).length === 0 ? (
-									<p className={styles.hint}>{t('manualMedia.cover.empty')}</p>
+									<EmptyState
+										icon={<IoImagesOutline size={28} />}
+										title={t('manualMedia.cover.empty')}
+										hint={t('manualMedia.cover.emptyHint')}
+									/>
 								) : (
 									<ul className={styles.grid}>
 										{candidates.images?.map(image => (
