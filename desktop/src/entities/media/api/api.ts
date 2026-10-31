@@ -236,17 +236,3 @@ export const deleteManualCoverFx = createNodeRequestFx<string, ManualMediaRespon
 	method: 'DELETE',
 	timeout: 15_000
 }))
-
-// Posters are found with the user's own Brave Search key, when there is one.
-export type ImageSearchSettings = Omit<NodeSchemas['ImageSearchSettings'], '$schema'>
-
-export const fetchImageSearchSettingsFx = createNodeRequestFx<void, ImageSearchSettings>({
-	url: '/v1/image-search/settings'
-})
-
-export const setBraveKeyFx = createNodeRequestFx<string, ImageSearchSettings>(apiKey => ({
-	url: '/v1/image-search/settings',
-	method: 'PUT',
-	body: { api_key: apiKey },
-	timeout: 20_000
-}))

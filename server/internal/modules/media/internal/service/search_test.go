@@ -275,3 +275,28 @@ func TestFilterOptionsAreCachedForADay(t *testing.T) {
 		t.Fatalf("past a day the source is asked again, got %d requests", asked)
 	}
 }
+
+func TestCoverCandidatesComeFromTheCatalogAndPutTheYearFirst(t *testing.T) {
+	h := newSearchHarness(t)
+	h.response = searchFixture
+
+	year := 1999
+	covers, err := h.svc.SearchCovers(context.Background(), CoverSearch{MediaType: "anime", Title: "frieren", Year: &year})
+	if err != nil {
+		t.Fatalf("covers: %v", err)
+	}
+
+	if len(covers) != 2 {
+		t.Fatalf("want both posters, got %+v", covers)
+	}
+
+	if covers[0].URL != "https://img/m.jpg" || covers[1].URL != "https://img/xl.jpg" {
+		t.Fatalf("the title of the given year comes first, got %+v", covers)
+	}
+
+	for _, cover := range covers {
+		if cover.Source != "catalog" {
+			t.Fatalf("a catalog poster is marked as one, got %q", cover.Source)
+		}
+	}
+}

@@ -641,23 +641,6 @@ components:
       required:
         - sources
       type: object
-    BraveKeyInputBody:
-      additionalProperties: false
-      properties:
-        $schema:
-          description: A URL to the JSON Schema for this object.
-          examples:
-            - https://example.com/schemas/BraveKeyInputBody.json
-          format: uri
-          readOnly: true
-          type: string
-        api_key:
-          description: The user's own Brave Search API key. Brave is asked to accept it before it is stored. Empty forgets it.
-          maxLength: 1024
-          type: string
-      required:
-        - api_key
-      type: object
     CandidatesOutputBody:
       additionalProperties: false
       properties:
@@ -2257,9 +2240,9 @@ components:
           format: int64
           type: integer
         source:
-          description: Which search found it.
+          description: "Which search found it: a catalog of the title's kind, which holds its real poster, or Wikimedia Commons, which only matches words."
           enum:
-            - brave
+            - catalog
             - wikimedia
           type: string
         source_page:
@@ -2278,29 +2261,6 @@ components:
         - url
         - thumbnail
         - source
-      type: object
-    ImageSearchSettings:
-      additionalProperties: false
-      properties:
-        $schema:
-          description: A URL to the JSON Schema for this object.
-          examples:
-            - https://example.com/schemas/ImageSearchSettings.json
-          format: uri
-          readOnly: true
-          type: string
-        enabled:
-          description: Whether this node can look for posters at all.
-          type: boolean
-        key_source:
-          description: Whether the user saved their own Brave Search key. Without one only Wikimedia Commons is searched, which rarely has posters.
-          enum:
-            - user
-            - none
-          type: string
-      required:
-        - enabled
-        - key_source
       type: object
     InstallExtensionInputBody:
       additionalProperties: false
@@ -7368,51 +7328,6 @@ paths:
       summary: Node health
       tags:
         - health
-  /v1/image-search/settings:
-    get:
-      description: Whether posters can be searched for, and whether the user saved a Brave Search key. The key itself is never returned.
-      operationId: getImageSearchSettings
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ImageSearchSettings"
-          description: OK
-        default:
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ErrorModel"
-          description: Error
-      summary: Poster search
-      tags:
-        - media
-    put:
-      description: Checks the key with one small Brave search, then keeps it in a file only the user can read, never in the database or a backup. A key Brave refuses is not stored and answers 428.
-      operationId: setBraveKey
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/BraveKeyInputBody"
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ImageSearchSettings"
-          description: OK
-        default:
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ErrorModel"
-          description: Error
-      summary: Use your own Brave Search key
-      tags:
-        - media
   /v1/library/collection:
     get:
       description: "Every title the library holds files of, by name, with how many files each has. This is what the library shelf is drawn from: grouping a page of files into titles on the client would both cost a page of files and miss everything past it."
@@ -8452,7 +8367,7 @@ paths:
         - media
   /v1/media/manual/cover/search:
     get:
-      description: Searches Brave Images with the user's own key, when there is one, and Wikimedia Commons, by the title's kind, name and year as the form has them, so a poster can be picked before the title is saved. Pictures wider than tall are left out. Nothing is downloaded.
+      description: Looks the title up by name in the catalog of its kind (TMDB, AniList, Open Library, Google Books) and offers the posters found, those of the given year first. Only when no catalog knows it, searches Wikimedia Commons. Works from the form's own values, so a poster can be picked before the title is saved. Pictures wider than tall are left out. Nothing is downloaded.
       operationId: searchManualCovers
       parameters:
         - description: The kind of title.

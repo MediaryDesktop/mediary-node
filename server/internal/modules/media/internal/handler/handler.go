@@ -150,16 +150,6 @@ type CandidatesOutput struct {
 	}
 }
 
-type ImageSearchSettingsOutput struct {
-	Body *service.ImageSearchSettings
-}
-
-type BraveKeyInput struct {
-	Body struct {
-		APIKey string `json:"api_key" maxLength:"1024" doc:"The user's own Brave Search API key. Brave is asked to accept it before it is stored. Empty forgets it."`
-	}
-}
-
 type AISettingsInput struct {
 	Body service.AISettingsUpdate
 }
@@ -277,7 +267,7 @@ func (h *Handler) registerCover(api huma.API) {
 		Method:      http.MethodGet,
 		Path:        "/v1/media/manual/cover/search",
 		Summary:     "Pictures that could be a manual title's poster",
-		Description: "Searches Brave Images with the user's own key, when there is one, and Wikimedia Commons, by the title's kind, name and year as the form has them, so a poster can be picked before the title is saved. Pictures wider than tall are left out. Nothing is downloaded.",
+		Description: "Looks the title up by name in the catalog of its kind (TMDB, AniList, Open Library, Google Books) and offers the posters found, those of the given year first. Only when no catalog knows it, searches Wikimedia Commons. Works from the form's own values, so a poster can be picked before the title is saved. Pictures wider than tall are left out. Nothing is downloaded.",
 		Tags:        []string{"media"},
 	}, func(ctx context.Context, in *CoverSearchInput) (*CandidatesOutput, error) {
 		search := service.CoverSearch{MediaType: in.Type, Title: in.Title}
@@ -293,7 +283,6 @@ func (h *Handler) registerCover(api huma.API) {
 		out := &CandidatesOutput{}
 		out.Body.Images = images
 		out.Body.Sources = []httpapi.Source{
-			{ID: "brave", Name: "Brave Search", URL: "https://search.brave.com"},
 			{ID: "wikimedia", Name: "Wikimedia Commons", URL: "https://commons.wikimedia.org"},
 		}
 
@@ -370,38 +359,6 @@ func (h *Handler) registerCover(api huma.API) {
 			w.Header().Set("Cache-Control", "private, max-age=31536000, immutable")
 			http.ServeContent(w, r, filepath.Base(path), stat.ModTime(), file)
 		}}, nil
-	})
-
-	huma.Register(api, huma.Operation{
-		OperationID: "getImageSearchSettings",
-		Method:      http.MethodGet,
-		Path:        "/v1/image-search/settings",
-		Summary:     "Poster search",
-		Description: "Whether posters can be searched for, and whether the user saved a Brave Search key. The key itself is never returned.",
-		Tags:        []string{"media"},
-	}, func(_ context.Context, _ *struct{}) (*ImageSearchSettingsOutput, error) {
-		settings, err := h.svc.ImageSearchSettings()
-		if err != nil {
-			return nil, httpapi.ToHTTP(err)
-		}
-
-		return &ImageSearchSettingsOutput{Body: settings}, nil
-	})
-
-	huma.Register(api, huma.Operation{
-		OperationID: "setBraveKey",
-		Method:      http.MethodPut,
-		Path:        "/v1/image-search/settings",
-		Summary:     "Use your own Brave Search key",
-		Description: "Checks the key with one small Brave search, then keeps it in a file only the user can read, never in the database or a backup. A key Brave refuses is not stored and answers 428.",
-		Tags:        []string{"media"},
-	}, func(ctx context.Context, in *BraveKeyInput) (*ImageSearchSettingsOutput, error) {
-		settings, err := h.svc.SetBraveKey(ctx, in.Body.APIKey)
-		if err != nil {
-			return nil, httpapi.ToHTTP(err)
-		}
-
-		return &ImageSearchSettingsOutput{Body: settings}, nil
 	})
 }
 

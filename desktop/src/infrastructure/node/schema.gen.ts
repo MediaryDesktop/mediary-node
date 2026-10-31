@@ -515,30 +515,6 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
-	'/v1/image-search/settings': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		/**
-		 * Poster search
-		 * @description Whether posters can be searched for, and whether the user saved a Brave Search key. The key itself is never returned.
-		 */
-		get: operations['getImageSearchSettings']
-		/**
-		 * Use your own Brave Search key
-		 * @description Checks the key with one small Brave search, then keeps it in a file only the user can read, never in the database or a backup. A key Brave refuses is not stored and answers 428.
-		 */
-		put: operations['setBraveKey']
-		post?: never
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
 	'/v1/library/collection': {
 		parameters: {
 			query?: never
@@ -1103,7 +1079,7 @@ export interface paths {
 		}
 		/**
 		 * Pictures that could be a manual title's poster
-		 * @description Searches Brave Images with the user's own key, when there is one, and Wikimedia Commons, by the title's kind, name and year as the form has them, so a poster can be picked before the title is saved. Pictures wider than tall are left out. Nothing is downloaded.
+		 * @description Looks the title up by name in the catalog of its kind (TMDB, AniList, Open Library, Google Books) and offers the posters found, those of the given year first. Only when no catalog knows it, searches Wikimedia Commons. Works from the form's own values, so a poster can be picked before the title is saved. Pictures wider than tall are left out. Nothing is downloaded.
 		 */
 		get: operations['searchManualCovers']
 		put?: never
@@ -2715,16 +2691,6 @@ export interface components {
 			/** @description The sources the node searches; empty while none is set up. */
 			sources: components['schemas']['BookSource'][] | null
 		}
-		BraveKeyInputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/BraveKeyInputBody.json
-			 */
-			readonly $schema?: string
-			/** @description The user's own Brave Search API key. Brave is asked to accept it before it is stored. Empty forgets it. */
-			api_key: string
-		}
 		CandidatesOutputBody: {
 			/**
 			 * Format: uri
@@ -3598,10 +3564,10 @@ export interface components {
 			/** Format: int64 */
 			height?: number
 			/**
-			 * @description Which search found it.
+			 * @description Which search found it: a catalog of the title's kind, which holds its real poster, or Wikimedia Commons, which only matches words.
 			 * @enum {string}
 			 */
-			source: 'brave' | 'wikimedia'
+			source: 'catalog' | 'wikimedia'
 			/** @description The page the picture was found on. */
 			source_page?: string
 			/** @description A small copy to show in the list of candidates. */
@@ -3610,21 +3576,6 @@ export interface components {
 			url: string
 			/** Format: int64 */
 			width?: number
-		}
-		ImageSearchSettings: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/ImageSearchSettings.json
-			 */
-			readonly $schema?: string
-			/** @description Whether this node can look for posters at all. */
-			enabled: boolean
-			/**
-			 * @description Whether the user saved their own Brave Search key. Without one only Wikimedia Commons is searched, which rarely has posters.
-			 * @enum {string}
-			 */
-			key_source: 'user' | 'none'
 		}
 		InstallExtensionInputBody: {
 			/**
@@ -6053,7 +6004,6 @@ export type SchemaBookPositionOutputBody = components['schemas']['BookPositionOu
 export type SchemaBookSource = components['schemas']['BookSource']
 export type SchemaBookSourceOutcome = components['schemas']['BookSourceOutcome']
 export type SchemaBookSourcesOutputBody = components['schemas']['BookSourcesOutputBody']
-export type SchemaBraveKeyInputBody = components['schemas']['BraveKeyInputBody']
 export type SchemaCandidatesOutputBody = components['schemas']['CandidatesOutputBody']
 export type SchemaCatalogPlugin = components['schemas']['CatalogPlugin']
 export type SchemaChapter = components['schemas']['Chapter']
@@ -6107,7 +6057,6 @@ export type SchemaGoogleBooksSettings = components['schemas']['GoogleBooksSettin
 export type SchemaGutenbergSettingsBody = components['schemas']['GutenbergSettingsBody']
 export type SchemaHealthOutputBody = components['schemas']['HealthOutputBody']
 export type SchemaImage = components['schemas']['Image']
-export type SchemaImageSearchSettings = components['schemas']['ImageSearchSettings']
 export type SchemaInstallExtensionInputBody = components['schemas']['InstallExtensionInputBody']
 export type SchemaKeyedAiSettings = components['schemas']['KeyedAISettings']
 export type SchemaLibraryCollection = components['schemas']['LibraryCollection']
@@ -7340,68 +7289,6 @@ export interface operations {
 				}
 				content: {
 					'application/json': components['schemas']['HealthOutputBody']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	getImageSearchSettings: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['ImageSearchSettings']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	setBraveKey: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['BraveKeyInputBody']
-			}
-		}
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['ImageSearchSettings']
 				}
 			}
 			/** @description Error */

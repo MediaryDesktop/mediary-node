@@ -11,7 +11,6 @@ import {
 	deleteManualMediaFx,
 	fetchAISettingsFx,
 	fetchGoogleBooksSettingsFx,
-	fetchImageSearchSettingsFx,
 	fetchMediaDetailsFx,
 	fetchMediaEpisodesFx,
 	fetchMediaFilterOptionsFx,
@@ -19,7 +18,6 @@ import {
 	searchManualCoversFx,
 	searchMediaFx,
 	setAISettingsFx,
-	setBraveKeyFx,
 	setGoogleBooksKeyFx,
 	setManualCoverFx,
 	setTMDBKeyFx,
@@ -83,18 +81,6 @@ export const setAISettingsMutation = createMutation({
 })
 
 keepFresh(aiSettingsQuery, { triggers: [setAISettingsMutation.finished.success] })
-
-export const imageSearchSettingsQuery = createQuery({
-	effect: fetchImageSearchSettingsFx,
-	name: 'imageSearchSettings'
-})
-
-export const setBraveKeyMutation = createMutation({
-	effect: setBraveKeyFx,
-	name: 'setBraveKey'
-})
-
-keepFresh(imageSearchSettingsQuery, { triggers: [setBraveKeyMutation.finished.success] })
 
 export const createManualMediaMutation = createMutation({
 	effect: createManualMediaFx,

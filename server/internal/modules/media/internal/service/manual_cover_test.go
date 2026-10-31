@@ -17,7 +17,6 @@ import (
 
 	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/safehttp"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/secrets"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/imagesearch"
 )
 
@@ -169,7 +168,6 @@ func TestCandidatesAreSearchedForAndPosterShaped(t *testing.T) {
 	h.svc.opts.Images = imagesearch.New(imagesearch.Options{
 		WikimediaEndpoint: commons.URL,
 		Timeout:           5 * time.Second,
-		Store:             secrets.New(filepath.Join(t.TempDir(), "imagesearch-secrets.json")),
 	})
 
 	year := 1994

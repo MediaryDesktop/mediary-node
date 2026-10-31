@@ -15,7 +15,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 
 	"golang.org/x/image/draw"
@@ -68,6 +67,13 @@ func (s *Service) SearchCovers(ctx context.Context, search CoverSearch) ([]image
 		return nil, apperr.Invalid("title", "a poster is looked for by the title's name")
 	}
 
+	// A catalog's own poster is the right one; a free-text picture search only
+	// finds whatever mentions the words, so it is asked when no catalog knows
+	// the title.
+	if catalog := s.catalogCovers(ctx, search); len(catalog) > 0 {
+		return catalog, nil
+	}
+
 	if s.opts.Images == nil {
 		return []imagesearch.Image{}, nil
 	}
@@ -87,33 +93,59 @@ func (s *Service) SearchCovers(ctx context.Context, search CoverSearch) ([]image
 	return candidates, nil
 }
 
-func coverQuery(search CoverSearch) imagesearch.Query {
-	name := search.Title
-	parts := []string{name}
+// maxCatalogCovers is how many of a catalog's matches are offered as posters.
+const maxCatalogCovers = 8
 
-	if search.Year != nil {
-		parts = append(parts, strconv.Itoa(*search.Year))
+// catalogCovers asks the catalog of the title's kind — TMDB, AniList, Open
+// Library or Google Books — for the title and offers the posters it has, those
+// of the year the user gave first. A catalog that is off or fails offers none.
+func (s *Service) catalogCovers(ctx context.Context, search CoverSearch) []imagesearch.Image {
+	page, err := s.searchSource(ctx, SearchParams{
+		Query:     search.Title,
+		MediaType: search.MediaType,
+		PerPage:   maxCatalogCovers,
+		Page:      1,
+	})
+	if err != nil {
+		s.logger.Debug().Err(err).Str("type", search.MediaType).Msg("poster search in the catalog failed")
+		return nil
 	}
 
-	switch search.MediaType {
-	case mediaTypeAnime:
-		parts = append(parts, "anime poster")
-	case mediaTypeManga:
-		parts = append(parts, "manga cover")
-	case MediaTypeBook:
-		parts = append(parts, "book cover")
-	case MediaTypeMovie:
-		parts = append(parts, "film poster")
-	default:
-		parts = append(parts, "series poster")
+	var sameYear, others []imagesearch.Image
+
+	for i := range page.Items {
+		item := &page.Items[i]
+		if item.CoverImage == nil || *item.CoverImage == "" {
+			continue
+		}
+
+		candidate := imagesearch.Image{
+			URL:        *item.CoverImage,
+			Thumbnail:  *item.CoverImage,
+			SourcePage: item.SiteURL,
+			Source:     imagesearch.SourceCatalog,
+		}
+
+		if search.Year != nil && item.StartDate.Year != nil && *item.StartDate.Year == *search.Year {
+			sameYear = append(sameYear, candidate)
+			continue
+		}
+
+		others = append(others, candidate)
 	}
 
+	return append(sameYear, others...)
+}
+
+// coverQuery is little more than the title's name: Commons matches the words of
+// a file's own description, which rarely mention a year or a kind.
+func coverQuery(search CoverSearch) string {
 	noun := "poster"
 	if search.MediaType == mediaTypeManga || search.MediaType == MediaTypeBook {
 		noun = "cover"
 	}
 
-	return imagesearch.Query{Web: strings.Join(parts, " "), Commons: name + " " + noun}
+	return search.Title + " " + noun
 }
 
 // posterShaped keeps what could stand as a poster: taller than wide and big
@@ -372,51 +404,4 @@ func (s *Service) removeCoverFile(file string) {
 	if err := os.Remove(filepath.Join(s.opts.CoverDir, file)); err != nil && !errors.Is(err, os.ErrNotExist) {
 		s.logger.Warn().Err(err).Str("file", file).Msg("remove an old poster")
 	}
-}
-
-// ImageSearchSettings is how the node finds posters. The key itself never
-// leaves it.
-type ImageSearchSettings struct {
-	Enabled   bool   `json:"enabled" doc:"Whether this node can look for posters at all."`
-	KeySource string `json:"key_source" enum:"user,none" doc:"Whether the user saved their own Brave Search key. Without one only Wikimedia Commons is searched, which rarely has posters."`
-}
-
-func (s *Service) ImageSearchSettings() (*ImageSearchSettings, error) {
-	if s.opts.Images == nil {
-		return &ImageSearchSettings{KeySource: "none"}, nil
-	}
-
-	key, err := s.opts.Images.Keys().Key()
-	if err != nil {
-		return nil, apperr.Wrap(err, apperr.KindInternal, "read brave api key")
-	}
-
-	source := "none"
-	if key != "" {
-		source = "user"
-	}
-
-	return &ImageSearchSettings{Enabled: true, KeySource: source}, nil
-}
-
-// SetBraveKey stores the user's own Brave Search key after Brave has accepted
-// it. An empty key forgets it.
-func (s *Service) SetBraveKey(ctx context.Context, key string) (*ImageSearchSettings, error) {
-	if s.opts.Images == nil {
-		return nil, apperr.New(apperr.KindPrecondition, "poster search is turned off on this node")
-	}
-
-	key = strings.TrimSpace(key)
-
-	if key != "" {
-		if err := s.opts.Images.Check(ctx, key); err != nil {
-			return nil, err
-		}
-	}
-
-	if err := s.opts.Images.Keys().SetUserKey(key); err != nil {
-		return nil, apperr.Wrap(err, apperr.KindInternal, "store brave api key")
-	}
-
-	return s.ImageSearchSettings()
 }

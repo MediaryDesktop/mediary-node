@@ -137,13 +137,11 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 	}
 
 	var imageSearch *imagesearch.Client
-	if cfg.ImageSearch.BraveEndpoint != "" || cfg.ImageSearch.WikimediaEndpoint != "" {
+	if cfg.ImageSearch.WikimediaEndpoint != "" {
 		imageSearch = imagesearch.New(imagesearch.Options{
-			BraveEndpoint:     cfg.ImageSearch.BraveEndpoint,
 			WikimediaEndpoint: cfg.ImageSearch.WikimediaEndpoint,
 			UserAgent:         "mediary-node/" + build.Version,
 			Timeout:           cfg.ImageSearch.Timeout,
-			Store:             secrets.New(filepath.Join(cfg.DataDir, "imagesearch-secrets.json")),
 		})
 	}
 

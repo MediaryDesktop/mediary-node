@@ -19,7 +19,7 @@ import { BookServersSettings, GutenbergSettings } from '@features/manage-book-so
 import { DebridServiceSettings } from '@features/manage-debrid-service'
 import { LibraryRootsSettings } from '@features/manage-library-roots'
 import { OPDSServersSettings } from '@features/manage-opds-servers'
-import { AISettings, BraveSettings, GoogleBooksSettings, TMDBSettings } from '@features/manage-source-keys'
+import { AISettings, GoogleBooksSettings, TMDBSettings } from '@features/manage-source-keys'
 import { TorrentClientSettings } from '@features/manage-torrent-client'
 import { ReleaseProfileSettings, TorznabSourcesSettings } from '@features/manage-torznab-sources'
 import { LanguageSwitcher } from '@features/switch-language'
@@ -173,9 +173,6 @@ function SectionContent({ section }: { section: SectionInfo }) {
 				<Card>
 					<Row name={t('settings.ai.name')} hint={t('settings.ai.hint')} block>
 						<AISettings />
-					</Row>
-					<Row name={t('settings.brave.name')} hint={t('settings.brave.hint')} block>
-						<BraveSettings />
 					</Row>
 				</Card>
 			)

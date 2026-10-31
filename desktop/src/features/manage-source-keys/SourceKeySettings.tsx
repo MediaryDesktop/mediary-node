@@ -12,8 +12,6 @@ import { $nodeReady } from '@infra/node'
 
 import {
 	googleBooksSettingsQuery,
-	imageSearchSettingsQuery,
-	setBraveKeyMutation,
 	setGoogleBooksKeyMutation,
 	setTMDBKeyMutation,
 	tmdbSettingsQuery
@@ -22,13 +20,13 @@ import {
 import styles from './SourceKeySettings.module.scss'
 
 // Every source with a key answers the same shape: whether it is on, and whose
-// key it sends. The key itself never comes back from the node. TMDB and Google
-// Books also allow 'build' (a key this app ships with); Brave never does.
+// key it sends. The key itself never comes back from the node. Both sources
+// also allow 'build' (a key this app ships with).
 interface SourceKeySettingsProps<Settings extends { enabled: boolean; key_source: string }> {
 	settingsQuery: Query<void, Settings, HttpRequestError>
 	saveMutation: Mutation<string, Settings, HttpRequestError>
 	// The source's strings live under this key, the same shape for each.
-	texts: 'tmdb' | 'googleBooks' | 'brave'
+	texts: 'tmdb' | 'googleBooks'
 	keysPage: string
 }
 
@@ -139,17 +137,6 @@ export function GoogleBooksSettings() {
 			saveMutation={setGoogleBooksKeyMutation}
 			texts='googleBooks'
 			keysPage='https://console.cloud.google.com/apis/library/books.googleapis.com'
-		/>
-	)
-}
-
-export function BraveSettings() {
-	return (
-		<SourceKeySettings
-			settingsQuery={imageSearchSettingsQuery}
-			saveMutation={setBraveKeyMutation}
-			texts='brave'
-			keysPage='https://api-dashboard.search.brave.com/app/keys'
 		/>
 	)
 }

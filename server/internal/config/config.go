@@ -39,13 +39,11 @@ type Config struct {
 	Log         Log
 }
 
-// ImageSearch finds posters for titles added by hand. Brave answers only with
-// the user's own key, saved in the app; Wikimedia Commons needs none. An empty
-// endpoint turns that source off.
+// ImageSearch finds posters for titles added by hand on Wikimedia Commons,
+// which needs no key. An empty endpoint turns it off.
 type ImageSearch struct {
-	BraveEndpoint     string        `env:"NODE_BRAVE_IMAGES_ENDPOINT" envDefault:"https://api.search.brave.com/res/v1/images/search"`
-	WikimediaEndpoint string        `env:"NODE_WIKIMEDIA_ENDPOINT"    envDefault:"https://commons.wikimedia.org/w/api.php"`
-	Timeout           time.Duration `env:"NODE_IMAGE_SEARCH_TIMEOUT"  envDefault:"15s"`
+	WikimediaEndpoint string        `env:"NODE_WIKIMEDIA_ENDPOINT"   envDefault:"https://commons.wikimedia.org/w/api.php"`
+	Timeout           time.Duration `env:"NODE_IMAGE_SEARCH_TIMEOUT" envDefault:"15s"`
 }
 
 // Claude fills in the details of a title the user describes by hand. An empty
