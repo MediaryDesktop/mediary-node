@@ -1,6 +1,6 @@
 .card {
 	display: grid;
-	grid-template-columns: 10rem minmax(0, 1fr);
+	grid-template-columns: 12rem minmax(0, 1fr);
 	gap: 1.75rem;
 	padding: 1.5rem;
 	border-radius: var(--radius-lg);
@@ -18,10 +18,10 @@
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	align-self: start;
+	align-self: stretch;
 	gap: 0.625rem;
 	width: 100%;
-	aspect-ratio: 2 / 3;
+	min-height: 15rem;
 	padding: 1rem;
 	overflow: hidden;
 	border: 1.5px dashed var(--border-strong);
@@ -55,8 +55,13 @@
 		object-fit: cover;
 	}
 
+	// Stacked above the fields there is no row to stretch along, so it keeps the
+	// shape of a poster instead.
 	@media (max-width: 640px) {
-		width: 8rem;
+		align-self: start;
+		width: 9rem;
+		min-height: 0;
+		aspect-ratio: 2 / 3;
 	}
 }
 
@@ -76,14 +81,6 @@
 		font-size: 0.75rem;
 		font-weight: 500;
 	}
-}
-
-.filePicker {
-	position: absolute;
-	width: 1px;
-	height: 1px;
-	overflow: hidden;
-	opacity: 0;
 }
 
 .fields {

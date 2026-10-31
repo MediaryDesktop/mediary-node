@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { completeness, formatAfterTypeChange } from './draft'
+import type { AiMergeField } from './draft'
+import { completeness, formatAfterTypeChange, mergeSuggestion, withoutAiFilled } from './draft'
 
 describe('formatAfterTypeChange', () => {
 	it('keeps a format the new kind accepts', () => {
@@ -31,5 +32,60 @@ describe('completeness', () => {
 
 		expect(required.filled).toBe(1)
 		expect(required.total).toBe(4)
+	})
+})
+
+describe('mergeSuggestion', () => {
+	const typed = { media_type: 'book', title: 'Dune', year: 1965 } as const
+
+	it('fills only what the user left empty', () => {
+		const { draft, filled } = mergeSuggestion(typed, {
+			...typed,
+			year: 1999,
+			authors: ['Frank Herbert']
+		})
+
+		expect(draft.year).toBe(1965)
+		expect(draft.authors).toEqual(['Frank Herbert'])
+		expect([...filled]).toEqual(['authors'])
+	})
+
+	it('replaces what an earlier answer put there and clears what the new one lacks', () => {
+		const first = mergeSuggestion(
+			{ media_type: 'book', title: 'Dune' },
+			{ media_type: 'book', title: 'Dune', genres: ['Sci-Fi'], authors: ['Frank Herbert'], pages: 600 }
+		)
+
+		const second = mergeSuggestion(
+			{ ...first.draft, title: 'Emma' },
+			{ media_type: 'book', title: 'Emma', authors: ['Jane Austen'] },
+			first.filled
+		)
+
+		expect(second.draft.authors).toEqual(['Jane Austen'])
+		expect(second.draft.genres).toEqual([])
+		expect(second.draft.pages).toBeUndefined()
+	})
+
+	it('never replaces a value the user has since edited', () => {
+		const aiFilled = new Set<AiMergeField>(['authors'])
+		const edited = { media_type: 'book', title: 'Emma', pages: 300 } as const
+
+		const { draft } = mergeSuggestion(edited, { ...edited, pages: 500 }, aiFilled)
+
+		expect(draft.pages).toBe(300)
+	})
+})
+
+describe('withoutAiFilled', () => {
+	it('drops the values an answer filled in and keeps the typed ones', () => {
+		const own = withoutAiFilled(
+			{ media_type: 'book', title: 'Dune', year: 1965, genres: ['Sci-Fi'] },
+			new Set<AiMergeField>(['year', 'genres'])
+		)
+
+		expect(own.title).toBe('Dune')
+		expect(own.year).toBeUndefined()
+		expect(own.genres).toEqual([])
 	})
 })

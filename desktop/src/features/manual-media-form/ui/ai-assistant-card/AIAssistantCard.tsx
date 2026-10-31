@@ -9,15 +9,10 @@ import { $nodeReady } from '@infra/node'
 
 import { aiSettingsQuery } from '@entities/media'
 
-import type { FillModeValue } from '../fill-mode/FillMode'
-import { FillMode } from '../fill-mode/FillMode'
-
 import styles from './AIAssistantCard.module.scss'
 
 export interface AIAssistantCardProps {
 	mode: 'create' | 'edit'
-	fillMode: FillModeValue
-	onFillModeChange: (value: FillModeValue) => void
 	onGenerate: () => void
 	pending: boolean
 	// The AI is asked about a kind of title; without one it would answer for the
@@ -28,8 +23,6 @@ export interface AIAssistantCardProps {
 
 export function AIAssistantCard({
 	mode,
-	fillMode,
-	onFillModeChange,
 	onGenerate,
 	pending,
 	typeMissing = false,
@@ -81,54 +74,42 @@ export function AIAssistantCard({
 				</Link>
 			</div>
 
-			<FillMode value={fillMode} onChange={onFillModeChange} disabled={disabled} />
+			<p className={styles.description}>{t('manualMedia.assistant.description')}</p>
 
-			{fillMode === 'manual' ? (
-				<p className={styles.description}>{t('manualMedia.mode.manualHint')}</p>
+			<ul className={styles.checklist}>
+				<li>
+					<Icon name='common/check' size={14} />
+					{t('manualMedia.assistant.checklistBasics')}
+				</li>
+				<li>
+					<Icon name='common/check' size={14} />
+					{t('manualMedia.assistant.checklistGenres')}
+				</li>
+				<li>
+					<Icon name='common/check' size={14} />
+					{t('manualMedia.assistant.checklistCover')}
+				</li>
+			</ul>
+
+			{settings && !ready ? (
+				<Link to='/settings' search={{ section: 'manual-media' }} className={styles.setupLink}>
+					<Icon name='common/settings' size={15} />
+					{t('manualMedia.assistant.needsKey')}
+				</Link>
 			) : (
-				<>
-					<p className={styles.description}>{t('manualMedia.assistant.description')}</p>
-
-					<ul className={styles.checklist}>
-						<li>
-							<Icon name='common/check' size={14} />
-							{t('manualMedia.assistant.checklistBasics')}
-						</li>
-						<li>
-							<Icon name='common/check' size={14} />
-							{t('manualMedia.assistant.checklistGenres')}
-						</li>
-						<li>
-							<Icon name='common/check' size={14} />
-							{t('manualMedia.assistant.checklistCover')}
-						</li>
-					</ul>
-
-					{settings && !ready ? (
-						<Link
-							to='/settings'
-							search={{ section: 'manual-media' }}
-							className={styles.setupLink}
-						>
-							<Icon name='common/settings' size={15} />
-							{t('manualMedia.assistant.needsKey')}
-						</Link>
-					) : (
-						<Button
-							variant='primary'
-							fullWidth
-							startIcon={<Icon name='common/wand-sparkles' size={18} />}
-							loading={pending}
-							disabled={disabled || !settings || typeMissing}
-							onClick={onGenerate}
-						>
-							{t(mode === 'create' ? 'manualMedia.ai.action' : 'manualMedia.ai.regenerate')}
-						</Button>
-					)}
-
-					{typeMissing && <p className={styles.typeHint}>{t('manualMedia.assistant.needsType')}</p>}
-				</>
+				<Button
+					variant='primary'
+					fullWidth
+					startIcon={<Icon name='common/wand-sparkles' size={18} />}
+					loading={pending}
+					disabled={disabled || !settings || typeMissing}
+					onClick={onGenerate}
+				>
+					{t(mode === 'create' ? 'manualMedia.ai.action' : 'manualMedia.ai.regenerate')}
+				</Button>
 			)}
+
+			{typeMissing && <p className={styles.typeHint}>{t('manualMedia.assistant.needsType')}</p>}
 		</section>
 	)
 }

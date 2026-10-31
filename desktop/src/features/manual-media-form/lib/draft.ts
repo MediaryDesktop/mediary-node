@@ -92,7 +92,7 @@ function isEmptyValue(value: unknown): boolean {
 
 // Claude answers from the hint alone, with no memory of what else the user
 // already typed — every field it fills in is merged in here, and only where
-// the user's own draft was still empty.
+// the user's own draft was still empty (or held only an earlier AI answer).
 const AI_MERGE_FIELDS = [
 	'original_title',
 	'synonyms',
@@ -120,12 +120,30 @@ export interface MergeResult {
 	filled: Set<AiMergeField>
 }
 
-export function mergeSuggestion(draft: ManualDraft, suggested: ManualDraft): MergeResult {
-	const next: Record<string, unknown> = { ...draft }
+// What the user themselves typed: a value the AI filled in and the user has not
+// touched since is its guess, not their word, so it neither goes into the next
+// request nor stops the next answer from replacing it.
+export function withoutAiFilled(draft: ManualDraft, aiFilled: ReadonlySet<AiMergeField>): ManualDraft {
+	const own: Record<string, unknown> = { ...draft }
+
+	for (const field of aiFilled) {
+		own[field] = Array.isArray(draft[field]) ? [] : undefined
+	}
+
+	return own as ManualDraft
+}
+
+export function mergeSuggestion(
+	draft: ManualDraft,
+	suggested: ManualDraft,
+	aiFilled: ReadonlySet<AiMergeField> = new Set()
+): MergeResult {
+	const own = withoutAiFilled(draft, aiFilled)
+	const next: Record<string, unknown> = { ...own }
 	const filled = new Set<AiMergeField>()
 
 	for (const field of AI_MERGE_FIELDS) {
-		if (!isEmptyValue(draft[field])) {
+		if (!isEmptyValue(own[field])) {
 			continue
 		}
 

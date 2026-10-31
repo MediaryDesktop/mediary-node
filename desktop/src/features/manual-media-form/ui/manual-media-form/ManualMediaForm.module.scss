@@ -1,12 +1,14 @@
 .root {
 	display: flex;
 	flex-direction: column;
-	gap: 1.5rem;
 	width: 100%;
 	padding-bottom: 1.5rem;
 }
 
+// The page header already ends with its own margin, so the form adds none
+// above it; only what follows the layout, the save bar, needs room.
 .layout {
+	margin-bottom: 1.5rem;
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) 21rem;
 	gap: 1.25rem;

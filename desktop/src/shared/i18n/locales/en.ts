@@ -791,8 +791,7 @@ export const en = {
 
 	manualMedia: {
 		createTitle: 'Add a title',
-		createSubtitle:
-			'Create a title no source knows. Fill in the minimum and let AI help with the rest.',
+		createSubtitle: 'Create a title no source knows. Fill in the minimum and let AI help with the rest.',
 		editTitle: 'Edit title',
 		editSubtitle: 'It is your own data — changes save to this title only.',
 		type: 'Kind',
@@ -848,13 +847,6 @@ export const en = {
 			counts: 'Counts',
 			releaseHistory: 'Release history',
 			genres: 'Popular genres'
-		},
-		mode: {
-			label: 'How to fill this in',
-			ai: 'Fill with AI',
-			aiHint: 'Fill the fields in automatically',
-			manual: 'By hand',
-			manualHint: 'Fill everything in yourself'
 		},
 		status: {
 			draft: 'Draft · Not saved yet',
@@ -925,7 +917,8 @@ export const en = {
 			fromSearch: 'Picked from search',
 			fromUrl: 'Pasted address',
 			add: 'Add a poster',
-			addHint: 'or pick one below',
+			addHint: 'search, link or file',
+			done: 'Done',
 			needsType: 'Choose a kind first to search. You can still paste an address or upload a file.'
 		},
 		delete: {
@@ -1880,21 +1873,6 @@ export const en = {
 		note: 'Keys stay in a file only you can read on this computer — not in backups. Requests on your own key are paid for by that key’s account.',
 		model: 'Model'
 	},
-	brave: {
-		source: {
-			user: 'Using your own key.',
-			none: 'No key yet: only Wikimedia Commons is searched for posters, which rarely has one.'
-		},
-		keyPlaceholder: 'Brave Search API key',
-		save: 'Check and save',
-		getKey: 'Get a free key on Brave Search',
-		useBuiltIn: 'Remove the key',
-		saved: 'Brave accepted the key',
-		cleared: 'Key removed',
-		saveFailed: 'Could not save the key',
-		disabled: 'Poster search is turned off on this node.',
-		note: 'The key stays in a file only you can read on this computer — not in backups.'
-	},
 	backup: {
 		signedOut:
 			'Backups go to your Mediary account. Sign in to turn them on — everything else works without an account.',
@@ -2022,10 +2000,6 @@ export const en = {
 		ai: {
 			name: 'AI',
 			hint: 'Fills in a title you add yourself: free with a Mediary account, or with your own key'
-		},
-		brave: {
-			name: 'Brave Search key',
-			hint: 'Finds posters for titles you add yourself'
 		},
 		mangaDownloads: {
 			name: 'Manga downloads',

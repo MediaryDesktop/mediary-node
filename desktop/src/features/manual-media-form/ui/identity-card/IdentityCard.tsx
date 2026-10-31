@@ -1,9 +1,8 @@
 import clsx from 'clsx'
-import { useRef } from 'react'
 import { IoImageOutline } from 'react-icons/io5'
 
 import { useTranslation } from '@shared/i18n'
-import { Icon, Input, SelectDropdown, toast } from '@shared/ui'
+import { Icon, Input, SelectDropdown } from '@shared/ui'
 import type { IconName, SelectDropdownOption } from '@shared/ui'
 
 import { enumLabel } from '@entities/media'
@@ -11,9 +10,7 @@ import type { ManualDraft } from '@entities/media'
 
 import { COMMON_COUNTRIES, flagEmoji, MANUAL_MEDIA_TYPES, MANUAL_STATUSES } from '../../lib/draft'
 import type { ManualMediaType } from '../../lib/draft'
-import { readImageFile } from '../../lib/read-image-file'
 import { Field } from '../field/Field'
-import type { CoverSelection } from '../poster-card/PosterCard'
 
 import styles from './IdentityCard.module.scss'
 
@@ -37,7 +34,7 @@ export interface IdentityCardProps {
 	typeError?: string
 	titleError?: string
 	disabled?: boolean
-	onPickCover: (selection: CoverSelection & { kind: 'data' }) => void
+	onOpenPoster: () => void
 }
 
 export function IdentityCard({
@@ -49,10 +46,9 @@ export function IdentityCard({
 	typeError,
 	titleError,
 	disabled,
-	onPickCover
+	onOpenPoster
 }: IdentityCardProps) {
 	const { t } = useTranslation()
-	const picker = useRef<HTMLInputElement>(null)
 
 	const typeOptions: SelectDropdownOption[] = MANUAL_MEDIA_TYPES.map(value => ({
 		value,
@@ -70,33 +66,14 @@ export function IdentityCard({
 		label: `${flagEmoji(code)} ${code}`
 	}))
 
-	const pick = async (file: File | undefined) => {
-		if (!file) {
-			return
-		}
-
-		try {
-			const read = await readImageFile(file)
-			onPickCover({
-				kind: 'data',
-				value: read.data,
-				previewUrl: read.previewUrl,
-				name: file.name,
-				size: file.size
-			})
-		} catch {
-			toast.error(t('manualMedia.cover.invalidFile'), { id: 'manual-cover-file' })
-		}
-	}
-
 	return (
 		<section className={styles.card}>
 			<button
 				type='button'
 				className={clsx(styles.thumb, coverUrl && styles.filled)}
 				disabled={disabled}
-				aria-label={t('manualMedia.cover.add')}
-				onClick={() => picker.current?.click()}
+				aria-label={t('manualMedia.cover.title')}
+				onClick={onOpenPoster}
 			>
 				{coverUrl ? (
 					<img src={coverUrl} alt='' draggable={false} />
@@ -110,17 +87,6 @@ export function IdentityCard({
 					</>
 				)}
 			</button>
-
-			<input
-				ref={picker}
-				type='file'
-				accept='image/*'
-				className={styles.filePicker}
-				onChange={event => {
-					void pick(event.target.files?.[0])
-					event.target.value = ''
-				}}
-			/>
 
 			<div className={styles.fields}>
 				<div className={styles.titleRow}>

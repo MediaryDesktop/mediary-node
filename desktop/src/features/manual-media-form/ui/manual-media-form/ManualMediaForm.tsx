@@ -1,6 +1,6 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 import { getApiProblems, HttpRequestError, problemDetail } from '@shared/api'
 import { isLanguage, useTranslation } from '@shared/i18n'
@@ -12,24 +12,31 @@ import {
 	createManualMediaFx,
 	deleteManualCoverFx,
 	deleteManualMediaFx,
+	searchManualCoversFx,
 	setManualCoverFx,
 	suggestManualMediaFx,
 	updateManualMediaFx
 } from '@entities/media'
 import type { ManualDraft, ManualHint } from '@entities/media'
 
-import { completeness, formatAfterTypeChange, hintNote, manualId, mergeSuggestion } from '../../lib/draft'
+import {
+	completeness,
+	formatAfterTypeChange,
+	hintNote,
+	manualId,
+	mergeSuggestion,
+	withoutAiFilled
+} from '../../lib/draft'
 import type { AiMergeField } from '../../lib/draft'
 import { AIAssistantCard } from '../ai-assistant-card/AIAssistantCard'
 import { BasicsTab } from '../basics-tab/BasicsTab'
 import { CompletenessCard } from '../completeness-card/CompletenessCard'
 import { DetailsTab } from '../details-tab/DetailsTab'
 import { Field } from '../field/Field'
-import type { FillModeValue } from '../fill-mode/FillMode'
 import { GenresPanel } from '../genres-panel/GenresPanel'
 import { IdentityCard } from '../identity-card/IdentityCard'
-import type { CoverSelection } from '../poster-card/PosterCard'
-import { PosterCard } from '../poster-card/PosterCard'
+import type { CoverSelection } from '../poster-modal/PosterModal'
+import { PosterModal } from '../poster-modal/PosterModal'
 import { SaveBar } from '../save-bar/SaveBar'
 
 import styles from './ManualMediaForm.module.scss'
@@ -76,14 +83,17 @@ export function ManualMediaForm({
 	const [draft, setDraft] = useState<ManualDraft>(initialDraft)
 	const [aiFilled, setAiFilled] = useState<ReadonlySet<AiMergeField>>(new Set())
 	const [cover, setCover] = useState<CoverSelection>({ kind: 'keep' })
+	// Whether the poster in place was put there by the AI fill, not picked by the
+	// user: only such a poster is swapped when the next fill finds another title.
+	const autoCover = useRef(false)
 	const [errors, setErrors] = useState<Record<string, string>>({})
 	const [tab, setTab] = useState<Tab>('basic')
-	const [fillMode, setFillMode] = useState<FillModeValue>('ai')
 	const [typePicked, setTypePicked] = useState(!typeUnset)
 	const [saving, setSaving] = useState(false)
 	const [suggesting, setSuggesting] = useState(false)
 	const [deleting, setDeleting] = useState(false)
 	const [deleteOpen, setDeleteOpen] = useState(false)
+	const [posterOpen, setPosterOpen] = useState(false)
 
 	const requireType = () => {
 		if (typePicked) {
@@ -135,6 +145,49 @@ export function ManualMediaForm({
 		}
 	}
 
+	// A title the AI has just filled in has what a poster search needs, so the
+	// search runs now rather than leaving the trip to the poster window. It never
+	// replaces a poster the user picked or the title already has, only one an
+	// earlier fill chose for another title; a failed search stays quiet: the
+	// filled-in form is what the user asked for.
+	const findPoster = async (found: ManualDraft) => {
+		if (initialCoverUrl || (cover.kind !== 'keep' && !autoCover.current)) {
+			return
+		}
+
+		try {
+			const result = await searchManualCoversFx({
+				type: found.media_type,
+				title: found.title,
+				year: found.year
+			})
+			const image = result.images?.[0]
+
+			// Only a catalog's poster is the title's own; a picture search finds
+			// whatever mentions the words, so those are left for the user to pick.
+			if (image?.source === 'catalog') {
+				setCover(current =>
+					current.kind === 'keep' || autoCover.current
+						? { kind: 'url', value: image.url, previewUrl: image.thumbnail, source: 'search' }
+						: current
+				)
+				autoCover.current = true
+			} else {
+				dropAutoCover()
+			}
+		} catch {
+			// The poster window is still there to search by hand.
+		}
+	}
+
+	// The poster an earlier fill chose belongs to the title it was chosen for.
+	const dropAutoCover = () => {
+		if (autoCover.current) {
+			autoCover.current = false
+			setCover({ kind: 'keep' })
+		}
+	}
+
 	const suggest = async () => {
 		if (!requireType()) {
 			return
@@ -146,11 +199,15 @@ export function ManualMediaForm({
 			return
 		}
 
+		// Only what the user typed describes the title; what an earlier fill added
+		// may be for another one.
+		const own = withoutAiFilled(draft, aiFilled)
+
 		const hint: ManualHint = {
 			media_type: draft.media_type,
 			title,
-			year: draft.year,
-			note: hintNote(draft),
+			year: own.year,
+			note: hintNote(own),
 			language: isLanguage(i18n.language) ? i18n.language : 'en'
 		}
 
@@ -158,15 +215,21 @@ export function ManualMediaForm({
 
 		try {
 			const suggestion = await suggestManualMediaFx(hint)
-			const { draft: merged, filled } = mergeSuggestion(draft, suggestion.draft)
+			const { draft: merged, filled } = mergeSuggestion(draft, suggestion.draft, aiFilled)
 
 			setDraft(merged)
-			setAiFilled(current => new Set([...current, ...filled]))
+			setAiFilled(filled)
 
 			toast[suggestion.recognized ? 'success' : 'info'](
 				t(suggestion.recognized ? 'manualMedia.ai.recognized' : 'manualMedia.ai.unrecognized'),
 				{ id: 'manual-media-ai' }
 			)
+
+			if (suggestion.recognized) {
+				void findPoster(merged)
+			} else {
+				dropAutoCover()
+			}
 		} catch (error) {
 			const failure = HttpRequestError.fromUnknown(error)
 
@@ -315,7 +378,7 @@ export function ManualMediaForm({
 						typeError={errors.media_type}
 						titleError={errors.title}
 						disabled={saving}
-						onPickCover={setCover}
+						onOpenPoster={() => setPosterOpen(true)}
 					/>
 
 					{!typePicked && (
@@ -394,22 +457,9 @@ export function ManualMediaForm({
 
 					<AIAssistantCard
 						mode={mode}
-						fillMode={fillMode}
-						onFillModeChange={setFillMode}
 						onGenerate={() => void suggest()}
 						pending={suggesting}
 						typeMissing={!typePicked}
-						disabled={saving}
-					/>
-
-					<PosterCard
-						mediaType={draft.media_type}
-						typeMissing={!typePicked}
-						title={draft.title}
-						year={draft.year}
-						existingCoverUrl={initialCoverUrl}
-						selection={cover}
-						onChange={setCover}
 						disabled={saving}
 					/>
 				</aside>
@@ -437,6 +487,22 @@ export function ManualMediaForm({
 						</Button>
 					)
 				}
+			/>
+
+			<PosterModal
+				open={posterOpen}
+				onOpenChange={setPosterOpen}
+				mediaType={draft.media_type}
+				typeMissing={!typePicked}
+				title={draft.title}
+				year={draft.year}
+				existingCoverUrl={initialCoverUrl}
+				selection={cover}
+				onChange={chosen => {
+					autoCover.current = false
+					setCover(chosen)
+				}}
+				disabled={saving}
 			/>
 
 			<Modal
