@@ -807,7 +807,6 @@ export const uk: Translation = {
 		notEditable: 'Цей тайтл не можна редагувати.',
 		notSpecified: 'Не вказано',
 		tagPlaceholder: 'Введіть назву та натисніть Enter',
-		genreSearchPlaceholder: 'Пошук жанру…',
 		fields: {
 			title: 'Назва',
 			titlePlaceholder: 'Наприклад: Interstellar',
@@ -831,21 +830,23 @@ export const uk: Translation = {
 			pages: 'Сторінки',
 			duration: 'Тривалість епізоду (хв)',
 			score: 'Оцінка',
+			scoreDialHint: 'Перетягніть, або стрілки ←→',
 			country: 'Країна походження',
 			isAdult: 'Контент для дорослих',
 			description: 'Опис',
 			descriptionPlaceholder: 'Короткий синопсис'
 		},
-		tabs: {
-			basic: 'Основна інформація',
-			details: 'Причетні',
-			description: 'Опис'
-		},
 		sections: {
-			params: 'Основні параметри',
-			counts: 'Кількість',
+			basics: 'Основні параметри',
+			basicsHint: 'Тривалість і кількість.',
 			releaseHistory: 'Історія виходу',
-			genres: 'Популярні жанри'
+			releaseHistoryHint: 'Коли почалось і коли закінчилось.',
+			genres: 'Жанри',
+			genresHint: 'Оберіть жанри з каталогу або додайте власні.',
+			genresNoMatch: 'У каталозі немає такого жанру.',
+			credits: 'Причетні',
+			creditsHint: 'Хто це створив і як ще це називають.',
+			descriptionHint: 'Короткий опис сюжету.'
 		},
 		status: {
 			draft: 'Чернетка · Ще не збережено',

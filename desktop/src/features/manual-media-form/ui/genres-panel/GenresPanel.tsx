@@ -3,11 +3,11 @@ import { useUnit } from 'effector-react'
 import { useEffect, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Badge, Icon, Input } from '@shared/ui'
 
 import { mediaFilterOptionsQuery } from '@entities/media'
 
 import type { ManualMediaType } from '../../lib/draft'
+import { Field } from '../field/Field'
 import { TagField } from '../tag-field/TagField'
 
 import styles from './GenresPanel.module.scss'
@@ -16,21 +16,14 @@ export interface GenresPanelProps {
 	mediaType: ManualMediaType
 	genres: string[]
 	onGenresChange: (next: string[]) => void
-	score?: number
-	onScoreChange: (score: number | undefined) => void
 	aiGenres?: boolean
 	disabled?: boolean
 }
 
-export function GenresPanel({
-	mediaType,
-	genres,
-	onGenresChange,
-	score,
-	onScoreChange,
-	aiGenres,
-	disabled
-}: GenresPanelProps) {
+// The catalog is short enough per kind (a few dozen at most) to show in full —
+// what is typed into the tag field above narrows it, rather than a search box
+// of its own next to a field that already takes typed text.
+export function GenresPanel({ mediaType, genres, onGenresChange, aiGenres, disabled }: GenresPanelProps) {
 	const { t } = useTranslation()
 	const [query, setQuery] = useState('')
 
@@ -40,45 +33,28 @@ export function GenresPanel({
 		start(mediaType)
 	}, [mediaType, start])
 
-	const suggestions = (options?.options.genres ?? []).filter(genre =>
-		genre.toLowerCase().includes(query.trim().toLowerCase())
-	)
+	const catalog = options?.options.genres ?? []
+	const needle = query.trim().toLowerCase()
+	const visible = needle === '' ? catalog : catalog.filter(genre => genre.toLowerCase().includes(needle))
 
 	const toggle = (genre: string) =>
 		onGenresChange(genres.includes(genre) ? genres.filter(item => item !== genre) : [...genres, genre])
 
 	return (
-		<div className={styles.root}>
-			<section className={styles.section}>
-				<h3 className={styles.title}>
-					{t('manualMedia.fields.genres')}
-
-					{aiGenres && (
-						<Badge tone='accent' size='sm'>
-							{t('manualMedia.ai.filledBadge')}
-						</Badge>
-					)}
-				</h3>
-
+		<Field as='div' label={t('manualMedia.fields.genres')} ai={aiGenres}>
+			<div className={styles.genres}>
 				<TagField
 					value={genres}
 					onChange={onGenresChange}
+					onDraftChange={setQuery}
 					placeholder={t('manualMedia.tagPlaceholder')}
 					disabled={disabled}
 				/>
 
-				<div className={styles.suggestions}>
-					<Input
-						value={query}
-						onChange={event => setQuery(event.target.value)}
-						placeholder={t('manualMedia.genreSearchPlaceholder')}
-						startIcon={<Icon name='common/search' size={16} />}
-						disabled={disabled}
-					/>
-
-					{suggestions.length > 0 && (
-						<div className={styles.pills}>
-							{suggestions.slice(0, 18).map(genre => (
+				{catalog.length > 0 && (
+					<div className={styles.pills}>
+						{visible.length > 0 ? (
+							visible.map(genre => (
 								<button
 									key={genre}
 									type='button'
@@ -89,33 +65,13 @@ export function GenresPanel({
 								>
 									{genre}
 								</button>
-							))}
-						</div>
-					)}
-				</div>
-			</section>
-
-			<section className={styles.section}>
-				<h3 className={styles.title}>{t('manualMedia.fields.score')}</h3>
-
-				<div className={styles.score}>
-					<Input
-						className={styles.scoreInput}
-						type='number'
-						min={0}
-						max={100}
-						value={score ?? ''}
-						onChange={event =>
-							onScoreChange(event.target.value === '' ? undefined : Number(event.target.value))
-						}
-						placeholder='—'
-						startIcon={<Icon name='common/star' size={16} className={styles.starIcon} />}
-						aria-label={t('manualMedia.fields.score')}
-						disabled={disabled}
-					/>
-					<span className={styles.scoreMax}>/ 100</span>
-				</div>
-			</section>
-		</div>
+							))
+						) : (
+							<span className={styles.noMatch}>{t('manualMedia.sections.genresNoMatch')}</span>
+						)}
+					</div>
+				)}
+			</div>
+		</Field>
 	)
 }

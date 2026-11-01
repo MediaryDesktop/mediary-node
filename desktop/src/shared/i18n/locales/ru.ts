@@ -809,7 +809,6 @@ export const ru: Translation = {
 		notEditable: 'Этот тайтл нельзя редактировать.',
 		notSpecified: 'Не указано',
 		tagPlaceholder: 'Введите название и нажмите Enter',
-		genreSearchPlaceholder: 'Поиск жанра…',
 		fields: {
 			title: 'Название',
 			titlePlaceholder: 'Например: Interstellar',
@@ -833,21 +832,23 @@ export const ru: Translation = {
 			pages: 'Страницы',
 			duration: 'Длительность эпизода (мин)',
 			score: 'Оценка',
+			scoreDialHint: 'Перетащите, или стрелки ←→',
 			country: 'Страна происхождения',
 			isAdult: 'Контент для взрослых',
 			description: 'Описание',
 			descriptionPlaceholder: 'Краткий синопсис'
 		},
-		tabs: {
-			basic: 'Основная информация',
-			details: 'Причастные',
-			description: 'Описание'
-		},
 		sections: {
-			params: 'Основные параметры',
-			counts: 'Количество',
+			basics: 'Основные параметры',
+			basicsHint: 'Длительность и количество.',
 			releaseHistory: 'История выхода',
-			genres: 'Популярные жанры'
+			releaseHistoryHint: 'Когда началось и когда закончилось.',
+			genres: 'Жанры',
+			genresHint: 'Выберите жанры из каталога или добавьте свои.',
+			genresNoMatch: 'В каталоге нет такого жанра.',
+			credits: 'Причастные',
+			creditsHint: 'Кто это создал и как ещё это называют.',
+			descriptionHint: 'Краткое описание сюжета.'
 		},
 		status: {
 			draft: 'Черновик · Ещё не сохранено',

@@ -242,37 +242,22 @@ export interface Completeness {
 	additional: CompletenessTier
 }
 
-function filledCount(
-	draft: ManualDraft,
-	hasCover: boolean,
-	fields: readonly (keyof ManualDraft | 'cover')[]
-) {
-	let filled = 0
+export type CompletenessField = keyof ManualDraft | 'cover'
 
-	for (const field of fields) {
-		if (field === 'cover') {
-			if (hasCover) {
-				filled++
-			}
-			continue
-		}
-
-		if (!isEmptyValue(draft[field])) {
-			filled++
-		}
-	}
-
-	return { filled, total: fields.length }
+export interface CompletenessFields {
+	required: CompletenessField[]
+	recommended: CompletenessField[]
+	additional: CompletenessField[]
 }
 
-// What the completeness ring counts: a handful of fields no title should miss,
-// a few that make it easier to find and browse, and the rest — each only as
-// useful as the one before it, never required to save.
-export function completeness(draft: ManualDraft, hasCover: boolean, typePicked = true): Completeness {
-	const main = mainCountField(draft.media_type) ?? 'duration'
-	const credits = draft.media_type === 'manga' || draft.media_type === 'book' ? 'authors' : 'studios'
+// What completeness counts: a handful of fields no title should miss, a few
+// that make it easier to find and browse, and the rest — each only as useful
+// as the one before it, never required to save.
+export function completenessFields(mediaType: ManualMediaType): CompletenessFields {
+	const main = mainCountField(mediaType) ?? 'duration'
+	const credits = mediaType === 'manga' || mediaType === 'book' ? 'authors' : 'studios'
 
-	const additionalFields: (keyof ManualDraft)[] = [
+	const additional: CompletenessField[] = [
 		'original_title',
 		'synonyms',
 		credits,
@@ -281,24 +266,50 @@ export function completeness(draft: ManualDraft, hasCover: boolean, typePicked =
 		'end_year'
 	]
 
-	if (draft.media_type === 'manga') {
-		additionalFields.push('volumes')
-	} else if (draft.media_type !== 'movie' && draft.media_type !== 'book') {
-		additionalFields.push('seasons')
-	}
-
-	const required = filledCount(draft, hasCover, ['title', 'media_type', 'year', 'status'])
-
-	// Before the kind is picked the draft carries a placeholder one, which must
-	// not count as the user's answer.
-	if (!typePicked) {
-		required.filled--
+	if (mediaType === 'manga') {
+		additional.push('volumes')
+	} else if (mediaType !== 'movie' && mediaType !== 'book') {
+		additional.push('seasons')
 	}
 
 	return {
-		required,
-		recommended: filledCount(draft, hasCover, ['format', 'genres', 'description', 'cover', main]),
-		additional: filledCount(draft, hasCover, additionalFields)
+		required: ['title', 'media_type', 'year', 'status'],
+		recommended: ['format', 'genres', 'description', 'cover', main],
+		additional
+	}
+}
+
+// Before the kind is picked the draft carries a placeholder one, which must
+// not count as the user's answer.
+export function fieldFilled(
+	draft: ManualDraft,
+	field: CompletenessField,
+	hasCover: boolean,
+	typePicked = true
+): boolean {
+	if (field === 'cover') {
+		return hasCover
+	}
+
+	if (field === 'media_type' && !typePicked) {
+		return false
+	}
+
+	return !isEmptyValue(draft[field])
+}
+
+export function completeness(draft: ManualDraft, hasCover: boolean, typePicked = true): Completeness {
+	const fields = completenessFields(draft.media_type)
+
+	const tier = (list: CompletenessField[]): CompletenessTier => ({
+		filled: list.filter(field => fieldFilled(draft, field, hasCover, typePicked)).length,
+		total: list.length
+	})
+
+	return {
+		required: tier(fields.required),
+		recommended: tier(fields.recommended),
+		additional: tier(fields.additional)
 	}
 }
 

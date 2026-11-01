@@ -1,7 +1,16 @@
 import { describe, expect, it } from 'vitest'
 
+import type { ManualDraft } from '@entities/media'
+
 import type { AiMergeField } from './draft'
-import { completeness, formatAfterTypeChange, mergeSuggestion, withoutAiFilled } from './draft'
+import {
+	completeness,
+	completenessFields,
+	fieldFilled,
+	formatAfterTypeChange,
+	mergeSuggestion,
+	withoutAiFilled
+} from './draft'
 
 describe('formatAfterTypeChange', () => {
 	it('keeps a format the new kind accepts', () => {
@@ -32,6 +41,34 @@ describe('completeness', () => {
 
 		expect(required.filled).toBe(1)
 		expect(required.total).toBe(4)
+	})
+})
+
+describe('completenessFields', () => {
+	it('counts what each kind is measured by', () => {
+		expect(completenessFields('book').recommended).toContain('pages')
+		expect(completenessFields('book').additional).toContain('authors')
+		expect(completenessFields('movie').recommended).toContain('duration')
+		expect(completenessFields('manga').additional).toContain('volumes')
+		expect(completenessFields('series').additional).toContain('seasons')
+	})
+})
+
+describe('fieldFilled', () => {
+	const draft: ManualDraft = { media_type: 'anime', title: 'Frieren', genres: [] }
+
+	it('treats the placeholder kind as not filled', () => {
+		expect(fieldFilled(draft, 'media_type', false, false)).toBe(false)
+		expect(fieldFilled(draft, 'media_type', false)).toBe(true)
+	})
+
+	it('reads the poster from outside the draft', () => {
+		expect(fieldFilled(draft, 'cover', true)).toBe(true)
+		expect(fieldFilled(draft, 'cover', false)).toBe(false)
+	})
+
+	it('does not count an empty list as filled', () => {
+		expect(fieldFilled(draft, 'genres', false)).toBe(false)
 	})
 })
 

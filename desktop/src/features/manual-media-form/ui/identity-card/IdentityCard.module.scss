@@ -1,15 +1,38 @@
 .card {
 	display: grid;
-	grid-template-columns: 12rem minmax(0, 1fr);
+	grid-template-columns: 12rem minmax(0, 1fr) auto;
+	align-items: stretch;
 	gap: 1.75rem;
 	padding: 1.5rem;
 	border-radius: var(--radius-lg);
 	background: var(--surface);
 	box-shadow: var(--shadow-sm);
 
+	@media (max-width: 960px) {
+		grid-template-columns: 12rem minmax(0, 1fr);
+
+		.dial {
+			grid-column: 2;
+			justify-self: start;
+		}
+	}
+
 	@media (max-width: 640px) {
 		grid-template-columns: minmax(0, 1fr);
+
+		.dial {
+			grid-column: 1;
+		}
 	}
+}
+
+// Stretched to the row's own height, then centers the dial inside that —
+// align-self alone centers the item's box, not necessarily what is drawn
+// inside it, so the box itself is made to fill the row and do the centering.
+.dial {
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 .thumb {
@@ -97,13 +120,13 @@
 
 .row {
 	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
-	gap: 1rem;
+	grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+	gap: 0.875rem;
 }
 
 .titleRow {
 	display: grid;
-	grid-template-columns: minmax(11rem, 14rem) minmax(0, 1fr);
+	grid-template-columns: minmax(9.5rem, 12rem) minmax(0, 1fr);
 	align-items: start;
 	gap: 1rem;
 

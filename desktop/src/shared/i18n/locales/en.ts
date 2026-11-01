@@ -808,7 +808,6 @@ export const en = {
 		notEditable: 'This title cannot be edited.',
 		notSpecified: 'Not specified',
 		tagPlaceholder: 'Type a name and press Enter',
-		genreSearchPlaceholder: 'Search genres…',
 		fields: {
 			title: 'Title',
 			titlePlaceholder: 'e.g. Interstellar',
@@ -832,21 +831,23 @@ export const en = {
 			pages: 'Pages',
 			duration: 'Episode length (min)',
 			score: 'Score',
+			scoreDialHint: 'Drag, or use ←→',
 			country: 'Country of origin',
 			isAdult: 'Adult content',
 			description: 'Description',
 			descriptionPlaceholder: 'A short synopsis'
 		},
-		tabs: {
-			basic: 'Basic info',
-			details: 'Credits',
-			description: 'Description'
-		},
 		sections: {
-			params: 'Basic parameters',
-			counts: 'Counts',
+			basics: 'Basic parameters',
+			basicsHint: 'How long it runs, and its counts.',
 			releaseHistory: 'Release history',
-			genres: 'Popular genres'
+			releaseHistoryHint: 'When it started and ended.',
+			genres: 'Genres',
+			genresHint: 'Pick genres from the catalog, or add your own.',
+			genresNoMatch: 'No catalog genre matches that.',
+			credits: 'Credits',
+			creditsHint: 'Who made it, and other names it is known by.',
+			descriptionHint: 'A short synopsis.'
 		},
 		status: {
 			draft: 'Draft · Not saved yet',

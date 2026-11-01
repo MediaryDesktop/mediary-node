@@ -11,6 +11,7 @@ import type { ManualDraft } from '@entities/media'
 import { COMMON_COUNTRIES, flagEmoji, MANUAL_MEDIA_TYPES, MANUAL_STATUSES } from '../../lib/draft'
 import type { ManualMediaType } from '../../lib/draft'
 import { Field } from '../field/Field'
+import { ScoreDial } from '../score-dial/ScoreDial'
 
 import styles from './IdentityCard.module.scss'
 
@@ -177,6 +178,13 @@ export function IdentityCard({
 					</span>
 				)}
 			</div>
+
+			<ScoreDial
+				className={styles.dial}
+				value={draft.score}
+				onChange={score => onChange({ score })}
+				disabled={disabled}
+			/>
 		</section>
 	)
 }

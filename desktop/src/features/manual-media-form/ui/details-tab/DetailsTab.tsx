@@ -35,6 +35,20 @@ export function DetailsTab({ draft, onChange, aiFilled, disabled }: DetailsTabPr
 				/>
 			</Field>
 
+			<Field
+				as='div'
+				label={t('manualMedia.fields.synonyms')}
+				hint={t('manualMedia.fields.synonymsHint')}
+				ai={aiFilled.has('synonyms')}
+			>
+				<TagField
+					value={draft.synonyms ?? []}
+					onChange={next => onChange({ synonyms: next })}
+					placeholder={t('manualMedia.tagPlaceholder')}
+					disabled={disabled}
+				/>
+			</Field>
+
 			<label className={styles.adultRow}>
 				<Checkbox
 					checked={draft.is_adult ?? false}

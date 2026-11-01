@@ -1,31 +1,4 @@
-.root {
-	display: flex;
-	flex-direction: column;
-	gap: 2rem;
-	min-width: 0;
-}
-
-.section {
-	display: flex;
-	flex-direction: column;
-	gap: 1rem;
-}
-
-.title {
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-	min-height: 0.75rem;
-	margin: 0;
-	color: var(--text-muted);
-	font-size: 0.75rem;
-	font-weight: 700;
-	letter-spacing: 0.06em;
-	line-height: 1;
-	text-transform: uppercase;
-}
-
-.suggestions {
+.genres {
 	display: flex;
 	flex-direction: column;
 	gap: 0.75rem;
@@ -66,23 +39,8 @@
 	}
 }
 
-.score {
-	display: flex;
-	align-items: center;
-	gap: 0.75rem;
-}
-
-.scoreInput {
-	flex: 1;
-	max-width: 10rem;
-}
-
-.starIcon {
-	color: var(--warning);
-}
-
-.scoreMax {
+.noMatch {
+	padding: 0.375rem 0;
 	color: var(--text-muted);
-	font-size: 0.875rem;
-	font-weight: 600;
+	font-size: 0.8125rem;
 }

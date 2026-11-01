@@ -1,11 +1,9 @@
 import { useUnit } from 'effector-react'
-import type { ReactNode } from 'react'
 import { useEffect, useRef, useState } from 'react'
-import { IoCloudOfflineOutline, IoImagesOutline, IoSearchOutline } from 'react-icons/io5'
 
 import { useTranslation } from '@shared/i18n'
 import { formatBytes } from '@shared/lib'
-import { Button, Icon, Input, Modal, SegmentedControl, toast } from '@shared/ui'
+import { Button, EmptyState, Icon, Input, Modal, SegmentedControl, toast } from '@shared/ui'
 
 import { manualCoverSearchQuery } from '@entities/media'
 
@@ -19,16 +17,6 @@ export type CoverSelection =
 	| { kind: 'remove' }
 	| { kind: 'url'; value: string; previewUrl: string; source: 'search' | 'url' }
 	| { kind: 'data'; value: string; previewUrl: string; name: string; size: number }
-
-function EmptyState({ icon, title, hint }: { icon: ReactNode; title: string; hint?: string }) {
-	return (
-		<div className={styles.empty}>
-			<span className={styles.emptyIcon}>{icon}</span>
-			<p className={styles.emptyTitle}>{title}</p>
-			{hint && <p className={styles.emptyHint}>{hint}</p>}
-		</div>
-	)
-}
 
 export interface PosterModalProps {
 	open: boolean
@@ -225,20 +213,14 @@ export function PosterModal({
 							</Button>
 						</form>
 
-						{typeMissing && (
-							<EmptyState
-								icon={<IoSearchOutline size={28} />}
-								title={t('manualMedia.cover.needsType')}
-							/>
-						)}
+						{typeMissing && <EmptyState title={t('manualMedia.cover.needsType')} />}
 						{!typeMissing && searching && (
 							<p className={styles.hint}>{t('manualMedia.cover.searching')}</p>
 						)}
 						{!typeMissing && !searching && failed && (
 							<EmptyState
-								icon={<IoCloudOfflineOutline size={28} />}
 								title={t('manualMedia.cover.failed')}
-								hint={t('manualMedia.cover.failedHint')}
+								description={t('manualMedia.cover.failedHint')}
 							/>
 						)}
 
@@ -246,9 +228,8 @@ export function PosterModal({
 							<>
 								{(candidates.images ?? []).length === 0 ? (
 									<EmptyState
-										icon={<IoImagesOutline size={28} />}
 										title={t('manualMedia.cover.empty')}
-										hint={t('manualMedia.cover.emptyHint')}
+										description={t('manualMedia.cover.emptyHint')}
 									/>
 								) : (
 									<ul className={styles.grid}>

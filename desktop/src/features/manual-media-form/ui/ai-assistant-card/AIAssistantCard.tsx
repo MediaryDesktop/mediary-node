@@ -1,13 +1,9 @@
 import { Link } from '@tanstack/react-router'
-import { useUnit } from 'effector-react'
-import { useEffect } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { Button, Icon } from '@shared/ui'
 
-import { $nodeReady } from '@infra/node'
-
-import { aiSettingsQuery } from '@entities/media'
+import { useAiStatus } from '../../lib/useAiStatus'
 
 import styles from './AIAssistantCard.module.scss'
 
@@ -30,29 +26,7 @@ export function AIAssistantCard({
 }: AIAssistantCardProps) {
 	const { t } = useTranslation()
 
-	const [settings, load, nodeReady] = useUnit([aiSettingsQuery.$data, aiSettingsQuery.start, $nodeReady])
-
-	useEffect(() => {
-		if (nodeReady) {
-			load()
-		}
-	}, [load, nodeReady])
-
-	const ready = settings?.ready ?? false
-
-	// The free AI shows what is left of today's allowance; an own key, the model.
-	const detail = !settings
-		? null
-		: settings.provider === 'cloud'
-			? settings.cloud.known && settings.cloud.enabled
-				? t('manualMedia.assistant.remaining', {
-						remaining: settings.cloud.remaining,
-						limit: settings.cloud.limit
-					})
-				: null
-			: settings.provider === 'openai'
-				? settings.openai.model || null
-				: settings[settings.provider].model
+	const { loaded, ready, detail } = useAiStatus()
 
 	return (
 		<section className={styles.card}>
@@ -91,7 +65,7 @@ export function AIAssistantCard({
 				</li>
 			</ul>
 
-			{settings && !ready ? (
+			{loaded && !ready ? (
 				<Link to='/settings' search={{ section: 'manual-media' }} className={styles.setupLink}>
 					<Icon name='common/settings' size={15} />
 					{t('manualMedia.assistant.needsKey')}
@@ -102,7 +76,7 @@ export function AIAssistantCard({
 					fullWidth
 					startIcon={<Icon name='common/wand-sparkles' size={18} />}
 					loading={pending}
-					disabled={disabled || !settings || typeMissing}
+					disabled={disabled || !loaded || typeMissing}
 					onClick={onGenerate}
 				>
 					{t(mode === 'create' ? 'manualMedia.ai.action' : 'manualMedia.ai.regenerate')}
