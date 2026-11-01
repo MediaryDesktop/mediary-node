@@ -1,4 +1,5 @@
 import { useUnit } from 'effector-react'
+import { useState } from 'react'
 import { LuDatabase, LuRefreshCw } from 'react-icons/lu'
 
 import { useTranslation } from '@shared/i18n'
@@ -56,13 +57,19 @@ export function CatalogActions({ onRepositories }: { onRepositories: () => void 
 
 export function DependenciesActions() {
 	const { t } = useTranslation()
-	const [refresh, refreshing] = useUnit([toolsQuery.start, toolsQuery.$pending])
+	const [refresh] = useUnit([toolsQuery.start])
+	// Not toolsQuery.$pending: the node also re-triggers this query twice a
+	// second while a tool downloads, which would flash the button's spinner.
+	const [refreshing, setRefreshing] = useState(false)
+
+	useUnitWatch(toolsQuery.finished.finally, () => setRefreshing(false))
 
 	return (
 		<Button
 			loading={refreshing}
 			startIcon={<LuRefreshCw size={16} />}
 			onClick={() => {
+				setRefreshing(true)
 				refresh()
 				toast.success(t('extensions.refreshed'), { duration: 1000 })
 			}}

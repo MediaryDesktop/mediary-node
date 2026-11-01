@@ -62,7 +62,6 @@
 
 	&.glass-accent {
 		background: var(--accent-muted);
-		box-shadow: inset 0 0 0 var(--ring-width) var(--accent);
 		color: var(--accent);
 
 		&:not(:disabled):hover {
@@ -70,13 +69,39 @@
 		}
 	}
 
+	&.glass-info {
+		background: var(--info-muted);
+		color: var(--info-text);
+
+		&:not(:disabled):hover {
+			background: var(--info-muted-hover);
+		}
+	}
+
 	&.glass-warning {
 		background: var(--warning-muted);
-		box-shadow: inset 0 0 0 var(--ring-width) var(--warning);
 		color: var(--warning-text);
 
 		&:not(:disabled):hover {
 			background: var(--warning-muted-hover);
+		}
+	}
+
+	&.glass-danger {
+		background: var(--danger-muted);
+		color: var(--danger-text);
+
+		&:not(:disabled):hover {
+			background: var(--danger-muted-hover);
+		}
+	}
+
+	&.glass-success {
+		background: var(--success-muted);
+		color: var(--success-text);
+
+		&:not(:disabled):hover {
+			background: var(--success-muted-hover);
 		}
 	}
 

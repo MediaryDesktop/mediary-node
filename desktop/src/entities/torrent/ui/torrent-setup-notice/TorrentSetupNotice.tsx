@@ -1,6 +1,5 @@
 import { useTranslation } from '@shared/i18n'
-import { Button, Notice } from '@shared/ui'
-import type { ButtonVariant } from '@shared/ui'
+import { Notice } from '@shared/ui'
 
 import type { TorrentSetup } from '../../lib/useTorrentSetup'
 
@@ -23,15 +22,14 @@ export function TorrentSetupNotice({ setup, needSearch, onOpenSettings }: Torren
 		return null
 	}
 
-	const action = (missing: TorrentSetupGap, variant: ButtonVariant = 'secondary') => (
-		<Button size='small' variant={variant} onClick={() => onOpenSettings(missing)}>
-			{t('torrents.setup.openSettings')}
-		</Button>
-	)
-
 	if (!setup.clientConfigured) {
 		return (
-			<Notice tone='warning' title={t('torrents.setup.noClient')} action={action('client', 'glass-warning')}>
+			<Notice
+				tone='warning'
+				title={t('torrents.setup.noClient')}
+				actionLabel={t('torrents.setup.openSettings')}
+				onAction={() => onOpenSettings('client')}
+			>
 				{t('torrents.setup.noClientHint')}
 			</Notice>
 		)
@@ -39,7 +37,12 @@ export function TorrentSetupNotice({ setup, needSearch, onOpenSettings }: Torren
 
 	if (setup.clientReachable === false) {
 		return (
-			<Notice tone='danger' title={t('torrents.setup.unreachable')} action={action('client')}>
+			<Notice
+				tone='danger'
+				title={t('torrents.setup.unreachable')}
+				actionLabel={t('torrents.setup.openSettings')}
+				onAction={() => onOpenSettings('client')}
+			>
 				{setup.clientError}
 			</Notice>
 		)
@@ -47,7 +50,12 @@ export function TorrentSetupNotice({ setup, needSearch, onOpenSettings }: Torren
 
 	if (needSearch && !setup.hasSources) {
 		return (
-			<Notice tone='info' title={t('torrents.setup.noSources')} action={action('sources')}>
+			<Notice
+				tone='info'
+				title={t('torrents.setup.noSources')}
+				actionLabel={t('torrents.setup.openSettings')}
+				onAction={() => onOpenSettings('sources')}
+			>
 				{t('torrents.setup.noSourcesHint')}
 			</Notice>
 		)

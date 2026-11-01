@@ -3,7 +3,7 @@ import { useUnit } from 'effector-react'
 import { useEffect } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, Notice } from '@shared/ui'
+import { Notice } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
 
@@ -44,14 +44,8 @@ export function MissingPlayerNotice({ className }: MissingPlayerNoticeProps) {
 			<Notice
 				tone='warning'
 				title={t('settings.player.mpvMissing.title')}
-				action={
-					<Button
-						size='small'
-						onClick={() => void navigate({ to: '/extensions', search: { tab: 'dependencies' } })}
-					>
-						{t('player.openDependencies')}
-					</Button>
-				}
+				actionLabel={t('player.openDependencies')}
+				onAction={() => void navigate({ to: '/extensions', search: { tab: 'dependencies' } })}
 			>
 				{t('settings.player.mpvMissing.description')}
 			</Notice>

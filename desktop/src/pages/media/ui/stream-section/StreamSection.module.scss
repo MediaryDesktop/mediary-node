@@ -1,18 +1,13 @@
+.setupNotice {
+	margin-bottom: 1.25rem;
+}
+
 .card {
 	margin-bottom: 1.25rem;
 	overflow: hidden;
 	border: 1px solid var(--border);
 	border-radius: var(--radius);
 	background: var(--surface);
-}
-
-.infoButton.infoButton {
-	color: var(--info);
-
-	&:not(:disabled):hover {
-		color: var(--info);
-		opacity: 0.85;
-	}
 }
 
 .head {

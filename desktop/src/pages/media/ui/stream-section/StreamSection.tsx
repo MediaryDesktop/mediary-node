@@ -5,7 +5,7 @@ import { useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { readStored, writeStored } from '@shared/lib'
-import { Button, CollapsibleSection, Icon, Notice, RippleButton, SegmentedControl, Switch } from '@shared/ui'
+import { CollapsibleSection, Icon, Notice, RippleButton, SegmentedControl, Switch } from '@shared/ui'
 
 import type { MediaEpisode } from '@entities/media'
 import { useTorrentSetup } from '@entities/torrent'
@@ -146,19 +146,11 @@ export function StreamSection({
 		<section className={sectionStyles.section}>
 			{setup.loaded && !setup.hasSources && (
 				<Notice
+					className={styles.setupNotice}
 					tone='warning'
 					title={t('torrents.setup.noSources')}
-					action={
-						<Button
-							size='small'
-							variant='secondary'
-							onClick={() =>
-								navigate({ to: '/settings', search: { section: 'torrent-search' } })
-							}
-						>
-							{t('torrents.setup.openSettings')}
-						</Button>
-					}
+					actionLabel={t('torrents.setup.openSettings')}
+					onAction={() => navigate({ to: '/settings', search: { section: 'torrent-search' } })}
 				>
 					{t('torrents.setup.noSourcesHint')}
 				</Notice>
@@ -195,18 +187,8 @@ export function StreamSection({
 						{!setup.debrid && (
 							<Notice
 								title={t('media.stream.debridPitch')}
-								action={
-									<Button
-										size='small'
-										variant='ghost'
-										className={styles.infoButton}
-										onClick={() =>
-											navigate({ to: '/settings', search: { section: 'debrid' } })
-										}
-									>
-										{t('torrents.setup.openSettings')}
-									</Button>
-								}
+								actionLabel={t('torrents.setup.openSettings')}
+								onAction={() => navigate({ to: '/settings', search: { section: 'debrid' } })}
 							>
 								{t('media.stream.debridPitchHint')}
 							</Notice>

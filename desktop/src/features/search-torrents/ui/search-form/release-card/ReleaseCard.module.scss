@@ -18,11 +18,6 @@
 		background: var(--surface-hover);
 	}
 
-	&.checked {
-		border-color: var(--accent-border);
-		background: var(--accent-muted);
-	}
-
 	// A release only ever watched: nothing here ticks, so the card itself is not
 	// a control — only its own buttons are.
 	&.plain {
