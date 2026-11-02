@@ -3,7 +3,8 @@ import type { FormEvent } from 'react'
 import { useId, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, Icon, Input } from '@shared/ui'
+import { useUnitWatch } from '@shared/lib'
+import { Button, Icon, Input, toast } from '@shared/ui'
 
 import { aniListAccountModel } from '@entities/anilist-account'
 import type { AniListConnectFailure } from '@entities/anilist-account'
@@ -35,7 +36,7 @@ export function GetTokenLink() {
 	return (
 		<button type='button' className={styles.link} disabled={!authorizeUrl} onClick={() => authorize()}>
 			{t('anilist.connect.open')}
-			<Icon name='common/arrow-right' style={{transform: 'rotate(-45deg)'}} size={16} />
+			<Icon name='common/arrow-right' style={{ transform: 'rotate(-45deg)' }} size={16} />
 		</button>
 	)
 }
@@ -80,11 +81,10 @@ function TokenForm({ showHeader, tokenLink }: Required<ConnectAniListProps>) {
 	const tokenId = useId()
 	const [token, setToken] = useState('')
 
-	const { authorizeUrl, loaded, connecting, failure, connect } = useUnit({
+	const { authorizeUrl, loaded, connecting, connect } = useUnit({
 		authorizeUrl: aniListAccountModel.$authorizeUrl,
 		loaded: aniListAccountModel.$loaded,
 		connecting: aniListAccountModel.$connecting,
-		failure: aniListAccountModel.$connectFailure,
 		connect: aniListAccountModel.connectRequested
 	})
 
@@ -93,6 +93,10 @@ function TokenForm({ showHeader, tokenLink }: Required<ConnectAniListProps>) {
 		unreachable: t('anilist.connect.failure.unreachable'),
 		unknown: t('anilist.connect.failure.unknown')
 	}
+
+	useUnitWatch(aniListAccountModel.connectFailed, failure =>
+		toast.error(failureMessages[failure], { id: 'anilist-connect-failed' })
+	)
 
 	const submit = (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault()
@@ -131,7 +135,6 @@ function TokenForm({ showHeader, tokenLink }: Required<ConnectAniListProps>) {
 					spellCheck={false}
 					value={token}
 					placeholder={t('anilist.connect.tokenPlaceholder')}
-					error={failure ? failureMessages[failure] : undefined}
 					onChange={event => setToken(event.target.value)}
 				/>
 

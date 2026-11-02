@@ -5,18 +5,20 @@ import "time"
 // What a root holds, as the user said when adding it. For videos it picks the
 // source — anime is matched against AniList, movies and shows against TMDB, and
 // doramas against TMDB's East Asian shows — since a file's name cannot tell
-// them apart. A root of comics or books keeps only those.
+// them apart. A root of mixed videos is matched against both and keeps what fits
+// best, file by file. A root of comics or books keeps only those.
 const (
 	ContentAnime          = "anime"
 	ContentMoviesAndShows = "movies_and_shows"
 	ContentDoramas        = "doramas"
+	ContentMixed          = "mixed"
 	ContentManga          = "manga"
 	ContentBooks          = "books"
 )
 
 func validContent(content string) bool {
 	switch content {
-	case ContentAnime, ContentMoviesAndShows, ContentDoramas, ContentManga, ContentBooks:
+	case ContentAnime, ContentMoviesAndShows, ContentDoramas, ContentMixed, ContentManga, ContentBooks:
 		return true
 	default:
 		return false
@@ -40,7 +42,7 @@ func keptKind(content string) string {
 type Root struct {
 	ID      int64     `json:"id" doc:"Identifier of the root, stable across scans."`
 	Path    string    `json:"path" doc:"Absolute path on this machine."`
-	Content string    `json:"content" enum:"anime,movies_and_shows,doramas,manga,books" doc:"What the folder holds. For videos it picks the source: anime is matched against AniList, movies and shows against TMDB, doramas against TMDB's East Asian shows; such a folder keeps comics and books as well. A folder of manga keeps only comics, a folder of books only books."`
+	Content string    `json:"content" enum:"anime,movies_and_shows,doramas,mixed,manga,books" doc:"What the folder holds. For videos it picks the source: anime is matched against AniList, movies and shows against TMDB, doramas against TMDB's East Asian shows, mixed videos against both, file by file; such a folder keeps comics and books as well. A folder of manga keeps only comics, a folder of books only books."`
 	AddedAt time.Time `json:"added_at" doc:"When the user added the root."`
 
 	LastScanAt *time.Time `json:"last_scan_at,omitempty" doc:"When the root was last walked. Absent until the first scan."`

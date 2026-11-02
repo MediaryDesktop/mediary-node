@@ -121,6 +121,31 @@ func mediaTypeForForm(form, content string) (string, bool) {
 	return "series", true
 }
 
+// mediaTypesForForm is every media type a file may be matched as: the one its
+// folder says, or, in a folder of mixed videos, anime and the TMDB type alike.
+func mediaTypesForForm(form, content string) ([]string, bool) {
+	if content != ContentMixed {
+		mediaType, supported := mediaTypeForForm(form, content)
+		if !supported {
+			return nil, false
+		}
+
+		return []string{mediaType}, true
+	}
+
+	anime, supported := mediaTypeForForm(form, ContentAnime)
+	if !supported {
+		return nil, false
+	}
+	if anime != "anime" {
+		return []string{anime}, true
+	}
+
+	other, _ := mediaTypeForForm(form, ContentMoviesAndShows)
+
+	return []string{anime, other}, true
+}
+
 func candidates(source []TitleCandidate, tracked bool) []matcher.Candidate {
 	converted := make([]matcher.Candidate, 0, len(source))
 

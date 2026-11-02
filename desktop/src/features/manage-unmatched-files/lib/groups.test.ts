@@ -16,7 +16,7 @@ function root(id: number, content: LibraryContent): LibraryRoot {
 	} as LibraryRoot
 }
 
-const ROOTS = [root(1, 'anime'), root(2, 'movies_and_shows'), root(3, 'books')]
+const ROOTS = [root(1, 'anime'), root(2, 'movies_and_shows'), root(3, 'books'), root(4, 'mixed')]
 
 function file(path: string, overrides: Partial<LibraryFile> = {}): LibraryFile {
 	return {
@@ -73,6 +73,7 @@ describe('unmatchedGroups', () => {
 		expect(typed([file('D:\\Anime\\Show\\ep 1.mkv')])).toBe(true)
 		expect(typed([file('D:\\Anime\\Manga\\ch 1.cbz', { kind: 'manga', root_id: 3 })])).toBe(true)
 		expect(typed([file('D:\\Movies\\Film.mkv', { root_id: 2 })])).toBe(false)
+		expect(typed([file('D:\\Downloads\\Film.mkv', { root_id: 4 })])).toBe(false)
 		expect(typed([file('D:\\Books\\Book.epub', { kind: 'book', root_id: 3 })])).toBe(false)
 		expect(
 			typed([file('D:\\Anime\\Mix\\ep 1.mkv'), file('D:\\Anime\\Mix\\novel.epub', { kind: 'book' })])

@@ -12,6 +12,7 @@ export const LIBRARY_CONTENTS = [
 	'anime',
 	'movies_and_shows',
 	'doramas',
+	'mixed',
 	'manga',
 	'books'
 ] as const satisfies readonly LibraryContent[]
@@ -20,6 +21,7 @@ export const LIBRARY_CONTENT_ICONS: Record<LibraryContent, IconName> = {
 	anime: 'categories/anime',
 	movies_and_shows: 'categories/movie',
 	doramas: 'categories/doramas',
+	mixed: 'common/folder',
 	manga: 'categories/manga',
 	books: 'categories/book'
 }

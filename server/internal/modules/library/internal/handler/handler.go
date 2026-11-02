@@ -28,14 +28,14 @@ type RootsOutput struct {
 type AddRootInput struct {
 	Body struct {
 		Path    string `json:"path" minLength:"1" maxLength:"4096" example:"D:\\Anime" doc:"Absolute path to an existing folder on this machine."`
-		Content string `json:"content,omitempty" enum:"anime,movies_and_shows,doramas,manga,books" doc:"What the folder holds, as in listLibraryRoots. Left out means anime."`
+		Content string `json:"content,omitempty" enum:"anime,movies_and_shows,doramas,mixed,manga,books" doc:"What the folder holds, as in listLibraryRoots. Left out means anime."`
 	}
 }
 
 type UpdateRootInput struct {
 	ID   int64 `path:"id" doc:"Identifier of the root."`
 	Body struct {
-		Content string `json:"content" enum:"anime,movies_and_shows,doramas,manga,books" required:"true" doc:"What the folder holds, as in listLibraryRoots. A folder turned to manga or books drops the files of other kinds."`
+		Content string `json:"content" enum:"anime,movies_and_shows,doramas,mixed,manga,books" required:"true" doc:"What the folder holds, as in listLibraryRoots. A folder turned to manga or books drops the files of other kinds."`
 	}
 }
 

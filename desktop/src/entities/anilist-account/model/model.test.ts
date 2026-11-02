@@ -62,9 +62,13 @@ describe('anilist account', () => {
 			]
 		})
 
-		await allSettled(aniListAccountModel.connectRequested, { scope, params: 'stale' })
+		const failed = vi.fn()
+		const unwatch = aniListAccountModel.connectFailed.watch(failed)
 
-		expect(scope.getState(aniListAccountModel.$connectFailure)).toBe('rejected')
+		await allSettled(aniListAccountModel.connectRequested, { scope, params: 'stale' })
+		unwatch()
+
+		expect(failed).toHaveBeenCalledWith('rejected')
 	})
 
 	it('ignores a blank token', async () => {

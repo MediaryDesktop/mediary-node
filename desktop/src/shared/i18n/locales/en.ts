@@ -324,11 +324,12 @@ export const en = {
 		},
 		root: {
 			add: 'Add folder',
-			note: 'A folder’s type tells the node what is inside. For videos it picks where names come from: anime from AniList, movies, series and doramas from TMDB. A video folder picks up comics and books too; a folder of manga or books keeps only those.',
+			note: 'A folder’s type tells the node what is inside. For videos it picks where names come from: anime from AniList, movies, series and doramas from TMDB; a mixed folder looks in both. A video folder picks up comics and books too; a folder of manga or books keeps only those.',
 			content: {
 				anime: 'Anime',
 				movies_and_shows: 'Movies & series',
 				doramas: 'Doramas',
+				mixed: 'Mixed',
 				manga: 'Manga',
 				books: 'Books'
 			},
@@ -336,6 +337,7 @@ export const en = {
 				anime: 'Folder of anime',
 				movies_and_shows: 'Folder of movies & series',
 				doramas: 'Folder of doramas',
+				mixed: 'Folder of mixed content',
 				manga: 'Folder of manga',
 				books: 'Folder of books'
 			},
@@ -343,6 +345,7 @@ export const en = {
 				anime: 'It holds anime',
 				movies_and_shows: 'It holds movies & series',
 				doramas: 'It holds doramas',
+				mixed: 'It holds a mix',
 				manga: 'It holds manga only',
 				books: 'It holds books only'
 			},

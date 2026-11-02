@@ -55,6 +55,27 @@ func TestAFolderOfShowsIsMatchedAgainstShows(t *testing.T) {
 	}
 }
 
+func TestAFolderOfMixedVideosIsMatchedAgainstBothSources(t *testing.T) {
+	h := newHarness(t)
+	root := t.TempDir()
+
+	h.titles.found = []TitleCandidate{breakingBad}
+
+	writeEpisodes(t, root, "Breaking.Bad.S01E01.1080p.WEB-DL.mkv")
+
+	if _, err := h.svc.AddRoot(context.Background(), root, ContentMixed); err != nil {
+		t.Fatalf("add root: %v", err)
+	}
+
+	if status := h.scan(t, 0); status.Matched != 1 {
+		t.Fatalf("matched %d of %d", status.Matched, status.Considered)
+	}
+
+	if !slices.Contains(h.titles.types, "anime") || !slices.Contains(h.titles.types, "series") {
+		t.Fatalf("asked for %v, want both anime and series", h.titles.types)
+	}
+}
+
 func TestChangingWhatAFolderHoldsRedoesItsAutomaticMatches(t *testing.T) {
 	h := newHarness(t)
 	ctx := context.Background()
@@ -156,6 +177,32 @@ func TestMediaTypeForForm(t *testing.T) {
 		if got != c.want || supported != c.supported {
 			t.Errorf("%s in %s = %q %v, want %q %v", c.form, c.content, got, supported, c.want, c.supported)
 		}
+	}
+}
+
+func TestMediaTypesForFormInAMixedFolder(t *testing.T) {
+	cases := []struct {
+		form      string
+		want      []string
+		supported bool
+	}{
+		{"series", []string{"anime", "series"}, true},
+		{"special", []string{"anime", "series"}, true},
+		{"movie", []string{"anime", "movie"}, true},
+		{"manga", []string{"manga"}, true},
+		{"book", []string{"book"}, true},
+		{"extra", nil, false},
+	}
+
+	for _, c := range cases {
+		got, supported := mediaTypesForForm(c.form, ContentMixed)
+		if !slices.Equal(got, c.want) || supported != c.supported {
+			t.Errorf("%s = %v %v, want %v %v", c.form, got, supported, c.want, c.supported)
+		}
+	}
+
+	if got, _ := mediaTypesForForm("series", ContentMoviesAndShows); !slices.Equal(got, []string{"series"}) {
+		t.Errorf("a folder of one type asks one source, got %v", got)
 	}
 }
 

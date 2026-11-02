@@ -12,7 +12,8 @@ export interface UnmatchedGroup {
 }
 
 // Mirrors the node's choice of source: comics go to AniList anywhere, videos
-// only under an anime folder. An unknown root is not assumed to be anime.
+// only under an anime folder. An unknown root is not assumed to be anime, and
+// neither is a folder of mixed videos.
 function matchesOnAniList(file: LibraryFile, content: LibraryContent | undefined): boolean {
 	if (file.kind === 'manga') {
 		return true
@@ -22,7 +23,8 @@ function matchesOnAniList(file: LibraryFile, content: LibraryContent | undefined
 		file.kind === 'video' &&
 		content !== undefined &&
 		content !== 'movies_and_shows' &&
-		content !== 'doramas'
+		content !== 'doramas' &&
+		content !== 'mixed'
 	)
 }
 

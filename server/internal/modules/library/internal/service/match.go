@@ -55,7 +55,7 @@ func (s *Service) Suggestions(ctx context.Context, fileID int64) ([]Suggestion, 
 		return nil, apperr.New(apperr.KindPrecondition, "nothing in this file's name to search by")
 	}
 
-	mediaType, supported := mediaTypeForForm(file.Parsed.Form, file.RootContent)
+	mediaTypes, supported := mediaTypesForForm(file.Parsed.Form, file.RootContent)
 	if !supported {
 		return nil, apperr.New(apperr.KindPrecondition,
 			"the node has no source for %q files yet", file.Parsed.Form)
@@ -70,16 +70,22 @@ func (s *Service) Suggestions(ctx context.Context, fileID int64) ([]Suggestion, 
 		Authors: authors,
 	}
 
-	tracked, err := s.opts.Titles.Tracked(ctx, mediaType)
-	if err != nil {
-		return nil, apperr.Wrap(err, apperr.KindUnavailable, "read tracked titles")
-	}
+	var tracked, found []TitleCandidate
 
-	found, err := s.opts.Titles.Search(ctx, title, mediaType)
-	if err != nil {
-		// The list from the user's own collection is still worth offering while the
-		// source is unreachable.
-		s.logger.Debug().Err(err).Msg("search for suggestions failed")
+	for _, mediaType := range mediaTypes {
+		listed, err := s.opts.Titles.Tracked(ctx, mediaType)
+		if err != nil {
+			return nil, apperr.Wrap(err, apperr.KindUnavailable, "read tracked titles")
+		}
+		tracked = append(tracked, listed...)
+
+		searched, err := s.opts.Titles.Search(ctx, title, mediaType)
+		if err != nil {
+			// The list from the user's own collection is still worth offering while the
+			// source is unreachable.
+			s.logger.Debug().Err(err).Msg("search for suggestions failed")
+		}
+		found = append(found, searched...)
 	}
 
 	ranked := matcher.Rank(target, append(candidates(tracked, true), candidates(found, false)...))
@@ -173,12 +179,12 @@ func (s *Service) matchFiles(ctx context.Context) matchOutcome {
 			break
 		}
 
-		mediaType, supported := mediaTypeForForm(group.form, group.content)
+		mediaTypes, supported := mediaTypesForForm(group.form, group.content)
 		if !supported {
 			continue
 		}
 
-		best, matched := s.bestForGroup(ctx, group, mediaType, trackedByType)
+		best, matched := s.bestOfTypes(ctx, group, mediaTypes, trackedByType)
 		if !matched {
 			for i := range group.files {
 				file := &group.files[i]
@@ -253,6 +259,24 @@ func (s *Service) announceMatched(ctx context.Context, groups []matchGroupOutcom
 	if len(refs) > 0 {
 		listener.Matched(ctx, refs)
 	}
+}
+
+// bestOfTypes is bestForGroup over every media type the group may be: the
+// candidate it is surest of wins.
+func (s *Service) bestOfTypes(
+	ctx context.Context,
+	group unmatchedGroup,
+	mediaTypes []string,
+	trackedByType map[string][]matcher.Candidate,
+) (best *matcher.Scored, matched bool) {
+	for _, mediaType := range mediaTypes {
+		scored, ok := s.bestForGroup(ctx, group, mediaType, trackedByType)
+		if scored != nil && (best == nil || scored.Confidence > best.Confidence) {
+			best, matched = scored, ok
+		}
+	}
+
+	return best, matched
 }
 
 // bestForGroup ranks a group's candidates and reports whether the best one

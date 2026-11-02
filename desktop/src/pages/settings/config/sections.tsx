@@ -57,7 +57,7 @@ export interface SectionInfo {
 // The menu's cards: what belongs together sits in one, as in Seanime.
 export const SECTION_GROUPS: readonly (readonly SectionInfo[])[] = [
 	[{ id: 'app', icon: 'common/settings', key: 'app' }],
-	[{ id: 'anilist', icon: 'common/user', key: 'anilist' }],
+	[{ id: 'anilist', icon: 'common/anilist', key: 'anilist' }],
 	[
 		{ id: 'backup', icon: 'common/cloud', key: 'backup' },
 		{ id: 'devices', icon: <IoLaptopOutline size={18} />, key: 'devices' }

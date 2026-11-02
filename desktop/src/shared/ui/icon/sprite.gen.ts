@@ -260,6 +260,7 @@ export const sprites = defineSpriteMap([
 	defineSprite('common', [
 		defineSpriteAsset(
 			[
+				defineSpriteSymbol(['anilist'], [24]),
 				defineSpriteSymbol(['arrow-left'], [24]),
 				defineSpriteSymbol(['arrow-right'], [24]),
 				defineSpriteSymbol(['book-open-text'], [24]),
@@ -356,6 +357,7 @@ export const sprites = defineSpriteMap([
 export type SpritesMeta = {
 	categories: 'anime' | 'book' | 'doramas' | 'manga' | 'movie' | 'series'
 	common:
+		| 'anilist'
 		| 'arrow-left'
 		| 'arrow-right'
 		| 'book-open-text'

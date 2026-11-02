@@ -1,5 +1,5 @@
 import { createQuery, keepFresh } from '@farfetched/core'
-import { createEffect, createEvent, createStore, sample } from 'effector'
+import { createEffect, createEvent, sample } from 'effector'
 
 import type { HttpRequestError } from '@shared/api'
 import { atom } from '@shared/factory'
@@ -46,9 +46,10 @@ export const aniListAccountModel = atom(() => {
 	const $connecting = connectAniListFx.pending
 	const $disconnecting = disconnectAniListFx.pending
 
-	const $connectFailure = createStore<AniListConnectFailure | null>(null)
-		.on(connectAniListFx.failData, (_, error) => failureOf(error))
-		.reset(connectRequested, connectAniListFx.done)
+	// Fires once per failed attempt, for the UI to report as a toast — never a
+	// store, so a repeat of the same failure is not silently swallowed.
+	const connectFailed = createEvent<AniListConnectFailure>()
+	sample({ clock: connectAniListFx.failData, fn: failureOf, target: connectFailed })
 
 	sample({
 		clock: authorizeRequested,
@@ -81,6 +82,6 @@ export const aniListAccountModel = atom(() => {
 		$loaded,
 		$connecting,
 		$disconnecting,
-		$connectFailure
+		connectFailed
 	}
 })
