@@ -59,11 +59,8 @@ export const uk: Translation = {
 			title: 'AniList',
 			description:
 				'Аніме й манга живуть у вашому акаунті AniList. Mediary читає й оновлює їх із цього компʼютера',
-			open: 'Отримати токен на AniList',
-			tokenLabel: 'Токен доступу',
+			open: 'Отримати токен',
 			tokenPlaceholder: 'Вставте токен з AniList',
-			tokenHint:
-				'AniList відкриється в браузері. Дозвольте доступ, скопіюйте показаний токен і вставте його сюди',
 			submit: 'Підключити',
 			notConfigured: 'У цій збірці не налаштовано клієнт AniList, тож вхід недоступний',
 			connectedAs: 'Підключено як {{name}}',

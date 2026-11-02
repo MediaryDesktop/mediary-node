@@ -12,9 +12,35 @@ import styles from './ConnectAniList.module.scss'
 
 export interface ConnectAniListProps {
 	showHeader?: boolean
+	// Where "Get a token" appears: in this component's own header, or left out
+	// for the caller to place with GetTokenLink — next to a title of its own.
+	tokenLink?: 'inline' | 'none'
 }
 
-export function ConnectAniList({ showHeader = true }: ConnectAniListProps) {
+// The "Get a token on AniList" action on its own, for a caller that gives
+// AniList its own title elsewhere and wants this next to it.
+export function GetTokenLink() {
+	const { t } = useTranslation()
+
+	const { authorizeUrl, connected, authorize } = useUnit({
+		authorizeUrl: aniListAccountModel.$authorizeUrl,
+		connected: aniListAccountModel.$connected,
+		authorize: aniListAccountModel.authorizeRequested
+	})
+
+	if (connected) {
+		return null
+	}
+
+	return (
+		<button type='button' className={styles.link} disabled={!authorizeUrl} onClick={() => authorize()}>
+			{t('anilist.connect.open')}
+			<Icon name='common/arrow-right' style={{transform: 'rotate(-45deg)'}} size={16} />
+		</button>
+	)
+}
+
+export function ConnectAniList({ showHeader = true, tokenLink = 'inline' }: ConnectAniListProps) {
 	const { t } = useTranslation()
 
 	const { account, connected, disconnecting, disconnect } = useUnit({
@@ -25,7 +51,7 @@ export function ConnectAniList({ showHeader = true }: ConnectAniListProps) {
 	})
 
 	if (!connected) {
-		return <TokenForm showHeader={showHeader} />
+		return <TokenForm showHeader={showHeader} tokenLink={tokenLink} />
 	}
 
 	return (
@@ -42,24 +68,23 @@ export function ConnectAniList({ showHeader = true }: ConnectAniListProps) {
 				{t('anilist.connect.connectedAs', { name: account?.name ?? 'AniList' })}
 			</span>
 
-			<Button variant='ghost' size='small' loading={disconnecting} onClick={() => disconnect()}>
+			<Button variant='glass-accent' size='small' loading={disconnecting} onClick={() => disconnect()}>
 				{t('anilist.connect.disconnect')}
 			</Button>
 		</div>
 	)
 }
 
-function TokenForm({ showHeader }: Required<ConnectAniListProps>) {
+function TokenForm({ showHeader, tokenLink }: Required<ConnectAniListProps>) {
 	const { t } = useTranslation()
 	const tokenId = useId()
 	const [token, setToken] = useState('')
 
-	const { authorizeUrl, loaded, connecting, failure, authorize, connect } = useUnit({
+	const { authorizeUrl, loaded, connecting, failure, connect } = useUnit({
 		authorizeUrl: aniListAccountModel.$authorizeUrl,
 		loaded: aniListAccountModel.$loaded,
 		connecting: aniListAccountModel.$connecting,
 		failure: aniListAccountModel.$connectFailure,
-		authorize: aniListAccountModel.authorizeRequested,
 		connect: aniListAccountModel.connectRequested
 	})
 
@@ -78,21 +103,16 @@ function TokenForm({ showHeader }: Required<ConnectAniListProps>) {
 		<form className={styles.form} onSubmit={submit}>
 			{showHeader && (
 				<header className={styles.header}>
-					<h3 className={styles.title}>{t('anilist.connect.title')}</h3>
-					<p className={styles.description}>{t('anilist.connect.description')}</p>
+					<div className={styles.headerText}>
+						<h3 className={styles.title}>{t('anilist.connect.title')}</h3>
+						<p className={styles.description}>{t('anilist.connect.description')}</p>
+					</div>
+
+					{tokenLink === 'inline' && <GetTokenLink />}
 				</header>
 			)}
 
-			<Button
-				type='button'
-				variant='glass-accent'
-				fullWidth
-				disabled={!authorizeUrl}
-				endIcon={<Icon name='common/arrow-right' size={16} />}
-				onClick={() => authorize()}
-			>
-				{t('anilist.connect.open')}
-			</Button>
+			{tokenLink === 'inline' && !showHeader && <GetTokenLink />}
 
 			{loaded && !authorizeUrl && (
 				<p className={styles.notice}>
@@ -101,27 +121,24 @@ function TokenForm({ showHeader }: Required<ConnectAniListProps>) {
 				</p>
 			)}
 
-			<label className={styles.label} htmlFor={tokenId}>
-				{t('anilist.connect.tokenLabel')}
-			</label>
+			<div className={styles.tokenRow}>
+				<Input
+					id={tokenId}
+					className={styles.tokenField}
+					type='password'
+					revealable
+					autoComplete='off'
+					spellCheck={false}
+					value={token}
+					placeholder={t('anilist.connect.tokenPlaceholder')}
+					error={failure ? failureMessages[failure] : undefined}
+					onChange={event => setToken(event.target.value)}
+				/>
 
-			<Input
-				id={tokenId}
-				type='password'
-				revealable
-				autoComplete='off'
-				spellCheck={false}
-				value={token}
-				placeholder={t('anilist.connect.tokenPlaceholder')}
-				error={failure ? failureMessages[failure] : undefined}
-				onChange={event => setToken(event.target.value)}
-			/>
-
-			<p className={styles.hint}>{t('anilist.connect.tokenHint')}</p>
-
-			<Button type='submit' variant='primary' fullWidth loading={connecting} disabled={!token.trim()}>
-				{t('anilist.connect.submit')}
-			</Button>
+				<Button type='submit' variant='primary' loading={connecting} disabled={!token.trim()}>
+					{t('anilist.connect.submit')}
+				</Button>
+			</div>
 		</form>
 	)
 }

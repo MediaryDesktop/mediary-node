@@ -12,7 +12,7 @@ import { sessionModel } from '@entities/session'
 
 import { BackupSettings, DevicesSettings } from '@features/back-up-node'
 import { MissingPlayerNotice, PlayerModeSwitcher } from '@features/choose-player'
-import { ConnectAniList } from '@features/connect-anilist'
+import { ConnectAniList, GetTokenLink } from '@features/connect-anilist'
 import { DownloadFolderSetting } from '@features/download-chapters'
 import { BookFolderSetting } from '@features/download-free-book'
 import { BookServersSettings, GutenbergSettings } from '@features/manage-book-sources'
@@ -114,8 +114,13 @@ function SectionContent({ section }: { section: SectionInfo }) {
 		case 'anilist':
 			return (
 				<Card>
-					<Row name={t('settings.anilist.name')} hint={t('settings.anilist.hint')} block>
-						<ConnectAniList showHeader={false} />
+					<Row
+						name={t('settings.anilist.name')}
+						hint={t('settings.anilist.hint')}
+						action={<GetTokenLink />}
+						block
+					>
+						<ConnectAniList showHeader={false} tokenLink='none' />
 					</Row>
 				</Card>
 			)
@@ -291,15 +296,22 @@ interface RowProps {
 	hint: string
 	// A list or a form does not fit beside its label, so it goes under it.
 	block?: boolean
+	// An action that belongs with the label, not the control below it — "Get a
+	// token" next to the AniList row's own title, say.
+	action?: ReactNode
 	children: ReactNode
 }
 
-function Row({ name, hint, block, children }: RowProps) {
+function Row({ name, hint, block, action, children }: RowProps) {
 	return (
 		<div className={clsx(styles.row, block && styles.block)}>
 			<div className={styles.label}>
-				<span className={styles.name}>{name}</span>
-				<span className={styles.hint}>{hint}</span>
+				<div className={styles.labelText}>
+					<span className={styles.name}>{name}</span>
+					<span className={styles.hint}>{hint}</span>
+				</div>
+
+				{action}
 			</div>
 			<div className={styles.control}>{children}</div>
 		</div>

@@ -150,9 +150,18 @@
 
 			.label {
 				display: flex;
-				flex-direction: column;
-				gap: 0.25rem;
+				flex: 1;
+				align-items: flex-start;
+				justify-content: space-between;
+				gap: 1rem;
 				min-width: 0;
+
+				.labelText {
+					display: flex;
+					flex-direction: column;
+					gap: 0.25rem;
+					min-width: 0;
+				}
 
 				.name {
 					font-weight: 600;

@@ -61,11 +61,8 @@ export const en = {
 			title: 'AniList',
 			description:
 				'Anime and manga live in your AniList account. Mediary reads and updates them from this computer',
-			open: 'Get a token on AniList',
-			tokenLabel: 'Access token',
+			open: 'Get a token',
 			tokenPlaceholder: 'Paste the token from AniList',
-			tokenHint:
-				'AniList opens in your browser. Approve access, copy the token it shows and paste it here',
 			submit: 'Connect',
 			notConfigured: 'This build has no AniList client configured, so sign-in is unavailable',
 			connectedAs: 'Connected as {{name}}',
