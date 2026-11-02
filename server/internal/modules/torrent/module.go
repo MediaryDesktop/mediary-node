@@ -31,6 +31,9 @@ type Deps struct {
 	// Library is where downloads are saved and how they join the library.
 	Library Library
 
+	// DownloadDir is where torrents go until the user chooses a library folder.
+	DownloadDir string
+
 	// SecretsPath is the file that holds the torrent client's password.
 	SecretsPath string
 
@@ -113,12 +116,13 @@ func New(deps Deps) *Module {
 		deps.Events,
 		deps.Logger,
 		service.Options{
-			Defaults:  deps.Client,
-			Embedded:  builtin,
-			Debrid:    services,
-			Titles:    deps.Titles,
-			Torznab:   torznab.New(20*time.Second, deps.UserAgent),
-			Providers: deps.Providers,
+			Defaults:    deps.Client,
+			Embedded:    builtin,
+			DownloadDir: deps.DownloadDir,
+			Debrid:      services,
+			Titles:      deps.Titles,
+			Torznab:     torznab.New(20*time.Second, deps.UserAgent),
+			Providers:   deps.Providers,
 		},
 	)
 

@@ -101,6 +101,13 @@ func (m *Module) RootContent(ctx context.Context, rootID int64) (content string,
 	return "", false, nil
 }
 
+// EnsureRoot creates a folder the node writes into and makes it part of the
+// library, for a module with a folder of its own. relDir is where the folder
+// sits inside the root it ends up in; empty when it is that root.
+func (m *Module) EnsureRoot(ctx context.Context, path string) (rootID int64, relDir string, err error) {
+	return m.svc.EnsureRoot(ctx, path)
+}
+
 // ImportFile adds a file the node wrote into a library folder and matches it to
 // the title it belongs to, without a scan of the whole folder.
 func (m *Module) ImportFile(ctx context.Context, rootID int64, relPath, mediaRef string, episode *int) (int64, error) {

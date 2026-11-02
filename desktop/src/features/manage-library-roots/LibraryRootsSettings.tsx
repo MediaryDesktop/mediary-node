@@ -5,43 +5,27 @@ import { IoIosRefresh } from 'react-icons/io'
 import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
-import { Button, DropdownMenu, Icon, ListTile, ManagedList, MoreMenu, toast } from '@shared/ui'
-import type { IconName } from '@shared/ui'
+import { Button, Icon, ListTile, ManagedList, MoreMenu, toast } from '@shared/ui'
 
 import {
+	AddRootMenu,
 	deleteLibraryRootMutation,
+	LIBRARY_CONTENT_ICONS,
+	LIBRARY_CONTENTS,
 	libraryModel,
 	libraryRootsQuery,
 	updateLibraryRootMutation
 } from '@entities/library-item'
-import type { LibraryContent } from '@entities/library-item'
 
-const CONTENTS = [
-	'anime',
-	'movies_and_shows',
-	'doramas',
-	'manga',
-	'books'
-] as const satisfies readonly LibraryContent[]
-
-const CONTENT_ICONS: Record<LibraryContent, IconName> = {
-	anime: 'categories/anime',
-	movies_and_shows: 'categories/movie',
-	doramas: 'categories/doramas',
-	manga: 'categories/manga',
-	books: 'categories/book'
-}
+const CONTENTS = LIBRARY_CONTENTS
+const CONTENT_ICONS = LIBRARY_CONTENT_ICONS
 
 export function LibraryRootsSettings() {
 	const { t } = useTranslation()
 
 	const [rootsData, startRoots] = useUnit([libraryRootsQuery.$data, libraryRootsQuery.start])
 
-	const [pickingFolder, folderRequested, scanRequested] = useUnit([
-		libraryModel.$pickingFolder,
-		libraryModel.folderRequested,
-		libraryModel.scanRequested
-	])
+	const [pickingFolder, scanRequested] = useUnit([libraryModel.$pickingFolder, libraryModel.scanRequested])
 
 	const [remove, removing] = useUnit([deleteLibraryRootMutation.start, deleteLibraryRootMutation.$pending])
 	const [update, updating] = useUnit([updateLibraryRootMutation.start, updateLibraryRootMutation.$pending])
@@ -125,14 +109,7 @@ export function LibraryRootsSettings() {
 				/>
 			)}
 			action={
-				<DropdownMenu
-					items={CONTENTS.map(content => ({
-						id: content,
-						label: t(`library.root.addAs.${content}`),
-						icon: CONTENT_ICONS[content],
-						disabled: pickingFolder,
-						onSelect: () => folderRequested(content)
-					}))}
+				<AddRootMenu
 					trigger={
 						<Button
 							startIcon={<Icon name='common/folder-open' size={16} />}

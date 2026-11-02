@@ -132,11 +132,12 @@ func (s *Service) Add(ctx context.Context, req AddRequest) (*TorrentDownload, er
 	if err != nil {
 		return nil, err
 	}
-	if settings.RootID == 0 {
-		return nil, apperr.New(apperr.KindPrecondition, "choose a library folder for downloads in the settings first")
+	rootID, inside, err := s.downloadRoot(ctx, settings.RootID)
+	if err != nil {
+		return nil, err
 	}
 
-	rootPath, found, err := s.library.RootPath(ctx, settings.RootID)
+	rootPath, found, err := s.library.RootPath(ctx, rootID)
 	if err != nil {
 		return nil, err
 	}
@@ -148,7 +149,7 @@ func (s *Service) Add(ctx context.Context, req AddRequest) (*TorrentDownload, er
 	if title == "" {
 		title = info.Name
 	}
-	relDir := folderName(title)
+	relDir := path.Join(inside, folderName(title))
 
 	err = client.Add(ctx, qbittorrent.AddRequest{
 		Magnet:   req.Magnet,
@@ -166,7 +167,7 @@ func (s *Service) Add(ctx context.Context, req AddRequest) (*TorrentDownload, er
 		InfoHash: info.InfoHash,
 		MediaRef: req.MediaRef,
 		Title:    title,
-		RootID:   settings.RootID,
+		RootID:   rootID,
 		RelDir:   relDir,
 		Source:   source,
 		Choosing: req.ChooseFiles,
@@ -188,6 +189,21 @@ func (s *Service) Add(ctx context.Context, req AddRequest) (*TorrentDownload, er
 	download := s.view(*saved)
 
 	return &download, nil
+}
+
+// downloadRoot is the library folder a new torrent goes into, and where inside
+// it: the one the user chose, or else the node's own download folder, made part
+// of the library the first time it is needed.
+func (s *Service) downloadRoot(ctx context.Context, chosen int64) (rootID int64, inside string, err error) {
+	if chosen != 0 {
+		return chosen, "", nil
+	}
+
+	if s.opts.DownloadDir == "" {
+		return 0, "", apperr.New(apperr.KindPrecondition, "choose a library folder for downloads in the settings first")
+	}
+
+	return s.library.EnsureRoot(ctx, s.opts.DownloadDir)
 }
 
 func readTorrent(req AddRequest) (*metainfo.Info, string, error) {
@@ -391,7 +407,7 @@ func (s *Service) removeEmptyFolder(ctx context.Context, download *store.Downloa
 	}
 
 	dir := filepath.Join(rootPath, download.RelDir)
-	if filepath.Dir(dir) != filepath.Clean(rootPath) {
+	if rel, relErr := filepath.Rel(rootPath, dir); relErr != nil || rel == "." || strings.HasPrefix(rel, "..") {
 		return
 	}
 

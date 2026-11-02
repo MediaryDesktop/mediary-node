@@ -51,7 +51,8 @@ export function TorrentClientSettings() {
 				: settings.client === 'debrid'
 					? t('torrents.settings.throughService', { service: service?.name ?? '—' })
 					: t('torrents.settings.notConfigured')
-	const folder = (roots?.roots ?? []).find(root => root.id === settings.root_id)?.path
+	const folder =
+		(roots?.roots ?? []).find(root => root.id === settings.root_id)?.path ?? settings.default_folder
 
 	return (
 		<div className={styles.root}>

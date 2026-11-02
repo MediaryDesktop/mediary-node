@@ -4441,7 +4441,7 @@ export interface components {
 			path_map: components['schemas']['TorrentPathMap']
 			/**
 			 * Format: int64
-			 * @description Library folder torrents are saved into; 0 while none is chosen.
+			 * @description Library folder torrents are saved into; 0 saves them into the node's own download folder.
 			 */
 			root_id: number
 			/** @description qBittorrent WebUI address; empty disconnects. */
@@ -5746,9 +5746,14 @@ export interface components {
 			 * @enum {string}
 			 */
 			client: '' | 'qbittorrent' | 'embedded' | 'debrid'
+			/** @description The node's own download folder, used while no library folder is chosen. It joins the library on the first download; empty when the node has none. */
+			default_folder: string
 			has_password: boolean
 			path_map: components['schemas']['TorrentPathMap']
-			/** Format: int64 */
+			/**
+			 * Format: int64
+			 * @description Library folder torrents are saved into; 0 saves them into default_folder.
+			 */
 			root_id: number
 			url: string
 			username: string

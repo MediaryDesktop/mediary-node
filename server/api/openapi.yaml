@@ -3940,7 +3940,7 @@ components:
           $ref: "#/components/schemas/TorrentPathMap"
           description: How the client names the node's folders, when it runs in Docker or on another machine.
         root_id:
-          description: Library folder torrents are saved into; 0 while none is chosen.
+          description: Library folder torrents are saved into; 0 saves them into the node's own download folder.
           format: int64
           minimum: 0
           type: integer
@@ -6092,11 +6092,15 @@ components:
             - embedded
             - debrid
           type: string
+        default_folder:
+          description: The node's own download folder, used while no library folder is chosen. It joins the library on the first download; empty when the node has none.
+          type: string
         has_password:
           type: boolean
         path_map:
           $ref: "#/components/schemas/TorrentPathMap"
         root_id:
+          description: Library folder torrents are saved into; 0 saves them into default_folder.
           format: int64
           type: integer
         url:
@@ -6109,6 +6113,7 @@ components:
         - username
         - has_password
         - root_id
+        - default_folder
         - path_map
       type: object
     TorrentSource:

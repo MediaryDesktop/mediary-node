@@ -9,9 +9,19 @@ export interface DrawerSectionProps {
 	action?: ReactNode
 	className?: string
 	children?: ReactNode
+	// False when the section continues the one above it rather than starting a
+	// new group, e.g. a connection check right under the control it tests.
+	divider?: boolean
 }
 
-export function DrawerSection({ title, description, action, className, children }: DrawerSectionProps) {
+export function DrawerSection({
+	title,
+	description,
+	action,
+	className,
+	children,
+	divider = true
+}: DrawerSectionProps) {
 	const header = (
 		<>
 			{title != null && <h3 className={styles.title}>{title}</h3>}
@@ -20,7 +30,7 @@ export function DrawerSection({ title, description, action, className, children 
 	)
 
 	return (
-		<section className={clsx(styles.section, className)}>
+		<section className={clsx(styles.section, !divider && styles.noDivider, className)}>
 			{action != null ? (
 				<div className={styles.headerRow}>
 					<div className={styles.headerText}>{header}</div>
@@ -31,7 +41,14 @@ export function DrawerSection({ title, description, action, className, children 
 			)}
 
 			{children != null && (
-				<div className={clsx(styles.body, (title != null || description != null) && styles.spaced)}>
+				<div
+					className={clsx(
+						styles.body,
+						description != null
+							? styles.spacedWithHint
+							: title != null && styles.spaced
+					)}
+				>
 					{children}
 				</div>
 			)}

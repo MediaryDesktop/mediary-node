@@ -147,8 +147,21 @@ type fakeLibrary struct {
 	roots    map[int64]string
 	episodes map[string][]int
 
+	// What EnsureRoot answers: the root the folder ends up in, and where in it.
+	ensureRoot   int64
+	ensureInside string
+
 	mu       sync.Mutex
 	imported []imported
+	ensured  []string
+}
+
+func (l *fakeLibrary) EnsureRoot(_ context.Context, path string) (rootID int64, relDir string, err error) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	l.ensured = append(l.ensured, path)
+
+	return l.ensureRoot, l.ensureInside, nil
 }
 
 func (l *fakeLibrary) RootPath(_ context.Context, rootID int64) (path string, found bool, err error) {
@@ -305,6 +318,59 @@ func TestAddingNeedsAClientAndAFolder(t *testing.T) {
 
 	if len(h.client.added) != 0 {
 		t.Fatalf("nothing may reach the client, got %+v", h.client.added)
+	}
+}
+
+func TestAddWithoutAFolderUsesTheNodesOwn(t *testing.T) {
+	cases := map[string]struct {
+		inside string
+		want   string
+	}{
+		"the folder is a root":        {inside: "", want: "Sousou no Frieren"},
+		"the folder is inside a root": {inside: "Downloads/Mediary", want: "Downloads/Mediary/Sousou no Frieren"},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			h := newHarness(t)
+			ctx := context.Background()
+
+			h.svc.opts.DownloadDir = filepath.Join(t.TempDir(), "Mediary")
+			h.library.roots[2] = h.root
+			h.library.ensureRoot, h.library.ensureInside = 2, tc.inside
+
+			if _, err := h.svc.UpdateSettings(ctx, TorrentSettingsUpdate{URL: "http://localhost:8080"}); err != nil {
+				t.Fatal(err)
+			}
+
+			settings, err := h.svc.Settings(ctx)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if settings.RootID != 0 || settings.DefaultFolder != h.svc.opts.DownloadDir {
+				t.Fatalf("settings = %+v", settings)
+			}
+
+			h.add(t)
+
+			if len(h.library.ensured) != 1 || h.library.ensured[0] != h.svc.opts.DownloadDir {
+				t.Fatalf("ensured = %v", h.library.ensured)
+			}
+			if got := h.client.added[0].SavePath; got != filepath.Join(h.root, filepath.FromSlash(tc.want)) {
+				t.Fatalf("save path = %s", got)
+			}
+
+			h.writeVideo(t, tc.want+"/Frieren - 01.mkv")
+			h.client.set(
+				qbittorrent.Torrent{Hash: frierenHash, State: "stalledUP", Progress: 1},
+				qbittorrent.File{Name: "Frieren - 01.mkv", Progress: 1, Priority: 1},
+			)
+			h.svc.Poll(ctx)
+
+			if len(h.library.imported) != 1 || h.library.imported[0].relPath != tc.want+"/Frieren - 01.mkv" {
+				t.Fatalf("imported = %+v", h.library.imported)
+			}
+		})
 	}
 }
 

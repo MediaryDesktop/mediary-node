@@ -40,6 +40,9 @@ type CacheChecker interface {
 // downloaded file joins it.
 type Library interface {
 	RootPath(ctx context.Context, rootID int64) (path string, found bool, err error)
+	// EnsureRoot creates the node's own download folder and makes it part of the
+	// library; relDir is where it sits inside the root it ends up in.
+	EnsureRoot(ctx context.Context, path string) (rootID int64, relDir string, err error)
 	ImportFile(ctx context.Context, rootID int64, relPath, mediaRef string, episode *int) (int64, error)
 	// NameEpisode reads a file's path the way the library would: whether it keeps
 	// it as a video, and the episode its name gives.
@@ -105,6 +108,11 @@ type Options struct {
 	// Embedded is the node's own client, used when the user picks it; nil where
 	// it is not available.
 	Embedded Client
+
+	// DownloadDir is where torrents go while the user has chosen no library
+	// folder for them; it joins the library on the first download. Empty means
+	// a folder has to be chosen.
+	DownloadDir string
 
 	// Debrid are the debrid services by client kind; a kind missing here is not
 	// available on this node.

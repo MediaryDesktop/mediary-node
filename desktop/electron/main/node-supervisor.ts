@@ -160,6 +160,9 @@ export class NodeSupervisor {
 		this.child = spawn(binary, [], {
 			env: {
 				...devServerEnv(),
+				// The node's own default is in its data folder, out of the user's sight;
+				// on a desktop, gigabytes of video belong where they look for downloads.
+				NODE_TORRENT_DOWNLOAD_DIR: join(app.getPath('downloads'), 'Mediary'),
 				...process.env,
 				NODE_HTTP_HOST: this.host,
 				NODE_HTTP_PORT: String(this.port),

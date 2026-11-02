@@ -1600,7 +1600,7 @@ export const uk: Translation = {
 			ok: 'Підключено до qBittorrent {{version}}',
 			okAccount: 'Підключено: {{account}}',
 			folderLabel: 'Тека завантажень',
-			folderHint: 'Тека бібліотеки, куди зберігаються торенти, по підтеці на тайтл',
+			folderHint: 'По підтеці на тайтл. Тека Mediary додається до бібліотеки з першим завантаженням',
 			folderPlaceholder: 'Виберіть теку бібліотеки',
 			mappingLabel: 'Відповідність шляхів',
 			mappingHint:

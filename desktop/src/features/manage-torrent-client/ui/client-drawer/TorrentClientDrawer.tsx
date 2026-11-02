@@ -5,17 +5,19 @@ import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
 import {
+	Button,
 	ConnectionCheck,
 	Drawer,
 	DrawerForm,
 	DrawerSection,
+	Icon,
 	Input,
 	SelectDropdown,
 	SelectionGroup,
 	toast
 } from '@shared/ui'
 
-import { libraryRootsQuery } from '@entities/library-item'
+import { addLibraryRootMutation, AddRootMenu, libraryModel, libraryRootsQuery } from '@entities/library-item'
 import {
 	checkTorrentClientMutation,
 	putTorrentSettingsMutation,
@@ -38,6 +40,9 @@ type CheckState = { ok: true; version: string } | { ok: false; problem: string }
 const NONE = 'none'
 type ClientChoice = Exclude<TorrentClientKind, ''> | typeof NONE
 
+// The node's "its own folder" is root 0, which a selection cannot hold either.
+const DEFAULT_FOLDER = 'default'
+
 // The form is mounted afresh for every opening, so its fields start from the saved
 // settings. qBittorrent's address, sign-in and path mapping only show for it: the
 // node's own client needs none of them, and downloading through the debrid
@@ -51,6 +56,7 @@ export function TorrentClientDrawer({ open, settings, onClose }: TorrentClientDr
 			onOpenChange={next => !next && onClose()}
 			title={t('torrents.settings.drawerTitle')}
 			description={t('torrents.settings.drawerDescription')}
+			size='lg'
 			closable={false}
 		>
 			{open && <ClientForm settings={settings} onDone={onClose} />}
@@ -61,13 +67,14 @@ export function TorrentClientDrawer({ open, settings, onClose }: TorrentClientDr
 function ClientForm({ settings, onDone }: { settings: TorrentSettings; onDone: () => void }) {
 	const { t } = useTranslation()
 
-	const [save, check, saving, checking, roots, debridSettings] = useUnit([
+	const [save, check, saving, checking, roots, debridSettings, pickingFolder] = useUnit([
 		putTorrentSettingsMutation.start,
 		checkTorrentClientMutation.start,
 		putTorrentSettingsMutation.$pending,
 		checkTorrentClientMutation.$pending,
 		libraryRootsQuery.$data,
-		torrentDebridQuery.$data
+		torrentDebridQuery.$data,
+		libraryModel.$pickingFolder
 	])
 
 	const [choice, setChoice] = useState<ClientChoice>(settings.client || NONE)
@@ -83,6 +90,11 @@ function ClientForm({ settings, onDone }: { settings: TorrentSettings; onDone: (
 	const throughDebrid = choice === 'debrid'
 	const debrid = readyDebrid(debridSettings)
 	const client: TorrentClientKind = choice === NONE ? '' : choice
+
+	// Once the node's own folder has joined the library it is a root like any
+	// other; it is still offered once, as the default.
+	const otherRoots = (roots?.roots ?? []).filter(root => root.path !== settings.default_folder)
+	const folderValue = otherRoots.some(root => root.id === rootId) ? String(rootId) : DEFAULT_FOLDER
 
 	// An untouched password field keeps the saved password.
 	const passwordValue = settings.has_password && password === '' ? undefined : password
@@ -105,6 +117,16 @@ function ClientForm({ settings, onDone }: { settings: TorrentSettings; onDone: (
 	)
 	useUnitWatch(checkTorrentClientMutation.finished.failure, ({ error }) =>
 		setResult({ ok: false, problem: problemDetail(error, t('torrents.client.notConfigured')) })
+	)
+	// The newly added folder is exactly what the user was about to pick anyway.
+	useUnitWatch(addLibraryRootMutation.finished.success, ({ result }) => setRootId(result.root.id))
+	useUnitWatch(addLibraryRootMutation.finished.failure, ({ error }) =>
+		toast.error(
+			error.status === 409
+				? problemDetail(error, t('library.root.overlap'))
+				: problemDetail(error, t('library.root.failed')),
+			{ id: 'library-root-failed' }
+		)
 	)
 
 	const submit = () =>
@@ -142,7 +164,7 @@ function ClientForm({ settings, onDone }: { settings: TorrentSettings; onDone: (
 			cancelDisabled={saving}
 			submitting={saving}
 		>
-			<DrawerSection title={t('torrents.settings.clientLabel')} description={hint}>
+			<DrawerSection description={hint}>
 				<SelectionGroup
 					options={[
 						{ value: 'embedded', label: t('torrents.settings.embedded') },
@@ -163,29 +185,36 @@ function ClientForm({ settings, onDone }: { settings: TorrentSettings; onDone: (
 
 			{qbittorrent && (
 				<>
-					<DrawerSection title={t('torrents.settings.urlLabel')}>
-						<Input
-							value={url}
-							onChange={event => setUrl(event.target.value)}
-							disabled={saving}
-							autoComplete='off'
-							spellCheck={false}
-							placeholder='http://localhost:8080'
-						/>
-					</DrawerSection>
+					<DrawerSection>
+						<div className={styles.row}>
+							<label className={styles.field}>
+								<span className={styles.fieldTitle}>{t('torrents.settings.urlLabel')}</span>
+								<Input
+									value={url}
+									onChange={event => setUrl(event.target.value)}
+									disabled={saving}
+									autoComplete='off'
+									spellCheck={false}
+									placeholder='http://localhost:8080'
+								/>
+							</label>
 
-					<DrawerSection title={t('torrents.settings.usernameLabel')}>
-						<Input
-							value={username}
-							onChange={event => setUsername(event.target.value)}
-							disabled={saving}
-							autoComplete='off'
-							spellCheck={false}
-						/>
+							<label className={styles.field}>
+								<span className={styles.fieldTitle}>{t('torrents.settings.usernameLabel')}</span>
+								<Input
+									value={username}
+									onChange={event => setUsername(event.target.value)}
+									disabled={saving}
+									autoComplete='off'
+									spellCheck={false}
+								/>
+							</label>
+						</div>
 					</DrawerSection>
 
 					<DrawerSection
 						title={t('torrents.settings.passwordLabel')}
+						divider={false}
 						description={
 							settings.has_password
 								? t('torrents.settings.passwordKept')
@@ -205,7 +234,7 @@ function ClientForm({ settings, onDone }: { settings: TorrentSettings; onDone: (
 			)}
 
 			{choice !== NONE && !missingDebrid && (
-				<DrawerSection>
+				<DrawerSection divider={false}>
 					<ConnectionCheck
 						label={t('torrents.settings.check')}
 						checking={checking}
@@ -230,11 +259,29 @@ function ClientForm({ settings, onDone }: { settings: TorrentSettings; onDone: (
 				description={t('torrents.settings.folderHint')}
 			>
 				<SelectDropdown
-					options={(roots?.roots ?? []).map(root => ({ value: String(root.id), label: root.path }))}
-					value={rootId ? String(rootId) : null}
-					onChange={value => setRootId(value ? Number(value) : 0)}
-					placeholder={t('torrents.settings.folderPlaceholder')}
+					options={[
+						{ value: DEFAULT_FOLDER, label: settings.default_folder },
+						...otherRoots.map(root => ({ value: String(root.id), label: root.path }))
+					]}
+					value={folderValue}
+					onChange={value => setRootId(value && value !== DEFAULT_FOLDER ? Number(value) : 0)}
 					disabled={saving}
+					footer={
+						<AddRootMenu
+							align='center'
+							trigger={
+								<Button
+									variant='ghost'
+									size='small'
+									fullWidth
+									disabled={pickingFolder || saving}
+									startIcon={<Icon name='common/folder-open' size={16} />}
+								>
+									{t('library.root.add')}
+								</Button>
+							}
+						/>
+					}
 				/>
 			</DrawerSection>
 

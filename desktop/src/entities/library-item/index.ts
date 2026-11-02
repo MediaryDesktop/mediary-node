@@ -23,6 +23,7 @@ export {
 export type { BulkOutcome } from './model/queries'
 
 export { libraryModel } from './model/model'
+export { AddRootMenu, LIBRARY_CONTENTS, LIBRARY_CONTENT_ICONS } from './ui/add-root-menu/AddRootMenu'
 export type { ScanActivity, ScanPhase } from './model/scan'
 
 export {

@@ -75,7 +75,7 @@ type PutTorrentSettingsInput struct {
 		URL      string                 `json:"url" maxLength:"2048" doc:"qBittorrent WebUI address; empty disconnects."`
 		Username string                 `json:"username" maxLength:"256"`
 		Password *string                `json:"password,omitempty" maxLength:"1024" doc:"Left out keeps the saved password; empty removes it."`
-		RootID   int64                  `json:"root_id" minimum:"0" doc:"Library folder torrents are saved into; 0 while none is chosen."`
+		RootID   int64                  `json:"root_id" minimum:"0" doc:"Library folder torrents are saved into; 0 saves them into the node's own download folder."`
 		PathMap  service.TorrentPathMap `json:"path_map" doc:"How the client names the node's folders, when it runs in Docker or on another machine."`
 	}
 }

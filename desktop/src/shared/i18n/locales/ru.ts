@@ -1600,7 +1600,7 @@ export const ru: Translation = {
 			ok: 'Подключено к qBittorrent {{version}}',
 			okAccount: 'Подключено: {{account}}',
 			folderLabel: 'Папка загрузок',
-			folderHint: 'Папка библиотеки, куда сохраняются торренты, по подпапке на тайтл',
+			folderHint: 'По подпапке на тайтл. Папка Mediary добавляется в библиотеку с первой загрузкой',
 			folderPlaceholder: 'Выберите папку библиотеки',
 			mappingLabel: 'Соответствие путей',
 			mappingHint:

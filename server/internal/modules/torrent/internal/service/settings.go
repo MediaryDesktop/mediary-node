@@ -30,12 +30,14 @@ type TorrentPathMap struct {
 }
 
 type TorrentSettings struct {
-	Client      string         `json:"client" enum:",qbittorrent,embedded,debrid" doc:"Who downloads torrents into the library: the user's qBittorrent, the node's own client, the debrid service set up under /v1/torrent/debrid, or none."`
-	URL         string         `json:"url"`
-	Username    string         `json:"username"`
-	HasPassword bool           `json:"has_password"`
-	RootID      int64          `json:"root_id"`
-	PathMap     TorrentPathMap `json:"path_map"`
+	Client      string `json:"client" enum:",qbittorrent,embedded,debrid" doc:"Who downloads torrents into the library: the user's qBittorrent, the node's own client, the debrid service set up under /v1/torrent/debrid, or none."`
+	URL         string `json:"url"`
+	Username    string `json:"username"`
+	HasPassword bool   `json:"has_password"`
+	RootID      int64  `json:"root_id" doc:"Library folder torrents are saved into; 0 saves them into default_folder."`
+	// DefaultFolder is where torrents go while RootID is 0.
+	DefaultFolder string         `json:"default_folder" doc:"The node's own download folder, used while no library folder is chosen. It joins the library on the first download; empty when the node has none."`
+	PathMap       TorrentPathMap `json:"path_map"`
 }
 
 type TorrentSettingsUpdate struct {
@@ -55,10 +57,11 @@ func (s *Service) Settings(ctx context.Context) (*TorrentSettings, error) {
 	}
 
 	settings := &TorrentSettings{
-		Client:      conn.Kind,
-		URL:         conn.URL,
-		Username:    conn.Username,
-		HasPassword: conn.Password != "",
+		Client:        conn.Kind,
+		URL:           conn.URL,
+		Username:      conn.Username,
+		HasPassword:   conn.Password != "",
+		DefaultFolder: s.opts.DownloadDir,
 	}
 
 	if raw, _, err := s.store.Meta(ctx, keyRoot); err != nil {

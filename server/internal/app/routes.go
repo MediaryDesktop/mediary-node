@@ -65,9 +65,10 @@ type Deps struct {
 	TranscodeDir     string
 	TranscodeHWAccel string
 
-	TorrentClient     torrent.Connection
-	TorrentListenPort int
-	TorrentEnableUPnP bool
+	TorrentClient      torrent.Connection
+	TorrentDownloadDir string
+	TorrentListenPort  int
+	TorrentEnableUPnP  bool
 
 	// LocalURL is the node's own address of a file's direct endpoint, which the
 	// player's tools read streams through.
@@ -167,6 +168,7 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 		Logger:      moduleLogger(deps.Logger, "torrent"),
 		Events:      deps.Events,
 		Library:     downloadFolders{library: libraryModule},
+		DownloadDir: deps.TorrentDownloadDir,
 		SecretsPath: filepath.Join(deps.DataDir, "torrent-secrets.json"),
 		Client:      deps.TorrentClient,
 		EmbeddedDir: filepath.Join(deps.DataDir, "torrent-client"),

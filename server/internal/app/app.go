@@ -222,9 +222,10 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 		TranscodeDir:     cfg.Playback.TranscodeDir,
 		TranscodeHWAccel: cfg.Playback.TranscodeHWAccel,
 
-		TorrentClient:     torrentClient(cfg.Torrent),
-		TorrentListenPort: cfg.Torrent.ListenPort,
-		TorrentEnableUPnP: cfg.Torrent.EnableUPnP,
+		TorrentClient:      torrentClient(cfg.Torrent),
+		TorrentDownloadDir: cfg.Torrent.DownloadDir,
+		TorrentListenPort:  cfg.Torrent.ListenPort,
+		TorrentEnableUPnP:  cfg.Torrent.EnableUPnP,
 
 		LocalURL: localDirectURL(cfg.HTTP, token),
 	})

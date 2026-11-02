@@ -1597,7 +1597,7 @@ export const en = {
 			ok: 'Connected to qBittorrent {{version}}',
 			okAccount: 'Connected: {{account}}',
 			folderLabel: 'Download folder',
-			folderHint: 'The library folder torrents are saved into, one subfolder per title',
+			folderHint: 'One subfolder per title. Mediary’s own folder joins the library with the first download',
 			folderPlaceholder: 'Choose a library folder',
 			mappingLabel: 'Path mapping',
 			mappingHint:

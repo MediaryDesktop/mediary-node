@@ -118,6 +118,10 @@ func (d downloadFolders) RootPath(ctx context.Context, rootID int64) (path strin
 	return d.library.RootPath(ctx, rootID)
 }
 
+func (d downloadFolders) EnsureRoot(ctx context.Context, path string) (rootID int64, relDir string, err error) {
+	return d.library.EnsureRoot(ctx, path)
+}
+
 func (d downloadFolders) ImportFile(ctx context.Context, rootID int64, relPath, mediaRef string, chapter *int) (int64, error) {
 	return d.library.ImportFile(ctx, rootID, relPath, mediaRef, chapter)
 }
