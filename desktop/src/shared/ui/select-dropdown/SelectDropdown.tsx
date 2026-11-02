@@ -32,6 +32,9 @@ interface SelectDropdownBaseProps {
 	id?: string
 	startIcon?: ReactNode
 	accentWhenSelected?: boolean
+	// An action under the list, e.g. "Add a folder" where there may be none to
+	// pick from yet.
+	footer?: ReactNode
 }
 
 export type SelectDropdownProps = SelectDropdownBaseProps &
@@ -51,7 +54,8 @@ export function SelectDropdown(props: SelectDropdownProps) {
 		className,
 		id,
 		startIcon,
-		accentWhenSelected = false
+		accentWhenSelected = false,
+		footer
 	} = props
 
 	const { t } = useTranslation()
@@ -348,6 +352,8 @@ export function SelectDropdown(props: SelectDropdownProps) {
 
 							{visible.length === 0 && <p className={styles.empty}>{t('select.noResults')}</p>}
 						</div>
+
+						{footer != null && <div className={styles.footer}>{footer}</div>}
 					</div>,
 					document.body
 				)}

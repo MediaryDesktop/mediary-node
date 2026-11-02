@@ -104,7 +104,14 @@ export function useFloatingPanel({
 		const handlePointerDown = (event: PointerEvent) => {
 			const target = event.target as Node
 
-			if (containerRef.current?.contains(target) || panelRef.current?.contains(target)) {
+			if (
+				containerRef.current?.contains(target) ||
+				panelRef.current?.contains(target) ||
+				// A Radix popper (a dropdown menu opened from inside the panel, say)
+				// renders in its own portal, so it is never a DOM descendant of
+				// either ref above even while logically part of this panel.
+				(target instanceof Element && target.closest('[data-radix-popper-content-wrapper]'))
+			) {
 				return
 			}
 
