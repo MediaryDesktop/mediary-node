@@ -77,7 +77,7 @@ export function SearchResults({ renderMenu }: SearchResultsProps) {
 				action={
 					<Button
 						size='small'
-						onClick={() => navigate({ to: '/settings', search: { section: 'tmdb' } })}
+						onClick={() => navigate({ to: '/settings', search: { section: 'metadata' } })}
 					>
 						{t('tmdb.openSettings')}
 					</Button>

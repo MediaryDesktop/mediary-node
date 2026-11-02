@@ -109,11 +109,6 @@ function SectionContent({ section }: { section: SectionInfo }) {
 						<NodeVersion />
 					</Row>
 					<AccountRow />
-				</Card>
-			)
-		case 'anilist':
-			return (
-				<Card>
 					<Row
 						name={t('settings.anilist.name')}
 						hint={t('settings.anilist.hint')}
@@ -122,6 +117,13 @@ function SectionContent({ section }: { section: SectionInfo }) {
 					>
 						<ConnectAniList showHeader={false} tokenLink='none' />
 					</Row>
+					<Row name={t('settings.ai.name')} hint={t('settings.ai.hint')} block>
+						<AISettings />
+					</Row>
+					<Row name={t('settings.player.name')} hint={t('settings.player.hint')}>
+						<PlayerModeSwitcher />
+					</Row>
+					<MissingPlayerNotice className={styles.cardNotice} />
 				</Card>
 			)
 		case 'backup':
@@ -148,58 +150,26 @@ function SectionContent({ section }: { section: SectionInfo }) {
 					</Row>
 				</Card>
 			)
-		case 'player':
-			return (
-				<Card>
-					<Row name={t('settings.player.name')} hint={t('settings.player.hint')}>
-						<PlayerModeSwitcher />
-					</Row>
-					<MissingPlayerNotice className={styles.cardNotice} />
-				</Card>
-			)
-		case 'tmdb':
+		case 'metadata':
 			return (
 				<Card>
 					<Row name={t('settings.tmdb.name')} hint={t('settings.tmdb.hint')} block>
 						<TMDBSettings />
 					</Row>
-				</Card>
-			)
-		case 'google-books':
-			return (
-				<Card>
 					<Row name={t('settings.googleBooks.name')} hint={t('settings.googleBooks.hint')} block>
 						<GoogleBooksSettings />
 					</Row>
 				</Card>
 			)
-		case 'manual-media':
-			return (
-				<Card>
-					<Row name={t('settings.ai.name')} hint={t('settings.ai.hint')} block>
-						<AISettings />
-					</Row>
-				</Card>
-			)
-		case 'torrent-client':
+		case 'torrents':
 			return (
 				<Card>
 					<Row name={t('settings.torrents.name')} hint={t('settings.torrents.hint')} block>
 						<TorrentClientSettings />
 					</Row>
-				</Card>
-			)
-		case 'debrid':
-			return (
-				<Card>
 					<Row name={t('settings.debrid.name')} hint={t('settings.debrid.hint')} block>
 						<DebridServiceSettings />
 					</Row>
-				</Card>
-			)
-		case 'torrent-search':
-			return (
-				<Card>
 					<Row
 						name={t('settings.torrentSearch.name')}
 						hint={t('settings.torrentSearch.hint')}
@@ -207,11 +177,6 @@ function SectionContent({ section }: { section: SectionInfo }) {
 					>
 						<TorznabSourcesSettings />
 					</Row>
-				</Card>
-			)
-		case 'torrent-preferences':
-			return (
-				<Card>
 					<Row
 						name={t('settings.releaseProfile.name')}
 						hint={t('settings.releaseProfile.hint')}
@@ -221,23 +186,18 @@ function SectionContent({ section }: { section: SectionInfo }) {
 					</Row>
 				</Card>
 			)
-		case 'manga-sources':
+		case 'manga':
 			return (
 				<Card>
 					<Row name={t('settings.mangaSources.name')} hint={t('settings.mangaSources.hint')} block>
 						<OPDSServersSettings />
 					</Row>
-				</Card>
-			)
-		case 'manga-downloads':
-			return (
-				<Card>
 					<Row name={t('settings.mangaDownloads.name')} hint={t('settings.mangaDownloads.hint')}>
 						<DownloadFolderSetting />
 					</Row>
 				</Card>
 			)
-		case 'book-sources':
+		case 'books':
 			return (
 				<Card>
 					<Row name={t('settings.gutenberg.name')} hint={t('settings.gutenberg.hint')} block>
@@ -246,11 +206,6 @@ function SectionContent({ section }: { section: SectionInfo }) {
 					<Row name={t('settings.bookServers.name')} hint={t('settings.bookServers.hint')} block>
 						<BookServersSettings />
 					</Row>
-				</Card>
-			)
-		case 'book-downloads':
-			return (
-				<Card>
 					<Row name={t('settings.bookDownloads.name')} hint={t('settings.bookDownloads.hint')}>
 						<BookFolderSetting />
 					</Row>

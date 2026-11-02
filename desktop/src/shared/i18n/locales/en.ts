@@ -1925,11 +1925,7 @@ export const en = {
 		sections: {
 			app: {
 				title: 'App',
-				subtitle: 'Appearance, language and first-time setup'
-			},
-			anilist: {
-				title: 'AniList',
-				subtitle: 'The account your anime and manga lists live in'
+				subtitle: 'Appearance, your account and first-time setup'
 			},
 			backup: {
 				title: 'Backup',
@@ -1943,53 +1939,21 @@ export const en = {
 				title: 'Local library',
 				subtitle: 'Folders the node scans for media'
 			},
-			player: {
-				title: 'Video playback',
-				subtitle: 'Which player opens your videos'
+			metadata: {
+				title: 'Metadata providers',
+				subtitle: 'Where titles, posters and details come from'
 			},
-			torrentClient: {
-				title: 'Torrent client',
-				subtitle: 'Where torrents are downloaded'
+			torrents: {
+				title: 'Torrents',
+				subtitle: 'Client, debrid, search and release preferences'
 			},
-			debrid: {
-				title: 'Debrid service',
-				subtitle: 'Watch without downloading'
+			manga: {
+				title: 'Manga',
+				subtitle: 'Sources, and where downloaded chapters are kept'
 			},
-			torrentSearch: {
-				title: 'Torrent search',
-				subtitle: 'Torznab sources for finding releases'
-			},
-			torrentPreferences: {
-				title: 'Release preferences',
-				subtitle: 'Which releases search ranks first'
-			},
-			mangaSources: {
-				title: 'Manga sources',
-				subtitle: 'OPDS catalogs with manga'
-			},
-			tmdb: {
-				title: 'TMDB',
-				subtitle: 'Movies, series and doramas'
-			},
-			googleBooks: {
-				title: 'Google Books',
-				subtitle: 'Books Open Library does not know'
-			},
-			manualMedia: {
-				title: 'Titles you add yourself',
-				subtitle: 'AI filling in details, and posters'
-			},
-			mangaDownloads: {
-				title: 'Manga downloads',
-				subtitle: 'Where downloaded chapters are kept'
-			},
-			bookSources: {
-				title: 'Book sources',
-				subtitle: 'Project Gutenberg and your OPDS catalogues of books'
-			},
-			bookDownloads: {
-				title: 'Book downloads',
-				subtitle: 'Where saved books are kept'
+			books: {
+				title: 'Books',
+				subtitle: 'Sources, and where saved books are kept'
 			}
 		},
 		tmdb: {

@@ -1929,11 +1929,7 @@ export const uk: Translation = {
 		sections: {
 			app: {
 				title: 'Застосунок',
-				subtitle: 'Вигляд, мова та первинне налаштування'
-			},
-			anilist: {
-				title: 'AniList',
-				subtitle: 'Акаунт, у якому живуть твої списки аніме та манги'
+				subtitle: 'Вигляд, акаунт та первинне налаштування'
 			},
 			backup: {
 				title: 'Бекап',
@@ -1947,53 +1943,21 @@ export const uk: Translation = {
 				title: 'Локальна бібліотека',
 				subtitle: 'Теки, які нода сканує на медіа'
 			},
-			player: {
-				title: 'Відтворення відео',
-				subtitle: 'Яким плеєром відкривати відео'
+			metadata: {
+				title: 'Постачальники метаданих',
+				subtitle: 'Звідки беруться назви, постери й деталі'
 			},
-			torrentClient: {
-				title: 'Торент-клієнт',
-				subtitle: 'Куди завантажуються торенти'
+			torrents: {
+				title: 'Торенти',
+				subtitle: 'Клієнт, debrid, пошук і вибір роздач'
 			},
-			debrid: {
-				title: 'Debrid-сервіс',
-				subtitle: 'Перегляд без завантаження'
+			manga: {
+				title: 'Манга',
+				subtitle: 'Джерела та де зберігаються завантажені розділи'
 			},
-			torrentSearch: {
-				title: 'Пошук торентів',
-				subtitle: 'Джерела Torznab для пошуку роздач'
-			},
-			torrentPreferences: {
-				title: 'Вибір роздач',
-				subtitle: 'Які роздачі пошук ставить першими'
-			},
-			mangaSources: {
-				title: 'Джерела манги',
-				subtitle: 'Каталоги OPDS з мангою'
-			},
-			tmdb: {
-				title: 'TMDB',
-				subtitle: 'Фільми, серіали й дорами'
-			},
-			googleBooks: {
-				title: 'Google Books',
-				subtitle: 'Книжки, яких не знає Open Library'
-			},
-			manualMedia: {
-				title: 'Тайтли, додані вручну',
-				subtitle: 'Заповнення деталей ШІ і постери'
-			},
-			mangaDownloads: {
-				title: 'Завантаження манги',
-				subtitle: 'Де зберігаються завантажені розділи'
-			},
-			bookSources: {
-				title: 'Джерела книг',
-				subtitle: 'Project Gutenberg і ваші OPDS-каталоги книг'
-			},
-			bookDownloads: {
-				title: 'Завантаження книг',
-				subtitle: 'Де зберігаються збережені книги'
+			books: {
+				title: 'Книги',
+				subtitle: 'Джерела та де зберігаються збережені книги'
 			}
 		},
 		tmdb: {

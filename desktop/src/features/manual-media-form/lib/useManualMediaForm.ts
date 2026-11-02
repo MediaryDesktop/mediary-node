@@ -221,7 +221,7 @@ export function useManualMediaForm({
 		} catch (error) {
 			const failure = HttpRequestError.fromUnknown(error)
 
-			const openSettings = () => navigate({ to: '/settings', search: { section: 'manual-media' } })
+			const openSettings = () => navigate({ to: '/settings', search: { section: 'app' } })
 
 			if (failure.status === 428) {
 				toast.error(problemDetail(failure, t('manualMedia.ai.needsKey')), {

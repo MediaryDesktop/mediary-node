@@ -24,7 +24,7 @@ export function useBookFolderAction() {
 				? {
 						label: t('bookSources.copies.chooseFolder'),
 						onClick: () =>
-							void navigate({ to: '/settings', search: { section: 'book-downloads' } })
+							void navigate({ to: '/settings', search: { section: 'books' } })
 					}
 				: undefined,
 		[navigate, t]

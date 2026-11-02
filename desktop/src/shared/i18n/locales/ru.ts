@@ -1930,11 +1930,7 @@ export const ru: Translation = {
 		sections: {
 			app: {
 				title: 'Приложение',
-				subtitle: 'Внешний вид, язык и первичная настройка'
-			},
-			anilist: {
-				title: 'AniList',
-				subtitle: 'Аккаунт, в котором живут ваши списки аниме и манги'
+				subtitle: 'Внешний вид, аккаунт и первичная настройка'
 			},
 			backup: {
 				title: 'Бэкап',
@@ -1948,53 +1944,21 @@ export const ru: Translation = {
 				title: 'Локальная библиотека',
 				subtitle: 'Папки, которые нода сканирует на медиа'
 			},
-			player: {
-				title: 'Воспроизведение видео',
-				subtitle: 'Каким плеером открывать видео'
+			metadata: {
+				title: 'Поставщики метаданных',
+				subtitle: 'Откуда берутся названия, постеры и детали'
 			},
-			torrentClient: {
-				title: 'Торрент-клиент',
-				subtitle: 'Куда загружаются торренты'
+			torrents: {
+				title: 'Торренты',
+				subtitle: 'Клиент, debrid, поиск и выбор раздач'
 			},
-			debrid: {
-				title: 'Debrid-сервис',
-				subtitle: 'Просмотр без загрузки'
+			manga: {
+				title: 'Манга',
+				subtitle: 'Источники и где хранятся загруженные главы'
 			},
-			torrentSearch: {
-				title: 'Поиск торрентов',
-				subtitle: 'Источники Torznab для поиска раздач'
-			},
-			torrentPreferences: {
-				title: 'Выбор раздач',
-				subtitle: 'Какие раздачи поиск ставит первыми'
-			},
-			mangaSources: {
-				title: 'Источники манги',
-				subtitle: 'Каталоги OPDS с мангой'
-			},
-			tmdb: {
-				title: 'TMDB',
-				subtitle: 'Фильмы, сериалы и дорамы'
-			},
-			googleBooks: {
-				title: 'Google Books',
-				subtitle: 'Книги, которых не знает Open Library'
-			},
-			manualMedia: {
-				title: 'Тайтлы, добавленные вручную',
-				subtitle: 'Заполнение деталей ИИ и постеры'
-			},
-			mangaDownloads: {
-				title: 'Загрузка манги',
-				subtitle: 'Где хранятся загруженные главы'
-			},
-			bookSources: {
-				title: 'Источники книг',
-				subtitle: 'Project Gutenberg и ваши OPDS-каталоги книг'
-			},
-			bookDownloads: {
-				title: 'Загрузка книг',
-				subtitle: 'Где хранятся сохранённые книги'
+			books: {
+				title: 'Книги',
+				subtitle: 'Источники и где хранятся сохранённые книги'
 			}
 		},
 		tmdb: {

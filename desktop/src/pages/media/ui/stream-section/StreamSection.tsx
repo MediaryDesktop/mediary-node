@@ -150,7 +150,7 @@ export function StreamSection({
 					tone='warning'
 					title={t('torrents.setup.noSources')}
 					actionLabel={t('torrents.setup.openSettings')}
-					onAction={() => navigate({ to: '/settings', search: { section: 'torrent-search' } })}
+					onAction={() => navigate({ to: '/settings', search: { section: 'torrents' } })}
 				>
 					{t('torrents.setup.noSourcesHint')}
 				</Notice>
@@ -188,7 +188,7 @@ export function StreamSection({
 							<Notice
 								title={t('media.stream.debridPitch')}
 								actionLabel={t('torrents.setup.openSettings')}
-								onAction={() => navigate({ to: '/settings', search: { section: 'debrid' } })}
+								onAction={() => navigate({ to: '/settings', search: { section: 'torrents' } })}
 							>
 								{t('media.stream.debridPitchHint')}
 							</Notice>

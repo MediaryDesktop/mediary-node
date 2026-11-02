@@ -38,7 +38,7 @@ export function AIAssistantCard({
 
 				<Link
 					to='/settings'
-					search={{ section: 'manual-media' }}
+					search={{ section: 'app' }}
 					className={styles.settingsLink}
 					aria-label={t('manualMedia.assistant.settings')}
 					title={t('manualMedia.assistant.settings')}
@@ -66,7 +66,7 @@ export function AIAssistantCard({
 			</ul>
 
 			{loaded && !ready ? (
-				<Link to='/settings' search={{ section: 'manual-media' }} className={styles.setupLink}>
+				<Link to='/settings' search={{ section: 'app' }} className={styles.setupLink}>
 					<Icon name='common/settings' size={15} />
 					{t('manualMedia.assistant.needsKey')}
 				</Link>

@@ -124,7 +124,7 @@ export function DiscoverPage({ tab, onTabChange }: DiscoverPageProps) {
 							<Button
 								size='small'
 								onClick={() =>
-									void navigate({ to: '/settings', search: { section: 'tmdb' } })
+									void navigate({ to: '/settings', search: { section: 'metadata' } })
 								}
 							>
 								{t('tmdb.openSettings')}
