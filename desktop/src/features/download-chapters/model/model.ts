@@ -7,7 +7,8 @@ import {
 } from '@entities/manga-source'
 
 // Chapters to save. They go straight to the queue when a download folder is
-// chosen; otherwise the user is asked for one first, and they go after that.
+// chosen or the node has a folder of its own; otherwise the user is asked for one
+// first, and they go after that.
 export const downloadRequested = createEvent<string[]>()
 export const folderChosen = createEvent<number>()
 export const promptClosed = createEvent()
@@ -18,7 +19,9 @@ export const $promptOpen = createStore(false)
 
 // An answer not yet in counts as a folder: the node refuses a download without
 // one, and says why.
-const $hasFolder = mangaDownloadSettingsQuery.$data.map(settings => settings === null || settings.root_id > 0)
+const $hasFolder = mangaDownloadSettingsQuery.$data.map(
+	settings => settings === null || settings.root_id > 0 || settings.default_folder !== ''
+)
 
 sample({
 	clock: downloadRequested,

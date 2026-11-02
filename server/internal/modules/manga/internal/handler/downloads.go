@@ -42,7 +42,8 @@ type MangaDownloadIDInput struct {
 }
 
 type MangaDownloadSettingsBody struct {
-	RootID int64 `json:"root_id" doc:"Library folder chapters are saved to; 0 while none is chosen."`
+	RootID        int64  `json:"root_id" doc:"Library folder chapters are saved to; 0 saves them into default_folder."`
+	DefaultFolder string `json:"default_folder" doc:"The node's own folder for chapters, used while no library folder is chosen. It joins the library as a folder of manga on the first download; empty when the node has none."`
 }
 
 type MangaDownloadSettingsOutput struct {
@@ -137,6 +138,7 @@ func (h *Handler) registerDownloads(api huma.API) {
 
 		out := &MangaDownloadSettingsOutput{}
 		out.Body.RootID = rootID
+		out.Body.DefaultFolder = h.queue.DefaultFolder()
 
 		return out, nil
 	})
@@ -155,6 +157,7 @@ func (h *Handler) registerDownloads(api huma.API) {
 
 		out := &MangaDownloadSettingsOutput{}
 		out.Body.RootID = in.Body.RootID
+		out.Body.DefaultFolder = h.queue.DefaultFolder()
 
 		return out, nil
 	})

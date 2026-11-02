@@ -2431,7 +2431,7 @@ export interface components {
 			 * @description What the folder holds, as in listLibraryRoots. Left out means anime.
 			 * @enum {string}
 			 */
-			content?: 'anime' | 'movies_and_shows' | 'doramas' | 'manga' | 'books'
+			content?: 'anime' | 'movies_and_shows' | 'doramas' | 'mixed' | 'manga' | 'books'
 			/**
 			 * @description Absolute path to an existing folder on this machine.
 			 * @example D:\Anime
@@ -2523,9 +2523,11 @@ export interface components {
 			 * @example https://example.com/schemas/BookDownloadSettings.json
 			 */
 			readonly $schema?: string
+			/** @description The node's own folder for books, used while no library folder is chosen. It joins the library as a folder of books on the first download; empty when the node has none. */
+			default_folder: string
 			/**
 			 * Format: int64
-			 * @description Library folder of books copies are saved to; 0 while none is chosen.
+			 * @description Library folder of books copies are saved to; 0 saves them into default_folder.
 			 */
 			root_id: number
 		}
@@ -3707,9 +3709,11 @@ export interface components {
 			 * @example https://example.com/schemas/MangaDownloadSettingsBody.json
 			 */
 			readonly $schema?: string
+			/** @description The node's own folder for chapters, used while no library folder is chosen. It joins the library as a folder of manga on the first download; empty when the node has none. */
+			default_folder: string
 			/**
 			 * Format: int64
-			 * @description Library folder chapters are saved to; 0 while none is chosen.
+			 * @description Library folder chapters are saved to; 0 saves them into default_folder.
 			 */
 			root_id: number
 		}
@@ -4502,10 +4506,10 @@ export interface components {
 			 */
 			added_at: string
 			/**
-			 * @description What the folder holds. For videos it picks the source: anime is matched against AniList, movies and shows against TMDB, doramas against TMDB's East Asian shows; such a folder keeps comics and books as well. A folder of manga keeps only comics, a folder of books only books.
+			 * @description What the folder holds. For videos it picks the source: anime is matched against AniList, movies and shows against TMDB, doramas against TMDB's East Asian shows, mixed videos against both, file by file; such a folder keeps comics and books as well. A folder of manga keeps only comics, a folder of books only books.
 			 * @enum {string}
 			 */
-			content: 'anime' | 'movies_and_shows' | 'doramas' | 'manga' | 'books'
+			content: 'anime' | 'movies_and_shows' | 'doramas' | 'mixed' | 'manga' | 'books'
 			/**
 			 * Format: int64
 			 * @description Media files currently present under the root.
@@ -5958,7 +5962,7 @@ export interface components {
 			 * @description What the folder holds, as in listLibraryRoots. A folder turned to manga or books drops the files of other kinds.
 			 * @enum {string}
 			 */
-			content: 'anime' | 'movies_and_shows' | 'doramas' | 'manga' | 'books'
+			content: 'anime' | 'movies_and_shows' | 'doramas' | 'mixed' | 'manga' | 'books'
 		}
 		Video: {
 			/** Format: int32 */

@@ -46,10 +46,15 @@ type Source interface {
 	Archive(ctx context.Context, ref string) (io.ReadCloser, error)
 }
 
-// Library is the library module, through a port: where its folders are, and how a
-// new file joins it.
+// ContentManga is the library folder content the node's own folder for chapters
+// is added as.
+const ContentManga = "manga"
+
+// Library is the library module, through a port: where its folders are, how the
+// node's own folder joins it, and how a new file joins it.
 type Library interface {
 	RootPath(ctx context.Context, rootID int64) (path string, found bool, err error)
+	EnsureRootOf(ctx context.Context, path, content string) (rootID int64, relDir string, err error)
 	ImportFile(ctx context.Context, rootID int64, relPath, mediaRef string, chapter *int) (int64, error)
 }
 
@@ -60,6 +65,9 @@ type Queue struct {
 	hub     *events.Hub
 	logger  zerolog.Logger
 	now     func() time.Time
+	// defaultDir is where chapters go while the user has chosen no folder; empty
+	// when the node has none.
+	defaultDir string
 
 	wake chan struct{}
 
@@ -71,15 +79,16 @@ type Queue struct {
 	lastProgress sync.Map
 }
 
-func New(st *store.Store, source Source, library Library, hub *events.Hub, logger zerolog.Logger) *Queue {
+func New(st *store.Store, source Source, library Library, defaultDir string, hub *events.Hub, logger zerolog.Logger) *Queue {
 	return &Queue{
-		store:   st,
-		source:  source,
-		library: library,
-		hub:     hub,
-		logger:  logger,
-		now:     time.Now,
-		wake:    make(chan struct{}, 1),
+		store:      st,
+		source:     source,
+		library:    library,
+		hub:        hub,
+		logger:     logger,
+		now:        time.Now,
+		defaultDir: defaultDir,
+		wake:       make(chan struct{}, 1),
 	}
 }
 
@@ -314,18 +323,9 @@ func (q *Queue) removePartial(ctx context.Context, item store.Download) {
 
 // Enqueue adds chapters to the queue, into the folder chosen for downloads.
 func (q *Queue) Enqueue(ctx context.Context, refs []string) ([]store.Download, error) {
-	rootID, err := q.store.DownloadRoot(ctx)
+	rootID, err := q.downloadRoot(ctx)
 	if err != nil {
 		return nil, err
-	}
-	if rootID == 0 {
-		return nil, apperr.New(apperr.KindPrecondition, "choose a library folder for downloads first")
-	}
-
-	if _, found, err := q.library.RootPath(ctx, rootID); err != nil {
-		return nil, err
-	} else if !found {
-		return nil, apperr.New(apperr.KindPrecondition, "the download folder is no longer in the library; choose another")
 	}
 
 	queued := make([]store.Download, 0, len(refs))
@@ -438,9 +438,47 @@ func (q *Queue) List(ctx context.Context) ([]store.Download, error) {
 	return q.store.Downloads(ctx, 200)
 }
 
+// downloadRoot is the library folder new chapters go to: the one the user chose,
+// or else the node's own folder for manga, made part of the library the first
+// time it is needed — also when the chosen one has left the library. A default
+// folder inside another root saves into that root.
+func (q *Queue) downloadRoot(ctx context.Context) (int64, error) {
+	rootID, err := q.store.DownloadRoot(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	if rootID != 0 {
+		_, found, pathErr := q.library.RootPath(ctx, rootID)
+		if pathErr != nil {
+			return 0, pathErr
+		}
+		if found {
+			return rootID, nil
+		}
+		if q.defaultDir == "" {
+			return 0, apperr.New(apperr.KindPrecondition, "the download folder is no longer in the library; choose another")
+		}
+	}
+
+	if q.defaultDir == "" {
+		return 0, apperr.New(apperr.KindPrecondition, "choose a library folder for downloads first")
+	}
+
+	rootID, _, err = q.library.EnsureRootOf(ctx, q.defaultDir, ContentManga)
+
+	return rootID, err
+}
+
 // Root is the library folder downloads go to, or 0 while none is chosen.
 func (q *Queue) Root(ctx context.Context) (int64, error) {
 	return q.store.DownloadRoot(ctx)
+}
+
+// DefaultFolder is where chapters go while no folder is chosen; empty when the
+// node has none.
+func (q *Queue) DefaultFolder() string {
+	return q.defaultDir
 }
 
 func (q *Queue) SetRoot(ctx context.Context, rootID int64) error {

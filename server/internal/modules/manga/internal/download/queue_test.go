@@ -64,10 +64,21 @@ type fakeLibrary struct {
 
 	mu       sync.Mutex
 	imported []imported
+	// ensured is every folder EnsureRootOf was asked for, as path and content.
+	ensured [][2]string
 }
 
 func (f *fakeLibrary) RootPath(_ context.Context, rootID int64) (path string, found bool, err error) {
 	return f.root, rootID == 1, nil
+}
+
+func (f *fakeLibrary) EnsureRootOf(_ context.Context, path, content string) (rootID int64, relDir string, err error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+
+	f.ensured = append(f.ensured, [2]string{path, content})
+
+	return 1, "", nil
 }
 
 func (f *fakeLibrary) ImportFile(_ context.Context, _ int64, relPath, mediaRef string, chapter *int) (int64, error) {
@@ -111,7 +122,7 @@ func newHarness(t *testing.T, source *fakeSource) *harness {
 
 	library := &fakeLibrary{root: filepath.Join(dir, "library")}
 
-	return &harness{queue: New(st, source, library, nil, zerolog.Nop()), store: st, source: source, library: library}
+	return &harness{queue: New(st, source, library, "", nil, zerolog.Nop()), store: st, source: source, library: library}
 }
 
 func (h *harness) start(t *testing.T) {
@@ -349,6 +360,33 @@ func TestDownloadsNeedAFolderAndALinkedTitle(t *testing.T) {
 	h.source.chapter.MediaRef = ""
 	if _, err := h.queue.Enqueue(ctx, []string{"opds:1:a"}); apperr.KindOf(err) != apperr.KindPrecondition {
 		t.Errorf("unlinked series: %v", err)
+	}
+}
+
+func TestWithNoFolderChosenChaptersGoToTheDefaultFolder(t *testing.T) {
+	h := newHarness(t, &fakeSource{chapter: berserk("12", 1)})
+	ctx := context.Background()
+
+	h.queue.defaultDir = filepath.Join(t.TempDir(), "manga")
+
+	// None chosen, then one chosen that has since left the library.
+	for _, chosen := range []int64{0, 7} {
+		if err := h.store.SetDownloadRoot(ctx, chosen); err != nil {
+			t.Fatal(err)
+		}
+
+		queued, err := h.queue.Enqueue(ctx, []string{"opds:1:a"})
+		if err != nil {
+			t.Fatalf("chosen %d: %v", chosen, err)
+		}
+		if len(queued) != 1 || queued[0].RootID != 1 {
+			t.Fatalf("chosen %d: queued = %+v", chosen, queued)
+		}
+	}
+
+	want := [2]string{h.queue.defaultDir, ContentManga}
+	if len(h.library.ensured) != 2 || h.library.ensured[0] != want || h.library.ensured[1] != want {
+		t.Fatalf("ensured = %v, want %v twice", h.library.ensured, want)
 	}
 }
 

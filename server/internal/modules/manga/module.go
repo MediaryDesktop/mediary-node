@@ -24,6 +24,9 @@ type Deps struct {
 
 	// Library is where downloaded chapters go and how they join the library.
 	Library Library
+	// DownloadDir is where chapters go until the user chooses a library folder;
+	// empty when the node has none.
+	DownloadDir string
 
 	// SecretsPath is the file that holds the OPDS servers' passwords.
 	SecretsPath string
@@ -53,7 +56,7 @@ func New(deps Deps) *Module {
 		Plugins: deps.Plugins,
 	})
 
-	queue := download.New(st, svc.DownloadSource(), deps.Library, deps.Events, deps.Logger)
+	queue := download.New(st, svc.DownloadSource(), deps.Library, deps.DownloadDir, deps.Events, deps.Logger)
 
 	return &Module{handler: handler.New(svc, queue), svc: svc, queue: queue}
 }

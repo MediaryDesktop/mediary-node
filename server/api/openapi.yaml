@@ -157,6 +157,7 @@ components:
             - anime
             - movies_and_shows
             - doramas
+            - mixed
             - manga
             - books
           type: string
@@ -332,12 +333,16 @@ components:
           format: uri
           readOnly: true
           type: string
+        default_folder:
+          description: The node's own folder for books, used while no library folder is chosen. It joins the library as a folder of books on the first download; empty when the node has none.
+          type: string
         root_id:
-          description: Library folder of books copies are saved to; 0 while none is chosen.
+          description: Library folder of books copies are saved to; 0 saves them into default_folder.
           format: int64
           type: integer
       required:
         - root_id
+        - default_folder
       type: object
     BookDownloadsOutputBody:
       additionalProperties: false
@@ -2530,12 +2535,16 @@ components:
           format: uri
           readOnly: true
           type: string
+        default_folder:
+          description: The node's own folder for chapters, used while no library folder is chosen. It joins the library as a folder of manga on the first download; empty when the node has none.
+          type: string
         root_id:
-          description: Library folder chapters are saved to; 0 while none is chosen.
+          description: Library folder chapters are saved to; 0 saves them into default_folder.
           format: int64
           type: integer
       required:
         - root_id
+        - default_folder
       type: object
     MangaDownloadsOutputBody:
       additionalProperties: false
@@ -4065,11 +4074,12 @@ components:
           format: date-time
           type: string
         content:
-          description: "What the folder holds. For videos it picks the source: anime is matched against AniList, movies and shows against TMDB, doramas against TMDB's East Asian shows; such a folder keeps comics and books as well. A folder of manga keeps only comics, a folder of books only books."
+          description: "What the folder holds. For videos it picks the source: anime is matched against AniList, movies and shows against TMDB, doramas against TMDB's East Asian shows, mixed videos against both, file by file; such a folder keeps comics and books as well. A folder of manga keeps only comics, a folder of books only books."
           enum:
             - anime
             - movies_and_shows
             - doramas
+            - mixed
             - manga
             - books
           type: string
@@ -6431,6 +6441,7 @@ components:
             - anime
             - movies_and_shows
             - doramas
+            - mixed
             - manga
             - books
           type: string

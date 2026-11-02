@@ -102,7 +102,7 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 		// — there is nowhere to keep them, and the routes still register.
 		Images:   deps.ImageSearch,
 		Fetch:    safehttp.NewClient(30 * time.Second),
-		CoverDir: coverDir(deps.DataDir),
+		CoverDir: dataSubdir(deps.DataDir, "manual-covers"),
 		CoverURL: deps.CoverURL,
 
 		UserAgent: "mediary-node/" + deps.Build.Version,
@@ -217,6 +217,7 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 		Logger:      moduleLogger(deps.Logger, "manga"),
 		Events:      deps.Events,
 		Library:     downloadFolders{library: libraryModule},
+		DownloadDir: dataSubdir(deps.DataDir, "manga"),
 		SecretsPath: filepath.Join(deps.DataDir, "opds-secrets.json"),
 		UserAgent:   "mediary-node/" + deps.Build.Version,
 
@@ -230,8 +231,9 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 		DB:      deps.DB,
 		Logger:  moduleLogger(deps.Logger, "booksource"),
 		Events:  deps.Events,
-		Library: bookFolders{library: libraryModule},
-		Works:   bookWorks{media: mediaModule},
+		Library:     bookFolders{library: libraryModule},
+		DownloadDir: dataSubdir(deps.DataDir, "books"),
+		Works:       bookWorks{media: mediaModule},
 
 		Gutenberg:   deps.Gutenberg,
 		SecretsPath: filepath.Join(deps.DataDir, "book-opds-secrets.json"),

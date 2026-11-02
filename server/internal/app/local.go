@@ -52,12 +52,12 @@ func localCoverURL(httpCfg config.HTTP, token string) func(id string, version in
 	}
 }
 
-// coverDir is where manual titles' posters are kept, or nothing without a data
-// directory.
-func coverDir(dataDir string) string {
+// dataSubdir is a folder of the node's own beside its data, or nothing without a
+// data directory — the OpenAPI export has none.
+func dataSubdir(dataDir, name string) string {
 	if dataDir == "" {
 		return ""
 	}
 
-	return filepath.Join(dataDir, "manual-covers")
+	return filepath.Join(dataDir, name)
 }

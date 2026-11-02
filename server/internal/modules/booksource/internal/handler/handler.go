@@ -111,7 +111,8 @@ type BookDownloadIDInput struct {
 }
 
 type BookDownloadSettings struct {
-	RootID int64 `json:"root_id" doc:"Library folder of books copies are saved to; 0 while none is chosen."`
+	RootID        int64  `json:"root_id" doc:"Library folder of books copies are saved to; 0 saves them into default_folder."`
+	DefaultFolder string `json:"default_folder" doc:"The node's own folder for books, used while no library folder is chosen. It joins the library as a folder of books on the first download; empty when the node has none."`
 }
 
 type BookDownloadSettingsOutput struct {
@@ -283,7 +284,7 @@ func (h *Handler) Register(api huma.API) {
 			return nil, httpapi.ToHTTP(err)
 		}
 
-		return &BookDownloadSettingsOutput{Body: BookDownloadSettings{RootID: rootID}}, nil
+		return &BookDownloadSettingsOutput{Body: BookDownloadSettings{RootID: rootID, DefaultFolder: h.queue.DefaultFolder()}}, nil
 	})
 
 	huma.Register(api, huma.Operation{
@@ -298,7 +299,7 @@ func (h *Handler) Register(api huma.API) {
 			return nil, httpapi.ToHTTP(err)
 		}
 
-		return &BookDownloadSettingsOutput{Body: BookDownloadSettings{RootID: in.Body.RootID}}, nil
+		return &BookDownloadSettingsOutput{Body: BookDownloadSettings{RootID: in.Body.RootID, DefaultFolder: h.queue.DefaultFolder()}}, nil
 	})
 }
 

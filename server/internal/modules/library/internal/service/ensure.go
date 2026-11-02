@@ -10,10 +10,21 @@ import (
 )
 
 // EnsureRoot makes a folder the node writes into part of the library: it creates
-// the folder and adds it as a root of videos, unless a root already is or holds
-// it. relDir is where the folder sits inside the root it ends up in, slash
+// the folder and adds it as a root of mixed videos, unless a root already is or
+// holds it. relDir is where the folder sits inside the root it ends up in, slash
 // separated; empty when it is that root itself.
 func (s *Service) EnsureRoot(ctx context.Context, path string) (rootID int64, relDir string, err error) {
+	return s.EnsureRootOf(ctx, path, ContentMixed)
+}
+
+// EnsureRootOf is EnsureRoot for a folder of one content, added as such when no
+// root is or holds it yet. A root that already holds it is returned as it is,
+// whatever it holds: the caller decides whether that will do.
+func (s *Service) EnsureRootOf(ctx context.Context, path, content string) (rootID int64, relDir string, err error) {
+	if !validContent(content) {
+		return 0, "", apperr.Invalid("content", "unknown folder content %q", content)
+	}
+
 	absolute, err := filepath.Abs(path)
 	if err != nil {
 		return 0, "", apperr.Invalid("path", "%s is not a usable path", path)
@@ -38,7 +49,7 @@ func (s *Service) EnsureRoot(ctx context.Context, path string) (rootID int64, re
 		}
 	}
 
-	root, err := s.AddRoot(ctx, cleaned, ContentAnime)
+	root, err := s.AddRoot(ctx, cleaned, content)
 	if err != nil {
 		return 0, "", err
 	}

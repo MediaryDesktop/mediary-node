@@ -10,13 +10,18 @@ import {
 
 import { $promptOpen, downloadRequested, folderChosen } from './model'
 
-function setup(rootId: number) {
+function setup(rootId: number, defaultFolder = '') {
 	const enqueue = vi.fn().mockResolvedValue({ downloads: [] })
-	const putSettings = vi.fn().mockImplementation((id: number) => Promise.resolve({ root_id: id }))
+	const putSettings = vi
+		.fn()
+		.mockImplementation((id: number) => Promise.resolve({ root_id: id, default_folder: defaultFolder }))
 
 	const scope = fork({
 		handlers: [
-			[fetchMangaDownloadSettingsFx, () => Promise.resolve({ root_id: rootId })],
+			[
+				fetchMangaDownloadSettingsFx,
+				() => Promise.resolve({ root_id: rootId, default_folder: defaultFolder })
+			],
 			[enqueueMangaDownloadsFx, enqueue],
 			[putMangaDownloadSettingsFx, putSettings]
 		]
@@ -36,7 +41,17 @@ describe('downloading chapters', () => {
 		expect(scope.getState($promptOpen)).toBe(false)
 	})
 
-	it('asks for a folder first, then queues what was asked for', async () => {
+	it('queues straight away into the node’s own folder when none is chosen', async () => {
+		const { scope, enqueue } = setup(0, 'C:\\Mediary\\manga')
+		await allSettled(mangaDownloadSettingsQuery.start, { scope })
+
+		await allSettled(downloadRequested, { scope, params: ['opds:1:a'] })
+
+		expect(enqueue).toHaveBeenCalledWith(['opds:1:a'])
+		expect(scope.getState($promptOpen)).toBe(false)
+	})
+
+	it('asks for a folder first when the node has none, then queues what was asked for', async () => {
 		const { scope, enqueue, putSettings } = setup(0)
 		await allSettled(mangaDownloadSettingsQuery.start, { scope })
 

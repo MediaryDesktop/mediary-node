@@ -38,10 +38,11 @@ type Source interface {
 }
 
 // Library is the library module, through a port: where its folders are, what
-// they hold, and how a new file joins it.
+// they hold, how the node's own folder joins it, and how a new file joins it.
 type Library interface {
 	RootPath(ctx context.Context, rootID int64) (path string, found bool, err error)
 	RootContent(ctx context.Context, rootID int64) (content string, found bool, err error)
+	EnsureRootOf(ctx context.Context, path, content string) (rootID int64, relDir string, err error)
 	ImportFile(ctx context.Context, rootID int64, relPath, mediaRef string, episode *int) (int64, error)
 }
 
@@ -52,6 +53,9 @@ type Queue struct {
 	hub     *events.Hub
 	logger  zerolog.Logger
 	now     func() time.Time
+	// defaultDir is where books go while the user has chosen no folder; empty
+	// when the node has none.
+	defaultDir string
 	// maxBytes is MaxBookBytes; tests lower it.
 	maxBytes int64
 
@@ -65,16 +69,17 @@ type Queue struct {
 	lastProgress sync.Map
 }
 
-func New(st *store.Store, source Source, library Library, hub *events.Hub, logger zerolog.Logger) *Queue {
+func New(st *store.Store, source Source, library Library, defaultDir string, hub *events.Hub, logger zerolog.Logger) *Queue {
 	return &Queue{
-		store:    st,
-		source:   source,
-		library:  library,
-		hub:      hub,
-		logger:   logger,
-		now:      time.Now,
-		maxBytes: MaxBookBytes,
-		wake:     make(chan struct{}, 1),
+		store:      st,
+		source:     source,
+		library:    library,
+		hub:        hub,
+		logger:     logger,
+		now:        time.Now,
+		defaultDir: defaultDir,
+		maxBytes:   MaxBookBytes,
+		wake:       make(chan struct{}, 1),
 	}
 }
 
@@ -375,16 +380,9 @@ type NewBook = store.NewDownload
 
 // Enqueue adds a book to the queue, into the folder chosen for books.
 func (q *Queue) Enqueue(ctx context.Context, book NewBook) (*store.Download, error) {
-	rootID, err := q.store.DownloadRoot(ctx)
+	rootID, err := q.downloadRoot(ctx)
 	if err != nil {
 		return nil, err
-	}
-	if rootID == 0 {
-		return nil, apperr.New(apperr.KindPrecondition, "choose a library folder for books first")
-	}
-
-	if rootErr := q.checkRoot(ctx, rootID); rootErr != nil {
-		return nil, rootErr
 	}
 
 	book.RootID = rootID
@@ -398,6 +396,39 @@ func (q *Queue) Enqueue(ctx context.Context, book NewBook) (*store.Download, err
 	q.signal()
 
 	return item, nil
+}
+
+// downloadRoot is the library folder a new book goes to: the one the user chose,
+// or else the node's own folder for books, made part of the library as a folder
+// of books the first time it is needed — also when the chosen one has left the
+// library.
+func (q *Queue) downloadRoot(ctx context.Context) (int64, error) {
+	rootID, err := q.store.DownloadRoot(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	if rootID != 0 {
+		_, found, contentErr := q.library.RootContent(ctx, rootID)
+		if contentErr != nil {
+			return 0, contentErr
+		}
+		if found || q.defaultDir == "" {
+			return rootID, q.checkRoot(ctx, rootID)
+		}
+	}
+
+	if q.defaultDir == "" {
+		return 0, apperr.New(apperr.KindPrecondition, "choose a library folder for books first")
+	}
+
+	rootID, _, err = q.library.EnsureRootOf(ctx, q.defaultDir, ContentBooks)
+	if err != nil {
+		return 0, err
+	}
+
+	// The default folder may sit inside a root the user added for something else.
+	return rootID, q.checkRoot(ctx, rootID)
 }
 
 // checkRoot refuses a folder that is gone or holds something other than books:
@@ -484,6 +515,12 @@ func (q *Queue) List(ctx context.Context) ([]store.Download, error) {
 // Root is the library folder books go to, or 0 while none is chosen.
 func (q *Queue) Root(ctx context.Context) (int64, error) {
 	return q.store.DownloadRoot(ctx)
+}
+
+// DefaultFolder is where books go while no folder is chosen; empty when the node
+// has none.
+func (q *Queue) DefaultFolder() string {
+	return q.defaultDir
 }
 
 func (q *Queue) SetRoot(ctx context.Context, rootID int64) error {

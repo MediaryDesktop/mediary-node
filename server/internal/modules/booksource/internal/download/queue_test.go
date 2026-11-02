@@ -69,6 +69,17 @@ type fakeLibrary struct {
 
 	mu       sync.Mutex
 	imported []imported
+	// ensured is every folder EnsureRootOf was asked for, as path and content.
+	ensured [][2]string
+}
+
+func (f *fakeLibrary) EnsureRootOf(_ context.Context, path, content string) (rootID int64, relDir string, err error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+
+	f.ensured = append(f.ensured, [2]string{path, content})
+
+	return 1, "", nil
 }
 
 func (f *fakeLibrary) RootPath(_ context.Context, rootID int64) (path string, found bool, err error) {
@@ -124,7 +135,7 @@ func newHarness(t *testing.T) *harness {
 	source := &fakeSource{files: map[string][]byte{"gutenberg:84": epub}}
 
 	return &harness{
-		queue:   New(st, source, library, nil, zerolog.Nop()),
+		queue:   New(st, source, library, "", nil, zerolog.Nop()),
 		store:   st,
 		source:  source,
 		library: library,
@@ -337,6 +348,39 @@ func TestQueueingNeedsAFolderOfBooks(t *testing.T) {
 	}
 	if _, err := h.queue.Enqueue(ctx, frankenstein()); err != nil {
 		t.Errorf("with a folder of books: %v", err)
+	}
+}
+
+func TestWithNoFolderChosenBooksGoToTheDefaultFolder(t *testing.T) {
+	h := newHarness(t)
+	ctx := context.Background()
+
+	h.queue.defaultDir = filepath.Join(t.TempDir(), "books")
+
+	// None chosen, then one chosen that has since left the library.
+	for _, chosen := range []int64{0, 7} {
+		if err := h.store.SetDownloadRoot(ctx, chosen); err != nil {
+			t.Fatal(err)
+		}
+
+		item, err := h.queue.Enqueue(ctx, frankenstein())
+		if err != nil {
+			t.Fatalf("chosen %d: %v", chosen, err)
+		}
+		if item.RootID != 1 {
+			t.Fatalf("chosen %d: download = %+v", chosen, item)
+		}
+	}
+
+	want := [2]string{h.queue.defaultDir, ContentBooks}
+	if len(h.library.ensured) != 2 || h.library.ensured[0] != want || h.library.ensured[1] != want {
+		t.Fatalf("ensured = %v, want %v twice", h.library.ensured, want)
+	}
+
+	// A default folder inside a root of something else is refused, not filled.
+	h.library.content = "anime"
+	if _, err := h.queue.Enqueue(ctx, frankenstein()); apperr.KindOf(err) != apperr.KindPrecondition {
+		t.Errorf("default folder in a folder of anime: %v", err)
 	}
 }
 

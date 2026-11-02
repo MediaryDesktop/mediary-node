@@ -22,6 +22,10 @@ func (b bookFolders) RootContent(ctx context.Context, rootID int64) (content str
 	return b.library.RootContent(ctx, rootID)
 }
 
+func (b bookFolders) EnsureRootOf(ctx context.Context, path, content string) (rootID int64, relDir string, err error) {
+	return b.library.EnsureRootOf(ctx, path, content)
+}
+
 func (b bookFolders) ImportFile(ctx context.Context, rootID int64, relPath, mediaRef string, episode *int) (int64, error) {
 	return b.library.ImportFile(ctx, rootID, relPath, mediaRef, episode)
 }

@@ -16,13 +16,18 @@ const book = {
 	media_ref: 'openlibrary:OL450063W'
 }
 
-function setup(rootId: number) {
+function setup(rootId: number, defaultFolder = '') {
 	const enqueue = vi.fn().mockResolvedValue({ id: 1, state: 'queued' })
-	const putSettings = vi.fn().mockImplementation((id: number) => Promise.resolve({ root_id: id }))
+	const putSettings = vi
+		.fn()
+		.mockImplementation((id: number) => Promise.resolve({ root_id: id, default_folder: defaultFolder }))
 
 	const scope = fork({
 		handlers: [
-			[fetchBookDownloadSettingsFx, () => Promise.resolve({ root_id: rootId })],
+			[
+				fetchBookDownloadSettingsFx,
+				() => Promise.resolve({ root_id: rootId, default_folder: defaultFolder })
+			],
 			[enqueueBookDownloadFx, enqueue],
 			[putBookDownloadSettingsFx, putSettings]
 		]
@@ -42,7 +47,17 @@ describe('downloading a free copy of a book', () => {
 		expect(scope.getState($promptOpen)).toBe(false)
 	})
 
-	it('asks for a folder first, then queues the copy', async () => {
+	it('queues straight away into the node’s own folder when none is chosen', async () => {
+		const { scope, enqueue } = setup(0, 'C:\\Mediary\\books')
+		await allSettled(bookDownloadSettingsQuery.start, { scope })
+
+		await allSettled(downloadRequested, { scope, params: book })
+
+		expect(enqueue).toHaveBeenCalledWith(book)
+		expect(scope.getState($promptOpen)).toBe(false)
+	})
+
+	it('asks for a folder first when the node has none, then queues the copy', async () => {
 		const { scope, enqueue, putSettings } = setup(0)
 		await allSettled(bookDownloadSettingsQuery.start, { scope })
 

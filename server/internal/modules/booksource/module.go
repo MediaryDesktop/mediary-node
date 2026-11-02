@@ -31,6 +31,9 @@ type Deps struct {
 
 	// Library is where saved books go and how they join the library.
 	Library Library
+	// DownloadDir is where books go until the user chooses a library folder of
+	// books; empty when the node has none.
+	DownloadDir string
 	// Works names the book a search is for.
 	Works Works
 
@@ -85,7 +88,7 @@ func New(deps Deps) *Module {
 	}
 
 	svc := service.New(service.Options{Sources: sources, Works: deps.Works})
-	queue := download.New(store.New(deps.DB), svc, deps.Library, deps.Events, deps.Logger)
+	queue := download.New(store.New(deps.DB), svc, deps.Library, deps.DownloadDir, deps.Events, deps.Logger)
 
 	return &Module{handler: handler.New(svc, queue, catalog, opdsServers), queue: queue, gutenberg: catalog}
 }

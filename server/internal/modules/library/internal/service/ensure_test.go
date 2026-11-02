@@ -36,8 +36,32 @@ func TestEnsureRootAddsTheFolderOnce(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(roots) != 1 || roots[0].Content != ContentAnime {
+	if len(roots) != 1 || roots[0].Content != ContentMixed {
 		t.Fatalf("roots = %+v", roots)
+	}
+}
+
+func TestEnsureRootOfAddsTheFolderAsItsContent(t *testing.T) {
+	svc := newHarness(t).svc
+	ctx := context.Background()
+
+	folder := filepath.Join(t.TempDir(), "books")
+
+	id, _, err := svc.EnsureRootOf(ctx, folder, ContentBooks)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	roots, err := svc.Roots(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(roots) != 1 || roots[0].ID != id || roots[0].Content != ContentBooks {
+		t.Fatalf("roots = %+v", roots)
+	}
+
+	if _, _, err := svc.EnsureRootOf(ctx, folder, "comics"); err == nil {
+		t.Fatal("an unknown content was accepted")
 	}
 }
 

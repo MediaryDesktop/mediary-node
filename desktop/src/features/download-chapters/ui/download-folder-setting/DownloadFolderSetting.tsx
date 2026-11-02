@@ -9,7 +9,8 @@ import { $nodeReady } from '@infra/node'
 import { libraryRootsQuery } from '@entities/library-item'
 import { mangaDownloadSettingsQuery, putMangaDownloadSettingsMutation } from '@entities/manga-source'
 
-// The library folder saved chapters go to.
+// The library folder saved chapters go to. Until the user picks one, the node's
+// own folder is shown: chapters go there, and it joins the library on the first.
 export function DownloadFolderSetting() {
 	const { t } = useTranslation()
 
@@ -30,14 +31,16 @@ export function DownloadFolderSetting() {
 		}
 	}, [loadSettings, loadRoots, nodeReady])
 
-	const current = settings?.root_id ? String(settings.root_id) : null
+	const folders = roots?.roots ?? []
+	const defaultFolder = settings?.default_folder ?? ''
+	const current = settings?.root_id || folders.find(root => root.path === defaultFolder)?.id
 
 	return (
 		<SelectDropdown
-			options={(roots?.roots ?? []).map(root => ({ value: String(root.id), label: root.path }))}
-			value={current}
+			options={folders.map(root => ({ value: String(root.id), label: root.path }))}
+			value={current ? String(current) : null}
 			onChange={value => value && save(Number(value))}
-			placeholder={t('mangaSources.downloads.folderPlaceholder')}
+			placeholder={defaultFolder || t('mangaSources.downloads.folderPlaceholder')}
 			disabled={saving}
 		/>
 	)

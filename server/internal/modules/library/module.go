@@ -108,6 +108,12 @@ func (m *Module) EnsureRoot(ctx context.Context, path string) (rootID int64, rel
 	return m.svc.EnsureRoot(ctx, path)
 }
 
+// EnsureRootOf is EnsureRoot for a folder of one content — "manga", "books"… —
+// that a new root is added as.
+func (m *Module) EnsureRootOf(ctx context.Context, path, content string) (rootID int64, relDir string, err error) {
+	return m.svc.EnsureRootOf(ctx, path, content)
+}
+
 // ImportFile adds a file the node wrote into a library folder and matches it to
 // the title it belongs to, without a scan of the whole folder.
 func (m *Module) ImportFile(ctx context.Context, rootID int64, relPath, mediaRef string, episode *int) (int64, error) {
