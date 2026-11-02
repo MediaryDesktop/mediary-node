@@ -7,6 +7,11 @@
 		margin: 0;
 		font-size: 1.0625rem;
 		font-weight: 650;
+
+		// Closer to the list it titles than to whatever sits above it.
+		& + .list {
+			margin-top: -0.425rem;
+		}
 	}
 
 	.list {
