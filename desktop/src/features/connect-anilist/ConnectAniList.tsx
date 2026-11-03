@@ -1,6 +1,7 @@
 import { useUnit } from 'effector-react'
 import type { FormEvent } from 'react'
 import { useId, useState } from 'react'
+import { IoLogOutOutline } from 'react-icons/io5'
 
 import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
@@ -35,8 +36,8 @@ export function GetTokenLink() {
 
 	return (
 		<button type='button' className={styles.link} disabled={!authorizeUrl} onClick={() => authorize()}>
+			<Icon name='common/external-link' size={16} />
 			{t('anilist.connect.open')}
-			<Icon name='common/arrow-right' style={{ transform: 'rotate(-45deg)' }} size={16} />
 		</button>
 	)
 }
@@ -69,7 +70,12 @@ export function ConnectAniList({ showHeader = true, tokenLink = 'inline' }: Conn
 				{t('anilist.connect.connectedAs', { name: account?.name ?? 'AniList' })}
 			</span>
 
-			<Button variant='glass-accent' size='small' loading={disconnecting} onClick={() => disconnect()}>
+			<Button
+				variant='glass-accent'
+				startIcon={<IoLogOutOutline size={22} />}
+				loading={disconnecting}
+				onClick={() => disconnect()}
+			>
 				{t('anilist.connect.disconnect')}
 			</Button>
 		</div>
@@ -136,6 +142,7 @@ function TokenForm({ showHeader, tokenLink }: Required<ConnectAniListProps>) {
 					value={token}
 					placeholder={t('anilist.connect.tokenPlaceholder')}
 					onChange={event => setToken(event.target.value)}
+					startIcon={<Icon name='common/lock' size={18} />}
 				/>
 
 				<Button type='submit' variant='primary' loading={connecting} disabled={!token.trim()}>

@@ -1927,7 +1927,11 @@ export const en = {
 		sections: {
 			app: {
 				title: 'App',
-				subtitle: 'Appearance, your account and first-time setup'
+				subtitle: 'Appearance, language and first-time setup'
+			},
+			account: {
+				title: 'Account integrations',
+				subtitle: 'Your Mediary account and connected services'
 			},
 			backup: {
 				title: 'Backup',

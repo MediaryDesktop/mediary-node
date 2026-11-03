@@ -1931,7 +1931,11 @@ export const ru: Translation = {
 		sections: {
 			app: {
 				title: 'Приложение',
-				subtitle: 'Внешний вид, аккаунт и первичная настройка'
+				subtitle: 'Внешний вид, язык и первичная настройка'
+			},
+			account: {
+				title: 'Интеграции аккаунта',
+				subtitle: 'Ваш аккаунт Mediary и подключённые сервисы'
 			},
 			backup: {
 				title: 'Бэкап',

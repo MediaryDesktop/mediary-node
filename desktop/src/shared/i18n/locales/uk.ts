@@ -1930,7 +1930,11 @@ export const uk: Translation = {
 		sections: {
 			app: {
 				title: 'Застосунок',
-				subtitle: 'Вигляд, акаунт та первинне налаштування'
+				subtitle: 'Вигляд, мова та первинне налаштування'
+			},
+			account: {
+				title: 'Інтеграції акаунта',
+				subtitle: 'Ваш акаунт Mediary та підключені сервіси'
 			},
 			backup: {
 				title: 'Бекап',
