@@ -5,7 +5,7 @@ import { problemDetail } from '@shared/api'
 import type { RequestFailure } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
-import { ConnectionCheck, DrawerForm, DrawerSection, Input, toast } from '@shared/ui'
+import { Button, ConnectionCheck, Input, toast } from '@shared/ui'
 
 import {
 	checkTorrentSourceMutation,
@@ -14,9 +14,13 @@ import {
 } from '@entities/torrent'
 import type { TorrentSource } from '@entities/torrent'
 
+import styles from './TorznabSourceForm.module.scss'
+
 export interface TorznabSourceFormProps {
 	// The source being changed, or null to add one.
 	source: TorrentSource | null
+	// Called after a successful save, and when the user cancels: either way the
+	// form's local state should go back to matching what is saved.
 	onDone: () => void
 }
 
@@ -46,7 +50,7 @@ export function TorznabSourceForm({ source, onDone }: TorznabSourceFormProps) {
 	// An untouched key field on an existing source keeps the saved key.
 	const keyValue = source && apiKey === '' ? undefined : apiKey
 
-	// Only one form is open at a time, so whatever these mutations report is this form's.
+	// Only one form is mounted at a time, so whatever these mutations report is this form's.
 	const failed = ({ error }: RequestFailure) =>
 		toast.error(problemDetail(error, t('torrents.sources.saveFailed')), { id: 'torznab-save-failed' })
 
@@ -87,16 +91,18 @@ export function TorznabSourceForm({ source, onDone }: TorznabSourceFormProps) {
 	}
 
 	return (
-		<DrawerForm
-			onSubmit={submit}
-			onCancel={onDone}
-			submitLabel={source ? t('torrents.sources.save') : t('torrents.sources.create')}
-			submitDisabled={!canSubmit}
-			cancelDisabled={submitting}
-			submitting={submitting}
-			scrollable={false}
+		<form
+			className={styles.root}
+			onSubmit={event => {
+				event.preventDefault()
+				submit()
+			}}
 		>
-			<DrawerSection title={t('torrents.sources.nameLabel')}>
+			<label className={styles.field}>
+				<div className={styles.fieldHeader}>
+					<span className={styles.label}>{t('torrents.sources.nameLabel')}</span>
+					<p className={styles.hint}>{t('torrents.sources.nameHint')}</p>
+				</div>
 				<Input
 					value={name}
 					onChange={event => setName(event.target.value)}
@@ -105,9 +111,13 @@ export function TorznabSourceForm({ source, onDone }: TorznabSourceFormProps) {
 					maxLength={100}
 					placeholder='Jackett'
 				/>
-			</DrawerSection>
+			</label>
 
-			<DrawerSection title={t('torrents.sources.urlLabel')} description={t('torrents.sources.urlHint')}>
+			<div className={styles.field}>
+				<div className={styles.fieldHeader}>
+					<span className={styles.label}>{t('torrents.sources.urlLabel')}</span>
+					<p className={styles.hint}>{t('torrents.sources.urlHint')}</p>
+				</div>
 				<Input
 					value={url}
 					onChange={event => setUrl(event.target.value)}
@@ -116,14 +126,15 @@ export function TorznabSourceForm({ source, onDone }: TorznabSourceFormProps) {
 					spellCheck={false}
 					placeholder='http://localhost:9117/api/v2.0/indexers/all/results/torznab/'
 				/>
-			</DrawerSection>
+			</div>
 
-			<DrawerSection
-				title={t('torrents.sources.keyLabel')}
-				description={
-					source?.has_api_key ? t('torrents.sources.keyKept') : t('torrents.sources.keyHint')
-				}
-			>
+			<div className={styles.field}>
+				<div className={styles.fieldHeader}>
+					<span className={styles.label}>{t('torrents.sources.keyLabel')}</span>
+					<p className={styles.hint}>
+						{source?.has_api_key ? t('torrents.sources.keyKept') : t('torrents.sources.keyHint')}
+					</p>
+				</div>
 				<Input
 					type='password'
 					revealable
@@ -132,17 +143,28 @@ export function TorznabSourceForm({ source, onDone }: TorznabSourceFormProps) {
 					disabled={submitting}
 					autoComplete='off'
 				/>
-			</DrawerSection>
+			</div>
 
-			<DrawerSection>
+			<div className={styles.footer}>
 				<ConnectionCheck
 					label={t('torrents.sources.check')}
+					size='default'
 					checking={checking}
 					disabled={url.trim() === '' || submitting}
 					onCheck={runCheck}
 					status={result && { ok: result.ok && result.search, message: checkMessage(result) }}
 				/>
-			</DrawerSection>
-		</DrawerForm>
+
+				<div className={styles.formActions}>
+					<Button variant='secondary' onClick={onDone} disabled={submitting}>
+						{t('common.cancel')}
+					</Button>
+
+					<Button type='submit' variant='primary' disabled={!canSubmit} loading={submitting}>
+						{source ? t('torrents.sources.save') : t('torrents.sources.create')}
+					</Button>
+				</div>
+			</div>
+		</form>
 	)
 }

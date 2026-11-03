@@ -1397,6 +1397,7 @@ export const en = {
 			editTitle: 'Change the search source',
 			description: 'A Torznab feed from Jackett or Prowlarr. Which sites it searches is set up there.',
 			nameLabel: 'Name',
+			nameHint: 'Your own label for it — shown in the list above',
 			urlLabel: 'Torznab address',
 			urlHint:
 				'Jackett: Copy Torznab Feed on an indexer, or the “all” feed. Prowlarr: an indexer’s Torznab URL',

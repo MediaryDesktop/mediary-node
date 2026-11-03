@@ -1398,6 +1398,7 @@ export const uk: Translation = {
 			editTitle: 'Змінити джерело пошуку',
 			description: 'Torznab-стрічка з Jackett або Prowlarr. Які сайти вона шукає, налаштовується там.',
 			nameLabel: 'Назва',
+			nameHint: 'Власна назва — показується у списку вище',
 			urlLabel: 'Адреса Torznab',
 			urlHint:
 				'Jackett: «Copy Torznab Feed» на індексаторі або стрічка «all». Prowlarr: Torznab-адреса індексатора',

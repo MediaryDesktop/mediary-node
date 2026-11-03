@@ -1,17 +1,17 @@
 import { useUnit } from 'effector-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
-import { Button, CollapsibleSection, Icon, ListTile, ManagedList, MoreMenu, toast } from '@shared/ui'
+import { Button, CollapsibleSection, Icon, toast } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
 
 import { deleteTorrentSourceMutation, torrentSourcesQuery } from '@entities/torrent'
-import type { TorrentSource } from '@entities/torrent'
 
-import styles from './TorznabSourcesSettings.module.scss'
 import { TorznabSourceForm } from './source-form/TorznabSourceForm'
+import { SourceRow } from './source-row/SourceRow'
+import styles from './TorznabSourcesSettings.module.scss'
 
 // The user's Jackett or Prowlarr endpoints the node searches for releases.
 export function TorznabSourcesSettings() {
@@ -25,11 +25,19 @@ export function TorznabSourcesSettings() {
 		$nodeReady
 	])
 
-	// undefined: nothing open; null: the add form is open; a source: that row's
-	// edit form is open.
-	const [editing, setEditing] = useState<TorrentSource | null | undefined>(undefined)
-	const close = useCallback(() => setEditing(undefined), [])
-	const adding = editing === null
+	// Shut by default. The form stays mounted through the closing animation
+	// (CollapsibleSection only hides it); addKey remounts it with fresh,
+	// empty fields each time it opens, so a cancelled draft never lingers.
+	const [adding, setAdding] = useState(false)
+	const [addKey, setAddKey] = useState(0)
+
+	const toggleAdding = () =>
+		setAdding(current => {
+			if (!current) {
+				setAddKey(key => key + 1)
+			}
+			return !current
+		})
 
 	useEffect(() => {
 		if (nodeReady) {
@@ -41,70 +49,44 @@ export function TorznabSourcesSettings() {
 		toast.error(t('torrents.sources.removeFailed'), { id: 'torznab-remove-failed' })
 	)
 
+	const sources = data?.sources ?? []
+
 	return (
-		<div className={styles.root}>
-			<ManagedList
-				items={data?.sources ?? []}
-				emptyText={t('torrents.sources.none')}
-				renderItem={source => {
-					const open = editing != null && editing.id === source.id
+		<div className={styles.card}>
+			<div className={styles.header}>
+				<div className={styles.headerText}>
+					<h3 className={styles.title}>{t('settings.torrentSearch.name')}</h3>
+					<p className={styles.hint}>{t('settings.torrentSearch.hint')}</p>
+				</div>
 
-					return (
-						<li key={source.id} className={styles.item}>
-							<ListTile
-								icon='common/search'
-								title={source.name}
-								subtitle={source.url}
-								subtitleHint={source.url}
-								actions={
-									<MoreMenu
-										label={t('torrents.sources.menu')}
-										items={[
-											{
-												id: 'edit',
-												label: open ? t('common.cancel') : t('torrents.sources.edit'),
-												icon: open ? 'common/close' : 'common/pencil',
-												onSelect: () => setEditing(open ? undefined : source)
-											},
-											{
-												id: 'remove',
-												label: t('torrents.sources.remove'),
-												icon: 'common/trash',
-												danger: true,
-												disabled: removing,
-												onSelect: () => remove(source.id)
-											}
-										]}
-									/>
-								}
-							/>
+				<Button
+					size='small'
+					iconOnly
+					aria-label={adding ? t('common.cancel') : t('torrents.sources.add')}
+					startIcon={<Icon name={adding ? 'common/close' : 'common/plus'} size={16} />}
+					onClick={toggleAdding}
+				/>
+			</div>
 
-							<CollapsibleSection open={open}>
-								{open && (
-									<div className={styles.form}>
-										<TorznabSourceForm source={source} onDone={close} />
-									</div>
-								)}
-							</CollapsibleSection>
-						</li>
-					)
-				}}
-				action={
-					<Button
-						startIcon={<Icon name={adding ? 'common/close' : 'common/plus'} size={16} />}
-						onClick={() => setEditing(adding ? undefined : null)}
-					>
-						{adding ? t('common.cancel') : t('torrents.sources.add')}
-					</Button>
-				}
-			/>
+			{sources.length > 0 ? (
+				<div className={styles.list}>
+					{sources.map(source => (
+						<SourceRow
+							key={source.id}
+							source={source}
+							removing={removing}
+							onRemove={() => remove(source.id)}
+						/>
+					))}
+				</div>
+			) : (
+				<p className={styles.empty}>{t('torrents.sources.none')}</p>
+			)}
 
-			<CollapsibleSection open={adding} className={styles.addForm}>
-				{adding && (
-					<div className={styles.form}>
-						<TorznabSourceForm source={null} onDone={close} />
-					</div>
-				)}
+			<CollapsibleSection open={adding}>
+				<div className={styles.addSection}>
+					<TorznabSourceForm key={addKey} source={null} onDone={() => setAdding(false)} />
+				</div>
 			</CollapsibleSection>
 		</div>
 	)
