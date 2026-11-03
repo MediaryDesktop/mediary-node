@@ -163,28 +163,29 @@ function SectionContent({ section }: { section: SectionInfo }) {
 			)
 		case 'torrents':
 			return (
-				<Card>
-					<Row name={t('settings.torrents.name')} hint={t('settings.torrents.hint')} block>
-						<TorrentClientSettings />
-					</Row>
-					<Row name={t('settings.debrid.name')} hint={t('settings.debrid.hint')} block>
-						<DebridServiceSettings />
-					</Row>
-					<Row
-						name={t('settings.torrentSearch.name')}
-						hint={t('settings.torrentSearch.hint')}
-						block
-					>
-						<TorznabSourcesSettings />
-					</Row>
-					<Row
-						name={t('settings.releaseProfile.name')}
-						hint={t('settings.releaseProfile.hint')}
-						block
-					>
-						<ReleaseProfileSettings />
-					</Row>
-				</Card>
+				<>
+					<TorrentClientSettings />
+
+					<Card>
+						<Row name={t('settings.debrid.name')} hint={t('settings.debrid.hint')} block>
+							<DebridServiceSettings />
+						</Row>
+						<Row
+							name={t('settings.torrentSearch.name')}
+							hint={t('settings.torrentSearch.hint')}
+							block
+						>
+							<TorznabSourcesSettings />
+						</Row>
+						<Row
+							name={t('settings.releaseProfile.name')}
+							hint={t('settings.releaseProfile.hint')}
+							block
+						>
+							<ReleaseProfileSettings />
+						</Row>
+					</Card>
+				</>
 			)
 		case 'manga':
 			return (

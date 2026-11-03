@@ -44,9 +44,7 @@ export function DrawerSection({
 				<div
 					className={clsx(
 						styles.body,
-						description != null
-							? styles.spacedWithHint
-							: title != null && styles.spaced
+						description != null ? styles.spacedWithHint : title != null && styles.spaced
 					)}
 				>
 					{children}

@@ -5,7 +5,7 @@ import { problemDetail } from '@shared/api'
 import type { RequestFailure } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
-import { ConnectionCheck, Drawer, DrawerForm, DrawerSection, Input, toast } from '@shared/ui'
+import { ConnectionCheck, DrawerForm, DrawerSection, Input, toast } from '@shared/ui'
 
 import {
 	checkTorrentSourceMutation,
@@ -14,33 +14,16 @@ import {
 } from '@entities/torrent'
 import type { TorrentSource } from '@entities/torrent'
 
-export interface TorznabSourceDrawerProps {
-	open: boolean
+export interface TorznabSourceFormProps {
 	// The source being changed, or null to add one.
 	source: TorrentSource | null
-	onClose: () => void
+	onDone: () => void
 }
 
 type CheckState = { ok: true; title: string; search: boolean } | { ok: false; problem: string } | null
 
-// The form is mounted afresh for every opening, so its fields start from the source.
-export function TorznabSourceDrawer({ open, source, onClose }: TorznabSourceDrawerProps) {
-	const { t } = useTranslation()
-
-	return (
-		<Drawer
-			open={open}
-			onOpenChange={next => !next && onClose()}
-			title={source ? t('torrents.sources.editTitle') : t('torrents.sources.createTitle')}
-			description={t('torrents.sources.description')}
-			closable={false}
-		>
-			{open && <SourceForm key={source?.id ?? 'new'} source={source} onDone={onClose} />}
-		</Drawer>
-	)
-}
-
-function SourceForm({ source, onDone }: { source: TorrentSource | null; onDone: () => void }) {
+// Mounted afresh for every opening, so its fields start from the source.
+export function TorznabSourceForm({ source, onDone }: TorznabSourceFormProps) {
 	const { t } = useTranslation()
 
 	const [create, update, check, creating, updating, checking] = useUnit([
@@ -111,6 +94,7 @@ function SourceForm({ source, onDone }: { source: TorrentSource | null; onDone: 
 			submitDisabled={!canSubmit}
 			cancelDisabled={submitting}
 			submitting={submitting}
+			scrollable={false}
 		>
 			<DrawerSection title={t('torrents.sources.nameLabel')}>
 				<Input

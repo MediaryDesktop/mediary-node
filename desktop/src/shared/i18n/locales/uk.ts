@@ -75,7 +75,9 @@ export const uk: Translation = {
 
 	common: {
 		cancel: 'Скасувати',
-		breadcrumbs: 'Шлях навігації'
+		breadcrumbs: 'Шлях навігації',
+		connected: 'Підключено',
+		connectionFailed: 'Не вдалося підключитися'
 	},
 
 	lists: {
@@ -1575,22 +1577,20 @@ export const uk: Translation = {
 		settings: {
 			clientLabel: 'Торент-клієнт',
 			embedded: 'Вбудований',
+			embeddedDescription: 'Mediary завантажує торенти сама, нічого більше встановлювати не треба.',
+			embeddedPort: 'Чекає на пірів на порту 42069',
+			embeddedPortHint: 'Не відкрито на вашому роутері',
 			none: 'Немає',
-			embeddedHint:
-				'Mediary завантажує торенти сама, нічого більше встановлювати не треба. Чекає на пірів на порту 42069 і не відкриває його на роутері.',
+			noneDescription: 'Не завантажувати торенти.',
+			qbittorrentDescription: 'Надсилайте торенти у ваш qBittorrent через його Web UI.',
 			qbittorrentHint:
 				'Ваш qBittorrent через його Web UI. Увімкніть Web UI в qBittorrent: Налаштування → Веб-інтерфейс.',
 			debrid: 'Через debrid',
+			debridDescription: 'Забирайте файли з debrid-сервісу замість пірів.',
 			debridHint:
 				'Завантаження йдуть через {{service}}: він качає торент на своїх серверах, а Mediary забирає файли по HTTPS. Жодного BitTorrent-трафіку з цього комп’ютера.',
 			debridMissing: 'Спершу підключіть debrid-сервіс: Налаштування → Debrid-сервіс.',
 			throughService: 'Через {{service}}',
-			noneHint: 'Торенти вимкнено.',
-			notConfigured: 'Не підключено',
-			configure: 'Підключити',
-			edit: 'Змінити',
-			drawerTitle: 'Торент-клієнт',
-			drawerDescription: 'Який клієнт завантажує торенти в бібліотеку.',
 			urlLabel: 'Адреса Web UI',
 			usernameLabel: 'Ім’я користувача',
 			passwordLabel: 'Пароль',
@@ -1601,7 +1601,7 @@ export const uk: Translation = {
 			okAccount: 'Підключено: {{account}}',
 			folderLabel: 'Тека завантажень',
 			folderHint: 'По підтеці на тайтл. Тека Mediary додається до бібліотеки з першим завантаженням',
-			folderPlaceholder: 'Виберіть теку бібліотеки',
+			change: 'Змінити',
 			mappingLabel: 'Відповідність шляхів',
 			mappingHint:
 				'Лише якщо qBittorrent працює в Docker чи на іншому комп’ютері й бачить теку завантажень під іншим шляхом. Заповніть обидва поля або жодного.',

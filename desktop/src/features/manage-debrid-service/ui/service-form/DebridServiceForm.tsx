@@ -4,16 +4,7 @@ import { useState } from 'react'
 import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
-import {
-	Button,
-	ConnectionCheck,
-	Drawer,
-	DrawerForm,
-	DrawerSection,
-	Input,
-	SelectDropdown,
-	toast
-} from '@shared/ui'
+import { Button, ConnectionCheck, DrawerForm, DrawerSection, Input, SelectDropdown, toast } from '@shared/ui'
 
 import {
 	checkTorrentDebridMutation,
@@ -23,32 +14,15 @@ import {
 } from '@entities/torrent'
 import type { DebridKind, TorrentDebrid } from '@entities/torrent'
 
-export interface DebridServiceDrawerProps {
-	open: boolean
+export interface DebridServiceFormProps {
 	debrid: TorrentDebrid
-	onClose: () => void
+	onDone: () => void
 }
 
 type CheckState = { ok: true; account: string } | { ok: false; problem: string } | null
 
 // Mounted afresh for every opening, so the fields start from what is saved.
-export function DebridServiceDrawer({ open, debrid, onClose }: DebridServiceDrawerProps) {
-	const { t } = useTranslation()
-
-	return (
-		<Drawer
-			open={open}
-			onOpenChange={next => !next && onClose()}
-			title={t('debrid.drawerTitle')}
-			description={t('debrid.drawerDescription')}
-			closable={false}
-		>
-			{open && <ServiceForm debrid={debrid} onDone={onClose} />}
-		</Drawer>
-	)
-}
-
-function ServiceForm({ debrid, onDone }: { debrid: TorrentDebrid; onDone: () => void }) {
+export function DebridServiceForm({ debrid, onDone }: DebridServiceFormProps) {
 	const { t } = useTranslation()
 
 	const [save, check, saving, checking] = useUnit([
@@ -90,6 +64,7 @@ function ServiceForm({ debrid, onDone }: { debrid: TorrentDebrid; onDone: () => 
 			submitDisabled={saving || missingKey}
 			cancelDisabled={saving}
 			submitting={saving}
+			scrollable={false}
 		>
 			<DrawerSection
 				title={t('debrid.serviceLabel')}

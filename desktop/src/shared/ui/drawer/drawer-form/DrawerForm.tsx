@@ -16,6 +16,10 @@ export interface DrawerFormProps {
 	cancelDisabled?: boolean
 	submitting?: boolean
 	className?: string
+	// False for a form mounted inline in the page (a settings card's own
+	// expanding body) rather than in a Drawer's fixed-height panel: the content
+	// then grows with the page instead of scrolling inside itself.
+	scrollable?: boolean
 }
 
 export function DrawerForm({
@@ -27,7 +31,8 @@ export function DrawerForm({
 	submitDisabled = false,
 	cancelDisabled = false,
 	submitting = false,
-	className
+	className,
+	scrollable = true
 }: DrawerFormProps) {
 	const { t } = useTranslation()
 
@@ -38,7 +43,7 @@ export function DrawerForm({
 
 	return (
 		<form className={clsx(styles.form, className)} onSubmit={handleSubmit}>
-			<div className={styles.content}>{children}</div>
+			<div className={clsx(styles.content, !scrollable && styles.static)}>{children}</div>
 
 			<div className={styles.actions}>
 				<Button variant='secondary' onClick={onCancel} disabled={cancelDisabled}>

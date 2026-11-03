@@ -1,5 +1,7 @@
+import { useTranslation } from '../../i18n'
 import { Button } from '../button/Button'
 import { Icon } from '../icon/Icon'
+import { Tooltip } from '../tooltip/Tooltip'
 
 import styles from './ConnectionCheck.module.scss'
 
@@ -16,25 +18,37 @@ export interface ConnectionCheckProps {
 	onCheck: () => void
 }
 
-// A "test the connection" button with the answer beside it.
+// A "test the connection" button that becomes its own answer: success or
+// failure colors the button and renames it, and the full message (a version,
+// an account, what went wrong) sits behind a tooltip instead of beside it.
 export function ConnectionCheck({ label, checking, disabled, status, onCheck }: ConnectionCheckProps) {
-	return (
-		<div className={styles.check}>
-			<Button
-				size='small'
-				startIcon={<Icon name='common/signal' size={16} />}
-				loading={checking}
-				disabled={disabled}
-				onClick={onCheck}
-			>
-				{label}
-			</Button>
+	const { t } = useTranslation()
 
-			{status && (
-				<span className={status.ok ? styles.ok : styles.problem} role='status'>
-					{status.message}
-				</span>
-			)}
-		</div>
+	const button = (
+		<Button
+			size='small'
+			variant={status ? (status.ok ? 'glass-success' : 'glass-danger') : undefined}
+			startIcon={
+				<Icon
+					name={status ? (status.ok ? 'common/check' : 'common/close') : 'common/signal'}
+					size={16}
+				/>
+			}
+			loading={checking}
+			disabled={disabled}
+			onClick={onCheck}
+		>
+			{status ? (status.ok ? t('common.connected') : t('common.connectionFailed')) : label}
+		</Button>
+	)
+
+	if (!status) {
+		return button
+	}
+
+	return (
+		<span className={styles.check} role='status'>
+			<Tooltip content={status.message}>{button}</Tooltip>
+		</span>
 	)
 }

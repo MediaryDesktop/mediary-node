@@ -77,7 +77,9 @@ export const en = {
 
 	common: {
 		cancel: 'Cancel',
-		breadcrumbs: 'Breadcrumb'
+		breadcrumbs: 'Breadcrumb',
+		connected: 'Connected',
+		connectionFailed: 'Connection failed'
 	},
 
 	lists: {
@@ -1572,22 +1574,20 @@ export const en = {
 		settings: {
 			clientLabel: 'Torrent client',
 			embedded: 'Built-in',
+			embeddedDescription: 'Mediary downloads torrents itself. Nothing else to install.',
+			embeddedPort: 'Listening for peers on port 42069',
+			embeddedPortHint: 'Not opened on your router',
 			none: 'None',
-			embeddedHint:
-				'Mediary downloads torrents itself; nothing else to install. It listens for peers on port 42069 and does not open it on the router.',
+			noneDescription: 'Do not download torrents.',
+			qbittorrentDescription: 'Send torrents to your own qBittorrent through its Web UI.',
 			qbittorrentHint:
 				'Your own qBittorrent, through its Web UI. Turn the Web UI on in qBittorrent: Options → Web UI.',
 			debrid: 'Through debrid',
+			debridDescription: 'Fetch files from a debrid service instead of from peers.',
 			debridHint:
 				'Downloads go through {{service}}: it gets the torrent on its servers, then Mediary fetches the files over HTTPS. No BitTorrent traffic leaves this computer.',
 			debridMissing: 'Set up a debrid service first, in Settings → Debrid service.',
 			throughService: 'Through {{service}}',
-			noneHint: 'Torrents are off.',
-			notConfigured: 'Not connected',
-			configure: 'Connect',
-			edit: 'Change',
-			drawerTitle: 'Torrent client',
-			drawerDescription: 'Which client downloads torrents for the library.',
 			urlLabel: 'Web UI address',
 			usernameLabel: 'Username',
 			passwordLabel: 'Password',
@@ -1597,8 +1597,9 @@ export const en = {
 			ok: 'Connected to qBittorrent {{version}}',
 			okAccount: 'Connected: {{account}}',
 			folderLabel: 'Download folder',
-			folderHint: 'One subfolder per title. Mediary’s own folder joins the library with the first download',
-			folderPlaceholder: 'Choose a library folder',
+			folderHint:
+				'One subfolder per title. Mediary’s own folder joins the library with the first download',
+			change: 'Change',
 			mappingLabel: 'Path mapping',
 			mappingHint:
 				'Only when qBittorrent runs in Docker or on another computer and sees the download folder under another path. Fill in both or neither.',

@@ -1,0 +1,21 @@
+.root {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	width: 100%;
+}
+
+.item {
+	display: flex;
+	flex-direction: column;
+}
+
+.form {
+	width: 100%;
+	padding-top: 0.75rem;
+	border-top: 1px solid var(--border);
+}
+
+.addForm {
+	width: 100%;
+}

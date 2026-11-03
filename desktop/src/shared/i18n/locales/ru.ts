@@ -75,7 +75,9 @@ export const ru: Translation = {
 
 	common: {
 		cancel: 'Отменить',
-		breadcrumbs: 'Путь навигации'
+		breadcrumbs: 'Путь навигации',
+		connected: 'Подключено',
+		connectionFailed: 'Не удалось подключиться'
 	},
 
 	lists: {
@@ -1575,22 +1577,20 @@ export const ru: Translation = {
 		settings: {
 			clientLabel: 'Торрент-клиент',
 			embedded: 'Встроенный',
+			embeddedDescription: 'Mediary загружает торренты сама, больше ничего устанавливать не нужно.',
+			embeddedPort: 'Ждёт пиров на порту 42069',
+			embeddedPortHint: 'Не открыт на вашем роутере',
 			none: 'Нет',
-			embeddedHint:
-				'Mediary загружает торренты сама, больше ничего устанавливать не нужно. Ждёт пиров на порту 42069 и не открывает его на роутере.',
+			noneDescription: 'Не загружать торренты.',
+			qbittorrentDescription: 'Отправляйте торренты в свой qBittorrent через его Web UI.',
 			qbittorrentHint:
 				'Ваш qBittorrent через его Web UI. Включите Web UI в qBittorrent: Настройки → Веб-интерфейс.',
 			debrid: 'Через debrid',
+			debridDescription: 'Забирайте файлы с debrid-сервиса вместо пиров.',
 			debridHint:
 				'Загрузки идут через {{service}}: он качает торрент на своих серверах, а Mediary забирает файлы по HTTPS. Никакого BitTorrent-трафика с этого компьютера.',
 			debridMissing: 'Сначала подключите debrid-сервис: Настройки → Debrid-сервис.',
 			throughService: 'Через {{service}}',
-			noneHint: 'Торренты выключены.',
-			notConfigured: 'Не подключено',
-			configure: 'Подключить',
-			edit: 'Изменить',
-			drawerTitle: 'Торрент-клиент',
-			drawerDescription: 'Какой клиент загружает торренты в библиотеку.',
 			urlLabel: 'Адрес Web UI',
 			usernameLabel: 'Имя пользователя',
 			passwordLabel: 'Пароль',
@@ -1601,7 +1601,7 @@ export const ru: Translation = {
 			okAccount: 'Подключено: {{account}}',
 			folderLabel: 'Папка загрузок',
 			folderHint: 'По подпапке на тайтл. Папка Mediary добавляется в библиотеку с первой загрузкой',
-			folderPlaceholder: 'Выберите папку библиотеки',
+			change: 'Изменить',
 			mappingLabel: 'Соответствие путей',
 			mappingHint:
 				'Только если qBittorrent работает в Docker или на другом компьютере и видит папку загрузок под другим путём. Заполните оба поля или ни одного.',

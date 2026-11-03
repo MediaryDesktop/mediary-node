@@ -2,32 +2,31 @@ import { useUnit } from 'effector-react'
 import { useCallback, useEffect, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, ListTile } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
 
 import { libraryRootsQuery } from '@entities/library-item'
-import { readyDebrid, torrentDebridQuery, torrentSettingsQuery } from '@entities/torrent'
+import { torrentDebridQuery, torrentSettingsQuery } from '@entities/torrent'
 
 import styles from './TorrentClientSettings.module.scss'
-import { TorrentClientDrawer } from './ui/client-drawer/TorrentClientDrawer'
+import { TorrentClientForm } from './ui/client-form/TorrentClientForm'
 
 // The client the node adds torrents to, and the library folder they go into.
 export function TorrentClientSettings() {
 	const { t } = useTranslation()
 
-	const [settings, load, roots, loadRoots, debrid, loadDebrid, nodeReady] = useUnit([
+	const [settings, load, loadRoots, loadDebrid, nodeReady] = useUnit([
 		torrentSettingsQuery.$data,
 		torrentSettingsQuery.start,
-		libraryRootsQuery.$data,
 		libraryRootsQuery.start,
-		torrentDebridQuery.$data,
 		torrentDebridQuery.start,
 		$nodeReady
 	])
 
-	const [open, setOpen] = useState(false)
-	const close = useCallback(() => setOpen(false), [])
+	// Bumped after a save or a cancel, so the form below remounts with fresh
+	// fields instead of carrying over whatever was half-typed.
+	const [formKey, setFormKey] = useState(0)
+	const reset = useCallback(() => setFormKey(key => key + 1), [])
 
 	useEffect(() => {
 		if (nodeReady) {
@@ -41,34 +40,14 @@ export function TorrentClientSettings() {
 		return null
 	}
 
-	const connected = settings.client !== ''
-	const service = readyDebrid(debrid)
-	const name =
-		settings.client === 'embedded'
-			? t('torrents.settings.embedded')
-			: settings.client === 'qbittorrent'
-				? settings.url
-				: settings.client === 'debrid'
-					? t('torrents.settings.throughService', { service: service?.name ?? '—' })
-					: t('torrents.settings.notConfigured')
-	const folder =
-		(roots?.roots ?? []).find(root => root.id === settings.root_id)?.path ?? settings.default_folder
-
 	return (
-		<div className={styles.root}>
-			<ListTile
-				icon='common/download'
-				title={name}
-				subtitle={connected ? (folder ?? t('torrents.settings.folderPlaceholder')) : undefined}
-				subtitleHint={folder}
-				actions={
-					<Button size='small' onClick={() => setOpen(true)}>
-						{connected ? t('torrents.settings.edit') : t('torrents.settings.configure')}
-					</Button>
-				}
-			/>
+		<div className={styles.card}>
+			<div className={styles.header}>
+				<h3 className={styles.title}>{t('settings.torrents.name')}</h3>
+				<p className={styles.hint}>{t('settings.torrents.hint')}</p>
+			</div>
 
-			<TorrentClientDrawer open={open} settings={settings} onClose={close} />
+			<TorrentClientForm key={formKey} settings={settings} onReset={reset} />
 		</div>
 	)
 }
