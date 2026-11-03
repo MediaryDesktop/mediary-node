@@ -152,14 +152,10 @@ function SectionContent({ section }: { section: SectionInfo }) {
 			)
 		case 'metadata':
 			return (
-				<Card>
-					<Row name={t('settings.tmdb.name')} hint={t('settings.tmdb.hint')} block>
-						<TMDBSettings />
-					</Row>
-					<Row name={t('settings.googleBooks.name')} hint={t('settings.googleBooks.hint')} block>
-						<GoogleBooksSettings />
-					</Row>
-				</Card>
+				<>
+					<TMDBSettings />
+					<GoogleBooksSettings />
+				</>
 			)
 		case 'torrents':
 			return (

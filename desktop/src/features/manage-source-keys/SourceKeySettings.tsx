@@ -1,4 +1,5 @@
 import type { Mutation, Query } from '@farfetched/core'
+import clsx from 'clsx'
 import { useUnit } from 'effector-react'
 import { useEffect, useState } from 'react'
 
@@ -25,7 +26,8 @@ import styles from './SourceKeySettings.module.scss'
 interface SourceKeySettingsProps<Settings extends { enabled: boolean; key_source: string }> {
 	settingsQuery: Query<void, Settings, HttpRequestError>
 	saveMutation: Mutation<string, Settings, HttpRequestError>
-	// The source's strings live under this key, the same shape for each.
+	// The source's strings live under this key, the same shape for each — and
+	// matches its own card's title/hint under settings.<texts>.
 	texts: 'tmdb' | 'googleBooks'
 	keysPage: string
 }
@@ -65,56 +67,70 @@ function SourceKeySettings<Settings extends { enabled: boolean; key_source: stri
 		return null
 	}
 
-	if (!settings.enabled) {
-		return <p className={styles.note}>{t(`${texts}.disabled`)}</p>
-	}
-
-	const trimmed = key.trim()
-
 	return (
-		<div className={styles.root}>
-			<p className={styles.state}>{t(`${texts}.source.${settings.key_source}` as never)}</p>
-
-			<form
-				className={styles.form}
-				onSubmit={event => {
-					event.preventDefault()
-					if (trimmed) {
-						save(trimmed)
-					}
-				}}
-			>
-				<Input
-					type='password'
-					value={key}
-					onChange={event => setKey(event.target.value)}
-					placeholder={t(`${texts}.keyPlaceholder`)}
-					autoComplete='off'
-					disabled={saving}
-				/>
-				<Button type='submit' disabled={!trimmed || saving} loading={saving}>
-					{t(`${texts}.save`)}
-				</Button>
-			</form>
-
-			<div className={styles.actions}>
-				<Button
-					variant='ghost'
-					size='small'
-					startIcon={<Icon name='common/external-link' size={16} />}
-					onClick={() => window.open(keysPage, '_blank', 'noreferrer')}
-				>
-					{t(`${texts}.getKey`)}
-				</Button>
-
-				{settings.key_source === 'user' && (
-					<Button variant='ghost' size='small' disabled={saving} onClick={() => save('')}>
-						{t(`${texts}.useBuiltIn`)}
-					</Button>
-				)}
+		<div className={styles.card}>
+			<div className={styles.header}>
+				<h3 className={styles.title}>{t(`settings.${texts}.name`)}</h3>
+				<p className={styles.hint}>{t(`settings.${texts}.hint`)}</p>
 			</div>
 
-			<p className={styles.note}>{t(`${texts}.note`)}</p>
+			{!settings.enabled ? (
+				<p className={styles.note}>{t(`${texts}.disabled`)}</p>
+			) : (
+				<>
+					<div className={styles.statusRow}>
+						<p className={clsx(styles.status, settings.key_source === 'none' && styles.warning)}>
+							<Icon
+								name={
+									settings.key_source === 'none' ? 'common/info' : 'common/check-circle-2'
+								}
+								size={18}
+							/>
+							<span>{t(`${texts}.source.${settings.key_source}` as never)}</span>
+						</p>
+
+						{settings.key_source === 'user' && (
+							<Button variant='ghost' size='small' disabled={saving} onClick={() => save('')}>
+								{t(`${texts}.useBuiltIn`)}
+							</Button>
+						)}
+					</div>
+
+					<form
+						className={styles.form}
+						onSubmit={event => {
+							event.preventDefault()
+							const trimmed = key.trim()
+							if (trimmed) {
+								save(trimmed)
+							}
+						}}
+					>
+						<Input
+							className={styles.keyField}
+							type='password'
+							revealable
+							value={key}
+							onChange={event => setKey(event.target.value)}
+							placeholder={t(`${texts}.keyPlaceholder`)}
+							autoComplete='off'
+							startIcon={<Icon name='common/lock' size={18} />}
+							disabled={saving}
+						/>
+
+						<Button type='submit' disabled={key.trim() === '' || saving} loading={saving}>
+							{t(`${texts}.save`)}
+						</Button>
+					</form>
+
+					<a className={styles.link} href={keysPage} target='_blank' rel='noreferrer'>
+						<Icon name='common/external-link' size={16} />
+						{t(`${texts}.getKey`)}
+					</a>
+
+					<p className={styles.note}>{t(`${texts}.note`)}</p>
+				</>
+			)}
 		</div>
 	)
 }
