@@ -2,11 +2,10 @@ import { useUnit } from 'effector-react'
 import { useCallback, useEffect, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, CollapsibleSection, ListTile } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
 
-import { debridService, torrentDebridQuery } from '@entities/torrent'
+import { torrentDebridQuery } from '@entities/torrent'
 
 import styles from './DebridServiceSettings.module.scss'
 import { DebridServiceForm } from './ui/service-form/DebridServiceForm'
@@ -22,8 +21,10 @@ export function DebridServiceSettings() {
 		$nodeReady
 	])
 
-	const [open, setOpen] = useState(false)
-	const close = useCallback(() => setOpen(false), [])
+	// Bumped after a save or a cancel, so the form below remounts with fresh
+	// fields instead of carrying over whatever was half-typed.
+	const [formKey, setFormKey] = useState(0)
+	const reset = useCallback(() => setFormKey(key => key + 1), [])
 
 	useEffect(() => {
 		if (nodeReady) {
@@ -35,29 +36,14 @@ export function DebridServiceSettings() {
 		return null
 	}
 
-	const service = debridService(debrid.service)
-	const connected = Boolean(service && debrid.ready)
-
 	return (
-		<div className={styles.root}>
-			<ListTile
-				icon='common/play'
-				title={connected && service ? service.name : t('debrid.notConfigured')}
-				subtitle={connected ? t('debrid.readySubtitle') : t('debrid.offSubtitle')}
-				actions={
-					<Button size='small' onClick={() => setOpen(current => !current)}>
-						{open ? t('common.cancel') : connected ? t('debrid.edit') : t('debrid.configure')}
-					</Button>
-				}
-			/>
+		<div className={styles.card}>
+			<div className={styles.header}>
+				<h3 className={styles.title}>{t('settings.debrid.name')}</h3>
+				<p className={styles.hint}>{t('settings.debrid.hint')}</p>
+			</div>
 
-			<CollapsibleSection open={open}>
-				{open && (
-					<div className={styles.form}>
-						<DebridServiceForm debrid={debrid} onDone={close} />
-					</div>
-				)}
-			</CollapsibleSection>
+			<DebridServiceForm key={formKey} debrid={debrid} onReset={reset} />
 		</div>
 	)
 }

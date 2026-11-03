@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import type { ReactNode } from 'react'
 
-import { CollapsibleSection, renderIcon } from '@shared/ui'
+import { CollapsibleSection, RadioDot, renderIcon } from '@shared/ui'
 import type { IconLike } from '@shared/ui'
 
 import styles from './OptionCard.module.scss'
@@ -46,9 +46,7 @@ export function OptionCard({
 					<span className={styles.description}>{description}</span>
 				</span>
 
-				<span className={clsx(styles.radio, selected && styles.radioSelected)} aria-hidden='true'>
-					{selected && <span className={styles.radioDot} />}
-				</span>
+				<RadioDot selected={selected} />
 			</button>
 
 			{detail != null && (

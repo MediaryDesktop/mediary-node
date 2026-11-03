@@ -165,11 +165,9 @@ function SectionContent({ section }: { section: SectionInfo }) {
 			return (
 				<>
 					<TorrentClientSettings />
+					<DebridServiceSettings />
 
 					<Card>
-						<Row name={t('settings.debrid.name')} hint={t('settings.debrid.hint')} block>
-							<DebridServiceSettings />
-						</Row>
 						<Row
 							name={t('settings.torrentSearch.name')}
 							hint={t('settings.torrentSearch.hint')}

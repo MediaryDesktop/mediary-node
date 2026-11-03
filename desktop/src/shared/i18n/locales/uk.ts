@@ -2181,20 +2181,14 @@ export const uk: Translation = {
 	},
 
 	debrid: {
-		notConfigured: 'Не підключено',
-		readySubtitle: 'У пошуку торентів увімкнено «Дивитися зараз»',
-		offSubtitle: 'Підключіть, щоб дивитися роздачі без завантаження',
-		configure: 'Підключити',
-		edit: 'Змінити',
-		drawerTitle: 'Debrid-сервіс',
-		drawerDescription: 'Сервіс, що тримає торенти на своїх серверах і віддає їх вам одразу.',
 		serviceLabel: 'Сервіс',
-		serviceHint: 'Real-Debrid, AllDebrid і Premiumize працюють лише з преміум-акаунтом.',
+		freePlan: 'Безкоштовний план',
 		torboxFree: 'TorBox має безкоштовний план: один торент за раз, кілька на місяць.',
 		apiKeyLabel: 'Ключ API',
 		apiKeyHint:
 			'Скопіюйте його з {{page}}. Нода зберігає його в окремому файлі й більше ніколи не показує',
 		apiKeyKept: 'Лишіть порожнім, щоб зберегти поточний ключ',
+		apiKeyPlaceholder: 'Вставте ваш ключ API {{service}}',
 		check: 'Перевірити ключ',
 		ok: 'Підключено: {{account}}',
 		checkFailed: 'Сервіс не прийняв ключ',

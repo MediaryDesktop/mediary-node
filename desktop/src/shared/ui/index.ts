@@ -95,6 +95,9 @@ export type { RatingStarsProps } from './rating-stars/RatingStars'
 export { ReelLoader } from './reel-loader/ReelLoader'
 export type { ReelLoaderProps } from './reel-loader/ReelLoader'
 
+export { RadioDot } from './radio-dot/RadioDot'
+export type { RadioDotProps } from './radio-dot/RadioDot'
+
 export { SelectionGroup } from './selection-group/SelectionGroup'
 export type { SelectionGroupOption, SelectionGroupProps } from './selection-group/SelectionGroup'
 
