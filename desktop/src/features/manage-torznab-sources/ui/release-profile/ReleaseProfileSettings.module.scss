@@ -1,24 +1,63 @@
-.root {
+.card {
 	display: flex;
 	flex-direction: column;
-	align-items: flex-start;
-	gap: 0.75rem;
+	gap: 1.5rem;
 	width: 100%;
-
-	.row {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
-		gap: 0.75rem;
-		width: 100%;
-	}
+	padding: 1.75rem;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-lg);
+	background: var(--surface);
 }
 
-// Used both directly inside .root and inside .root .row — kept unscoped so one
-// rule reaches both.
-.field {
-	display: grid;
+.header {
+	display: flex;
+	flex-direction: column;
 	gap: 0.25rem;
+}
+
+.title {
+	margin: 0;
+	font-size: 1.0625rem;
+	font-weight: 600;
+	color: var(--text);
+}
+
+.hint {
+	margin: 0;
+	font-size: 0.875rem;
+	line-height: 1.25rem;
+	color: var(--text-secondary);
+}
+
+.form {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
 	width: 100%;
-	color: var(--text-muted);
-	font-size: 0.75rem;
+}
+
+.grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+	gap: 0.75rem;
+	width: 100%;
+}
+
+.field {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	width: 100%;
+}
+
+.label {
+	font-size: 0.9375rem;
+	font-weight: 600;
+	line-height: 1.25rem;
+	color: var(--text);
+}
+
+.actions {
+	display: flex;
+	justify-content: flex-end;
 }

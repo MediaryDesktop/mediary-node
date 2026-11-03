@@ -1417,7 +1417,7 @@ export const en = {
 			codec: 'Codec',
 			any: 'Any',
 			minSeeders: 'Minimum seeders',
-			preferred: 'Preferred words, best first — groups, sites',
+			preferredLabel: 'Preferred words',
 			excluded: 'Never pick releases with these words',
 			preferCached: 'Prefer releases {{service}} already holds: they arrive at once',
 			save: 'Save preferences',

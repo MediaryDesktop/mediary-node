@@ -167,16 +167,7 @@ function SectionContent({ section }: { section: SectionInfo }) {
 					<TorrentClientSettings />
 					<DebridServiceSettings />
 					<TorznabSourcesSettings />
-
-					<Card>
-						<Row
-							name={t('settings.releaseProfile.name')}
-							hint={t('settings.releaseProfile.hint')}
-							block
-						>
-							<ReleaseProfileSettings />
-						</Row>
-					</Card>
+					<ReleaseProfileSettings />
 				</>
 			)
 		case 'manga':

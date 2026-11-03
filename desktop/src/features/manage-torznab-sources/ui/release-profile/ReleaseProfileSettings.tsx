@@ -34,6 +34,8 @@ function words(line: string): string[] {
 
 // What the user likes in a release. Search ranks by it and names the best result.
 export function ReleaseProfileSettings() {
+	const { t } = useTranslation()
+
 	const [profile, load, loadDebrid, nodeReady] = useUnit([
 		torrentProfileQuery.$data,
 		torrentProfileQuery.start,
@@ -52,8 +54,17 @@ export function ReleaseProfileSettings() {
 		return null
 	}
 
-	// Mounted afresh when the saved profile changes, so the fields start from it.
-	return <ProfileForm key={JSON.stringify(profile)} profile={profile} />
+	return (
+		<div className={styles.card}>
+			<div className={styles.header}>
+				<h3 className={styles.title}>{t('settings.releaseProfile.name')}</h3>
+				<p className={styles.hint}>{t('settings.releaseProfile.hint')}</p>
+			</div>
+
+			{/* Mounted afresh when the saved profile changes, so the fields start from it. */}
+			<ProfileForm key={JSON.stringify(profile)} profile={profile} />
+		</div>
+	)
 }
 
 function ProfileForm({ profile }: { profile: TorrentProfile }) {
@@ -92,10 +103,16 @@ function ProfileForm({ profile }: { profile: TorrentProfile }) {
 		})
 
 	return (
-		<div className={styles.root}>
-			<div className={styles.row}>
+		<form
+			className={styles.form}
+			onSubmit={event => {
+				event.preventDefault()
+				submit()
+			}}
+		>
+			<div className={styles.grid}>
 				<label className={styles.field}>
-					{t('torrents.profile.resolution')}
+					<span className={styles.label}>{t('torrents.profile.resolution')}</span>
 					<SelectDropdown
 						options={[
 							{ value: ANY, label: t('torrents.profile.any') },
@@ -112,7 +129,7 @@ function ProfileForm({ profile }: { profile: TorrentProfile }) {
 				</label>
 
 				<label className={styles.field}>
-					{t('torrents.profile.codec')}
+					<span className={styles.label}>{t('torrents.profile.codec')}</span>
 					<SelectDropdown
 						options={[
 							{ value: ANY, label: t('torrents.profile.any') },
@@ -127,7 +144,7 @@ function ProfileForm({ profile }: { profile: TorrentProfile }) {
 				</label>
 
 				<label className={styles.field}>
-					{t('torrents.profile.minSeeders')}
+					<span className={styles.label}>{t('torrents.profile.minSeeders')}</span>
 					<Input
 						type='number'
 						min={0}
@@ -139,7 +156,7 @@ function ProfileForm({ profile }: { profile: TorrentProfile }) {
 			</div>
 
 			<label className={styles.field}>
-				{t('torrents.profile.preferred')}
+				<span className={styles.label}>{t('torrents.profile.preferredLabel')}</span>
 				<Input
 					value={preferred}
 					onChange={event => setPreferred(event.target.value)}
@@ -150,7 +167,7 @@ function ProfileForm({ profile }: { profile: TorrentProfile }) {
 			</label>
 
 			<label className={styles.field}>
-				{t('torrents.profile.excluded')}
+				<span className={styles.label}>{t('torrents.profile.excluded')}</span>
 				<Input
 					value={excluded}
 					onChange={event => setExcluded(event.target.value)}
@@ -169,9 +186,11 @@ function ProfileForm({ profile }: { profile: TorrentProfile }) {
 				/>
 			)}
 
-			<Button size='small' loading={saving} onClick={submit}>
-				{t('torrents.profile.save')}
-			</Button>
-		</div>
+			<div className={styles.actions}>
+				<Button type='submit' variant='primary' loading={saving}>
+					{t('torrents.profile.save')}
+				</Button>
+			</div>
+		</form>
 	)
 }
