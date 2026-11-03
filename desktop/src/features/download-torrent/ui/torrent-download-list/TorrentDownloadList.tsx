@@ -107,10 +107,10 @@ export function TorrentDownloadList({ mediaRef, title, poster }: TorrentDownload
 		<section className={styles.root}>
 			<TorrentSetupNotice
 				setup={setup}
-				onOpenSettings={missing =>
+				onOpenSettings={() =>
 					navigate({
 						to: '/settings',
-						search: { section: missing === 'client' ? 'torrent-client' : 'torrent-search' }
+						search: { section: 'torrents' }
 					})
 				}
 			/>

@@ -132,10 +132,10 @@ export function SearchForm({ mediaRef, title, missing, poster, watching, onDone 
 			<TorrentSetupNotice
 				setup={setup}
 				needSearch
-				onOpenSettings={missing =>
+				onOpenSettings={() =>
 					navigate({
 						to: '/settings',
-						search: { section: missing === 'client' ? 'torrent-client' : 'torrent-search' }
+						search: { section: 'torrents' }
 					})
 				}
 			/>
