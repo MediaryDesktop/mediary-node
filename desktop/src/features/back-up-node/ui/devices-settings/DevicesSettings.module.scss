@@ -1,0 +1,64 @@
+.root {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	width: 100%;
+
+	.list {
+		display: flex;
+		flex-direction: column;
+		margin: 0;
+		padding: 0;
+		border: 1px solid var(--border);
+		border-radius: 0.75rem;
+		list-style: none;
+
+		.item {
+			display: flex;
+			gap: 0.75rem;
+			align-items: center;
+			justify-content: space-between;
+			padding: 0.625rem 0.875rem;
+
+			& + .item {
+				border-top: 1px solid var(--border);
+			}
+
+			.details {
+				display: flex;
+				flex-direction: column;
+				gap: 0.125rem;
+				min-width: 0;
+
+				.when {
+					color: var(--text);
+					font-size: 0.875rem;
+				}
+
+				.meta {
+					overflow: hidden;
+					color: var(--text-muted);
+					font-size: 0.8125rem;
+					white-space: nowrap;
+					text-overflow: ellipsis;
+				}
+			}
+
+			.itemActions {
+				display: flex;
+				flex-shrink: 0;
+				gap: 0.25rem;
+				align-items: center;
+			}
+		}
+	}
+}
+
+// Shown either as the component's whole output or as a line inside .root —
+// kept unscoped so one rule reaches both.
+.note {
+	margin: 0;
+	color: var(--text-muted);
+	font-size: 0.8125rem;
+	line-height: 1.45;
+}

@@ -1889,7 +1889,7 @@ export const ru: Translation = {
 		turnOff: 'Выключить на этом компьютере',
 		empty: 'В аккаунте ещё нет бэкапов.',
 		listFailed: 'Не удалось загрузить бэкапы.',
-		thisDevice: '{{name}} (этот компьютер)',
+		allBackups: 'Все бэкапы',
 		restore: 'Восстановить',
 		delete: 'Удалить бэкап',
 		deleteFailed: 'Не удалось удалить бэкап',

@@ -1888,7 +1888,7 @@ export const uk: Translation = {
 		turnOff: 'Вимкнути на цьому компʼютері',
 		empty: 'В акаунті ще немає бекапів.',
 		listFailed: 'Не вдалося завантажити бекапи.',
-		thisDevice: '{{name}} (цей компʼютер)',
+		allBackups: 'Усі бекапи',
 		restore: 'Відновити',
 		delete: 'Видалити бекап',
 		deleteFailed: 'Не вдалося видалити бекап',

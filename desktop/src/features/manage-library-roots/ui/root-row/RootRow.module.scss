@@ -5,7 +5,7 @@
 	padding: 0.875rem 1rem;
 	border: 1px solid var(--border);
 	border-radius: var(--radius);
-	background: var(--bg-subtle);
+	background: transparent;
 }
 
 .badge {
@@ -16,8 +16,8 @@
 	width: 2.8rem;
 	height: 2.8rem;
 	border-radius: var(--radius-md);
-	background: var(--accent-muted);
-	color: var(--accent);
+	background: var(--surface-hover);
+	color: var(--text-secondary);
 }
 
 .body {

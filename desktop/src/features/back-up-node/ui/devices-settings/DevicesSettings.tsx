@@ -9,7 +9,8 @@ import { Button, toast } from '@shared/ui'
 import { sessionModel } from '@entities/session'
 
 import { devicesQuery, revokeDeviceMutation, syncStatusQuery } from '../../model/model'
-import styles from '../backup-settings/BackupSettings.module.scss'
+
+import styles from './DevicesSettings.module.scss'
 
 // The account's paired nodes. Revoking one is the answer to a lost laptop: its
 // token stops working at once, while its backups stay.

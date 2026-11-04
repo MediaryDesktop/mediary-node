@@ -2,6 +2,7 @@ import { useRouter } from '@tanstack/react-router'
 import { useStoreMap, useUnit } from 'effector-react'
 import { useEffect } from 'react'
 import { IoIosRefresh } from 'react-icons/io'
+import { IoCloudOutline } from 'react-icons/io5'
 
 import { useTranslation } from '@shared/i18n'
 import { Button, EmptyState, Icon, PageTransition, PhaseTransition } from '@shared/ui'
@@ -72,7 +73,7 @@ export function MediaPage({ mediaRef }: MediaPageProps) {
 
 				{phase === 'offline' && (
 					<div className={styles.offline} role='status'>
-						<Icon name='common/cloud' size={15} className={styles.offlineIcon} />
+						<IoCloudOutline size={15} className={styles.offlineIcon} />
 						<span className={styles.offlineText}>{t('media.offline')}</span>
 						<Button
 							variant='ghost'

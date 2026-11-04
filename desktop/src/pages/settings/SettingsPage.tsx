@@ -124,13 +124,7 @@ function SectionContent({ section }: { section: SectionInfo }) {
 				</>
 			)
 		case 'backup':
-			return (
-				<Card>
-					<Row name={t('settings.backup.name')} hint={t('settings.backup.hint')} block>
-						<BackupSettings />
-					</Row>
-				</Card>
-			)
+			return <BackupSettings />
 		case 'devices':
 			return (
 				<Card>

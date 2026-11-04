@@ -1,4 +1,4 @@
-import { IoLaptopOutline, IoLibraryOutline } from 'react-icons/io5'
+import { IoCloudOutline, IoLaptopOutline, IoLibraryOutline } from 'react-icons/io5'
 
 import type { IconLike } from '@shared/ui'
 
@@ -34,7 +34,7 @@ export const SECTION_GROUPS: readonly (readonly SectionInfo[])[] = [
 	[{ id: 'app', icon: 'common/settings', key: 'app' }],
 	[{ id: 'account', icon: 'common/user', key: 'account' }],
 	[
-		{ id: 'backup', icon: 'common/cloud', key: 'backup' },
+		{ id: 'backup', icon: <IoCloudOutline size={18} />, key: 'backup' },
 		{ id: 'devices', icon: <IoLaptopOutline size={18} />, key: 'devices' }
 	],
 	[{ id: 'library', icon: <IoLibraryOutline size={18} />, key: 'library' }],

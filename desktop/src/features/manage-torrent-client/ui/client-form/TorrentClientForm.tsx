@@ -1,5 +1,6 @@
 import { useUnit } from 'effector-react'
 import { useState } from 'react'
+import { IoCloudOutline } from 'react-icons/io5'
 import { SiQbittorrent } from 'react-icons/si'
 
 import { problemDetail } from '@shared/api'
@@ -285,7 +286,7 @@ export function TorrentClientForm({ settings, onReset }: TorrentClientFormProps)
 				/>
 
 				<OptionCard
-					icon='common/cloud'
+					icon={<IoCloudOutline size={20} />}
 					title={t('torrents.settings.debrid')}
 					description={t('torrents.settings.debridDescription')}
 					selected={throughDebrid}

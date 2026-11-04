@@ -3,7 +3,7 @@ import clsx from 'clsx'
 import { useUnit } from 'effector-react'
 import { cloneElement } from 'react'
 import type { ReactElement, ReactNode } from 'react'
-import { IoExtensionPuzzleOutline } from 'react-icons/io5'
+import { IoCloudOutline, IoExtensionPuzzleOutline } from 'react-icons/io5'
 
 import type { NodeState } from '@shared/bridge'
 import { useTranslation } from '@shared/i18n'
@@ -68,7 +68,7 @@ export function Sidebar() {
 			<div className={styles.utilities}>
 				{VISIBLE_NODE_STATES.has(state) && (
 					<span className={clsx(styles.item, styles.status, styles[state])}>
-						<Icon name='common/cloud' size={22} />
+						<IoCloudOutline size={22} />
 						<Tooltip>{t(NODE_LABELS[state])}</Tooltip>
 					</span>
 				)}

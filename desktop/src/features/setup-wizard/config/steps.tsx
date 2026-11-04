@@ -1,4 +1,4 @@
-import { IoLibraryOutline } from 'react-icons/io5'
+import { IoCloudOutline, IoLibraryOutline } from 'react-icons/io5'
 
 import type { IconLike } from '@shared/ui'
 
@@ -22,7 +22,7 @@ export const SETUP_STEPS: readonly SetupStep[] = [
 	},
 	{
 		id: 'account',
-		icon: 'common/cloud',
+		icon: <IoCloudOutline size={24} />,
 		labelKey: 'setup.steps.account.label',
 		titleKey: 'setup.steps.account.title',
 		descriptionKey: 'setup.steps.account.description'

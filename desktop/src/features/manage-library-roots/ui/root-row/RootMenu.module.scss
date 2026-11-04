@@ -111,6 +111,11 @@
 	color: inherit;
 }
 
+.typeSection {
+	display: flex;
+	flex-direction: column;
+}
+
 .typeTrigger {
 	display: flex;
 	align-items: center;

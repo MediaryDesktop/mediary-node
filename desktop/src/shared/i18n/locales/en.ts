@@ -1885,7 +1885,7 @@ export const en = {
 		turnOff: 'Turn off on this computer',
 		empty: 'No backups in your account yet.',
 		listFailed: 'Could not load the backups.',
-		thisDevice: '{{name}} (this computer)',
+		allBackups: 'All backups',
 		restore: 'Restore',
 		delete: 'Delete backup',
 		deleteFailed: 'Could not delete the backup',

@@ -1,6 +1,8 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
 import { useEffect, useState } from 'react'
+import { IoCloudOfflineOutline, IoCloudOutline } from 'react-icons/io5'
+import { MdRestore } from 'react-icons/md'
 
 import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
@@ -82,94 +84,112 @@ export function BackupSettings() {
 		toast.success(t(result.created ? 'backup.backedUp' : 'backup.unchanged'), { id: TOAST_ID })
 	)
 
-	if (updateRequired) {
-		return (
-			<div className={styles.root}>
-				<p className={styles.error}>{t('backup.banner.outdated')}</p>
-				{updateUrl && (
+	return (
+		<div className={styles.card}>
+			<div className={styles.header}>
+				<div className={styles.headerText}>
+					<h3 className={styles.title}>{t('settings.backup.name')}</h3>
+					<p className={styles.hint}>{t('settings.backup.hint')}</p>
+				</div>
+			</div>
+
+			{updateRequired ? (
+				<>
+					<p className={styles.error}>{t('backup.banner.outdated')}</p>
+					{updateUrl && (
+						<div className={styles.actions}>
+							<Button onClick={() => window.open(updateUrl, '_blank', 'noreferrer')}>
+								{t('backup.banner.update')}
+							</Button>
+						</div>
+					)}
+				</>
+			) : !account ? (
+				<>
+					<p className={styles.note}>{t('backup.signedOut')}</p>
 					<div className={styles.actions}>
-						<Button onClick={() => window.open(updateUrl, '_blank', 'noreferrer')}>
-							{t('backup.banner.update')}
+						<Button onClick={() => leaveToAuth('/sign-in')}>{t('backup.signIn')}</Button>
+					</div>
+				</>
+			) : !account.email_verified ? (
+				<>
+					<p className={styles.note}>{t('backup.unverified')}</p>
+					<div className={styles.actions}>
+						<Button onClick={() => leaveToAuth('/verify-email')}>{t('backup.verify')}</Button>
+					</div>
+				</>
+			) : !status ? null : !status.linked ? (
+				<>
+					<p className={styles.note}>{t('backup.off', { name: account.display_name })}</p>
+					<div className={styles.actions}>
+						<Button
+							loading={pairing}
+							startIcon={<IoCloudOutline size={16} />}
+							onClick={() => pair()}
+						>
+							{t('backup.turnOn')}
 						</Button>
 					</div>
-				)}
-			</div>
-		)
-	}
+				</>
+			) : (
+				<>
+					<p className={styles.banner}>
+						<Icon name='common/info' size={18} />
+						<span>{t('backup.note')}</span>
+					</p>
 
-	if (!account) {
-		return (
-			<div className={styles.root}>
-				<p className={styles.note}>{t('backup.signedOut')}</p>
-				<div className={styles.actions}>
-					<Button onClick={() => leaveToAuth('/sign-in')}>{t('backup.signIn')}</Button>
-				</div>
-			</div>
-		)
-	}
+					<div className={styles.lastBackup}>
+						<span className={styles.badge}>
+							<Icon name='common/clock' size={20} />
+						</span>
 
-	if (!account.email_verified) {
-		return (
-			<div className={styles.root}>
-				<p className={styles.note}>{t('backup.unverified')}</p>
-				<div className={styles.actions}>
-					<Button onClick={() => leaveToAuth('/verify-email')}>{t('backup.verify')}</Button>
-				</div>
-			</div>
-		)
-	}
+						<span className={styles.lastBackupBody}>
+							<span className={styles.lastBackupTitle}>
+								{status.last_backup_at
+									? t('backup.lastBackup', {
+											when: formatRelativeTime(status.last_backup_at, i18n.language)
+										})
+									: t('backup.noBackupYet')}
+							</span>
+							{status.last_backup_at && (
+								<span className={styles.lastBackupWhen}>
+									{formatDateTime(status.last_backup_at, i18n.language)}
+								</span>
+							)}
+						</span>
 
-	if (!status) {
-		return null
-	}
+						<Button
+							variant='primary'
+							loading={backingUp}
+							startIcon={<IoCloudOutline size={20} />}
+							onClick={() => backUp()}
+						>
+							{t('backup.backUpNow')}
+						</Button>
+					</div>
 
-	if (!status.linked) {
-		return (
-			<div className={styles.root}>
-				<p className={styles.note}>{t('backup.off', { name: account.display_name })}</p>
-				<div className={styles.actions}>
-					<Button
-						loading={pairing}
-						startIcon={<Icon name='common/cloud' size={16} />}
-						onClick={() => pair()}
-					>
-						{t('backup.turnOn')}
-					</Button>
-				</div>
-			</div>
-		)
-	}
+					{status.last_error && <p className={styles.error}>{status.last_error}</p>}
 
-	return (
-		<div className={styles.root}>
-			<p className={styles.state}>
-				{status.last_backup_at
-					? t('backup.lastBackup', {
-							when: formatRelativeTime(status.last_backup_at, i18n.language)
-						})
-					: t('backup.noBackupYet')}
-			</p>
+					<BackupList />
 
-			{status.last_error && <p className={styles.error}>{status.last_error}</p>}
-
-			<div className={styles.actions}>
-				<Button loading={backingUp} onClick={() => backUp()}>
-					{t('backup.backUpNow')}
-				</Button>
-
-				<Button variant='ghost' size='small' disabled={unpairing} onClick={() => unpair()}>
-					{t('backup.turnOff')}
-				</Button>
-			</div>
-
-			<BackupList thisDevice={status.device_id} />
-
-			<p className={styles.note}>{t('backup.note')}</p>
+					<div className={styles.footer}>
+						<Button
+							variant='glass-accent'
+							size='small'
+							startIcon={<IoCloudOfflineOutline size={16} />}
+							disabled={unpairing}
+							onClick={() => unpair()}
+						>
+							{t('backup.turnOff')}
+						</Button>
+					</div>
+				</>
+			)}
 		</div>
 	)
 }
 
-function BackupList({ thisDevice }: { thisDevice?: string }) {
+function BackupList() {
 	const { t, i18n } = useTranslation()
 	const [restoring, setRestoring] = useState<SyncBackup | null>(null)
 
@@ -201,39 +221,45 @@ function BackupList({ thisDevice }: { thisDevice?: string }) {
 
 	return (
 		<>
-			<ul className={styles.list}>
-				{backups.backups.map(backup => (
-					<li key={backup.id} className={styles.item}>
-						<div className={styles.details}>
-							<span className={styles.when}>
-								{formatDateTime(backup.created_at, i18n.language)}
-							</span>
-							<span className={styles.meta}>
-								{backup.device_id === thisDevice
-									? t('backup.thisDevice', { name: backup.device_label })
-									: backup.device_label}
-								{' · '}
-								{formatBytes(backup.size_bytes)}
-							</span>
-						</div>
+			<div className={styles.listSection}>
+				<span className={styles.listLabel}>{t('backup.allBackups')}</span>
 
-						<div className={styles.itemActions}>
-							<Button variant='secondary' size='small' onClick={() => setRestoring(backup)}>
-								{t('backup.restore')}
-							</Button>
-							<Button
-								variant='ghost'
-								size='small'
-								disabled={removing}
-								aria-label={t('backup.delete')}
-								onClick={() => remove(backup.id)}
-							>
-								<Icon name='common/trash' size={16} />
-							</Button>
-						</div>
-					</li>
-				))}
-			</ul>
+				<ul className={styles.list}>
+					{backups.backups.map(backup => (
+						<li key={backup.id} className={styles.item}>
+							<div className={styles.details}>
+								<span className={styles.when}>
+									{formatDateTime(backup.created_at, i18n.language)}
+								</span>
+								<span className={styles.meta}>
+									{backup.device_label} · {formatBytes(backup.size_bytes)}
+								</span>
+							</div>
+
+							<div className={styles.itemActions}>
+								<Button
+									variant='ghost'
+									size='small'
+									startIcon={<MdRestore size={16} />}
+									onClick={() => setRestoring(backup)}
+								>
+									{t('backup.restore')}
+								</Button>
+								<Button
+									variant='glass-accent'
+									size='small'
+									iconOnly
+									disabled={removing}
+									aria-label={t('backup.delete')}
+									onClick={() => remove(backup.id)}
+								>
+									<Icon name='common/trash' size={16} />
+								</Button>
+							</div>
+						</li>
+					))}
+				</ul>
+			</div>
 
 			<RestoreDialog backup={restoring} onClose={() => setRestoring(null)} />
 		</>
@@ -275,6 +301,7 @@ function RestoreDialog({ backup, onClose }: { backup: SyncBackup | null; onClose
 					<Button
 						variant='primary'
 						loading={restoring}
+						startIcon={<MdRestore size={16} />}
 						onClick={() => backup && restore(backup.id)}
 					>
 						{t('backup.restore')}

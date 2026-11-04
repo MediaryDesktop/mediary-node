@@ -68,38 +68,44 @@ export function RootMenu({ root, onRescan, onSwitch, onRemove, switching, removi
 
 					<div className={styles.separator} aria-hidden='true' />
 
-					<button
-						type='button'
-						className={clsx(styles.typeTrigger, typeOpen && styles.typeTriggerOpen)}
-						onClick={() => setTypeOpen(current => !current)}
-					>
-						<Icon name={LIBRARY_CONTENT_ICONS[root.content]} size={20} className={styles.icon} />
-						<span className={styles.text}>{t(`library.root.switchTo.${root.content}`)}</span>
-						<Icon
-							name='common/chevron-down'
-							size={16}
-							className={clsx(styles.chevron, typeOpen && styles.chevronOpen)}
-						/>
-					</button>
+					<div className={styles.typeSection}>
+						<button
+							type='button'
+							className={clsx(styles.typeTrigger, typeOpen && styles.typeTriggerOpen)}
+							onClick={() => setTypeOpen(current => !current)}
+						>
+							<Icon
+								name={LIBRARY_CONTENT_ICONS[root.content]}
+								size={20}
+								className={styles.icon}
+							/>
+							<span className={styles.text}>{t(`library.root.switchTo.${root.content}`)}</span>
+							<Icon
+								name='common/chevron-down'
+								size={16}
+								className={clsx(styles.chevron, typeOpen && styles.chevronOpen)}
+							/>
+						</button>
 
-					<CollapsibleSection open={typeOpen}>
-						<div className={styles.typeList}>
-							{LIBRARY_CONTENTS.map(content => (
-								<MenuItem
-									key={content}
-									icon={<Icon name={LIBRARY_CONTENT_ICONS[content]} size={20} />}
-									label={t(`library.root.switchTo.${content}`)}
-									checked={content === root.content}
-									disabled={switching}
-									onSelect={() => {
-										if (content !== root.content) {
-											onSwitch(content)
-										}
-									}}
-								/>
-							))}
-						</div>
-					</CollapsibleSection>
+						<CollapsibleSection open={typeOpen}>
+							<div className={styles.typeList}>
+								{LIBRARY_CONTENTS.map(content => (
+									<MenuItem
+										key={content}
+										icon={<Icon name={LIBRARY_CONTENT_ICONS[content]} size={20} />}
+										label={t(`library.root.switchTo.${content}`)}
+										checked={content === root.content}
+										disabled={switching}
+										onSelect={() => {
+											if (content !== root.content) {
+												onSwitch(content)
+											}
+										}}
+									/>
+								))}
+							</div>
+						</CollapsibleSection>
+					</div>
 
 					<div className={styles.separator} aria-hidden='true' />
 

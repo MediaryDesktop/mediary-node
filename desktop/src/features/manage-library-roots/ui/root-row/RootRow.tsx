@@ -31,16 +31,17 @@ export function RootRow({ root, onRescan, onSwitch, onRemove, switching, removin
 				</span>
 
 				<div className={styles.meta}>
-					<Badge size='sm'>{t(`library.root.content.${root.content}`)}</Badge>
-					<span className={styles.count}>
-						{t('library.root.files', { count: root.file_count })}
-					</span>
+					<Badge tone='accent' size='sm'>{t(`library.root.content.${root.content}`)}</Badge>
 
 					{root.unmatched_count > 0 && (
 						<Badge tone='warning' size='sm'>
 							{t('library.summary.unmatched', { count: root.unmatched_count })}
 						</Badge>
 					)}
+
+					<span className={styles.count}>
+						{t('library.root.files', { count: root.file_count })}
+					</span>
 
 					{root.missing_count > 0 && (
 						<Badge tone='danger' size='sm'>
