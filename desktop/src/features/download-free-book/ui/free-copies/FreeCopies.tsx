@@ -29,9 +29,8 @@ export interface FreeCopiesProps {
 	mediaRef: string
 }
 
-// Free copies of this book in the sources the user turned on: Project
-// Gutenberg's public domain, and their own OPDS servers. Not shown at all while
-// no source is on, so a book page does not advertise an empty search.
+// Free copies of this book in the OPDS servers the user added. Not shown at
+// all while none is set up, so a book page does not advertise an empty search.
 export function FreeCopies({ mediaRef }: FreeCopiesProps) {
 	const { t } = useTranslation()
 

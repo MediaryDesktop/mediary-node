@@ -10,10 +10,7 @@ export {
 	deleteBookOPDSServerMutation,
 	enqueueBookDownloadMutation,
 	forgetBookDownloadMutation,
-	gutenbergSettingsQuery,
 	putBookDownloadSettingsMutation,
-	putGutenbergSettingsMutation,
-	refreshGutenbergCatalogMutation,
 	retryBookDownloadMutation,
 	updateBookOPDSServerMutation
 } from './model/model'
@@ -32,6 +29,5 @@ export type {
 	BookOPDSServerInput,
 	BookSource,
 	BookSourceOutcome,
-	EnqueueBookDownloadInput,
-	GutenbergSettings
+	EnqueueBookDownloadInput
 } from './api/api'

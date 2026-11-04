@@ -1,6 +1,5 @@
 // Package source is what a source of free copies of books looks like to the
-// rest of the module: Project Gutenberg's catalogue, an OPDS server the user
-// added.
+// rest of the module: an OPDS server the user added.
 package source
 
 import (
@@ -11,9 +10,9 @@ import (
 
 // Source finds copies of a book and hands one over as a file.
 type Source interface {
-	// ID is the prefix of the source's references: "gutenberg", "opds:2".
+	// ID is the prefix of the source's references: "opds:2".
 	ID() string
-	// Name is what the user sees: "Project Gutenberg", the server's own name.
+	// Name is what the user sees: the server's own name.
 	Name() string
 	Search(ctx context.Context, query Query) ([]Edition, error)
 	// Open fetches the file at location, which the source itself put in a
@@ -31,8 +30,7 @@ type Query struct {
 
 // Edition is one copy of a book in a source.
 type Edition struct {
-	// Ref is the source's ID and the copy's key in it: "gutenberg:84",
-	// "opds:2:urn:uuid:…".
+	// Ref is the source's ID and the copy's key in it: "opds:2:urn:uuid:…".
 	Ref      string
 	Title    string
 	Authors  []string
@@ -56,9 +54,9 @@ type Format struct {
 	Location string
 }
 
-// SourceOf is the ID of the source a reference belongs to: "gutenberg" for
-// "gutenberg:84", "opds:2" for "opds:2:urn:uuid:…". It is "" for a reference
-// that has no key after the source.
+// SourceOf is the ID of the source a reference belongs to: "opds:2" for
+// "opds:2:urn:uuid:…". It is "" for a reference that has no key after the
+// source.
 func SourceOf(ref string) string {
 	kind, rest, ok := strings.Cut(ref, ":")
 	if !ok || kind == "" || rest == "" {

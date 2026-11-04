@@ -8,7 +8,6 @@ export type BookEdition = NodeSchemas['BookEdition']
 export type BookFormat = NodeSchemas['BookFormat']
 export type BookSourceOutcome = NodeSchemas['BookSourceOutcome']
 export type BookDownload = NodeSchemas['BookDownload']
-export type GutenbergSettings = NodeSchemas['GutenbergSettingsBody']
 export type BookOPDSServer = NodeSchemas['BookOPDSServerBody']
 export type BookOPDSServerInput = NodeSchemas['BookOPDSServerInputBody']
 export type BookOPDSCheckInput = NodeSchemas['CheckBookOPDSServerInputBody']
@@ -69,21 +68,6 @@ export const fetchBookDownloadSettingsFx = createNodeRequestFx<void, NodeSchemas
 export const putBookDownloadSettingsFx = createNodeRequestFx<number, NodeSchemas['BookDownloadSettings']>(
 	rootId => ({ url: '/v1/books/downloads/settings', method: 'PUT', body: { root_id: rootId } })
 )
-
-export const fetchGutenbergSettingsFx = createNodeRequestFx<void, GutenbergSettings>(() => ({
-	url: '/v1/books/sources/gutenberg'
-}))
-
-export const putGutenbergSettingsFx = createNodeRequestFx<boolean, GutenbergSettings>(enabled => ({
-	url: '/v1/books/sources/gutenberg',
-	method: 'PUT',
-	body: { enabled }
-}))
-
-export const refreshGutenbergCatalogFx = createNodeRequestFx<void, GutenbergSettings>(() => ({
-	url: '/v1/books/sources/gutenberg/refresh',
-	method: 'POST'
-}))
 
 export const fetchBookOPDSServersFx = createNodeRequestFx<void, NodeSchemas['BookOPDSServersOutputBody']>(
 	() => ({ url: '/v1/books/opds/servers' })

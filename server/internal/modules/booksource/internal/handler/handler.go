@@ -8,27 +8,24 @@ import (
 
 	"github.com/mediaryorg/mediary-node/server/internal/httpapi"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/download"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/gutenberg"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/servers"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/service"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/store"
 )
 
 type Handler struct {
-	svc   *service.Service
-	queue *download.Queue
-	// gutenberg is nil on a node configured without it.
-	gutenberg *gutenberg.Gutenberg
-	servers   *servers.Servers
+	svc     *service.Service
+	queue   *download.Queue
+	servers *servers.Servers
 }
 
-func New(svc *service.Service, queue *download.Queue, pg *gutenberg.Gutenberg, opds *servers.Servers) *Handler {
-	return &Handler{svc: svc, queue: queue, gutenberg: pg, servers: opds}
+func New(svc *service.Service, queue *download.Queue, opds *servers.Servers) *Handler {
+	return &Handler{svc: svc, queue: queue, servers: opds}
 }
 
 type BookSource struct {
-	ID   string `json:"id" example:"gutenberg" doc:"The prefix of the source's edition references."`
-	Name string `json:"name" example:"Project Gutenberg"`
+	ID   string `json:"id" example:"opds:1" doc:"The prefix of the source's edition references."`
+	Name string `json:"name" example:"Komga at home"`
 }
 
 type BookSourcesOutput struct {
@@ -44,7 +41,7 @@ type BookFormat struct {
 }
 
 type BookEdition struct {
-	Ref      string       `json:"ref" example:"gutenberg:84" doc:"Pass as edition_ref to download it, within 30 minutes of the search."`
+	Ref      string       `json:"ref" example:"opds:1:urn:uuid:8b2c1f3e-0001" doc:"Pass as edition_ref to download it, within 30 minutes of the search."`
 	Title    string       `json:"title"`
 	Authors  []string     `json:"authors"`
 	Language string       `json:"language,omitempty"`
@@ -126,7 +123,6 @@ type PutBookDownloadSettingsInput struct {
 }
 
 func (h *Handler) Register(api huma.API) {
-	h.registerGutenberg(api)
 	h.registerServers(api)
 
 	huma.Register(api, huma.Operation{

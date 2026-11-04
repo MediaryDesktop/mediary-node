@@ -1,6 +1,6 @@
-// Package booksource finds free copies of books — public-domain ones, and ones on
-// the user's own OPDS servers — and saves the one the user picks into a library
-// folder of books, where it joins the library as the book it was found for.
+// Package booksource finds free copies of books on the user's own OPDS
+// servers and saves the one the user picks into a library folder of books,
+// where it joins the library as the book it was found for.
 package booksource
 
 import (
@@ -12,15 +12,12 @@ import (
 	"github.com/rs/zerolog"
 
 	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/download"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/gutenberg"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/handler"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/servers"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/service"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/source"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/store"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/secrets"
-	pg "github.com/mediaryorg/mediary-node/server/internal/platform/sources/gutenberg"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/opds"
 )
 
@@ -37,9 +34,6 @@ type Deps struct {
 	// Works names the book a search is for.
 	Works Works
 
-	// Gutenberg is Project Gutenberg's site; nil on a node configured without it.
-	Gutenberg *pg.Client
-
 	// SecretsPath is the file the OPDS servers' passwords are kept in.
 	SecretsPath string
 	UserAgent   string
@@ -55,22 +49,11 @@ type Works = service.Works
 type Work = service.Work
 
 type Module struct {
-	handler   *handler.Handler
-	queue     *download.Queue
-	gutenberg *gutenberg.Gutenberg
+	handler *handler.Handler
+	queue   *download.Queue
 }
 
 func New(deps Deps) *Module {
-	var catalog *gutenberg.Gutenberg
-	if deps.Gutenberg != nil {
-		catalog = gutenberg.New(gutenberg.Options{
-			DB:     deps.DB,
-			Client: deps.Gutenberg,
-			Events: deps.Events,
-			Logger: deps.Logger,
-		})
-	}
-
 	opdsServers := servers.New(servers.Options{
 		DB:        deps.DB,
 		Client:    opds.New(30*time.Second, deps.UserAgent),
@@ -78,29 +61,15 @@ func New(deps Deps) *Module {
 		Logger:    deps.Logger,
 	})
 
-	sources := func(ctx context.Context) []source.Source {
-		var on []source.Source
-		if catalog != nil && catalog.Enabled(ctx) {
-			on = append(on, catalog)
-		}
-
-		return append(on, opdsServers.Sources(ctx)...)
-	}
-
-	svc := service.New(service.Options{Sources: sources, Works: deps.Works})
+	svc := service.New(service.Options{Sources: opdsServers.Sources, Works: deps.Works})
 	queue := download.New(store.New(deps.DB), svc, deps.Library, deps.DownloadDir, deps.Events, deps.Logger)
 
-	return &Module{handler: handler.New(svc, queue, catalog, opdsServers), queue: queue, gutenberg: catalog}
+	return &Module{handler: handler.New(svc, queue, opdsServers), queue: queue}
 }
 
-// Start resumes the download queue and keeps the Gutenberg catalogue up to date,
-// until ctx ends.
+// Start resumes the download queue until ctx ends.
 func (m *Module) Start(ctx context.Context) {
 	m.queue.Start(ctx)
-
-	if m.gutenberg != nil {
-		m.gutenberg.Start(ctx)
-	}
 }
 
 func (m *Module) Register(api huma.API) {

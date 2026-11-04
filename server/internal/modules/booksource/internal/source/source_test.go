@@ -4,10 +4,10 @@ import "testing"
 
 func TestSourceOfAReference(t *testing.T) {
 	for ref, want := range map[string]string{
-		"gutenberg:84":                  "gutenberg",
+		"plugin:84":                     "plugin",
 		"opds:2:urn:uuid:8b2c1f3e-0001": "opds:2",
 		"opds:2:/opds/book/7":           "opds:2",
-		"gutenberg:":                    "",
+		"plugin:":                       "",
 		"opds:2":                        "",
 		"opds::key":                     "",
 		":84":                           "",
@@ -21,7 +21,7 @@ func TestSourceOfAReference(t *testing.T) {
 
 func TestRefRoundTrip(t *testing.T) {
 	for _, tc := range []struct{ source, key string }{
-		{"gutenberg", "84"},
+		{"plugin", "84"},
 		{"opds:2", "urn:uuid:8b2c1f3e-0001"},
 	} {
 		ref := Ref(tc.source, tc.key)

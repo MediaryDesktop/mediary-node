@@ -74,7 +74,7 @@ func (h *Handler) registerServers(api huma.API) {
 		Method:      http.MethodGet,
 		Path:        "/v1/books/opds/servers",
 		Summary:     "OPDS servers of books",
-		Description: "The user's own catalogues of books — Calibre-Web, Kavita — and Standard Ebooks for its patrons. Each is searched beside Project Gutenberg.",
+		Description: "The user's own catalogues of books — Calibre-Web, Kavita — and Standard Ebooks for its patrons.",
 		Tags:        []string{"books"},
 	}, func(ctx context.Context, _ *struct{}) (*BookOPDSServersOutput, error) {
 		list, err := h.servers.List(ctx)

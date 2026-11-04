@@ -1207,11 +1207,10 @@ export const en = {
 	bookSources: {
 		copies: {
 			title: 'Free copies',
-			subtitle: 'Public-domain books from Project Gutenberg and books on your own OPDS servers',
+			subtitle: 'Books on your own OPDS servers',
 			searching: 'Looking in your sources…',
 			none: 'None of your sources has this book',
-			noneHint:
-				'Project Gutenberg holds only books in the public domain, mostly older ones in English. A newer book is usually not there.',
+			noneHint: 'Add more OPDS servers in the settings, or try another title.',
 			sourceFailed: '{{name}}: {{error}}',
 			queued: 'The book is queued',
 			failedToQueue: 'Could not queue the book',
@@ -1237,19 +1236,6 @@ export const en = {
 				failed: 'Failed',
 				cancelled: 'Stopped'
 			}
-		},
-		gutenberg: {
-			enable: 'Search Project Gutenberg',
-			note: 'Turning it on downloads Gutenberg’s catalogue, about 6 MB, and searches it on this computer; the site is asked only for a book you save. Almost all of it is in English, and there are no books in Ukrainian.',
-			unavailable: 'Project Gutenberg is turned off on this node',
-			saveFailed: 'Could not change Project Gutenberg',
-			syncing: 'Downloading the catalogue…',
-			books_one: '{{number}} book · catalogue of {{date}}',
-			books_few: '{{number}} books · catalogue of {{date}}',
-			books_many: '{{number}} books · catalogue of {{date}}',
-			books_other: '{{number}} books · catalogue of {{date}}',
-			noCatalog: 'The catalogue is not downloaded yet',
-			refresh: 'Check for updates'
 		},
 		servers: {
 			none: 'No servers yet',
@@ -1981,10 +1967,6 @@ export const en = {
 		mangaDownloads: {
 			name: 'Manga downloads',
 			hint: 'Library folder chapters are saved to, as CBZ files'
-		},
-		gutenberg: {
-			name: 'Project Gutenberg',
-			hint: 'Over 75,000 public-domain books, searched on this computer'
 		},
 		bookServers: {
 			name: 'OPDS servers',

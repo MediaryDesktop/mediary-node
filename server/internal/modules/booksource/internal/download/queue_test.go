@@ -132,7 +132,7 @@ func newHarness(t *testing.T) *harness {
 		t.Fatal(err)
 	}
 
-	source := &fakeSource{files: map[string][]byte{"gutenberg:84": epub}}
+	source := &fakeSource{files: map[string][]byte{"press:84": epub}}
 
 	return &harness{
 		queue:   New(st, source, library, "", nil, zerolog.Nop()),
@@ -152,14 +152,14 @@ func (h *harness) start(t *testing.T) {
 
 func frankenstein() NewBook {
 	return NewBook{
-		EditionRef: "gutenberg:84",
+		EditionRef: "press:84",
 		Format:     "application/epub+zip",
 		Ext:        ".epub",
 		Location:   "cache/epub/84/pg84-images-3.epub",
 		MediaRef:   "openlibrary:OL450063W",
 		Title:      "Frankenstein; Or, The Modern Prometheus",
 		Authors:    "Mary Wollstonecraft Shelley, Percy Bysshe Shelley",
-		SourceName: "Project Gutenberg",
+		SourceName: "Open Press",
 		Size:       int64(len(epub)),
 	}
 }
@@ -246,7 +246,7 @@ func TestABookIsSavedAndJoinsTheLibrary(t *testing.T) {
 	}
 
 	// The file came from where the search said, not from anywhere a client named.
-	if len(h.source.opened) != 1 || h.source.opened[0] != "gutenberg:84 cache/epub/84/pg84-images-3.epub" {
+	if len(h.source.opened) != 1 || h.source.opened[0] != "press:84 cache/epub/84/pg84-images-3.epub" {
 		t.Errorf("opened = %v", h.source.opened)
 	}
 }
@@ -274,7 +274,7 @@ func TestAFileOfTheUsersIsNeverOverwritten(t *testing.T) {
 
 func TestWhatIsNotABookIsNotKept(t *testing.T) {
 	h := newHarness(t)
-	h.source.files["gutenberg:84"] = []byte("<!DOCTYPE html><html><body>Please log in</body></html>")
+	h.source.files["press:84"] = []byte("<!DOCTYPE html><html><body>Please log in</body></html>")
 	h.start(t)
 
 	item := h.wait(t, h.enqueue(t, frankenstein()).ID, store.DownloadDone, store.DownloadFailed)

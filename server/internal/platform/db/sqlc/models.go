@@ -105,18 +105,6 @@ type FileMatch struct {
 	MatchedAt  int64         `json:"matched_at"`
 }
 
-type GutenbergBook struct {
-	ID       int64  `json:"id"`
-	Title    string `json:"title"`
-	Authors  string `json:"authors"`
-	Language string `json:"language"`
-}
-
-type GutenbergFt struct {
-	Title   string `json:"title"`
-	Authors string `json:"authors"`
-}
-
 type LibraryFile struct {
 	ID              int64          `json:"id"`
 	RootID          int64          `json:"root_id"`

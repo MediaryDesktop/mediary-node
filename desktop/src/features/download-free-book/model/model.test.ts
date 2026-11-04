@@ -11,7 +11,7 @@ import {
 import { $promptOpen, downloadRequested, folderChosen, promptClosed } from './model'
 
 const book = {
-	edition_ref: 'gutenberg:84',
+	edition_ref: 'opds:1:urn:uuid:8b2c1f3e-0001',
 	format: 'application/epub+zip',
 	media_ref: 'openlibrary:OL450063W'
 }

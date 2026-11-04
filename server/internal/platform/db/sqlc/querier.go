@@ -12,12 +12,10 @@ import (
 type Querier interface {
 	ClearCustomListItems(ctx context.Context) error
 	ClearCustomLists(ctx context.Context) error
-	ClearGutenbergBooks(ctx context.Context) error
 	ClearLibraryFileIgnored(ctx context.Context, id int64) (int64, error)
 	ClearLibraryFileMissing(ctx context.Context, arg ClearLibraryFileMissingParams) error
 	ClearListIcons(ctx context.Context) error
 	ClearTrackerEntries(ctx context.Context) error
-	CountGutenbergBooks(ctx context.Context) (int64, error)
 	// What the filter tabs above the list show. One query rather than three: the
 	// three numbers have to agree with each other, and they only do if they are read
 	// from the same snapshot.
@@ -91,7 +89,6 @@ type Querier interface {
 	InsertCustomListItem(ctx context.Context, arg InsertCustomListItemParams) error
 	InsertExtension(ctx context.Context, arg InsertExtensionParams) (Extension, error)
 	InsertExtensionRepository(ctx context.Context, arg InsertExtensionRepositoryParams) (ExtensionRepository, error)
-	InsertGutenbergBook(ctx context.Context, arg InsertGutenbergBookParams) error
 	InsertLibraryFile(ctx context.Context, arg InsertLibraryFileParams) (int64, error)
 	InsertLibraryRoot(ctx context.Context, arg InsertLibraryRootParams) (InsertLibraryRootRow, error)
 	InsertManualTitle(ctx context.Context, arg InsertManualTitleParams) error
@@ -149,9 +146,6 @@ type Querier interface {
 	// A local database has no reason to grow scan history forever; the newest runs
 	// are the only ones anyone comes back to read.
 	PruneScanRuns(ctx context.Context, limit int64) error
-	// The search index follows the table only when rebuilt: rows are replaced all
-	// at once, a catalogue at a time.
-	RebuildGutenbergIndex(ctx context.Context) error
 	RecordAniListOutboxFailure(ctx context.Context, arg RecordAniListOutboxFailureParams) error
 	RenameCustomList(ctx context.Context, arg RenameCustomListParams) (int64, error)
 	RenameExtensionRepository(ctx context.Context, arg RenameExtensionRepositoryParams) error

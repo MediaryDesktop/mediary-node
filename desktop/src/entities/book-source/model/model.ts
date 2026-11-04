@@ -14,11 +14,8 @@ import {
 	fetchBookEditionsFx,
 	fetchBookOPDSServersFx,
 	fetchBookSourcesFx,
-	fetchGutenbergSettingsFx,
 	forgetBookDownloadFx,
 	putBookDownloadSettingsFx,
-	putGutenbergSettingsFx,
-	refreshGutenbergCatalogFx,
 	retryBookDownloadFx,
 	updateBookOPDSServerFx
 } from '../api/api'
@@ -29,21 +26,6 @@ export const bookEditionsQuery = createQuery({ effect: fetchBookEditionsFx, name
 
 // A page opened while the last book's search is still out must show its own.
 concurrency(bookEditionsQuery, { strategy: 'TAKE_LATEST' })
-
-export const gutenbergSettingsQuery = createQuery({
-	effect: fetchGutenbergSettingsFx,
-	name: 'gutenbergSettings'
-})
-
-export const putGutenbergSettingsMutation = createMutation({
-	effect: putGutenbergSettingsFx,
-	name: 'putGutenbergSettings'
-})
-
-export const refreshGutenbergCatalogMutation = createMutation({
-	effect: refreshGutenbergCatalogFx,
-	name: 'refreshGutenbergCatalog'
-})
 
 export const bookOPDSServersQuery = createQuery({ effect: fetchBookOPDSServersFx, name: 'bookOPDSServers' })
 
@@ -67,17 +49,6 @@ export const checkBookOPDSServerMutation = createMutation({
 	name: 'checkBookOPDSServer'
 })
 
-// The catalogue's download and weekly check are reported as they go.
-const catalogChanged = nodeTopic('books.catalog')
-
-keepFresh(gutenbergSettingsQuery, {
-	triggers: [
-		catalogChanged,
-		putGutenbergSettingsMutation.finished.success,
-		refreshGutenbergCatalogMutation.finished.success
-	]
-})
-
 const serversChanged = [
 	createBookOPDSServerMutation.finished.success,
 	updateBookOPDSServerMutation.finished.success,
@@ -86,12 +57,9 @@ const serversChanged = [
 
 keepFresh(bookOPDSServersQuery, { triggers: serversChanged })
 
-// A source turned on or off, or a catalogue that has just arrived, changes what
-// a book page finds.
-const sourcesChanged = [...serversChanged, putGutenbergSettingsMutation.finished.success, catalogChanged]
-
-keepFresh(bookSourcesQuery, { triggers: sourcesChanged })
-keepFresh(bookEditionsQuery, { triggers: sourcesChanged })
+// A source turned on or off changes what a book page finds.
+keepFresh(bookSourcesQuery, { triggers: serversChanged })
+keepFresh(bookEditionsQuery, { triggers: serversChanged })
 
 export const bookDownloadsQuery = createQuery({ effect: fetchBookDownloadsFx, name: 'bookDownloads' })
 

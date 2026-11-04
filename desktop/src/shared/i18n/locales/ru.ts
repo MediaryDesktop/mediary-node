@@ -1209,11 +1209,10 @@ export const ru: Translation = {
 	bookSources: {
 		copies: {
 			title: 'Бесплатные экземпляры',
-			subtitle: 'Книги в общественном достоянии из Project Gutenberg и книги на ваших OPDS-серверах',
+			subtitle: 'Книги на ваших OPDS-серверах',
 			searching: 'Ищем в ваших источниках…',
 			none: 'Во включённых источниках этой книги нет',
-			noneHint:
-				'В Project Gutenberg только книги в общественном достоянии, в основном старые и на английском. Более новой книги там обычно нет.',
+			noneHint: 'Добавьте больше OPDS-серверов в настройках или попробуйте другой тайтл.',
 			sourceFailed: '{{name}}: {{error}}',
 			queued: 'Книга добавлена в очередь',
 			failedToQueue: 'Не удалось добавить книгу в очередь',
@@ -1239,19 +1238,6 @@ export const ru: Translation = {
 				failed: 'Ошибка',
 				cancelled: 'Остановлено'
 			}
-		},
-		gutenberg: {
-			enable: 'Искать в Project Gutenberg',
-			note: 'Включение загружает каталог Gutenberg (около 6 МБ) и ищет по нему на этом компьютере; сайт запрашивается только о книге, которую вы сохраняете. Почти всё в нём на английском.',
-			unavailable: 'Project Gutenberg выключен на этом узле',
-			saveFailed: 'Не удалось изменить Project Gutenberg',
-			syncing: 'Загружаем каталог…',
-			books_one: '{{number}} книга · каталог от {{date}}',
-			books_few: '{{number}} книги · каталог от {{date}}',
-			books_many: '{{number}} книг · каталог от {{date}}',
-			books_other: '{{number}} книги · каталог от {{date}}',
-			noCatalog: 'Каталог ещё не загружен',
-			refresh: 'Проверить обновления'
 		},
 		servers: {
 			none: 'Серверов пока нет',
@@ -1985,10 +1971,6 @@ export const ru: Translation = {
 		mangaDownloads: {
 			name: 'Загрузки манги',
 			hint: 'Папка библиотеки, куда сохраняются главы в формате CBZ'
-		},
-		gutenberg: {
-			name: 'Project Gutenberg',
-			hint: 'Более 75 000 книг в общественном достоянии, поиск на этом компьютере'
 		},
 		bookServers: {
 			name: 'OPDS-серверы',

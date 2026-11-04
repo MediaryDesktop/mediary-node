@@ -32,7 +32,6 @@ type Config struct {
 	TMDB        TMDB
 	OpenLibrary OpenLibrary
 	GoogleBooks GoogleBooks
-	Gutenberg   Gutenberg
 	Claude      Claude
 	AI          AI
 	ImageSearch ImageSearch
@@ -121,16 +120,6 @@ type GoogleBooks struct {
 	Endpoint string        `env:"NODE_GOOGLE_BOOKS_ENDPOINT" envDefault:"https://www.googleapis.com/books/v1"`
 	APIKey   string        `env:"NODE_GOOGLE_BOOKS_API_KEY"`
 	Timeout  time.Duration `env:"NODE_GOOGLE_BOOKS_TIMEOUT"  envDefault:"20s"`
-}
-
-// Gutenberg is Project Gutenberg as a source of free books. An empty endpoint
-// turns it off on this node; with it on, the user still has to turn it on in the
-// app before its catalogue is downloaded. A contact goes into the User-Agent, as
-// the site asks of programs. The timeout covers a whole file.
-type Gutenberg struct {
-	Endpoint string        `env:"NODE_GUTENBERG_ENDPOINT" envDefault:"https://www.gutenberg.org"`
-	Contact  string        `env:"NODE_GUTENBERG_CONTACT"`
-	Timeout  time.Duration `env:"NODE_GUTENBERG_TIMEOUT"  envDefault:"10m"`
 }
 
 type Library struct {

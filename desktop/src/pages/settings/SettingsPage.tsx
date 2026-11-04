@@ -13,7 +13,7 @@ import { MissingPlayerNotice, PlayerModeSwitcher } from '@features/choose-player
 import { AniListAccountSettings } from '@features/connect-anilist'
 import { DownloadFolderSetting } from '@features/download-chapters'
 import { BookFolderSetting } from '@features/download-free-book'
-import { BookServersSettings, GutenbergSettings } from '@features/manage-book-sources'
+import { BookServersSettings } from '@features/manage-book-sources'
 import { DebridServiceSettings } from '@features/manage-debrid-service'
 import { LibraryRootsSettings } from '@features/manage-library-roots'
 import { OPDSServersSettings } from '@features/manage-opds-servers'
@@ -175,9 +175,6 @@ function SectionContent({ section }: { section: SectionInfo }) {
 		case 'books':
 			return (
 				<Card>
-					<Row name={t('settings.gutenberg.name')} hint={t('settings.gutenberg.hint')} block>
-						<GutenbergSettings />
-					</Row>
 					<Row name={t('settings.bookServers.name')} hint={t('settings.bookServers.hint')} block>
 						<BookServersSettings />
 					</Row>

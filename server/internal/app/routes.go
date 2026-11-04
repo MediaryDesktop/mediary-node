@@ -27,7 +27,6 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anizip"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/googlebooks"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/gutenberg"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/imagesearch"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/openlibrary"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/tmdb"
@@ -47,7 +46,6 @@ type Deps struct {
 	TMDB                *tmdb.Client
 	OpenLibrary         *openlibrary.Client
 	GoogleBooks         *googlebooks.Client
-	Gutenberg           *gutenberg.Client
 	AI                  media.AIProviders
 	ImageSearch         *imagesearch.Client
 	AniListClientID     string
@@ -228,14 +226,13 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 	// Free copies of books are saved into a library folder of books and join the
 	// library through it, as the book their search started from.
 	bookSourceModule := booksource.New(booksource.Deps{
-		DB:      deps.DB,
-		Logger:  moduleLogger(deps.Logger, "booksource"),
-		Events:  deps.Events,
+		DB:          deps.DB,
+		Logger:      moduleLogger(deps.Logger, "booksource"),
+		Events:      deps.Events,
 		Library:     bookFolders{library: libraryModule},
 		DownloadDir: dataSubdir(deps.DataDir, "books"),
 		Works:       bookWorks{media: mediaModule},
 
-		Gutenberg:   deps.Gutenberg,
 		SecretsPath: filepath.Join(deps.DataDir, "book-opds-secrets.json"),
 		UserAgent:   "mediary-node/" + deps.Build.Version,
 	})

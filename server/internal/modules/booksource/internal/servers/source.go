@@ -21,8 +21,8 @@ const (
 	prefix = "opds:"
 
 	maxResults = 20
-	// The same rule as the Gutenberg search: a long surname is matched by its
-	// start, so a catalogue's "Dostoyevsky" is the work's "Dostoevsky".
+	// A long surname is matched by its start, so a catalogue's "Dostoyevsky" is
+	// the work's "Dostoevsky".
 	surnameStem = 5
 	// The queue's own cap; a server is not trusted to say how large a file is.
 	maxFileBytes = 200 << 20

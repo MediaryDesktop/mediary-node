@@ -384,7 +384,7 @@ components:
         ref:
           description: Pass as edition_ref to download it, within 30 minutes of the search.
           examples:
-            - gutenberg:84
+            - opds:1:urn:uuid:8b2c1f3e-0001
           type: string
         source:
           description: The source's name.
@@ -599,11 +599,11 @@ components:
         id:
           description: The prefix of the source's edition references.
           examples:
-            - gutenberg
+            - opds:1
           type: string
         name:
           examples:
-            - Project Gutenberg
+            - Komga at home
           type: string
       required:
         - id
@@ -2157,46 +2157,6 @@ components:
       required:
         - enabled
         - key_source
-      type: object
-    GutenbergSettingsBody:
-      additionalProperties: false
-      properties:
-        $schema:
-          description: A URL to the JSON Schema for this object.
-          examples:
-            - https://example.com/schemas/GutenbergSettingsBody.json
-          format: uri
-          readOnly: true
-          type: string
-        available:
-          description: False when the node is configured without Project Gutenberg.
-          type: boolean
-        books:
-          description: Books in the node's copy of the catalogue; 0 until it is downloaded.
-          format: int64
-          type: integer
-        checked_at:
-          description: When the node last asked for a newer one; it asks once a week.
-          format: date-time
-          type: string
-        enabled:
-          description: Off until the user turns it on; turning it on downloads the catalogue (about 6 MB, mostly books in English).
-          type: boolean
-        error:
-          description: Why the last download or check failed.
-          type: string
-        syncing:
-          description: The catalogue is being downloaded or checked. Changes arrive on the books.catalog topic.
-          type: boolean
-        updated_at:
-          description: When the node took the catalogue it has.
-          format: date-time
-          type: string
-      required:
-        - available
-        - enabled
-        - syncing
-        - books
       type: object
     HealthOutputBody:
       additionalProperties: false
@@ -3816,21 +3776,6 @@ components:
           type: integer
       required:
         - root_id
-      type: object
-    PutGutenbergSettingsInputBody:
-      additionalProperties: false
-      properties:
-        $schema:
-          description: A URL to the JSON Schema for this object.
-          examples:
-            - https://example.com/schemas/PutGutenbergSettingsInputBody.json
-          format: uri
-          readOnly: true
-          type: string
-        enabled:
-          type: boolean
-      required:
-        - enabled
       type: object
     PutMangaDownloadSettingsInputBody:
       additionalProperties: false
@@ -6827,7 +6772,7 @@ paths:
         - books
   /v1/books/opds/servers:
     get:
-      description: The user's own catalogues of books — Calibre-Web, Kavita — and Standard Ebooks for its patrons. Each is searched beside Project Gutenberg.
+      description: The user's own catalogues of books — Calibre-Web, Kavita — and Standard Ebooks for its patrons.
       operationId: listBookOPDSServers
       responses:
         "200":
@@ -6940,69 +6885,6 @@ paths:
                 $ref: "#/components/schemas/ErrorModel"
           description: Error
       summary: Sources of free copies of books
-      tags:
-        - books
-  /v1/books/sources/gutenberg:
-    get:
-      operationId: getGutenbergSettings
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/GutenbergSettingsBody"
-          description: OK
-        default:
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ErrorModel"
-          description: Error
-      summary: Project Gutenberg as a source of books
-      tags:
-        - books
-    put:
-      description: "On, the node downloads Gutenberg's catalogue and searches it locally: the site is asked only for a book the user downloads. Off removes the catalogue."
-      operationId: putGutenbergSettings
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/PutGutenbergSettingsInputBody"
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/GutenbergSettingsBody"
-          description: OK
-        default:
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ErrorModel"
-          description: Error
-      summary: Turn Project Gutenberg on or off
-      tags:
-        - books
-  /v1/books/sources/gutenberg/refresh:
-    post:
-      operationId: refreshGutenbergCatalog
-      responses:
-        "202":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/GutenbergSettingsBody"
-          description: Accepted
-        default:
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ErrorModel"
-          description: Error
-      summary: Check for a newer Project Gutenberg catalogue now
       tags:
         - books
   /v1/extension/status:

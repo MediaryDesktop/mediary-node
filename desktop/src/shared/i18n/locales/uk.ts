@@ -1207,11 +1207,10 @@ export const uk: Translation = {
 	bookSources: {
 		copies: {
 			title: 'Безкоштовні примірники',
-			subtitle: 'Книги в суспільному надбанні з Project Gutenberg і книги на ваших OPDS-серверах',
+			subtitle: 'Книги на ваших OPDS-серверах',
 			searching: 'Шукаємо у ваших джерелах…',
 			none: 'У ввімкнених джерелах цієї книги немає',
-			noneHint:
-				'У Project Gutenberg лише книги в суспільному надбанні, переважно старі й англійською. Новішої книги там зазвичай немає.',
+			noneHint: 'Додайте більше OPDS-серверів у налаштуваннях або спробуйте інший тайтл.',
 			sourceFailed: '{{name}}: {{error}}',
 			queued: 'Книгу додано в чергу',
 			failedToQueue: 'Не вдалося додати книгу в чергу',
@@ -1237,19 +1236,6 @@ export const uk: Translation = {
 				failed: 'Помилка',
 				cancelled: 'Зупинено'
 			}
-		},
-		gutenberg: {
-			enable: 'Шукати в Project Gutenberg',
-			note: 'Увімкнення завантажує каталог Gutenberg (близько 6 МБ) і шукає по ньому на цьому комп’ютері; сайт запитується лише про книгу, яку ви зберігаєте. Майже все в ньому англійською, українських книг немає.',
-			unavailable: 'Project Gutenberg вимкнено на цьому вузлі',
-			saveFailed: 'Не вдалося змінити Project Gutenberg',
-			syncing: 'Завантажуємо каталог…',
-			books_one: '{{number}} книга · каталог від {{date}}',
-			books_few: '{{number}} книги · каталог від {{date}}',
-			books_many: '{{number}} книг · каталог від {{date}}',
-			books_other: '{{number}} книги · каталог від {{date}}',
-			noCatalog: 'Каталог ще не завантажено',
-			refresh: 'Перевірити оновлення'
 		},
 		servers: {
 			none: 'Серверів ще немає',
@@ -1984,10 +1970,6 @@ export const uk: Translation = {
 		mangaDownloads: {
 			name: 'Завантаження манги',
 			hint: 'Тека бібліотеки, куди зберігаються розділи у форматі CBZ'
-		},
-		gutenberg: {
-			name: 'Project Gutenberg',
-			hint: 'Понад 75 000 книг у суспільному надбанні, пошук на цьому комп’ютері'
 		},
 		bookServers: {
 			name: 'OPDS-сервери',

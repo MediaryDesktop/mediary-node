@@ -12,7 +12,7 @@ import type { BookOPDSServer } from '@entities/book-source'
 
 import { BookServerDrawer } from '../server-drawer/BookServerDrawer'
 
-// The user's OPDS catalogues of books, searched beside Project Gutenberg.
+// The user's OPDS catalogues of books.
 export function BookServersSettings() {
 	const { t } = useTranslation()
 
