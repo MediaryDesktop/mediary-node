@@ -5,7 +5,7 @@ import { problemDetail } from '@shared/api'
 import type { RequestFailure } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
-import { Button, ConnectionCheck, Drawer, DrawerForm, DrawerSection, Input, toast } from '@shared/ui'
+import { Button, ConnectionCheck, Input, toast } from '@shared/ui'
 
 import {
 	checkBookOPDSServerMutation,
@@ -14,44 +14,24 @@ import {
 } from '@entities/book-source'
 import type { BookOPDSCheckResult, BookOPDSServer } from '@entities/book-source'
 
-import styles from './BookServerDrawer.module.scss'
+import styles from './BookServerForm.module.scss'
 
 // Standard Ebooks opens its OPDS feed to members of its Patrons Circle, who sign
 // in with their e-mail and no password.
 const STANDARD_EBOOKS_OPDS = 'https://standardebooks.org/feeds/opds'
-const STANDARD_EBOOKS_FEEDS = 'https://standardebooks.org/feeds'
 
-export interface BookServerDrawerProps {
-	open: boolean
+export interface BookServerFormProps {
 	// The server being changed, or null to add one.
 	server: BookOPDSServer | null
-	onClose: () => void
+	// Called after a successful save, and when the user cancels: either way the
+	// form's local state should go back to matching what is saved.
+	onDone: () => void
 }
 
 // The same form as for manga servers, with Standard Ebooks spelt out: its
-// patrons sign in by e-mail alone. The form is mounted afresh for every
-// opening, so its fields start from the server.
-export function BookServerDrawer({ open, server, onClose }: BookServerDrawerProps) {
-	const { t } = useTranslation()
-
-	return (
-		<Drawer
-			open={open}
-			onOpenChange={next => !next && onClose()}
-			title={
-				server
-					? t('bookSources.servers.drawer.editTitle')
-					: t('bookSources.servers.drawer.createTitle')
-			}
-			description={t('bookSources.servers.drawer.description')}
-			closable={false}
-		>
-			{open && <ServerForm key={server?.id ?? 'new'} server={server} onDone={onClose} />}
-		</Drawer>
-	)
-}
-
-function ServerForm({ server, onDone }: { server: BookOPDSServer | null; onDone: () => void }) {
+// patrons sign in by e-mail alone. Mounted afresh for every opening, so its
+// fields start from the server.
+export function BookServerForm({ server, onDone }: BookServerFormProps) {
 	const { t } = useTranslation()
 
 	const [create, update, check, creating, updating, checking] = useUnit([
@@ -75,7 +55,7 @@ function ServerForm({ server, onDone }: { server: BookOPDSServer | null; onDone:
 	// An untouched password field on an existing server keeps the stored password.
 	const passwordValue = server && password === '' ? undefined : password
 
-	// Only one form is open at a time, so whatever these mutations report is this form's.
+	// Only one form is mounted at a time, so whatever these mutations report is this form's.
 	const failed = ({ error }: RequestFailure) =>
 		toast.error(problemDetail(error, t('bookSources.servers.saveFailed')), {
 			id: 'book-opds-save-failed'
@@ -106,41 +86,18 @@ function ServerForm({ server, onDone }: { server: BookOPDSServer | null; onDone:
 	}
 
 	return (
-		<DrawerForm
-			onSubmit={submit}
-			onCancel={onDone}
-			submitLabel={
-				server ? t('bookSources.servers.drawer.save') : t('bookSources.servers.drawer.create')
-			}
-			submitDisabled={!canSubmit}
-			cancelDisabled={submitting}
-			submitting={submitting}
+		<form
+			className={styles.root}
+			onSubmit={event => {
+				event.preventDefault()
+				submit()
+			}}
 		>
-			{!server && (
-				<DrawerSection title={t('bookSources.servers.drawer.standardTitle')}>
-					<div className={styles.standard}>
-						<p className={styles.hint}>
-							{t('bookSources.servers.drawer.standardHint')}{' '}
-							<a href={STANDARD_EBOOKS_FEEDS} target='_blank' rel='noreferrer'>
-								{t('bookSources.servers.drawer.standardLink')}
-							</a>
-						</p>
-						<Button
-							size='small'
-							disabled={submitting}
-							onClick={() => {
-								setName('Standard Ebooks')
-								setUrl(STANDARD_EBOOKS_OPDS)
-								setPassword('')
-							}}
-						>
-							{t('bookSources.servers.drawer.standardFill')}
-						</Button>
-					</div>
-				</DrawerSection>
-			)}
-
-			<DrawerSection title={t('bookSources.servers.drawer.nameLabel')}>
+			<label className={styles.field}>
+				<div className={styles.fieldHeader}>
+					<span className={styles.label}>{t('bookSources.servers.drawer.nameLabel')}</span>
+					<p className={styles.hint}>{t('bookSources.servers.drawer.nameHint')}</p>
+				</div>
 				<Input
 					value={name}
 					onChange={event => setName(event.target.value)}
@@ -149,9 +106,13 @@ function ServerForm({ server, onDone }: { server: BookOPDSServer | null; onDone:
 					maxLength={100}
 					placeholder={t('bookSources.servers.drawer.namePlaceholder')}
 				/>
-			</DrawerSection>
+			</label>
 
-			<DrawerSection title={t('bookSources.servers.drawer.urlLabel')}>
+			<div className={styles.field}>
+				<div className={styles.fieldHeader}>
+					<span className={styles.label}>{t('bookSources.servers.drawer.urlLabel')}</span>
+					<p className={styles.hint}>{t('bookSources.servers.drawer.description')}</p>
+				</div>
 				<Input
 					value={url}
 					onChange={event => setUrl(event.target.value)}
@@ -160,16 +121,17 @@ function ServerForm({ server, onDone }: { server: BookOPDSServer | null; onDone:
 					spellCheck={false}
 					placeholder='http://nas:8083/opds'
 				/>
-			</DrawerSection>
+			</div>
 
-			<DrawerSection
-				title={t('bookSources.servers.drawer.usernameLabel')}
-				description={
-					url.trim() === STANDARD_EBOOKS_OPDS
-						? t('bookSources.servers.drawer.standardUsername')
-						: undefined
-				}
-			>
+			<label className={styles.field}>
+				<div className={styles.fieldHeader}>
+					<span className={styles.label}>{t('bookSources.servers.drawer.usernameLabel')}</span>
+					<p className={styles.hint}>
+						{url.trim() === STANDARD_EBOOKS_OPDS
+							? t('bookSources.servers.drawer.standardUsername')
+							: t('bookSources.servers.drawer.usernameHint')}
+					</p>
+				</div>
 				<Input
 					value={username}
 					onChange={event => setUsername(event.target.value)}
@@ -177,16 +139,17 @@ function ServerForm({ server, onDone }: { server: BookOPDSServer | null; onDone:
 					autoComplete='off'
 					spellCheck={false}
 				/>
-			</DrawerSection>
+			</label>
 
-			<DrawerSection
-				title={t('bookSources.servers.drawer.passwordLabel')}
-				description={
-					server?.has_password
-						? t('bookSources.servers.drawer.passwordKept')
-						: t('bookSources.servers.drawer.passwordHint')
-				}
-			>
+			<div className={styles.field}>
+				<div className={styles.fieldHeader}>
+					<span className={styles.label}>{t('bookSources.servers.drawer.passwordLabel')}</span>
+					<p className={styles.hint}>
+						{server?.has_password
+							? t('bookSources.servers.drawer.passwordKept')
+							: t('bookSources.servers.drawer.passwordHint')}
+					</p>
+				</div>
 				<Input
 					type='password'
 					revealable
@@ -195,11 +158,12 @@ function ServerForm({ server, onDone }: { server: BookOPDSServer | null; onDone:
 					disabled={submitting}
 					autoComplete='new-password'
 				/>
-			</DrawerSection>
+			</div>
 
-			<DrawerSection>
+			<div className={styles.footer}>
 				<ConnectionCheck
 					label={t('bookSources.servers.drawer.check')}
+					size='default'
 					checking={checking}
 					disabled={url.trim() === '' || submitting}
 					onCheck={runCheck}
@@ -212,7 +176,19 @@ function ServerForm({ server, onDone }: { server: BookOPDSServer | null; onDone:
 						}
 					}
 				/>
-			</DrawerSection>
-		</DrawerForm>
+
+				<div className={styles.formActions}>
+					<Button variant='secondary' onClick={onDone} disabled={submitting}>
+						{t('common.cancel')}
+					</Button>
+
+					<Button type='submit' variant='primary' disabled={!canSubmit} loading={submitting}>
+						{server
+							? t('bookSources.servers.drawer.save')
+							: t('bookSources.servers.drawer.create')}
+					</Button>
+				</div>
+			</div>
+		</form>
 	)
 }

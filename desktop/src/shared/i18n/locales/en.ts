@@ -1239,6 +1239,7 @@ export const en = {
 		},
 		servers: {
 			none: 'No servers yet',
+			noneHint: 'Add an OPDS server to find free copies of your books',
 			add: 'Add OPDS server',
 			menu: 'Server actions',
 			edit: 'Edit',
@@ -1250,16 +1251,13 @@ export const en = {
 				editTitle: 'Edit OPDS server',
 				description:
 					'Address of the catalogue’s root feed, such as http://nas:8083/opds for Calibre-Web',
-				standardTitle: 'Standard Ebooks',
-				standardHint:
-					'Its OPDS feed is open to members of the Patrons Circle: the user name is your e-mail, the password stays empty.',
-				standardLink: 'About the feeds',
-				standardFill: 'Fill in for Standard Ebooks',
 				standardUsername: 'The e-mail of your Patrons Circle membership',
 				nameLabel: 'Name',
+				nameHint: 'Your own label for it — shown in the list above',
 				namePlaceholder: 'Calibre-Web at home',
 				urlLabel: 'Address',
 				usernameLabel: 'User name',
+				usernameHint: 'Leave empty if the server lets you in without one',
 				passwordLabel: 'Password',
 				passwordHint: 'The node keeps it in a file of its own and never shows it again',
 				passwordKept: 'Leave empty to keep the stored password',

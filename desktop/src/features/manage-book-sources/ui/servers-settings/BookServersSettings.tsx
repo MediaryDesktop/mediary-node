@@ -1,18 +1,19 @@
 import { useUnit } from 'effector-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
-import { Button, Icon, ListTile, ManagedList, MoreMenu, toast } from '@shared/ui'
+import { Button, CollapsibleSection, EmptyCard, Icon, toast } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
 
 import { bookOPDSServersQuery, deleteBookOPDSServerMutation } from '@entities/book-source'
-import type { BookOPDSServer } from '@entities/book-source'
 
-import { BookServerDrawer } from '../server-drawer/BookServerDrawer'
+import { BookServerForm } from '../server-form/BookServerForm'
+import { BookServerRow } from '../server-row/BookServerRow'
 
-// The user's OPDS catalogues of books.
+import styles from './BookServersSettings.module.scss'
+
 export function BookServersSettings() {
 	const { t } = useTranslation()
 
@@ -24,9 +25,19 @@ export function BookServersSettings() {
 		$nodeReady
 	])
 
-	// undefined: closed; null: adding; a server: changing it.
-	const [editing, setEditing] = useState<BookOPDSServer | null | undefined>(undefined)
-	const close = useCallback(() => setEditing(undefined), [])
+	// Shut by default. The form stays mounted through the closing animation
+	// (CollapsibleSection only hides it); addKey remounts it with fresh,
+	// empty fields each time it opens, so a cancelled draft never lingers.
+	const [adding, setAdding] = useState(false)
+	const [addKey, setAddKey] = useState(0)
+
+	const toggleAdding = () =>
+		setAdding(current => {
+			if (!current) {
+				setAddKey(key => key + 1)
+			}
+			return !current
+		})
 
 	useEffect(() => {
 		if (nodeReady) {
@@ -38,53 +49,49 @@ export function BookServersSettings() {
 		toast.error(t('bookSources.servers.removeFailed'), { id: 'book-opds-remove-failed' })
 	)
 
-	return (
-		<>
-			<ManagedList
-				items={data?.servers ?? []}
-				emptyText={t('bookSources.servers.none')}
-				renderItem={server => (
-					<ListTile
-						key={server.id}
-						as='li'
-						icon='common/database'
-						title={server.name}
-						subtitle={server.username ? `${server.username} · ${server.url}` : server.url}
-						subtitleHint={server.url}
-						actions={
-							<MoreMenu
-								label={t('bookSources.servers.menu')}
-								items={[
-									{
-										id: 'edit',
-										label: t('bookSources.servers.edit'),
-										icon: 'common/pencil',
-										onSelect: () => setEditing(server)
-									},
-									{
-										id: 'remove',
-										label: t('bookSources.servers.remove'),
-										icon: 'common/trash',
-										danger: true,
-										disabled: removing,
-										onSelect: () => remove(server.id)
-									}
-								]}
-							/>
-						}
-					/>
-				)}
-				action={
-					<Button
-						startIcon={<Icon name='common/plus' size={16} />}
-						onClick={() => setEditing(null)}
-					>
-						{t('bookSources.servers.add')}
-					</Button>
-				}
-			/>
+	const servers = data?.servers ?? []
 
-			<BookServerDrawer open={editing !== undefined} server={editing ?? null} onClose={close} />
-		</>
+	return (
+		<div className={styles.card}>
+			<div className={styles.header}>
+				<div className={styles.headerText}>
+					<h3 className={styles.title}>{t('settings.bookServers.name')}</h3>
+					<p className={styles.hint}>{t('settings.bookServers.hint')}</p>
+				</div>
+
+				<Button
+					size='small'
+					iconOnly
+					aria-label={adding ? t('common.cancel') : t('bookSources.servers.add')}
+					startIcon={<Icon name={adding ? 'common/close' : 'common/plus'} size={16} />}
+					onClick={toggleAdding}
+				/>
+			</div>
+
+			{servers.length > 0 ? (
+				<div className={styles.list}>
+					{servers.map(server => (
+						<BookServerRow
+							key={server.id}
+							server={server}
+							removing={removing}
+							onRemove={() => remove(server.id)}
+						/>
+					))}
+				</div>
+			) : (
+				<EmptyCard
+					icon='common/database'
+					title={t('bookSources.servers.none')}
+					description={t('bookSources.servers.noneHint')}
+				/>
+			)}
+
+			<CollapsibleSection open={adding}>
+				<div className={styles.addSection}>
+					<BookServerForm key={addKey} server={null} onDone={() => setAdding(false)} />
+				</div>
+			</CollapsibleSection>
+		</div>
 	)
 }

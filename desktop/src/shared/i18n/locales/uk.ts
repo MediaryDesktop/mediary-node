@@ -1239,6 +1239,7 @@ export const uk: Translation = {
 		},
 		servers: {
 			none: 'Серверів ще немає',
+			noneHint: 'Додайте OPDS-сервер, щоб знаходити вільні копії ваших книг',
 			add: 'Додати OPDS-сервер',
 			menu: 'Дії із сервером',
 			edit: 'Змінити',
@@ -1250,16 +1251,13 @@ export const uk: Translation = {
 				editTitle: 'Змінити OPDS-сервер',
 				description:
 					'Адреса кореневого фіду каталогу, наприклад http://nas:8083/opds для Calibre-Web',
-				standardTitle: 'Standard Ebooks',
-				standardHint:
-					'Його OPDS-фід відкритий учасникам Patrons Circle: логін — ваш email, пароль лишається порожнім.',
-				standardLink: 'Про фіди',
-				standardFill: 'Заповнити для Standard Ebooks',
 				standardUsername: 'Email, з яким ви в Patrons Circle',
 				nameLabel: 'Назва',
+				nameHint: 'Власна назва — показується у списку вище',
 				namePlaceholder: 'Calibre-Web удома',
 				urlLabel: 'Адреса',
 				usernameLabel: 'Ім’я користувача',
+				usernameHint: 'Лишіть порожнім, якщо сервер пускає без нього',
 				passwordLabel: 'Пароль',
 				passwordHint: 'Вузол зберігає його в окремому файлі й більше ніколи не показує',
 				passwordKept: 'Залиште порожнім, щоб зберегти поточний пароль',

@@ -174,14 +174,15 @@ function SectionContent({ section }: { section: SectionInfo }) {
 			)
 		case 'books':
 			return (
-				<Card>
-					<Row name={t('settings.bookServers.name')} hint={t('settings.bookServers.hint')} block>
-						<BookServersSettings />
-					</Row>
-					<Row name={t('settings.bookDownloads.name')} hint={t('settings.bookDownloads.hint')}>
-						<BookFolderSetting />
-					</Row>
-				</Card>
+				<>
+					<BookServersSettings />
+
+					<Card>
+						<Row name={t('settings.bookDownloads.name')} hint={t('settings.bookDownloads.hint')}>
+							<BookFolderSetting />
+						</Row>
+					</Card>
+				</>
 			)
 	}
 }
