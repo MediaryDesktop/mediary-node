@@ -1,24 +1,21 @@
 import { useUnit } from 'effector-react'
 import { useEffect } from 'react'
-import { IoIosRefresh } from 'react-icons/io'
 
 import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
-import { Button, Icon, ListTile, ManagedList, MoreMenu, toast } from '@shared/ui'
+import { Button, Icon, toast } from '@shared/ui'
 
 import {
 	AddRootMenu,
 	deleteLibraryRootMutation,
-	LIBRARY_CONTENT_ICONS,
-	LIBRARY_CONTENTS,
 	libraryModel,
 	libraryRootsQuery,
 	updateLibraryRootMutation
 } from '@entities/library-item'
 
-const CONTENTS = LIBRARY_CONTENTS
-const CONTENT_ICONS = LIBRARY_CONTENT_ICONS
+import styles from './LibraryRootsSettings.module.scss'
+import { RootRow } from './ui/root-row/RootRow'
 
 export function LibraryRootsSettings() {
 	const { t } = useTranslation()
@@ -49,77 +46,47 @@ export function LibraryRootsSettings() {
 		toast.error(t('library.root.contentFailed'), { id: 'library-root-content-failed' })
 	)
 
+	const roots = rootsData?.roots ?? []
+
 	return (
-		<ManagedList
-			items={rootsData?.roots ?? []}
-			note={t('library.root.note')}
-			emptyText={t('library.root.none')}
-			renderItem={root => (
-				<ListTile
-					key={root.id}
-					as='li'
-					icon={CONTENT_ICONS[root.content]}
-					title={root.path}
-					titleHint={root.path}
-					subtitle={[
-						t(`library.root.content.${root.content}`),
-						t('library.root.files', { count: root.file_count }),
-						root.unmatched_count > 0
-							? t('library.summary.unmatched', { count: root.unmatched_count })
-							: null,
-						root.missing_count > 0
-							? t('library.root.missing', { count: root.missing_count })
-							: null
-					]
-						.filter(Boolean)
-						.join(' · ')}
-					actions={
-						<MoreMenu
-							label={t('library.root.menu')}
-							items={[
-								{
-									id: 'rescan',
-									label: t('library.root.rescan'),
-									icon: <IoIosRefresh size={20} />,
-									onSelect: () => scanRequested(root.id)
-								},
-								...CONTENTS.map(content => ({
-									id: `content-${content}`,
-									label: t(`library.root.switchTo.${content}`),
-									icon: CONTENT_ICONS[content],
-									checked: content === root.content,
-									disabled: updating,
-									onSelect: () => {
-										if (content !== root.content) {
-											update({ id: root.id, content })
-										}
-									}
-								})),
-								{
-									id: 'remove',
-									label: t('library.root.remove'),
-									icon: 'common/trash',
-									danger: true,
-									disabled: removing,
-									onSelect: () => remove(root.id)
-								}
-							]}
+		<div className={styles.card}>
+			<div className={styles.header}>
+				<h3 className={styles.title}>{t('settings.library.name')}</h3>
+				<p className={styles.hint}>{t('settings.library.hint')}</p>
+			</div>
+
+			<p className={styles.note}>
+				<Icon name='common/info' size={18} />
+				<span>{t('library.root.note')}</span>
+			</p>
+
+			{roots.length > 0 ? (
+				<div className={styles.list}>
+					{roots.map(root => (
+						<RootRow
+							key={root.id}
+							root={root}
+							switching={updating}
+							removing={removing}
+							onRescan={() => scanRequested(root.id)}
+							onSwitch={content => update({ id: root.id, content })}
+							onRemove={() => remove(root.id)}
 						/>
-					}
-				/>
+					))}
+				</div>
+			) : (
+				<p className={styles.empty}>{t('library.root.none')}</p>
 			)}
-			action={
+
+			<div className={styles.actions}>
 				<AddRootMenu
 					trigger={
-						<Button
-							startIcon={<Icon name='common/folder-open' size={16} />}
-							disabled={pickingFolder}
-						>
+						<Button startIcon={<Icon name='common/plus' size={16} />} disabled={pickingFolder}>
 							{t('library.root.add')}
 						</Button>
 					}
 				/>
-			}
-		/>
+			</div>
+		</div>
 	)
 }

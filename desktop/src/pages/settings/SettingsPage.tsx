@@ -140,13 +140,7 @@ function SectionContent({ section }: { section: SectionInfo }) {
 				</Card>
 			)
 		case 'library':
-			return (
-				<Card>
-					<Row name={t('settings.library.name')} hint={t('settings.library.hint')} block>
-						<LibraryRootsSettings />
-					</Row>
-				</Card>
-			)
+			return <LibraryRootsSettings />
 		case 'metadata':
 			return (
 				<>
