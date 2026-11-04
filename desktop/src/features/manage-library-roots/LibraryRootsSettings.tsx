@@ -81,7 +81,11 @@ export function LibraryRootsSettings() {
 			<div className={styles.actions}>
 				<AddRootMenu
 					trigger={
-						<Button startIcon={<Icon name='common/plus' size={16} />} disabled={pickingFolder}>
+						<Button
+							variant='primary'
+							startIcon={<Icon name='common/plus' size={16} />}
+							disabled={pickingFolder}
+						>
 							{t('library.root.add')}
 						</Button>
 					}

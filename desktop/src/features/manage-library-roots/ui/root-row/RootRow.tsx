@@ -1,11 +1,10 @@
-import { IoIosRefresh } from 'react-icons/io'
-
 import { useTranslation } from '@shared/i18n'
-import { Badge, Icon, MoreMenu } from '@shared/ui'
+import { Badge, Icon } from '@shared/ui'
 
-import { LIBRARY_CONTENT_ICONS, LIBRARY_CONTENTS } from '@entities/library-item'
+import { LIBRARY_CONTENT_ICONS } from '@entities/library-item'
 import type { LibraryRoot } from '@entities/library-item'
 
+import { RootMenu } from './RootMenu'
 import styles from './RootRow.module.scss'
 
 export interface RootRowProps {
@@ -23,7 +22,7 @@ export function RootRow({ root, onRescan, onSwitch, onRemove, switching, removin
 	return (
 		<div className={styles.row}>
 			<span className={styles.badge}>
-				<Icon name={LIBRARY_CONTENT_ICONS[root.content]} size={20} />
+				<Icon name={LIBRARY_CONTENT_ICONS[root.content]} size={24} />
 			</span>
 
 			<div className={styles.body}>
@@ -51,36 +50,13 @@ export function RootRow({ root, onRescan, onSwitch, onRemove, switching, removin
 				</div>
 			</div>
 
-			<MoreMenu
-				label={t('library.root.menu')}
-				items={[
-					{
-						id: 'rescan',
-						label: t('library.root.rescan'),
-						icon: <IoIosRefresh size={20} />,
-						onSelect: onRescan
-					},
-					...LIBRARY_CONTENTS.map(content => ({
-						id: `content-${content}`,
-						label: t(`library.root.switchTo.${content}`),
-						icon: LIBRARY_CONTENT_ICONS[content],
-						checked: content === root.content,
-						disabled: switching,
-						onSelect: () => {
-							if (content !== root.content) {
-								onSwitch(content)
-							}
-						}
-					})),
-					{
-						id: 'remove',
-						label: t('library.root.remove'),
-						icon: 'common/trash',
-						danger: true,
-						disabled: removing,
-						onSelect: onRemove
-					}
-				]}
+			<RootMenu
+				root={root}
+				onRescan={onRescan}
+				onSwitch={onSwitch}
+				onRemove={onRemove}
+				switching={switching}
+				removing={removing}
 			/>
 		</div>
 	)
