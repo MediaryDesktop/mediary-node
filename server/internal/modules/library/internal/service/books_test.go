@@ -56,7 +56,9 @@ func TestABookIsMatchedByItsISBN(t *testing.T) {
 	writeBookEPUB(t, filepath.Join(root, "scan_0042.epub"),
 		`<dc:title>Dune</dc:title><dc:identifier>urn:isbn:978-0-441-17271-9</dc:identifier>`)
 
-	h.addRoot(t, root)
+	if _, err := h.svc.AddRoot(context.Background(), root, ContentBooks); err != nil {
+		t.Fatalf("add root: %v", err)
+	}
 	h.scan(t, 0)
 
 	file := h.files(t)[0]
@@ -92,7 +94,9 @@ func TestABookIsSearchedByTheTitleItCarries(t *testing.T) {
 	writeBookEPUB(t, filepath.Join(root, "herbert_v2_fixed.epub"),
 		`<dc:title>Dune</dc:title><dc:creator>Frank Herbert</dc:creator>`)
 
-	h.addRoot(t, root)
+	if _, err := h.svc.AddRoot(context.Background(), root, ContentBooks); err != nil {
+		t.Fatalf("add root: %v", err)
+	}
 	h.scan(t, 0)
 
 	if !slices.Equal(h.titles.searches, []string{"Dune"}) {
@@ -114,7 +118,9 @@ func TestABookWithoutMetadataGoesByItsName(t *testing.T) {
 
 	writeFile(t, filepath.Join(root, "Frank Herbert - Dune.pdf"), "%PDF-1.7")
 
-	h.addRoot(t, root)
+	if _, err := h.svc.AddRoot(context.Background(), root, ContentBooks); err != nil {
+		t.Fatalf("add root: %v", err)
+	}
 	h.scan(t, 0)
 
 	file := h.files(t)[0]

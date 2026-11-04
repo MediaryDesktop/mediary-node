@@ -250,11 +250,14 @@ func TestAFolderOfBooksKeepsOnlyBooks(t *testing.T) {
 		"Frank Herbert - Dune.pdf",
 	)
 
-	root := h.addRoot(t, dir)
+	root, err := h.svc.AddRoot(ctx, dir, ContentMixed)
+	if err != nil {
+		t.Fatalf("add root: %v", err)
+	}
 	h.scan(t, 0)
 
 	if kinds := fileKinds(h.files(t)); kinds != "book,manga,video" {
-		t.Fatalf("a folder of anime keeps every kind, got %s", kinds)
+		t.Fatalf("a folder of mixed videos keeps every kind, got %s", kinds)
 	}
 
 	stream, unsubscribe := h.hub.Subscribe(events.TopicLibraryScan)
@@ -278,6 +281,28 @@ func TestAFolderOfBooksKeepsOnlyBooks(t *testing.T) {
 
 	if kinds := fileKinds(h.files(t)); kinds != "manga" {
 		t.Fatalf("a folder of manga keeps %s", kinds)
+	}
+}
+
+func TestAFolderOfShowsKeepsOnlyVideo(t *testing.T) {
+	h := newHarness(t)
+	dir := t.TempDir()
+
+	writeEpisodes(t, dir,
+		"[SubsPlease] Sousou no Frieren - 01 (1080p).mkv",
+		"Berserk v01.cbz",
+		"Frank Herbert - Dune.pdf",
+	)
+
+	// A folder is anime unless said otherwise, and anime is one of the three
+	// single-source video kinds: unlike mixed, it does not also pick up comics
+	// and books — a stray one would otherwise sit there unmatched, with nothing
+	// in the settings explaining why.
+	h.addRoot(t, dir)
+	h.scan(t, 0)
+
+	if kinds := fileKinds(h.files(t)); kinds != "video" {
+		t.Fatalf("a folder of anime keeps %s, want only video", kinds)
 	}
 }
 

@@ -12,7 +12,10 @@ func TestImportFileAddsOneFileAndMatchesIt(t *testing.T) {
 	h := newHarness(t)
 	dir := t.TempDir()
 	writeFile(t, filepath.Join(dir, "Other", "Other 01.cbz"), "zip")
-	root := h.addRoot(t, dir)
+	root, err := h.svc.AddRoot(context.Background(), dir, ContentManga)
+	if err != nil {
+		t.Fatalf("add root: %v", err)
+	}
 	h.scan(t, root.ID)
 
 	writeFile(t, filepath.Join(dir, "Berserk", "Berserk - Ch. 013.cbz"), "zip")

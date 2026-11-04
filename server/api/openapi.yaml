@@ -4074,7 +4074,7 @@ components:
           format: date-time
           type: string
         content:
-          description: "What the folder holds. For videos it picks the source: anime is matched against AniList, movies and shows against TMDB, doramas against TMDB's East Asian shows, mixed videos against both, file by file; such a folder keeps comics and books as well. A folder of manga keeps only comics, a folder of books only books."
+          description: "What the folder holds. For videos it picks the source: anime is matched against AniList, movies and shows against TMDB, doramas against TMDB's East Asian shows. Each of those three keeps only video files. A folder of mixed videos is matched against both AniList and TMDB, file by file, and keeps comics and books as well. A folder of manga keeps only comics, a folder of books only books."
           enum:
             - anime
             - movies_and_shows

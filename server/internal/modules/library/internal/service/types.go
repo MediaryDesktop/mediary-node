@@ -5,8 +5,12 @@ import "time"
 // What a root holds, as the user said when adding it. For videos it picks the
 // source — anime is matched against AniList, movies and shows against TMDB, and
 // doramas against TMDB's East Asian shows — since a file's name cannot tell
-// them apart. A root of mixed videos is matched against both and keeps what fits
-// best, file by file. A root of comics or books keeps only those.
+// them apart. A root of one of those three video kinds keeps only video: a
+// comic or a book left in it would otherwise sit there unmatched, confusing
+// the user into thinking it should have been picked up. A root of mixed videos
+// is the deliberate exception — matched against both AniList and TMDB, file by
+// file, and keeping comics and books too, for a folder that genuinely holds a
+// bit of everything. A root of comics or books keeps only those.
 const (
 	ContentAnime          = "anime"
 	ContentMoviesAndShows = "movies_and_shows"
@@ -26,10 +30,12 @@ func validContent(content string) bool {
 }
 
 // keptKind is the only kind of file a root of this content keeps, or "" for a
-// root of videos — which keeps comics and books too, as it always has, so a
-// folder that mixes them loses nothing.
+// root of mixed videos — the one content that deliberately keeps every kind,
+// so a folder that mixes them loses nothing.
 func keptKind(content string) string {
 	switch content {
+	case ContentAnime, ContentMoviesAndShows, ContentDoramas:
+		return "video"
 	case ContentManga:
 		return "manga"
 	case ContentBooks:
@@ -42,7 +48,7 @@ func keptKind(content string) string {
 type Root struct {
 	ID      int64     `json:"id" doc:"Identifier of the root, stable across scans."`
 	Path    string    `json:"path" doc:"Absolute path on this machine."`
-	Content string    `json:"content" enum:"anime,movies_and_shows,doramas,mixed,manga,books" doc:"What the folder holds. For videos it picks the source: anime is matched against AniList, movies and shows against TMDB, doramas against TMDB's East Asian shows, mixed videos against both, file by file; such a folder keeps comics and books as well. A folder of manga keeps only comics, a folder of books only books."`
+	Content string    `json:"content" enum:"anime,movies_and_shows,doramas,mixed,manga,books" doc:"What the folder holds. For videos it picks the source: anime is matched against AniList, movies and shows against TMDB, doramas against TMDB's East Asian shows. Each of those three keeps only video files. A folder of mixed videos is matched against both AniList and TMDB, file by file, and keeps comics and books as well. A folder of manga keeps only comics, a folder of books only books."`
 	AddedAt time.Time `json:"added_at" doc:"When the user added the root."`
 
 	LastScanAt *time.Time `json:"last_scan_at,omitempty" doc:"When the root was last walked. Absent until the first scan."`
