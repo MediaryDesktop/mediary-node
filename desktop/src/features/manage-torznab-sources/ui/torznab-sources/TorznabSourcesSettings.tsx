@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
-import { Button, CollapsibleSection, Icon, toast } from '@shared/ui'
+import { Button, CollapsibleSection, EmptyCard, Icon, toast } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
 
@@ -80,7 +80,11 @@ export function TorznabSourcesSettings() {
 					))}
 				</div>
 			) : (
-				<p className={styles.empty}>{t('torrents.sources.none')}</p>
+				<EmptyCard
+					icon='common/search'
+					title={t('torrents.sources.none')}
+					description={t('torrents.sources.noneHint')}
+				/>
 			)}
 
 			<CollapsibleSection open={adding}>

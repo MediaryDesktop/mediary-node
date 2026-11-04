@@ -1077,6 +1077,7 @@ export const ru: Translation = {
 
 	mangaSources: {
 		none: 'Серверов пока нет',
+		noneHint: 'Добавьте OPDS-сервер, чтобы читать его главы в Mediary',
 		add: 'Добавить OPDS-сервер',
 		menu: 'Действия с сервером',
 		edit: 'Изменить',
@@ -1089,9 +1090,11 @@ export const ru: Translation = {
 			description:
 				'Адрес корневого фида каталога, например http://nas:25600/opds/v1.2/catalog для Komga',
 			nameLabel: 'Название',
+			nameHint: 'Собственное название — отображается в списке выше',
 			namePlaceholder: 'Komga дома',
 			urlLabel: 'Адрес',
 			usernameLabel: 'Имя пользователя',
+			usernameHint: 'Оставьте пустым, если сервер пускает без него',
 			passwordLabel: 'Пароль',
 			passwordHint: 'Нода хранит его в отдельном файле и больше никогда не показывает',
 			passwordKept: 'Оставьте пустым, чтобы сохранить текущий пароль',
@@ -1389,6 +1392,7 @@ export const ru: Translation = {
 		},
 		sources: {
 			none: 'Источников поиска пока нет',
+			noneHint: 'Добавьте Jackett или Prowlarr, чтобы искать релизы',
 			add: 'Добавить источник',
 			edit: 'Изменить',
 			remove: 'Удалить',

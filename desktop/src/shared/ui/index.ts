@@ -31,6 +31,9 @@ export type { IconLike, IconName } from './icon/Icon'
 export { SelectDropdown } from './select-dropdown'
 export type { SelectDropdownOption, SelectDropdownProps } from './select-dropdown'
 
+export { EmptyCard } from './empty-card/EmptyCard'
+export type { EmptyCardProps } from './empty-card/EmptyCard'
+
 export { EmptyState } from './empty-state/EmptyState'
 export type { EmptyStateProps, EmptyStateSize } from './empty-state/EmptyState'
 

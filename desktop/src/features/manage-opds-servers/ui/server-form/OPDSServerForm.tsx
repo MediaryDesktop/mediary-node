@@ -5,7 +5,7 @@ import { problemDetail } from '@shared/api'
 import type { RequestFailure } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
-import { ConnectionCheck, Drawer, DrawerForm, DrawerSection, Input, toast } from '@shared/ui'
+import { Button, ConnectionCheck, Icon, Input, toast } from '@shared/ui'
 
 import {
 	checkOPDSServerMutation,
@@ -14,31 +14,18 @@ import {
 } from '@entities/manga-source'
 import type { OPDSCheckResult, OPDSServer } from '@entities/manga-source'
 
-export interface OPDSServerDrawerProps {
-	open: boolean
+import styles from './OPDSServerForm.module.scss'
+
+export interface OPDSServerFormProps {
 	// The server being changed, or null to add one.
 	server: OPDSServer | null
-	onClose: () => void
+	// Called after a successful save, and when the user cancels: either way the
+	// form's local state should go back to matching what is saved.
+	onDone: () => void
 }
 
-// The form is mounted afresh for every opening, so its fields start from the server.
-export function OPDSServerDrawer({ open, server, onClose }: OPDSServerDrawerProps) {
-	const { t } = useTranslation()
-
-	return (
-		<Drawer
-			open={open}
-			onOpenChange={next => !next && onClose()}
-			title={server ? t('mangaSources.drawer.editTitle') : t('mangaSources.drawer.createTitle')}
-			description={t('mangaSources.drawer.description')}
-			closable={false}
-		>
-			{open && <ServerForm key={server?.id ?? 'new'} server={server} onDone={onClose} />}
-		</Drawer>
-	)
-}
-
-function ServerForm({ server, onDone }: { server: OPDSServer | null; onDone: () => void }) {
+// Mounted afresh for every opening, so its fields start from the server.
+export function OPDSServerForm({ server, onDone }: OPDSServerFormProps) {
 	const { t } = useTranslation()
 
 	const [create, update, check, creating, updating, checking] = useUnit([
@@ -62,7 +49,7 @@ function ServerForm({ server, onDone }: { server: OPDSServer | null; onDone: () 
 	// An untouched password field on an existing server keeps the stored password.
 	const passwordValue = server && password === '' ? undefined : password
 
-	// Only one form is open at a time, so whatever these mutations report is this form's.
+	// Only one form is mounted at a time, so whatever these mutations report is this form's.
 	const failed = ({ error }: RequestFailure) =>
 		toast.error(problemDetail(error, t('mangaSources.saveFailed')), { id: 'opds-save-failed' })
 
@@ -91,15 +78,18 @@ function ServerForm({ server, onDone }: { server: OPDSServer | null; onDone: () 
 	}
 
 	return (
-		<DrawerForm
-			onSubmit={submit}
-			onCancel={onDone}
-			submitLabel={server ? t('mangaSources.drawer.save') : t('mangaSources.drawer.create')}
-			submitDisabled={!canSubmit}
-			cancelDisabled={submitting}
-			submitting={submitting}
+		<form
+			className={styles.root}
+			onSubmit={event => {
+				event.preventDefault()
+				submit()
+			}}
 		>
-			<DrawerSection title={t('mangaSources.drawer.nameLabel')}>
+			<label className={styles.field}>
+				<div className={styles.fieldHeader}>
+					<span className={styles.label}>{t('mangaSources.drawer.nameLabel')}</span>
+					<p className={styles.hint}>{t('mangaSources.drawer.nameHint')}</p>
+				</div>
 				<Input
 					value={name}
 					onChange={event => setName(event.target.value)}
@@ -108,9 +98,13 @@ function ServerForm({ server, onDone }: { server: OPDSServer | null; onDone: () 
 					maxLength={100}
 					placeholder={t('mangaSources.drawer.namePlaceholder')}
 				/>
-			</DrawerSection>
+			</label>
 
-			<DrawerSection title={t('mangaSources.drawer.urlLabel')}>
+			<div className={styles.field}>
+				<div className={styles.fieldHeader}>
+					<span className={styles.label}>{t('mangaSources.drawer.urlLabel')}</span>
+					<p className={styles.hint}>{t('mangaSources.drawer.description')}</p>
+				</div>
 				<Input
 					value={url}
 					onChange={event => setUrl(event.target.value)}
@@ -119,9 +113,13 @@ function ServerForm({ server, onDone }: { server: OPDSServer | null; onDone: () 
 					spellCheck={false}
 					placeholder='http://nas:25600/opds/v1.2/catalog'
 				/>
-			</DrawerSection>
+			</div>
 
-			<DrawerSection title={t('mangaSources.drawer.usernameLabel')}>
+			<label className={styles.field}>
+				<div className={styles.fieldHeader}>
+					<span className={styles.label}>{t('mangaSources.drawer.usernameLabel')}</span>
+					<p className={styles.hint}>{t('mangaSources.drawer.usernameHint')}</p>
+				</div>
 				<Input
 					value={username}
 					onChange={event => setUsername(event.target.value)}
@@ -129,16 +127,17 @@ function ServerForm({ server, onDone }: { server: OPDSServer | null; onDone: () 
 					autoComplete='off'
 					spellCheck={false}
 				/>
-			</DrawerSection>
+			</label>
 
-			<DrawerSection
-				title={t('mangaSources.drawer.passwordLabel')}
-				description={
-					server?.has_password
-						? t('mangaSources.drawer.passwordKept')
-						: t('mangaSources.drawer.passwordHint')
-				}
-			>
+			<div className={styles.field}>
+				<div className={styles.fieldHeader}>
+					<span className={styles.label}>{t('mangaSources.drawer.passwordLabel')}</span>
+					<p className={styles.hint}>
+						{server?.has_password
+							? t('mangaSources.drawer.passwordKept')
+							: t('mangaSources.drawer.passwordHint')}
+					</p>
+				</div>
 				<Input
 					type='password'
 					revealable
@@ -146,12 +145,14 @@ function ServerForm({ server, onDone }: { server: OPDSServer | null; onDone: () 
 					onChange={event => setPassword(event.target.value)}
 					disabled={submitting}
 					autoComplete='new-password'
+					startIcon={<Icon name='common/lock' size={18} />}
 				/>
-			</DrawerSection>
+			</div>
 
-			<DrawerSection>
+			<div className={styles.footer}>
 				<ConnectionCheck
 					label={t('mangaSources.drawer.check')}
+					size='default'
 					checking={checking}
 					disabled={url.trim() === '' || submitting}
 					onCheck={runCheck}
@@ -164,7 +165,17 @@ function ServerForm({ server, onDone }: { server: OPDSServer | null; onDone: () 
 						}
 					}
 				/>
-			</DrawerSection>
-		</DrawerForm>
+
+				<div className={styles.formActions}>
+					<Button variant='secondary' onClick={onDone} disabled={submitting}>
+						{t('common.cancel')}
+					</Button>
+
+					<Button type='submit' variant='primary' disabled={!canSubmit} loading={submitting}>
+						{server ? t('mangaSources.drawer.save') : t('mangaSources.drawer.create')}
+					</Button>
+				</div>
+			</div>
+		</form>
 	)
 }

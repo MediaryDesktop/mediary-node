@@ -1075,6 +1075,7 @@ export const en = {
 
 	mangaSources: {
 		none: 'No servers yet',
+		noneHint: 'Add an OPDS server to read its chapters in Mediary',
 		add: 'Add OPDS server',
 		menu: 'Server actions',
 		edit: 'Edit',
@@ -1087,9 +1088,11 @@ export const en = {
 			description:
 				'Address of the catalogue’s root feed, such as http://nas:25600/opds/v1.2/catalog for Komga',
 			nameLabel: 'Name',
+			nameHint: 'Your own label for it — shown in the list above',
 			namePlaceholder: 'Komga at home',
 			urlLabel: 'Address',
 			usernameLabel: 'User name',
+			usernameHint: 'Leave empty if the server lets you in without one',
 			passwordLabel: 'Password',
 			passwordHint: 'The node keeps it in a file of its own and never shows it again',
 			passwordKept: 'Leave empty to keep the stored password',
@@ -1388,6 +1391,7 @@ export const en = {
 		},
 		sources: {
 			none: 'No search source yet',
+			noneHint: 'Add a Jackett or Prowlarr source to search for releases',
 			add: 'Add a source',
 			edit: 'Change',
 			remove: 'Remove',

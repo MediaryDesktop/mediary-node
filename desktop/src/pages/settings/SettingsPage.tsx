@@ -159,14 +159,18 @@ function SectionContent({ section }: { section: SectionInfo }) {
 			)
 		case 'manga':
 			return (
-				<Card>
-					<Row name={t('settings.mangaSources.name')} hint={t('settings.mangaSources.hint')} block>
-						<OPDSServersSettings />
-					</Row>
-					<Row name={t('settings.mangaDownloads.name')} hint={t('settings.mangaDownloads.hint')}>
-						<DownloadFolderSetting />
-					</Row>
-				</Card>
+				<>
+					<OPDSServersSettings />
+
+					<Card>
+						<Row
+							name={t('settings.mangaDownloads.name')}
+							hint={t('settings.mangaDownloads.hint')}
+						>
+							<DownloadFolderSetting />
+						</Row>
+					</Card>
+				</>
 			)
 		case 'books':
 			return (

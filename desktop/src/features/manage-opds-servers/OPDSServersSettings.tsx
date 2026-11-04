@@ -1,16 +1,17 @@
 import { useUnit } from 'effector-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
-import { Button, Icon, ListTile, ManagedList, MoreMenu, toast } from '@shared/ui'
+import { Button, CollapsibleSection, EmptyCard, Icon, toast } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
 
 import { deleteOPDSServerMutation, opdsServersQuery } from '@entities/manga-source'
-import type { OPDSServer } from '@entities/manga-source'
 
-import { OPDSServerDrawer } from './ui/server-drawer/OPDSServerDrawer'
+import styles from './OPDSServersSettings.module.scss'
+import { OPDSServerForm } from './ui/server-form/OPDSServerForm'
+import { ServerRow } from './ui/server-row/ServerRow'
 
 export function OPDSServersSettings() {
 	const { t } = useTranslation()
@@ -23,9 +24,19 @@ export function OPDSServersSettings() {
 		$nodeReady
 	])
 
-	// undefined: closed; null: adding; a server: changing it.
-	const [editing, setEditing] = useState<OPDSServer | null | undefined>(undefined)
-	const close = useCallback(() => setEditing(undefined), [])
+	// Shut by default. The form stays mounted through the closing animation
+	// (CollapsibleSection only hides it); addKey remounts it with fresh,
+	// empty fields each time it opens, so a cancelled draft never lingers.
+	const [adding, setAdding] = useState(false)
+	const [addKey, setAddKey] = useState(0)
+
+	const toggleAdding = () =>
+		setAdding(current => {
+			if (!current) {
+				setAddKey(key => key + 1)
+			}
+			return !current
+		})
 
 	useEffect(() => {
 		if (nodeReady) {
@@ -37,53 +48,49 @@ export function OPDSServersSettings() {
 		toast.error(t('mangaSources.removeFailed'), { id: 'opds-remove-failed' })
 	)
 
-	return (
-		<>
-			<ManagedList
-				items={data?.servers ?? []}
-				emptyText={t('mangaSources.none')}
-				renderItem={server => (
-					<ListTile
-						key={server.id}
-						as='li'
-						icon='common/database'
-						title={server.name}
-						subtitle={server.username ? `${server.username} · ${server.url}` : server.url}
-						subtitleHint={server.url}
-						actions={
-							<MoreMenu
-								label={t('mangaSources.menu')}
-								items={[
-									{
-										id: 'edit',
-										label: t('mangaSources.edit'),
-										icon: 'common/pencil',
-										onSelect: () => setEditing(server)
-									},
-									{
-										id: 'remove',
-										label: t('mangaSources.remove'),
-										icon: 'common/trash',
-										danger: true,
-										disabled: removing,
-										onSelect: () => remove(server.id)
-									}
-								]}
-							/>
-						}
-					/>
-				)}
-				action={
-					<Button
-						startIcon={<Icon name='common/plus' size={16} />}
-						onClick={() => setEditing(null)}
-					>
-						{t('mangaSources.add')}
-					</Button>
-				}
-			/>
+	const servers = data?.servers ?? []
 
-			<OPDSServerDrawer open={editing !== undefined} server={editing ?? null} onClose={close} />
-		</>
+	return (
+		<div className={styles.card}>
+			<div className={styles.header}>
+				<div className={styles.headerText}>
+					<h3 className={styles.title}>{t('settings.mangaSources.name')}</h3>
+					<p className={styles.hint}>{t('settings.mangaSources.hint')}</p>
+				</div>
+
+				<Button
+					size='small'
+					iconOnly
+					aria-label={adding ? t('common.cancel') : t('mangaSources.add')}
+					startIcon={<Icon name={adding ? 'common/close' : 'common/plus'} size={16} />}
+					onClick={toggleAdding}
+				/>
+			</div>
+
+			{servers.length > 0 ? (
+				<div className={styles.list}>
+					{servers.map(server => (
+						<ServerRow
+							key={server.id}
+							server={server}
+							removing={removing}
+							onRemove={() => remove(server.id)}
+						/>
+					))}
+				</div>
+			) : (
+				<EmptyCard
+					icon='common/database'
+					title={t('mangaSources.none')}
+					description={t('mangaSources.noneHint')}
+				/>
+			)}
+
+			<CollapsibleSection open={adding}>
+				<div className={styles.addSection}>
+					<OPDSServerForm key={addKey} server={null} onDone={() => setAdding(false)} />
+				</div>
+			</CollapsibleSection>
+		</div>
 	)
 }
