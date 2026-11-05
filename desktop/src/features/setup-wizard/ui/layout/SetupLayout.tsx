@@ -17,7 +17,6 @@ export interface SetupLayoutProps {
 	backDisabled?: boolean
 	nextDisabled?: boolean
 	nextLabel?: string
-	caption?: ReactNode
 	children: ReactNode
 }
 
@@ -29,7 +28,6 @@ export function SetupLayout({
 	backDisabled = false,
 	nextDisabled = false,
 	nextLabel,
-	caption,
 	children
 }: SetupLayoutProps) {
 	const { t } = useTranslation()
@@ -44,51 +42,53 @@ export function SetupLayout({
 				<p className={styles.note}>{t('setup.note')}</p>
 			</header>
 
-			<nav className={styles.rail} aria-label={t('setup.railLabel')}>
-				{SETUP_STEPS.map((step, index) => {
-					const active = index === currentIndex
-					const done = index < currentIndex
-
-					return (
-						<button
-							key={step.id}
-							type='button'
-							className={clsx(styles.step, active && styles.active, done && styles.done)}
-							aria-current={active ? 'step' : undefined}
-							disabled={!onSelectStep || index > currentIndex}
-							onClick={() => onSelectStep?.(step.id)}
-						>
-							<span className={styles.badge}>{renderIcon(step.icon, 24)}</span>
-
-							<span className={styles.label}>{t(step.labelKey)}</span>
-						</button>
-					)
-				})}
-			</nav>
-
-			<main className={styles.content}>{children}</main>
-
-			<div className={styles.footer}>
+			<div className={styles.railRow}>
 				<Button
+					className={styles.railNav}
 					variant='ghost'
+					iconOnly
 					disabled={backDisabled}
 					onClick={onBack}
-					startIcon={<Icon name='common/arrow-left' size={16} />}
+					aria-label={t('setup.previous')}
 				>
-					{t('setup.previous')}
+					<Icon name='common/arrow-left' size={20} />
 				</Button>
 
+				<nav className={styles.rail} aria-label={t('setup.railLabel')}>
+					{SETUP_STEPS.map((step, index) => {
+						const active = index === currentIndex
+						const done = index < currentIndex
+
+						return (
+							<button
+								key={step.id}
+								type='button'
+								className={clsx(styles.step, active && styles.active, done && styles.done)}
+								aria-current={active ? 'step' : undefined}
+								disabled={!onSelectStep || index > currentIndex}
+								onClick={() => onSelectStep?.(step.id)}
+							>
+								<span className={styles.badge}>{renderIcon(step.icon, 24)}</span>
+
+								<span className={styles.label}>{t(step.labelKey)}</span>
+							</button>
+						)
+					})}
+				</nav>
+
 				<Button
-					variant='primary'
+					className={styles.railNav}
+					variant='ghost'
+					iconOnly
 					disabled={nextDisabled}
 					onClick={onNext}
-					endIcon={<Icon name='common/arrow-right' size={16} />}
+					aria-label={nextLabel ?? t('setup.next')}
 				>
-					{nextLabel ?? t('setup.next')}
+					<Icon name='common/arrow-right' size={20} />
 				</Button>
 			</div>
 
-			{caption && <p className={styles.caption}>{caption}</p>}
+			<main className={styles.content}>{children}</main>
 		</div>
 	)
 }

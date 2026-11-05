@@ -2207,11 +2207,16 @@ export const en = {
 				description:
 					'Choose your preferred player for anime, films and series. Progress is tracked automatically'
 			},
-			downloads: {
-				label: 'Downloads',
-				title: 'Downloading',
+			torrents: {
+				label: 'Torrents',
+				title: 'Torrent client',
+				description: 'Choose how Mediary downloads torrents: its built-in client, your own qBittorrent, or none'
+			},
+			debrid: {
+				label: 'Debrid',
+				title: 'Debrid service',
 				description:
-					'Choose how Mediary downloads torrents: its built-in client, your own qBittorrent, or a debrid service'
+					'Optional. Connect your own TorBox, Real-Debrid, AllDebrid or Premiumize account to watch a release at once, without downloading it'
 			},
 			anilist: {
 				label: 'AniList',

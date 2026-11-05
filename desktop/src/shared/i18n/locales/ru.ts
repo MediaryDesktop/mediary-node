@@ -2212,11 +2212,16 @@ export const ru: Translation = {
 				description:
 					'Выберите, чем воспроизводить аниме, фильмы и сериалы. Прогресс отслеживается автоматически'
 			},
-			downloads: {
-				label: 'Загрузки',
-				title: 'Загрузка файлов',
+			torrents: {
+				label: 'Торренты',
+				title: 'Торрент-клиент',
+				description: 'Выберите, как Mediary загружает торренты: встроенным клиентом, своим qBittorrent или вовсе никак'
+			},
+			debrid: {
+				label: 'Debrid',
+				title: 'Debrid-сервис',
 				description:
-					'Выберите, как Mediary загружает торренты: встроенным клиентом, своим qBittorrent или debrid-сервисом'
+					'Необязательно. Подключите свой аккаунт TorBox, Real-Debrid, AllDebrid или Premiumize, чтобы смотреть релиз сразу, без загрузки'
 			},
 			anilist: {
 				label: 'AniList',

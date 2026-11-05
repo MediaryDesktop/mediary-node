@@ -1,8 +1,8 @@
-import { IoCloudOutline, IoLibraryOutline } from 'react-icons/io5'
+import { IoCloudDownloadOutline, IoCloudOutline, IoLibraryOutline } from 'react-icons/io5'
 
 import type { IconLike } from '@shared/ui'
 
-export type SetupStepId = 'anilist' | 'account' | 'library' | 'player' | 'downloads'
+export type SetupStepId = 'anilist' | 'account' | 'library' | 'player' | 'torrents' | 'debrid'
 
 export interface SetupStep {
 	id: SetupStepId
@@ -42,10 +42,17 @@ export const SETUP_STEPS: readonly SetupStep[] = [
 		descriptionKey: 'setup.steps.player.description'
 	},
 	{
-		id: 'downloads',
+		id: 'torrents',
 		icon: 'common/download',
-		labelKey: 'setup.steps.downloads.label',
-		titleKey: 'setup.steps.downloads.title',
-		descriptionKey: 'setup.steps.downloads.description'
+		labelKey: 'setup.steps.torrents.label',
+		titleKey: 'setup.steps.torrents.title',
+		descriptionKey: 'setup.steps.torrents.description'
+	},
+	{
+		id: 'debrid',
+		icon: <IoCloudDownloadOutline size={24} />,
+		labelKey: 'setup.steps.debrid.label',
+		titleKey: 'setup.steps.debrid.title',
+		descriptionKey: 'setup.steps.debrid.description'
 	}
 ]

@@ -2210,11 +2210,16 @@ export const uk: Translation = {
 				description:
 					'Оберіть, чим відтворювати аніме, фільми й серіали. Прогрес відстежується автоматично'
 			},
-			downloads: {
-				label: 'Завантаження',
-				title: 'Завантаження файлів',
+			torrents: {
+				label: 'Торенти',
+				title: 'Торент-клієнт',
+				description: 'Оберіть, як Mediary завантажує торенти: вбудованим клієнтом, своїм qBittorrent чи зовсім ні'
+			},
+			debrid: {
+				label: 'Debrid',
+				title: 'Debrid-сервіс',
 				description:
-					'Оберіть, як Mediary завантажує торенти: вбудованим клієнтом, своїм qBittorrent чи debrid-сервісом'
+					'Необовʼязково. Підключіть свій акаунт TorBox, Real-Debrid, AllDebrid чи Premiumize, щоб дивитися реліз одразу, без завантаження'
 			},
 			anilist: {
 				label: 'AniList',

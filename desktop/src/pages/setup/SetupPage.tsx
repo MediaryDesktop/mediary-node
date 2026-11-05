@@ -99,7 +99,6 @@ export function SetupPage({ initialStep }: SetupPageProps) {
 			backDisabled={index === 0}
 			nextDisabled={needsAniList}
 			nextLabel={isLast ? t('setup.finish') : undefined}
-			caption={t('setup.progress', { current: index + 1, total: SETUP_STEPS.length })}
 		>
 			<section className={clsx(styles.panel, SLIDE_CONTENT_CLASS)}>
 				<header className={styles.header}>
@@ -120,16 +119,8 @@ export function SetupPage({ initialStep }: SetupPageProps) {
 					)}
 					{step.id === 'library' && <SetupLibraryStep />}
 					{step.id === 'player' && <SetupPlayerStep />}
-					{step.id === 'downloads' && (
-						<SetupDownloadingStep
-							content={
-								<>
-									<TorrentClientSettings />
-									<DebridServiceSettings />
-								</>
-							}
-						/>
-					)}
+					{step.id === 'torrents' && <SetupDownloadingStep content={<TorrentClientSettings />} />}
+					{step.id === 'debrid' && <SetupDownloadingStep content={<DebridServiceSettings />} />}
 				</div>
 			</section>
 		</SetupLayout>
