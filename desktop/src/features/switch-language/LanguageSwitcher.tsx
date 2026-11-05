@@ -12,6 +12,7 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
 
 	return (
 		<SegmentedControl
+			size='large'
 			items={LANGUAGES.map(language => ({
 				value: language,
 				label: language.toUpperCase(),

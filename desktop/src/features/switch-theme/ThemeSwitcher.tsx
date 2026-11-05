@@ -17,6 +17,7 @@ export function ThemeSwitcher({ className }: ThemeSwitcherProps) {
 
 	return (
 		<SegmentedControl
+			size='large'
 			items={THEMES.map(option => ({
 				value: option,
 				label: <Icon name={ICONS[option]} size={16} />,

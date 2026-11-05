@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
-import { Button, Icon, Input, ProgressBar, SelectDropdown, SelectionGroup, toast } from '@shared/ui'
+import { Badge, Button, Icon, Input, ProgressBar, SelectDropdown, toast } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
 
@@ -13,6 +13,7 @@ import { aiSettingsQuery, setAISettingsMutation } from '@entities/media'
 import type { AIProvider, SetAISettingsParams, AISettings as Settings } from '@entities/media'
 
 import styles from './AISettings.module.scss'
+import { ProviderOption } from './provider-option/ProviderOption'
 
 const PROVIDERS: readonly AIProvider[] = ['cloud', 'claude', 'gemini', 'openai']
 
@@ -66,17 +67,22 @@ export function AISettings() {
 
 	return (
 		<div className={styles.root}>
-			<SelectionGroup
-				label={t('ai.providerLabel')}
-				options={PROVIDERS.map(provider => ({
-					value: provider,
-					label: t(`ai.providers.${provider}`)
-				}))}
-				value={settings.provider}
-				onValueChange={provider => save({ provider })}
-				disabled={saving}
-				stretch
-			/>
+			<div role='radiogroup' aria-label={t('ai.providerLabel')} className={styles.providerGrid}>
+				{PROVIDERS.map(provider => (
+					<ProviderOption
+						key={provider}
+						label={t(`ai.providers.${provider}`)}
+						selected={settings.provider === provider}
+						disabled={saving}
+						onSelect={() => save({ provider })}
+						badge={
+							provider === 'cloud' ? (
+								<Badge size='sm'>{t('ai.free')}</Badge>
+							) : undefined
+						}
+					/>
+				))}
+			</div>
 
 			{settings.provider === 'cloud' && <CloudPanel settings={settings} />}
 
@@ -180,10 +186,6 @@ function KeyPanel({ provider, settings, saving, save }: KeyPanelProps) {
 
 	return (
 		<div className={styles.panel}>
-			<p className={styles.state}>
-				{settings.configured ? t('ai.key.configured') : t('ai.key.missing', { provider: name })}
-			</p>
-
 			<form
 				className={styles.form}
 				onSubmit={event => {
@@ -193,7 +195,16 @@ function KeyPanel({ provider, settings, saving, save }: KeyPanelProps) {
 					}
 				}}
 			>
+				<SelectDropdown
+					className={styles.modelField}
+					value={settings.model}
+					onChange={model => model && save({ [provider]: { model } })}
+					options={(settings.models ?? []).map(model => ({ value: model, label: model }))}
+					disabled={saving}
+				/>
+
 				<Input
+					className={styles.keyInput}
 					type='password'
 					value={key}
 					onChange={event => setKey(event.target.value)}
@@ -205,16 +216,6 @@ function KeyPanel({ provider, settings, saving, save }: KeyPanelProps) {
 					{t('ai.key.save')}
 				</Button>
 			</form>
-
-			<label className={styles.field}>
-				<span className={styles.label}>{t('ai.model')}</span>
-				<SelectDropdown
-					value={settings.model}
-					onChange={model => model && save({ [provider]: { model } })}
-					options={(settings.models ?? []).map(model => ({ value: model, label: model }))}
-					disabled={saving}
-				/>
-			</label>
 
 			<div className={styles.actions}>
 				<Button
@@ -275,12 +276,6 @@ function OpenAIPanel({ settings, saving, save }: OpenAIPanelProps) {
 				})
 			}}
 		>
-			<p className={styles.state}>
-				{settings.configured
-					? t('ai.openai.configured', { endpoint: settings.endpoint })
-					: t('ai.openai.missing')}
-			</p>
-
 			<div className={styles.presets}>
 				{ENDPOINT_PRESETS.map(preset => (
 					<button
@@ -296,18 +291,18 @@ function OpenAIPanel({ settings, saving, save }: OpenAIPanelProps) {
 				))}
 			</div>
 
-			<label className={styles.field}>
-				<span className={styles.label}>{t('ai.openai.endpoint')}</span>
-				<Input
-					value={endpoint}
-					onChange={event => setEndpoint(event.target.value)}
-					placeholder='https://api.openai.com/v1'
-					autoComplete='off'
-					disabled={saving}
-				/>
-			</label>
-
 			<div className={styles.row}>
+				<label className={styles.field}>
+					<span className={styles.label}>{t('ai.openai.endpoint')}</span>
+					<Input
+						value={endpoint}
+						onChange={event => setEndpoint(event.target.value)}
+						placeholder='https://api.openai.com/v1'
+						autoComplete='off'
+						disabled={saving}
+					/>
+				</label>
+
 				<label className={styles.field}>
 					<span className={styles.label}>{t('ai.model')}</span>
 					<Input
@@ -318,7 +313,9 @@ function OpenAIPanel({ settings, saving, save }: OpenAIPanelProps) {
 						disabled={saving}
 					/>
 				</label>
+			</div>
 
+			<div className={styles.keyRow}>
 				<label className={styles.field}>
 					<span className={styles.label}>
 						{settings.has_key ? t('ai.openai.keySaved') : t('ai.openai.key')}
@@ -332,9 +329,7 @@ function OpenAIPanel({ settings, saving, save }: OpenAIPanelProps) {
 						disabled={saving}
 					/>
 				</label>
-			</div>
 
-			<div className={styles.actions}>
 				<Button type='submit' disabled={!dirty || saving} loading={saving}>
 					{t('ai.key.save')}
 				</Button>

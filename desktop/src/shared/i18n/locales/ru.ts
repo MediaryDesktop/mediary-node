@@ -1828,6 +1828,7 @@ export const ru: Translation = {
 	},
 	ai: {
 		providerLabel: 'ИИ, который заполняет тайтлы',
+		free: 'Бесплатно',
 		providers: {
 			cloud: 'Mediary AI',
 			claude: 'Claude',
@@ -1854,9 +1855,6 @@ export const ru: Translation = {
 			remove: 'Убрать ключ'
 		},
 		openai: {
-			configured: 'Запросы идут на {{endpoint}}.',
-			missing:
-				'Добавьте адрес и модель любого OpenAI-совместимого сервера: OpenAI, OpenRouter, или Ollama и LM Studio на этом компьютере.',
 			endpoint: 'Адрес',
 			modelPlaceholder: 'gpt-4.1-mini, llama3.1…',
 			key: 'API-ключ',

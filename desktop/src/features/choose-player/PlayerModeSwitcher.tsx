@@ -11,6 +11,7 @@ export function PlayerModeSwitcher() {
 
 	return (
 		<SegmentedControl
+			size='large'
 			items={PLAYER_MODES.map(value => ({ value, label: t(`settings.player.modes.${value}`) }))}
 			value={mode}
 			onValueChange={change}

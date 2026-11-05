@@ -1827,6 +1827,7 @@ export const uk: Translation = {
 	},
 	ai: {
 		providerLabel: 'ШІ, що заповнює тайтли',
+		free: 'Безкоштовно',
 		providers: {
 			cloud: 'Mediary AI',
 			claude: 'Claude',
@@ -1853,9 +1854,6 @@ export const uk: Translation = {
 			remove: 'Прибрати ключ'
 		},
 		openai: {
-			configured: 'Запити йдуть на {{endpoint}}.',
-			missing:
-				'Додайте адресу й модель будь-якого OpenAI-сумісного сервера: OpenAI, OpenRouter, або Ollama й LM Studio на цьому компʼютері.',
 			endpoint: 'Адреса',
 			modelPlaceholder: 'gpt-4.1-mini, llama3.1…',
 			key: 'API-ключ',

@@ -1824,6 +1824,7 @@ export const en = {
 	},
 	ai: {
 		providerLabel: 'The AI that fills in titles',
+		free: 'Free',
 		providers: {
 			cloud: 'Mediary AI',
 			claude: 'Claude',
@@ -1850,9 +1851,6 @@ export const en = {
 			remove: 'Remove the key'
 		},
 		openai: {
-			configured: 'Requests go to {{endpoint}}.',
-			missing:
-				'Add the address and the model of any OpenAI-compatible server: OpenAI, OpenRouter, or Ollama and LM Studio on this computer.',
 			endpoint: 'Address',
 			modelPlaceholder: 'gpt-4.1-mini, llama3.1…',
 			key: 'API key',

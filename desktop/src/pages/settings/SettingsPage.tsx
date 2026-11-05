@@ -92,29 +92,37 @@ function SectionContent({ section }: { section: SectionInfo }) {
 	switch (section.id) {
 		case 'app':
 			return (
-				<Card>
-					<Row name={t('settings.appearance.name')} hint={t('settings.appearance.hint')}>
-						<ThemeSwitcher />
-					</Row>
-					<Row name={t('settings.language.name')} hint={t('settings.language.hint')}>
-						<LanguageSwitcher />
-					</Row>
-					<Row name={t('settings.wizard.name')} hint={t('settings.wizard.hint')}>
-						<Link to='/setup' className={styles.link}>
-							{t('settings.wizard.action')}
-						</Link>
-					</Row>
-					<Row name={t('settings.node.name')} hint={t('settings.node.hint')}>
-						<NodeVersion />
-					</Row>
-					<Row name={t('settings.ai.name')} hint={t('settings.ai.hint')} block>
-						<AISettings />
-					</Row>
-					<Row name={t('settings.player.name')} hint={t('settings.player.hint')}>
-						<PlayerModeSwitcher />
-					</Row>
-					<MissingPlayerNotice className={styles.cardNotice} />
-				</Card>
+				<>
+					<Card>
+						<Row name={t('settings.appearance.name')} hint={t('settings.appearance.hint')}>
+							<ThemeSwitcher />
+						</Row>
+						<Row name={t('settings.language.name')} hint={t('settings.language.hint')}>
+							<LanguageSwitcher />
+						</Row>
+						<Row name={t('settings.player.name')} hint={t('settings.player.hint')}>
+							<PlayerModeSwitcher />
+						</Row>
+						<MissingPlayerNotice className={styles.cardNotice} />
+					</Card>
+
+					<Card>
+						<Row name={t('settings.ai.name')} hint={t('settings.ai.hint')} block>
+							<AISettings />
+						</Row>
+					</Card>
+
+					<Card>
+						<Row name={t('settings.wizard.name')} hint={t('settings.wizard.hint')}>
+							<Link to='/setup' className={styles.link}>
+								{t('settings.wizard.action')}
+							</Link>
+						</Row>
+						<Row name={t('settings.node.name')} hint={t('settings.node.hint')}>
+							<NodeVersion />
+						</Row>
+					</Card>
+				</>
 			)
 		case 'account':
 			return (
