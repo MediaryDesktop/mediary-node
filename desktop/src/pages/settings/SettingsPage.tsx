@@ -4,7 +4,7 @@ import { useUnit } from 'effector-react'
 import type { ReactNode } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { PageTransition, renderIcon, RippleButton } from '@shared/ui'
+import { PageTransition, PhaseTransition, renderIcon, RippleButton } from '@shared/ui'
 
 import { nodeHealthQuery } from '@infra/node'
 
@@ -70,17 +70,21 @@ export function SettingsPage({ section }: SettingsPageProps) {
 			</nav>
 
 			<section className={styles.panel}>
-				<header className={styles.header}>
-					<span className={styles.headerIcon}>{renderIcon(current.icon, 24)}</span>
-					<div>
-						<h2 className={styles.headerTitle}>{t(`settings.sections.${current.key}.title`)}</h2>
-						<p className={styles.headerSubtitle}>
-							{t(`settings.sections.${current.key}.subtitle`)}
-						</p>
-					</div>
-				</header>
+				<PhaseTransition phase={current.id} className={styles.sectionContent}>
+					<header className={styles.header}>
+						<span className={styles.headerIcon}>{renderIcon(current.icon, 24)}</span>
+						<div>
+							<h2 className={styles.headerTitle}>
+								{t(`settings.sections.${current.key}.title`)}
+							</h2>
+							<p className={styles.headerSubtitle}>
+								{t(`settings.sections.${current.key}.subtitle`)}
+							</p>
+						</div>
+					</header>
 
-				<SectionContent section={current} />
+					<SectionContent section={current} />
+				</PhaseTransition>
 			</section>
 		</PageTransition>
 	)

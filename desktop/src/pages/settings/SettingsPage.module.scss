@@ -109,6 +109,14 @@
 			}
 		}
 
+		// The PhaseTransition wrapper around SectionContent's output: its own flex
+		// column, since it's now the direct child carrying .panel's card-to-card gap.
+		.sectionContent {
+			display: flex;
+			flex-direction: column;
+			gap: 1.5rem;
+		}
+
 		// SectionContent() returns a .card of .row's — a local component called
 		// from here, kept at this level so one set of rules reaches it.
 		.card {
