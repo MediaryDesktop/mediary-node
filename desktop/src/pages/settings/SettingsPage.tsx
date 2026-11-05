@@ -126,13 +126,7 @@ function SectionContent({ section }: { section: SectionInfo }) {
 		case 'backup':
 			return <BackupSettings />
 		case 'devices':
-			return (
-				<Card>
-					<Row name={t('settings.devices.name')} hint={t('settings.devices.hint')} block>
-						<DevicesSettings />
-					</Row>
-				</Card>
-			)
+			return <DevicesSettings />
 		case 'library':
 			return <LibraryRootsSettings />
 		case 'metadata':

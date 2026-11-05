@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import { cloneElement } from 'react'
 import type { ReactElement, SVGProps } from 'react'
 
 import { sprites } from './sprite.gen'
@@ -20,7 +21,11 @@ export type IconLike = IconName | ReactElement
 // Resolves an IconLike wherever a caller takes one as data (a menu item, a step,
 // a settings section) rather than rendering it directly.
 export function renderIcon(icon: IconLike, size?: number) {
-	return typeof icon === 'string' ? <Icon name={icon} size={size} /> : icon
+	if (typeof icon === 'string') {
+		return <Icon name={icon} size={size} />
+	}
+
+	return size === undefined ? icon : cloneElement(icon, { size } as object)
 }
 
 export function Icon({ name, size = 20, className, ...props }: IconProps) {
