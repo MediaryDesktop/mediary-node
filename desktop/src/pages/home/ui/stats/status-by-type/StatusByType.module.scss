@@ -1,103 +1,103 @@
 .scroll {
 	overflow-x: auto;
-}
 
-.table {
-	display: grid;
-	grid-template-columns: minmax(3.75rem, auto) repeat(6, minmax(2.125rem, 1fr)) minmax(1.75rem, auto);
-	min-width: 20rem;
-	column-gap: 0.375rem;
-	row-gap: 0.5rem;
-	align-items: center;
-
-	.row {
-		display: contents;
-	}
-
-	.statusHead {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 0.25rem;
-		color: var(--text-muted);
-		font-size: 0.625rem;
-		line-height: 1.15;
-		text-align: center;
-	}
-
-	.dot {
-		width: 0.5rem;
-		height: 0.5rem;
-		border-radius: 2px;
-	}
-
-	.totalHead {
-		color: var(--text-muted);
-		font-size: 0.625rem;
-		text-align: right;
-		padding-right: 0.125rem;
-	}
-
-	.typeLabel {
-		color: var(--text);
-		font-weight: 650;
-		font-size: 0.8125rem;
-	}
-
-	.cell,
-	.cellEmpty {
+	.table {
 		display: grid;
-		place-items: center;
-		height: 1.875rem;
-		border-radius: 0.4375rem;
-		font-size: 0.8125rem;
-		font-weight: 700;
-		font-variant-numeric: tabular-nums;
-	}
+		grid-template-columns: minmax(3.75rem, auto) repeat(6, minmax(2.125rem, 1fr)) minmax(1.75rem, auto);
+		min-width: 20rem;
+		column-gap: 0.375rem;
+		row-gap: 0.5rem;
+		align-items: center;
 
-	.cellEmpty {
-		background: var(--surface-hover);
-		color: var(--text-muted);
-		font-weight: 500;
-	}
+		.row {
+			display: contents;
 
-	.rowTotal {
-		color: var(--text);
-		font-weight: 700;
-		font-size: 0.8125rem;
-		text-align: right;
-		padding-right: 0.125rem;
-		font-variant-numeric: tabular-nums;
-	}
+			.statusHead {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 0.25rem;
+				color: var(--text-muted);
+				font-size: 0.625rem;
+				line-height: 1.15;
+				text-align: center;
 
-	.footerRow {
-		display: contents;
+				.dot {
+					width: 0.5rem;
+					height: 0.5rem;
+					border-radius: 2px;
+				}
+			}
 
-		> * {
-			margin-top: 0.25rem;
-			padding-top: 0.5rem;
-			border-top: 1px solid var(--border);
+			.totalHead {
+				color: var(--text-muted);
+				font-size: 0.625rem;
+				text-align: right;
+				padding-right: 0.125rem;
+			}
+
+			.typeLabel {
+				color: var(--text);
+				font-weight: 650;
+				font-size: 0.8125rem;
+			}
+
+			.cell,
+			.cellEmpty {
+				display: grid;
+				place-items: center;
+				height: 1.875rem;
+				border-radius: 0.4375rem;
+				font-size: 0.8125rem;
+				font-weight: 700;
+				font-variant-numeric: tabular-nums;
+			}
+
+			.cellEmpty {
+				background: var(--surface-hover);
+				color: var(--text-muted);
+				font-weight: 500;
+			}
+
+			.rowTotal {
+				color: var(--text);
+				font-weight: 700;
+				font-size: 0.8125rem;
+				text-align: right;
+				padding-right: 0.125rem;
+				font-variant-numeric: tabular-nums;
+			}
 		}
-	}
 
-	.allLabel {
-		color: var(--text-muted);
-		font-size: 0.8125rem;
-	}
+		.footerRow {
+			display: contents;
 
-	.footerCell {
-		text-align: center;
-		font-size: 0.8125rem;
-		font-weight: 700;
-		font-variant-numeric: tabular-nums;
-	}
+			> * {
+				margin-top: 0.25rem;
+				padding-top: 0.5rem;
+				border-top: 1px solid var(--border);
+			}
 
-	.grandTotal {
-		color: var(--tile-accent, var(--accent));
-		font-weight: 800;
-		font-size: 0.8125rem;
-		text-align: right;
-		padding-right: 0.125rem;
-		font-variant-numeric: tabular-nums;
+			.allLabel {
+				color: var(--text-muted);
+				font-size: 0.8125rem;
+			}
+
+			.footerCell {
+				text-align: center;
+				font-size: 0.8125rem;
+				font-weight: 700;
+				font-variant-numeric: tabular-nums;
+			}
+
+			.grandTotal {
+				color: var(--tile-accent, var(--accent));
+				font-weight: 800;
+				font-size: 0.8125rem;
+				text-align: right;
+				padding-right: 0.125rem;
+				font-variant-numeric: tabular-nums;
+			}
+		}
 	}
 }

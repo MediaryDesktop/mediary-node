@@ -12,11 +12,11 @@
 	&.selected {
 		border-color: var(--text);
 	}
-}
 
-.dot {
-	width: 0.625rem;
-	height: 0.625rem;
-	border-radius: 50%;
-	background: var(--text);
+	.dot {
+		width: 0.625rem;
+		height: 0.625rem;
+		border-radius: 50%;
+		background: var(--text);
+	}
 }

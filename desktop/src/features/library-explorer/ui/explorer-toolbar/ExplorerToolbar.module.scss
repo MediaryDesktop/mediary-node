@@ -30,17 +30,15 @@
 
 	.pulse {
 		animation: pulse 2s ease-in-out infinite;
+
+		@media (prefers-reduced-motion: reduce) {
+			animation: none;
+		}
 	}
 }
 
 @keyframes pulse {
 	50% {
 		opacity: 0.6;
-	}
-}
-
-@media (prefers-reduced-motion: reduce) {
-	.toolbar .pulse {
-		animation: none;
 	}
 }

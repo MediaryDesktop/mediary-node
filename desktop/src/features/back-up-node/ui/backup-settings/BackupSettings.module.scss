@@ -7,186 +7,186 @@
 	border: 1px solid var(--border);
 	border-radius: var(--radius-lg);
 	background: var(--surface);
-}
 
-.header {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	justify-content: space-between;
-	gap: 0.75rem;
-}
+	.header {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
 
-.headerText {
-	display: flex;
-	flex-direction: column;
-	gap: 0.25rem;
-	min-width: 0;
-}
+		.headerText {
+			display: flex;
+			flex-direction: column;
+			gap: 0.25rem;
+			min-width: 0;
 
-.title {
-	margin: 0;
-	font-size: 1.0625rem;
-	font-weight: 600;
-	color: var(--text);
-}
+			.title {
+				margin: 0;
+				font-size: 1.0625rem;
+				font-weight: 600;
+				color: var(--text);
+			}
 
-.hint {
-	margin: 0;
-	font-size: 0.875rem;
-	line-height: 1.25rem;
-	color: var(--text-secondary);
-}
-
-.note {
-	margin: 0;
-	font-size: 0.875rem;
-	line-height: 1.3125rem;
-	color: var(--text-secondary);
-}
-
-.error {
-	margin: 0;
-	font-size: 0.8125rem;
-	line-height: 1.3125rem;
-	color: var(--danger-text);
-}
-
-.actions {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	gap: 0.5rem;
-}
-
-.banner {
-	display: flex;
-	align-items: flex-start;
-	gap: 0.75rem;
-	margin: 0;
-	padding: 0.875rem 1rem;
-	border: 1px solid var(--border);
-	border-radius: var(--radius);
-	background: transparent;
-	color: var(--text-secondary);
-	font-size: 0.8125rem;
-	line-height: 1.125rem;
-
-	svg {
-		flex-shrink: 0;
+			.hint {
+				margin: 0;
+				font-size: 0.875rem;
+				line-height: 1.25rem;
+				color: var(--text-secondary);
+			}
+		}
 	}
-}
 
-.lastBackup {
-	display: flex;
-	align-items: center;
-	gap: 0.875rem;
-	padding: 0.875rem 1rem;
-	border: 1px solid var(--border);
-	border-radius: var(--radius);
-	background: transparent;
-}
+	.note {
+		margin: 0;
+		font-size: 0.875rem;
+		line-height: 1.3125rem;
+		color: var(--text-secondary);
+	}
 
-.badge {
-	display: flex;
-	flex: none;
-	align-items: center;
-	justify-content: center;
-	width: 2.5rem;
-	height: 2.5rem;
-	border-radius: var(--radius-md);
-	background: var(--surface-hover);
-	color: var(--text-secondary);
-}
+	.error {
+		margin: 0;
+		font-size: 0.8125rem;
+		line-height: 1.3125rem;
+		color: var(--danger-text);
+	}
 
-.lastBackupBody {
-	display: flex;
-	flex: 1;
-	flex-direction: column;
-	min-width: 0;
-	gap: 0.125rem;
-}
+	.actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5rem;
+	}
 
-.lastBackupTitle {
-	font-size: 0.9375rem;
-	font-weight: 600;
-	line-height: 1.25rem;
-	color: var(--text);
-}
+	.banner {
+		display: flex;
+		align-items: flex-start;
+		gap: 0.75rem;
+		margin: 0;
+		padding: 0.875rem 1rem;
+		border: 1px solid var(--border);
+		border-radius: var(--radius);
+		background: transparent;
+		color: var(--text-secondary);
+		font-size: 0.8125rem;
+		line-height: 1.125rem;
 
-.lastBackupWhen {
-	font-size: 0.8125rem;
-	line-height: 1.125rem;
-	color: var(--text-secondary);
-}
+		svg {
+			flex-shrink: 0;
+		}
+	}
 
-.listSection {
-	display: flex;
-	flex-direction: column;
-	gap: 0.5rem;
-}
+	.lastBackup {
+		display: flex;
+		align-items: center;
+		gap: 0.875rem;
+		padding: 0.875rem 1rem;
+		border: 1px solid var(--border);
+		border-radius: var(--radius);
+		background: transparent;
 
-.listLabel {
-	padding: 0 0.25rem;
-	color: var(--text-secondary);
-	font-size: 0.75rem;
-	font-weight: 600;
-	line-height: 1rem;
-	letter-spacing: 0.04em;
-	text-transform: uppercase;
-}
+		.badge {
+			display: flex;
+			flex: none;
+			align-items: center;
+			justify-content: center;
+			width: 2.5rem;
+			height: 2.5rem;
+			border-radius: var(--radius-md);
+			background: var(--surface-hover);
+			color: var(--text-secondary);
+		}
 
-.list {
-	display: flex;
-	flex-direction: column;
-	gap: 0.5rem;
-	margin: 0;
-	padding: 0;
-	list-style: none;
-}
+		.lastBackupBody {
+			display: flex;
+			flex: 1;
+			flex-direction: column;
+			min-width: 0;
+			gap: 0.125rem;
 
-.item {
-	display: flex;
-	align-items: center;
-	gap: 0.875rem;
-	padding: 0.875rem 1rem;
-	border: 1px solid var(--border);
-	border-radius: var(--radius);
-	background: transparent;
-}
+			.lastBackupTitle {
+				font-size: 0.9375rem;
+				font-weight: 600;
+				line-height: 1.25rem;
+				color: var(--text);
+			}
 
-.details {
-	display: flex;
-	flex: 1;
-	flex-direction: column;
-	min-width: 0;
-	gap: 0.25rem;
-}
+			.lastBackupWhen {
+				font-size: 0.8125rem;
+				line-height: 1.125rem;
+				color: var(--text-secondary);
+			}
+		}
+	}
 
-.when {
-	font-size: 0.9375rem;
-	font-weight: 600;
-	line-height: 1.25rem;
-	color: var(--text);
-}
+	.listSection {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
 
-.meta {
-	overflow: hidden;
-	color: var(--text-secondary);
-	font-size: 0.8125rem;
-	line-height: 1.125rem;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-}
+		.listLabel {
+			padding: 0 0.25rem;
+			color: var(--text-secondary);
+			font-size: 0.75rem;
+			font-weight: 600;
+			line-height: 1rem;
+			letter-spacing: 0.04em;
+			text-transform: uppercase;
+		}
 
-.itemActions {
-	display: flex;
-	flex: none;
-	align-items: center;
-	gap: 0.375rem;
-}
+		.list {
+			display: flex;
+			flex-direction: column;
+			gap: 0.5rem;
+			margin: 0;
+			padding: 0;
+			list-style: none;
 
-.footer {
-	display: flex;
-	justify-content: flex-end;
+			.item {
+				display: flex;
+				align-items: center;
+				gap: 0.875rem;
+				padding: 0.875rem 1rem;
+				border: 1px solid var(--border);
+				border-radius: var(--radius);
+				background: transparent;
+
+				.details {
+					display: flex;
+					flex: 1;
+					flex-direction: column;
+					min-width: 0;
+					gap: 0.25rem;
+
+					.when {
+						font-size: 0.9375rem;
+						font-weight: 600;
+						line-height: 1.25rem;
+						color: var(--text);
+					}
+
+					.meta {
+						overflow: hidden;
+						color: var(--text-secondary);
+						font-size: 0.8125rem;
+						line-height: 1.125rem;
+						text-overflow: ellipsis;
+						white-space: nowrap;
+					}
+				}
+
+				.itemActions {
+					display: flex;
+					flex: none;
+					align-items: center;
+					gap: 0.375rem;
+				}
+			}
+		}
+	}
+
+	.footer {
+		display: flex;
+		justify-content: flex-end;
+	}
 }

@@ -46,14 +46,14 @@
 		display: flex;
 		gap: 0.75rem;
 		margin-top: 0.5rem;
-	}
 
-	.link {
-		color: var(--accent-text);
-		text-decoration: none;
+		.link {
+			color: var(--accent-text);
+			text-decoration: none;
 
-		&:hover {
-			text-decoration: underline;
+			&:hover {
+				text-decoration: underline;
+			}
 		}
 	}
 }

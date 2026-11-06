@@ -36,6 +36,14 @@
 			font-weight: 600;
 		}
 
+		.logs {
+			display: flex;
+			flex-direction: column;
+			border: 1px solid var(--border);
+			border-radius: var(--radius);
+			overflow: hidden;
+		}
+
 		.groups {
 			display: flex;
 			flex-direction: column;
@@ -119,18 +127,10 @@
 			}
 		}
 	}
-}
 
-.muted {
-	margin: 0;
-	color: var(--text-muted);
-	font-size: 0.875rem;
-}
-
-.logs {
-	display: flex;
-	flex-direction: column;
-	border: 1px solid var(--border);
-	border-radius: var(--radius);
-	overflow: hidden;
+	.muted {
+		margin: 0;
+		color: var(--text-muted);
+		font-size: 0.875rem;
+	}
 }

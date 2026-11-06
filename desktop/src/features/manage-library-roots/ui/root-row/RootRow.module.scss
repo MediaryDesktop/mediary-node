@@ -6,48 +6,48 @@
 	border: 1px solid var(--border);
 	border-radius: var(--radius);
 	background: transparent;
-}
 
-.badge {
-	display: flex;
-	flex: none;
-	align-items: center;
-	justify-content: center;
-	width: 2.8rem;
-	height: 2.8rem;
-	border-radius: var(--radius-md);
-	background: var(--surface-hover);
-	color: var(--text-secondary);
-}
+	.badge {
+		display: flex;
+		flex: none;
+		align-items: center;
+		justify-content: center;
+		width: 2.8rem;
+		height: 2.8rem;
+		border-radius: var(--radius-md);
+		background: var(--surface-hover);
+		color: var(--text-secondary);
+	}
 
-.body {
-	display: flex;
-	flex: 1;
-	flex-direction: column;
-	min-width: 0;
-	gap: 0.25rem;
-}
+	.body {
+		display: flex;
+		flex: 1;
+		flex-direction: column;
+		min-width: 0;
+		gap: 0.25rem;
 
-.path {
-	overflow: hidden;
-	font-size: 0.9375rem;
-	font-weight: 600;
-	line-height: 1.25rem;
-	color: var(--text);
-	text-overflow: ellipsis;
-	white-space: nowrap;
-}
+		.path {
+			overflow: hidden;
+			font-size: 0.9375rem;
+			font-weight: 600;
+			line-height: 1.25rem;
+			color: var(--text);
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
 
-.meta {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	margin-top: 0.25rem; ;
-	gap: 0.5rem;
-}
+		.meta {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			margin-top: 0.25rem; ;
+			gap: 0.5rem;
 
-.count {
-	font-size: 0.8125rem;
-	line-height: 1.125rem;
-	color: var(--text-secondary);
+			.count {
+				font-size: 0.8125rem;
+				line-height: 1.125rem;
+				color: var(--text-secondary);
+			}
+		}
+	}
 }

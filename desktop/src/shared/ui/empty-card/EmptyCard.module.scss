@@ -7,30 +7,30 @@
 	border: 1px dashed var(--border-strong);
 	border-radius: var(--radius-lg);
 	text-align: center;
-}
 
-.badge {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 3.5rem;
-	height: 3.5rem;
-	border-radius: var(--radius-lg);
-	background: var(--field);
-	color: var(--text-secondary);
-}
+	.badge {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 3.5rem;
+		height: 3.5rem;
+		border-radius: var(--radius-lg);
+		background: var(--field);
+		color: var(--text-secondary);
+	}
 
-.title {
-	margin: 0;
-	font-size: 0.9375rem;
-	font-weight: 600;
-	color: var(--text);
-}
+	.title {
+		margin: 0;
+		font-size: 0.9375rem;
+		font-weight: 600;
+		color: var(--text);
+	}
 
-.description {
-	margin: 0;
-	max-width: 24rem;
-	font-size: 0.8125rem;
-	line-height: 1.25rem;
-	color: var(--text-secondary);
+	.description {
+		margin: 0;
+		max-width: 24rem;
+		font-size: 0.8125rem;
+		line-height: 1.25rem;
+		color: var(--text-secondary);
+	}
 }

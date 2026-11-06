@@ -6,137 +6,137 @@
 	border-radius: var(--radius-lg);
 	background: var(--surface);
 	box-shadow: var(--shadow-sm);
-}
 
-.title {
-	display: flex;
-	align-items: center;
-	gap: 0.375rem;
-	margin: 0;
-	font-size: 0.9375rem;
-	font-weight: 700;
-	line-height: 1.25rem;
-}
+	.title {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+		margin: 0;
+		font-size: 0.9375rem;
+		font-weight: 700;
+		line-height: 1.25rem;
 
-.infoDot {
-	display: inline-flex;
-	color: var(--text-muted);
-	cursor: help;
-}
-
-.summary {
-	display: flex;
-	align-items: center;
-	gap: 1rem;
-}
-
-.ring {
-	position: relative;
-	flex: none;
-	width: 4.25rem;
-	height: 4.25rem;
-
-	svg {
-		display: block;
-		width: 100%;
-		height: 100%;
-		transform: rotate(-90deg);
+		.infoDot {
+			display: inline-flex;
+			color: var(--text-muted);
+			cursor: help;
+		}
 	}
 
-	.track {
-		fill: none;
-		stroke: var(--field);
-		stroke-width: 9;
+	.summary {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+
+		.ring {
+			position: relative;
+			flex: none;
+			width: 4.25rem;
+			height: 4.25rem;
+
+			svg {
+				display: block;
+				width: 100%;
+				height: 100%;
+				transform: rotate(-90deg);
+			}
+
+			.track {
+				fill: none;
+				stroke: var(--field);
+				stroke-width: 9;
+			}
+
+			.progress {
+				fill: none;
+				stroke: var(--accent);
+				stroke-width: 9;
+				stroke-linecap: round;
+				transition: stroke-dashoffset 400ms ease;
+			}
+
+			.ringLabel {
+				position: absolute;
+				inset: 0;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 0.8125rem;
+				font-weight: 700;
+				font-variant-numeric: tabular-nums;
+			}
+		}
+
+		.summaryText {
+			display: flex;
+			flex-direction: column;
+			gap: 0.25rem;
+			min-width: 0;
+
+			.count {
+				font-size: 1.5rem;
+				font-weight: 800;
+				line-height: 1;
+				font-variant-numeric: tabular-nums;
+
+				.total {
+					color: var(--text-muted);
+					font-size: 1rem;
+					font-weight: 600;
+				}
+			}
+
+			.caption {
+				color: var(--text-secondary);
+				font-size: 0.8125rem;
+			}
+		}
 	}
 
-	.progress {
-		fill: none;
-		stroke: var(--accent);
-		stroke-width: 9;
-		stroke-linecap: round;
-		transition: stroke-dashoffset 400ms ease;
-	}
-}
+	.breakdown {
+		display: flex;
+		flex-direction: column;
+		gap: 0.625rem;
+		margin: 0;
+		padding: 1rem 0 0;
+		border-top: 1px solid var(--border);
+		list-style: none;
 
-.ringLabel {
-	position: absolute;
-	inset: 0;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-size: 0.8125rem;
-	font-weight: 700;
-	font-variant-numeric: tabular-nums;
-}
+		.row {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			font-size: 0.8125rem;
 
-.summaryText {
-	display: flex;
-	flex-direction: column;
-	gap: 0.25rem;
-	min-width: 0;
-}
+			.rowLabel {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.625rem;
+				color: var(--text-secondary);
 
-.count {
-	font-size: 1.5rem;
-	font-weight: 800;
-	line-height: 1;
-	font-variant-numeric: tabular-nums;
-}
+				.dot {
+					width: 0.5rem;
+					height: 0.5rem;
+					border-radius: 50%;
 
-.total {
-	color: var(--text-muted);
-	font-size: 1rem;
-	font-weight: 600;
-}
+					&.required {
+						background: var(--accent);
+					}
 
-.caption {
-	color: var(--text-secondary);
-	font-size: 0.8125rem;
-}
+					&.recommended {
+						background: var(--info);
+					}
 
-.breakdown {
-	display: flex;
-	flex-direction: column;
-	gap: 0.625rem;
-	margin: 0;
-	padding: 1rem 0 0;
-	border-top: 1px solid var(--border);
-	list-style: none;
-}
+					&.additional {
+						background: var(--text-muted);
+					}
+				}
+			}
 
-.row {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	font-size: 0.8125rem;
-}
-
-.rowLabel {
-	display: inline-flex;
-	align-items: center;
-	gap: 0.625rem;
-	color: var(--text-secondary);
-}
-
-.rowCount {
-	font-weight: 700;
-	font-variant-numeric: tabular-nums;
-}
-
-.dot {
-	width: 0.5rem;
-	height: 0.5rem;
-	border-radius: 50%;
-
-	&.required {
-		background: var(--accent);
-	}
-
-	&.recommended {
-		background: var(--info);
-	}
-
-	&.additional {
-		background: var(--text-muted);
+			.rowCount {
+				font-weight: 700;
+				font-variant-numeric: tabular-nums;
+			}
+		}
 	}
 }

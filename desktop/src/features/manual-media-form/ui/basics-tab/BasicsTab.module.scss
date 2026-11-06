@@ -2,17 +2,17 @@
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
 	gap: 1.25rem 1rem;
-}
 
-.counter {
-	display: flex;
-	align-items: center;
-	height: var(--control-height);
-	padding: 0 0.25rem;
-	border-radius: var(--radius);
-	background: var(--field);
-}
+	.counter {
+		display: flex;
+		align-items: center;
+		height: var(--control-height);
+		padding: 0 0.25rem;
+		border-radius: var(--radius);
+		background: var(--field);
 
-.stepper {
-	flex: 1;
+		.stepper {
+			flex: 1;
+		}
+	}
 }

@@ -7,41 +7,41 @@
 	border: 1px solid var(--border);
 	border-radius: var(--radius-lg);
 	background: var(--surface);
-}
 
-.avatar {
-	display: flex;
-	flex: none;
-	align-items: center;
-	justify-content: center;
-	width: 2.5rem;
-	height: 2.5rem;
-	border-radius: 50%;
-	background: var(--field);
-	color: var(--text-secondary);
-}
+	.avatar {
+		display: flex;
+		flex: none;
+		align-items: center;
+		justify-content: center;
+		width: 2.5rem;
+		height: 2.5rem;
+		border-radius: 50%;
+		background: var(--field);
+		color: var(--text-secondary);
+	}
 
-.body {
-	display: flex;
-	flex: 1;
-	flex-direction: column;
-	min-width: 0;
-	gap: 0.125rem;
-}
+	.body {
+		display: flex;
+		flex: 1;
+		flex-direction: column;
+		min-width: 0;
+		gap: 0.125rem;
 
-.title {
-	margin: 0;
-	font-size: 1.0625rem;
-	font-weight: 600;
-	color: var(--text);
-}
+		.title {
+			margin: 0;
+			font-size: 1.0625rem;
+			font-weight: 600;
+			color: var(--text);
+		}
 
-.hint {
-	margin: 0;
-	overflow: hidden;
-	font-size: 0.875rem;
-	line-height: 1.25rem;
-	color: var(--text-secondary);
-	text-overflow: ellipsis;
-	white-space: nowrap;
+		.hint {
+			margin: 0;
+			overflow: hidden;
+			font-size: 0.875rem;
+			line-height: 1.25rem;
+			color: var(--text-secondary);
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+	}
 }

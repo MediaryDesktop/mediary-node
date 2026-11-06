@@ -7,24 +7,24 @@
 	border: 1px solid var(--border);
 	border-radius: var(--radius-lg);
 	background: var(--surface);
-}
 
-.header {
-	display: flex;
-	flex-direction: column;
-	gap: 0.25rem;
-}
+	.header {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
 
-.title {
-	margin: 0;
-	font-size: 1.0625rem;
-	font-weight: 600;
-	color: var(--text);
-}
+		.title {
+			margin: 0;
+			font-size: 1.0625rem;
+			font-weight: 600;
+			color: var(--text);
+		}
 
-.hint {
-	margin: 0;
-	font-size: 0.875rem;
-	line-height: 1.25rem;
-	color: var(--text-secondary);
+		.hint {
+			margin: 0;
+			font-size: 0.875rem;
+			line-height: 1.25rem;
+			color: var(--text-secondary);
+		}
+	}
 }

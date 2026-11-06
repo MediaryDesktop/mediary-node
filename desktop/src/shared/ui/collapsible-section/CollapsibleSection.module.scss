@@ -6,11 +6,11 @@
 	&.open {
 		grid-template-rows: 1fr;
 	}
-}
 
-.inner {
-	overflow: hidden;
-	min-height: 0;
+	.inner {
+		overflow: hidden;
+		min-height: 0;
+	}
 }
 
 @media (prefers-reduced-motion: reduce) {

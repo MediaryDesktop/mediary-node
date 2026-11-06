@@ -109,27 +109,27 @@
 				background: var(--accent-muted);
 			}
 		}
-	}
 
-	.tooltip {
-		position: absolute;
-		top: 50%;
-		left: calc(100% + 0.5rem);
-		z-index: 1;
-		padding: 0.375rem 0.625rem;
-		border: 1px solid var(--border);
-		border-radius: 8px;
-		background: var(--surface);
-		box-shadow: var(--shadow-md);
-		color: var(--text);
-		font-size: 0.8125rem;
-		white-space: nowrap;
-		opacity: 0;
-		visibility: hidden;
-		transform: translate(-0.25rem, -50%);
-		pointer-events: none;
-		transition:
-			opacity 140ms,
-			transform 140ms;
+		.tooltip {
+			position: absolute;
+			top: 50%;
+			left: calc(100% + 0.5rem);
+			z-index: 1;
+			padding: 0.375rem 0.625rem;
+			border: 1px solid var(--border);
+			border-radius: 8px;
+			background: var(--surface);
+			box-shadow: var(--shadow-md);
+			color: var(--text);
+			font-size: 0.8125rem;
+			white-space: nowrap;
+			opacity: 0;
+			visibility: hidden;
+			transform: translate(-0.25rem, -50%);
+			pointer-events: none;
+			transition:
+				opacity 140ms,
+				transform 140ms;
+		}
 	}
 }

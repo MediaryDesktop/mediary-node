@@ -28,13 +28,13 @@
 		border-color: var(--border-stronger);
 		background: var(--surface);
 	}
-}
 
-.label {
-	flex: 1;
-	min-width: 0;
-	font-size: 0.9375rem;
-	font-weight: 600;
-	line-height: 1.25rem;
-	color: var(--text);
+	.label {
+		flex: 1;
+		min-width: 0;
+		font-size: 0.9375rem;
+		font-weight: 600;
+		line-height: 1.25rem;
+		color: var(--text);
+	}
 }
