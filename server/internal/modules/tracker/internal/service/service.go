@@ -9,10 +9,10 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/tracker/internal/store"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/tracker/internal/store"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/events"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/anilist"
 )
 
 const backgroundRefreshTimeout = 2 * time.Minute

@@ -6,11 +6,11 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/rs/zerolog"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/handler"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/mpv"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/service"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/videofile"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/playback/internal/handler"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/playback/internal/mpv"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/playback/internal/service"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/playback/internal/videofile"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/events"
 )
 
 // The module's ports: playback plays files the library owns and reports progress to

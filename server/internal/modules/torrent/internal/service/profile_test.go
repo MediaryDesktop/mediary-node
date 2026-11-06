@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/release"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/torrent/internal/release"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 func candidate(title string, seeders int, match string) TorrentRelease {

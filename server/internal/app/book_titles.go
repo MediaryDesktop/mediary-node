@@ -6,9 +6,9 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/library"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/googlebooks"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/openlibrary"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/library"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/googlebooks"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/openlibrary"
 )
 
 var _ library.ISBNResolver = titleSource{}

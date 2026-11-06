@@ -18,8 +18,8 @@ import (
 
 	"github.com/bodgit/sevenzip"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/tools/internal/manifest"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/childenv"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/tools/internal/manifest"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/childenv"
 )
 
 const (

@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 // withDebrid makes TorBox and Real-Debrid available on the node, both backed by

@@ -12,9 +12,9 @@ import (
 
 	"golang.org/x/text/unicode/norm"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/source"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/opds"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/booksource/internal/source"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/opds"
 )
 
 const (

@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/qbittorrent"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/torrent/internal/qbittorrent"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 // A feed for a title the library has episodes 1 and 2 of.

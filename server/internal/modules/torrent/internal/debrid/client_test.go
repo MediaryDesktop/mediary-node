@@ -16,7 +16,7 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/qbittorrent"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/torrent/internal/qbittorrent"
 )
 
 const hash = "0123456789abcdef0123456789abcdef01234567"

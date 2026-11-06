@@ -8,8 +8,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/ai"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/ai"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 func newTestClient(t *testing.T, token string, handler http.HandlerFunc) *Client {

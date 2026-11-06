@@ -17,8 +17,8 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/tools/internal/manifest"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/tools/internal/manifest"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 // The test binary stands in for ffmpeg and ffprobe: asked for its version, it

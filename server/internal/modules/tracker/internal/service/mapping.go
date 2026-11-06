@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/anilist"
 )
 
 func accountFromViewer(viewer *anilist.Viewer) Account {

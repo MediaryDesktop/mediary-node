@@ -8,9 +8,9 @@ import (
 
 	"golang.org/x/mod/semver"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/extension/internal/repository"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/extension/internal/store"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/extension/internal/repository"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/extension/internal/store"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 const (

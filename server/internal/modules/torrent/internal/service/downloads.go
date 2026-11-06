@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/metainfo"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/qbittorrent"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/store"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/torrent/internal/metainfo"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/torrent/internal/qbittorrent"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/torrent/internal/store"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 // The most downloads one listing returns; older ones stay in the table.

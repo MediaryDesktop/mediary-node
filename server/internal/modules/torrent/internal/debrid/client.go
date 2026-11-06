@@ -22,8 +22,8 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/qbittorrent"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/torrent/internal/qbittorrent"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 // Provider is one debrid service, as much of it as the node needs.

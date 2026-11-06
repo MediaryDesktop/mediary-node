@@ -10,10 +10,10 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/reader/internal/archive"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/reader/internal/ref"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/reader/internal/store"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/reader/internal/archive"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/reader/internal/ref"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/reader/internal/store"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 // PlayableFile is what the reader needs to know about a library file. Which files

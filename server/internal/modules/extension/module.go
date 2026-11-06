@@ -13,12 +13,12 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/rs/zerolog"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/extension/internal/handler"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/extension/internal/sandbox"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/extension/internal/service"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/extension/internal/store"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/secrets"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/extension/internal/handler"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/extension/internal/sandbox"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/extension/internal/service"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/extension/internal/store"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/events"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/secrets"
 )
 
 // How long reading a manifest or a plugin's code may take.

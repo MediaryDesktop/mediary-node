@@ -14,11 +14,11 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/source"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/db"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/secrets"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/opds"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/booksource/internal/source"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/db"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/secrets"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/opds"
 )
 
 const calibreRoot = `<?xml version="1.0" encoding="UTF-8"?>

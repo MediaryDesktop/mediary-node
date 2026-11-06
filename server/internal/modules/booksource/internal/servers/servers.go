@@ -16,9 +16,9 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/db/sqlc"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/opds"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/db/sqlc"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/opds"
 )
 
 const maxNameRunes = 100

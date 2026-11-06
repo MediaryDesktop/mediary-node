@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/backup"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/backup"
 )
 
 // Store reads and replaces the user's data for a backup without knowing a

@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 const keyDebrid = "torrent.debrid.service"

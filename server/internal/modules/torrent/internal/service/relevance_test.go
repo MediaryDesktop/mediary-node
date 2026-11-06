@@ -3,7 +3,7 @@ package service
 import (
 	"testing"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/release"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/torrent/internal/release"
 )
 
 func TestNamesTitle(t *testing.T) {

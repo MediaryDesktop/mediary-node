@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 const capsFeed = `<?xml version="1.0" encoding="UTF-8"?>

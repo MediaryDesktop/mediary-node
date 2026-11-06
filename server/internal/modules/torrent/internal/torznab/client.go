@@ -15,7 +15,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 // A search answer larger than this is not a feed of results.

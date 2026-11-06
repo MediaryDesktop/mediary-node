@@ -24,9 +24,9 @@ import (
 	"github.com/rs/zerolog"
 
 	// Before the library's storage reads its file IO choice; see the package.
-	_ "github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/embedded/classicio"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/qbittorrent"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	_ "github.com/MediaryDesktop/mediary-node/server/internal/modules/torrent/internal/embedded/classicio"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/torrent/internal/qbittorrent"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 // Version names the client in the settings.

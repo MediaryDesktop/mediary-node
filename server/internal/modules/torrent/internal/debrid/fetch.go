@@ -13,9 +13,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/metainfo"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/qbittorrent"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/torrent/internal/metainfo"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/torrent/internal/qbittorrent"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 // job is one file to fetch.

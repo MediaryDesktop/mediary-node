@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/db/sqlc"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/db/sqlc"
 )
 
 // The manual titles' share of a backup works only through the transaction it

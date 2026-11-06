@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/videofile"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/playback/internal/videofile"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 // Prober reads what streams a file holds. The real one runs ffprobe and keeps

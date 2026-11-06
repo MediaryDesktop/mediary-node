@@ -9,8 +9,8 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"github.com/mediaryorg/mediary-node/server/internal/app"
-	"github.com/mediaryorg/mediary-node/server/internal/httpapi"
+	"github.com/MediaryDesktop/mediary-node/server/internal/app"
+	"github.com/MediaryDesktop/mediary-node/server/internal/httpapi"
 )
 
 var version = "0.0.0-dev"

@@ -11,10 +11,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/secrets"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/claude"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/openai"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/secrets"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/claude"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/openai"
 )
 
 // withClaude points the harness at a fake Anthropic that answers every message

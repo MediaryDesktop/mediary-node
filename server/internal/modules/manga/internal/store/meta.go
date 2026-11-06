@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/db/sqlc"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/db/sqlc"
 )
 
 // Meta reads one of the module's settings from node_meta. It reports false when

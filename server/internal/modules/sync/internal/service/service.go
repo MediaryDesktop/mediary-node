@@ -17,14 +17,14 @@ import (
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 
-	contracts "github.com/mediaryorg/mediary-contracts/go/cloudclient"
+	contracts "github.com/MediaryDesktop/mediary-contracts/go/cloudclient"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/sync/internal/store"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/backup"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/cloud"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/secrets"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/sync/internal/store"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/backup"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/cloud"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/events"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/secrets"
 )
 
 const (

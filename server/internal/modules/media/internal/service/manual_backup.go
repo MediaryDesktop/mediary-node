@@ -9,8 +9,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/media/internal/store"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/backup"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/media/internal/store"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/backup"
 )
 
 // jpegMagic opens every JPEG file; the node saves posters only as JPEG.

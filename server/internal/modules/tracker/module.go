@@ -8,12 +8,12 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/rs/zerolog"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/tracker/internal/handler"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/tracker/internal/service"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/tracker/internal/store"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/backup"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/tracker/internal/handler"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/tracker/internal/service"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/tracker/internal/store"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/backup"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/events"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/anilist"
 )
 
 type Deps struct {

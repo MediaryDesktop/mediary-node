@@ -19,13 +19,13 @@ import (
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/sync/internal/store"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/backup"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/cloud"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/db"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/secrets"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/sync/internal/store"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/backup"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/cloud"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/db"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/events"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/secrets"
 )
 
 const pairingCode = "K7QM-4XPA"

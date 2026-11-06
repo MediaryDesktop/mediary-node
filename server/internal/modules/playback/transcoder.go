@@ -6,8 +6,8 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/cassette"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/videofile"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/playback/internal/cassette"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/playback/internal/videofile"
 )
 
 // lazyTranscoder makes the transcoder on the first file that needs it, and again

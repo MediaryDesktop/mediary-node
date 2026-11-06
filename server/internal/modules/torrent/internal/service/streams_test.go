@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/debrid"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/torrent/internal/debrid"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 // streamingClient is a debrid client that can play a torrent it holds.

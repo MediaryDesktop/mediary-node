@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/openlibrary"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/openlibrary"
 )
 
 const (

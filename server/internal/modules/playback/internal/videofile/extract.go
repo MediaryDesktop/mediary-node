@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/childenv"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/childenv"
 )
 
 const extractTimeout = 2 * time.Minute

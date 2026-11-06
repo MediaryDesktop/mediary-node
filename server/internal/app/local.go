@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/mediaryorg/mediary-node/server/internal/config"
-	"github.com/mediaryorg/mediary-node/server/internal/httpapi/middleware"
+	"github.com/MediaryDesktop/mediary-node/server/internal/config"
+	"github.com/MediaryDesktop/mediary-node/server/internal/httpapi/middleware"
 )
 
 // localBase is the node's own address: loopback when it listens on every

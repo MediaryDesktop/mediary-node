@@ -10,8 +10,8 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/mpv"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/playback/internal/mpv"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 // Tools finds the programs playback runs: mpv, ffmpeg and ffprobe. It is asked

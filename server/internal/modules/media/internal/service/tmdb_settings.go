@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/tmdb"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/tmdb"
 )
 
 type TMDBSettings struct {

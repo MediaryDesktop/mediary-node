@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/reader/internal/archive"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/reader/internal/ref"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/reader/internal/archive"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/reader/internal/ref"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 // Source is where chapters come from. The reader, the progress rule and the page

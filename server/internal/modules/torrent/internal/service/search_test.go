@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/release"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/torznab"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/torrent/internal/release"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/torrent/internal/torznab"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 type fakeTitles map[string][]string

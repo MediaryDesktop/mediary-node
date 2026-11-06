@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/anilist"
 )
 
 const ProviderAniList = "anilist"

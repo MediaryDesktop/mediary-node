@@ -7,13 +7,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/library"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/media"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/tracker"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/googlebooks"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/openlibrary"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/tmdb"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/library"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/media"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/tracker"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/anilist"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/googlebooks"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/openlibrary"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/tmdb"
 )
 
 // titleSource answers the library's "what could this file be" with the user's own

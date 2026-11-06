@@ -11,7 +11,7 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/videofile"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/playback/internal/videofile"
 )
 
 // The test binary stands in for an ffmpeg that crashes on every file, as the

@@ -10,7 +10,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/backup"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/backup"
 )
 
 func manualSnapshot(t *testing.T, h *detailsHarness) backup.Document {

@@ -5,9 +5,9 @@ import (
 	"maps"
 	"slices"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/qbittorrent"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/store"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/torrent/internal/qbittorrent"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/torrent/internal/store"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 // TorrentFile is one file inside a torrent, as the library reads its name.

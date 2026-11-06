@@ -10,9 +10,9 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humachi"
 
-	"github.com/mediaryorg/mediary-node/server/internal/httpapi"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/reader/internal/service"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/reader/internal/store"
+	"github.com/MediaryDesktop/mediary-node/server/internal/httpapi"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/reader/internal/service"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/reader/internal/store"
 )
 
 type BookPosition struct {

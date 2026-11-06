@@ -15,9 +15,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/safehttp"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/imagesearch"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/safehttp"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/imagesearch"
 )
 
 func pngOf(t *testing.T, width, height int, fill color.Color) []byte {

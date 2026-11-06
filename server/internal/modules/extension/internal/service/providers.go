@@ -7,10 +7,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/extension/internal/manifest"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/extension/internal/sandbox"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/extension/internal/store"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/extension/internal/manifest"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/extension/internal/sandbox"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/extension/internal/store"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 // perPlugin is how many calls one plugin runs at once. A search fans out into

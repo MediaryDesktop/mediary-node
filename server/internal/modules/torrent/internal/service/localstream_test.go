@@ -7,7 +7,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/debrid"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/torrent/internal/debrid"
 )
 
 // localClient is the node's own client as the streams see it: it knows the

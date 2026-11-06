@@ -6,11 +6,11 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/rs/zerolog"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/reader/internal/archive"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/reader/internal/handler"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/reader/internal/ref"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/reader/internal/service"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/reader/internal/store"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/reader/internal/archive"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/reader/internal/handler"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/reader/internal/ref"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/reader/internal/service"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/reader/internal/store"
 )
 
 // The module's ports: the reader reads files the library owns and reports read

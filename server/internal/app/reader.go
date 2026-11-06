@@ -5,11 +5,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/library"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/manga"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/reader"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/tracker"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/library"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/manga"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/reader"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/tracker"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 // readableFiles hands the reader a library file by id, never a path the client

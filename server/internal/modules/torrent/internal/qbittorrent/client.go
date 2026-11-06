@@ -20,7 +20,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 // The WebUI API version that renamed pause and resume to stop and start

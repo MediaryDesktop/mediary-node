@@ -3,7 +3,7 @@ package parser
 import (
 	"testing"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/library/internal/scanner"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/library/internal/scanner"
 )
 
 func number(value int) *int { return &value }

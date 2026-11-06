@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 func newTestClient(t *testing.T, contact string, handler http.HandlerFunc) *Client {

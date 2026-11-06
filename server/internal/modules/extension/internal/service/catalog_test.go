@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/extension/internal/sandbox"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/extension/internal/sandbox"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 // listing serves a repository at path listing entries, and returns its address.

@@ -6,8 +6,8 @@ import (
 
 	"github.com/danielgtaylor/huma/v2"
 
-	"github.com/mediaryorg/mediary-node/server/internal/httpapi"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/service"
+	"github.com/MediaryDesktop/mediary-node/server/internal/httpapi"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/torrent/internal/service"
 )
 
 type StartTorrentStreamInput struct {

@@ -11,14 +11,14 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/media/internal/store"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anizip"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/googlebooks"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/imagesearch"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/openlibrary"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/tmdb"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/media/internal/store"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/anilist"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/anizip"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/googlebooks"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/imagesearch"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/openlibrary"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/tmdb"
 )
 
 const aniListMaxAge = 24 * time.Hour

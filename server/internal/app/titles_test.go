@@ -3,7 +3,7 @@ package app
 import (
 	"testing"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/tmdb"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/tmdb"
 )
 
 // The matcher ranks a folder of doramas by the catalog's own rule: an animated

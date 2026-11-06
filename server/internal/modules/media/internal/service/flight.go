@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 // A book's page takes Open Library two requests at one a second, and a card

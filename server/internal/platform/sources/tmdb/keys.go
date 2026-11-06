@@ -1,7 +1,7 @@
 package tmdb
 
 import (
-	"github.com/mediaryorg/mediary-node/server/internal/platform/secrets"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/secrets"
 )
 
 type (

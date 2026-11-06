@@ -6,10 +6,10 @@ import (
 
 	"github.com/danielgtaylor/huma/v2"
 
-	"github.com/mediaryorg/mediary-node/server/internal/httpapi"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/metainfo"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/service"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/torznab"
+	"github.com/MediaryDesktop/mediary-node/server/internal/httpapi"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/torrent/internal/metainfo"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/torrent/internal/service"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/torrent/internal/torznab"
 )
 
 type Handler struct {

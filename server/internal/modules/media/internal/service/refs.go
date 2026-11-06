@@ -4,10 +4,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/googlebooks"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/openlibrary"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/tmdb"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/googlebooks"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/openlibrary"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/tmdb"
 )
 
 const ProviderTMDB = "tmdb"

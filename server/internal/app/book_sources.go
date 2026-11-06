@@ -3,9 +3,9 @@ package app
 import (
 	"context"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/library"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/media"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/booksource"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/library"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/media"
 )
 
 // bookFolders lets the booksource module save books into library folders of

@@ -3,9 +3,9 @@ package app
 import (
 	"context"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/media"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/tracker"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/media"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/tracker"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 // forgetManual takes a deleted manual title off the user's list. The media module

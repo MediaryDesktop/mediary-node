@@ -6,9 +6,9 @@ import (
 
 	"github.com/danielgtaylor/huma/v2"
 
-	"github.com/mediaryorg/mediary-node/server/internal/httpapi"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/manga/internal/download"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/manga/internal/service"
+	"github.com/MediaryDesktop/mediary-node/server/internal/httpapi"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/manga/internal/download"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/manga/internal/service"
 )
 
 type Handler struct {

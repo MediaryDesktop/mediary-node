@@ -31,7 +31,7 @@ jobs:
       - name: Check out the contracts repository
         uses: actions/checkout@v5
         with:
-          repository: mediaryorg/mediary-contracts
+          repository: MediaryDesktop/mediary-contracts
           path: .contracts
 
       - uses: actions/setup-go@v6

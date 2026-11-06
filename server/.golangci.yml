@@ -52,19 +52,19 @@ linters:
           files:
             - "**/internal/platform/**"
           deny:
-            - pkg: github.com/mediaryorg/mediary-node/server/internal/modules
+            - pkg: github.com/MediaryDesktop/mediary-node/server/internal/modules
               desc: platform is the bottom layer and must not know about a module
-            - pkg: github.com/mediaryorg/mediary-node/server/internal/app
+            - pkg: github.com/MediaryDesktop/mediary-node/server/internal/app
               desc: platform must not import the composition root
-            - pkg: github.com/mediaryorg/mediary-node/server/internal/httpapi
+            - pkg: github.com/MediaryDesktop/mediary-node/server/internal/httpapi
               desc: platform must not import the transport layer
         httpapi:
           files:
             - "**/internal/httpapi/**"
           deny:
-            - pkg: github.com/mediaryorg/mediary-node/server/internal/modules
+            - pkg: github.com/MediaryDesktop/mediary-node/server/internal/modules
               desc: httpapi must not import a module — internal/app composes them
-            - pkg: github.com/mediaryorg/mediary-node/server/internal/app
+            - pkg: github.com/MediaryDesktop/mediary-node/server/internal/app
               desc: httpapi must not import the composition root
         contracts:
           # Only the cloud wrapper may see the generated contract. If a module
@@ -74,7 +74,7 @@ linters:
             - "**/internal/modules/**"
             - "**/internal/httpapi/**"
           deny:
-            - pkg: github.com/mediaryorg/mediary-contracts
+            - pkg: github.com/MediaryDesktop/mediary-contracts
               desc: reach the cloud through internal/platform/cloud, not the generated client
 
   exclusions:
@@ -101,8 +101,8 @@ formatters:
       sections:
         - standard
         - default
-        - prefix(github.com/mediaryorg/mediary-contracts)
-        - prefix(github.com/mediaryorg/mediary-node)
+        - prefix(github.com/MediaryDesktop/mediary-contracts)
+        - prefix(github.com/MediaryDesktop/mediary-node)
 
   exclusions:
     generated: lax

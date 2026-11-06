@@ -5,13 +5,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/ai"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/cloud"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/secrets"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/claude"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/gemini"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/openai"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/ai"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/cloud"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/secrets"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/claude"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/gemini"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/openai"
 )
 
 const (

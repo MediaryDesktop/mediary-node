@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/db/sqlc"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/db/sqlc"
 )
 
 type Server struct {

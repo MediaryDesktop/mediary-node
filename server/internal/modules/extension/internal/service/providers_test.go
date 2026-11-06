@@ -10,8 +10,8 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/extension/internal/sandbox"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/extension/internal/sandbox"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 // A plugin that needs no network: it answers with what its settings say.

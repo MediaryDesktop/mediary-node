@@ -10,7 +10,7 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 // SourcePrefixPlugin starts a manga plugin's source id: "plugin:<id>".

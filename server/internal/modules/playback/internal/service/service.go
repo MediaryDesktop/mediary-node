@@ -8,10 +8,10 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/mpv"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/videofile"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/playback/internal/mpv"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/playback/internal/videofile"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/events"
 )
 
 const (

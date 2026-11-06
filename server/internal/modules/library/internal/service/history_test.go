@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/library/internal/matcher"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/library/internal/matcher"
 )
 
 func TestScanRecordsHistory(t *testing.T) {

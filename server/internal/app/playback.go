@@ -4,11 +4,11 @@ import (
 	"context"
 	"strings"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/library"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/media"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/playback"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/tracker"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/library"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/media"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/playback"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/torrent"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/tracker"
 )
 
 // playableFiles lets the player open a file without knowing how the library keeps

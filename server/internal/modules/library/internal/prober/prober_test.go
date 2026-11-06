@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/library/internal/prober"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/library/internal/prober"
 )
 
 const episode = 1437 * time.Second

@@ -13,10 +13,10 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/extension/internal/manifest"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/extension/internal/sandbox"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/extension/internal/store"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/extension/internal/manifest"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/extension/internal/sandbox"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/extension/internal/store"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 // maxCode is the largest plugin the node downloads. A provider that reads

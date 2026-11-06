@@ -15,8 +15,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/debrid"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/torrent/internal/debrid"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 const DefaultBaseURL = "https://api.real-debrid.com/rest/1.0"

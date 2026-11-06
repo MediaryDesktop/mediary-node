@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/torznab"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/torrent/internal/torznab"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 // TorrentSource is one of the user's Torznab endpoints. The API key is never

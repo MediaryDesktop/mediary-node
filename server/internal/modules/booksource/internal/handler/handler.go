@@ -6,11 +6,11 @@ import (
 
 	"github.com/danielgtaylor/huma/v2"
 
-	"github.com/mediaryorg/mediary-node/server/internal/httpapi"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/download"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/servers"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/service"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/store"
+	"github.com/MediaryDesktop/mediary-node/server/internal/httpapi"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/booksource/internal/download"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/booksource/internal/servers"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/booksource/internal/service"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/booksource/internal/store"
 )
 
 type Handler struct {

@@ -5,8 +5,8 @@ import (
 	"errors"
 	"os/exec"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/videofile"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/playback/internal/videofile"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 // The node serves one renderer, so every request is the same client to the

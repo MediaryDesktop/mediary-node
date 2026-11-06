@@ -14,13 +14,13 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/rs/zerolog"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/sync/internal/handler"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/sync/internal/service"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/sync/internal/store"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/backup"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/cloud"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/secrets"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/sync/internal/handler"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/sync/internal/service"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/sync/internal/store"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/backup"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/cloud"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/events"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/secrets"
 )
 
 type Deps struct {

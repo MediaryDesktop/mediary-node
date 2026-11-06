@@ -6,7 +6,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/mpv"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/playback/internal/mpv"
 )
 
 // PlayableFile is what the module needs to know about a file to play it. Which

@@ -8,16 +8,16 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/rs/zerolog"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/media/internal/handler"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/media/internal/service"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/media/internal/store"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/backup"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anizip"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/googlebooks"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/imagesearch"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/openlibrary"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/tmdb"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/media/internal/handler"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/media/internal/service"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/media/internal/store"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/backup"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/anilist"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/anizip"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/googlebooks"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/imagesearch"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/openlibrary"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/tmdb"
 )
 
 type Deps struct {

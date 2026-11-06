@@ -8,13 +8,13 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/rs/zerolog"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/manga/internal/download"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/manga/internal/handler"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/manga/internal/secrets"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/manga/internal/service"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/manga/internal/store"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/opds"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/manga/internal/download"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/manga/internal/handler"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/manga/internal/secrets"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/manga/internal/service"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/manga/internal/store"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/events"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/opds"
 )
 
 type Deps struct {

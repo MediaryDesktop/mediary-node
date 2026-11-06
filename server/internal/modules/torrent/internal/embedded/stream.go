@@ -12,8 +12,8 @@ import (
 	"github.com/anacrolix/torrent/metainfo"
 	"github.com/anacrolix/torrent/storage"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/debrid"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/torrent/internal/debrid"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 // ServiceName names the client where a stream says who is getting it.

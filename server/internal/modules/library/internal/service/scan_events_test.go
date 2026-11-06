@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/events"
 )
 
 // Every scan event names its root by the root's id, the same number the

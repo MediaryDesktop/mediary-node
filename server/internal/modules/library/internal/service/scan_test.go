@@ -11,12 +11,12 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/library/internal/parser"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/library/internal/scanner"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/library/internal/store"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/db"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/library/internal/parser"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/library/internal/scanner"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/library/internal/store"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/db"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/events"
 )
 
 type harness struct {

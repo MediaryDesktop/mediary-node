@@ -13,8 +13,8 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/videofile"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/childenv"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/playback/internal/videofile"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/childenv"
 )
 
 // HwAccelOptions are configuration knobs for hardware acceleration

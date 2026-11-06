@@ -7,12 +7,12 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/rs/zerolog"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/library/internal/handler"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/library/internal/parser"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/library/internal/scanner"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/library/internal/service"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/library/internal/store"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/library/internal/handler"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/library/internal/parser"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/library/internal/scanner"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/library/internal/service"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/library/internal/store"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/events"
 )
 
 // TitleCandidate and TitleSource are the module's port for "what could this file

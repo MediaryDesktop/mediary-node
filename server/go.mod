@@ -1,6 +1,6 @@
-module github.com/mediaryorg/mediary-node/server
+module github.com/MediaryDesktop/mediary-node/server
 
-// github.com/mediaryorg/mediary-contracts/go is imported by
+// github.com/MediaryDesktop/mediary-contracts/go is imported by
 // internal/platform/cloud but is deliberately absent from `require`: the module
 // is not published yet, and a require line pointing at a tag that does not
 // exist makes every build fail — including the workspace build that currently

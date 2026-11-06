@@ -20,9 +20,9 @@ import (
 	"golang.org/x/image/draw"
 	_ "golang.org/x/image/webp" // registers the WebP decoder
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/safehttp"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/imagesearch"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/safehttp"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/imagesearch"
 )
 
 const (

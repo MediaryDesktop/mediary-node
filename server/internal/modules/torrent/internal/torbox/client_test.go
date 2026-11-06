@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 func serve(t *testing.T, handler http.HandlerFunc) *Client {

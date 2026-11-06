@@ -15,7 +15,7 @@ import (
 	"github.com/anacrolix/torrent/storage"
 	"github.com/rs/zerolog"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/qbittorrent"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/torrent/internal/qbittorrent"
 )
 
 // seed makes a torrent of a two-episode folder and a client that seeds it, with

@@ -9,10 +9,10 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/rs/zerolog"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/tools/internal/handler"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/tools/internal/manifest"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/tools/internal/service"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/tools/internal/handler"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/tools/internal/manifest"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/tools/internal/service"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/events"
 )
 
 type Deps struct {

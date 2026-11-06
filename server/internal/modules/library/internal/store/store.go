@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/db/sqlc"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/db/sqlc"
 )
 
 type Store struct {

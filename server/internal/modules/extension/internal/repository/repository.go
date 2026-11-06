@@ -14,7 +14,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/extension/internal/manifest"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/extension/internal/manifest"
 )
 
 const (

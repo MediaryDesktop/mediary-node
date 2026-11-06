@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/library/internal/matcher"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/library/internal/matcher"
 )
 
 // TitleCandidate is a title a file could belong to. The library does not know

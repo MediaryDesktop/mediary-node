@@ -11,7 +11,7 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/rs/zerolog"
 
-	"github.com/mediaryorg/mediary-node/server/internal/httpapi/middleware"
+	"github.com/MediaryDesktop/mediary-node/server/internal/httpapi/middleware"
 )
 
 const Title = "Mediary Node API"

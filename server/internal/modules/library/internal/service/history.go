@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/library/internal/store"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/library/internal/store"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 // How long the history write is given once a scan has already finished. It is a

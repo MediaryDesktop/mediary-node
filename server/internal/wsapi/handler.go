@@ -10,7 +10,7 @@ import (
 	"github.com/coder/websocket/wsjson"
 	"github.com/rs/zerolog"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/events"
 )
 
 // Variables so a test can run through several pings quickly.

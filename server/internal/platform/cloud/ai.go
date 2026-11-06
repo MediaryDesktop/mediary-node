@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"time"
 
-	contracts "github.com/mediaryorg/mediary-contracts/go/cloudclient"
+	contracts "github.com/MediaryDesktop/mediary-contracts/go/cloudclient"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/ai"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/ai"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 // AIQuota is the account's daily allowance of AI requests on the cloud's key.

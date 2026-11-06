@@ -10,9 +10,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/download"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/booksource/internal/source"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/booksource/internal/download"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/booksource/internal/source"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 const (

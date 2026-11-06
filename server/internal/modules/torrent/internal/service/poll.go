@@ -10,10 +10,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/qbittorrent"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/release"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent/internal/store"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/torrent/internal/qbittorrent"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/torrent/internal/release"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/torrent/internal/store"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 // How many polls in a row a torrent has to be missing from the client before its

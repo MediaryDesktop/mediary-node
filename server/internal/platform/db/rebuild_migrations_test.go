@@ -8,7 +8,7 @@ import (
 	"github.com/pressly/goose/v3"
 	"github.com/rs/zerolog"
 
-	migrations "github.com/mediaryorg/mediary-node/server/db"
+	migrations "github.com/MediaryDesktop/mediary-node/server/db"
 )
 
 // SQLite cannot alter a CHECK constraint, so a migration that needs to

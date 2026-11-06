@@ -8,9 +8,9 @@ import (
 	"sync"
 	"time"
 
-	contracts "github.com/mediaryorg/mediary-contracts/go/cloudclient"
+	contracts "github.com/MediaryDesktop/mediary-contracts/go/cloudclient"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 const DeviceTokenHeader = "X-Mediary-Device-Token"

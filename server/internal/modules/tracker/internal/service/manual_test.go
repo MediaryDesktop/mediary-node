@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 const manualAnime = "manual:0123456789abcdef0123"

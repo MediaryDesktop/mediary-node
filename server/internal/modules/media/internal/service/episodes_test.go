@@ -12,10 +12,10 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/media/internal/store"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/db"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anizip"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/media/internal/store"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/db"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/anilist"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/anizip"
 )
 
 const episodesDetailsFixture = `{"data":{"Media":{

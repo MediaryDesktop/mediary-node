@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/mediaryorg/mediary-node/server/internal/app"
-	"github.com/mediaryorg/mediary-node/server/internal/httpapi"
+	"github.com/MediaryDesktop/mediary-node/server/internal/app"
+	"github.com/MediaryDesktop/mediary-node/server/internal/httpapi"
 )
 
 var (

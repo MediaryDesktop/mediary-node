@@ -9,7 +9,7 @@ import (
 	"github.com/pressly/goose/v3"
 	"github.com/rs/zerolog"
 
-	migrations "github.com/mediaryorg/mediary-node/server/db"
+	migrations "github.com/MediaryDesktop/mediary-node/server/db"
 )
 
 // backupsKept is how many pre-migration copies of the database stay on disk.

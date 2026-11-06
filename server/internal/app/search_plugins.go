@@ -3,8 +3,8 @@ package app
 import (
 	"context"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/extension"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/extension"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/torrent"
 )
 
 // searchPlugins lets a release search ask the user's plugins, which the

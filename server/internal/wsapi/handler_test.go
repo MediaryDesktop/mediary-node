@@ -11,7 +11,7 @@ import (
 	"github.com/coder/websocket/wsjson"
 	"github.com/rs/zerolog"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/events"
 )
 
 // A client that only listens must outlive the pings: they used to time out for

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/db/sqlc"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/db/sqlc"
 )
 
 // Repository is an address the user added to look for plugins at.

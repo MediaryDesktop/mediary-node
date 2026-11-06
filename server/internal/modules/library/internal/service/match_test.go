@@ -7,8 +7,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/library/internal/matcher"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/library/internal/matcher"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 // fakeTitles stands in for the composition root's adapter over the tracker and the

@@ -8,11 +8,11 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/google/uuid"
 
-	contracts "github.com/mediaryorg/mediary-contracts/go/cloudclient"
+	contracts "github.com/MediaryDesktop/mediary-contracts/go/cloudclient"
 
-	"github.com/mediaryorg/mediary-node/server/internal/httpapi"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/sync/internal/service"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/httpapi"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/sync/internal/service"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 type Handler struct {

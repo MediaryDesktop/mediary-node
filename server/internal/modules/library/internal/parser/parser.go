@@ -20,7 +20,7 @@ import (
 
 	habari "github.com/5rahim/habari"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/library/internal/scanner"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/library/internal/scanner"
 )
 
 // Version is stored next to every parsed row. Bumping it makes the next scan

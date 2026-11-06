@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"time"
 
-	"github.com/mediaryorg/mediary-node/server/internal/platform/childenv"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/childenv"
 )
 
 // How long the node waits for mpv to create its socket. mpv opens the window first

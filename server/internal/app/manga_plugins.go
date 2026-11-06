@@ -4,10 +4,10 @@ import (
 	"context"
 	"strings"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/extension"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/manga"
-	"github.com/mediaryorg/mediary-node/server/internal/modules/reader"
-	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/extension"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/manga"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/reader"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
 
 // mangaPlugins lets the manga module read from the user's manga plugins, which

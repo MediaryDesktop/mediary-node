@@ -7,7 +7,7 @@ import (
 	"math"
 	"strings"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/videofile"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/playback/internal/videofile"
 )
 
 // Quality is the video resolution tier; Original keeps the source's own.

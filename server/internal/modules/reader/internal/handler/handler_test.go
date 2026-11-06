@@ -12,7 +12,7 @@ import (
 
 	"github.com/danielgtaylor/huma/v2/humatest"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/reader/internal/service"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/reader/internal/service"
 )
 
 type library struct {

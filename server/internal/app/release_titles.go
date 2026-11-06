@@ -4,7 +4,7 @@ import (
 	"context"
 	"unicode"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/media"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/media"
 )
 
 // releaseTitles names a title for a torrent search, from the details the node
