@@ -14,6 +14,7 @@ import (
 	"github.com/rs/zerolog"
 
 	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/videofile"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/childenv"
 )
 
 // KeyframeIndex holds extracted keyframe timestamps
@@ -168,6 +169,7 @@ func extractKeyframes(
 		path,
 	)
 	videofile.HideWindow(cmd)
+	childenv.Apply(cmd)
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {

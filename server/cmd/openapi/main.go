@@ -53,12 +53,12 @@ func run() error {
 	}
 
 	if dir := filepath.Dir(out); dir != "." {
-		if err := os.MkdirAll(dir, 0o750); err != nil {
+		if err := os.MkdirAll(dir, 0o750); err != nil { //nolint:gosec // the output path is the developer's own flag
 			return fmt.Errorf("create %s: %w", dir, err)
 		}
 	}
 
-	if err := os.WriteFile(out, document, 0o644); err != nil {
+	if err := os.WriteFile(out, document, 0o644); err != nil { //nolint:gosec // a public API document checked into the repository
 		return fmt.Errorf("write %s: %w", out, err)
 	}
 

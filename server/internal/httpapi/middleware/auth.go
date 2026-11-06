@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-const TokenHeader = "X-Mediary-Node-Token"
+const TokenHeader = "X-Mediary-Node-Token" //nolint:gosec // a header name, not a credential
 
 func LocalToken(token string, exempt ...string) func(http.Handler) http.Handler {
 	exemptSet := make(map[string]struct{}, len(exempt))

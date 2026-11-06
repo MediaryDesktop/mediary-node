@@ -99,11 +99,12 @@ func proxy(w http.ResponseWriter, r *http.Request, link, contentType string) (ex
 			w.Header().Set(name, value)
 		}
 	}
-	if contentType != "" {
-		w.Header().Set("Content-Type", contentType)
-	} else if upstream := resp.Header.Get("Content-Type"); upstream != "" {
-		w.Header().Set("Content-Type", upstream)
+	// Never the CDN's own type: whatever it calls the file is served on the
+	// node's origin, and text/html there would run as a page.
+	if contentType == "" {
+		contentType = "application/octet-stream"
 	}
+	w.Header().Set("Content-Type", contentType)
 
 	w.WriteHeader(resp.StatusCode)
 

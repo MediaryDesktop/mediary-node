@@ -14,6 +14,7 @@ import (
 	"github.com/rs/zerolog"
 
 	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/videofile"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/childenv"
 )
 
 // HwAccelOptions are configuration knobs for hardware acceleration
@@ -134,6 +135,7 @@ func testEncoder(ffmpegPath, encoder string) bool {
 		"-f", "null", "-",
 	)
 	videofile.HideWindow(cmd)
+	childenv.Apply(cmd)
 	return cmd.Run() == nil
 }
 

@@ -20,6 +20,7 @@ import (
 	"github.com/samber/lo"
 
 	"github.com/mediaryorg/mediary-node/server/internal/modules/playback/internal/videofile"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/childenv"
 )
 
 // ErrEncoderFailed is a segment ffmpeg crashed on instead of writing.
@@ -520,6 +521,7 @@ func (p *Pipeline) runHead(start int32) error {
 	// stops through "q" on stdin or Kill.
 	cmd := exec.Command(p.settings.FfmpegPath, args...) //nolint:gosec,noctx // the configured ffmpeg, arguments built here
 	videofile.HideWindow(cmd)
+	childenv.Apply(cmd)
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {

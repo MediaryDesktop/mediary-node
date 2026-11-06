@@ -19,6 +19,7 @@ import (
 	"github.com/bodgit/sevenzip"
 
 	"github.com/mediaryorg/mediary-node/server/internal/modules/tools/internal/manifest"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/childenv"
 )
 
 const (
@@ -285,6 +286,7 @@ func check(ctx context.Context, binary string, program manifest.Program) error {
 
 	cmd := exec.CommandContext(ctx, binary, program.VersionFlag) //nolint:gosec // a binary the node just verified against its checksum
 	hideWindow(cmd)
+	childenv.Apply(cmd)
 
 	output, err := cmd.CombinedOutput()
 	if ctxErr := ctx.Err(); errors.Is(ctxErr, context.Canceled) {

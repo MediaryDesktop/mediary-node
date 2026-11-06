@@ -12,6 +12,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/mediaryorg/mediary-node/server/internal/platform/childenv"
 )
 
 const (
@@ -132,6 +134,7 @@ func (t *Thumbnailer) run(ctx context.Context, path string, position float64, ou
 
 	cmd := exec.CommandContext(ctx, ffmpeg, args...) //nolint:gosec // the configured ffmpeg, arguments built here
 	HideWindow(cmd)
+	childenv.Apply(cmd)
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {

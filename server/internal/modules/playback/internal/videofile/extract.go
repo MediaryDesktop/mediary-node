@@ -11,6 +11,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/mediaryorg/mediary-node/server/internal/platform/childenv"
 )
 
 const extractTimeout = 2 * time.Minute
@@ -116,6 +118,7 @@ func (x *Extractor) run(ctx context.Context, path string, info *MediaInfo, out E
 
 	cmd := exec.CommandContext(ctx, binary, args...) //nolint:gosec // the configured ffmpeg, arguments built here
 	HideWindow(cmd)
+	childenv.Apply(cmd)
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {

@@ -27,12 +27,13 @@ type Options struct {
 	Logger         zerolog.Logger
 }
 
-func New(opts Options) (chi.Router, huma.API) {
+func New(opts Options) (*chi.Mux, huma.API) {
 	router := chi.NewMux()
 
 	router.Use(chimw.RequestID)
 	router.Use(chimw.Recoverer)
 	router.Use(middleware.Logging(opts.Logger))
+	router.Use(middleware.NoSniff)
 	router.Use(corsHandler(opts.AllowedOrigins))
 	router.Use(middleware.LocalToken(opts.Token, unauthenticatedPaths...))
 

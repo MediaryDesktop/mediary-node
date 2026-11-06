@@ -37,6 +37,21 @@ func TestProxyPassesRangesOnAndBack(t *testing.T) {
 	}
 }
 
+func TestProxyNeverServesTheServicesOwnType(t *testing.T) {
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		_, _ = w.Write([]byte("<script>fetch('/v1/library/files')</script>"))
+	}))
+	defer upstream.Close()
+
+	rec := httptest.NewRecorder()
+	proxy(rec, httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/", http.NoBody), upstream.URL, "")
+
+	if got := rec.Header().Get("Content-Type"); got != "application/octet-stream" {
+		t.Errorf("Content-Type = %q, want application/octet-stream", got)
+	}
+}
+
 func TestProxyHidesTheServicesRefusal(t *testing.T) {
 	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)

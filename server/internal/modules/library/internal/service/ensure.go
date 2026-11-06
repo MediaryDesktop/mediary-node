@@ -31,7 +31,7 @@ func (s *Service) EnsureRootOf(ctx context.Context, path, content string) (rootI
 	}
 	cleaned := filepath.Clean(absolute)
 
-	if err := os.MkdirAll(cleaned, 0o755); err != nil {
+	if err := os.MkdirAll(cleaned, 0o755); err != nil { //nolint:gosec // a media folder the user chose; other programs read it too
 		return 0, "", apperr.Wrap(err, apperr.KindPrecondition, "create the folder %s", cleaned)
 	}
 

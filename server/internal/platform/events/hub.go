@@ -2,6 +2,7 @@ package events
 
 import (
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -40,7 +41,7 @@ type Hub struct {
 type subscriber struct {
 	channel chan Event
 	topics  map[Topic]struct{}
-	dropped uint64
+	dropped atomic.Uint64
 }
 
 func NewHub(bufferSize int) *Hub {
@@ -98,8 +99,7 @@ func (h *Hub) Publish(topic Topic, payload map[string]any) {
 		select {
 		case sub.channel <- event:
 		default:
-
-			sub.dropped++
+			sub.dropped.Add(1)
 		}
 	}
 }

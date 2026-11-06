@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"syscall"
 
-	"github.com/go-chi/chi/v5"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/mediaryorg/mediary-node/server/internal/config"
@@ -216,9 +215,7 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 	})
 	defer shutdownModules()
 
-	if mux, ok := router.(*chi.Mux); ok {
-		mux.Handle("/ws", wsapi.New(hub, logger, cfg.HTTP.AllowedOrigins))
-	}
+	router.Handle("/ws", wsapi.New(hub, logger, cfg.HTTP.AllowedOrigins))
 
 	server := &http.Server{
 		Addr:              cfg.HTTP.Addr(),

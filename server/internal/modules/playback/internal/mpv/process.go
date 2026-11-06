@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os/exec"
 	"time"
+
+	"github.com/mediaryorg/mediary-node/server/internal/platform/childenv"
 )
 
 // How long the node waits for mpv to create its socket. mpv opens the window first
@@ -46,6 +48,7 @@ func Launch(options LaunchOptions) (*exec.Cmd, error) {
 	// started it — an episode runs for twenty minutes — and it is stopped explicitly
 	// when the session ends.
 	command := exec.Command(options.Binary, args...) //nolint:gosec,noctx // see above; the binary is the user's own player
+	childenv.Apply(command)
 
 	if err := command.Start(); err != nil {
 		return nil, fmt.Errorf("start mpv: %w", err)

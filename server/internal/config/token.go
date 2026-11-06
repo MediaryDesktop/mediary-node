@@ -19,7 +19,7 @@ func (c *Config) EnsureToken() (string, error) {
 
 	path := c.TokenPath()
 
-	stored, err := os.ReadFile(path)
+	stored, err := os.ReadFile(path) //nolint:gosec // the node's own token file in its data folder
 	switch {
 	case err == nil:
 		token := strings.TrimSpace(string(stored))
