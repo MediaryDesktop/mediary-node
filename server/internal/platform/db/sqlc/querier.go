@@ -15,6 +15,7 @@ type Querier interface {
 	ClearLibraryFileIgnored(ctx context.Context, id int64) (int64, error)
 	ClearLibraryFileMissing(ctx context.Context, arg ClearLibraryFileMissingParams) error
 	ClearListIcons(ctx context.Context) error
+	ClearManualTitles(ctx context.Context) error
 	ClearTrackerEntries(ctx context.Context) error
 	// What the filter tabs above the list show. One query rather than three: the
 	// three numbers have to agree with each other, and they only do if they are read
@@ -155,6 +156,7 @@ type Querier interface {
 	RestoreCustomList(ctx context.Context, arg RestoreCustomListParams) error
 	RestoreCustomListItem(ctx context.Context, arg RestoreCustomListItemParams) error
 	RestoreListIcon(ctx context.Context, arg RestoreListIconParams) error
+	RestoreManualTitle(ctx context.Context, arg RestoreManualTitleParams) error
 	RestoreTrackerEntry(ctx context.Context, arg RestoreTrackerEntryParams) error
 	RetryBookDownload(ctx context.Context, arg RetryBookDownloadParams) (int64, error)
 	RetryMangaDownload(ctx context.Context, arg RetryMangaDownloadParams) (int64, error)
@@ -176,8 +178,11 @@ type Querier interface {
 	SnapshotCustomListItems(ctx context.Context) ([]CustomListItem, error)
 	SnapshotCustomLists(ctx context.Context) ([]CustomList, error)
 	SnapshotListIcons(ctx context.Context) ([]ListIcon, error)
-	// Queries owned by the sync module: reading the user's own data into a backup
-	// snapshot and writing a snapshot back. Ordered everywhere, so an unchanged
+	// Every manual title, for a backup. Ordered, so an unchanged state encodes to
+	// the same bytes.
+	SnapshotManualTitles(ctx context.Context) ([]ManualTitle, error)
+	// Queries owned by the tracker module: its share of a backup snapshot, read
+	// out and written back by its backup part. Ordered everywhere, so an unchanged
 	// state always encodes to the same bytes and the cloud can tell it is unchanged.
 	SnapshotTrackerEntries(ctx context.Context) ([]TrackerEntry, error)
 	TouchLibraryRoot(ctx context.Context, arg TouchLibraryRootParams) error

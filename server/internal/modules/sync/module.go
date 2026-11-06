@@ -17,6 +17,7 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/modules/sync/internal/handler"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/sync/internal/service"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/sync/internal/store"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/backup"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/cloud"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/secrets"
@@ -28,6 +29,11 @@ type Deps struct {
 	Events  *events.Hub
 	Cloud   *cloud.Client
 	DataDir string
+
+	// Parts are the modules' shares of a backup, wired by internal/app. The sync
+	// module knows none of their tables: it runs the parts in one transaction
+	// and moves the encoded result.
+	Parts []backup.Part
 }
 
 type Module struct {
@@ -38,7 +44,7 @@ type Module struct {
 
 func New(deps Deps) *Module {
 	svc := service.New(service.Deps{
-		Store:     store.New(deps.DB),
+		Store:     store.New(deps.DB, deps.Parts...),
 		Logger:    deps.Logger,
 		Hub:       deps.Events,
 		Cloud:     deps.Cloud,

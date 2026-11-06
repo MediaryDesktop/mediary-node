@@ -19,9 +19,9 @@ import (
 
 	contracts "github.com/mediaryorg/mediary-contracts/go/cloudclient"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/sync/internal/snapshot"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/sync/internal/store"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/backup"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/cloud"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/secrets"
@@ -260,14 +260,14 @@ func (s *Service) upload(ctx context.Context) (*Uploaded, error) {
 		return nil, apperr.Wrap(err, apperr.KindInternal, "read state for backup")
 	}
 
-	encoded, err := snapshot.Encode(doc)
+	encoded, err := backup.Encode(doc)
 	if err != nil {
 		return nil, apperr.Wrap(err, apperr.KindInternal, "encode backup")
 	}
 
 	resp, err := s.cloud.API().UploadBackupWithBodyWithResponse(ctx, &contracts.UploadBackupParams{
 		XBackupSha256:        encoded.Sha256,
-		XBackupFormatVersion: snapshot.FormatVersion,
+		XBackupFormatVersion: backup.FormatVersion,
 	}, "application/octet-stream", bytes.NewReader(encoded.Body))
 	if err != nil {
 		return nil, apperr.Wrap(err, apperr.KindUpstream, "cloud is unreachable")
@@ -327,7 +327,7 @@ func (s *Service) restoreLatestIfEmpty(ctx context.Context) error {
 		return err
 	}
 
-	if len(doc.TrackerEntries) > 0 || len(doc.CustomLists) > 0 {
+	if !doc.Empty() {
 		return nil
 	}
 
@@ -361,12 +361,12 @@ func (s *Service) restore(ctx context.Context, id uuid.UUID) error {
 		return cloudError(resp.StatusCode(), resp.Body, "download backup")
 	}
 
-	if want := resp.HTTPResponse.Header.Get("X-Backup-Sha256"); want != "" && snapshot.Hash(resp.Body) != want {
+	if want := resp.HTTPResponse.Header.Get("X-Backup-Sha256"); want != "" && backup.Hash(resp.Body) != want {
 		return apperr.New(apperr.KindUpstream, "downloaded backup does not match its hash")
 	}
 
-	doc, err := snapshot.Decode(resp.Body)
-	if errors.Is(err, snapshot.ErrNewerFormat) {
+	doc, err := backup.Decode(resp.Body)
+	if errors.Is(err, backup.ErrNewerFormat) {
 		return apperr.New(apperr.KindPrecondition, "this backup was made by a newer version of Mediary; update to restore it")
 	}
 	if err != nil {
@@ -443,7 +443,7 @@ func (s *Service) keepSafetyCopy(ctx context.Context) error {
 		return err
 	}
 
-	encoded, err := snapshot.Encode(doc)
+	encoded, err := backup.Encode(doc)
 	if err != nil {
 		return err
 	}

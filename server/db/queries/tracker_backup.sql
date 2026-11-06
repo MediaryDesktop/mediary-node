@@ -1,5 +1,5 @@
--- Queries owned by the sync module: reading the user's own data into a backup
--- snapshot and writing a snapshot back. Ordered everywhere, so an unchanged
+-- Queries owned by the tracker module: its share of a backup snapshot, read
+-- out and written back by its backup part. Ordered everywhere, so an unchanged
 -- state always encodes to the same bytes and the cloud can tell it is unchanged.
 
 -- name: SnapshotTrackerEntries :many

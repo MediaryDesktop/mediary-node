@@ -1,4 +1,4 @@
-package snapshot
+package backup
 
 import (
 	"bytes"
@@ -79,5 +79,66 @@ func TestDecodeRefusesANewerFormat(t *testing.T) {
 func TestDecodeRefusesGarbage(t *testing.T) {
 	if _, err := Decode([]byte("not gzip")); err == nil {
 		t.Fatal("garbage decoded without an error")
+	}
+}
+
+// A version 1 document, from a node that knew nothing of manual titles, is read
+// as one without them.
+func TestDecodeReadsAVersionOneDocument(t *testing.T) {
+	var buf bytes.Buffer
+
+	writer := gzip.NewWriter(&buf)
+	_, _ = writer.Write([]byte(`{"format_version": 1, "tracker_entries": [
+		{"media_ref": "tmdb:tv:1399", "media_type": "series", "status": "PLANNING", "created_at": 1, "updated_at": 1}
+	], "custom_lists": [], "custom_list_items": [], "list_icons": []}`))
+	_ = writer.Close()
+
+	doc, err := Decode(buf.Bytes())
+	if err != nil {
+		t.Fatalf("decode a version 1 document: %v", err)
+	}
+
+	if doc.FormatVersion != 1 || len(doc.TrackerEntries) != 1 || len(doc.ManualTitles) != 0 {
+		t.Fatalf("decoded %+v", doc)
+	}
+}
+
+func TestAManualTitleAndItsPosterSurviveEncoding(t *testing.T) {
+	doc := sample()
+	doc.ManualTitles = []ManualTitle{{
+		ID: "0123456789abcdef0123", MediaType: "anime", Details: `{"title":"My own show"}`,
+		CreatedAt: 7, UpdatedAt: 8, CoverColor: "#112233", CoverVersion: 2,
+		Cover: []byte{0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10},
+	}}
+
+	encoded, err := Encode(doc)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	decoded, err := Decode(encoded.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	doc.FormatVersion = FormatVersion
+	if !reflect.DeepEqual(decoded, doc) {
+		t.Fatalf("round trip changed the document:\n got %+v\nwant %+v", decoded, doc)
+	}
+}
+
+func TestEmpty(t *testing.T) {
+	if doc := (Document{}); !doc.Empty() {
+		t.Error("a document with nothing in it is not empty")
+	}
+
+	for name, doc := range map[string]Document{
+		"entries":       {TrackerEntries: []TrackerEntry{{MediaRef: "tmdb:tv:1"}}},
+		"lists":         {CustomLists: []CustomList{{ID: 1}}},
+		"manual titles": {ManualTitles: []ManualTitle{{ID: "0123456789abcdef0123"}}},
+	} {
+		if doc.Empty() {
+			t.Errorf("a document with %s is empty", name)
+		}
 	}
 }

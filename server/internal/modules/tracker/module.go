@@ -11,6 +11,7 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/modules/tracker/internal/handler"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/tracker/internal/service"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/tracker/internal/store"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/backup"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
 )
@@ -63,6 +64,12 @@ type Module struct {
 
 func (m *Module) Register(api huma.API) {
 	m.handler.Register(api)
+}
+
+// BackupPart is the tracker's share of a backup: its own tables, read and
+// written back by the tracker, so the backup follows every change to them.
+func (m *Module) BackupPart() backup.Part {
+	return store.BackupPart{}
 }
 
 // TrackedTitles reads the mirrored collection, so it answers offline and never

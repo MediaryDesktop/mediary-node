@@ -358,26 +358,12 @@ func (s *Service) storeCover(ctx context.Context, id string, data []byte, color 
 	file := ""
 
 	if data != nil {
-		if mkdirErr := os.MkdirAll(s.opts.CoverDir, 0o700); mkdirErr != nil {
-			return nil, apperr.Wrap(mkdirErr, apperr.KindInternal, "create posters folder")
-		}
-
-		var suffix [4]byte
-		if _, randErr := rand.Read(suffix[:]); randErr != nil {
-			return nil, apperr.Wrap(randErr, apperr.KindInternal, "name poster file")
-		}
-
-		file = id + "-" + hex.EncodeToString(suffix[:]) + ".jpg"
-
-		temporary := filepath.Join(s.opts.CoverDir, file+".tmp")
-		if writeErr := os.WriteFile(temporary, data, 0o600); writeErr != nil {
+		written, writeErr := s.writeCoverFile(id, data)
+		if writeErr != nil {
 			return nil, apperr.Wrap(writeErr, apperr.KindInternal, "write poster")
 		}
 
-		if renameErr := os.Rename(temporary, filepath.Join(s.opts.CoverDir, file)); renameErr != nil {
-			_ = os.Remove(temporary)
-			return nil, apperr.Wrap(renameErr, apperr.KindInternal, "write poster")
-		}
+		file = written
 	}
 
 	updated, err := s.store.SetManualCover(ctx, id, file, color, s.opts.Now())
@@ -394,6 +380,34 @@ func (s *Service) storeCover(ctx context.Context, id string, data []byte, color 
 	s.removeCoverFile(existing.Cover.File)
 
 	return s.manualTitle(ctx, id)
+}
+
+// writeCoverFile saves a poster under a fresh name in the posters folder and
+// returns that name. The name is new every time, so whatever pointed at the old
+// file still finds it until it is moved on.
+func (s *Service) writeCoverFile(id string, data []byte) (string, error) {
+	if err := os.MkdirAll(s.opts.CoverDir, 0o700); err != nil {
+		return "", fmt.Errorf("create posters folder: %w", err)
+	}
+
+	var suffix [4]byte
+	if _, err := rand.Read(suffix[:]); err != nil {
+		return "", fmt.Errorf("name poster file: %w", err)
+	}
+
+	file := id + "-" + hex.EncodeToString(suffix[:]) + ".jpg"
+
+	temporary := filepath.Join(s.opts.CoverDir, file+".tmp")
+	if err := os.WriteFile(temporary, data, 0o600); err != nil {
+		return "", err
+	}
+
+	if err := os.Rename(temporary, filepath.Join(s.opts.CoverDir, file)); err != nil {
+		_ = os.Remove(temporary)
+		return "", err
+	}
+
+	return file, nil
 }
 
 func (s *Service) removeCoverFile(file string) {

@@ -11,6 +11,7 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/modules/media/internal/handler"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/media/internal/service"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/media/internal/store"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/backup"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anilist"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/anizip"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/sources/googlebooks"
@@ -115,4 +116,10 @@ func (m *Module) Cached(ctx context.Context, mediaRef string) (*MediaDetails, er
 // live on the node, so this never reaches a source.
 func (m *Module) ManualTitles(ctx context.Context, mediaType string) ([]MediaDetails, error) {
 	return m.svc.ManualTitles(ctx, mediaType)
+}
+
+// BackupPart is the manual titles' share of a backup, posters included: a title
+// the user described by hand exists nowhere else.
+func (m *Module) BackupPart() backup.Part {
+	return m.svc.ManualBackupPart()
 }

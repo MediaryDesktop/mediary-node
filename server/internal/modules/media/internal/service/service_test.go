@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
@@ -38,6 +39,7 @@ const detailsFixture = `{"data":{"Media":{
 
 type detailsHarness struct {
 	svc      *Service
+	db       *sql.DB
 	requests *atomic.Int32
 	server   *httptest.Server
 	now      time.Time
@@ -59,7 +61,7 @@ func newDetailsHarness(t *testing.T) *detailsHarness {
 		t.Fatalf("migrate: %v", err)
 	}
 
-	h := &detailsHarness{requests: &atomic.Int32{}, now: time.Now()}
+	h := &detailsHarness{db: database, requests: &atomic.Int32{}, now: time.Now()}
 
 	h.server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		h.requests.Add(1)

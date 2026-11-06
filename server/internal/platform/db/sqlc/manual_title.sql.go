@@ -10,6 +10,15 @@ import (
 	"database/sql"
 )
 
+const clearManualTitles = `-- name: ClearManualTitles :exec
+DELETE FROM manual_title
+`
+
+func (q *Queries) ClearManualTitles(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, clearManualTitles)
+	return err
+}
+
 const deleteManualTitle = `-- name: DeleteManualTitle :execrows
 DELETE FROM manual_title
 WHERE id = ?
@@ -108,6 +117,37 @@ func (q *Queries) ListManualTitles(ctx context.Context, mediaType string) ([]Man
 	return items, nil
 }
 
+const restoreManualTitle = `-- name: RestoreManualTitle :exec
+INSERT INTO manual_title (
+    id, media_type, details, created_at, updated_at, cover_file, cover_color, cover_version
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+`
+
+type RestoreManualTitleParams struct {
+	ID           string         `json:"id"`
+	MediaType    string         `json:"media_type"`
+	Details      string         `json:"details"`
+	CreatedAt    int64          `json:"created_at"`
+	UpdatedAt    int64          `json:"updated_at"`
+	CoverFile    sql.NullString `json:"cover_file"`
+	CoverColor   sql.NullString `json:"cover_color"`
+	CoverVersion int64          `json:"cover_version"`
+}
+
+func (q *Queries) RestoreManualTitle(ctx context.Context, arg RestoreManualTitleParams) error {
+	_, err := q.db.ExecContext(ctx, restoreManualTitle,
+		arg.ID,
+		arg.MediaType,
+		arg.Details,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+		arg.CoverFile,
+		arg.CoverColor,
+		arg.CoverVersion,
+	)
+	return err
+}
+
 const setManualTitleCover = `-- name: SetManualTitleCover :execrows
 UPDATE manual_title
 SET cover_file = ?, cover_color = ?, cover_version = cover_version + 1, updated_at = ?
@@ -132,6 +172,46 @@ func (q *Queries) SetManualTitleCover(ctx context.Context, arg SetManualTitleCov
 		return 0, err
 	}
 	return result.RowsAffected()
+}
+
+const snapshotManualTitles = `-- name: SnapshotManualTitles :many
+SELECT id, media_type, details, created_at, updated_at, cover_file, cover_color, cover_version
+FROM manual_title
+ORDER BY id
+`
+
+// Every manual title, for a backup. Ordered, so an unchanged state encodes to
+// the same bytes.
+func (q *Queries) SnapshotManualTitles(ctx context.Context) ([]ManualTitle, error) {
+	rows, err := q.db.QueryContext(ctx, snapshotManualTitles)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ManualTitle{}
+	for rows.Next() {
+		var i ManualTitle
+		if err := rows.Scan(
+			&i.ID,
+			&i.MediaType,
+			&i.Details,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.CoverFile,
+			&i.CoverColor,
+			&i.CoverVersion,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const updateManualTitle = `-- name: UpdateManualTitle :execrows

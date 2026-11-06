@@ -21,6 +21,7 @@ import (
 	"github.com/mediaryorg/mediary-node/server/internal/modules/tools"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/torrent"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/tracker"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/backup"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/cloud"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/safehttp"
@@ -268,6 +269,11 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 		Events:  deps.Events,
 		Cloud:   deps.Cloud,
 		DataDir: deps.DataDir,
+
+		// Manual titles before the tracker, so a restore writes the titles before
+		// the entries that point at them — not required by any constraint today,
+		// but the order the data depends on.
+		Parts: []backup.Part{mediaModule.BackupPart(), trackerModule.BackupPart()},
 	})
 	syncModule.Register(api)
 

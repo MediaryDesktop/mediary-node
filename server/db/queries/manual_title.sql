@@ -26,3 +26,18 @@ WHERE id = ?;
 -- name: DeleteManualTitle :execrows
 DELETE FROM manual_title
 WHERE id = ?;
+
+-- name: SnapshotManualTitles :many
+-- Every manual title, for a backup. Ordered, so an unchanged state encodes to
+-- the same bytes.
+SELECT id, media_type, details, created_at, updated_at, cover_file, cover_color, cover_version
+FROM manual_title
+ORDER BY id;
+
+-- name: ClearManualTitles :exec
+DELETE FROM manual_title;
+
+-- name: RestoreManualTitle :exec
+INSERT INTO manual_title (
+    id, media_type, details, created_at, updated_at, cover_file, cover_color, cover_version
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?);

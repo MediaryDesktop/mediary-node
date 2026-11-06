@@ -19,9 +19,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 
-	"github.com/mediaryorg/mediary-node/server/internal/modules/sync/internal/snapshot"
 	"github.com/mediaryorg/mediary-node/server/internal/modules/sync/internal/store"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/apperr"
+	"github.com/mediaryorg/mediary-node/server/internal/platform/backup"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/cloud"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/db"
 	"github.com/mediaryorg/mediary-node/server/internal/platform/events"
@@ -82,7 +82,7 @@ func (f *fakeCloud) handler(t *testing.T) http.Handler {
 		body, _ := io.ReadAll(r.Body)
 		sha := r.Header.Get("X-Backup-Sha256")
 
-		if snapshot.Hash(body) != sha {
+		if backup.Hash(body) != sha {
 			t.Errorf("node sent a body that does not match its declared hash")
 		}
 
@@ -133,7 +133,7 @@ func (f *fakeCloud) handler(t *testing.T) http.Handler {
 		defer f.mu.Unlock()
 
 		if f.serve != nil {
-			w.Header().Set("X-Backup-Sha256", snapshot.Hash(f.serve))
+			w.Header().Set("X-Backup-Sha256", backup.Hash(f.serve))
 			_, _ = w.Write(f.serve)
 			return
 		}
@@ -185,9 +185,52 @@ func problem(w http.ResponseWriter, status int, detail string) {
 	_ = json.NewEncoder(w).Encode(map[string]any{"status": status, "detail": detail})
 }
 
+// memoryPart stands in for the modules' backup parts: the sync module's job is
+// to run them and move the bytes, whatever tables they own. Like a real part
+// it changes nothing until the transaction commits — its finish applies the
+// restored document only then.
+type memoryPart struct {
+	mu  sync.Mutex
+	doc backup.Document
+}
+
+func (p *memoryPart) Snapshot(_ context.Context, _ *sql.Tx, doc *backup.Document) error {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	doc.TrackerEntries = append([]backup.TrackerEntry{}, p.doc.TrackerEntries...)
+	doc.CustomLists = append([]backup.CustomList{}, p.doc.CustomLists...)
+	doc.CustomListItems = append([]backup.CustomListItem{}, p.doc.CustomListItems...)
+	doc.ListIcons = append([]backup.ListIcon{}, p.doc.ListIcons...)
+	doc.ManualTitles = append([]backup.ManualTitle(nil), p.doc.ManualTitles...)
+
+	return nil
+}
+
+func (p *memoryPart) Restore(_ context.Context, _ *sql.Tx, doc *backup.Document) (func(bool), error) {
+	restored := *doc
+
+	return func(committed bool) {
+		if !committed {
+			return
+		}
+
+		p.mu.Lock()
+		p.doc = restored
+		p.mu.Unlock()
+	}, nil
+}
+
+func (p *memoryPart) document() backup.Document {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	return p.doc
+}
+
 type node struct {
 	svc     *Service
-	db      *sql.DB
+	part    *memoryPart
 	dataDir string
 }
 
@@ -212,8 +255,10 @@ func newNode(t *testing.T, cloudURL string) *node {
 		t.Fatal(err)
 	}
 
+	part := &memoryPart{}
+
 	svc := New(Deps{
-		Store:     store.New(database),
+		Store:     store.New(database, part),
 		Logger:    zerolog.Nop(),
 		Hub:       events.NewHub(64),
 		Cloud:     client,
@@ -222,40 +267,57 @@ func newNode(t *testing.T, cloudURL string) *node {
 		Label:     "test-node",
 	})
 
-	return &node{svc: svc, db: database, dataDir: dir}
+	return &node{svc: svc, part: part, dataDir: dir}
 }
 
-func (n *node) exec(t *testing.T, query string, args ...any) {
-	t.Helper()
-
-	if _, err := n.db.ExecContext(t.Context(), query, args...); err != nil {
-		t.Fatalf("%s: %v", query, err)
-	}
-}
-
+// count is how many records of one kind the node holds, by the table the
+// tracker keeps them in.
 func (n *node) count(t *testing.T, table string) int {
 	t.Helper()
 
-	var c int
-	if err := n.db.QueryRowContext(t.Context(), "SELECT COUNT(*) FROM "+table).Scan(&c); err != nil {
-		t.Fatal(err)
+	doc := n.part.document()
+
+	switch table {
+	case "tracker_entry":
+		return len(doc.TrackerEntries)
+	case "custom_list":
+		return len(doc.CustomLists)
+	case "custom_list_item":
+		return len(doc.CustomListItems)
+	case "list_icon":
+		return len(doc.ListIcons)
+	case "manual_title":
+		return len(doc.ManualTitles)
 	}
 
-	return c
+	t.Fatalf("no such kind of record: %s", table)
+
+	return 0
 }
 
 func (n *node) seed(t *testing.T) {
 	t.Helper()
 
-	n.exec(t, `INSERT INTO tracker_entry (media_ref, media_type, status, score, progress, notes,
-		completed_year, created_at, updated_at) VALUES ('tmdb:movie:438631', 'movie', 'COMPLETED', 90, 1,
-		'rewatch', 2026, 1, 2)`)
-	n.exec(t, `INSERT INTO tracker_entry (media_ref, media_type, status, created_at, updated_at)
-		VALUES ('openlibrary:OL893414W', 'book', 'CURRENT', 3, 4)`)
-	n.exec(t, `INSERT INTO custom_list (id, media_type, name, position, created_at) VALUES (7, 'book', 'Sci-fi', 0, 5)`)
-	n.exec(t, `INSERT INTO custom_list_item (list_id, media_ref, position, added_at)
-		VALUES (7, 'openlibrary:OL893414W', 0, 6)`)
-	n.exec(t, `INSERT INTO list_icon (list_id, icon) VALUES ('local:7', 'rocket')`)
+	year := int64(2026)
+
+	n.part.mu.Lock()
+	defer n.part.mu.Unlock()
+
+	n.part.doc = backup.Document{
+		TrackerEntries: []backup.TrackerEntry{
+			{
+				MediaRef: "openlibrary:OL893414W", MediaType: "book", Status: "CURRENT",
+				CreatedAt: 3, UpdatedAt: 4,
+			},
+			{
+				MediaRef: "tmdb:movie:438631", MediaType: "movie", Status: "COMPLETED",
+				Score: 90, Progress: 1, Notes: "rewatch", CompletedYear: &year, CreatedAt: 1, UpdatedAt: 2,
+			},
+		},
+		CustomLists:     []backup.CustomList{{ID: 7, MediaType: "book", Name: "Sci-fi", Position: 0, CreatedAt: 5}},
+		CustomListItems: []backup.CustomListItem{{ListID: 7, MediaRef: "openlibrary:OL893414W", Position: 0, AddedAt: 6}},
+		ListIcons:       []backup.ListIcon{{ListID: "local:7", Icon: "rocket"}},
+	}
 }
 
 func newCloud(t *testing.T) (fake *fakeCloud, url string) {
@@ -313,8 +375,9 @@ func TestPairBackUpAndRestoreOnAnotherNode(t *testing.T) {
 	}
 
 	laptop := newNode(t, url)
-	laptop.exec(t, `INSERT INTO tracker_entry (media_ref, media_type, status, created_at, updated_at)
-		VALUES ('tmdb:tv:1399', 'series', 'PLANNING', 1, 1)`)
+	laptop.part.doc = backup.Document{TrackerEntries: []backup.TrackerEntry{
+		{MediaRef: "tmdb:tv:1399", MediaType: "series", Status: "PLANNING", CreatedAt: 1, UpdatedAt: 1},
+	}}
 
 	if _, pairErr := laptop.svc.Pair(ctx, pairingCode); pairErr != nil {
 		t.Fatal(pairErr)
@@ -332,18 +395,11 @@ func TestPairBackUpAndRestoreOnAnotherNode(t *testing.T) {
 		}
 	}
 
-	restored, err := store.New(laptop.db).Read(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
+	restored := laptop.part.document()
+	original := home.part.document()
 
-	original, err := store.New(home.db).Read(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	a, _ := snapshot.Encode(original)
-	b, _ := snapshot.Encode(restored)
+	a, _ := backup.Encode(original)
+	b, _ := backup.Encode(restored)
 
 	if !bytes.Equal(a.Body, b.Body) {
 		t.Fatal("the restored state differs from the backed-up one")
@@ -356,7 +412,7 @@ func TestPairBackUpAndRestoreOnAnotherNode(t *testing.T) {
 
 	body, _ := os.ReadFile(copies[0])
 
-	replaced, err := snapshot.Decode(body)
+	replaced, err := backup.Decode(body)
 	if err != nil || len(replaced.TrackerEntries) != 1 || replaced.TrackerEntries[0].MediaRef != "tmdb:tv:1399" {
 		t.Fatalf("the safety copy does not hold the replaced state: %+v, %v", replaced, err)
 	}
@@ -464,5 +520,36 @@ func TestDue(t *testing.T) {
 
 	if !n.svc.due(now.Add(dailyFloor + time.Second)) {
 		t.Fatal("the state is offered at least once a day")
+	}
+}
+
+// A node holding only manual titles is not empty: pairing it must not replace
+// them with the account's backup.
+func TestPairingANodeWithOnlyManualTitlesKeepsThem(t *testing.T) {
+	ctx := context.Background()
+	_, url := newCloud(t)
+
+	home := newNode(t, url)
+	home.seed(t)
+
+	if _, err := home.svc.Pair(ctx, pairingCode); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := home.svc.BackupNow(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	own := newNode(t, url)
+	own.part.doc = backup.Document{ManualTitles: []backup.ManualTitle{
+		{ID: "0123456789abcdef0123", MediaType: "anime", Details: `{}`, CreatedAt: 1, UpdatedAt: 1},
+	}}
+
+	if _, err := own.svc.Pair(ctx, pairingCode); err != nil {
+		t.Fatal(err)
+	}
+
+	if own.count(t, "manual_title") != 1 || own.count(t, "tracker_entry") != 0 {
+		t.Fatalf("pairing replaced a node that held manual titles: %+v", own.part.document())
 	}
 }
