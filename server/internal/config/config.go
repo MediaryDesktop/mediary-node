@@ -82,6 +82,12 @@ type HTTP struct {
 	AllowedOrigins []string `env:"NODE_HTTP_ALLOWED_ORIGINS" envSeparator:"," envDefault:"http://localhost:5173"`
 
 	Token string `env:"NODE_TOKEN"`
+
+	// AllowPlaintext confirms that a node reachable from the network may speak
+	// plain HTTP — the token crosses the wire with every request — because a
+	// TLS proxy in front of it is the only thing the network sees. Without it a
+	// node off loopback refuses to start. Loopback ignores it.
+	AllowPlaintext bool `env:"NODE_HTTP_ALLOW_PLAINTEXT" envDefault:"false"`
 }
 
 func (h HTTP) Addr() string {
@@ -279,6 +285,16 @@ func (c *Config) validate() error {
 		return fmt.Errorf(
 			"NODE_HTTP_HOST is %q (not loopback) but NODE_TOKEN is unset: "+
 				"a node reachable from the network must be given an explicit token",
+			c.HTTP.Host,
+		)
+	}
+
+	if !c.HTTP.Loopback() && !c.HTTP.AllowPlaintext {
+		return fmt.Errorf(
+			"NODE_HTTP_HOST is %q (reachable from the network) but the node speaks plain HTTP: "+
+				"the token would cross the network in clear text. Put a TLS proxy in front of it "+
+				"(mediary-node README, \"Headless\") and set NODE_HTTP_ALLOW_PLAINTEXT=true to "+
+				"confirm the plain HTTP stays between the proxy and the node",
 			c.HTTP.Host,
 		)
 	}

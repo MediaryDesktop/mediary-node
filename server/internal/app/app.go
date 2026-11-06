@@ -57,6 +57,13 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 		Bool("linked", cfg.Cloud.Linked()).
 		Msg("starting mediary node")
 
+	if !cfg.HTTP.Loopback() {
+		logger.Warn().
+			Str("addr", cfg.HTTP.Addr()).
+			Msg("listening on the network over plain HTTP (NODE_HTTP_ALLOW_PLAINTEXT): " +
+				"reach this node only through a TLS proxy, never directly")
+	}
+
 	ctx, stop := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 

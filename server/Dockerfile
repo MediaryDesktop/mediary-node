@@ -40,9 +40,11 @@ RUN apk add --no-cache ffmpeg mpv ca-certificates tini \
 COPY --from=builder /out/nodesrv /usr/local/bin/nodesrv
 
 # A headless node is reachable over the network by definition, so the loopback
-# default does not apply — but config.validate then requires NODE_TOKEN, which
-# has to be supplied at run time. Starting without one is a hard failure, not a
-# warning.
+# default does not apply — but config.validate then requires NODE_TOKEN and
+# NODE_HTTP_ALLOW_PLAINTEXT=true, both supplied at run time. The node speaks
+# plain HTTP, so the second confirms a TLS proxy stands in front of it (see the
+# README, "Headless"); it is deliberately not set here. Starting without either
+# is a hard failure, not a warning.
 ENV NODE_ENV=production \
     NODE_HTTP_HOST=0.0.0.0 \
     NODE_HTTP_PORT=43711 \

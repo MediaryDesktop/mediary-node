@@ -57,6 +57,46 @@ Electron main ──spawn──▶ nodesrv (Go)
 передається ноді через середовище; без нього нода віддає 401 навіть на
 loopback ([TZ §8](../TZ.md)).
 
+## Headless
+
+Нода в Docker слухає мережу (`NODE_HTTP_HOST=0.0.0.0` в
+[server/Dockerfile](server/Dockerfile)), але говорить звичайним HTTP: токен іде
+з кожним запитом, і в мережі його видно відкритим текстом. Тому нода не
+відкривається в мережу напряму, а лише через TLS-проксі, і без двох змінних не
+стартує:
+
+| Змінна | Навіщо |
+|---|---|
+| `NODE_TOKEN` | токен, який клієнт шле в `X-Mediary-Node-Token`; згенеруй довгий випадковий, напр. `openssl rand -base64 32` |
+| `NODE_HTTP_ALLOW_PLAINTEXT=true` | підтвердження, що HTTP лишається між проксі й нодою, а мережа бачить лише HTTPS |
+
+Приклад із [Caddy](https://caddyserver.com) — він сам отримує сертифікат і
+проксує WebSocket:
+
+```yaml
+services:
+  node:
+    image: mediary-node
+    environment:
+      NODE_TOKEN: ${NODE_TOKEN}
+      NODE_HTTP_ALLOW_PLAINTEXT: "true" # HTTP лише між Caddy і нодою
+    volumes:
+      - ./data:/data
+      - /media:/media
+    # ports: немає — нода не відкрита в мережу, її бачить лише caddy
+
+  caddy:
+    image: caddy:2
+    ports:
+      - "443:443"
+    command: caddy reverse-proxy --from mediary.home.example --to node:43711
+```
+
+Для імені лише в домашній мережі (`.lan`, `.local`) Caddy видає сертифікат
+власного CA — його кореневий сертифікат треба один раз додати в довірені на
+клієнтах. Traefik чи Nginx Proxy Manager підходять так само: головне, щоб порт
+`43711` не був опублікований назовні.
+
 ## Команди
 
 | Команда | Що робить |
