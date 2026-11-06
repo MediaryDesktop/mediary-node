@@ -6,7 +6,15 @@
 # laptop.
 #
 # Build from the repository root:
-#   docker build -f server/Dockerfile -t mediary-node ./server
+#   docker build -f server/Dockerfile -t mediary-node \
+#     --build-arg VERSION=$(node -p "require('./desktop/package.json').version") \
+#     --build-arg COMMIT=$(git rev-parse --short HEAD) \
+#     ./server
+#
+# VERSION is the app's one version, the one in desktop/package.json, which the
+# build context cannot see. The node reports it to the cloud, and the cloud
+# holds it to its minimum client version; left at 0.0.0-dev it is older than
+# any minimum, so a deployment that sets one refuses this node's backups.
 
 ARG GO_VERSION=1.27
 

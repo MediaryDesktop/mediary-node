@@ -111,6 +111,20 @@ services:
 Go-частина має власні команди — див. [server/Taskfile.yml](server/Taskfile.yml)
 і `task --list`.
 
+## Версія
+
+У застосунку одна версія — `version` у [desktop/package.json](desktop/package.json).
+Її показує desktop і з нею ж порівнює мінімальну версію з хмари (банер
+оновлення). `task build` вшиває ту саму версію в бінарник ноди, і нода називає
+її хмарі в `User-Agent: mediary-node/<версія>`, тож гейт хмари й банер desktop
+перевіряють одне й те саме.
+
+Реліз: підняти `version` у `desktop/package.json`, зібрати й поставити тег
+`v<версія>` на коміт релізу. Docker-образ ноди отримує версію через
+`--build-arg VERSION=...` (див. [server/Dockerfile](server/Dockerfile)). Збірка
+без Node.js у PATH має версію `0.0.0-dev` — старішу за будь-який мінімум, який
+може задати хмара.
+
 ## Архітектура
 
 - Сервер ноди: [docs/server-architecture.md](docs/server-architecture.md)

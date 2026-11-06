@@ -2,8 +2,13 @@ version: "3"
 
 vars:
   BINARY: nodesrv
+  # The app's one version, the one the desktop shows in "About" and compares
+  # with the cloud's minimum: the node inside the same installer reports the
+  # same one in its User-Agent, so the cloud's gate and the desktop's banner
+  # agree. Override with `task build VERSION=x.y.z`. Without Node.js on the PATH
+  # a build is 0.0.0-dev: older than any minimum the cloud sets, never newer.
   VERSION:
-    sh: git describe --tags --always --dirty 2>/dev/null || echo "0.0.0-dev"
+    sh: node -p "require('../desktop/package.json').version" 2>/dev/null || echo "0.0.0-dev"
   COMMIT:
     sh: git rev-parse --short HEAD 2>/dev/null || echo "unknown"
   # Task's own template function rather than `date` — the embedded shell has no
