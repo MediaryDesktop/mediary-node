@@ -1,10 +1,33 @@
+import { combine, createStore } from 'effector'
 import { useUnit } from 'effector-react'
 import { useEffect, useMemo } from 'react'
 
 import { $nodeReady } from '@infra/node'
 
 import type { TrackerEntry } from '../api/api'
+import type { TrackerMediaType } from '../api/api'
 import { isLocalTrackerType, TRACKER_MEDIA_TYPES, trackerQueries } from '../model/model'
+
+/**
+ * Latches on once reached instead of tracking the current pending state, so a
+ * background refetch (e.g. from `keepFresh` reacting to a node sync event right after
+ * startup) doesn't flip `useTrackedEntriesReady` back to `false` and make the home page
+ * blink back to its loading skeleton — farfetched queries keep their last successful
+ * `$data` during a refetch, so there's nothing stale to hide while that happens.
+ */
+const $nodeEverReady = createStore(false).on($nodeReady, (everReady, ready) => everReady || ready)
+
+const $everLoaded = combine(
+	Object.fromEntries(
+		TRACKER_MEDIA_TYPES.map(mediaType => [
+			mediaType,
+			createStore(false).on(
+				trackerQueries[mediaType].$status,
+				(loaded, status) => loaded || (status !== 'initial' && status !== 'pending')
+			)
+		])
+	) as Record<TrackerMediaType, ReturnType<typeof createStore<boolean>>>
+)
 
 export function useTrackedEntries(enabled: boolean): TrackerEntry[] {
 	const data = useUnit({
@@ -52,24 +75,17 @@ export function useTrackedEntries(enabled: boolean): TrackerEntry[] {
 }
 
 export function useTrackedEntriesReady(enabled: boolean): boolean {
-	const nodeReady = useUnit($nodeReady)
-	const status = useUnit({
-		anime: trackerQueries.anime.$status,
-		manga: trackerQueries.manga.$status,
-		movie: trackerQueries.movie.$status,
-		series: trackerQueries.series.$status,
-		dorama: trackerQueries.dorama.$status,
-		book: trackerQueries.book.$status
-	})
+	const nodeEverReady = useUnit($nodeEverReady)
+	const everLoaded = useUnit($everLoaded)
 
 	return (
-		nodeReady &&
+		nodeEverReady &&
 		TRACKER_MEDIA_TYPES.every(mediaType => {
 			if (!enabled && !isLocalTrackerType(mediaType)) {
 				return true
 			}
 
-			return status[mediaType] !== 'initial' && status[mediaType] !== 'pending'
+			return everLoaded[mediaType]
 		})
 	)
 }
