@@ -57,7 +57,7 @@ func New(opts Options) (*Client, error) {
 	build := func(timeout time.Duration) (*contracts.ClientWithResponses, error) {
 		api, err := contracts.NewClientWithResponses(
 			opts.BaseURL,
-			contracts.WithHTTPClient(&http.Client{Timeout: timeout}),
+			contracts.WithHTTPClient(&http.Client{Timeout: timeout, Transport: limitedTransport{next: http.DefaultTransport}}),
 			contracts.WithRequestEditorFn(func(_ context.Context, req *http.Request) error {
 				req.Header.Set("User-Agent", userAgent)
 				if token := client.DeviceToken(); token != "" {
