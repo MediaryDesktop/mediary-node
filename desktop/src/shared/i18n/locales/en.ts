@@ -1177,7 +1177,8 @@ export const en = {
 			noFolders: 'Add a library folder in the settings first',
 			folderPlaceholder: 'Choose a folder',
 			title: 'Manga chapters',
-			empty: 'Nothing saved yet',
+			emptyTitle: 'Nothing saved yet',
+			emptyHint: 'Save a chapter from a title’s Manga tab.',
 			cancel: 'Stop',
 			retry: 'Try again',
 			forget: 'Remove from the list',
@@ -1219,7 +1220,8 @@ export const en = {
 			retry: 'Retry {{format}}'
 		},
 		downloads: {
-			empty: 'No books saved yet',
+			emptyTitle: 'No books saved yet',
+			emptyHint: 'Save a copy from a title’s Free copies section.',
 			actionFailed: 'Could not change the download',
 			cancel: 'Stop',
 			retry: 'Try again',
@@ -1419,7 +1421,6 @@ export const en = {
 			queryShort: 'searching “{{query}}”',
 			emptyHint: 'Turn on auto-download on a title’s Torrents tab.',
 			emptyTitle: 'No rules yet',
-			intro: 'Rules search your sources every 30 minutes and add the best release of each new episode. A rule is turned on and tuned on its title’s Torrents tab.',
 			settings: 'Rule settings',
 			panelHint: 'New episodes download by themselves, checked every 30 minutes',
 			panelTitle: 'Auto-download',

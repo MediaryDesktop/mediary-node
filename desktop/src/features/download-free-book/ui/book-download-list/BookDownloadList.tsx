@@ -8,7 +8,7 @@ import { problemDetail } from '@shared/api'
 import type { RequestFailure } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
 import { formatBytes, useUnitWatch } from '@shared/lib'
-import { Button, Icon, ProgressBar, toast } from '@shared/ui'
+import { Button, EmptyState, Icon, ProgressBar, toast } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
 
@@ -52,7 +52,14 @@ export function BookDownloadList() {
 	const downloads = data?.downloads ?? []
 
 	if (downloads.length === 0) {
-		return <p className={styles.empty}>{t('bookSources.downloads.empty')}</p>
+		return (
+			<div className={styles.root}>
+				<EmptyState
+					title={t('bookSources.downloads.emptyTitle')}
+					description={t('bookSources.downloads.emptyHint')}
+				/>
+			</div>
+		)
 	}
 
 	return (

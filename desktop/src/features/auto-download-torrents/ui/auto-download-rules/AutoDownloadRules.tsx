@@ -70,8 +70,6 @@ export function AutoDownloadRules() {
 
 	return (
 		<section className={styles.root}>
-			<p className={styles.intro}>{t('torrents.auto.intro')}</p>
-
 			{rules.length > 0 && (
 				<TorrentSetupNotice
 					setup={setup}

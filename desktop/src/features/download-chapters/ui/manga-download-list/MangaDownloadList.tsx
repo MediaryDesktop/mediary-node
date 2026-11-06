@@ -7,7 +7,7 @@ import { problemDetail } from '@shared/api'
 import type { RequestFailure } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
-import { Button, Icon, ProgressBar, toast } from '@shared/ui'
+import { Button, EmptyState, Icon, ProgressBar, toast } from '@shared/ui'
 
 import { $nodeReady } from '@infra/node'
 
@@ -59,7 +59,10 @@ export function MangaDownloadList({ hideTitle }: MangaDownloadListProps = {}) {
 			{!hideTitle && <h2 className={styles.title}>{t('mangaSources.downloads.title')}</h2>}
 
 			{downloads.length === 0 ? (
-				<p className={styles.empty}>{t('mangaSources.downloads.empty')}</p>
+				<EmptyState
+					title={t('mangaSources.downloads.emptyTitle')}
+					description={t('mangaSources.downloads.emptyHint')}
+				/>
 			) : (
 				<ul className={styles.list}>
 					{downloads.map(item => (

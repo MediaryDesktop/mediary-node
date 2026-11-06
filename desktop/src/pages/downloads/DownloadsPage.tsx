@@ -56,10 +56,12 @@ export function DownloadsPage() {
 				]}
 			/>
 
-			{tab === 'torrents' && <TorrentDownloadList />}
-			{tab === 'auto' && <AutoDownloadRules />}
-			{tab === 'manga' && <MangaDownloadList hideTitle />}
-			{tab === 'books' && <BookDownloadList />}
+			<div className={styles.content}>
+				{tab === 'torrents' && <TorrentDownloadList />}
+				{tab === 'auto' && <AutoDownloadRules />}
+				{tab === 'manga' && <MangaDownloadList hideTitle />}
+				{tab === 'books' && <BookDownloadList />}
+			</div>
 		</PageTransition>
 	)
 }
