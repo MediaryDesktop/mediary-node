@@ -88,6 +88,12 @@ func (h HTTP) Addr() string {
 	return fmt.Sprintf("%s:%d", h.Host, h.Port)
 }
 
+// Loopback says whether the node listens only on this machine. Only then can
+// it know which Host a legitimate request names.
+func (h HTTP) Loopback() bool {
+	return h.Host == "127.0.0.1" || h.Host == "localhost"
+}
+
 // AniZip is the episode-listing source. An empty endpoint turns it off, and the
 // episode list falls back on what AniList itself carries.
 type AniZip struct {
@@ -269,7 +275,7 @@ func (c *Config) validate() error {
 		)
 	}
 
-	if c.HTTP.Host != "127.0.0.1" && c.HTTP.Host != "localhost" && c.HTTP.Token == "" {
+	if !c.HTTP.Loopback() && c.HTTP.Token == "" {
 		return fmt.Errorf(
 			"NODE_HTTP_HOST is %q (not loopback) but NODE_TOKEN is unset: "+
 				"a node reachable from the network must be given an explicit token",

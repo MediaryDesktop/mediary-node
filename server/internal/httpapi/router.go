@@ -25,6 +25,10 @@ type Options struct {
 	Token          string
 	AllowedOrigins []string
 	Logger         zerolog.Logger
+
+	// Loopback refuses requests that name any host but this machine: on
+	// loopback, any other Host is a page that rebound its domain to the node.
+	Loopback bool
 }
 
 func New(opts Options) (*chi.Mux, huma.API) {
@@ -34,6 +38,9 @@ func New(opts Options) (*chi.Mux, huma.API) {
 	router.Use(chimw.Recoverer)
 	router.Use(middleware.Logging(opts.Logger))
 	router.Use(middleware.NoSniff)
+	if opts.Loopback {
+		router.Use(middleware.LoopbackHost)
+	}
 	router.Use(corsHandler(opts.AllowedOrigins))
 	router.Use(middleware.LocalToken(opts.Token, unauthenticatedPaths...))
 

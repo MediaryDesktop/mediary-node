@@ -172,6 +172,7 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 		Token:          token,
 		AllowedOrigins: cfg.HTTP.AllowedOrigins,
 		Logger:         logger,
+		Loopback:       cfg.HTTP.Loopback(),
 	})
 
 	shutdownModules := Register(ctx, api, Deps{
