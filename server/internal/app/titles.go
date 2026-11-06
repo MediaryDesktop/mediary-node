@@ -251,9 +251,7 @@ func (s titleSource) searchDoramas(ctx context.Context, query string) ([]library
 }
 
 func isDorama(found *tmdb.Result) bool {
-	return slices.ContainsFunc(found.OriginCountry, func(country string) bool {
-		return slices.Contains(media.DoramaCountries, country)
-	})
+	return media.IsDorama(found.GenreIDs, found.OriginCountry)
 }
 
 func tmdbCandidate(kind tmdb.Kind, found *tmdb.Result, name, original, date string) library.TitleCandidate {

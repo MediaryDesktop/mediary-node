@@ -63,8 +63,12 @@ type EpisodeList = service.EpisodeList
 // AIProviders is every model that can fill in a title, wired by internal/app.
 type AIProviders = service.AIProviders
 
-// DoramaCountries are where a live-action show has to come from to be a dorama.
-var DoramaCountries = service.DoramaCountries
+// IsDorama says whether a TMDB show — its genres and countries of origin — is a
+// dorama: live action from one of the dorama countries. The catalog files shows
+// by the same rule.
+func IsDorama(genreIDs []int, countries []string) bool {
+	return service.IsDorama(genreIDs, countries)
+}
 
 func New(deps Deps) *Module {
 	svc := service.New(store.New(deps.DB), deps.Logger, service.Options{

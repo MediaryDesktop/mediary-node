@@ -42,6 +42,13 @@ type Service struct {
 
 	mu   sync.Mutex
 	scan ScanStatus
+
+	// life ends when the node stops. A scan is detached from the request that
+	// started it, not from the node: Close cancels it and waits, so it never
+	// writes to a database that is already closed.
+	life  context.Context
+	end   context.CancelFunc
+	scans sync.WaitGroup
 }
 
 func New(st *store.Store, logger zerolog.Logger, hub *events.Hub, opts Options) *Service {
@@ -49,7 +56,16 @@ func New(st *store.Store, logger zerolog.Logger, hub *events.Hub, opts Options) 
 		opts.Now = time.Now
 	}
 
-	return &Service{store: st, logger: logger, hub: hub, opts: opts}
+	life, end := context.WithCancel(context.Background())
+
+	return &Service{store: st, logger: logger, hub: hub, opts: opts, life: life, end: end}
+}
+
+// Close stops a scan in progress and waits until it has. Called once, as the
+// node shuts down.
+func (s *Service) Close() {
+	s.end()
+	s.scans.Wait()
 }
 
 func (s *Service) Roots(ctx context.Context) ([]Root, error) {

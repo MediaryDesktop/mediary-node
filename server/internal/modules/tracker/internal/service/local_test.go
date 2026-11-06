@@ -287,8 +287,8 @@ func TestABookCountsPages(t *testing.T) {
 		t.Fatalf("page 100 starts the book, got %s %s", reading.Status, reading.MediaType)
 	}
 
-	if err := h.svc.MarkRead(ctx, "openlibrary:OL893414W", 608); err != nil {
-		t.Fatalf("last page: %v", err)
+	if readErr := h.svc.MarkRead(ctx, "openlibrary:OL893414W", 608); readErr != nil {
+		t.Fatalf("last page: %v", readErr)
 	}
 
 	collection, err := h.svc.Entries(ctx, MediaTypeBook)

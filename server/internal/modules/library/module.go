@@ -188,3 +188,9 @@ func (m *Module) Episodes(ctx context.Context, mediaRef string) ([]int, error) {
 
 	return episodes, nil
 }
+
+// Close stops a library scan in progress and waits for it, so it never writes
+// to the database after the node has closed it.
+func (m *Module) Close() {
+	m.svc.Close()
+}

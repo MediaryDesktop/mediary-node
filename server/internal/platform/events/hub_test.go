@@ -34,3 +34,29 @@ func TestConcurrentPublishToAFullSubscriberCountsWhatItDrops(t *testing.T) {
 		}
 	}
 }
+
+func TestDroppedCountsOnlyItsOwnSubscription(t *testing.T) {
+	hub := NewHub(1)
+
+	full, unsubscribeFull := hub.Subscribe()
+	defer unsubscribeFull()
+
+	idle, unsubscribeIdle := hub.Subscribe(TopicTorrent)
+	defer unsubscribeIdle()
+
+	for range 3 {
+		hub.Publish(TopicLibraryScan, nil)
+	}
+
+	if got := hub.Dropped(full); got != 2 {
+		t.Errorf("dropped by the full subscription = %d, want 2", got)
+	}
+	if got := hub.Dropped(idle); got != 0 {
+		t.Errorf("dropped by a subscription to another topic = %d, want 0", got)
+	}
+
+	unsubscribeFull()
+	if got := hub.Dropped(full); got != 0 {
+		t.Errorf("dropped after unsubscribing = %d, want 0", got)
+	}
+}

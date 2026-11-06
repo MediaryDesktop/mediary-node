@@ -45,6 +45,25 @@ function parseNodeEvent(data: unknown): NodeEvent | null {
 	}
 }
 
+// The node sends this when this client fell behind and some events never
+// reached it. What the page shows may be stale, exactly as after a reconnect.
+const OVERFLOW_TOPIC = 'hub.overflow'
+
+export function receiveNodeMessage(data: unknown): void {
+	const event = parseNodeEvent(data)
+
+	if (!event) {
+		return
+	}
+
+	if (event.topic === OVERFLOW_TOPIC) {
+		nodeStreamResumed()
+		return
+	}
+
+	nodeEventReceived(event)
+}
+
 function closeStream(): void {
 	if (reconnectTimer) {
 		clearTimeout(reconnectTimer)
@@ -73,13 +92,7 @@ const openStreamFx = createEffect(() => {
 		openedBefore = true
 	})
 
-	stream.addEventListener('message', message => {
-		const event = parseNodeEvent(message.data)
-
-		if (event) {
-			nodeEventReceived(event)
-		}
-	})
+	stream.addEventListener('message', message => receiveNodeMessage(message.data))
 
 	stream.addEventListener('close', () => {
 		if (socket !== stream) {

@@ -524,6 +524,12 @@ func episodesFromTMDB(seasons []tmdb.Season, runtime *int) []Episode {
 	return episodes
 }
 
+// IsDorama says whether a TMDB show is a dorama in Mediary — the one rule for
+// it, so the catalog and the file matcher never disagree.
+func IsDorama(genreIDs []int, countries []string) bool {
+	return classifyTMDB(tmdb.KindTV, genreIDs, countries) == MediaTypeDorama
+}
+
 // classifyTMDB names the media type a TMDB title belongs to in Mediary.
 func classifyTMDB(kind tmdb.Kind, genreIDs []int, countries []string) string {
 	if kind == tmdb.KindMovie {

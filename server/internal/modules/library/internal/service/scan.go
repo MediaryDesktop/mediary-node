@@ -36,7 +36,7 @@ func (s *Service) ScanState() ScanStatus {
 // returns the status the scan started with. Progress arrives as library.scan
 // events; the walk of a large library takes minutes, and a request cannot wait
 // that long.
-func (s *Service) StartScan(ctx context.Context, rootID int64) (*ScanStatus, error) {
+func (s *Service) StartScan(ctx context.Context, rootID int64) (*ScanStatus, error) { //nolint:contextcheck // the scan outlives the request; it runs under the service's own lifetime
 	roots, err := s.scanTargets(ctx, rootID)
 	if err != nil {
 		return nil, err
@@ -61,9 +61,14 @@ func (s *Service) StartScan(ctx context.Context, rootID int64) (*ScanStatus, err
 	status := s.snapshotLocked()
 	s.mu.Unlock()
 
-	detached, cancel := context.WithTimeout(context.WithoutCancel(ctx), scanTimeout)
+	// Not the request's context: the scan outlives the request. The service's
+	// own, so the node's shutdown stops it.
+	detached, cancel := context.WithTimeout(s.life, scanTimeout)
+
+	s.scans.Add(1)
 
 	go func() {
+		defer s.scans.Done()
 		defer cancel()
 		s.runScan(detached, roots)
 	}()
@@ -221,7 +226,7 @@ func (s *Service) scanRoot(ctx context.Context, root store.Root, index, total in
 
 	changes := diffFiles(known, found)
 
-	result.Probed = s.probeDurations(ctx, root.Path, known, found, &changes, index, total)
+	result.Probed = s.probeDurations(ctx, root, known, found, &changes, index, total)
 
 	if err := s.store.ApplyScan(ctx, root.ID, changes, s.opts.Now()); err != nil {
 		s.logger.Error().Err(err).Int64("root_id", root.ID).Msg("apply library scan")
@@ -245,12 +250,13 @@ func (s *Service) scanRoot(ctx context.Context, root store.Root, index, total in
 // wedged.
 func (s *Service) probeDurations(
 	ctx context.Context,
-	rootPath string,
+	root store.Root,
 	known []store.FileState,
 	found []scanner.File,
 	changes *store.ScanChanges,
 	index, total int,
 ) int {
+	rootPath := root.Path
 	stale := staleProbes(known, found, changes)
 
 	work := len(changes.Added) + len(changes.Changed) + len(stale)
@@ -271,7 +277,7 @@ func (s *Service) probeDurations(
 		lastProgress = now
 
 		s.publishScan("probing", map[string]any{
-			"root_id":     rootPath,
+			"root_id":     root.ID,
 			"path":        rootPath,
 			"probed":      done,
 			"total":       work,

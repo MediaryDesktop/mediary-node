@@ -55,6 +55,25 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ticker := time.NewTicker(pingInterval)
 	defer ticker.Stop()
 
+	// seen is how many dropped events the client has been told about. Checked
+	// after every write and on every ping, so a gap is reported as soon as the
+	// client catches up, even when nothing else follows it.
+	var seen uint64
+
+	reportDrops := func() error {
+		dropped := h.hub.Dropped(stream)
+		if dropped == seen {
+			return nil
+		}
+
+		seen = dropped
+
+		writeCtx, cancel := context.WithTimeout(ctx, writeTimeout)
+		defer cancel()
+
+		return wsjson.Write(writeCtx, conn, events.Event{Topic: events.TopicOverflow, At: time.Now().UTC()})
+	}
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -76,6 +95,11 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
+			if err := reportDrops(); err != nil {
+				h.logClose(err, "write failed")
+				return
+			}
+
 		case <-ticker.C:
 			pingCtx, cancel := context.WithTimeout(ctx, writeTimeout)
 			err := conn.Ping(pingCtx)
@@ -83,6 +107,11 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 			if err != nil {
 				h.logClose(err, "ping failed")
+				return
+			}
+
+			if err := reportDrops(); err != nil {
+				h.logClose(err, "write failed")
 				return
 			}
 		}

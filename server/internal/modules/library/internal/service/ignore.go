@@ -29,8 +29,8 @@ func (s *Service) SetIgnored(ctx context.Context, fileID int64, ignored bool) (*
 		at = &now
 	}
 
-	if _, err := s.store.SetIgnored(ctx, fileID, at); err != nil {
-		return nil, apperr.Wrap(err, apperr.KindInternal, "set ignored")
+	if _, setErr := s.store.SetIgnored(ctx, fileID, at); setErr != nil {
+		return nil, apperr.Wrap(setErr, apperr.KindInternal, "set ignored")
 	}
 
 	s.hub.Publish(events.TopicLibraryUpdate, map[string]any{"reason": "ignored_changed"})

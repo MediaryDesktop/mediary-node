@@ -110,8 +110,8 @@ func TestLocalListsLiveWithoutAniList(t *testing.T) {
 		t.Fatalf("unexpected lists: %+v", lists)
 	}
 
-	if err := h.svc.DeleteList(ctx, dorama.ID); err != nil {
-		t.Fatalf("delete dorama list: %v", err)
+	if deleteErr := h.svc.DeleteList(ctx, dorama.ID); deleteErr != nil {
+		t.Fatalf("delete dorama list: %v", deleteErr)
 	}
 
 	renamed, err := h.svc.UpdateList(ctx, created.ID, "Cosy evening", nil)

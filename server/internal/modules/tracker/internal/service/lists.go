@@ -417,9 +417,9 @@ func (s *Service) DeleteList(ctx context.Context, id string) error {
 	}
 
 	if ref.provider == ListProviderLocal {
-		deleted, err := s.store.DeleteCustomList(ctx, ref.localID)
-		if err != nil {
-			return apperr.Wrap(err, apperr.KindInternal, "delete custom list")
+		deleted, deleteErr := s.store.DeleteCustomList(ctx, ref.localID)
+		if deleteErr != nil {
+			return apperr.Wrap(deleteErr, apperr.KindInternal, "delete custom list")
 		}
 
 		if !deleted {
@@ -506,8 +506,8 @@ func (s *Service) rewriteAniListCustomLists(
 	trackerType := mediaType.trackerType()
 
 	if change.to == "" {
-		if err := s.emptyAniListList(ctx, viewer.ID, trackerType, change.from); err != nil {
-			return err
+		if emptyErr := s.emptyAniListList(ctx, viewer.ID, trackerType, change.from); emptyErr != nil {
+			return emptyErr
 		}
 	}
 

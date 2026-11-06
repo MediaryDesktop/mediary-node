@@ -285,6 +285,7 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 
 	return func() {
 		stopQueue()
+		libraryModule.Close()
 		playbackModule.Close()
 		toolsModule.Close()
 		torrentModule.Close()

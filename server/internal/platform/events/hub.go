@@ -22,6 +22,11 @@ const (
 	TopicBookCatalog   Topic = "books.catalog"
 	TopicTools         Topic = "tools"
 	TopicExtension     Topic = "extension"
+
+	// TopicOverflow is never published: the WebSocket bridge sends it itself
+	// when a subscriber fell behind and events were dropped, so the client
+	// reloads what it shows instead of trusting a stream with gaps in it.
+	TopicOverflow Topic = "hub.overflow"
 )
 
 type Event struct {
@@ -109,4 +114,20 @@ func (h *Hub) SubscriberCount() int {
 	defer h.mu.RUnlock()
 
 	return len(h.subscribers)
+}
+
+// Dropped is how many events the subscription behind stream has missed
+// because it was full. It only grows; a subscriber compares it with what it saw
+// last to learn that it lost something.
+func (h *Hub) Dropped(stream <-chan Event) uint64 {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+
+	for _, sub := range h.subscribers {
+		if stream == sub.channel {
+			return sub.dropped.Load()
+		}
+	}
+
+	return 0
 }

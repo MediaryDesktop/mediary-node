@@ -243,8 +243,8 @@ func (s *Service) UpdateEntry(ctx context.Context, mediaRef string, patch EntryP
 		return s.createEntry(ctx, mediaID, patch)
 	}
 
-	if err := s.checkCustomLists(ctx, mediaType, patch); err != nil {
-		return nil, err
+	if listsErr := s.checkCustomLists(ctx, mediaType, patch); listsErr != nil {
+		return nil, listsErr
 	}
 
 	existing, err := s.store.OutboxEntry(ctx, account.ID, mediaID)
