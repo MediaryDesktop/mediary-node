@@ -21,28 +21,10 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      # TEMPORARY — remove once mediary-contracts publishes go/v0.1.0.
-      #
-      # server/internal/platform/cloud imports the generated cloud client, which
-      # has no published version yet. Rather than commit a `replace` directive
-      # (which would break every other checkout), CI reconstructs the same
-      # go.work developers use locally. After the first contracts release this
-      # whole step goes away and `go build` resolves the dependency normally.
-      - name: Check out the contracts repository
-        uses: actions/checkout@v5
-        with:
-          repository: MediaryDesktop/mediary-contracts
-          path: .contracts
-
       - uses: actions/setup-go@v6
         with:
           go-version: ${{ env.GO_VERSION }}
           cache-dependency-path: server/go.sum
-
-      - name: Link the unpublished contracts module
-        run: |
-          cd "$GITHUB_WORKSPACE"
-          go work init ./server ./.contracts/go
 
       - uses: golangci/golangci-lint-action@v9
         with:
