@@ -219,6 +219,15 @@ func (s *Service) updateLocalEntry(ctx context.Context, mediaRef string, patch E
 		return nil, err
 	}
 
+	unlock := s.entryLocks.lock(mediaRef)
+	defer unlock()
+
+	return s.updateLocalEntryLocked(ctx, mediaRef, patch)
+}
+
+// updateLocalEntryLocked is updateLocalEntry for a caller that already holds
+// the title's lock.
+func (s *Service) updateLocalEntryLocked(ctx context.Context, mediaRef string, patch EntryPatch) (*Entry, error) {
 	now := s.opts.Now()
 
 	existing, err := s.store.LocalEntry(ctx, mediaRef)
@@ -413,6 +422,9 @@ func (s *Service) DeleteEntry(ctx context.Context, mediaRef string) error {
 		return err
 	}
 
+	unlock := s.entryLocks.lock(mediaRef)
+	defer unlock()
+
 	existing, err := s.store.LocalEntry(ctx, mediaRef)
 	if err != nil {
 		return apperr.Wrap(err, apperr.KindInternal, "read entry")
@@ -434,7 +446,16 @@ func (s *Service) DeleteEntry(ctx context.Context, mediaRef string) error {
 
 // raiseLocalProgress is the player's and the reader's way in: it never lowers
 // progress the user already has, as AniList's queue never does.
+// The check and the write happen under the title's lock: two raises at once
+// must not let the lower one land last.
 func (s *Service) raiseLocalProgress(ctx context.Context, mediaRef string, progress int) error {
+	if err := validateLocalRef(mediaRef); err != nil {
+		return err
+	}
+
+	unlock := s.entryLocks.lock(mediaRef)
+	defer unlock()
+
 	existing, err := s.store.LocalEntry(ctx, mediaRef)
 	if err != nil {
 		return apperr.Wrap(err, apperr.KindInternal, "read entry")
@@ -444,7 +465,7 @@ func (s *Service) raiseLocalProgress(ctx context.Context, mediaRef string, progr
 		return nil
 	}
 
-	_, err = s.updateLocalEntry(ctx, mediaRef, EntryPatch{Progress: &progress})
+	_, err = s.updateLocalEntryLocked(ctx, mediaRef, EntryPatch{Progress: &progress})
 
 	return err
 }

@@ -40,6 +40,8 @@ type Service struct {
 	flushTimer *time.Timer
 
 	flushMu sync.Mutex
+
+	entryLocks refLocks
 }
 
 func New(st *store.Store, logger zerolog.Logger, hub *events.Hub, opts Options) *Service {
