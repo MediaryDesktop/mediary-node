@@ -1,7 +1,10 @@
 export interface NodeConnection {
 	baseUrl: string
 	wsUrl: string
+	/** For headers only: never put it in a URL. */
 	token: string
+	/** The token for ?token= on the node's media routes and its WebSocket. */
+	urlToken: string
 }
 
 export type NodeState = 'stopped' | 'starting' | 'ready' | 'restarting' | 'failed'

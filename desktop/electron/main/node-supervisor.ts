@@ -6,10 +6,14 @@ import { createServer } from 'node:net'
 import { join } from 'node:path'
 import { setTimeout as delay } from 'node:timers/promises'
 
+import { urlToken } from './url-token'
+
 export interface NodeConnection {
 	baseUrl: string
 	wsUrl: string
 	token: string
+	/** Rides in addresses instead of the node token: see url-token.ts. */
+	urlToken: string
 }
 
 export interface SupervisorOptions {
@@ -115,7 +119,8 @@ export class NodeSupervisor {
 		return {
 			baseUrl: base,
 			wsUrl: `${base.replace(/^http/u, 'ws')}/ws`,
-			token: this.token
+			token: this.token,
+			urlToken: urlToken(this.token)
 		}
 	}
 

@@ -1,13 +1,41 @@
 package middleware
 
 import (
+	"crypto/hmac"
+	"crypto/sha256"
 	"crypto/subtle"
+	"encoding/base64"
 	"net/http"
 	"strings"
 )
 
 const TokenHeader = "X-Mediary-Node-Token" //nolint:gosec // a header name, not a credential
 
+// urlTokenLabel is what the URL token is derived under. The desktop shell
+// derives the same value (desktop/electron/main/url-token.ts); change both
+// together.
+const urlTokenLabel = "mediary-node url token v1" //nolint:gosec // a public HMAC label, not a credential
+
+// URLToken is the token that may ride in an address — ?token= on a WebSocket,
+// a video, a page image, a poster — derived from the node token so whoever
+// holds that one can compute it and nobody else can. Addresses end up in
+// process lists, browser caches and players' logs; this token opens only the
+// read-only routes that take it, and the node token itself never needs to be
+// in a URL.
+func URLToken(token string) string {
+	if token == "" {
+		return ""
+	}
+
+	mac := hmac.New(sha256.New, []byte(token))
+	mac.Write([]byte(urlTokenLabel))
+
+	return base64.RawURLEncoding.EncodeToString(mac.Sum(nil))
+}
+
+// LocalToken lets a request through with the node token in a header, or with
+// the URL token in ?token= on the routes that take one. Neither works in the
+// other's place.
 func LocalToken(token string, exempt ...string) func(http.Handler) http.Handler {
 	exemptSet := make(map[string]struct{}, len(exempt))
 	for _, path := range exempt {
@@ -15,6 +43,7 @@ func LocalToken(token string, exempt ...string) func(http.Handler) http.Handler 
 	}
 
 	expected := []byte(token)
+	expectedURL := []byte(URLToken(token))
 
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -28,9 +57,7 @@ func LocalToken(token string, exempt ...string) func(http.Handler) http.Handler 
 				return
 			}
 
-			presented := presentedToken(r)
-
-			if subtle.ConstantTimeCompare([]byte(presented), expected) != 1 {
+			if !authorized(r, expected, expectedURL) {
 				w.Header().Set("WWW-Authenticate", `Bearer realm="mediary-node"`)
 				http.Error(w, "invalid or missing node token", http.StatusUnauthorized)
 				return
@@ -41,7 +68,19 @@ func LocalToken(token string, exempt ...string) func(http.Handler) http.Handler 
 	}
 }
 
-func presentedToken(r *http.Request) string {
+func authorized(r *http.Request, expected, expectedURL []byte) bool {
+	if header := headerToken(r); header != "" {
+		return subtle.ConstantTimeCompare([]byte(header), expected) == 1
+	}
+
+	if acceptsQueryToken(r) {
+		return subtle.ConstantTimeCompare([]byte(r.URL.Query().Get("token")), expectedURL) == 1
+	}
+
+	return false
+}
+
+func headerToken(r *http.Request) string {
 	if header := r.Header.Get(TokenHeader); header != "" {
 		return header
 	}
@@ -52,15 +91,11 @@ func presentedToken(r *http.Request) string {
 		}
 	}
 
-	if acceptsQueryToken(r) {
-		return r.URL.Query().Get("token")
-	}
-
 	return ""
 }
 
 // The WebSocket API and the src of a video or image element cannot set headers, so these
-// take the token from the URL. Media is read-only, so only GET qualifies there.
+// take the URL token from the address. Media is read-only, so only GET qualifies there.
 func acceptsQueryToken(r *http.Request) bool {
 	if strings.HasPrefix(r.URL.Path, "/ws") {
 		return true

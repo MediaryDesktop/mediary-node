@@ -14,7 +14,7 @@ export function openNodeEventStream(topics: string[] = []): WebSocket {
 
 	const url = new URL(connection.wsUrl)
 
-	url.searchParams.set('token', connection.token)
+	url.searchParams.set('token', connection.urlToken)
 
 	for (const topic of topics) {
 		url.searchParams.append('topic', topic)
@@ -28,7 +28,7 @@ export function nodeMediaUrl(path: string): string {
 
 	const url = new URL(path, connection.baseUrl)
 
-	url.searchParams.set('token', connection.token)
+	url.searchParams.set('token', connection.urlToken)
 
 	return url.toString()
 }

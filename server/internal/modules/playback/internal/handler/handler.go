@@ -55,7 +55,7 @@ type TrackInput struct {
 
 type HLSInput struct {
 	ID    int64  `path:"id" doc:"Library file, as listed by listLibraryFiles."`
-	Token string `query:"token" doc:"The node token. Repeated into every URL the playlist lists, so the player can follow them."`
+	Token string `query:"token" doc:"The URL token. Repeated into every URL the playlist lists, so the player can follow them."`
 }
 
 type HLSVideoInput struct {
@@ -246,7 +246,7 @@ func (h *Handler) Register(api huma.API) {
 		Method:      http.MethodGet,
 		Path:        "/v1/playback/files/{id}/direct",
 		Summary:     "Serve a file as it is",
-		Description: "The file's bytes with range support, for a video element to play directly. For a stream (a negative ID) the node passes the request on to the debrid service, so the client never holds the service's link and the link can be renewed behind the same address. Accepts the node token as ?token=, because a video element cannot send headers.",
+		Description: "The file's bytes with range support, for a video element to play directly. For a stream (a negative ID) the node passes the request on to the debrid service, so the client never holds the service's link and the link can be renewed behind the same address. Accepts the URL token as ?token=, because a video element cannot send headers.",
 		Tags:        []string{"playback"},
 	}, func(ctx context.Context, in *FileInput) (*huma.StreamResponse, error) {
 		source, err := h.svc.DirectSource(ctx, in.ID)

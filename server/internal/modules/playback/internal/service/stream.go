@@ -41,7 +41,7 @@ type Stream struct {
 
 	Info *videofile.MediaInfo `json:"info" doc:"Streams, codecs and chapters as ffprobe reports them."`
 
-	DirectURL string `json:"direct_url" doc:"Path that serves the file as it is, with range requests. The renderer appends the node token as ?token= because a video element cannot send headers."`
+	DirectURL string `json:"direct_url" doc:"Path that serves the file as it is, with range requests. The renderer appends the URL token as ?token= because a video element cannot send headers."`
 
 	HLSURL string `json:"hls_url,omitempty" doc:"Master playlist of the file transcoded to HLS, for when the renderer cannot play it directly. Absent while transcoding is turned off."`
 }

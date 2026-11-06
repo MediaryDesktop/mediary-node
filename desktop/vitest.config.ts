@@ -1,5 +1,5 @@
-import { defineConfig } from 'vitest/config'
 import { fileURLToPath } from 'node:url'
+import { defineConfig } from 'vitest/config'
 
 const dir = (path: string) => fileURLToPath(new URL(path, import.meta.url))
 
@@ -17,7 +17,7 @@ export default defineConfig({
 	test: {
 		environment: 'jsdom',
 		globals: true,
-		include: ['src/**/*.{test,spec}.{ts,tsx}'],
+		include: ['src/**/*.{test,spec}.{ts,tsx}', 'electron/**/*.{test,spec}.ts'],
 		setupFiles: ['./vitest.setup.ts']
 	}
 })

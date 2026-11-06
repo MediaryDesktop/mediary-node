@@ -4888,7 +4888,7 @@ components:
       additionalProperties: false
       properties:
         direct_url:
-          description: Path that serves the file as it is, with range requests. The renderer appends the node token as ?token= because a video element cannot send headers.
+          description: Path that serves the file as it is, with range requests. The renderer appends the URL token as ?token= because a video element cannot send headers.
           type: string
         episode:
           description: Episode number within that title.
@@ -6437,7 +6437,7 @@ components:
       type: object
   securitySchemes:
     nodeToken:
-      description: The node's local token, generated on first start and read by the desktop shell.
+      description: "The node's local token, generated on first start and read by the desktop shell. Never in a URL: the routes a video, image or WebSocket loads take ?token= with the URL token instead, HMAC-SHA256 of \"mediary-node url token v1\" keyed with this token, base64url without padding."
       in: header
       name: X-Mediary-Node-Token
       type: apiKey
@@ -8842,7 +8842,7 @@ paths:
         - playback
   /v1/playback/files/{id}/direct:
     get:
-      description: The file's bytes with range support, for a video element to play directly. For a stream (a negative ID) the node passes the request on to the debrid service, so the client never holds the service's link and the link can be renewed behind the same address. Accepts the node token as ?token=, because a video element cannot send headers.
+      description: The file's bytes with range support, for a video element to play directly. For a stream (a negative ID) the node passes the request on to the debrid service, so the client never holds the service's link and the link can be renewed behind the same address. Accepts the URL token as ?token=, because a video element cannot send headers.
       operationId: getPlaybackDirect
       parameters:
         - description: Library file, as listed by listLibraryFiles.
@@ -8937,12 +8937,12 @@ paths:
             description: Library file, as listed by listLibraryFiles.
             format: int64
             type: integer
-        - description: The node token. Repeated into every URL the playlist lists, so the player can follow them.
+        - description: The URL token. Repeated into every URL the playlist lists, so the player can follow them.
           explode: false
           in: query
           name: token
           schema:
-            description: The node token. Repeated into every URL the playlist lists, so the player can follow them.
+            description: The URL token. Repeated into every URL the playlist lists, so the player can follow them.
             type: string
         - description: Audio track, as the master playlist names it.
           in: path
@@ -8985,12 +8985,12 @@ paths:
             description: Library file, as listed by listLibraryFiles.
             format: int64
             type: integer
-        - description: The node token. Repeated into every URL the playlist lists, so the player can follow them.
+        - description: The URL token. Repeated into every URL the playlist lists, so the player can follow them.
           explode: false
           in: query
           name: token
           schema:
-            description: The node token. Repeated into every URL the playlist lists, so the player can follow them.
+            description: The URL token. Repeated into every URL the playlist lists, so the player can follow them.
             type: string
       responses:
         "200":
@@ -9017,12 +9017,12 @@ paths:
             description: Library file, as listed by listLibraryFiles.
             format: int64
             type: integer
-        - description: The node token. Repeated into every URL the playlist lists, so the player can follow them.
+        - description: The URL token. Repeated into every URL the playlist lists, so the player can follow them.
           explode: false
           in: query
           name: token
           schema:
-            description: The node token. Repeated into every URL the playlist lists, so the player can follow them.
+            description: The URL token. Repeated into every URL the playlist lists, so the player can follow them.
             type: string
         - description: Rendition, as the master playlist names it.
           in: path

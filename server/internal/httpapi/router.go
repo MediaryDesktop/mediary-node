@@ -87,7 +87,7 @@ func humaConfig(opts Options) huma.Config {
 			Type:        "apiKey",
 			In:          "header",
 			Name:        middleware.TokenHeader,
-			Description: "The node's local token, generated on first start and read by the desktop shell.",
+			Description: "The node's local token, generated on first start and read by the desktop shell. Never in a URL: the routes a video, image or WebSocket loads take ?token= with the URL token instead, HMAC-SHA256 of \"mediary-node url token v1\" keyed with this token, base64url without padding.",
 		},
 	}
 

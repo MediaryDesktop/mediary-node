@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/mediaryorg/mediary-node/server/internal/config"
+	"github.com/mediaryorg/mediary-node/server/internal/httpapi/middleware"
 )
 
 // localBase is the node's own address: loopback when it listens on every
@@ -23,8 +24,10 @@ func localBase(httpCfg config.HTTP) string {
 }
 
 // localDirectURL is how the node's own tools reach a file's direct endpoint.
-// The token rides in the query, as for a video element.
-func localDirectURL(httpCfg config.HTTP, token string) func(fileID int64) string {
+// The URL token rides in the query, as for a video element: this address is
+// handed to mpv and FFmpeg on their command line.
+func localDirectURL(httpCfg config.HTTP, nodeToken string) func(fileID int64) string {
+	token := middleware.URLToken(nodeToken)
 	base := localBase(httpCfg)
 
 	return func(fileID int64) string {
@@ -37,9 +40,10 @@ func localDirectURL(httpCfg config.HTTP, token string) func(fileID int64) string
 	}
 }
 
-// localCoverURL is where a client loads a manual title's poster from. The token
+// localCoverURL is where a client loads a manual title's poster from. The URL token
 // rides in the query too: an <img> sends no headers.
-func localCoverURL(httpCfg config.HTTP, token string) func(id string, version int64) string {
+func localCoverURL(httpCfg config.HTTP, nodeToken string) func(id string, version int64) string {
+	token := middleware.URLToken(nodeToken)
 	base := localBase(httpCfg)
 
 	return func(id string, version int64) string {

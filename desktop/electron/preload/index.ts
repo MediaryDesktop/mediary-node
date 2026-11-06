@@ -84,6 +84,7 @@ export interface NodeConnection {
 	baseUrl: string
 	wsUrl: string
 	token: string
+	urlToken: string
 }
 
 export type NodeState = 'stopped' | 'starting' | 'ready' | 'restarting' | 'failed'
