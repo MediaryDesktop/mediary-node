@@ -78,12 +78,18 @@ jobs:
 
       # The generated API types are committed, so CI proves they still match the
       # specs they came from. A stale type file compiles happily against an API
-      # that no longer exists.
+      # that no longer exists. Formatted the way the committed file is, or the
+      # diff would only ever show Prettier's changes.
+      #
+      # Only the node's types: the cloud's come from mediary-contracts, which
+      # this job does not check out until the contracts are published
+      # (docs/audits/contracts.md, stage 2 in the workspace).
       - name: Generated API types are current
         working-directory: desktop
         run: |
           npm run api:types:node
-          git diff --exit-code -- src/shared/types/node.gen.ts
+          npx prettier --write --log-level warn src/infrastructure/node/schema.gen.ts
+          git diff --exit-code -- src/infrastructure/node/schema.gen.ts
 
       - name: Format, architecture, types, tests
         working-directory: desktop

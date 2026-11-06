@@ -201,7 +201,7 @@ export interface paths {
 		}
 		/**
 		 * OPDS servers of books
-		 * @description The user's own catalogues of books — Calibre-Web, Kavita — and Standard Ebooks for its patrons. Each is searched beside Project Gutenberg.
+		 * @description The user's own catalogues of books — Calibre-Web, Kavita — and Standard Ebooks for its patrons.
 		 */
 		get: operations['listBookOPDSServers']
 		put?: never
@@ -245,44 +245,6 @@ export interface paths {
 		get: operations['listBookSources']
 		put?: never
 		post?: never
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/v1/books/sources/gutenberg': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		/** Project Gutenberg as a source of books */
-		get: operations['getGutenbergSettings']
-		/**
-		 * Turn Project Gutenberg on or off
-		 * @description On, the node downloads Gutenberg's catalogue and searches it locally: the site is asked only for a book the user downloads. Off removes the catalogue.
-		 */
-		put: operations['putGutenbergSettings']
-		post?: never
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/v1/books/sources/gutenberg/refresh': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		get?: never
-		put?: never
-		/** Check for a newer Project Gutenberg catalogue now */
-		post: operations['refreshGutenbergCatalog']
 		delete?: never
 		options?: never
 		head?: never
@@ -1276,7 +1238,7 @@ export interface paths {
 		}
 		/**
 		 * Serve a file as it is
-		 * @description The file's bytes with range support, for a video element to play directly. For a stream (a negative ID) the node passes the request on to the debrid service, so the client never holds the service's link and the link can be renewed behind the same address. Accepts the node token as ?token=, because a video element cannot send headers.
+		 * @description The file's bytes with range support, for a video element to play directly. For a stream (a negative ID) the node passes the request on to the debrid service, so the client never holds the service's link and the link can be renewed behind the same address. Accepts the URL token as ?token=, because a video element cannot send headers.
 		 */
 		get: operations['getPlaybackDirect']
 		put?: never
@@ -2547,7 +2509,7 @@ export interface components {
 			language?: string
 			/**
 			 * @description Pass as edition_ref to download it, within 30 minutes of the search.
-			 * @example gutenberg:84
+			 * @example opds:1:urn:uuid:8b2c1f3e-0001
 			 */
 			ref: string
 			/** @description The source's name. */
@@ -2670,10 +2632,10 @@ export interface components {
 		BookSource: {
 			/**
 			 * @description The prefix of the source's edition references.
-			 * @example gutenberg
+			 * @example opds:1
 			 */
 			id: string
-			/** @example Project Gutenberg */
+			/** @example Komga at home */
 			name: string
 		}
 		BookSourceOutcome: {
@@ -3500,37 +3462,6 @@ export interface components {
 			 * @enum {string}
 			 */
 			key_source: 'user' | 'build' | 'none'
-		}
-		GutenbergSettingsBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/GutenbergSettingsBody.json
-			 */
-			readonly $schema?: string
-			/** @description False when the node is configured without Project Gutenberg. */
-			available: boolean
-			/**
-			 * Format: int64
-			 * @description Books in the node's copy of the catalogue; 0 until it is downloaded.
-			 */
-			books: number
-			/**
-			 * Format: date-time
-			 * @description When the node last asked for a newer one; it asks once a week.
-			 */
-			checked_at?: string
-			/** @description Off until the user turns it on; turning it on downloads the catalogue (about 6 MB, mostly books in English). */
-			enabled: boolean
-			/** @description Why the last download or check failed. */
-			error?: string
-			/** @description The catalogue is being downloaded or checked. Changes arrive on the books.catalog topic. */
-			syncing: boolean
-			/**
-			 * Format: date-time
-			 * @description When the node took the catalogue it has.
-			 */
-			updated_at?: string
 		}
 		HealthOutputBody: {
 			/**
@@ -4364,15 +4295,6 @@ export interface components {
 			/** Format: int64 */
 			root_id: number
 		}
-		PutGutenbergSettingsInputBody: {
-			/**
-			 * Format: uri
-			 * @description A URL to the JSON Schema for this object.
-			 * @example https://example.com/schemas/PutGutenbergSettingsInputBody.json
-			 */
-			readonly $schema?: string
-			enabled: boolean
-		}
 		PutMangaDownloadSettingsInputBody: {
 			/**
 			 * Format: uri
@@ -4506,7 +4428,7 @@ export interface components {
 			 */
 			added_at: string
 			/**
-			 * @description What the folder holds. For videos it picks the source: anime is matched against AniList, movies and shows against TMDB, doramas against TMDB's East Asian shows, mixed videos against both, file by file; such a folder keeps comics and books as well. A folder of manga keeps only comics, a folder of books only books.
+			 * @description What the folder holds. For videos it picks the source: anime is matched against AniList, movies and shows against TMDB, doramas against TMDB's East Asian shows. Each of those three keeps only video files. A folder of mixed videos is matched against both AniList and TMDB, file by file, and keeps comics and books as well. A folder of manga keeps only comics, a folder of books only books.
 			 * @enum {string}
 			 */
 			content: 'anime' | 'movies_and_shows' | 'doramas' | 'mixed' | 'manga' | 'books'
@@ -5118,7 +5040,7 @@ export interface components {
 			ready: boolean
 		}
 		Stream: {
-			/** @description Path that serves the file as it is, with range requests. The renderer appends the node token as ?token= because a video element cannot send headers. */
+			/** @description Path that serves the file as it is, with range requests. The renderer appends the URL token as ?token= because a video element cannot send headers. */
 			direct_url: string
 			/**
 			 * Format: int64
@@ -6063,7 +5985,6 @@ export type SchemaFont = components['schemas']['Font']
 export type SchemaFuzzyDate = components['schemas']['FuzzyDate']
 export type SchemaGoogleBooksKeyInputBody = components['schemas']['GoogleBooksKeyInputBody']
 export type SchemaGoogleBooksSettings = components['schemas']['GoogleBooksSettings']
-export type SchemaGutenbergSettingsBody = components['schemas']['GutenbergSettingsBody']
 export type SchemaHealthOutputBody = components['schemas']['HealthOutputBody']
 export type SchemaImage = components['schemas']['Image']
 export type SchemaInstallExtensionInputBody = components['schemas']['InstallExtensionInputBody']
@@ -6109,7 +6030,6 @@ export type SchemaPreviewExtensionInputBody = components['schemas']['PreviewExte
 export type SchemaProgressInputBody = components['schemas']['ProgressInputBody']
 export type SchemaProgressOutputBody = components['schemas']['ProgressOutputBody']
 export type SchemaPutBookDownloadSettingsInputBody = components['schemas']['PutBookDownloadSettingsInputBody']
-export type SchemaPutGutenbergSettingsInputBody = components['schemas']['PutGutenbergSettingsInputBody']
 export type SchemaPutMangaDownloadSettingsInputBody =
 	components['schemas']['PutMangaDownloadSettingsInputBody']
 export type SchemaPutMangaLinkInputBody = components['schemas']['PutMangaLinkInputBody']
@@ -6770,97 +6690,6 @@ export interface operations {
 				}
 				content: {
 					'application/json': components['schemas']['BookSourcesOutputBody']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	getGutenbergSettings: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['GutenbergSettingsBody']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	putGutenbergSettings: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['PutGutenbergSettingsInputBody']
-			}
-		}
-		responses: {
-			/** @description OK */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['GutenbergSettingsBody']
-				}
-			}
-			/** @description Error */
-			default: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/problem+json': components['schemas']['ErrorModel']
-				}
-			}
-		}
-	}
-	refreshGutenbergCatalog: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			/** @description Accepted */
-			202: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['GutenbergSettingsBody']
 				}
 			}
 			/** @description Error */
@@ -9061,7 +8890,7 @@ export interface operations {
 	getPlaybackHLSAudio: {
 		parameters: {
 			query?: {
-				/** @description The node token. Repeated into every URL the playlist lists, so the player can follow them. */
+				/** @description The URL token. Repeated into every URL the playlist lists, so the player can follow them. */
 				token?: string
 			}
 			header?: never
@@ -9098,7 +8927,7 @@ export interface operations {
 	getPlaybackHLSMaster: {
 		parameters: {
 			query?: {
-				/** @description The node token. Repeated into every URL the playlist lists, so the player can follow them. */
+				/** @description The URL token. Repeated into every URL the playlist lists, so the player can follow them. */
 				token?: string
 			}
 			header?: never
@@ -9131,7 +8960,7 @@ export interface operations {
 	getPlaybackHLSVideo: {
 		parameters: {
 			query?: {
-				/** @description The node token. Repeated into every URL the playlist lists, so the player can follow them. */
+				/** @description The URL token. Repeated into every URL the playlist lists, so the player can follow them. */
 				token?: string
 			}
 			header?: never
