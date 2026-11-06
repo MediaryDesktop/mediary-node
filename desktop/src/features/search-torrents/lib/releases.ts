@@ -8,7 +8,6 @@ export type ReleaseKind = 'all' | 'episodes' | 'batches'
 
 export interface ReleaseFilter {
 	kind: ReleaseKind
-	// Keep only releases that bring at least one missing episode.
 	onlyMissing: boolean
 	missing: readonly number[] | null
 }
@@ -22,7 +21,6 @@ export function filterReleases(releases: TorrentRelease[], { kind, onlyMissing, 
 	})
 }
 
-// What a release holds: its season, when its name gives one, and its episodes.
 export function releaseLabel(found: TorrentRelease, t: TFunction): string {
 	const range = found.episodes
 	const episodes = range
@@ -46,7 +44,6 @@ export interface DownloadTarget {
 	missing: readonly number[] | null
 }
 
-// A batch only brings the episodes that are missing; a single episode brings itself.
 export function downloadRequests(
 	chosen: TorrentRelease[],
 	{ mediaRef, title, missing }: DownloadTarget
@@ -61,9 +58,6 @@ export function downloadRequests(
 			title,
 			release_id: found.id,
 			episodes: covered.length > 0 ? covered : single !== null ? [single] : undefined,
-			// A batch is held until its file list arrives: with the missing
-			// episodes known the node takes their files itself, otherwise the
-			// user picks them.
 			choose_files: found.batch
 		}
 	})

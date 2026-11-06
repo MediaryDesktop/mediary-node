@@ -10,7 +10,6 @@ export interface MoreMenuProps {
 	label: string
 }
 
-// The "⋮" menu at the end of a row.
 export function MoreMenu({ items, label }: MoreMenuProps) {
 	return (
 		<DropdownMenu

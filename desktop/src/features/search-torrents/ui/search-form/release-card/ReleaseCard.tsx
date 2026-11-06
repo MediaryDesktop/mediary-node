@@ -12,29 +12,21 @@ import styles from './ReleaseCard.module.scss'
 
 export interface ReleaseCardProps {
 	release: TorrentRelease
-	// The missing episodes it would bring.
 	covered: number[]
 	poster?: string | null
-	// The debrid service the cached mark is about, when the client is one.
 	cacheService?: string
-	// Playing without downloading, with a debrid service set up.
 	watch?: ReleaseWatch
-	// Absent for a release only ever watched: there is nothing to tick, each
-	// result plays on its own rather than joining a batch to download.
 	checked?: boolean
 	onCheckedChange?: (on: boolean) => void
 }
 
 export interface ReleaseWatch {
-	// False for a batch with no episode searched: there is nothing to pick by.
 	possible: boolean
-	// The service is readying this release; how far it is shows in the overlay.
 	preparing: boolean
 	onWatch: () => void
 	onCancel: () => void
 }
 
-// One search result, ticked to download.
 export function ReleaseCard({
 	release,
 	covered,

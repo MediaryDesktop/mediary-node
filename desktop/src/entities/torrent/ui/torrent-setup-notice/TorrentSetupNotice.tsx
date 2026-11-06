@@ -5,16 +5,12 @@ import type { TorrentSetup } from '../../lib/useTorrentSetup'
 
 export interface TorrentSetupNoticeProps {
 	setup: TorrentSetup
-	// Search and the rules also need a source; a downloads list does not.
 	needSearch?: boolean
-	// Which setting is missing, so the caller can open the section that fixes it.
 	onOpenSettings: (missing: TorrentSetupGap) => void
 }
 
 export type TorrentSetupGap = 'client' | 'sources'
 
-// Says what is missing before torrents work, and leads to where it is fixed. One
-// message at a time, the most basic first: without a client nothing else helps.
 export function TorrentSetupNotice({ setup, needSearch, onOpenSettings }: TorrentSetupNoticeProps) {
 	const { t } = useTranslation()
 

@@ -16,12 +16,10 @@ export interface ChapterRowProps {
 	state: ChapterState
 	read: boolean
 	icons: Map<string, string>
-	// Absent when the chapter cannot be saved, so there is nothing to select.
 	selected?: boolean
 	onSelect: (selected: boolean) => void
 	onOpen: (option: ChapterOption) => void
 	onSave?: () => void
-	// Absent for an extra such as 12.5, which progress cannot mark.
 	onToggleRead?: () => void
 }
 
@@ -56,7 +54,6 @@ function StateBadge({ state }: { state: ChapterState }) {
 	}
 }
 
-// A chapter opens its nearest copy; the other copies wait behind the menu.
 export function ChapterRow({
 	row,
 	state,
@@ -76,7 +73,6 @@ export function ChapterRow({
 	}
 
 	const label = row.number === null ? first.title : t('reader.chapterNumber', { number: row.number })
-	// The file name says more of a library copy than a title that repeats the number.
 	const subtitle = first.title !== label ? first.title : first.source === LOCAL_SOURCE ? first.detail : ''
 	const readLabel = t(read ? 'mangaSources.chapters.markUnread' : 'mangaSources.chapters.markRead', { label })
 

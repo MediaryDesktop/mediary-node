@@ -16,7 +16,6 @@ export interface PlayerHeaderProps {
 	onClose: () => void
 }
 
-// Full: back to the page, what is playing, the window buttons. Mini: expand and stop.
 export function PlayerHeader({
 	mini,
 	visible,

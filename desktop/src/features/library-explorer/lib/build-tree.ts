@@ -33,8 +33,6 @@ export function matchesFilter(file: LibraryFile, filter: ExplorerFilter | null):
 	switch (filter) {
 		case 'unmatched':
 			return !isMatched(file) && !isIgnored(file)
-		// A match the node made on its own and nobody confirmed — the one a rescan
-		// is still allowed to change.
 		case 'auto':
 			return file.match?.source === 'auto'
 		case 'ignored':
@@ -54,10 +52,6 @@ export function matchesSearch(file: LibraryFile, needle: string): boolean {
 	return file.rel_path.toLowerCase().includes(needle)
 }
 
-// The node stores a file as a root plus a path under it, which is already the
-// shape of a tree — it just has to be split back apart. Folders exist only as
-// prefixes of the files inside them, so a folder with nothing left after a
-// filter simply never gets created.
 export function buildTree(files: LibraryFile[], roots: LibraryRoot[]): TreeFolder[] {
 	const byRoot = new Map<number, TreeFolder>()
 
@@ -103,8 +97,6 @@ export function buildTree(files: LibraryFile[], roots: LibraryRoot[]): TreeFolde
 	return tree.sort((left, right) => left.name.localeCompare(right.name))
 }
 
-// Folders first, then by name — the order a file manager uses, and the one that
-// keeps a season's episodes together under the show they belong to.
 function sortFolder(folder: TreeFolder) {
 	folder.children.sort((left, right) => {
 		if (left.kind !== right.kind) {
@@ -144,8 +136,6 @@ function countFolder(folder: TreeFolder): TreeFolder {
 	return folder
 }
 
-// Only what is on screen: a collapsed folder contributes one row, not the
-// thousand files under it.
 export function flattenTree(tree: TreeFolder[], expanded: ReadonlySet<string>, depth = 0): FlatNode[] {
 	const rows: FlatNode[] = []
 
@@ -168,7 +158,6 @@ function rootNameOf(file: LibraryFile): string {
 	return file.path.slice(0, Math.max(file.path.length - file.rel_path.length - 1, 0))
 }
 
-// Every file in a folder, however deep.
 export function fileIdsUnder(folder: TreeFolder): number[] {
 	const ids: number[] = []
 
@@ -200,7 +189,6 @@ export function allFolderKeys(nodes: TreeNode[]): Set<string> {
 	return keys
 }
 
-// A folder's tick: none, all, or some of the files under it.
 export function checkState(node: TreeNode, selected: ReadonlySet<number>): boolean | 'mixed' {
 	if (node.kind === 'file') {
 		return selected.has(node.file.id)

@@ -45,7 +45,6 @@
 		z-index: 1;
 	}
 
-	// The full path outweighs .open's own subtitle colour below.
 	&.read {
 		--row-glow: rgba(42, 249, 35, 0.5);
 		--checkbox-accent: var(--success);

@@ -1,9 +1,6 @@
 import type { LibraryFile } from '@entities/library-item'
 import type { TorrentFile } from '@entities/torrent'
 
-// The episodes a title already has on disk, keyed so a torrent's files can be
-// looked up in them. A show numbered by season keys by season and episode — its
-// numbers repeat across seasons — and an anime by the episode alone.
 export class OwnedEpisodes {
 	private readonly keys: Set<string>
 
@@ -27,7 +24,6 @@ export class OwnedEpisodes {
 		return owned
 	}
 
-	// A first season is often left unwritten: Show - 05.mkv.
 	key(season: number | null | undefined, episode: number): string {
 		return this.seasonal ? `${season ?? 1}:${episode}` : String(episode)
 	}
@@ -37,9 +33,6 @@ export class OwnedEpisodes {
 	}
 }
 
-// Which files start ticked. For a torrent held for the choice: every video whose
-// episode the library does not have yet, and the rest of the files — subtitles,
-// fonts — as they come. Afterwards: what the client is downloading.
 export function initialSelection(files: TorrentFile[], owned: OwnedEpisodes, choosing: boolean): Set<number> {
 	if (!choosing) {
 		return new Set(files.filter(file => file.selected).map(file => file.index))
@@ -48,7 +41,6 @@ export function initialSelection(files: TorrentFile[], owned: OwnedEpisodes, cho
 	return new Set(files.filter(file => !owned.has(file)).map(file => file.index))
 }
 
-// Files in the order a person reads a show: by season, by episode, then by name.
 export function sortFiles(files: TorrentFile[]): TorrentFile[] {
 	return [...files].sort((left, right) => {
 		const bySeason = (left.season ?? 0) - (right.season ?? 0)

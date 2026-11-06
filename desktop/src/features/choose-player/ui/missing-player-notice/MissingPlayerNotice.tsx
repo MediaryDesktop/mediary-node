@@ -14,8 +14,6 @@ export interface MissingPlayerNoticeProps {
 	className?: string
 }
 
-// mpv is the chosen player but the node finds it nowhere: every episode would
-// fail to open, so the setting says so and points at the tab that installs it.
 export function MissingPlayerNotice({ className }: MissingPlayerNoticeProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()

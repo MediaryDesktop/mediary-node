@@ -3,8 +3,6 @@ import { toast } from '@shared/ui'
 
 import { trackerModel } from '@entities/tracker'
 
-// One toast follows a change out to the remote tracker: loading while it syncs,
-// a warning when it takes long, done or failed when it ends.
 const SYNC_TOAST = 'tracker-sync'
 const SYNC_PATIENCE_MS = 10_000
 

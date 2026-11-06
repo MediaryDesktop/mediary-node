@@ -68,8 +68,6 @@
 			grid-template-columns: 1fr 1fr;
 			gap: 0.5rem;
 
-			// A field reads fine without its own border inside the card, but a pair
-			// of them side by side needs one each to read as separate fields.
 			.field {
 				padding: 0.5rem 0.625rem;
 				border: 1px solid var(--border);
@@ -78,9 +76,6 @@
 		}
 	}
 
-	// Rendered by the local Field() component, called from both directly inside
-	// .card and, for a pair of values, inside .card .grid — kept at this level so
-	// one rule reaches it under either.
 	.field {
 		display: flex;
 		flex-direction: column;
@@ -102,8 +97,6 @@
 			font-weight: 500;
 		}
 
-		// The label and its value share a row instead of stacking, for a field
-		// whose value is already a badge and reads fine beside its name.
 		&.inline {
 			flex-direction: row;
 			align-items: center;

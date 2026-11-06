@@ -1,8 +1,5 @@
 export interface ReadImage {
-	// Base64, as CoverSource.data takes it — without the data URL prefix the
-	// browser's reader wraps it in.
 	data: string
-	// For an immediate preview, before the node has seen the file at all.
 	previewUrl: string
 }
 

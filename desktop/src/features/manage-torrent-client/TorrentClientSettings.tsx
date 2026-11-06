@@ -11,7 +11,6 @@ import { torrentDebridQuery, torrentSettingsQuery } from '@entities/torrent'
 import styles from './TorrentClientSettings.module.scss'
 import { TorrentClientForm } from './ui/client-form/TorrentClientForm'
 
-// The client the node adds torrents to, and the library folder they go into.
 export function TorrentClientSettings() {
 	const { t } = useTranslation()
 
@@ -23,8 +22,6 @@ export function TorrentClientSettings() {
 		$nodeReady
 	])
 
-	// Bumped after a save or a cancel, so the form below remounts with fresh
-	// fields instead of carrying over whatever was half-typed.
 	const [formKey, setFormKey] = useState(0)
 	const reset = useCallback(() => setFormKey(key => key + 1), [])
 

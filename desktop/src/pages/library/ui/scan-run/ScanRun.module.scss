@@ -44,8 +44,6 @@
 			padding: 0;
 			list-style: none;
 
-			// One title the scan matched files to — rendered by the sibling
-			// ScannedGroup component, which reuses this stylesheet.
 			.group {
 				display: flex;
 				flex-direction: column;
@@ -123,18 +121,12 @@
 	}
 }
 
-// The scan's summary line: shown inside .cardHeader, as the whole second card
-// (nothing matched or unmatched) and inside a matched group's .groupBody — kept
-// unscoped so one rule reaches all three.
 .muted {
 	margin: 0;
 	color: var(--text-muted);
 	font-size: 0.875rem;
 }
 
-// The scanner log list: once for the unmatched files directly under .section,
-// once inside a matched group's .scannerLogs disclosure — kept unscoped so one
-// rule reaches both.
 .logs {
 	display: flex;
 	flex-direction: column;

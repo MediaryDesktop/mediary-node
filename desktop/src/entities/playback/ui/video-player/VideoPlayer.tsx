@@ -22,11 +22,8 @@ import { TrackMenus } from './player-controls/track-menus/TrackMenus'
 import { PlayerHeader } from './player-header/PlayerHeader'
 import styles from './VideoPlayer.module.scss'
 
-// Matches the keyframes in the stylesheet; the host waits this long before unmounting.
 const LEAVE_MS = 240
 
-// Direct play hands the file to the video element as it is; HLS goes through
-// hls.js, because Chromium has no HLS of its own.
 export type VideoSource = { kind: 'direct' } | { kind: 'hls'; path: string }
 
 export interface VideoPlayerProps {
@@ -34,22 +31,15 @@ export interface VideoPlayerProps {
 	source: VideoSource
 	heading: string
 	subheading?: string
-	// Full covers the window; mini is the corner picture that stays while the user
-	// browses. The same element plays in both, so switching does not interrupt it.
 	mode: 'full' | 'mini'
 	onMinimize: () => void
 	onExpand: () => void
 	onClose: () => void
 	onOpenExternally: () => void
-	// Another way out of a failure the host recognises — FFmpeg missing, say —
-	// as a label and an action, or nothing.
 	failureAction?: (failure: PlayerFailure) => { label: string; onClick: () => void } | undefined
 
-	// Called instead of showing a failure when there is somewhere else to go:
-	// a file Chromium said it could play directly and then could not.
 	onFallback?: () => void
 
-	// Set while the player slides away; onLeft runs once that has finished.
 	leaving?: boolean
 	onLeft?: () => void
 }
@@ -78,7 +68,6 @@ export function VideoPlayer({
 	const fileId = stream.file_id
 	const info = stream.info
 
-	// The node never sends these empty-handed, but the schema allows null.
 	const audios = useMemo(() => info.audios ?? [], [info.audios])
 	const subtitles = useMemo(() => info.subtitles ?? [], [info.subtitles])
 	const fonts = useMemo(() => info.fonts ?? [], [info.fonts])
@@ -93,8 +82,6 @@ export function VideoPlayer({
 	const [subtitle, setSubtitle] = useState<number | null>(() => initialSubtitle(subtitles))
 	const [audio, setAudio] = useState(() => initialAudio(audios))
 
-	// A full player that opens slides up from the bottom, like a drawer — carrying on
-	// the slide the loading panel before it started, not starting one of its own.
 	const entrance = usePlayerEntrance()
 	const entering = entrance.entering && !mini
 
@@ -150,8 +137,6 @@ export function VideoPlayer({
 					className={styles.video}
 					style={{ objectFit: fit }}
 					src={source.kind === 'direct' ? directUrl(fileId) : undefined}
-					// The node is another origin; without CORS the frames are tainted
-					// and the subtitle renderer cannot read them.
 					crossOrigin='anonymous'
 					autoPlay
 					onClick={actions.togglePlay}

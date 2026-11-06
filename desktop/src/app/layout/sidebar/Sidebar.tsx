@@ -16,8 +16,6 @@ import { sessionModel } from '@entities/session'
 
 import styles from './Sidebar.module.scss'
 
-// A sidebar icon is either one of our own sprite names, or a ready-made
-// element (e.g. from react-icons) dropped in as-is.
 type SectionIcon = IconName | ReactElement
 
 const SECTIONS = [

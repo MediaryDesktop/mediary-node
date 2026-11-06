@@ -12,8 +12,6 @@ const navigateFx = createEffect((options: NavigateOptions) => {
 	void router.navigate(options)
 })
 
-// An unconfirmed account still goes to confirm its address first; the return
-// waits until emailVerified.
 sample({
 	clock: sessionModel.authenticated,
 	source: $returnAfterAuth,

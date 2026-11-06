@@ -14,8 +14,6 @@ export interface CheckboxProps {
 	className?: string
 }
 
-// A folder is checked when every file under it is, and "mixed" when only some
-// are — clicking a mixed one selects the rest rather than clearing what is there.
 export function Checkbox({ checked, onCheckedChange, label, disabled, className }: CheckboxProps) {
 	return (
 		<button

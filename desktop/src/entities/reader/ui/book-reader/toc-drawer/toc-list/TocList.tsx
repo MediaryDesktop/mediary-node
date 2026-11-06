@@ -8,12 +8,10 @@ import styles from './TocList.module.scss'
 export interface TocListProps {
 	items: FoliateTocItem[]
 	numbers: WeakMap<FoliateTocItem, number>
-	// The chapter being read, by its label.
 	current: string | null
 	onOpen: (href: string) => void
 }
 
-// The book's contents, nested as the book nests them.
 export function TocList({ items, numbers, current, onOpen }: TocListProps) {
 	return (
 		<ul className={styles.tocList}>

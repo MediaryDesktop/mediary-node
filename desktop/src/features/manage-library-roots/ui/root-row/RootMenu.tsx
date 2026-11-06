@@ -21,10 +21,6 @@ export interface RootMenuProps {
 	removing: boolean
 }
 
-// This row's "⋮" menu, built on the Radix primitives directly instead of the
-// generic DropdownMenu: the six folder-type choices fold under a summary of
-// the current one, so picking a different type doesn't mean scanning past the
-// rescan and remove actions to find them.
 export function RootMenu({ root, onRescan, onSwitch, onRemove, switching, removing }: RootMenuProps) {
 	const { t } = useTranslation()
 	const [open, setOpen] = useState(false)
@@ -36,7 +32,6 @@ export function RootMenu({ root, onRescan, onSwitch, onRemove, switching, removi
 			open={open}
 			onOpenChange={next => {
 				setOpen(next)
-				// Shut again next time, rather than remembering it was left open.
 				if (!next) {
 					setTypeOpen(false)
 				}

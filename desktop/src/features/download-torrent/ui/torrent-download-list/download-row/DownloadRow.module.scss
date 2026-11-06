@@ -24,7 +24,6 @@
 	&.metadata,
 	&.error,
 	&.failed {
-		// Leaves the state stripe on the left edge uncovered.
 		.poster {
 			left: 3px;
 		}

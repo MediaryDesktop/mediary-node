@@ -5,8 +5,6 @@
 	padding-bottom: 1.5rem;
 }
 
-// The page header already ends with its own margin, so the form adds none
-// above it; only what follows the layout, the save bar, needs room.
 .layout {
 	margin-bottom: 1.5rem;
 	display: grid;
@@ -26,10 +24,6 @@
 	min-width: 0;
 }
 
-// One card per group, in the order the fields are filled in — its own
-// surface and icon, real space between it and the next, rather than tabs
-// that hide everything but one group, or a single panel where every title
-// reads the same as the one before it.
 .cards {
 	display: flex;
 	flex-direction: column;

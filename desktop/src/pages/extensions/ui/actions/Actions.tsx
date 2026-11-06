@@ -9,7 +9,6 @@ import { Button, toast } from '@shared/ui'
 import { checkExtensionUpdatesMutation, extensionCatalogQuery } from '@entities/extension'
 import { toolsQuery } from '@entities/tool'
 
-// What each tab asks of the node, beside the tabs themselves.
 
 export function InstalledActions() {
 	const { t } = useTranslation()
@@ -58,8 +57,6 @@ export function CatalogActions({ onRepositories }: { onRepositories: () => void 
 export function DependenciesActions() {
 	const { t } = useTranslation()
 	const [refresh] = useUnit([toolsQuery.start])
-	// Not toolsQuery.$pending: the node also re-triggers this query twice a
-	// second while a tool downloads, which would flash the button's spinner.
 	const [refreshing, setRefreshing] = useState(false)
 
 	useUnitWatch(toolsQuery.finished.finally, () => setRefreshing(false))

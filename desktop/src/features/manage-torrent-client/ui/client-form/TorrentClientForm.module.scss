@@ -11,8 +11,6 @@
 	gap: 0.5rem;
 }
 
-// A detail row that sits beside a single line of text, e.g. the built-in
-// client's listening port next to its connection check.
 .detailRow {
 	display: flex;
 	flex-wrap: wrap;
@@ -21,8 +19,6 @@
 	gap: 1rem;
 }
 
-// A detail that stacks fields on top of each other, e.g. qBittorrent's or the
-// debrid client's own settings.
 .detailStack {
 	display: flex;
 	flex-direction: column;
@@ -52,9 +48,6 @@
 	color: var(--text-secondary);
 }
 
-// A connection check inside a stacked (column) detail: left to flex's default
-// stretch it would fill the row and center its own content inside that; this
-// keeps it sized to its label and pinned to the right edge instead.
 .checkRow {
 	align-self: flex-end;
 }

@@ -5,18 +5,12 @@ import { HttpRequestError } from '@shared/api'
 import { addTorrentFx } from '@entities/torrent'
 import type { AddTorrentParams } from '@entities/torrent'
 
-// What the sheet opens on: an episode, from the stream view without auto-select.
 export interface SearchTarget {
 	episode?: number
 	season?: number
-	// 'watch' is the stream view picking a release to play; nothing is ticked or
-	// downloaded, each result plays on its own. Absent, as from the title's header
-	// or the Torrents tab, means picking what to download.
 	intent?: 'download' | 'watch'
 }
 
-// The search sheet, opened from the title's header, its Torrents tab, or an
-// episode of the stream view.
 export const searchOpened = createEvent<SearchTarget | void>()
 export const searchClosed = createEvent()
 
@@ -33,8 +27,6 @@ export interface DownloadOutcome {
 	failures: string[]
 }
 
-// Several releases, one after another: the node checks each against what is
-// already downloading, and a failure of one must not stop the rest.
 export const downloadReleasesFx = createEffect(
 	async (items: AddTorrentParams[]): Promise<DownloadOutcome> => {
 		const outcome: DownloadOutcome = { added: 0, failures: [] }

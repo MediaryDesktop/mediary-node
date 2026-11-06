@@ -16,9 +16,6 @@ export interface DrawerFormProps {
 	cancelDisabled?: boolean
 	submitting?: boolean
 	className?: string
-	// False for a form mounted inline in the page (a settings card's own
-	// expanding body) rather than in a Drawer's fixed-height panel: the content
-	// then grows with the page instead of scrolling inside itself.
 	scrollable?: boolean
 }
 

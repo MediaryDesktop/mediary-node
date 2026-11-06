@@ -29,9 +29,6 @@ export interface ScanActivity {
 
 	found: number
 
-	// done and total belong to whichever phase is running: files probed of files
-	// to probe, then titles matched of titles to match. One pair rather than a
-	// pair per phase, because the bar only ever shows one of them.
 	done: number
 	total: number
 
@@ -45,9 +42,6 @@ function activityNumber(payload: Record<string, unknown> | undefined, key: strin
 	return typeof value === 'number' ? value : fallback
 }
 
-// Progress is read off the events rather than refetched: during a scan they
-// arrive several times a second, and the node already says everything the
-// header needs.
 export function createScanActivity() {
 	const idle: ScanActivity = {
 		phase: 'scanning',
@@ -86,8 +80,6 @@ export function createScanActivity() {
 			done: activityNumber(event.payload, 'matched'),
 			total: activityNumber(event.payload, 'total'),
 
-			// Matching runs once every folder is walked, so the folder count is
-			// complete by definition.
 			rootsDone: current?.rootsTotal ?? 0
 		}))
 		.reset(scanFinished, libraryScanQuery.finished.success)

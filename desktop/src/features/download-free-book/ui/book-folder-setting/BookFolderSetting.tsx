@@ -9,10 +9,6 @@ import { $nodeReady } from '@infra/node'
 import { bookDownloadSettingsQuery, putBookDownloadSettingsMutation } from '@entities/book-source'
 import { libraryRootsQuery } from '@entities/library-item'
 
-// The library folder saved books go to. Only folders of books are offered: the
-// node takes no other, so a saved book is in the library at once. Until the user
-// picks one, the node's own folder for books is shown: books go there, and it
-// joins the library on the first.
 export function BookFolderSetting() {
 	const { t } = useTranslation()
 

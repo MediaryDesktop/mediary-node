@@ -14,7 +14,6 @@ import type { MediaBase } from '../../lib/media-view'
 
 import styles from './MediaHero.module.scss'
 
-// Each line of text beside the cover comes in a beat after the one above it.
 function lineStyle(index: number) {
 	return { '--line': index } as CSSProperties
 }

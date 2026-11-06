@@ -8,8 +8,6 @@ import { sessionModel } from '@entities/session'
 
 import styles from './AccountCard.module.scss'
 
-// The signed-in Mediary account: a face for it, who it is, a way out. Nothing
-// here shows while signed out — the app's own sign-in flow handles that.
 export function AccountCard() {
 	const { t } = useTranslation()
 

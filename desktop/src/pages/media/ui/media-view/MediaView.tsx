@@ -35,7 +35,6 @@ import { TorrentSection } from '../torrent-section/TorrentSection'
 
 import styles from './MediaView.module.scss'
 
-// Kinds watched as video: what can be played without downloading it first.
 const VIDEO_TYPES = ['anime', 'movie', 'series', 'dorama']
 
 export interface MediaViewProps {
@@ -63,17 +62,10 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 	])
 	const setup = useTorrentSetup()
 
-	// The search sheet gives way to the player, which opens the moment a stream is
-	// asked for — from here or from the stream view — and covers it.
 	useUnitWatch(streamRequested, () => closeSearch())
 
 	const subject = resolveSubject(media, entry)
-	// Manga is read and books too: neither is downloaded as video, nor tracks missing
-	// episodes — asking for them would only race the library section's own file query
-	// for the same title, over the one kind the library section actually reads.
 	const torrents = subject ? subject.mediaType !== 'manga' && subject.mediaType !== 'book' : false
-	// Files of a show numbered by season cannot be compared with its whole count,
-	// so it offers no "download what is missing" until downloads know seasons.
 	const seasonal = mediaRef.startsWith('tmdb:tv:')
 	const missing = useMissingEpisodes(
 		mediaRef,
@@ -107,7 +99,6 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 	const description = media?.description ?? ''
 	const airing = media?.next_airing_episode
 
-	// The built-in client streams any video; a debrid service is a faster way, not a need.
 	const streamable = torrents && VIDEO_TYPES.includes(mediaType)
 	const shown: MediaViewKind = view === 'stream' && !streamable ? 'library' : view
 	const via = setup.debrid ? chosenVia : 'embedded'
@@ -289,8 +280,6 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 	)
 }
 
-// The episodes out so far: up to the one before the next to air for a title still
-// airing, all of them otherwise. Null when the count is unknown.
 function releasedEpisodes(media: MediaDetails | null, total: number | null | undefined): number | null {
 	const next = media?.next_airing_episode?.episode
 	if (next) {

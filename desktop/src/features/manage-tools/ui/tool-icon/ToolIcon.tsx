@@ -1,13 +1,5 @@
 import type { ToolId } from '@entities/tool'
 
-// The real mark of each program, in its own brand color — unlike the shared
-// Icon sprite, which resets every glyph to currentColor on purpose (it is for
-// tintable UI icons, not for a tool's own identity).
-//
-// Paths and colors are Simple Icons' traced marks (CC0 1.0 — simpleicons.org),
-// not mpv's or FFmpeg's own assets: neither project ships one. "mpv" and
-// "FFmpeg" are trademarks of their respective owners; showing their mark here
-// identifies the program Mediary installs, and claims no affiliation with it.
 const PATHS: Record<ToolId, { color: string; d: string }> = {
 	mpv: {
 		color: '#691F69',

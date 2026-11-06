@@ -3,7 +3,6 @@ import { useCallback, useEffect, useLayoutEffect, useState } from 'react'
 
 const GAP = 4
 const VIEWPORT_MARGIN = 8
-// Tall enough for every search type at once; a list past it scrolls.
 const MAX_HEIGHT = 400
 const MIN_HEIGHT = 96
 
@@ -107,9 +106,6 @@ export function useFloatingPanel({
 			if (
 				containerRef.current?.contains(target) ||
 				panelRef.current?.contains(target) ||
-				// A Radix popper (a dropdown menu opened from inside the panel, say)
-				// renders in its own portal, so it is never a DOM descendant of
-				// either ref above even while logically part of this panel.
 				(target instanceof Element && target.closest('[data-radix-popper-content-wrapper]'))
 			) {
 				return

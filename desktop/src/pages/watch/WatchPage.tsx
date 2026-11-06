@@ -4,8 +4,6 @@ import { useEffect } from 'react'
 
 import { playerOpened } from '@entities/playback'
 
-// A watch link only asks for the player: it opens over the home page, which is where
-// the player is shown from anyway. The player itself is mounted at the app root.
 export function WatchPage({ fileId }: { fileId: number }) {
 	const open = useUnit(playerOpened)
 	const navigate = useNavigate()

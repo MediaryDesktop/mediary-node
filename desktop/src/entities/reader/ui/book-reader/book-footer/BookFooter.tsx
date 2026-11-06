@@ -10,13 +10,11 @@ export interface BookFooterProps {
 	location: BookLocation | null
 	disabled: boolean
 	onSeek: (fraction: number) => void
-	// The tools at the end of the bar.
 	children?: ReactNode
 }
 
 const STEPS = 1000
 
-// How far into the book, as a bar to drag and as words.
 export function BookFooter({ location, disabled, onSeek, children }: BookFooterProps) {
 	const { t } = useTranslation()
 

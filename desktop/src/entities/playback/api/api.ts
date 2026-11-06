@@ -16,7 +16,6 @@ export const startPlaybackFx = createNodeRequestFx<number, NodeSchemas['Playback
 	method: 'POST',
 	body: { file_id: fileId },
 
-	// Starting mpv means waiting for a process and its socket.
 	timeout: 20_000
 }))
 
@@ -42,7 +41,6 @@ export const stopPlaybackFx = createNodeRequestFx<void, NodeSchemas['PlaybackOut
 export const fetchPlaybackStreamFx = createNodeRequestFx<number, NodeSchemas['StreamOutputBody']>(fileId => ({
 	url: `/v1/playback/files/${fileId}/stream`,
 
-	// The first look at a large file runs ffprobe over it.
 	timeout: 45_000
 }))
 

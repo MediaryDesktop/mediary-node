@@ -22,8 +22,6 @@ export function StatusByType({ byType, byStatus, className }: StatusByTypeProps)
 	const colorOf = (status: TrackerStatus) => theme.statusColor[status]
 	const grandTotal = TRACKER_STATUSES.reduce((sum, status) => sum + byStatus[status], 0)
 
-	// Every kind gets a row, even one the user has never tracked — it reads as "0
-	// of these" instead of silently dropping off the table.
 	const rows = TRACKER_MEDIA_TYPES.map(
 		type => byType.find(row => row.type === type) ?? { type, total: 0, counts: emptyCounts() }
 	)

@@ -20,9 +20,6 @@ export interface GenresPanelProps {
 	disabled?: boolean
 }
 
-// The catalog is short enough per kind (a few dozen at most) to show in full —
-// what is typed into the tag field above narrows it, rather than a search box
-// of its own next to a field that already takes typed text.
 export function GenresPanel({ mediaType, genres, onGenresChange, aiGenres, disabled }: GenresPanelProps) {
 	const { t } = useTranslation()
 	const [query, setQuery] = useState('')

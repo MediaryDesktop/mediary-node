@@ -40,8 +40,6 @@ export function SearchPage() {
 			<div className={clsx(styles.layout, filtersOpen && styles.withFilters)}>
 				<div className={styles.results}>
 					<SearchResults
-						// Anime and manga lists live in AniList and need the account; movies
-						// and shows go on the node's own list.
 						renderMenu={(media, entry) =>
 							canTrack(media.media_type, connected) ? (
 								<EntryMenu

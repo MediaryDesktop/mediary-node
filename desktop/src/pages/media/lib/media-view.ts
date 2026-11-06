@@ -1,9 +1,6 @@
 import type { MediaDetails } from '@entities/media'
 import type { TrackerEntry } from '@entities/tracker'
 
-// The page renders from AniList details when they load and from the mirrored
-// tracker entry when they do not, so everything shared by both is read through
-// this shape rather than branching at each field.
 export type MediaBase = NonNullable<MediaDetails | TrackerEntry['media']>
 
 export interface MediaViewSubject {

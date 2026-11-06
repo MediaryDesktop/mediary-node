@@ -27,8 +27,6 @@ function formatOf(name: string): string {
 	return dot > 0 ? lower.slice(dot + 1).toUpperCase() : ''
 }
 
-// The copies of this book in the library — one is the usual case, an EPUB and a
-// PDF of the same book the next most common — each a click from the reader.
 export function BookFiles({ mediaRef }: BookFilesProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
@@ -41,7 +39,6 @@ export function BookFiles({ mediaRef }: BookFilesProps) {
 		}
 	}, [mediaRef, load, nodeReady])
 
-	// Shared with the other title pages, so it may still hold another title's files.
 	const files = (data?.files.items ?? []).filter(
 		file => file.kind === 'book' && file.match?.media_ref === mediaRef
 	)

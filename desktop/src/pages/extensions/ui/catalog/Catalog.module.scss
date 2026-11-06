@@ -34,8 +34,6 @@
 		}
 	}
 
-	// One column on a narrow window, three on a wide one, four on a very wide
-	// one, as Seanime's grids.
 	.grid {
 		display: grid;
 		grid-template-columns: 1fr;

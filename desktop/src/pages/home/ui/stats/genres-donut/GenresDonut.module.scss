@@ -8,9 +8,6 @@
 		flex: 0 0 9.25rem;
 		height: 148px;
 
-		// The tooltip renders inside the chart's own wrapper, earlier in the DOM than
-		// the centre label below — without a z-index the label's stacking order wins
-		// and sits on top of it.
 		:global(.recharts-tooltip-wrapper) {
 			z-index: 1;
 		}

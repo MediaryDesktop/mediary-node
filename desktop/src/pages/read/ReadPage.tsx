@@ -32,11 +32,8 @@ export function ReadPage({ chapterRef, onOpenChapter }: ReadPageProps) {
 	])
 
 	const [page, setPage] = useState(0)
-	// When the page first asked to open this chapter; the loading panel and the reader
-	// that replaces it both continue this one opening slide.
 	const [openedAt] = useState(() => performance.now())
 
-	// A query sent before the node is up fails, and a reload of this page gets there first.
 	useEffect(() => {
 		if (nodeReady) {
 			loadChapter(chapterRef)
@@ -45,8 +42,6 @@ export function ReadPage({ chapterRef, onOpenChapter }: ReadPageProps) {
 
 	const chapter = chapterData?.chapter.ref === chapterRef ? chapterData.chapter : null
 
-	// The same list as the title page, so the next chapter may come from another
-	// source than this one: after a local 12, the server's 13.
 	const { rows } = useTitleChapters(chapter?.media_ref)
 	const neighbours = useMemo(() => neighbourChapters(rows, chapterRef), [rows, chapterRef])
 

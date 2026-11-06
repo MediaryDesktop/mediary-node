@@ -25,7 +25,6 @@ import { Status } from './status/Status'
 
 const SETTINGS_OPEN_KEY = 'mediary.autoDownload.settingsOpen'
 
-// An existing rule: where it stands, a check to run now, and its settings.
 export function RuleDetails({ rule }: { rule: TorrentRule }) {
 	const { t, i18n } = useTranslation()
 	const navigate = useNavigate()
@@ -56,8 +55,6 @@ export function RuleDetails({ rule }: { rule: TorrentRule }) {
 
 	const dirty = from !== rule.from_episode || query.trim() !== rule.query
 
-	// A missing client or source says it better than the rule's last error, which
-	// is that same thing in the node's words.
 	const setupMissing =
 		setup.loaded && (!setup.clientConfigured || setup.clientReachable === false || !setup.hasSources)
 
@@ -224,7 +221,6 @@ export function RuleDetails({ rule }: { rule: TorrentRule }) {
 	)
 }
 
-// Where the rule stands since its last look, until a check run here says more.
 function RuleStatus({ rule, setupMissing }: { rule: TorrentRule; setupMissing: boolean }) {
 	const { t } = useTranslation()
 

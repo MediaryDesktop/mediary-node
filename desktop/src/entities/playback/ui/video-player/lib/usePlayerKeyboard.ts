@@ -7,7 +7,6 @@ const SEEK_STEP = 5
 const VOLUME_STEP = 0.05
 
 export interface PlayerKeyboardOptions {
-	// The corner picture takes no keys: they belong to whatever page is open.
 	enabled: boolean
 	videoRef: RefObject<HTMLVideoElement | null>
 	actions: VideoActions
@@ -31,9 +30,6 @@ export function usePlayerKeyboard(options: PlayerKeyboardOptions): void {
 		}
 
 		const onKey = (event: KeyboardEvent) => {
-			// The seek and volume sliders are the only inputs in the player; once one
-			// has focus (e.g. after a click), arrow keys would otherwise nudge it by its
-			// own tiny `step` instead of running the player's shortcuts below.
 			const onRangeInput = event.target instanceof HTMLInputElement && event.target.type === 'range'
 
 			if ((event.target instanceof HTMLInputElement && !onRangeInput) || event.ctrlKey || event.metaKey || event.altKey) {

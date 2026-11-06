@@ -7,14 +7,11 @@ import type { MediaSummary } from '@entities/media'
 
 import type { DiscoverSection } from '../lib/sections'
 
-// Discover is browsed back and forth between tabs; a row fetched a moment ago is
-// shown again rather than asked for again. The sources' lists move by the day.
 const FRESH_FOR = 30 * 60 * 1000
 
 export interface SectionState {
 	status: 'loading' | 'done' | 'failed'
 	items: MediaSummary[]
-	// Set on a failure the user can fix: TMDB without a key answers 428.
 	setupNeeded: string | null
 	fetchedAt: number
 }

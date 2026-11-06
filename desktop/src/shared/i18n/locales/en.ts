@@ -2208,7 +2208,8 @@ export const en = {
 			torrents: {
 				label: 'Torrents',
 				title: 'Torrent client',
-				description: 'Choose how Mediary downloads torrents: its built-in client, your own qBittorrent, or none'
+				description:
+					'Choose how Mediary downloads torrents: its built-in client, your own qBittorrent, or none'
 			},
 			debrid: {
 				label: 'Debrid',

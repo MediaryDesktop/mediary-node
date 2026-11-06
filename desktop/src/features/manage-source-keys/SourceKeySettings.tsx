@@ -20,14 +20,9 @@ import {
 
 import styles from './SourceKeySettings.module.scss'
 
-// Every source with a key answers the same shape: whether it is on, and whose
-// key it sends. The key itself never comes back from the node. Both sources
-// also allow 'build' (a key this app ships with).
 interface SourceKeySettingsProps<Settings extends { enabled: boolean; key_source: string }> {
 	settingsQuery: Query<void, Settings, HttpRequestError>
 	saveMutation: Mutation<string, Settings, HttpRequestError>
-	// The source's strings live under this key, the same shape for each — and
-	// matches its own card's title/hint under settings.<texts>.
 	texts: 'tmdb' | 'googleBooks'
 	keysPage: string
 }

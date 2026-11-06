@@ -45,8 +45,6 @@ function matches(tool: Tool, status: StatusFilter, search: string): boolean {
 	)
 }
 
-// mpv and FFmpeg: a section per kind of program, filtered by kind, by whether
-// it is there, and by name.
 export function DependenciesTab() {
 	const { t } = useTranslation()
 

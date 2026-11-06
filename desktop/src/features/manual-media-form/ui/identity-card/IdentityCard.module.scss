@@ -26,9 +26,6 @@
 	}
 }
 
-// Stretched to the row's own height, then centers the dial inside that —
-// align-self alone centers the item's box, not necessarily what is drawn
-// inside it, so the box itself is made to fill the row and do the centering.
 .dial {
 	display: flex;
 	align-items: center;
@@ -78,8 +75,6 @@
 		object-fit: cover;
 	}
 
-	// Stacked above the fields there is no row to stretch along, so it keeps the
-	// shape of a poster instead.
 	@media (max-width: 640px) {
 		align-self: start;
 		width: 9rem;

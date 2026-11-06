@@ -27,8 +27,6 @@ export function ReleaseHistory({ draft, onChange, aiFilled, error, disabled }: R
 					value={dateFromParts(draft.year, draft.start_month, draft.start_day)}
 					onChange={value => {
 						const parts = partsFromDate(value)
-						// Clearing the date only drops its month and day; the year the
-						// basics card holds keeps whatever it already had.
 						onChange({
 							year: parts.year ?? draft.year,
 							start_month: parts.month,

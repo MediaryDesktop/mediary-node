@@ -30,7 +30,6 @@ export interface SearchFormProps {
 	onDone: () => void
 }
 
-// The search, its filters and the results to tick; submitting downloads the ticked.
 export function SearchForm({ mediaRef, title, missing, poster, watching, onDone }: SearchFormProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
@@ -45,7 +44,6 @@ export function SearchForm({ mediaRef, title, missing, poster, watching, onDone 
 		$searchTarget
 	])
 
-	// Opened on an episode, the search starts with it typed in.
 	const [criteria, setCriteria] = useState<SearchCriteria>(() => ({
 		query: '',
 		season: target.season ? String(target.season) : '',
@@ -55,8 +53,6 @@ export function SearchForm({ mediaRef, title, missing, poster, watching, onDone 
 	const [onlyMissing, setOnlyMissing] = useState(false)
 	const [selected, setSelected] = useState<Set<string>>(new Set())
 
-	// The page offers watching whenever a release can be streamed: through the
-	// built-in client always, through a debrid service when one is set up.
 	const canStream = Boolean(watching)
 
 	const watchOf = (release: TorrentRelease) => {
@@ -80,7 +76,6 @@ export function SearchForm({ mediaRef, title, missing, poster, watching, onDone 
 		})
 	}
 
-	// Opening the sheet is asking for releases: the first search needs no click.
 	useEffect(() => {
 		if (setup.loaded && setup.hasSources) {
 			search({ mediaRef, episode: target.episode ?? 0, season: target.season ?? 0, query: '' })
@@ -123,8 +118,6 @@ export function SearchForm({ mediaRef, title, missing, poster, watching, onDone 
 		error && 'body' in error ? (error.body as { detail?: string; status?: number } | null) : null
 	const failedSources = (result?.sources ?? []).filter(source => source.error)
 
-	// Picking what to watch ticks nothing and downloads nothing: each result plays
-	// on its own, so there is no selection to submit — only the sheet's own close.
 	const watchOnly = target.intent === 'watch'
 
 	const content = (

@@ -3,8 +3,6 @@ import { PiDevicesLight } from 'react-icons/pi'
 
 import type { IconLike } from '@shared/ui'
 
-// The settings sections, in the order the menu lists them. The id is what the
-// address carries, so a notice elsewhere can open the section it is about.
 export const SETTINGS_SECTIONS = [
 	'app',
 	'account',
@@ -26,11 +24,9 @@ export function isSettingsSection(value: unknown): value is SettingsSection {
 export interface SectionInfo {
 	id: SettingsSection
 	icon: IconLike
-	// The section's keys under settings.sections.
 	key: 'app' | 'account' | 'backup' | 'devices' | 'library' | 'metadata' | 'torrents' | 'manga' | 'books'
 }
 
-// The menu's cards: what belongs together sits in one, as in Seanime.
 export const SECTION_GROUPS: readonly (readonly SectionInfo[])[] = [
 	[{ id: 'app', icon: 'common/settings', key: 'app' }],
 	[{ id: 'account', icon: 'common/user', key: 'account' }],

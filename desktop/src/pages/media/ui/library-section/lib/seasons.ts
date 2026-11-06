@@ -2,8 +2,6 @@ import type { LibraryFile } from '@entities/library-item'
 
 import { episodeSeason } from '@features/continue-watching'
 
-// Files in season order, already sorted, split where the season changes. A file
-// without a season counts as the first.
 export function seasonsOf(files: LibraryFile[]): [number, LibraryFile[]][] {
 	const seasons: [number, LibraryFile[]][] = []
 

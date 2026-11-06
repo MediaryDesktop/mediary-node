@@ -17,12 +17,9 @@ import { RuleDetails } from './rule-details/RuleDetails'
 
 export interface AutoDownloadPanelProps {
 	mediaRef: string
-	// The title's name; it also names the folder downloads go into.
 	title: string
 }
 
-// A title's new episodes, downloaded by the node on its own: the switch makes
-// the rule, the rest tunes it. The node looks every 30 minutes.
 export function AutoDownloadPanel({ mediaRef, title }: AutoDownloadPanelProps) {
 	const { t } = useTranslation()
 
@@ -46,8 +43,6 @@ export function AutoDownloadPanel({ mediaRef, title }: AutoDownloadPanelProps) {
 	useUnitWatch(putTorrentRuleMutation.finished.failure, failed)
 	useUnitWatch(deleteTorrentRuleMutation.finished.failure, failed)
 
-	// The query is shared by every title page; an answer for another title is not
-	// this one's.
 	const rule = data?.rule?.media_ref === mediaRef ? data.rule : null
 
 	const toggle = (enabled: boolean) => {

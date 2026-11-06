@@ -19,8 +19,6 @@ export interface ActivityChartProps {
 	className?: string
 }
 
-// Titles started and finished over time, from the dates the tracker keeps. The
-// same two colours as "in progress" and "completed" in the status chart.
 export function ActivityChart({ entries, className }: ActivityChartProps) {
 	const { t, i18n } = useTranslation()
 	const theme = useChartTheme()

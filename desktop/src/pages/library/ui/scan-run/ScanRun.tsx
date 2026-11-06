@@ -13,13 +13,10 @@ import styles from './ScanRun.module.scss'
 
 export interface ScanRunProps {
 	run: LibraryScanRunDetail
-	// Trimmed and lowercased.
 	search: string
-	// Opens the explorer on a folder.
 	onExplore: (folder: string) => void
 }
 
-// One scan: what it could not match first, then each title it matched files to.
 export function ScanRun({ run, search, onExplore }: ScanRunProps) {
 	const { t } = useTranslation()
 

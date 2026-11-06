@@ -14,12 +14,8 @@ export interface IconProps extends Omit<SVGProps<SVGSVGElement>, 'name'> {
 	size?: number
 }
 
-// A sprite name, or a ready element (e.g. from react-icons) for glyphs the
-// sprite does not have.
 export type IconLike = IconName | ReactElement
 
-// Resolves an IconLike wherever a caller takes one as data (a menu item, a step,
-// a settings section) rather than rendering it directly.
 export function renderIcon(icon: IconLike, size?: number) {
 	if (typeof icon === 'string') {
 		return <Icon name={icon} size={size} />

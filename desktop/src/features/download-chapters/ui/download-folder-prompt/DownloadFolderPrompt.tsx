@@ -13,8 +13,6 @@ import { $promptOpen, folderChosen, promptClosed } from '../../model/model'
 
 import styles from './DownloadFolderPrompt.module.scss'
 
-// Asks once where chapters go, the first time the user saves one. It also reports
-// a download the node would not queue, wherever it was started from.
 export function DownloadFolderPrompt() {
 	const { t } = useTranslation()
 

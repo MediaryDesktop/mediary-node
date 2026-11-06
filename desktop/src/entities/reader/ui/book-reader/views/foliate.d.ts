@@ -1,5 +1,3 @@
-// foliate-js ships plain ES modules without types; this is the part the reader
-// uses. The library calls itself unstable, so the version is pinned.
 declare module 'foliate-js/view.js' {
 	export interface FoliateTocItem {
 		label: string

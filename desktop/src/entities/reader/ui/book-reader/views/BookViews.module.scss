@@ -6,12 +6,8 @@
 		display: block;
 		width: 100%;
 		height: 100%;
-		// It takes keyboard focus to hear the book's own key presses; without this
-		// the browser draws its default focus ring around the whole page.
 		outline: none;
 
-		// The section iframe lives two shadow roots down; foliate-js exports it as
-		// this part specifically so a host page can reach it.
 		&::part(filter) {
 			outline: none;
 		}

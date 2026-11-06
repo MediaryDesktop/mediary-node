@@ -3,7 +3,6 @@ import { useCallback, useState } from 'react'
 import { checkState, fileIdsUnder } from './build-tree'
 import type { TreeNode } from './build-tree'
 
-// Ticked files, by id. Ticking a folder ticks every file under it.
 export function useTreeSelection() {
 	const [selected, setSelected] = useState<ReadonlySet<number>>(new Set())
 

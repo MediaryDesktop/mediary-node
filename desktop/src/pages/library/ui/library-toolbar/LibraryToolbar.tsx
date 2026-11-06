@@ -19,8 +19,6 @@ export interface LibraryToolbarProps {
 	unmatched: number
 }
 
-// The explorer is the one thing worth a full button; the rest — scanning,
-// unresolved matches, ignored files, scan history — lives behind the menu.
 export function LibraryToolbar({ hasEntries, hasRoots, unmatched }: LibraryToolbarProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()

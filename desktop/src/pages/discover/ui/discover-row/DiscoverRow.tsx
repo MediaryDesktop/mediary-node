@@ -27,8 +27,6 @@ export interface DiscoverRowProps {
 	onRetry: () => void
 }
 
-// One row of Discover: a source's list, as cards that open the title and offer
-// the list menu, like every other grid of titles in the app.
 export function DiscoverRow({ title, icon, state, onRetry }: DiscoverRowProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()

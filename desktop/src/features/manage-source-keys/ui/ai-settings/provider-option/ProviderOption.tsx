@@ -10,13 +10,9 @@ export interface ProviderOptionProps {
 	selected: boolean
 	disabled?: boolean
 	onSelect: () => void
-	// A short chip beside the label, e.g. "Free" for Mediary AI.
 	badge?: ReactNode
 }
 
-// One tile in the AI provider grid: a radio dot and a name, with an optional
-// badge — the same shape as a debrid service tile, for the same reason: none
-// of these need their own expanding detail to pick between them.
 export function ProviderOption({ label, selected, disabled, onSelect, badge }: ProviderOptionProps) {
 	return (
 		<button

@@ -26,12 +26,6 @@ function changeVolume(video: HTMLVideoElement, next: number): void {
 	video.muted = video.volume === 0
 }
 
-// What the controls and the keyboard do to the element. Each is a no-op before the
-// element mounts.
-//
-// onSeek fires with the target position as soon as a seek is issued, before the
-// browser has anything buffered there — the scrubber moves on it immediately,
-// instead of snapping back each render until `timeupdate` catches up.
 export function useVideoActions(
 	videoRef: RefObject<HTMLVideoElement | null>,
 	onSeek?: (position: number) => void

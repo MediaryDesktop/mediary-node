@@ -16,9 +16,6 @@ export interface TorrentSectionProps {
 	poster?: string | null
 }
 
-// The title's torrents: search and manual adding up top, new episodes on their
-// own below that, and what is downloading for it. The search itself is a sheet
-// the title page holds, so the header's download button opens the same one.
 export function TorrentSection({ mediaRef, title, poster }: TorrentSectionProps) {
 	const { t } = useTranslation()
 

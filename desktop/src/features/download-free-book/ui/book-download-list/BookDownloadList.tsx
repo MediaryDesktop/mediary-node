@@ -22,8 +22,6 @@ import type { BookDownload } from '@entities/book-source'
 
 import styles from './BookDownloadList.module.scss'
 
-// The books queue and what it saved, newest first. The node pushes every change,
-// so the list moves while a book downloads.
 export function BookDownloadList() {
 	const { t } = useTranslation()
 

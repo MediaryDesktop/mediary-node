@@ -17,8 +17,6 @@ import {
 } from '@entities/tool'
 import type { Tool } from '@entities/tool'
 
-// The programs the node runs, asked for once the node is up; null until it
-// answers. A failed install, cancel or removal is said in a toast.
 export function useTools(): Tool[] | null {
 	const { t } = useTranslation()
 

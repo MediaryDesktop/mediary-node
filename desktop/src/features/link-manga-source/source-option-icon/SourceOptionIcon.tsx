@@ -8,7 +8,6 @@ import styles from './SourceOptionIcon.module.scss'
 export interface SourceOptionIconProps {
 	source: string
 	name: string
-	// The source plugin's own icon, from its manifest.
 	image?: string
 }
 
@@ -20,8 +19,6 @@ function builtIn(source: string): IconName | null {
 	return null
 }
 
-// A plugin source shows its manifest icon, or its first letter when there is
-// none or it does not load.
 export function SourceOptionIcon({ source, name, image }: SourceOptionIconProps) {
 	const [broken, setBroken] = useState(false)
 	const icon = builtIn(source)

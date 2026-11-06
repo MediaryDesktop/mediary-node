@@ -24,7 +24,6 @@ export const bookSourcesQuery = createQuery({ effect: fetchBookSourcesFx, name: 
 
 export const bookEditionsQuery = createQuery({ effect: fetchBookEditionsFx, name: 'bookEditions' })
 
-// A page opened while the last book's search is still out must show its own.
 concurrency(bookEditionsQuery, { strategy: 'TAKE_LATEST' })
 
 export const bookOPDSServersQuery = createQuery({ effect: fetchBookOPDSServersFx, name: 'bookOPDSServers' })
@@ -57,7 +56,6 @@ const serversChanged = [
 
 keepFresh(bookOPDSServersQuery, { triggers: serversChanged })
 
-// A source turned on or off changes what a book page finds.
 keepFresh(bookSourcesQuery, { triggers: serversChanged })
 keepFresh(bookEditionsQuery, { triggers: serversChanged })
 
@@ -93,8 +91,6 @@ export const putBookDownloadSettingsMutation = createMutation({
 	name: 'putBookDownloadSettings'
 })
 
-// The node reports every change in the queue, and the list asks again on each
-// one rather than polling; only the answer to the last of them may stand.
 concurrency(bookDownloadsQuery, { strategy: 'TAKE_LATEST' })
 
 sample({

@@ -24,15 +24,12 @@ export const libraryModel = atom(() => {
 
 	sample({ clock: folderRequested, target: pickFolderFx })
 
-	// A cancelled dialog is an answer, not a failure: nothing happens.
 	sample({
 		clock: pickFolderFx.doneData,
 		filter: (picked): picked is AddLibraryRootParams => picked !== null,
 		target: addLibraryRootMutation.start
 	})
 
-	// A folder is added to be scanned; making the user press scan straight after
-	// would be asking them to confirm what they just asked for.
 	sample({
 		clock: addLibraryRootMutation.finished.success,
 		fn: (): number => 0,

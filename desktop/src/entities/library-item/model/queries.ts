@@ -36,10 +36,6 @@ export const libraryTreeQuery = createQuery({ effect: fetchLibraryTreeFx, name: 
 
 export const titleFilesQuery = createQuery({ effect: fetchTitleFilesFx, name: 'titleFiles' })
 
-// Several pages and drawers share this one for their own title's files; without
-// this, one of their requests landing after a newer one would overwrite $data
-// with a different title's files, and the one still filtering for its own
-// media_ref would come up empty until something else happened to refetch it.
 concurrency(titleFilesQuery, { strategy: 'TAKE_LATEST' })
 
 export const libraryScanQuery = createQuery({ effect: fetchLibraryScanFx, name: 'libraryScan' })
@@ -85,9 +81,6 @@ export const deleteLibraryFileMutation = createMutation({
 	name: 'deleteLibraryFile'
 })
 
-// What a group action did: how many of the files it went through and how many
-// it could not. A file that is open in a player cannot be deleted, and one
-// failure should not throw away what happened to the other ninety-nine.
 export interface BulkOutcome {
 	done: number
 	failed: number
@@ -130,9 +123,6 @@ export const deleteLibraryMatchMutation = createMutation({
 	name: 'deleteLibraryMatch'
 })
 
-// The node says when its own rows changed, so nothing here polls: a scan that
-// finds a file, a match the matcher worked out, a folder that was removed — each
-// arrives as an event, and the query refetches once.
 keepFresh(libraryRootsQuery, { triggers: [libraryUpdated, nodeStreamResumed] })
 
 const filesChanged = [

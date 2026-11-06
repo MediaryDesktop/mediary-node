@@ -8,9 +8,6 @@ import { ConnectAniList, GetTokenLink } from '../../ConnectAniList'
 
 import styles from './AniListAccountSettings.module.scss'
 
-// The AniList account's own card in Settings: its connect/connected form
-// (ConnectAniList) stays header-less and reusable — this gives it the title
-// and "Get a token" link a settings card needs around it.
 export function AniListAccountSettings() {
 	const { t } = useTranslation()
 	const connected = useUnit(aniListAccountModel.$connected)

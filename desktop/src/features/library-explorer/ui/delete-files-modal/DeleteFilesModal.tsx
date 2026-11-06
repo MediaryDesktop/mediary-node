@@ -17,7 +17,6 @@ export interface DeleteFilesModalProps {
 	onDeleted: () => void
 }
 
-// Deleting removes the files from disk, so it asks first and names what goes.
 export function DeleteFilesModal({ open, files, onClose, onDeleted }: DeleteFilesModalProps) {
 	const { t } = useTranslation()
 	const [deleteFiles, deleting] = useUnit([

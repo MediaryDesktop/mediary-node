@@ -1,7 +1,3 @@
-// The entrance is a CSS animation, not a motion one: it runs on the compositor,
-// so it stays smooth while the content it brings in is still being mounted.
-// `backwards` only holds the first frame; once done, the element is back to its
-// own styles and the motion-driven exit can take over.
 .enter {
 	animation: phase-enter 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }

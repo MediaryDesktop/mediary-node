@@ -16,9 +16,6 @@ export type TorrentDisplayState =
 	| 'failed'
 	| 'unknown'
 
-// What a row says about a download. Once the node has the files the node's own
-// state is the story; before that, qBittorrent's dozen state names are folded into
-// the few a person cares about.
 export function displayState(download: TorrentDownload): TorrentDisplayState {
 	if (download.state !== 'downloading') {
 		return download.state
@@ -37,8 +34,6 @@ export function displayState(download: TorrentDownload): TorrentDisplayState {
 		return 'paused'
 	}
 
-	// A debrid service still getting the torrent itself: the node has nothing to
-	// download yet, and the service's own progress is the story.
 	if (live.remote) {
 		return live.remote.queued ? 'remoteQueued' : 'remote'
 	}

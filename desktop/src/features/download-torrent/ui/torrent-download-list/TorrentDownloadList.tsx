@@ -30,15 +30,11 @@ import { TorrentQuickAdd } from './quick-add/TorrentQuickAdd'
 import styles from './TorrentDownloadList.module.scss'
 
 export interface TorrentDownloadListProps {
-	// Only this title's downloads; all of them, with a summary, when left out.
 	mediaRef?: string
-	// The title's name; needed only alongside mediaRef, to label a quick add.
 	title?: string
 	poster?: string | null
 }
 
-// Torrents the node added to its client, newest first. The node polls the client
-// and announces each change, so the list moves while a torrent downloads.
 export function TorrentDownloadList({ mediaRef, title, poster }: TorrentDownloadListProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
@@ -85,8 +81,6 @@ export function TorrentDownloadList({ mediaRef, title, poster }: TorrentDownload
 
 	const downloads = (data?.downloads ?? []).filter(item => !mediaRef || item.media_ref === mediaRef)
 
-	// The caller already has the poster when it scopes the list to one title; for
-	// the all-titles list every row needs its own, fetched (and cached) by ref.
 	useEffect(() => {
 		if (poster !== undefined) return
 
@@ -95,8 +89,6 @@ export function TorrentDownloadList({ mediaRef, title, poster }: TorrentDownload
 		}
 	}, [poster, requestPreview, downloads])
 
-	// Only the list that shows the download hosts the choice, so a page with two
-	// lists does not open it twice.
 	const choosing = downloads.find(item => item.id === filesFor) ?? null
 
 	const states = downloads.map(displayState)

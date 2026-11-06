@@ -16,7 +16,6 @@ export interface TopRatedProps {
 	className?: string
 }
 
-// The user's own favourites by their own scores, not the source's.
 export function TopRated({ entries, className }: TopRatedProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()

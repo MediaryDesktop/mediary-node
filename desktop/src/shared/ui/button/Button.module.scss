@@ -114,8 +114,6 @@
 		}
 	}
 
-	// The window-chrome look: a transparent square that lights up on hover. The close
-	// variant lights up in the accent colour, the same as the window's own close.
 	&.chrome,
 	&.chrome-close {
 		height: var(--titlebar-height);

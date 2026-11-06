@@ -7,8 +7,6 @@
 	background: var(--surface);
 	color: var(--text);
 
-	// Both keep the poster readable underneath instead of replacing it: the
-	// tracked panel always skips the trailer, and a bare preview has none to show.
 	&.tracked,
 	&.bare {
 		background: rgba(8, 8, 10, 0.88);

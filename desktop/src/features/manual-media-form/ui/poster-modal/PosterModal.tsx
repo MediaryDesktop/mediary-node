@@ -27,8 +27,6 @@ export interface PosterModalProps {
 	existingCoverUrl?: string | null
 	selection: CoverSelection
 	onChange: (selection: CoverSelection) => void
-	// Searching looks for posters of one kind; pasting an address or choosing a
-	// file does not, so only the search waits for it.
 	typeMissing?: boolean
 	disabled?: boolean
 }
@@ -53,8 +51,6 @@ export function PosterModal({
 	const [url, setUrl] = useState('')
 	const picker = useRef<HTMLInputElement>(null)
 	const lastSearch = useRef('')
-	// Whether this window has searched at all: the answers are kept in a store
-	// shared by every form, so what is in it may belong to an earlier title.
 	const [searched, setSearched] = useState(false)
 
 	const [search, reset, candidates, searching, failed] = useUnit([
@@ -88,19 +84,15 @@ export function PosterModal({
 		search({ type: mediaType, title: text, year })
 	}
 
-	// Opening the window on a title that is already named shows its posters
-	// straight away, once: reopening it for the same title does not search again.
 	useEffect(() => {
 		const text = (query || title).trim()
 
 		if (open && tab === 'search' && lastSearch.current !== `${mediaType}|${text}|${year ?? ''}`) {
 			runSearch()
 		}
-		// Only opening should start a search; typing in the box must not.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [open])
 
-	// A picture chosen is the answer: the window has nothing more to ask.
 	const choose = (next: CoverSelection) => {
 		onChange(next)
 		onOpenChange(false)

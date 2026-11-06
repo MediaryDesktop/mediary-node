@@ -16,12 +16,9 @@ export interface TitleChapters {
 	sources: MangaSource[]
 	links: MangaLink[]
 	problems: MangaSourceProblem[]
-	// Online chapters are still on the way; the list may grow.
 	loadingOnline: boolean
 }
 
-// useTitleChapters gathers a manga title's chapters from the library and from every
-// linked source, as one list. The title page shows it; the reader walks it.
 export function useTitleChapters(mediaRef: string | undefined): TitleChapters {
 	const { t } = useTranslation()
 
@@ -58,7 +55,6 @@ export function useTitleChapters(mediaRef: string | undefined): TitleChapters {
 		}
 	}, [mediaRef, loadFiles, loadSources, loadLinks, loadChapters, nodeReady])
 
-	// Each query serves every title, so an answer counts only if it is this title's.
 	const online = chaptersData && chaptersData.mediaRef === mediaRef ? chaptersData : null
 	const links = (linksData && linksData.mediaRef === mediaRef ? linksData.links : null) ?? []
 
@@ -66,8 +62,6 @@ export function useTitleChapters(mediaRef: string | undefined): TitleChapters {
 		const options: ChapterOption[] = []
 
 		for (const file of files?.files.items ?? []) {
-			// Specials and extras are not chapters in reading order, and a file the last
-			// scan did not find cannot be opened.
 			if (
 				file.match?.media_ref !== mediaRef ||
 				file.ignored ||
@@ -95,12 +89,9 @@ export function useTitleChapters(mediaRef: string | undefined): TitleChapters {
 		}
 
 		for (const chapter of online?.chapters ?? []) {
-			// The source asks for the credit: language and translators sit next to
-			// the chapter wherever it is listed.
 			const credit = [chapter.language?.toUpperCase(), ...(chapter.groups ?? [])]
 				.filter(Boolean)
 				.join(' · ')
-			// A plugin learns a chapter's pages only when it is opened: 0 is unknown.
 			const size = chapter.external_url
 				? t('mangaSources.chapters.external')
 				: chapter.pages > 0

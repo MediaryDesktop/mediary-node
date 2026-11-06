@@ -49,7 +49,6 @@ describe('unmatchedGroups', () => {
 		expect(groups[1]?.files.map(entry => entry.parsed.episode)).toEqual([2, 10])
 	})
 
-	// Matched, set aside, or an opening: none of these is asking for a title.
 	it('leaves out everything that is not waiting for a title', () => {
 		const groups = unmatchedGroups(
 			[

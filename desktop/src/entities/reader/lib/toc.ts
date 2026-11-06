@@ -1,10 +1,8 @@
 import type { FoliateTocItem } from 'foliate-js/view.js'
 
 export interface TocIndex {
-	// Each item's place in reading order, nested chapters included.
 	numbers: WeakMap<FoliateTocItem, number>
 	total: number
-	// The current chapter's place in that same order, or null while unmatched.
 	current: number | null
 }
 

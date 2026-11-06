@@ -1,4 +1,3 @@
-// Shared across the tiles row and every chart panel below it.
 
 .swatch {
 	flex: none;
@@ -32,7 +31,6 @@
 .chartArea {
 	min-width: 0;
 
-	// Recharts focuses its wrapper on click; the outline would frame the chart.
 	:global(.recharts-wrapper),
 	:global(.recharts-surface) {
 		outline: none;

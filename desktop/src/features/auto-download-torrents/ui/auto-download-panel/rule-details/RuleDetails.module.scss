@@ -54,8 +54,6 @@
 		align-items: center;
 		gap: 0.5rem;
 
-		// Doubled to out-specificity Button's own .ghost rule, which otherwise wins
-		// or loses depending on CSS module import order rather than source intent.
 		.remove.remove {
 			margin-left: auto;
 			color: var(--accent);
@@ -64,8 +62,6 @@
 				color: var(--accent);
 			}
 
-			// The ripple paints in currentcolor by default; pinned here instead so
-			// it stays accent-muted regardless of the button's own text colour.
 			:global(.ripple__animation) {
 				background: var(--accent);
 			}
@@ -116,7 +112,6 @@
 			padding: 1.275rem 1.125rem;
 			border-radius: var(--radius);
 			border: none;
-			// The ripple paints in currentcolor; every child sets its own colour.
 			color: #99999965;
 			background: none;
 			cursor: pointer;

@@ -116,7 +116,6 @@ describe('search paging', () => {
 		expect(search).toHaveBeenCalledTimes(1)
 
 		await Promise.all([
-			// statuses is AniList-only, so the type has to be one for it to survive.
 			allSettled(searchMediaModel.filtersPatched, { scope, params: { type: 'anime' } }),
 			allSettled(searchMediaModel.filtersPatched, { scope, params: { genres: ['Action'] } }),
 			allSettled(searchMediaModel.filtersPatched, {

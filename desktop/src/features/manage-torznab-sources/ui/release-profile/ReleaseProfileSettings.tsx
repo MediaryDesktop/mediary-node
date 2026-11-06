@@ -21,10 +21,8 @@ import styles from './ReleaseProfileSettings.module.scss'
 const RESOLUTIONS = ['2160p', '1080p', '720p', '480p'] as const
 const CODECS = ['HEVC', 'AVC', 'AV1'] as const
 
-// The node's "any" is an empty string, which a dropdown cannot hold as a value.
 const ANY = 'any'
 
-// Words are typed as one comma-separated line; the order is the preference.
 function words(line: string): string[] {
 	return line
 		.split(',')
@@ -32,7 +30,6 @@ function words(line: string): string[] {
 		.filter(Boolean)
 }
 
-// What the user likes in a release. Search ranks by it and names the best result.
 export function ReleaseProfileSettings() {
 	const { t } = useTranslation()
 
@@ -83,8 +80,6 @@ function ProfileForm({ profile }: { profile: TorrentProfile }) {
 	const [minSeeders, setMinSeeders] = useState(String(profile.min_seeders))
 	const [preferCached, setPreferCached] = useState(profile.prefer_cached)
 
-	// Only a debrid service that can say what it holds makes this mean anything;
-	// without one the choice is kept but not offered.
 	const service = readyDebrid(debridSettings)
 	const debrid = service?.cacheCheck === true
 

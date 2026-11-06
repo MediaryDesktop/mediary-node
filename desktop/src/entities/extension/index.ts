@@ -20,6 +20,4 @@ export type {
 	ExtensionUpdate
 } from './api/api'
 
-// Called straight from the install dialog, which walks preview → consent →
-// install or update in one place and keeps the steps' state itself.
 export { installExtensionFx, previewExtensionFx, updateExtensionFx } from './api/api'

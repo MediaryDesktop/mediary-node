@@ -15,27 +15,17 @@ import { useBookEntrance } from '../book-reader/lib/useBookEntrance'
 
 import styles from './ReaderView.module.scss'
 
-// Matches the book reader's and the video player's own slide, so every full-screen
-// surface in the app opens and closes the same way.
 const LEAVE_MS = 240
 
-// How long a single click waits before it acts, in case a second one turns it into
-// a double click instead; the one that zooms, not the one that turns the page.
 const CLICK_DELAY_MS = 220
 
-// Matches .zoomed's scale() in the stylesheet: a drag's on-screen distance is this
-// many times the translate it needs, since the translate happens inside the same
-// scale.
 const ZOOM_SCALE = 2.2
-// A drag shorter than this is a click that missed, not a pan — it still un-zooms.
 const DRAG_THRESHOLD_PX = 4
 
 export interface ReaderViewProps {
 	chapter: ReaderChapter
 	page: number
 	onPageChange: (page: number) => void
-	// When the page first asked to open this chapter — continues the loading panel's
-	// own opening slide instead of starting a new one.
 	openedAt: number
 	onClose: () => void
 	previous: { ref: string } | null
@@ -65,8 +55,6 @@ export function ReaderView({
 	const [pan, setPan] = useState({ x: 0, y: 0 })
 	const [dragging, setDragging] = useState(false)
 	const clickTimer = useRef<number | undefined>(undefined)
-	// A drag in progress: where it started, the pan it started from, and whether it
-	// has moved enough to count as a pan rather than a click that un-zooms.
 	const dragRef = useRef<{ pointerId: number; startX: number; startY: number; panX: number; panY: number } | null>(
 		null
 	)
@@ -89,17 +77,12 @@ export function ReaderView({
 		[current, total, onPageChange]
 	)
 
-	// The node counts the chapter when the last page is reached; every turn is
-	// reported, and the node ignores the ones that do not matter.
 	useEffect(() => {
 		if (total > 0) {
 			pageTurned({ ref, page: current })
 		}
 	}, [current, ref, total, pageTurned])
 
-	// A zoomed-in page would otherwise carry its zoom to whatever comes next. Reset
-	// during render (not an effect) per the React-recommended way to adjust state
-	// when a prop changes, so the old page never flashes zoomed-out first.
 	const [zoomedPage, setZoomedPage] = useState(current)
 	if (zoomedPage !== current) {
 		setZoomedPage(current)
@@ -109,8 +92,6 @@ export function ReaderView({
 
 	useEffect(() => () => window.clearTimeout(clickTimer.current), [])
 
-	// Fetch the pages ahead while the current one is on screen, so turning a page
-	// does not wait on the archive.
 	useEffect(() => {
 		const preloaded = prefetchIndexes(current, total).map(index => {
 			const image = new Image()
@@ -163,11 +144,7 @@ export function ReaderView({
 		return () => window.removeEventListener('keydown', onKey)
 	}, [current, total, goTo, requestClose])
 
-	// Held a moment in case a second click turns this into the double click that
-	// zooms instead, so a tap-to-zoom does not also turn a page.
 	const onStageClick = (event: MouseEvent<HTMLDivElement>) => {
-		// A drag that just ended fires its own click; that one pans, it does not
-		// also un-zoom.
 		if (draggedRef.current) {
 			draggedRef.current = false
 			return
@@ -206,8 +183,6 @@ export function ReaderView({
 		setZoomed(zoom => !zoom)
 	}
 
-	// A zoomed page is dragged to pan it: the translate is divided by the scale so
-	// the image moves exactly as far as the pointer does, not 2.2x as far.
 	const onPagePointerDown = (event: PointerEvent<HTMLImageElement>) => {
 		if (!zoomed) {
 			return

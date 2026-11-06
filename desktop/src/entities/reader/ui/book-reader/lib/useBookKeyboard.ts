@@ -10,9 +10,6 @@ export interface BookKeyboardOptions {
 	onClose: () => void
 }
 
-// Arrows, Page Up/Down and space turn pages; Escape closes the contents first, then
-// the book. Returns the handler too: an EPUB page is an iframe of its own, and its
-// keys have to be handed over.
 export function useBookKeyboard({ viewRef, tocOpen, onCloseToc, onClose }: BookKeyboardOptions) {
 	const onKey = useCallback(
 		(event: KeyboardEvent) => {

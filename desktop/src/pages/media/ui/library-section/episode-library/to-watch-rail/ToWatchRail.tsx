@@ -6,7 +6,6 @@ import { Button, Icon } from '@shared/ui'
 
 import styles from './ToWatchRail.module.scss'
 
-// The episodes still to watch, as a row of large cards scrolled a page at a time.
 export function ToWatchRail({ children }: { children: ReactNode }) {
 	const { t } = useTranslation()
 	const rail = useRef<HTMLUListElement>(null)

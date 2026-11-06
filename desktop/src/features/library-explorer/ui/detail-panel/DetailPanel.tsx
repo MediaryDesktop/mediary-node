@@ -15,7 +15,6 @@ import styles from './DetailPanel.module.scss'
 export interface DetailPanelProps {
 	node: TreeNode | null
 	titles: LibraryTitle[]
-	// Opens a book in the reader; matched or not, a book on disk can be read.
 	onRead?: (fileId: number) => void
 }
 

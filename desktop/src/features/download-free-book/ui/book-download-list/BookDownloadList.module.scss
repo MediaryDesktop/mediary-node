@@ -57,7 +57,6 @@
 				color: var(--danger-text);
 				font-size: 0.8125rem;
 
-				// The node words its reasons in lower case, as part of a sentence.
 				&::first-letter {
 					text-transform: uppercase;
 				}

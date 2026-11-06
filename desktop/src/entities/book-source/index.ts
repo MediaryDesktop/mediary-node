@@ -15,7 +15,6 @@ export {
 	updateBookOPDSServerMutation
 } from './model/model'
 
-// The effects behind downloads, for models that are tested with their own answers.
 export { enqueueBookDownloadFx, fetchBookDownloadSettingsFx, putBookDownloadSettingsFx } from './api/api'
 
 export { isMissingBookFolderError, useBookFolderAction } from './lib/missing-folder'

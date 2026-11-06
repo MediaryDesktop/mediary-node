@@ -1,6 +1,3 @@
-// Per-computer preferences in localStorage. A window that keeps nothing (storage
-// disabled or full) still works: reads come back empty and writes are dropped, so
-// a choice simply lasts the session.
 
 export function readStored(key: string): string | null {
 	try {

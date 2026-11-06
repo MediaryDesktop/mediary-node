@@ -13,7 +13,6 @@ export type MangaLink = NodeSchemas['MangaLinkBody']
 export type MangaChapter = NodeSchemas['MangaChapterBody']
 export type MangaSourceProblem = NodeSchemas['MangaSourceProblemBody']
 
-// A media reference and a source both hold colons; the path segment gets them escaped.
 const segment = encodeURIComponent
 
 export const fetchOPDSServersFx = createNodeRequestFx<void, NodeSchemas['OPDSServersOutputBody']>(() => ({
@@ -44,7 +43,6 @@ export const checkOPDSServerFx = createNodeRequestFx<OPDSCheckInput, OPDSCheckRe
 	method: 'POST',
 	body,
 
-	// The node waits on the user's server, which may be slow to wake up.
 	timeout: 35_000
 }))
 
@@ -55,7 +53,6 @@ export const fetchMangaSourcesFx = createNodeRequestFx<void, NodeSchemas['MangaS
 export interface SearchMangaSourceParams {
 	source: string
 	query: string
-	// The title being linked, so a source that knows it puts its series first.
 	mediaRef?: string
 }
 
@@ -72,8 +69,6 @@ const requestMangaLinksFx = createNodeRequestFx<string, NodeSchemas['MangaLinksO
 	url: `/v1/manga/titles/${segment(mediaRef)}/links`
 }))
 
-// The answer says which title it is for: one query serves every title page, and a
-// page must not show the last title's links while its own are on the way.
 export const fetchMangaLinksFx = createEffect(async (mediaRef: string) => ({
 	mediaRef,
 	...(await requestMangaLinksFx(mediaRef))
@@ -108,7 +103,6 @@ const requestMangaChaptersFx = createNodeRequestFx<string, NodeSchemas['MangaCha
 	mediaRef => ({
 		url: `/v1/manga/titles/${segment(mediaRef)}/chapters`,
 
-		// Every linked server is asked in turn, and a big series is several pages.
 		timeout: 60_000
 	})
 )

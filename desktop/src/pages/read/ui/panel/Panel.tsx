@@ -12,16 +12,11 @@ import styles from './Panel.module.scss'
 export interface PanelProps {
 	onClose: () => void
 	children: ReactNode
-	// When the page first asked to open the book; the reader that replaces this panel
-	// continues this same opening slide instead of starting its own. Left out, the
-	// panel shows in place, for readers with no such slide to hand off to.
 	openedAt?: number
 }
 
-// What a reader shows while there is nothing to read yet: the way back, and why.
 export function Panel({ onClose, children, openedAt }: PanelProps) {
 	const { t } = useTranslation()
-	// Only read when openedAt is left out, so the hook still has a number to take.
 	const [fallbackOpenedAt] = useState(() => performance.now())
 	const entrance = useBookEntrance(openedAt ?? fallbackOpenedAt)
 	const entering = openedAt != null && entrance.entering

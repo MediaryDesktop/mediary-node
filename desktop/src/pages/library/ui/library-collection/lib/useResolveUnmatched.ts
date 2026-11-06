@@ -8,10 +8,6 @@ import type { LibraryCollectionEntry } from '@entities/library-item'
 
 type ResolvedTitle = NonNullable<LibraryCollectionEntry['title']>
 
-// A ref the server could not describe at collection time (it is neither on the
-// user's list nor cached yet) stays untitled until something asks the source for
-// it directly — the title page does that today, this warms the same cache so the
-// shelf does not wait for a visit there and back to pick up the answer.
 export function useResolveUnmatched(entries: LibraryCollectionEntry[]): Record<string, ResolvedTitle> {
 	const nodeReady = useUnit($nodeReady)
 	const [resolved, setResolved] = useState<Record<string, ResolvedTitle>>({})
@@ -49,16 +45,12 @@ export function useResolveUnmatched(entries: LibraryCollectionEntry[]): Record<s
 					}))
 				})
 				.catch(() => {
-					// Left unresolved: the card keeps showing the ref, same as before the
-					// warm, and the next collection refresh is free to try again.
 				})
 		}
 
 		return () => {
 			cancelled = true
 		}
-		// Only a change in which refs are unresolved asks again; answers landing
-		// must not re-run it.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [key, nodeReady])
 

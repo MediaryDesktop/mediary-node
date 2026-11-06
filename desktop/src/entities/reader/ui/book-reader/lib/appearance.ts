@@ -14,8 +14,6 @@ export const THEME_COLORS: Record<BookTheme, { background: string; text: string;
 	light: { background: '#ffffff', text: '#1a1a1a', link: '#1a56c4' }
 }
 
-// What a book's pages are drawn with. The colours are forced: a book that
-// writes its text black would vanish on a dark page.
 export function bookStyles({ theme, fontSize }: BookAppearance): string {
 	const colors = THEME_COLORS[theme]
 
@@ -50,7 +48,6 @@ export function bookStyles({ theme, fontSize }: BookAppearance): string {
 
 const STORAGE_KEY = 'mediary.reader.book-appearance'
 
-// How the user likes to read is theirs on this computer, kept beside the window.
 export function loadAppearance(): BookAppearance {
 	const raw = readStored(STORAGE_KEY)
 

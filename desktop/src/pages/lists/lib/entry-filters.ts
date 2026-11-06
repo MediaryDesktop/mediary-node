@@ -33,8 +33,6 @@ export function hasActiveFilters(filters: EntryFilters): boolean {
 	)
 }
 
-// Only the formats present in the list are offered, so the control never shows
-// an option that would empty the grid.
 export function formatsOf(entries: TrackerEntry[]): string[] {
 	const formats = new Set<string>()
 

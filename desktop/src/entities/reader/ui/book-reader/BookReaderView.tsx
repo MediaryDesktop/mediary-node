@@ -21,17 +21,12 @@ import type { BookAppearance, BookLocation, BookViewHandle } from './types'
 import { FoliateView } from './views/FoliateView'
 import { PdfView } from './views/PdfView'
 
-// Matches the video player's own slide, so every full-screen surface in the
-// app opens and closes the same way.
 const LEAVE_MS = 240
 
 export interface BookReaderViewProps {
 	book: ReaderBook
 	file: File
-	// Where to open the book; null starts it from its first page of text.
 	locator: string | null
-	// When the page first asked to open this book — continues the loading panel's
-	// own opening slide instead of starting a new one.
 	openedAt: number
 	onClose: () => void
 	onRelocate: (location: BookLocation) => void

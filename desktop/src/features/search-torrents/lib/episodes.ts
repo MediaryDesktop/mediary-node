@@ -1,7 +1,5 @@
 import type { TorrentRelease } from '@entities/torrent'
 
-// The episodes out so far that are neither on disk nor on their way. Unknown when
-// the title's episode count is.
 export function missingEpisodes(released: number | null, have: Iterable<number>): number[] | null {
 	if (!released || released < 1) {
 		return null
@@ -19,7 +17,6 @@ export function missingEpisodes(released: number | null, have: Iterable<number>)
 	return missing
 }
 
-// The missing episodes a release holds.
 export function coveredEpisodes(release: TorrentRelease, missing: readonly number[] | null): number[] {
 	const range = release.episodes
 	if (!range || !missing) {
@@ -29,7 +26,6 @@ export function coveredEpisodes(release: TorrentRelease, missing: readonly numbe
 	return missing.filter(episode => episode >= range.from && episode <= range.to)
 }
 
-// "1, 2, 3, 4, 5, …, 12": the first few and the last, as Seanime shows them.
 export function summarizeEpisodes(episodes: readonly number[], head = 5): string {
 	if (episodes.length <= head + 1) {
 		return episodes.join(', ')

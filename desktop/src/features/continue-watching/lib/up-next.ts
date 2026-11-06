@@ -9,9 +9,6 @@ export interface UpNext {
 	seasonal: boolean
 }
 
-// The episode right after the user's progress, when the library has it. A later
-// one does not count: "continue" from episode 3 to episode 7 skips what the user
-// has not seen. A movie, which has no number, is next until it is watched.
 export function upNext(
 	mediaRef: string,
 	files: LibraryFile[],

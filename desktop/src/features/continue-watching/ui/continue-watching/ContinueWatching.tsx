@@ -18,7 +18,6 @@ export interface ContinueWatchingProps {
 	className?: string
 }
 
-// The next episodes as a row of stills: one click plays the file.
 export function ContinueWatching({ state, className }: ContinueWatchingProps) {
 	const { t } = useTranslation()
 	const { play, starting } = usePlayFile()

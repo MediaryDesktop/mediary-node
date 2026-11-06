@@ -61,7 +61,6 @@ describe('discover model', () => {
 		expect(sections['movie:popular']?.items[0]?.media_ref).toBe('movie:POPULARITY_DESC')
 		expect(sections['movie:topRated']?.status).toBe('done')
 
-		// Back on the tab a moment later: nothing is asked again.
 		await allSettled(discoverModel.sectionsRequested, { scope, params: rows })
 		expect(search).toHaveBeenCalledTimes(rows.length)
 	})

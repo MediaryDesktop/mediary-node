@@ -16,12 +16,6 @@ export interface SourceRowProps {
 	onRemove: () => void
 }
 
-// One configured Torznab source: its name and address, a menu to edit or
-// remove it, and — while editing — the same form "Add a source" uses below,
-// unfolding right under this row instead of in a drawer. The form stays
-// mounted through the closing animation (CollapsibleSection only hides it);
-// formKey remounts it with fresh fields each time editing opens again, so a
-// cancelled edit never lingers into the next one.
 export function SourceRow({ source, removing, onRemove }: SourceRowProps) {
 	const { t } = useTranslation()
 

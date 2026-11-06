@@ -8,7 +8,6 @@ import { Status } from '../status/Status'
 
 export interface CheckResultProps {
 	check: TorrentRuleCheck
-	// A preview says what would be added; a real check, what was.
 	preview: boolean
 }
 

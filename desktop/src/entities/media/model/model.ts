@@ -171,8 +171,6 @@ export function mediaTitle(title: MediaTitle): string {
 	return firstPresent(title.user_preferred, title.english, title.romaji, title.native)
 }
 
-// The user's own language first, then English, then the romanisation a fan of the
-// original would recognise. The node only sends the languages the app speaks.
 export function episodeTitle(episode: MediaEpisode, language: string): string | null {
 	const titles = episode.titles ?? {}
 	const base = language.split('-')[0] ?? language

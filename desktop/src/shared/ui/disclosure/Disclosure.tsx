@@ -12,8 +12,6 @@ export interface DisclosureProps {
 	className?: string
 }
 
-// Built on details and summary: the browser already knows how to open, close and
-// announce one, and a log nobody opens should cost nothing to render.
 export function Disclosure({ summary, children, defaultOpen, className }: DisclosureProps) {
 	return (
 		<details className={clsx(styles.disclosure, className)} open={defaultOpen}>

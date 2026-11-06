@@ -20,13 +20,9 @@ import { ExplorerToolbar } from './ui/explorer-toolbar/ExplorerToolbar'
 import { SelectionActions } from './ui/explorer-toolbar/selection-actions/SelectionActions'
 
 export interface LibraryExplorerProps {
-	// Matching lives in its own slice; the page that mounts the explorer hands
-	// this in rather than the two features reaching into each other.
 	onMatchMany: (files: LibraryFile[]) => void
 }
 
-// The library as the folders on disk: search and filter it, open a file's details,
-// tick files to match, ignore or delete them together.
 export function LibraryExplorer({ onMatchMany }: LibraryExplorerProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
@@ -78,8 +74,6 @@ export function LibraryExplorer({ onMatchMany }: LibraryExplorerProps) {
 		)
 	}, [files, roots, filter, search])
 
-	// A filter or a search that narrows the library to a handful of files is
-	// useless behind closed folders, so narrowing opens everything it kept.
 	const narrowed = filter !== null || search.trim() !== ''
 
 	const rows = useMemo(

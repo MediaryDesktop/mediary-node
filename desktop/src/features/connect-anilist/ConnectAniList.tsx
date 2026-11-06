@@ -14,13 +14,9 @@ import styles from './ConnectAniList.module.scss'
 
 export interface ConnectAniListProps {
 	showHeader?: boolean
-	// Where "Get a token" appears: in this component's own header, or left out
-	// for the caller to place with GetTokenLink — next to a title of its own.
 	tokenLink?: 'inline' | 'none'
 }
 
-// The "Get a token on AniList" action on its own, for a caller that gives
-// AniList its own title elsewhere and wants this next to it.
 export function GetTokenLink() {
 	const { t } = useTranslation()
 

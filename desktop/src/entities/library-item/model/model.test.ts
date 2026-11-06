@@ -153,8 +153,6 @@ describe('scan activity', () => {
 			params: scanEvent('matching', { matched: 3, total: 10 })
 		})
 
-		// Matching starts once every folder is walked, so the folder count is
-		// complete even though the event does not repeat it.
 		expect(scope.getState(libraryModel.$activity)).toEqual({
 			phase: 'matching',
 			found: 128,

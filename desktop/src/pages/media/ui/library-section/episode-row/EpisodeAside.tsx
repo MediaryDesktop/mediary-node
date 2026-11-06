@@ -12,7 +12,6 @@ export interface EpisodeAsideProps {
 	watched: boolean
 }
 
-// The watched mark and the "about this episode" tooltip at the end of a row.
 export function EpisodeAside({ episode, watched }: EpisodeAsideProps) {
 	const { t } = useTranslation()
 	const text = useEpisodeText()

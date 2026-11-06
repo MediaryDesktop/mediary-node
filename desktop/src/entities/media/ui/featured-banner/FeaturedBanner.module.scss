@@ -14,9 +14,6 @@
 		overflow: hidden;
 		background: var(--bg);
 		transition: background-color 0.6s ease;
-		// While the page slides in, this edge lands between pixels and its
-		// anti-aliased row blends the cover colour through .fadeBottom as a line.
-		// Fading the last few pixels to transparent leaves only the page beneath.
 		mask-image: linear-gradient(to top, transparent, #000 0.25rem);
 
 		.image {
@@ -34,8 +31,6 @@
 				animation: none;
 			}
 
-			// A held breath while the next title swaps in behind the scrim: a
-			// slight push forward, so the reveal lands on a picture already moving.
 			&.transitioning {
 				transform: scale(1.015) translateX(-0.4%);
 			}
@@ -84,8 +79,6 @@
 		flex-direction: column;
 		gap: 1.25rem;
 
-		// The real content's own entrance is played by motion, staggered piece by
-		// piece; only the plain skeleton standing in for it needs a CSS one.
 		&.loadingContent {
 			gap: 0.75rem;
 			animation: rise 0.5s ease both;
@@ -258,8 +251,6 @@
 	}
 }
 
-// The score's colour depends on how good it is; the scale lives in scoreTone and
-// reads its name through styles[tone], so these stay reachable by plain name.
 .low {
 	color: var(--danger-text);
 }

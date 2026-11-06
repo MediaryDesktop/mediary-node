@@ -6,9 +6,6 @@ import { $nodeReady } from '@infra/node'
 import type { TrackerEntry } from '../api/api'
 import { isLocalTrackerType, TRACKER_MEDIA_TYPES, trackerQueries } from '../model/model'
 
-// `enabled` is whether the AniList account is connected, passed in rather than
-// read: entities do not import each other, so the page that knows about the
-// connection owns it. Movies, shows and books are the node's own and always load.
 export function useTrackedEntries(enabled: boolean): TrackerEntry[] {
 	const data = useUnit({
 		anime: trackerQueries.anime.$data,
@@ -39,9 +36,6 @@ export function useTrackedEntries(enabled: boolean): TrackerEntry[] {
 
 	const nodeReady = useUnit($nodeReady)
 
-	// Started before the node is up, a query fails on the missing connection and,
-	// no longer `initial`, is never asked again — the node's own types would stay
-	// empty all session.
 	useEffect(() => {
 		if (!nodeReady) {
 			return
@@ -57,10 +51,6 @@ export function useTrackedEntries(enabled: boolean): TrackerEntry[] {
 	return useMemo(() => TRACKER_MEDIA_TYPES.flatMap(mediaType => data[mediaType]?.entries ?? []), [data])
 }
 
-// Whether every type a page showing `entries` cares about has answered at least
-// once — not merely non-empty, since an empty list and one still in flight look
-// the same to `.length`. A page that tells the two apart can hold its first paint
-// for the second instead of flashing an empty state in between.
 export function useTrackedEntriesReady(enabled: boolean): boolean {
 	const nodeReady = useUnit($nodeReady)
 	const status = useUnit({

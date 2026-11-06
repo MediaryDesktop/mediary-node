@@ -14,8 +14,6 @@ import { languageName } from '../../lib/languages'
 
 import styles from './PluginCard.module.scss'
 
-// The plugin's own icon from its manifest, or its first letter when there is
-// none or it does not load.
 function PluginIcon({ name, icon }: { name: string; icon?: string }) {
 	const [broken, setBroken] = useState(false)
 

@@ -20,13 +20,10 @@ import styles from './ManualMediaForm.module.scss'
 
 export interface ManualMediaFormProps {
 	mode: 'create' | 'edit'
-	// The manual title's id (without the manual: prefix); edit mode only.
 	id?: string
 	initialDraft: ManualDraft
 	initialCoverUrl?: string | null
 	cancelTo: string
-	// A new title opened with no kind in mind: the draft holds a placeholder kind
-	// until the user picks one, so a book is never made an anime by default.
 	typeUnset?: boolean
 }
 

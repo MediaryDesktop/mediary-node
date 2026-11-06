@@ -10,8 +10,6 @@ export interface ManagedListProps<T> {
 	action: ReactNode
 }
 
-// A settings list of things the user adds, changes and removes: an optional note,
-// the rows (or a line saying there are none) and the add control under them.
 export function ManagedList<T>({ items, renderItem, emptyText, note, action }: ManagedListProps<T>) {
 	return (
 		<div className={styles.root}>

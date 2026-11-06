@@ -46,8 +46,6 @@ export const aniListAccountModel = atom(() => {
 	const $connecting = connectAniListFx.pending
 	const $disconnecting = disconnectAniListFx.pending
 
-	// Fires once per failed attempt, for the UI to report as a toast — never a
-	// store, so a repeat of the same failure is not silently swallowed.
 	const connectFailed = createEvent<AniListConnectFailure>()
 	sample({ clock: connectAniListFx.failData, fn: failureOf, target: connectFailed })
 

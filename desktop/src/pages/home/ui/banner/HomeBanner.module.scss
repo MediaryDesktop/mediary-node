@@ -1,10 +1,7 @@
-// Without Discover's tabs under it, the banner needs less of the page.
 .banner {
 	--featured-height: 22rem;
 }
 
-// Rendered by FeaturedBanner's own corner slot, several elements below anything
-// of ours — kept unscoped rather than nested under a distant ancestor.
 .progress {
 	display: flex;
 	flex-direction: column;

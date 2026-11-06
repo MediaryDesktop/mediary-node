@@ -67,8 +67,6 @@ describe('buildTree', () => {
 		expect(season.children.map(child => child.name)).toEqual(['ep 01.mkv', 'ep 02.mkv'])
 	})
 
-	// A folder's number is the whole subtree's, or a collapsed folder would say
-	// nothing about what is inside it.
 	it('counts every file underneath a folder, not just its own', () => {
 		const tree = buildTree(
 			[
@@ -98,8 +96,6 @@ describe('buildTree', () => {
 		expect(show.children.map(child => child.name)).toEqual(['Extras', 'ep 2.mkv', 'ep 10.mkv'])
 	})
 
-	// A root the user added but never scanned has nothing to show, and an empty
-	// row would only be noise.
 	it('leaves out a root with no files', () => {
 		expect(buildTree([], [root])).toHaveLength(0)
 	})

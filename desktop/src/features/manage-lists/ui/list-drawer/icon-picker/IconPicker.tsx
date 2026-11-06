@@ -14,15 +14,11 @@ import styles from './IconPicker.module.scss'
 
 export interface IconPickerProps {
 	value: string
-	// The list's media type, which the default icon is taken from.
 	mediaType: ListMediaType
 	onChange: (icon: string) => void
 	disabled?: boolean
 }
 
-// A dropdown that opens in place, under its field, rather than floating over the
-// page: inside a drawer, a panel portalled out of it would sit outside the
-// drawer's focus trap, and its search box could never be typed into.
 export function IconPicker({ value, mediaType, onChange, disabled }: IconPickerProps) {
 	const { t } = useTranslation()
 	const panelId = useId()
@@ -37,8 +33,6 @@ export function IconPicker({ value, mediaType, onChange, disabled }: IconPickerP
 
 	const matches = useMemo(() => filterIcons(LIST_ICONS, query), [query])
 
-	// The default sits first while nothing is searched for: choosing nothing and
-	// choosing the default are the same thing, and the grid says so.
 	const options = query.trim() === '' ? ['', ...matches] : matches
 
 	const close = useCallback(() => {
@@ -107,8 +101,6 @@ export function IconPicker({ value, mediaType, onChange, disabled }: IconPickerP
 			return
 		}
 
-		// The number of columns is whatever the panel fits, so it is read off the
-		// rendered cells rather than assumed.
 		const top = all[0]?.offsetTop ?? 0
 		const columns = Math.max(all.filter(cell => cell.offsetTop === top).length, 1)
 

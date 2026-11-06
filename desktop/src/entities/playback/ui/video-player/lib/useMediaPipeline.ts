@@ -12,8 +12,6 @@ import { playbackModel } from '../../../model/model'
 type Track = NonNullable<MediaInfo['audios']>[number]
 type Font = NonNullable<MediaInfo['fonts']>[number]
 
-// Chromium exposes audioTracks only behind a Blink feature, which the shell
-// turns on; the DOM typings do not know about it.
 interface AudioTrackList {
 	length: number
 	[index: number]: { enabled: boolean }
@@ -23,13 +21,7 @@ function audioTracksOf(video: HTMLVideoElement): AudioTrackList | undefined {
 	return (video as HTMLVideoElement & { audioTracks?: AudioTrackList }).audioTracks
 }
 
-// A segment the node answers with an error is one ffmpeg crashed on, and the
-// node already tried it again: two more asks, not hls.js's six, before the
-// player gives up and offers mpv. Slow segments still get hls.js's own timeouts.
 const HLS_CONFIG: Partial<HlsConfig> = {
-	// hls.js keeps everything already played by default, so a long episode held
-	// gigabytes until the player closed. The node has the segments on disk, so a
-	// seek further back only refetches them.
 	backBufferLength: 90,
 	fragLoadPolicy: {
 		default: {
@@ -44,7 +36,6 @@ const HLS_CONFIG: Partial<HlsConfig> = {
 export interface MediaPipelineOptions {
 	videoRef: RefObject<HTMLVideoElement | null>
 	fileId: number
-	// The transcode's playlist, or null when the element plays the file directly.
 	hlsPath: string | null
 	subtitle: number | null
 	fonts: Font[]
@@ -53,8 +44,6 @@ export interface MediaPipelineOptions {
 	onFailed: (failure: PlayerFailure) => void
 }
 
-// Why the transcoded stream stopped: the node's own answer when it gave one, so
-// "ffmpeg was not found: install it…" reaches the user instead of a generic line.
 export interface PlayerFailure {
 	status?: number
 	message?: string
@@ -77,8 +66,6 @@ function failureOf(data: ErrorData): PlayerFailure {
 	return { status, message }
 }
 
-// Everything that feeds the element besides its src: hls.js for a transcode, libass
-// for subtitles and the chosen audio track.
 export function useMediaPipeline({
 	videoRef,
 	fileId,
@@ -123,8 +110,6 @@ export function useMediaPipeline({
 		}
 	}, [videoRef, hlsPath, fileId, transcodeClosed])
 
-	// Subtitles are drawn by libass in a worker; the instance is rebuilt per track
-	// because a track switch also changes which fonts are worth loading.
 	useEffect(() => {
 		const video = videoRef.current
 		if (!video || subtitle === null) {
@@ -152,7 +137,6 @@ export function useMediaPipeline({
 	useEffect(() => {
 		const selected = audios.findIndex(track => track.index === audio)
 
-		// The master playlist lists the tracks in the file's order.
 		const hls = hlsRef.current
 		if (hls) {
 			if (selected >= 0 && hls.audioTrack !== selected) {
@@ -172,7 +156,6 @@ export function useMediaPipeline({
 			if (track) track.enabled = i === selected
 		}
 
-		// Chromium keeps playing the old track's buffer until the next seek.
 		const at = video.currentTime
 		video.currentTime = at
 	}, [videoRef, audio, audios])

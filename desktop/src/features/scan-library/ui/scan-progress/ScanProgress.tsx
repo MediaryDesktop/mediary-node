@@ -10,9 +10,6 @@ import { PHASE_LABELS, progressOf } from '../../lib/progress'
 
 import styles from './ScanProgress.module.scss'
 
-// Drawn over whatever page is open, so a scan started from the library keeps
-// reporting while the user goes and does something else — a thin bar across the
-// top of the window and a small card in the corner, nothing to dismiss.
 export function ScanProgress() {
 	const { t } = useTranslation()
 

@@ -31,8 +31,6 @@ export const matchFileModel = atom(() => {
 	const closed = createEvent()
 	const confirmed = createEvent<string>()
 
-	// A group is matched to one title, the way a season of episodes is: the
-	// candidates are looked up for the first file and the pick applies to all.
 	const $files = createStore<LibraryFile[]>([])
 		.on(requested, (_, file) => [file])
 		.on(requestedMany, (_, files) => files)
@@ -43,8 +41,6 @@ export const matchFileModel = atom(() => {
 		.on([requested, requestedMany], () => true)
 		.reset(closed, setLibraryMatchMutation.finished.success, setLibraryMatchesMutation.finished.success)
 
-	// The node has to ask the source, so the list is fetched when the drawer opens
-	// rather than kept for every file in the library.
 	sample({
 		clock: [requested, requestedMany],
 		source: $file,

@@ -21,8 +21,6 @@ export const candidatesChanged = createEvent<Candidate[]>()
 
 const $candidates = createStore<Candidate[]>([]).on(candidatesChanged, (_, next) => next)
 
-// Each title's files, asked for one by one: the node keeps them per title, and a
-// title that fails to answer must not hide the rest.
 const loadFilesFx = createEffect(async (refs: string[]): Promise<Record<string, LibraryFile[]>> => {
 	const answers = await Promise.allSettled(
 		refs.map(mediaRef => fetchTitleFilesFx({ mediaRef, kind: 'video' }))
@@ -39,8 +37,6 @@ const loadFilesFx = createEffect(async (refs: string[]): Promise<Record<string, 
 	return files
 })
 
-// Episode lists come from the sources through the node's cache. A title whose list
-// does not come stays empty, and its files are counted by their own numbers.
 const loadEpisodesFx = createEffect(async (refs: string[]): Promise<Record<string, MediaEpisode[]>> => {
 	const answers = await Promise.allSettled(refs.map(mediaRef => fetchMediaEpisodesFx(mediaRef)))
 	const episodes: Record<string, MediaEpisode[]> = {}
@@ -69,7 +65,6 @@ sample({
 	target: loadFilesFx
 })
 
-// An episode list hardly changes while the app is open; it is asked for once.
 sample({
 	clock: candidatesChanged,
 	source: $episodes,
@@ -79,8 +74,6 @@ sample({
 	target: loadEpisodesFx
 })
 
-// A show numbered by season waits for its episode list: without it S02E01 would
-// read as the first episode.
 export const $items = combine($candidates, $files, $episodes, (candidates, files, episodes) =>
 	candidates.flatMap(({ mediaRef, progress }): UpNextItem[] => {
 		const titleFiles = files[mediaRef]

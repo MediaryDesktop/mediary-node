@@ -46,7 +46,6 @@ export interface ChapterListProps {
 	mediaRef: string
 	title: string
 	progress: number
-	// Whether the title is on the user's list; marking a chapter read adds it.
 	listed: boolean
 }
 
@@ -54,8 +53,6 @@ const ALL = 'all'
 const FILTER_KEY = 'mediary.chapterSource'
 const ORDER_KEY = 'mediary.chapterOrder'
 
-// Every chapter of the title, from the library and from the user's servers, as one
-// list. A chapter held in several places is one row that opens the nearest copy.
 export function ChapterList({ mediaRef, title, progress, listed }: ChapterListProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
@@ -100,7 +97,6 @@ export function ChapterList({ mediaRef, title, progress, listed }: ChapterListPr
 	const [page, setPage] = useState(1)
 	const [selected, setSelected] = useState<ReadonlySet<string>>(() => new Set())
 
-	// undefined: closed; otherwise the source to start the search on.
 	const [linking, setLinking] = useState<string | null | undefined>(undefined)
 	const closeLinking = useCallback(() => setLinking(undefined), [])
 
@@ -116,7 +112,6 @@ export function ChapterList({ mediaRef, title, progress, listed }: ChapterListPr
 		)
 	)
 
-	// A remembered source this title does not have shows everything instead.
 	const active = present.has(filter) ? filter : ALL
 	const shown = sortRows(
 		(active === ALL ? rows : filterChapters(rows, active)).filter(
@@ -139,7 +134,6 @@ export function ChapterList({ mediaRef, title, progress, listed }: ChapterListPr
 		}
 	}
 
-	// A selection outlives a filter, but only what is shown and still savable counts.
 	const picked = [...savable].filter(([key]) => selected.has(key)).map(([, option]) => option)
 
 	const startOver =

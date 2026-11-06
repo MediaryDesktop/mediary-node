@@ -11,18 +11,12 @@ import { SearchForm } from './ui/search-form/SearchForm'
 
 export interface TorrentSearchDrawerProps {
 	mediaRef: string
-	// The title's name; it also names the folder downloads go into.
 	title: string
-	// The episodes out that the library lacks; null when the count is unknown.
 	missing: number[] | null
 	poster?: string | null
-	// Offers "watch now" on each release; absent without a debrid service.
 	watching?: ReleaseWatching
 }
 
-// Search for a title's releases in a sheet, as Seanime does it: the missing
-// episodes on top, the results below to tick, one button to download them. A
-// batch only brings the episodes that are missing.
 export function TorrentSearchDrawer({
 	mediaRef,
 	title,
@@ -33,8 +27,6 @@ export function TorrentSearchDrawer({
 	const { t } = useTranslation()
 
 	const [open, close, target] = useUnit([$searchOpen, searchClosed, $searchTarget])
-	// Picking a release to watch is not picking what to download: there is nothing
-	// missing to call out, and the sheet says so by its own name.
 	const watchOnly = target.intent === 'watch'
 
 	return (

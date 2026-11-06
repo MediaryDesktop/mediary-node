@@ -3,8 +3,6 @@ import type { RefObject } from 'react'
 
 import { videoFit } from '../../../lib/fit'
 
-// How the picture fits the player as the player resizes: cropped to fill when the
-// proportions nearly match, letterboxed otherwise.
 export function useStageFit(
 	stageRef: RefObject<HTMLElement | null>,
 	videoAspect: number | null

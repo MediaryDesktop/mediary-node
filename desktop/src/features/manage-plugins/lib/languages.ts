@@ -1,5 +1,3 @@
-// Languages by their own names, as Seanime lists them. "multi" is a plugin for
-// every language; it shows under all of them.
 export const LANGUAGES: Record<string, string> = {
 	en: 'English',
 	uk: 'Українська',

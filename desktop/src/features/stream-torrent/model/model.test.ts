@@ -61,7 +61,6 @@ describe('torrent stream', () => {
 	})
 
 	it('ignores what comes after the stream was cancelled', async () => {
-		// The user cancels while the node is still answering the request.
 		const scope: Scope = fork({
 			handlers: [
 				[
@@ -92,7 +91,6 @@ describe('torrent stream', () => {
 
 		await allSettled(streamRequested, { scope, params: TARGET })
 
-		// The player stays open on what went wrong until the user closes it.
 		expect(scope.getState($streamTarget)).toEqual(TARGET)
 		expect(scope.getState($streamError)).toBe('TorBox: no seeds')
 		expect(scope.getState($stream)?.state).toBe('failed')

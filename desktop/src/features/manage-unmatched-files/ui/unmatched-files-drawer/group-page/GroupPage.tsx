@@ -20,8 +20,6 @@ import { SuggestionCard } from './suggestion-card/SuggestionCard'
 
 const ANILIST = 'anilist:'
 
-// A new folder starts with all of it picked and nothing typed: most folders are
-// one show, and the last folder's answer is almost never this one's.
 export function GroupPage({ group }: { group: UnmatchedGroup }) {
 	const { t } = useTranslation()
 
@@ -45,8 +43,6 @@ export function GroupPage({ group }: { group: UnmatchedGroup }) {
 	const picked = group.files.filter(file => selected.has(file.id))
 	const busy = matching || ignoring
 
-	// The query is shared across folders and keeps its last answer while a new
-	// one loads, so that answer belongs to whatever was asked before.
 	const suggestions: LibrarySuggestion[] = asked && !suggesting ? (candidates?.suggestions ?? []) : []
 
 	const allState = picked.length === 0 ? false : picked.length === group.files.length ? true : 'mixed'

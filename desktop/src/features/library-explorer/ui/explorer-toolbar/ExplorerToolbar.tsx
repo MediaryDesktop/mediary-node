@@ -18,7 +18,6 @@ export interface ExplorerToolbarProps {
 	onToggleSelecting: () => void
 	refreshing: boolean
 	onRefresh: () => void
-	// The actions on the ticked files, shown while there are any.
 	selectionActions?: ReactNode
 }
 

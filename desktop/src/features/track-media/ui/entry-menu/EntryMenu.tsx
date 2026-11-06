@@ -22,9 +22,7 @@ export interface EntryMenuMedia {
 
 export interface EntryMenuProps {
 	media: EntryMenuMedia
-	// Null when the title is on no list yet: the menu then offers to add it.
 	entry: TrackerEntry | null
-	// The custom list the card is shown in, which the menu can take it out of.
 	listName?: string
 }
 
@@ -33,8 +31,6 @@ interface SourceLink {
 	url: string
 }
 
-// The library knows a title only by its reference, so the source's page is
-// rebuilt from it when no catalog link came along.
 function sourceLink({ mediaRef, mediaType, siteUrl }: EntryMenuMedia): SourceLink | null {
 	const [provider, first, second] = mediaRef.split(':')
 
@@ -118,7 +114,6 @@ export function EntryMenu({ media, entry, listName }: EntryMenuProps) {
 		})
 	}
 
-	// Only the node's own list can drop a title outright; AniList's is edited there.
 	if (entry && !listName && isLocalTrackerType(media.mediaType)) {
 		items.push({
 			id: 'delete',

@@ -1,4 +1,3 @@
-// The field follows SelectDropdown's, so the picker reads as one more dropdown.
 .root {
 	display: flex;
 	flex-direction: column;
@@ -141,7 +140,6 @@
 					background-color 120ms,
 					color 120ms;
 
-				// A long grid stays cheap: rows off screen are not laid out or painted.
 				content-visibility: auto;
 				contain-intrinsic-size: 40px 40px;
 
@@ -156,7 +154,6 @@
 					box-shadow: var(--focus-shadow);
 				}
 
-				// The default is marked apart, so it does not read as one more icon.
 				&.default {
 					border: 1px dashed var(--border-strong);
 				}

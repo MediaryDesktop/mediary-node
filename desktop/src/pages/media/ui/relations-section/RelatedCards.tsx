@@ -21,12 +21,9 @@ export interface RelatedCardsProps {
 	title?: ReactNode
 	icon?: IconLike
 	'aria-label'?: string
-	// What a card is to this title — "Sequel" — when there is something to say.
 	cornerLabel?: (title: RelatedTitle) => string | undefined
 }
 
-// A carousel of titles another title points at, each opening its own page and
-// offering the list menu where the title can be tracked.
 export function RelatedCards({ titles, title, icon, cornerLabel, ...rest }: RelatedCardsProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()

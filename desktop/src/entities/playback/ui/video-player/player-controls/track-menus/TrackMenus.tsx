@@ -17,7 +17,6 @@ export interface TrackMenusProps {
 	onSubtitle: (index: number | null) => void
 }
 
-// The audio menu shows when there is a choice; subtitles whenever the file has any.
 export function TrackMenus({ audios, audio, onAudio, subtitles, subtitle, onSubtitle }: TrackMenusProps) {
 	const { t, i18n } = useTranslation()
 

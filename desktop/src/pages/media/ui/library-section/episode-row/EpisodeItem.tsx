@@ -27,7 +27,6 @@ export interface EpisodeItemProps {
 	onPlay: (fileId: number) => void
 }
 
-// A file of the title in the library: its picture plays it.
 export function EpisodeItem({
 	file,
 	episode,

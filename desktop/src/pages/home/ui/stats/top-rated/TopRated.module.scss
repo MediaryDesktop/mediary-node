@@ -1,9 +1,6 @@
 .ranking {
 	display: flex;
 	flex-direction: column;
-	// Capped at three rows' worth (23.5rem fit all five and never actually
-	// clipped) so the rest scrolls in place instead of stretching the panel —
-	// and with it the whole row — past its neighbours.
 	max-height: 11.5rem;
 	gap: 0.25rem;
 	margin: 0;

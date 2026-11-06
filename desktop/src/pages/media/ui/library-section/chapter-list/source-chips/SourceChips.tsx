@@ -13,7 +13,6 @@ import { SourceIcon } from '../source-icon/SourceIcon'
 import styles from './SourceChips.module.scss'
 
 export interface SourceChipsProps {
-	// Every source the list holds, by id, with its name.
 	sources: Map<string, string>
 	counts: Map<string, number>
 	total: number
@@ -26,8 +25,6 @@ export interface SourceChipsProps {
 	onUnlink: (source: string) => void
 }
 
-// Which source the list shows. A linked source's own chip widens on hover to
-// offer the menu for the series it is linked to, instead of a separate button.
 export function SourceChips({
 	sources,
 	counts,
@@ -41,8 +38,6 @@ export function SourceChips({
 	onUnlink
 }: SourceChipsProps) {
 	const { t } = useTranslation()
-	// Open in a portal, so hover/focus-within on the chip cannot see it; kept
-	// expanded by hand so the trigger does not vanish under an open menu.
 	const [menuOpenFor, setMenuOpenFor] = useState<string | null>(null)
 
 	const linkBySource = new Map(links.map(link => [link.source, link]))

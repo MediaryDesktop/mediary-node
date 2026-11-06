@@ -6,7 +6,6 @@ import { Icon } from '../icon/Icon'
 
 import styles from './PageHeader.module.scss'
 
-// A crumb with no onSelect is the page itself — shown, but not a link.
 export interface PageHeaderCrumb {
 	label: string
 	onSelect?: () => void
@@ -33,8 +32,6 @@ export function PageHeader({
 }: PageHeaderProps) {
 	const { t } = useTranslation()
 
-	// Breadcrumbs say where the page sits in the hierarchy, so once there is a
-	// trail to show, the plain back arrow would only repeat its first step.
 	const trail = breadcrumbs && breadcrumbs.length > 0 ? breadcrumbs : null
 
 	return (

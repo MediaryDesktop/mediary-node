@@ -8,8 +8,6 @@ import { SetupCard } from '../layout'
 import styles from './SetupAccountStep.module.scss'
 
 export interface SetupAccountStepProps {
-	// What a signed-in user sees instead of the sign-in buttons — the backup
-	// switch, which lives in another feature and is composed in by the page.
 	signedIn: ReactNode | null
 	onSignIn: () => void
 	onSignUp: () => void

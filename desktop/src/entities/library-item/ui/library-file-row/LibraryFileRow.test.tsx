@@ -22,8 +22,6 @@ function file(overrides: Partial<LibraryFile> = {}): LibraryFile {
 }
 
 describe('LibraryFileRow', () => {
-	// The card above the rows carries the title, so a row repeating it on every
-	// line would say the same thing eighty times.
 	it('shows the file name rather than the folder it sits in', () => {
 		render(<LibraryFileRow file={file()} />)
 
@@ -31,8 +29,6 @@ describe('LibraryFileRow', () => {
 		expect(screen.queryByText('Frieren/ep 01.mkv')).toBeNull()
 	})
 
-	// "s02e01_720.mp4" says which season it is, and the scan already read it off
-	// the name: the row must not make the user open the file to find out.
 	it('numbers the season and the episode the scan read off the name', () => {
 		render(
 			<LibraryFileRow
@@ -112,7 +108,6 @@ describe('LibraryFileRow', () => {
 		expect(onMatch).toHaveBeenCalledTimes(1)
 	})
 
-	// An opening belongs to no episode, so there is nothing to match it to.
 	it('does not offer to match an extra', () => {
 		render(
 			<LibraryFileRow file={file({ parsed: { form: 'extra', title: 'Frieren' } })} onMatch={vi.fn()} />
@@ -131,8 +126,6 @@ describe('LibraryFileRow', () => {
 		expect(onPlay).toHaveBeenCalledTimes(1)
 	})
 
-	// There is nothing to open for a chapter or a book yet, and a button that does
-	// nothing is worse than no button.
 	it('does not offer to play what the node cannot play', () => {
 		render(<LibraryFileRow file={file({ kind: 'manga' })} onPlay={vi.fn()} />)
 

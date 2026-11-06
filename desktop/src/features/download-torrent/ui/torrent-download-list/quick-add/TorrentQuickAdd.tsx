@@ -16,12 +16,9 @@ import styles from './TorrentQuickAdd.module.scss'
 
 export interface TorrentQuickAddProps {
 	mediaRef: string
-	// The title's name; it also names the folder the torrent is saved into.
 	title: string
 }
 
-// The empty state doubles as the add form: a magnet pasted in or a .torrent
-// file dropped on the card both go straight to the same download.
 export function TorrentQuickAdd({ mediaRef, title }: TorrentQuickAddProps) {
 	const { t } = useTranslation()
 

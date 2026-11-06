@@ -16,9 +16,6 @@
 			display: none;
 		}
 
-		// Inline forms (a settings card's own expanding body) sit in the page's
-		// normal flow, which already scrolls; a second, usually-empty scroll
-		// container here just traps the wheel instead of handing it up.
 		&.static {
 			flex: initial;
 			min-height: auto;

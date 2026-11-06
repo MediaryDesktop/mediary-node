@@ -21,7 +21,6 @@ import { initialSelection, OwnedEpisodes, sortFiles } from '../../../lib/file-se
 import styles from './TorrentFilesDrawer.module.scss'
 
 export interface TorrentFilesDrawerProps {
-	// The download whose files are chosen; null keeps the drawer closed.
 	download: TorrentDownload | null
 	onClose: () => void
 }
@@ -56,8 +55,6 @@ export function TorrentFilesDrawer({ download, onClose }: TorrentFilesDrawerProp
 	)
 }
 
-// A batch keeps every file in the release's folder; repeating it on each row
-// only pushes the part that differs out of sight.
 function baseName(path: string): string {
 	return path.slice(path.lastIndexOf('/') + 1)
 }
@@ -85,17 +82,13 @@ function FilesForm({ download, onDone }: { download: TorrentDownload; onDone: ()
 
 	const files = useMemo(() => sortFiles(data?.files ?? []), [data])
 
-	// A show numbered by season repeats its episode numbers in every season.
 	const seasonal = download.media_ref.startsWith('tmdb:tv:')
 
-	// The episodes already on disk for this title; a missing file is not one.
 	const owned = useMemo(
 		() => OwnedEpisodes.fromLibrary(library?.files.items ?? [], seasonal),
 		[library, seasonal]
 	)
 
-	// Ticks are the user's from the first change on; until then they follow what
-	// the torrent and the library say, which may still be arriving.
 	const [touched, setTouched] = useState<Set<number> | null>(null)
 	const selected = touched ?? initialSelection(files, owned, download.choosing)
 

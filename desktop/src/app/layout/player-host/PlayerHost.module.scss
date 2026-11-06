@@ -18,8 +18,6 @@
 	.top {
 		display: flex;
 		align-items: center;
-		// Taller than the titlebar itself, as the video player's own header is, so the
-		// chrome button sits with room around it instead of filling the bar edge to edge.
 		height: calc(var(--titlebar-height) + 1rem);
 		padding-left: 0.75rem;
 		-webkit-app-region: drag;

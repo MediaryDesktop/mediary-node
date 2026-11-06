@@ -10,8 +10,6 @@ export function isLastPage(page: number, total: number): boolean {
 	return total > 0 && page >= total - 1
 }
 
-// The pages the reader fetches ahead of the one on screen, so turning a page
-// does not wait on the archive. Two is what a fast reader can outrun.
 export function prefetchIndexes(page: number, total: number, ahead = 2): number[] {
 	const out: number[] = []
 

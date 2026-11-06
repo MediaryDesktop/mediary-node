@@ -18,8 +18,6 @@ export interface PdfViewProps {
 	onError: (error: unknown) => void
 }
 
-// A PDF is drawn a page at a time, fitted to the window: its pages are already
-// laid out, and there is nothing to reflow.
 export const PdfView = forwardRef<BookViewHandle, PdfViewProps>(function PdfView(
 	{ file, locator, onReady, onRelocate, onError },
 	ref
@@ -134,8 +132,6 @@ export const PdfView = forwardRef<BookViewHandle, PdfViewProps>(function PdfView
 		}
 
 		draw().catch(error => {
-			// A page turned before the last one finished drawing cancels it; that is
-			// not a failure.
 			if (!cancelled && (error as { name?: string })?.name !== 'RenderingCancelledException') {
 				latest.current.onError(error)
 			}

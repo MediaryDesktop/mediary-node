@@ -15,7 +15,6 @@ import { useSynopses } from '../../lib/useSynopses'
 
 import styles from './HomeBanner.module.scss'
 
-// As many as Discover's banner goes through.
 const MAX_SLIDES = 8
 
 interface Slide extends FeaturedMedia {
@@ -25,14 +24,10 @@ interface Slide extends FeaturedMedia {
 export interface HomeBannerProps {
 	entries: TrackerEntry[]
 	watching: ContinueWatchingState
-	// Still waiting on the tracker's first answer: a title to show may yet arrive,
-	// so the banner holds its place with a skeleton rather than vanishing.
 	loading: boolean
 	onOpen: (mediaRef: string) => void
 }
 
-// The anime the user is in the middle of, one at a time, with how far they got
-// and — when the library has the next episode — a button that plays it.
 export function HomeBanner({ entries, watching, loading, onOpen }: HomeBannerProps) {
 	const { t } = useTranslation()
 	const { play, starting } = usePlayFile()

@@ -10,7 +10,6 @@ import styles from './SourceIcon.module.scss'
 export interface SourceIconProps {
 	source: string
 	name: string
-	// A manga plugin's own icon, from its manifest.
 	image?: string
 	size?: number
 }
@@ -26,8 +25,6 @@ function builtIn(source: string): IconName | null {
 	return null
 }
 
-// A plugin shows its manifest icon, or its first letter when there is none or
-// it does not load.
 export function SourceIcon({ source, name, image, size = 16 }: SourceIconProps) {
 	const [broken, setBroken] = useState(false)
 	const icon = builtIn(source)

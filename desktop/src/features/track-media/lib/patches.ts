@@ -6,9 +6,6 @@ export function sameLists(left: string[], right: string[]): boolean {
 	return left.length === right.length && left.every(name => right.includes(name))
 }
 
-// What the list drawer changes: the status and the custom lists. A title that is not
-// on any list yet (entry null) is added with whatever the drawer says. Starting or
-// finishing a title stamps today's date where none was set.
 export function managePatch(
 	entry: TrackerEntry | null,
 	status: TrackerStatus,
@@ -39,7 +36,6 @@ export function managePatch(
 export interface RateForm {
 	score: number
 	notes: string
-	// Dates as the date fields hold them: "2026-10-12", or empty.
 	startedAt: string
 	completedAt: string
 	repeat: number
@@ -59,7 +55,6 @@ export function rateFormOf(entry: TrackerEntry): RateForm {
 	}
 }
 
-// Only the fields the user changed; volumes count for manga alone.
 export function ratePatch(
 	entry: TrackerEntry,
 	form: RateForm,

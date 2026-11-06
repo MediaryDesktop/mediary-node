@@ -18,8 +18,6 @@ import {
 
 export const extensionsQuery = createQuery({ effect: fetchExtensionsFx, name: 'extensions' })
 
-// The parameter is whether to read every repository again; the node reuses a
-// read for an hour otherwise.
 export const extensionCatalogQuery = createQuery({
 	effect: fetchExtensionCatalogFx,
 	name: 'extensionCatalog'
@@ -55,15 +53,11 @@ export const removeExtensionRepositoryMutation = createMutation({
 concurrency(extensionsQuery, { strategy: 'TAKE_LATEST' })
 concurrency(extensionCatalogQuery, { strategy: 'TAKE_LATEST' })
 
-// The node keeps what the last check for updates found, so the list asked
-// again carries the update marks.
 sample({
 	clock: [nodeTopic('extension'), nodeStreamResumed, checkExtensionUpdatesMutation.finished.success],
 	target: extensionsQuery.start
 })
 
-// Installs and removals change the catalog's "installed" marks; repositories
-// change the catalog itself. A read under an hour old is reused by the node.
 sample({
 	clock: [nodeTopic('extension'), nodeStreamResumed],
 	fn: () => false,

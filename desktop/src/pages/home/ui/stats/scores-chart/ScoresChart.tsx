@@ -14,8 +14,6 @@ export interface ScoresChartProps {
 	className?: string
 }
 
-// How the user scores, on the ten-point scale: one bar per score, the most
-// common one in colour so the habit reads at a glance.
 export function ScoresChart({ scores, mean, scored, className }: ScoresChartProps) {
 	const { t } = useTranslation()
 	const theme = useChartTheme()

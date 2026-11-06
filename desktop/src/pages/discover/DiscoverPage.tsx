@@ -17,7 +17,6 @@ import type { DiscoverSection, DiscoverTab } from './lib/sections'
 import { discoverModel } from './model/model'
 import { DiscoverRow } from './ui/discover-row/DiscoverRow'
 
-// How many titles of the first row the banner goes through.
 const FEATURED = 8
 
 const TAB_ICONS: Record<DiscoverTab, IconName> = {
@@ -45,8 +44,6 @@ export function DiscoverPage({ tab, onTabChange }: DiscoverPageProps) {
 		$nodeReady
 	])
 
-	// The date only moves the anime seasons, and a page left open over a season
-	// change is not worth a timer.
 	const rows = useMemo(() => discoverSections(tab, new Date()), [tab])
 
 	useEffect(() => {

@@ -14,8 +14,6 @@ import styles from './DevicesSettings.module.scss'
 
 const TOAST_ID = 'devices-settings'
 
-// The account's paired nodes. Revoking one is the answer to a lost laptop: its
-// token stops working at once, while its backups stay.
 export function DevicesSettings() {
 	const { t, i18n } = useTranslation()
 

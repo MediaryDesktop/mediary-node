@@ -14,8 +14,6 @@ const RECONNECT_DELAY_MS = 2_000
 
 export const nodeEventReceived = createEvent<NodeEvent>()
 
-// The stream is back after a drop. What the node published in the gap is gone,
-// so whatever lives off its events should ask again.
 export const nodeStreamResumed = createEvent()
 
 let openedBefore = false

@@ -13,13 +13,9 @@ export interface OptionCardProps {
 	selected: boolean
 	disabled?: boolean
 	onSelect: () => void
-	// The selected option's own detail, e.g. a connection check or extra fields.
 	detail?: ReactNode
 }
 
-// One choice in a single-pick list of cards (the client a torrent downloads
-// through): an icon, a title and description, and a radio dot, with its own
-// detail unfolding underneath once it is the pick.
 export function OptionCard({
 	icon,
 	title,

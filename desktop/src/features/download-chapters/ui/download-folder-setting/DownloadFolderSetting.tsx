@@ -9,8 +9,6 @@ import { $nodeReady } from '@infra/node'
 import { libraryRootsQuery } from '@entities/library-item'
 import { mangaDownloadSettingsQuery, putMangaDownloadSettingsMutation } from '@entities/manga-source'
 
-// The library folder saved chapters go to. Until the user picks one, the node's
-// own folder is shown: chapters go there, and it joins the library on the first.
 export function DownloadFolderSetting() {
 	const { t } = useTranslation()
 

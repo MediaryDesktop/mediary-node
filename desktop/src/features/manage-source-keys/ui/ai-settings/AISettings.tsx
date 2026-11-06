@@ -29,8 +29,6 @@ const ENDPOINT_PRESETS = [
 	{ label: 'LM Studio', endpoint: 'http://localhost:1234/v1' }
 ] as const
 
-// The free AI comes first and needs nothing but a Mediary account; the others
-// answer on the user's own key, which never leaves this computer.
 export function AISettings() {
 	const { t } = useTranslation()
 

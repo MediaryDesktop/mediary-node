@@ -8,9 +8,6 @@ import stats from '../Stats.module.scss'
 
 import styles from './Panel.module.scss'
 
-// A muted badge in the given colour, the same 16% wash as --accent-muted but in
-// whichever hue the card was handed — undefined lets the CSS default (the accent)
-// stand.
 export function iconStyle(color: string | undefined): CSSProperties | undefined {
 	return color ? { background: `color-mix(in srgb, ${color} 16%, transparent)`, color } : undefined
 }
@@ -20,14 +17,11 @@ export interface PanelProps {
 	title: string
 	subtitle?: string
 	action?: ReactNode
-	// A series colour from useChartTheme, so each card reads as its own thing
-	// rather than all sharing the accent. Falls back to the accent when absent.
 	accent?: string
 	className?: string
 	children: ReactNode
 }
 
-// One card of the statistics: what it shows, why, and the chart itself.
 export function Panel({ icon, title, subtitle, action, accent, className, children }: PanelProps) {
 	return (
 		<section
@@ -57,7 +51,6 @@ export interface TooltipRow {
 	value: string
 }
 
-// The hover card every chart shares: a heading and one row per series.
 export function ChartTooltip({ title, rows }: { title?: string; rows: TooltipRow[] }) {
 	return (
 		<div className={styles.tooltip}>

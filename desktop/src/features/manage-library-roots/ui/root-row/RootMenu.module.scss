@@ -1,6 +1,4 @@
 .trigger {
-	// Radix sets this on the trigger it wraps; while its menu is open, the
-	// button stays filled instead of reverting to a plain ghost button.
 	&[data-state="open"] {
 		background: var(--field);
 		color: var(--text);

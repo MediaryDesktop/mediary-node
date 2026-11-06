@@ -39,7 +39,6 @@ const homeRoute = createRoute({
 	component: HomePage
 })
 
-// The tab lives in the address, so going back to Discover lands on the same one.
 const discoverRoute = createRoute({
 	getParentRoute: () => framedRoute,
 	path: '/discover',
@@ -88,8 +87,6 @@ const mediaRoute = createRoute({
 	}
 })
 
-// A title no source knows, described by the user — from the empty state of a
-// search that found nothing, carrying what was already typed.
 const createManualMediaRoute = createRoute({
 	getParentRoute: () => framedRoute,
 	path: '/media/new',
@@ -130,7 +127,6 @@ const downloadsRoute = createRoute({
 	component: DownloadsPage
 })
 
-// The tab lives in the address, so a missing-program error can open Dependencies.
 const extensionsRoute = createRoute({
 	getParentRoute: () => framedRoute,
 	path: '/extensions',

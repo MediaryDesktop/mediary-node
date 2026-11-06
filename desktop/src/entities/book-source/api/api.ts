@@ -23,14 +23,10 @@ const requestBookEditionsFx = createNodeRequestFx<string, NodeSchemas['SearchBoo
 		url: '/v1/books/editions',
 		query: { media_ref: mediaRef },
 
-		// Every source is asked at once, and the node waits up to 20 seconds for
-		// the slowest.
 		timeout: 30_000
 	})
 )
 
-// The answer says which book it is for: one query serves every book page, and a
-// page must not show the last book's copies while its own are on the way.
 export const fetchBookEditionsFx = createEffect(async (mediaRef: string) => ({
 	mediaRef,
 	...(await requestBookEditionsFx(mediaRef))
@@ -98,6 +94,5 @@ export const checkBookOPDSServerFx = createNodeRequestFx<BookOPDSCheckInput, Boo
 	method: 'POST',
 	body,
 
-	// The node waits on the user's server, which may be slow to wake up.
 	timeout: 35_000
 }))

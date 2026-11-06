@@ -4,7 +4,6 @@ import { WatchPage } from '@pages/watch'
 
 import { rootRoute } from './root'
 
-// Outside the framed layout: the player owns the whole window.
 export const watchRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: '/watch/$fileId',

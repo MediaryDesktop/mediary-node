@@ -56,8 +56,6 @@ export const searchMediaModel = atom(() => {
 
 	const $hasNextPage = mediaSearchQuery.$data.map(data => data?.results.has_next_page ?? false)
 
-	// Every catalog has its own genres; the ones on screen must belong to the type
-	// being searched, not to the one the list was last fetched for.
 	const $type = $filters.map(filters => filters.type)
 	const $optionsType = createStore<MediaSearchType | null>(null).on(
 		mediaFilterOptionsQuery.finished.success,
@@ -129,8 +127,6 @@ export const searchMediaModel = atom(() => {
 		(error, pending, page) => error !== null && !pending && page === 1
 	)
 
-	// The source cannot answer until the user sets it up — TMDB without a key. The
-	// node says what is missing; anything else is an ordinary failure.
 	const $setupNeeded = mediaSearchQuery.$error.map(error =>
 		error?.status === 428 ? (error.body?.detail ?? '') : null
 	)

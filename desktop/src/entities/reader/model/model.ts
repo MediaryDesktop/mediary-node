@@ -20,10 +20,8 @@ export const saveBookPositionMutation = createMutation({
 export const readerModel = atom(() => {
 	const pageTurned = createEvent<ReportPageParams>()
 
-	// The node decides when a chapter counts; the reader only says where it is.
 	sample({ clock: pageTurned, target: reportPageMutation.start })
 
-	// Set once the node has counted the chapter as read, so the reader can say so.
 	const $counted = createStore(false)
 		.on(reportPageMutation.finished.success, (current, { result }) => current || result.counted)
 		.reset(chapterQuery.start)

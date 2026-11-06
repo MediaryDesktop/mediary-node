@@ -15,7 +15,6 @@ export interface ScannedGroupProps {
 	onExplore: () => void
 }
 
-// A title the scan matched files to, with those files' scanner logs folded away.
 export function ScannedGroup({ group, search, onExplore }: ScannedGroupProps) {
 	const { t } = useTranslation()
 

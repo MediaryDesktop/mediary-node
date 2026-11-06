@@ -9,8 +9,6 @@ export interface DrawerSectionProps {
 	action?: ReactNode
 	className?: string
 	children?: ReactNode
-	// False when the section continues the one above it rather than starting a
-	// new group, e.g. a connection check right under the control it tests.
 	divider?: boolean
 }
 

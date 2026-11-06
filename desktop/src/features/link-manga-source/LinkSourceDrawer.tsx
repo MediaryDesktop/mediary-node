@@ -26,10 +26,8 @@ import styles from './LinkSourceDrawer.module.scss'
 export interface LinkSourceDrawerProps {
 	open: boolean
 	mediaRef: string
-	// The title's name, as the first search.
 	title: string
 	sources: MangaSource[]
-	// The source to start on, when the user is changing an existing link.
 	initialSource?: string
 	onClose: () => void
 }
@@ -46,8 +44,6 @@ export function LinkSourceDrawer({ open, onClose, ...props }: LinkSourceDrawerPr
 			closable={false}
 			size='lg'
 			onOpenAutoFocus={event => {
-				// Focus the search field without selecting its text: the title is
-				// already in it, and a selected one looks like it is about to be replaced.
 				event.preventDefault()
 				if (event.currentTarget instanceof HTMLElement) {
 					event.currentTarget.querySelector('input')?.focus({ preventScroll: true })
@@ -81,8 +77,6 @@ function LinkForm({ mediaRef, title, sources, initialSource, onDone }: LinkFormP
 	const [source, setSource] = useState(initialSource ?? sources[0]?.id ?? '')
 	const [query, setQuery] = useState(title)
 
-	// Opening the drawer searches for the title straight away; the user only types
-	// when its name on the server is different.
 	useEffect(() => {
 		reset()
 		if (source && title.trim()) {

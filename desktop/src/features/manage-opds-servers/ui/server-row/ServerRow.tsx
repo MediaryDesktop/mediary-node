@@ -16,12 +16,6 @@ export interface ServerRowProps {
 	onRemove: () => void
 }
 
-// One configured OPDS server: its name and address, a menu to edit or remove
-// it, and — while editing — the same form "Add OPDS server" uses below,
-// unfolding right under this row instead of in a drawer. The form stays
-// mounted through the closing animation (CollapsibleSection only hides it);
-// formKey remounts it with fresh fields each time editing opens again, so a
-// cancelled edit never lingers into the next one.
 export function ServerRow({ server, removing, onRemove }: ServerRowProps) {
 	const { t } = useTranslation()
 

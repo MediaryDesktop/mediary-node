@@ -8,26 +8,18 @@ import type { IconLike } from '../icon/Icon'
 
 import styles from './Carousel.module.scss'
 
-// Past this many pages the dots would be too small to mean anything.
 const MAX_DOTS = 30
 
 export interface CarouselProps {
 	children: ReactNode
-	// Shown in a header row together with the page dots. A carousel with a title
-	// renders as its own <section>; without one, as a plain row of items.
 	title?: ReactNode
-	// Shown before the title, same row.
 	icon?: IconLike
-	// A trailing arrow next to the title that jumps to the full list.
 	more?: { label: string; onClick: () => void }
-	// Width of one item, as CSS; the row shows as many as fit.
 	itemWidth?: string
 	'aria-label'?: string
 	className?: string
 }
 
-// A row of items that scrolls sideways: dragged, wheeled, or jumped to with the
-// page dots, which appear only once there is more than one page to show.
 export function Carousel({
 	children,
 	title,
@@ -56,7 +48,6 @@ export function Carousel({
 			return
 		}
 
-		// The first reading waits a frame: the track has to be laid out to measure.
 		const frame = requestAnimationFrame(update)
 		api.on('select', update).on('reInit', update)
 

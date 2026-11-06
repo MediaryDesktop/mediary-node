@@ -200,8 +200,6 @@
 	}
 }
 
-// Rendered through a portal into <body>, so it is never actually a descendant of
-// .field — nesting it there would produce a selector that never matches.
 .panel {
 	position: fixed;
 	z-index: 900;

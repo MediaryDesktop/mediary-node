@@ -1,5 +1,3 @@
-// A CSS entrance runs on the compositor, so a page that mounts a lot at once
-// still comes in smoothly. `backwards` lets go once done, for the leave below.
 .enter {
 	animation: page-enter 0.24s cubic-bezier(0.2, 0, 0, 1) backwards;
 }

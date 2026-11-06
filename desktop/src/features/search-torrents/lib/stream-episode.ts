@@ -5,21 +5,13 @@ export interface StreamEpisode {
 	season?: number
 }
 
-// Watching a release without downloading it, as the page wires it in: this
-// feature only offers the button, the stream itself belongs elsewhere.
 export interface ReleaseWatching {
-	// The release being readied, or null.
 	activeId: string | null
-	// Something is being readied; another cannot start until it plays or is cancelled.
 	busy: boolean
 	onWatch: (release: TorrentRelease, episode: StreamEpisode) => void
 	onCancel: () => void
 }
 
-// Which episode a release plays: its own when it holds one, the one searched
-// for when it is a batch. A batch with no episode searched has nothing to pick
-// by, so it cannot be watched; a release without episodes is a film or the like,
-// and the node plays its largest video.
 export function streamEpisode(
 	release: TorrentRelease,
 	searched: { episode: string; season: string }

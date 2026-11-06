@@ -89,17 +89,12 @@ export function LibraryFileRow({
 		})
 	}
 
-	// What the match is worth belongs on the control that changes it: the row
-	// shows a file, and a badge per line would drown the list in colour.
 	const matchHint = match
 		? match.source === 'manual'
 			? t('library.file.matchedByHand')
 			: t('library.file.matched', { percent: Math.round(match.confidence * 100) })
 		: t('library.file.unmatched')
 
-	// The season comes off the name the same way the episode does — "s02e01" says
-	// both — so a row that shows one and hides the other is hiding what the scan
-	// already worked out.
 	const numbering = [
 		season !== null ? t('library.file.season', { number: season }) : null,
 		number !== null

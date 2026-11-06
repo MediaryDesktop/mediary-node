@@ -17,16 +17,12 @@ import type { TorrentSource } from '@entities/torrent'
 import styles from './TorznabSourceForm.module.scss'
 
 export interface TorznabSourceFormProps {
-	// The source being changed, or null to add one.
 	source: TorrentSource | null
-	// Called after a successful save, and when the user cancels: either way the
-	// form's local state should go back to matching what is saved.
 	onDone: () => void
 }
 
 type CheckState = { ok: true; title: string; search: boolean } | { ok: false; problem: string } | null
 
-// Mounted afresh for every opening, so its fields start from the source.
 export function TorznabSourceForm({ source, onDone }: TorznabSourceFormProps) {
 	const { t } = useTranslation()
 
@@ -47,10 +43,8 @@ export function TorznabSourceForm({ source, onDone }: TorznabSourceFormProps) {
 	const submitting = creating || updating
 	const canSubmit = name.trim() !== '' && url.trim() !== '' && !submitting
 
-	// An untouched key field on an existing source keeps the saved key.
 	const keyValue = source && apiKey === '' ? undefined : apiKey
 
-	// Only one form is mounted at a time, so whatever these mutations report is this form's.
 	const failed = ({ error }: RequestFailure) =>
 		toast.error(problemDetail(error, t('torrents.sources.saveFailed')), { id: 'torznab-save-failed' })
 

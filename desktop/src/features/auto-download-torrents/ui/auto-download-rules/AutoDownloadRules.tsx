@@ -23,8 +23,6 @@ import type { TorrentRule } from '@entities/torrent'
 
 import styles from './AutoDownloadRules.module.scss'
 
-// Every title the node downloads new episodes of by itself, each with a switch
-// and a check on the spot; a rule's own settings are on its title's page.
 export function AutoDownloadRules() {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
@@ -126,7 +124,6 @@ function RuleRow({
 		checkTorrentRuleMutation.$pending
 	])
 
-	// Several rows share the check mutation; only this row's button spins.
 	const [mine, setMine] = useState(false)
 	useUnitWatch(checkTorrentRuleMutation.finished.finally, () => setMine(false))
 

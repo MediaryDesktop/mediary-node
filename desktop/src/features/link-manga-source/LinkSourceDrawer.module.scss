@@ -3,18 +3,11 @@
 	flex-direction: column;
 	gap: 1.25rem;
 
-	// The gap below the source section's divider is tightened: the drawer
-	// section's own padding plus the root gap otherwise add up to a wide gap.
 	section.sourceSection {
 		padding-bottom: 0.5rem;
 	}
 
-	// The search section isn't the drawer's last section (the results list
-	// follows it outside of a DrawerSection), so it would otherwise keep its
-	// divider line; drop it and the now-redundant top padding.
 	section.searchSection {
-		// Matches the gap above "Source": the panel's own header-to-body gap plus
-		// this section's padding-top otherwise outsize it, so pull it back up.
 		margin-top: -0.25rem;
 		padding-top: 0;
 		padding-bottom: 0.5rem;

@@ -10,8 +10,6 @@ import stats from '../Stats.module.scss'
 
 import styles from './GenresDonut.module.scss'
 
-// Six named slices and "other": past that, slices get too thin to tell apart
-// and the palette would have to repeat a colour.
 const SLICES = 6
 
 export interface GenresDonutProps {
@@ -25,8 +23,6 @@ export function GenresDonut({ genres, total, className }: GenresDonutProps) {
 	const theme = useChartTheme()
 
 	const slices = useMemo(() => {
-		// The badge colour (series[6]) leads the palette so the biggest slice reads
-		// as the same hue as the card's icon; the rest borrow the chart series.
 		const palette = [theme.series[6]!, ...theme.series.slice(0, SLICES - 1)]
 
 		const named = genres.slice(0, SLICES).map((genre, index) => ({

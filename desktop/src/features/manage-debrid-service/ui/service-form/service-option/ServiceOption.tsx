@@ -10,13 +10,9 @@ export interface ServiceOptionProps {
 	selected: boolean
 	disabled?: boolean
 	onSelect: () => void
-	// A short chip beside the label, e.g. "Free plan" for TorBox.
 	badge?: ReactNode
 }
 
-// One tile in the debrid service grid: a radio dot and a name, with an
-// optional badge — lighter than OptionCard, since none of these need their
-// own expanding detail.
 export function ServiceOption({ label, selected, disabled, onSelect, badge }: ServiceOptionProps) {
 	return (
 		<button

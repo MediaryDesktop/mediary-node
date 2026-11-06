@@ -42,9 +42,6 @@ function flagIn(payload: Record<string, unknown> | undefined, key: string): bool
 }
 
 export const playbackModel = atom(() => {
-	// The node reports the position several times a minute over the socket, so the
-	// session here follows those events; the query only supplies the starting point
-	// after the window is reopened.
 	const $session = createStore<PlaybackSession | null>(null)
 		.on(playbackQuery.finished.success, (_, { result }) => result.playback.session ?? null)
 		.on(startPlaybackMutation.finished.success, (_, { result }) => result.playback.session ?? null)
@@ -71,13 +68,10 @@ export const playbackModel = atom(() => {
 
 	sample({ clock: stopPlaybackMutation.finished.success, target: playbackQuery.start })
 
-	// The built-in player reports and forgets: a report that fails is followed by
-	// another a few seconds later, and the node keeps the rule about when to count.
 	const progressReported = createEvent<ReportProgressParams>()
 
 	sample({ clock: progressReported, target: reportPlaybackProgressFx })
 
-	// Encoders would otherwise run until the node's idle reaper notices.
 	const transcodeClosed = createEvent<number>()
 
 	sample({ clock: transcodeClosed, target: stopTranscodeFx })

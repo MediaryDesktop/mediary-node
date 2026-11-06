@@ -36,12 +36,8 @@ export interface UpdateTorrentSourceParams {
 
 export interface TorrentSearchParams {
 	mediaRef: string
-	// 0 for any episode.
 	episode: number
-	// For a show numbered by season: only releases of it, the episode counting
-	// within it. 0 for any.
 	season?: number
-	// Replaces the title's names when not empty.
 	query: string
 }
 
@@ -67,7 +63,6 @@ export const addTorrentFx = createNodeRequestFx<AddTorrentParams, TorrentDownloa
 	url: '/v1/torrent/downloads',
 	method: 'POST',
 	body,
-	// The node waits for qBittorrent, which has its own 15 s to answer.
 	timeout: 20_000
 }))
 
@@ -78,7 +73,6 @@ export const startTorrentStreamFx = createNodeRequestFx<StartTorrentStreamParams
 	url: '/v1/torrent/streams',
 	method: 'POST',
 	body,
-	// The node adds the torrent to the debrid service and asks what it holds.
 	timeout: 30_000
 }))
 
@@ -104,7 +98,6 @@ export const removeTorrentFx = createNodeRequestFx<RemoveTorrentParams, void>(({
 
 export const fetchTorrentFilesFx = createNodeRequestFx<number, NodeSchemas['TorrentFilesOutputBody']>(id => ({
 	url: `/v1/torrent/downloads/${id}/files`,
-	// The node asks qBittorrent for the list.
 	timeout: 20_000
 }))
 
@@ -200,7 +193,6 @@ export const searchTorrentsFx = createNodeRequestFx<TorrentSearchParams, Torrent
 			season: season || undefined,
 			q: query.trim() || undefined
 		},
-		// The node waits for the slowest source, up to 25 s.
 		timeout: 30_000
 	})
 )
@@ -244,7 +236,6 @@ export const checkTorrentRuleFx = createNodeRequestFx<CheckTorrentRuleParams, To
 		url: `/v1/torrent/rules/${encodeURIComponent(mediaRef)}/check`,
 		method: 'POST',
 		query: { preview: preview || undefined },
-		// A check searches every source and may add several torrents.
 		timeout: 60_000
 	})
 )

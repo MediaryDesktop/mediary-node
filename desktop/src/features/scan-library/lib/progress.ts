@@ -6,8 +6,6 @@ export const PHASE_LABELS = {
 	matching: 'library.scan.matching'
 } as const satisfies Record<ScanPhase, string>
 
-// What the bar measures depends on the phase: folders while it walks them, then
-// files while it reads their containers, then titles while it matches them.
 export function progressOf(activity: ScanActivity | null, scan: LibraryScan | null): number | null {
 	if (activity === null) {
 		return scan?.finished_at ? 100 : null

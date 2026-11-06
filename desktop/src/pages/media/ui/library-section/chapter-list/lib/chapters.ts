@@ -2,7 +2,6 @@ import type { MangaDownload } from '@entities/manga-source'
 import { isChapterRead, LOCAL_SOURCE } from '@entities/reader'
 import type { ChapterOption, ChapterRow } from '@entities/reader'
 
-// Every source the list holds a chapter from, with its name.
 export function presentSources(rows: ChapterRow[]): Map<string, string> {
 	const present = new Map<string, string>()
 
@@ -15,7 +14,6 @@ export function presentSources(rows: ChapterRow[]): Map<string, string> {
 	return present
 }
 
-// How many chapters each source holds; a chapter in two sources counts in both.
 export function sourceCounts(rows: ChapterRow[]): Map<string, number> {
 	const counts = new Map<string, number>()
 
@@ -49,10 +47,6 @@ export function matchesStatus(row: ChapterRow, filter: StatusFilter, progress: n
 	}
 }
 
-// The list's progress once a chapter is marked read or unread. AniList keeps one
-// number, so reading chapter 7 reads every chapter before it, and unreading it
-// unreads every one after. Null for an extra such as 12.5, which never moves
-// progress, and when nothing would change.
 export function readProgress(number: string | null, read: boolean, progress: number): number | null {
 	if (number === null || !/^\d+$/.test(number)) {
 		return null
@@ -68,7 +62,6 @@ export function readProgress(number: string | null, read: boolean, progress: num
 	return next === progress ? null : next
 }
 
-// A search finds a chapter by its number or by any copy's title.
 export function matchesSearch(row: ChapterRow, query: string): boolean {
 	const wanted = query.trim().toLowerCase()
 	if (!wanted) {
@@ -83,8 +76,6 @@ export function matchesSearch(row: ChapterRow, query: string): boolean {
 
 export type SortOrder = 'newest' | 'oldest'
 
-// Numbered chapters in number order either way; the unnumbered stay last, as
-// mergeChapters put them.
 export function sortRows(rows: ChapterRow[], order: SortOrder): ChapterRow[] {
 	if (order === 'oldest') {
 		return rows
@@ -96,8 +87,6 @@ export function sortRows(rows: ChapterRow[], order: SortOrder): ChapterRow[] {
 	return [...numbered.reverse(), ...rest]
 }
 
-// What the status column says of a chapter: a save under way comes first, as
-// it changes; then whether it is read; then whether the library holds it.
 export type ChapterState =
 	| { kind: 'saving'; done: number; total: number }
 	| { kind: 'queued' }
@@ -132,7 +121,6 @@ export function pageCount(total: number, size = PAGE_SIZE): number {
 	return Math.max(1, Math.ceil(total / size))
 }
 
-// The rows of one page, page counted from 1 and held to the last page there is.
 export function pageOf<T>(items: T[], page: number, size = PAGE_SIZE): T[] {
 	const last = pageCount(items.length, size)
 	const at = Math.min(Math.max(page, 1), last)
@@ -140,8 +128,6 @@ export function pageOf<T>(items: T[], page: number, size = PAGE_SIZE): T[] {
 	return items.slice((at - 1) * size, at * size)
 }
 
-// The newest download of each chapter, by the copy it was saved from. The node
-// lists them newest first.
 export function latestDownloads(items: MangaDownload[]): Map<string, MangaDownload> {
 	const downloads = new Map<string, MangaDownload>()
 
@@ -172,8 +158,6 @@ export function activeDownload(
 	return undefined
 }
 
-// A chapter the library does not hold can be saved from its first copy on the
-// user's server or from a manga plugin, unless that is already under way.
 const SAVABLE = ['opds:', 'plugin:']
 
 export function savableOption(row: ChapterRow, downloads: Map<string, MangaDownload>): ChapterOption | null {

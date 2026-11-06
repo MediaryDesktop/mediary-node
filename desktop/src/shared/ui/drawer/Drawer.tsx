@@ -17,8 +17,6 @@ export interface DrawerProps {
 	side?: 'right' | 'left' | 'bottom'
 	size?: 'sm' | 'md' | 'lg' | 'xl' | 'sheet'
 	children?: ReactNode
-	// Where focus lands on open. Radix selects the text of a field it focuses; a
-	// caller that wants the caret without the selection takes over here.
 	onOpenAutoFocus?: (event: Event) => void
 }
 
@@ -46,8 +44,6 @@ export function Drawer({
 					aria-describedby={undefined}
 					onOpenAutoFocus={onOpenAutoFocus}
 					onInteractOutside={event => {
-						// A select's list lives on the body, outside the drawer; picking from it
-						// is still working inside the drawer.
 						if (
 							event.target instanceof Element &&
 							event.target.closest('[data-floating-panel]')
@@ -56,8 +52,6 @@ export function Drawer({
 						}
 					}}
 					onEscapeKeyDown={event => {
-						// An open popup inside the drawer closes itself on Escape; the drawer
-						// stays. Radix listens on the document, so it hears the key first.
 						if (
 							event.target instanceof Element &&
 							event.target.closest('[data-handles-escape]')

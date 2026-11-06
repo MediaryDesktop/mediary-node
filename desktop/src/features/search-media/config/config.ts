@@ -15,8 +15,6 @@ export const SEARCH_TYPES = [
 	'book'
 ] as const satisfies readonly MediaSearchType[]
 
-// AniList's catalog has tags, formats, seasons and statuses to filter by; TMDB
-// and Open Library, which serve the rest, have genres, year and score only.
 export function isAniListType(type: MediaSearchType): boolean {
 	return type === 'anime' || type === 'manga'
 }
@@ -31,7 +29,6 @@ export const SEARCH_SORTS = [
 	'TITLE_ROMAJI'
 ] as const satisfies readonly MediaSearchSort[]
 
-// TMDB has no formats to filter by: a movie is a movie and a show is a show.
 export const SEARCH_FORMATS = {
 	anime: ['TV', 'TV_SHORT', 'MOVIE', 'SPECIAL', 'OVA', 'ONA', 'MUSIC'],
 	manga: ['MANGA', 'NOVEL', 'ONE_SHOT'],
@@ -62,7 +59,6 @@ export const EARLIEST_YEAR = 1940
 
 export const PER_PAGE = 30
 
-// How long typing settles before a request goes out.
 export const CHANGE_PAUSE_MS = 400
 
 export const BROWSE_SORT: MediaSearchSort = 'POPULARITY_DESC'

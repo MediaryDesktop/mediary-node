@@ -21,10 +21,7 @@ import type { MangaDownload } from '@entities/manga-source'
 
 import styles from './MangaDownloadList.module.scss'
 
-// The download queue and what it saved, newest first. The node pushes every
-// change, so the list moves while chapters download.
 export interface MangaDownloadListProps {
-	// Leaves the heading to a page that names the list already, a tab above all.
 	hideTitle?: boolean
 }
 

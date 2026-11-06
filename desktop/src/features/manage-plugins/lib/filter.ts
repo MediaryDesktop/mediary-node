@@ -1,5 +1,3 @@
-// What both plugin lists filter on: an installed plugin and a catalog entry
-// alike.
 export interface Filterable {
 	id: string
 	name: string
@@ -10,9 +8,7 @@ export interface Filterable {
 }
 
 export interface PluginFilter {
-	// 'all', or a plugin type.
 	type: string
-	// 'all', or a language code.
 	language: string
 	search: string
 }
@@ -22,7 +18,6 @@ export function matchesFilter(plugin: Filterable, { type, language, search }: Pl
 		return false
 	}
 
-	// A plugin for many languages shows under each of them.
 	if (language !== 'all' && plugin.lang !== language && plugin.lang !== 'multi') {
 		return false
 	}

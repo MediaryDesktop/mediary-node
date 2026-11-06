@@ -27,8 +27,6 @@ export const manageEntryModel = atom(() => {
 	const listsChanged = createEvent<string[]>()
 	const submitted = createEvent()
 
-	// Asking for a list that does not exist yet; whoever owns list creation answers
-	// with listCreated, and the new list comes ticked.
 	const createListRequested = createEvent()
 	const listCreated = createEvent<string>()
 
@@ -58,7 +56,6 @@ export const manageEntryModel = atom(() => {
 		.on(listsChanged, (_, lists) => lists)
 		.on(listCreated, (lists, name) => (lists.includes(name) ? lists : [...lists, name]))
 
-	// Adding is a change by itself, even with the defaults left as they are.
 	const $dirty = combine($target, $status, $lists, (target, status, lists) =>
 		target ? !isEmptyPatch(managePatch(target.entry, status, lists, today())) : false
 	)

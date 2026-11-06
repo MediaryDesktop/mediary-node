@@ -7,14 +7,12 @@ import type { MediaEpisode } from '@entities/media'
 
 import { episodeNumber, episodeSeason } from '@features/continue-watching'
 
-// The words an episode row is made of, from the file and from what the source knows.
 export function useEpisodeText() {
 	const { t, i18n } = useTranslation()
 
 	const label = (file: LibraryFile, seasonal = false): string => {
 		const number = episodeNumber(file)
 
-		// A movie or an unnumbered file has no "Episode N" to show, so it goes by its name.
 		if (number === null) {
 			return fileTitle(file)
 		}
@@ -27,7 +25,6 @@ export function useEpisodeText() {
 	const name = (episode: MediaEpisode | undefined): string | null =>
 		episode ? episodeTitle(episode, i18n.language) : null
 
-	// The file's own length when the scan read it, the source's otherwise.
 	const minutes = (file: LibraryFile | null, episode: MediaEpisode | undefined): string | null => {
 		const value = file?.duration_seconds ? file.duration_seconds / 60 : episode?.runtime_minutes
 

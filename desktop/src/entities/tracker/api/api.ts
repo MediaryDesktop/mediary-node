@@ -28,7 +28,6 @@ export const updateTrackerEntryFx = createNodeRequestFx<UpdateTrackerEntryParams
 	})
 )
 
-// Only the node's own entries (movies and shows) can be removed for now.
 export const deleteTrackerEntryFx = createNodeRequestFx<string, void>(mediaRef => ({
 	url: `/v1/tracker/entries/${encodeURIComponent(mediaRef)}`,
 	method: 'DELETE'
@@ -45,7 +44,6 @@ export const fetchTrackerListsFx = createNodeRequestFx<void, TrackerListCollecti
 export interface CreateTrackerListParams {
 	mediaType: ListMediaType
 	name: string
-	// Empty means the default icon.
 	icon?: string
 }
 
@@ -60,7 +58,6 @@ export const createTrackerListFx = createNodeRequestFx<CreateTrackerListParams, 
 export interface RenameTrackerListParams {
 	id: string
 	name: string
-	// Left out keeps the current icon; empty goes back to the default.
 	icon?: string
 }
 

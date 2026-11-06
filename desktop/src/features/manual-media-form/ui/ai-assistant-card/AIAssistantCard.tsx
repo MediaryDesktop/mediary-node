@@ -11,8 +11,6 @@ export interface AIAssistantCardProps {
 	mode: 'create' | 'edit'
 	onGenerate: () => void
 	pending: boolean
-	// The AI is asked about a kind of title; without one it would answer for the
-	// wrong one, so the button waits.
 	typeMissing?: boolean
 	disabled?: boolean
 }

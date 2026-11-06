@@ -19,8 +19,6 @@ export interface LibrarySectionProps {
 	listed: boolean
 }
 
-// What the library holds for the title, in the form its kind reads in: chapters for
-// manga, files for a book, episodes for anything watched.
 export function LibrarySection({ mediaType, ...props }: LibrarySectionProps) {
 	if (mediaType === 'manga') {
 		return (
@@ -33,7 +31,6 @@ export function LibrarySection({ mediaType, ...props }: LibrarySectionProps) {
 		)
 	}
 
-	// The copies the library has, then the free ones a source could add to it.
 	if (mediaType === 'book') {
 		return (
 			<div className={styles.book}>

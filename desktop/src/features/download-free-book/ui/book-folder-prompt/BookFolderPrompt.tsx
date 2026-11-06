@@ -11,8 +11,6 @@ import { $promptOpen, folderChosen, promptClosed } from '../../model/model'
 
 import styles from './BookFolderPrompt.module.scss'
 
-// Asks once where books go, the first time the user saves one. Only folders of
-// books are offered: the node takes no other.
 export function BookFolderPrompt() {
 	const { t } = useTranslation()
 

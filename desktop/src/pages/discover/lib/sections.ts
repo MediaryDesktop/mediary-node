@@ -2,7 +2,6 @@ import type { IconName } from '@shared/ui'
 
 import type { MediaSearchQuery, MediaSearchSeason, MediaSearchType } from '@entities/media'
 
-// One tab per kind of media, in the order the search offers them.
 export const DISCOVER_TABS = [
 	'anime',
 	'manga',
@@ -18,7 +17,6 @@ export function isDiscoverTab(value: unknown): value is DiscoverTab {
 	return typeof value === 'string' && (DISCOVER_TABS as readonly string[]).includes(value)
 }
 
-// The sources' own pages hold twenty; a row past that is never scrolled to.
 const PER_PAGE = 20
 
 export type SectionId =
@@ -37,8 +35,6 @@ export type SectionId =
 	| 'scienceFiction'
 	| 'mystery'
 
-// Keyed by section, not tab: "Popular" or "Top rated" wear the same icon wherever
-// they appear.
 export const SECTION_ICONS: Record<SectionId, IconName> = {
 	trending: 'common/flame',
 	thisSeason: 'common/leaf',
@@ -57,17 +53,14 @@ export const SECTION_ICONS: Record<SectionId, IconName> = {
 }
 
 export interface DiscoverSection {
-	// Unique across tabs and seasons: the row's results are kept by it.
 	key: string
 	id: SectionId
 	query: MediaSearchQuery
-	// What the title shows next to its name, such as the season it covers.
 	season?: { season: MediaSearchSeason; year: number }
 }
 
 const SEASONS: readonly MediaSearchSeason[] = ['WINTER', 'SPRING', 'SUMMER', 'FALL']
 
-// AniList's seasons follow the calendar's quarters: winter is January to March.
 export function seasonOf(date: Date): { season: MediaSearchSeason; year: number } {
 	return { season: SEASONS[Math.floor(date.getMonth() / 3)] ?? 'WINTER', year: date.getFullYear() }
 }
@@ -84,8 +77,6 @@ function section(tab: DiscoverTab, id: SectionId, query: Omit<MediaSearchQuery, 
 	return { key: `${tab}:${id}`, id, query: { type: tab, per_page: PER_PAGE, ...query } }
 }
 
-// What each tab shows, top to bottom. The first row also fills the banner, so it
-// is the one with the most to look at.
 export function discoverSections(tab: DiscoverTab, now: Date): DiscoverSection[] {
 	switch (tab) {
 		case 'anime': {

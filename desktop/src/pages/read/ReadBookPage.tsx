@@ -12,7 +12,6 @@ import type { BookLocation } from '@entities/reader'
 
 import { Panel } from './ui/panel/Panel'
 
-// Page turns come in bursts; the node hears where the reader settled.
 const SAVE_DELAY = 1500
 
 export interface ReadBookPageProps {
@@ -35,8 +34,6 @@ export function ReadBookPage({ fileId }: ReadBookPageProps) {
 	const [file, setFile] = useState<File | null>(null)
 	const [fileFailed, setFileFailed] = useState(false)
 	const [attempt, setAttempt] = useState(0)
-	// When the page first asked to open this book; the loading panel and the reader
-	// that replaces it both continue this one opening slide.
 	const [openedAt] = useState(() => performance.now())
 
 	useEffect(() => {
@@ -89,7 +86,6 @@ export function ReadBookPage({ fileId }: ReadBookPageProps) {
 		[flush]
 	)
 
-	// Leaving the book keeps the last page turned, not the one before the delay.
 	useEffect(() => flush, [flush])
 
 	const close = () => router.history.back()
@@ -123,7 +119,6 @@ export function ReadBookPage({ fileId }: ReadBookPageProps) {
 		<BookReaderView
 			book={book}
 			file={file}
-			// Read when the book opens; the views do not follow it afterwards.
 			locator={state?.position?.locator ?? null}
 			openedAt={openedAt}
 			onClose={close}

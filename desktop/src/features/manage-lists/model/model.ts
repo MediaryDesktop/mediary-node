@@ -56,7 +56,6 @@ export const manageListsModel = atom(() => {
 		.on(createRequested, () => '')
 		.on(renameRequested, (_, list) => list.name)
 
-	// Empty is the default icon, which is also what a list without a choice gets.
 	const $icon = createStore('')
 		.on(iconChanged, (_, icon) => icon)
 		.on(createRequested, () => '')

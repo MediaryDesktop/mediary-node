@@ -12,8 +12,6 @@ import { unmatchedFilesModel } from '../../model/model'
 import { GroupPage } from './group-page/GroupPage'
 import styles from './UnmatchedFilesDrawer.module.scss'
 
-// The design works through unmatched files a folder at a time: a page per
-// folder, every file on it picked by default, one title applied to the pick.
 export function UnmatchedFilesDrawer() {
 	const { t } = useTranslation()
 

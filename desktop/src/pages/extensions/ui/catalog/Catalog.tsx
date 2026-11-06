@@ -6,8 +6,6 @@ import type { SelectDropdownOption } from '@shared/ui'
 
 import styles from './Catalog.module.scss'
 
-// The pieces every tab is built from: the filters, then a section of cards per
-// kind, or a box saying why there are none.
 
 export interface CatalogFiltersProps<Type extends string> {
 	types: readonly { value: Type; label: string }[]
@@ -85,8 +83,6 @@ export interface CatalogEmptyProps {
 	actions?: ReactNode
 }
 
-// Nothing to show: inside a section it spans the whole grid, on its own it is
-// a box of its own.
 export function CatalogEmpty({ icon, title, description, actions }: CatalogEmptyProps) {
 	return (
 		<div className={styles.empty}>

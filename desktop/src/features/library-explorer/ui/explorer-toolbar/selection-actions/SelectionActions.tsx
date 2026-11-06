@@ -16,12 +16,9 @@ export interface SelectionActionsProps {
 	chosen: LibraryFile[]
 	onMatchMany: (files: LibraryFile[]) => void
 	onDelete: () => void
-	// After an action that is done with the selection.
 	onDone: () => void
 }
 
-// What can be done to the ticked files at once. Each action flips: matching what is
-// matched unmatches it, ignoring what is ignored brings it back.
 export function SelectionActions({ chosen, onMatchMany, onDelete, onDone }: SelectionActionsProps) {
 	const { t } = useTranslation()
 	const [unmatchFiles, ignoreFiles] = useUnit([

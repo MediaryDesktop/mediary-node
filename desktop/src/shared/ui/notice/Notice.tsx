@@ -16,8 +16,6 @@ const ACTION_VARIANT: Record<NoticeTone, ButtonVariant> = {
 	success: 'glass-success'
 }
 
-// The tone-matched Button variant for a Notice's action, for callers that
-// need to build the button themselves (e.g. with a router Link).
 export function noticeActionVariant(tone: NoticeTone): ButtonVariant {
 	return ACTION_VARIANT[tone]
 }
@@ -26,8 +24,6 @@ export interface NoticeProps {
 	tone?: NoticeTone
 	title?: ReactNode
 	children?: ReactNode
-	// The common case: one button, tone-matched automatically. For anything
-	// else (a link, two buttons, custom markup) pass `action` instead.
 	actionLabel?: ReactNode
 	onAction?: () => void
 	action?: ReactNode

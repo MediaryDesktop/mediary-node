@@ -14,8 +14,6 @@ export const cancelToolInstallMutation = createMutation({
 })
 export const removeToolMutation = createMutation({ effect: removeToolFx, name: 'removeTool' })
 
-// The node announces an install twice a second while it downloads; only the
-// answer to the latest question may stand.
 concurrency(toolsQuery, { strategy: 'TAKE_LATEST' })
 
 sample({

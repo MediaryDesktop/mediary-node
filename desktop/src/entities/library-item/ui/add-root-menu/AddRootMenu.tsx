@@ -31,8 +31,6 @@ export interface AddRootMenuProps {
 	align?: 'start' | 'center' | 'end'
 }
 
-// The content-type picker behind "add a folder", wherever a screen needs it —
-// the library roots list, or a spot that points at one without roots yet.
 export function AddRootMenu({ trigger, align }: AddRootMenuProps) {
 	const { t } = useTranslation()
 	const [pickingFolder, folderRequested] = useUnit([

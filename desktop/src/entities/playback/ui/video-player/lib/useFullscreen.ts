@@ -1,8 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
 
-// The whole document goes fullscreen rather than the player: menus open in a portal
-// on <body>, and a fullscreen element hides everything outside it. Leaving the
-// player leaves fullscreen too.
 export function useFullscreen(): { fullscreen: boolean; toggleFullscreen: () => void } {
 	const [fullscreen, setFullscreen] = useState(false)
 

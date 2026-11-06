@@ -27,8 +27,6 @@ export interface ToolCardProps {
 	tool: Tool
 }
 
-// One program the node runs, on the same card as a plugin: icon, name and the
-// programs it brings, what it does, version and author, the action in the corner.
 export function ToolCard({ tool }: ToolCardProps) {
 	const { t } = useTranslation()
 
@@ -125,8 +123,6 @@ export function ToolCard({ tool }: ToolCardProps) {
 				tool.update && <span className={styles.updateText}>{t('tools.updateAvailable')}</span>
 			]}
 			badge={
-				// Every program here is one Mediary picked and pins: the mark says so,
-				// as opposed to a plugin someone else wrote.
 				<Tooltip
 					side='top'
 					content={

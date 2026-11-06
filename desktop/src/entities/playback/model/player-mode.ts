@@ -8,7 +8,6 @@ export const PLAYER_MODES: readonly PlayerMode[] = ['builtin', 'external']
 
 const STORAGE_KEY = 'mediary.playerMode'
 
-// Built-in by default: it needs nothing installed, while mpv has to be on PATH.
 function readPlayerMode(): PlayerMode {
 	return readStored(STORAGE_KEY) === 'external' ? 'external' : 'builtin'
 }

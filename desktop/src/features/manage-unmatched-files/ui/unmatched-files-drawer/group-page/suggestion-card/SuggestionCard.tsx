@@ -7,7 +7,6 @@ import type { LibrarySuggestion } from '@entities/library-item'
 
 import styles from './SuggestionCard.module.scss'
 
-// A title the matcher thinks the folder is; picking it fills in its id.
 export interface SuggestionCardProps {
 	suggestion: LibrarySuggestion
 	chosen: boolean

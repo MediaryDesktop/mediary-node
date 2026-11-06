@@ -35,8 +35,6 @@ export interface EpisodeLibraryProps {
 	progress: number
 }
 
-// The title's video files: what is left to watch first, then every episode by
-// season, then specials and the rest.
 export function EpisodeLibrary({
 	mediaRef,
 	cover,
@@ -82,8 +80,6 @@ export function EpisodeLibrary({
 		})
 	)
 
-	// The query is shared across title pages, so what it holds may still be the
-	// previous title's files for a moment after navigating.
 	const files = (data?.files.items ?? []).filter(file => file.match?.media_ref === mediaRef)
 
 	if (files.length === 0) {
@@ -102,12 +98,8 @@ export function EpisodeLibrary({
 	const groups = groupTitleFiles(files, progress, order)
 	const fallback = banner ?? cover
 
-	// "/ 62" next to "S2 · E5" would compare a number within a season to the
-	// whole show's count.
 	const of = meta.seasonal ? null : (total ?? count)
 
-	// The source's still first: it is chosen to show the episode without spoiling
-	// it. A frame from the file stands in when the source has none.
 	const imagesFor = (file: LibraryFile, episode: MediaEpisode | undefined) => [
 		episode?.image,
 		file.missing ? null : thumbnailUrl(file.id),

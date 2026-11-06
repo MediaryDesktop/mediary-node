@@ -6,8 +6,6 @@ import { Button, Icon } from '@shared/ui'
 
 import { searchMediaModel } from '../../model/model'
 
-// Carries over whatever the user already typed, so starting a title by hand
-// does not mean retyping its name.
 export function AddManuallyButton() {
 	const { t } = useTranslation()
 	const navigate = useNavigate()

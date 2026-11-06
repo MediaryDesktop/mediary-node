@@ -16,14 +16,9 @@ export interface ConnectionCheckProps {
 	disabled?: boolean
 	status: ConnectionCheckStatus | null
 	onCheck: () => void
-	// 'default' for a button beside a full-height field, e.g. an input it's
-	// checking the value of; 'small' (the default) everywhere else.
 	size?: 'default' | 'small'
 }
 
-// A "test the connection" button that becomes its own answer: success or
-// failure colors the button and renames it, and the full message (a version,
-// an account, what went wrong) sits behind a tooltip instead of beside it.
 export function ConnectionCheck({
 	label,
 	checking,

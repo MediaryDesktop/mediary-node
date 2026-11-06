@@ -10,7 +10,6 @@
 		display: flex;
 		align-items: center;
 		gap: 0.75rem;
-		// The banner runs under the whole row, so only the controls take clicks.
 		pointer-events: none;
 
 		> * {
@@ -45,7 +44,6 @@
 			white-space: nowrap;
 		}
 
-		// Shrunk so the pill ends up the same height as the back button beside it.
 		.offlineRetry {
 			flex: none;
 			height: var(--control-height-xs);

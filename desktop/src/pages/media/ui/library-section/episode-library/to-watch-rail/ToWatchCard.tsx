@@ -14,7 +14,6 @@ export interface ToWatchCardProps {
 	file: LibraryFile
 	episode: MediaEpisode | undefined
 	seasonal: boolean
-	// The whole count after the number ("E5 / 12"), or null where it would mislead.
 	of: number | null | undefined
 	images: (string | null | undefined)[]
 	coverColor: string | null

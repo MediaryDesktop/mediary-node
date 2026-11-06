@@ -9,8 +9,6 @@ const UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
 
 export interface RelativeTimeOptions {
 	now?: Date | number
-	// Units coarser than this are skipped: an airing countdown reads better as
-	// "in 10 days" than as "in 1 week".
 	maxUnit?: Intl.RelativeTimeFormatUnit
 }
 

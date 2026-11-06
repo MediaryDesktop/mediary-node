@@ -7,7 +7,6 @@ import { $nodeReady } from '@infra/node'
 
 import { aiSettingsQuery } from '@entities/media'
 
-// Whether the AI fill can run, and the one line worth showing about it.
 export function useAiStatus() {
 	const { t } = useTranslation()
 
@@ -21,7 +20,6 @@ export function useAiStatus() {
 
 	const ready = settings?.ready ?? false
 
-	// The free AI shows what is left of today's allowance; an own key, the model.
 	const detail = !settings
 		? null
 		: settings.provider === 'cloud'

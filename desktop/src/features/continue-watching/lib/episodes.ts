@@ -6,16 +6,11 @@ export interface TitleEpisodes {
 	specials: LibraryFile[]
 	others: LibraryFile[]
 
-	// Main episodes past the user's progress, one file per number: two releases of
-	// episode 5 are one episode left to watch, not two.
 	toWatch: LibraryFile[]
 }
 
-// Where a file stands in the title's order, which is what progress counts. For an
-// anime that is its episode number; a show numbered by season counts across them.
 export type EpisodeOrder = (file: LibraryFile) => number | null
 
-// The match is what the user or the matcher settled on, so it wins over the name.
 export function episodeNumber(file: LibraryFile): number | null {
 	return file.match?.episode ?? file.parsed.episode ?? null
 }
@@ -24,7 +19,6 @@ export function episodeSeason(file: LibraryFile): number | null {
 	return file.match?.season ?? file.parsed.season ?? null
 }
 
-// A movie has no number, so it counts as watched once anything at all is.
 export function isWatched(file: LibraryFile, progress: number, order: EpisodeOrder = episodeNumber): boolean {
 	const number = order(file)
 
@@ -90,9 +84,6 @@ export function groupTitleFiles(
 	return { main, specials, others, toWatch }
 }
 
-// What the sources say about a title's episodes, indexed for the files to find
-// their own. A show listed by season is keyed by season and number; an anime, by
-// number alone.
 export interface EpisodeIndex {
 	seasonal: boolean
 	list: MediaEpisode[]
@@ -124,7 +115,6 @@ function fileKey(index: EpisodeIndex, file: LibraryFile): string | null {
 		return null
 	}
 
-	// A first season is often left unwritten on the file: Show - 05.mkv.
 	return key(index.seasonal ? (episodeSeason(file) ?? 1) : null, number)
 }
 
@@ -134,8 +124,6 @@ export function episodeFor(index: EpisodeIndex, file: LibraryFile): MediaEpisode
 	return at === null ? undefined : index.byKey.get(at)
 }
 
-// The order progress counts in. A show's episode the list does not hold yet sorts
-// after every known one, by season, and is never taken for watched.
 export function episodeOrder(index: EpisodeIndex): EpisodeOrder {
 	if (!index.seasonal) {
 		return episodeNumber

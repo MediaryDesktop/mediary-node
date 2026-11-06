@@ -31,8 +31,6 @@ export interface NotInLibraryProps {
 	meta: EpisodeIndex
 }
 
-// No files yet: the episodes the title has, drawn as rows to fill, with whatever the
-// source knows about them.
 export function NotInLibrary({ cover, coverColor, banner, total, meta }: NotInLibraryProps) {
 	const { t } = useTranslation()
 	const text = useEpisodeText()
@@ -41,8 +39,6 @@ export function NotInLibrary({ cover, coverColor, banner, total, meta }: NotInLi
 		return null
 	}
 
-	// A show listed by season is drawn from the list itself, since numbers repeat
-	// across seasons; anything else from its count, with whatever the list knows.
 	const placeholders: Placeholder[] = meta.seasonal
 		? meta.list.slice(0, MAX_EPISODE_PLACEHOLDERS).map(episode => ({
 				key: `${episode.season}:${episode.number}`,

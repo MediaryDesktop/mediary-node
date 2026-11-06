@@ -43,8 +43,6 @@ export function BackupSettings() {
 		returnAfterAuthRequested
 	])
 
-	// Back to this very section once the user has signed in or confirmed the
-	// address — that is what they left for.
 	const leaveToAuth = (to: '/sign-in' | '/verify-email') => {
 		requestReturn({ to: '/settings', search: { section: 'backup' } })
 		navigate({ to })

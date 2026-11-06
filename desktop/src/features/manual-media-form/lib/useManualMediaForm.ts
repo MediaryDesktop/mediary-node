@@ -26,16 +26,11 @@ import type { AiMergeField } from './draft'
 
 export interface UseManualMediaFormOptions {
 	mode: 'create' | 'edit'
-	// The manual title's id (without the manual: prefix); edit mode only.
 	id?: string
 	initialDraft: ManualDraft
 	initialCoverUrl?: string | null
 	cancelTo: string
-	// A new title opened with no kind in mind: the draft holds a placeholder kind
-	// until the user picks one, so a book is never made an anime by default.
 	typeUnset?: boolean
-	// A field the form refused to go on without, so the layout can bring it into
-	// view — each design keeps its fields in different places.
 	onInvalid?: (field: 'media_type' | 'title', action: 'save' | 'suggest') => void
 }
 
@@ -51,8 +46,6 @@ function coverSource(selection: CoverSelection): { url?: string; data?: string }
 	return null
 }
 
-// Everything a manual title form does — the draft, the AI fill, the poster and
-// saving — kept apart from how the form is laid out.
 export function useManualMediaForm({
 	mode,
 	id,
@@ -70,8 +63,6 @@ export function useManualMediaForm({
 	const [draft, setDraft] = useState<ManualDraft>(initialDraft)
 	const [aiFilled, setAiFilled] = useState<ReadonlySet<AiMergeField>>(new Set())
 	const [cover, setCover] = useState<CoverSelection>({ kind: 'keep' })
-	// Whether the poster in place was put there by the AI fill, not picked by the
-	// user: only such a poster is swapped when the next fill finds another title.
 	const autoCover = useRef(false)
 	const [errors, setErrors] = useState<Record<string, string>>({})
 	const [typePicked, setTypePicked] = useState(!typeUnset)
@@ -132,7 +123,6 @@ export function useManualMediaForm({
 		}
 	}
 
-	// The poster an earlier fill chose belongs to the title it was chosen for.
 	const dropAutoCover = () => {
 		if (autoCover.current) {
 			autoCover.current = false
@@ -140,11 +130,6 @@ export function useManualMediaForm({
 		}
 	}
 
-	// A title the AI has just filled in has what a poster search needs, so the
-	// search runs now rather than leaving the trip to the poster window. It never
-	// replaces a poster the user picked or the title already has, only one an
-	// earlier fill chose for another title; a failed search stays quiet: the
-	// filled-in form is what the user asked for.
 	const findPoster = async (found: ManualDraft) => {
 		if (initialCoverUrl || (cover.kind !== 'keep' && !autoCover.current)) {
 			return
@@ -158,8 +143,6 @@ export function useManualMediaForm({
 			})
 			const image = result.images?.[0]
 
-			// Only a catalog's poster is the title's own; a picture search finds
-			// whatever mentions the words, so those are left for the user to pick.
 			if (image?.source === 'catalog') {
 				setCover(current =>
 					current.kind === 'keep' || autoCover.current
@@ -171,7 +154,6 @@ export function useManualMediaForm({
 				dropAutoCover()
 			}
 		} catch {
-			// The poster window is still there to search by hand.
 		}
 	}
 
@@ -187,8 +169,6 @@ export function useManualMediaForm({
 			return
 		}
 
-		// Only what the user typed describes the title; what an earlier fill added
-		// may be for another one.
 		const own = withoutAiFilled(draft, aiFilled)
 
 		const hint: ManualHint = {
@@ -342,7 +322,6 @@ export function useManualMediaForm({
 		}
 	}
 
-	// A poster the user picks by hand is theirs: the next AI fill leaves it be.
 	const pickCover = (chosen: CoverSelection) => {
 		autoCover.current = false
 		setCover(chosen)

@@ -32,8 +32,6 @@ export interface SettingsPageProps {
 	section: SettingsSection
 }
 
-// Settings as Seanime lays them out: sections grouped in a menu on the left, the
-// open one on the right under its own header, its settings as rows in cards.
 export function SettingsPage({ section }: SettingsPageProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
@@ -51,8 +49,6 @@ export function SettingsPage({ section }: SettingsPageProps) {
 									className={clsx(styles.item, item.id === current.id && styles.active)}
 									aria-current={item.id === current.id ? 'page' : undefined}
 									onClick={() =>
-										// Replaces: switching sections should not pile up history entries
-										// that "back" would have to walk through one at a time.
 										navigate({
 											to: '/settings',
 											search: { section: item.id },
@@ -200,7 +196,6 @@ function Card({ children }: { children: ReactNode }) {
 interface RowProps {
 	name: string
 	hint: string
-	// A list or a form does not fit beside its label, so it goes under it.
 	block?: boolean
 	children: ReactNode
 }

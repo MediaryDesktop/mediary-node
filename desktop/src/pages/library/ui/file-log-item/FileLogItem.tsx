@@ -20,8 +20,6 @@ function nameOf(relPath: string): string {
 	return parts[parts.length - 1] || relPath
 }
 
-// One file's line in the scanner log: the name, and on opening it what the scan
-// read off the name and how close it came to a title.
 export function FileLogItem({ log, matched, search }: FileLogItemProps) {
 	const { t } = useTranslation()
 

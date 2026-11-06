@@ -30,10 +30,8 @@ import styles from './StreamSection.module.scss'
 const AUTO_SELECT_KEY = 'mediary.stream.autoSelect'
 const SETTINGS_OPEN_KEY = 'mediary.stream.settingsOpen'
 
-// The next episodes the rail offers, after what was watched.
 const RAIL_SIZE = 8
 
-// A list longer than this is an endless show; the rest is reached through search.
 const MAX_EPISODES = 500
 
 export interface StreamSectionProps {
@@ -43,7 +41,6 @@ export interface StreamSectionProps {
 	cover: string | null
 	coverColor: string | null
 	banner: string | null
-	// Episodes out so far; null when unknown.
 	released: number | null
 	progress: number
 }
@@ -54,14 +51,9 @@ interface StreamItem {
 	season?: number
 	label: string
 	meta: MediaEpisode | undefined
-	// Where it falls in the whole run, which is what progress counts.
 	position: number
 }
 
-// The title's episodes, played without downloading them into the library, as
-// Seanime's torrent streaming view: through the built-in client, which plays the
-// file as it comes, or the debrid service. With auto-select a click plays the
-// best release at once, without it the search opens on that episode to pick one.
 export function StreamSection({
 	mediaRef,
 	title,
@@ -86,7 +78,6 @@ export function StreamSection({
 		streamViaChanged
 	])
 
-	// Without a debrid service the built-in client is the only way.
 	const via: StreamVia = setup.debrid ? chosenVia : 'embedded'
 
 	const [autoSelect, setAutoSelect] = useState(() => readStored(AUTO_SELECT_KEY) !== 'off')
@@ -96,8 +87,6 @@ export function StreamSection({
 		writeStored(AUTO_SELECT_KEY, on ? 'on' : 'off')
 	}
 
-	// Shut by default: the explanation and the two choices are worth reading once,
-	// not on every visit, so they sit behind a button rather than always in view.
 	const [settingsOpen, setSettingsOpen] = useState(() => readStored(SETTINGS_OPEN_KEY) === 'on')
 
 	const toggleSettings = () => {
@@ -119,8 +108,6 @@ export function StreamSection({
 	})
 	const toWatch = items.filter(item => item.position > progress).slice(0, RAIL_SIZE)
 	const fallback = banner ?? cover
-	// The player opens over this section the moment one is asked for, so a second
-	// click has nothing to reach; this only guards the instant before it covers it.
 	const busy = target !== null
 
 	const play = (item: StreamItem) => {
@@ -322,12 +309,10 @@ function streamItems({
 	released: number | null
 	labels: Labels
 }): StreamItem[] {
-	// A film is one thing to play, and the node plays its largest video.
 	if (mediaType === 'movie') {
 		return [{ key: 'movie', label: title, meta: undefined, position: 1 }]
 	}
 
-	// A show listed by season goes by its list, since numbers repeat across seasons.
 	if (meta.seasonal) {
 		return meta.list.slice(0, MAX_EPISODES).map((episode, index) => ({
 			key: `${episode.season ?? ''}:${episode.number}`,

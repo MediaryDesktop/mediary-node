@@ -9,24 +9,16 @@ import { readyDebrid } from './clients'
 import type { DebridService, TorrentClientKind } from './clients'
 
 export interface TorrentSetup {
-	// False until both answers are in, so nothing warns about a setup still loading.
 	loaded: boolean
 	clientKind: TorrentClientKind
-	// With the debrid client, the service it downloads through.
 	clientService: string
 	clientConfigured: boolean
-	// Null while the node has not asked the client yet.
 	clientReachable: boolean | null
 	clientError: string
-	// Something to search with: a Torznab source, or a search plugin that is on.
 	hasSources: boolean
-	// The debrid service ready to play torrents and mark cached releases,
-	// whatever the client; undefined while none is set up.
 	debrid: DebridService | undefined
 }
 
-// What torrents need before they work: a client to download with and, for search
-// and the rules, a source to search. Every torrent screen reads it the same way.
 export function useTorrentSetup(): TorrentSetup {
 	const [downloads, sources, debrid, loadDownloads, loadSources, loadDebrid, nodeReady] = useUnit([
 		torrentDownloadsQuery.$data,

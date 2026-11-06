@@ -21,7 +21,6 @@ import { episodeNumber, episodeSeason } from './episodes'
 const VIDEO_TYPES = new Set(['anime', 'movie', 'series', 'dorama'])
 const WATCHING = new Set(['CURRENT', 'REPEATING'])
 
-// More than a row or two of "continue" is a list, not a shortcut.
 const MAX_TITLES = 12
 
 export interface UpNextEntry extends UpNextItem {
@@ -31,13 +30,10 @@ export interface UpNextEntry extends UpNextItem {
 export interface ContinueWatchingState {
 	items: UpNextEntry[]
 	byRef: Map<string, UpNextEntry>
-	// The titles are known but their files are not yet.
 	loading: boolean
 	pending: number
 }
 
-// The next episode of each title the user is watching, when the library already
-// has its file. Titles without one are the tracker's "in progress", not this.
 export function useContinueWatching(entries: TrackerEntry[]): ContinueWatchingState {
 	const [collection, loadCollection, nodeReady, items, loading, changed] = useUnit([
 		libraryCollectionQuery.$data,
@@ -72,8 +68,6 @@ export function useContinueWatching(entries: TrackerEntry[]): ContinueWatchingSt
 			.map(entry => ({ mediaRef: entry.media_ref, progress: entry.progress }))
 	}, [byEntry, collection])
 
-	// A new file in the library changes the counts, not the candidates; both have
-	// to reload what is next.
 	const key = useMemo(() => {
 		const counts = new Map(
 			(collection?.collection.entries ?? []).map(entry => [entry.media_ref, entry.file_count])
@@ -89,7 +83,6 @@ export function useContinueWatching(entries: TrackerEntry[]): ContinueWatchingSt
 
 	useEffect(() => {
 		changed(candidates)
-		// The key says when the candidates differ; their array is new on every refetch.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [key, changed])
 
@@ -108,8 +101,6 @@ export function useContinueWatching(entries: TrackerEntry[]): ContinueWatchingSt
 	}, [items, byEntry, loading, candidates.length])
 }
 
-// Plays a library file in whichever player the user chose, and says so when the
-// node cannot start it.
 export function usePlayFile(): { play: (fileId: number) => void; starting: boolean } {
 	const { t } = useTranslation()
 
@@ -135,7 +126,6 @@ export function usePlayFile(): { play: (fileId: number) => void; starting: boole
 	}
 }
 
-// "Episode 5", "Season 2 · Episode 5", or a movie's own name.
 export function useUpNextLabel(): (item: UpNextItem) => string {
 	const { t } = useTranslation()
 

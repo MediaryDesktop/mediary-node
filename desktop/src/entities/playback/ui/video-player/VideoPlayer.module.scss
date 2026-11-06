@@ -7,7 +7,6 @@
 	overflow: hidden;
 	background: #000;
 	color: #fff;
-	// Both modes move between these values, so the picture glides instead of jumping.
 	transition:
 		left 0.4s var(--ease),
 		top 0.4s var(--ease),
@@ -16,7 +15,6 @@
 		border-radius 0.4s var(--ease),
 		box-shadow 0.4s var(--ease);
 
-	// Above the window controls of the app chrome, which sit on top of every page.
 	&.full {
 		z-index: 1100;
 		top: 0;
@@ -83,7 +81,6 @@
 		gap: 1rem;
 		padding: 1.5rem;
 		text-align: center;
-		// The picture goes on behind the message, so it darkens to keep the text legible.
 		background: rgb(0 0 0 / 0.72);
 		backdrop-filter: blur(6px);
 		color: #fff;

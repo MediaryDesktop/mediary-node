@@ -24,9 +24,6 @@ const ROWS: { status: TrackerStatus; key: 'current' | 'planning' | 'completed'; 
 	{ status: 'COMPLETED', key: 'completed', icon: 'common/check-circle-2' }
 ]
 
-// What the user is in the middle of, first: the anime they are watching, the next
-// episode the library holds, then the lists and how it all adds up. Discovering
-// something new is Discover's job, not this page's.
 export function HomePage() {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
@@ -35,13 +32,10 @@ export function HomePage() {
 
 	const entries = useTrackedEntries(connected)
 	const entriesReady = useTrackedEntriesReady(connected)
-	// Until this is true, an empty `entries` means "not answered yet", not "nothing
-	// to show" — the empty state and the rows below wait for it, same as the hero.
 	const ready = sessionLoaded && entriesReady
 	const watching = useContinueWatching(entries)
 	const stats = useMemo(() => trackerStats(entries), [entries])
 
-	// One title, one card: a dorama the node also lists as a series is shown once.
 	const byStatus = useMemo(() => {
 		const unique = [...new Map(entries.map(entry => [entry.media_ref, entry])).values()].sort(
 			(a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at)

@@ -9,9 +9,6 @@ export interface EmptyCardProps {
 	description: string
 }
 
-// A dashed placeholder for a settings card's list before it holds anything —
-// a torrent search source, an OPDS server. The card's own header already
-// carries the add action, so this never needs one of its own.
 export function EmptyCard({ icon, title, description }: EmptyCardProps) {
 	return (
 		<div className={styles.root}>

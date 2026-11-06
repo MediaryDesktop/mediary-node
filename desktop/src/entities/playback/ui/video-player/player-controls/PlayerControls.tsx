@@ -20,7 +20,6 @@ export interface PlayerControlsProps {
 	actions: VideoActions
 	onToggleFullscreen: () => void
 	onClose: () => void
-	// The track menus, between the time and the window buttons.
 	children?: ReactNode
 }
 

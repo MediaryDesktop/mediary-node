@@ -31,7 +31,6 @@ const STATE_TONE: Record<TorrentDisplayState, BadgeTone> = {
 	unknown: 'neutral'
 }
 
-// One torrent: what it is, how far it got, and what can be done to it.
 export interface DownloadRowProps {
 	item: TorrentDownload
 	showTitle: boolean

@@ -29,8 +29,6 @@ export interface IdentityCardProps {
 	onChange: (patch: Partial<ManualDraft>) => void
 	coverUrl: string | null
 	lockType: boolean
-	// False while the draft only holds a placeholder kind: no tile is selected,
-	// so nothing looks chosen that the user never chose.
 	typePicked: boolean
 	typeError?: string
 	titleError?: string

@@ -14,8 +14,6 @@
 	}
 }
 
-// Shown either as the loading skeleton (no .results wrapper) or inside .results —
-// kept unscoped so one rule reaches both.
 .grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));

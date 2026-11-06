@@ -16,9 +16,6 @@ export type CloudHealth = CloudSchemas['HealthOutputBody']
 
 type PairingCode = CloudOperation<'createPairingCode'>['responses'][201]['content']['application/json']
 
-// The node's sync endpoints pass the cloud's 401 on — a wrong pairing code, a
-// revoked device. Without expectsUnauthorized that would read as the desktop's
-// own session expiring and sign the user out.
 export const fetchSyncStatusFx = createNodeRequestFx<void, SyncStatus>({ url: '/v1/sync/status' })
 
 export const pairNodeFx = createNodeRequestFx<string, Paired>(code => ({
@@ -31,7 +28,6 @@ export const pairNodeFx = createNodeRequestFx<string, Paired>(code => ({
 
 export const unpairNodeFx = createNodeRequestFx<void, void>({ url: '/v1/sync/pairing', method: 'DELETE' })
 
-// A snapshot of a large library is a few megabytes over a home uplink.
 export const backUpNowFx = createNodeRequestFx<void, BackupResult>({
 	url: '/v1/sync/backups',
 	method: 'POST',
@@ -57,8 +53,6 @@ const createPairingCodeFx = createCloudRequestFx<void, PairingCode>({
 	method: 'POST'
 })
 
-// The desktop asks the cloud for a code with its session and hands it straight
-// to its own node, so the user never has to see or type it.
 export const pairThisNodeFx = createEffect<void, Paired, HttpRequestError>(async () => {
 	const { code } = await createPairingCodeFx()
 

@@ -10,9 +10,6 @@ export interface RecommendationsSectionProps {
 	similar: RelatedTitle[]
 }
 
-// What to watch or read next: the source's recommendations and, where it has
-// them (TMDB), titles alike in genre — each its own carousel, one under the
-// other, so neither list crowds the other out.
 export function RecommendationsSection({ recommendations, similar }: RecommendationsSectionProps) {
 	const { t } = useTranslation()
 

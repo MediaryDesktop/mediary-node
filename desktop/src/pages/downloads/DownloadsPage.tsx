@@ -17,8 +17,6 @@ import styles from './DownloadsPage.module.scss'
 
 type Tab = 'torrents' | 'auto' | 'manga' | 'books'
 
-// Everything the node brings to disk, one kind per tab: torrents, the rules that
-// add them by themselves, saved manga chapters and free books.
 export function DownloadsPage() {
 	const { t } = useTranslation()
 

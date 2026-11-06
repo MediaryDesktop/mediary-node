@@ -19,15 +19,11 @@ import { ServiceOption } from './service-option/ServiceOption'
 
 export interface DebridServiceFormProps {
 	debrid: TorrentDebrid
-	// Called after a successful save, and when the user cancels: either way the
-	// form's local state should go back to matching what is saved.
 	onReset: () => void
 }
 
 type CheckState = { ok: true; account: string } | { ok: false; problem: string } | null
 
-// Remounted (by key) after every save or cancel, so its fields start fresh
-// from the saved settings.
 export function DebridServiceForm({ debrid, onReset }: DebridServiceFormProps) {
 	const { t } = useTranslation()
 
@@ -45,10 +41,8 @@ export function DebridServiceForm({ debrid, onReset }: DebridServiceFormProps) {
 	const [result, setResult] = useState<CheckState>(null)
 
 	const service = debridService(kind)!
-	// The service actually saved and working, not just the one picked locally.
 	const connectedKind = debrid.ready ? debridService(debrid.service)?.kind : undefined
 
-	// Each service keeps its own key; an untouched field keeps the saved one.
 	const keySaved = (debrid.keys ?? []).includes(kind)
 	const apiKeyValue = keySaved && apiKey.trim() === '' ? undefined : apiKey.trim()
 	const missingKey = apiKeyValue === ''

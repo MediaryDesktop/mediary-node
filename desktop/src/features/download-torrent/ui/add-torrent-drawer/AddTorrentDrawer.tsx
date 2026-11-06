@@ -25,13 +25,10 @@ import styles from './AddTorrentDrawer.module.scss'
 export interface AddTorrentDrawerProps {
 	open: boolean
 	mediaRef: string
-	// The title's name; it also names the folder the torrent is saved into.
 	title: string
 	onClose: () => void
 }
 
-// The form is mounted afresh for every opening, so it never carries a magnet over
-// from another title.
 export function AddTorrentDrawer({ open, mediaRef, title, onClose }: AddTorrentDrawerProps) {
 	const { t } = useTranslation()
 
@@ -50,7 +47,6 @@ export function AddTorrentDrawer({ open, mediaRef, title, onClose }: AddTorrentD
 
 interface TorrentFile {
 	name: string
-	// Base64, as the node takes it.
 	content: string
 }
 
@@ -61,7 +57,6 @@ function AddForm({ mediaRef, title, onDone }: { mediaRef: string; title: string;
 
 	const [magnet, setMagnet] = useState('')
 	const [file, setFile] = useState<TorrentFile | null>(null)
-	// On by default: a batch is the common case, and picking from it is the point.
 	const [chooseFiles, setChooseFiles] = useState(true)
 	const picker = useRef<HTMLInputElement>(null)
 

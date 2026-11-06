@@ -14,9 +14,6 @@ export interface SectionCardProps {
 	children: ReactNode
 }
 
-// One self-contained group of fields — its own surface, its own icon, a title
-// that says what it holds and a subtitle that says why. Cards sit apart with
-// real space between them, so one does not read as the next one's footnote.
 export function SectionCard({ icon, title, subtitle, className, children }: SectionCardProps) {
 	return (
 		<section className={clsx(styles.card, className)}>

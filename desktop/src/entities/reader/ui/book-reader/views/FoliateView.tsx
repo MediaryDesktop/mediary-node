@@ -13,14 +13,9 @@ export interface FoliateViewProps {
 	onReady: (toc: FoliateTocItem[]) => void
 	onRelocate: (location: BookLocation) => void
 	onError: (error: unknown) => void
-	// Keys pressed while the book's own document has focus, which the window never
-	// hears: every section is an iframe of its own.
 	onKey: (event: KeyboardEvent) => void
 }
 
-// EPUB, FB2, MOBI and AZW3, laid out by foliate-js in pages. The book's own
-// scripts never run: the window's CSP allows no script but the app's, and the
-// sections' blob: frames inherit it.
 export const FoliateView = forwardRef<BookViewHandle, FoliateViewProps>(function FoliateView(
 	{ file, locator, appearance, onReady, onRelocate, onError, onKey },
 	ref
@@ -28,7 +23,6 @@ export const FoliateView = forwardRef<BookViewHandle, FoliateViewProps>(function
 	const hostRef = useRef<HTMLDivElement>(null)
 	const viewRef = useRef<FoliateElement | null>(null)
 
-	// The callbacks change on every render; the book is opened once per file.
 	const latest = useRef({ locator, appearance, onReady, onRelocate, onError, onKey })
 	latest.current = { locator, appearance, onReady, onRelocate, onError, onKey }
 

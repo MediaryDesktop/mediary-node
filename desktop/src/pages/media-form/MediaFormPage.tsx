@@ -14,8 +14,6 @@ import type { ManualMediaType } from '@features/manual-media-form'
 import styles from './MediaFormPage.module.scss'
 
 export type MediaFormPageProps =
-	// A create with no kind leaves the choice to the user rather than defaulting
-	// to one, which they would not notice was wrong.
 	{ mode: 'create'; mediaType?: ManualMediaType; title: string } | { mode: 'edit'; mediaRef: string }
 
 export function MediaFormPage(props: MediaFormPageProps) {
@@ -23,7 +21,6 @@ export function MediaFormPage(props: MediaFormPageProps) {
 		return (
 			<PageTransition className={styles.root}>
 				<ManualMediaForm
-					// A different kind in the address is a different form, not an edit of this one.
 					key={props.mediaType ?? 'unset'}
 					mode='create'
 					typeUnset={props.mediaType === undefined}

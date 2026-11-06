@@ -6,14 +6,9 @@ export interface UnmatchedGroup {
 	folder: string
 	files: LibraryFile[]
 
-	// Only an AniList id is something people know by heart; TMDB needs movie or
-	// show on top of the number, and book ids are opaque strings from two sources.
 	typedId: boolean
 }
 
-// Mirrors the node's choice of source: comics go to AniList anywhere, videos
-// only under an anime folder. An unknown root is not assumed to be anime, and
-// neither is a folder of mixed videos.
 function matchesOnAniList(file: LibraryFile, content: LibraryContent | undefined): boolean {
 	if (file.kind === 'manga') {
 		return true
@@ -28,8 +23,6 @@ function matchesOnAniList(file: LibraryFile, content: LibraryContent | undefined
 	)
 }
 
-// What still needs a title: not matched, not set aside, and not an opening or a
-// trailer, which belong to no title by design.
 export function isUnmatched(file: LibraryFile): boolean {
 	return !isMatched(file) && !isIgnored(file) && isTrackable(file)
 }
@@ -40,8 +33,6 @@ function folderOf(file: LibraryFile): string {
 	return cut > 0 ? file.path.slice(0, cut) : file.path
 }
 
-// One page per folder: the files of one release almost always sit together, so a
-// folder is the unit someone matches in one go.
 export function unmatchedGroups(files: LibraryFile[], roots: LibraryRoot[]): UnmatchedGroup[] {
 	const contentOf = new Map(roots.map(root => [root.id, root.content]))
 	const byFolder = new Map<string, LibraryFile[]>()

@@ -10,8 +10,6 @@ import { torrentDebridQuery } from '@entities/torrent'
 import styles from './DebridServiceSettings.module.scss'
 import { DebridServiceForm } from './ui/service-form/DebridServiceForm'
 
-// The debrid service: set up apart from the torrent client, it plays torrents
-// without downloading them and marks the releases it holds, whatever the client.
 export function DebridServiceSettings() {
 	const { t } = useTranslation()
 
@@ -21,8 +19,6 @@ export function DebridServiceSettings() {
 		$nodeReady
 	])
 
-	// Bumped after a save or a cancel, so the form below remounts with fresh
-	// fields instead of carrying over whatever was half-typed.
 	const [formKey, setFormKey] = useState(0)
 	const reset = useCallback(() => setFormKey(key => key + 1), [])
 

@@ -29,10 +29,7 @@ interface Tile {
 	value: string
 	note: string
 	accent?: string
-	// 0–1, the mean score against the 10-point scale: drawn as a bar under the
-	// value, with the value itself read as "x / 10" instead of a bare number.
 	progress?: number
-	// The top genres as pills instead of a comma-joined value.
 	badges?: string[]
 }
 
@@ -41,8 +38,6 @@ export function TrackerStats({ stats, entries }: TrackerStatsProps) {
 	const theme = useChartTheme()
 	const format = new Intl.NumberFormat(i18n.language).format
 
-	// Each tile and its matching panel below share a hue (score/"Your scores",
-	// genres/"Genres"), so the two read as the same measurement at a glance.
 	const tiles: Tile[] = [
 		{
 			key: 'titles',

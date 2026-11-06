@@ -12,8 +12,6 @@ import styles from './FeaturedBanner.module.scss'
 import { useBannerRotation } from './lib/useBannerRotation'
 import { usePreloadImages } from './lib/usePreloadImages'
 
-// What the banner needs of a title: a search result has all of it, a list entry
-// everything but the synopsis and the dates.
 export type FeaturedMedia = Pick<
 	MediaSummary,
 	| 'media_ref'
@@ -29,25 +27,17 @@ export type FeaturedMedia = Pick<
 	Partial<Pick<MediaSummary, 'start_date' | 'media_type' | 'authors' | 'description'>>
 
 export interface FeaturedBannerProps<T extends FeaturedMedia> {
-	// The titles the banner goes through, in order. Empty while they load.
 	items: T[]
 	loading: boolean
 	onOpen: (media: T) => void
-	// Names the row of dots for a screen reader.
 	label: string
 	openLabel: string
-	// Whatever the page adds under the synopsis of the title on show.
 	extra?: (media: T) => ReactNode
-	// Floats over the bottom-right corner of the banner, clear of the title block.
 	corner?: (media: T) => ReactNode
-	// Floats at the bottom edge, centered over the fade: Discover's tab switcher.
 	bottom?: ReactNode
 	className?: string
 }
 
-// A page-wide banner: one title at a time, moving on by itself until the pointer
-// rests on it, or jumped to with the dots. The dots sit above the poster, the
-// title and its details below — both pinned to the top of the banner.
 export function FeaturedBanner<T extends FeaturedMedia>({
 	items,
 	loading,

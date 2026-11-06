@@ -77,8 +77,6 @@ function searchParams(query: MediaSearchQuery): Record<string, string> {
 	return params
 }
 
-// A book from Open Library takes two requests at one a second, and a page of cards
-// queues several: the node needs longer than the default to answer the last.
 export const fetchMediaDetailsFx = createNodeRequestFx<string, MediaDetailsResponse>(mediaRef => ({
 	url: `/v1/media/${encodeURIComponent(mediaRef)}`,
 	timeout: 20_000
@@ -103,15 +101,12 @@ export const fetchMediaFilterOptionsFx = createNodeRequestFx<MediaSearchType, Me
 	})
 )
 
-// Whether movies and shows can be looked up, and with whose key. The key itself
-// never comes back from the node.
 export type TMDBSettings = Omit<NodeSchemas['TMDBSettings'], '$schema'>
 
 export const fetchTMDBSettingsFx = createNodeRequestFx<void, TMDBSettings>({
 	url: '/v1/tmdb/settings'
 })
 
-// An empty key forgets the user's own and goes back to the one the build ships with.
 export const setTMDBKeyFx = createNodeRequestFx<string, TMDBSettings>(apiKey => ({
 	url: '/v1/tmdb/settings',
 	method: 'PUT',
@@ -119,8 +114,6 @@ export const setTMDBKeyFx = createNodeRequestFx<string, TMDBSettings>(apiKey => 
 	timeout: 20_000
 }))
 
-// Google Books answers for the books Open Library does not know, with the same
-// choice of keys as TMDB.
 export type GoogleBooksSettings = Omit<NodeSchemas['GoogleBooksSettings'], '$schema'>
 
 export const fetchGoogleBooksSettingsFx = createNodeRequestFx<void, GoogleBooksSettings>({
@@ -134,8 +127,6 @@ export const setGoogleBooksKeyFx = createNodeRequestFx<string, GoogleBooksSettin
 	timeout: 20_000
 }))
 
-// A title no source knows: the user's own data, kept on this node under a
-// manual:<id> reference.
 export type ManualDraft = Omit<NodeSchemas['ManualDraft'], '$schema'>
 export type ManualHint = Omit<NodeSchemas['ManualHint'], '$schema'>
 export type ManualSuggestion = Omit<NodeSchemas['ManualSuggestion'], '$schema'>
@@ -173,9 +164,6 @@ export const deleteManualMediaFx = createNodeRequestFx<string, void>(id => ({
 	timeout: 15_000
 }))
 
-// The chosen AI fills in a draft from a hint; nothing is stored until the user
-// saves it. Longer than the node's own 90s AI timeout, so the node's answer —
-// even a timeout — is the one the user sees.
 export const suggestManualMediaFx = createNodeRequestFx<ManualHint, ManualSuggestion>(hint => ({
 	url: '/v1/media/manual/suggest',
 	method: 'POST',
@@ -196,8 +184,6 @@ export const setAISettingsFx = createNodeRequestFx<SetAISettingsParams, AISettin
 	timeout: 30_000
 }))
 
-// Pictures that could be a manual title's poster — looked for by the title as the
-// form has it, before the title exists.
 export interface ManualCoverSearch {
 	type: MediaSearchType
 	title: string

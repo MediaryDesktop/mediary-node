@@ -10,7 +10,6 @@ import type { TrackerEntry, TrackerMediaType, TrackerStatus } from '@entities/tr
 
 import { EntryMenu } from '@features/track-media'
 
-// A row is a glance, not the list: past this the "see all" link takes over.
 const MAX_CARDS = 20
 
 export interface TrackerRowProps {
@@ -20,8 +19,6 @@ export interface TrackerRowProps {
 	entries: TrackerEntry[]
 }
 
-// One of the user's status lists as a row of posters, with the same card, list
-// state and menu as the list page itself.
 export function TrackerRow({ title, icon, status, entries }: TrackerRowProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()

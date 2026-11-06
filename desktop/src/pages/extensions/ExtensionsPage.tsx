@@ -37,9 +37,6 @@ export interface ExtensionsPageProps {
 	onTabChange: (tab: ExtensionsTab) => void
 }
 
-// The plugins the user installed, the ones their repositories offer, and the
-// programs the node runs, which Mediary installs itself: one tab each. The
-// dialogs belong to the page, since the header opens them from any plugin tab.
 export function ExtensionsPage({ tab, onTabChange }: ExtensionsPageProps) {
 	const { t } = useTranslation()
 	const installed = useUnit(extensionsQuery.$data)

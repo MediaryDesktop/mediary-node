@@ -11,8 +11,6 @@ export interface FieldProps {
 	error?: string
 	ai?: boolean
 	required?: boolean
-	// A <label> would forward clicks on its text to the first button inside, so
-	// fields that hold buttons rather than one input render as a plain div.
 	as?: 'label' | 'div'
 	children: ReactNode
 	className?: string

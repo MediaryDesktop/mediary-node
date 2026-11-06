@@ -12,8 +12,6 @@ export interface DownloadSummaryProps {
 	setup: TorrentSetup
 }
 
-// Above the all-titles list: how much is under way, how much is in, and whether the
-// client answers.
 export function DownloadSummary({ active, inLibrary, setup }: DownloadSummaryProps) {
 	const { t } = useTranslation()
 

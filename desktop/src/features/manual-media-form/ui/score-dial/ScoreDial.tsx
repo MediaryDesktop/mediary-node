@@ -20,8 +20,6 @@ const SIZE = 200
 const CENTER = SIZE / 2
 const RADIUS = 90
 const STROKE = 16
-// A knob, not a full ring: the dial sweeps 270° and leaves a 90° gap at the
-// bottom, the shape every physical volume or rating knob already uses.
 const START_ANGLE = 135
 const SWEEP = 270
 const GAP = 360 - SWEEP
@@ -47,9 +45,6 @@ function valueToAngle(value: number): number {
 	return START_ANGLE + (clamp(value, MIN, MAX) / MAX) * SWEEP
 }
 
-// The reverse of valueToAngle, for a pointer position rather than a value:
-// a position in the gap snaps to whichever end it is closer to, so dragging
-// past either tip of the knob does not wrap the value around.
 function angleToValue(angleDeg: number): number {
 	const shifted = (((angleDeg - START_ANGLE) % 360) + 360) % 360
 
@@ -60,9 +55,6 @@ function angleToValue(angleDeg: number): number {
 	return shifted - SWEEP < GAP / 2 ? MAX : MIN
 }
 
-// Mirrors scoreTone's own bands (entities/media), so a dial and a score badge
-// elsewhere in the app agree on what "good" looks like — blended smoothly
-// between them rather than snapping at each boundary.
 const COLOR_STOPS: [number, string][] = [
 	[0, '#DC2626'], // Critical — червоний
 	[40, '#F97316'], // Poor — помаранчевий
@@ -87,9 +79,6 @@ function scoreColor(value: number): string {
 	return COLOR_STOPS[0]![1]
 }
 
-// A drag dial for the one field that is naturally a 0–100 scale rather than a
-// count — turning it is faster and more tactile than typing two digits, and
-// its colour says at a glance what the number means.
 export function ScoreDial({ value, onChange, disabled, className }: ScoreDialProps) {
 	const { t } = useTranslation()
 	const ref = useRef<SVGSVGElement>(null)

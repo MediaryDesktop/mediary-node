@@ -52,7 +52,6 @@ export function ScanHistoryPage() {
 
 	const runs = history?.history.items ?? []
 
-	// Until one is picked the newest scan is the one worth reading.
 	const selected = picked ?? (runs[0] ? String(runs[0].id) : null)
 
 	useEffect(() => {

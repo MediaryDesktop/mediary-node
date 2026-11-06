@@ -11,13 +11,9 @@ export interface TagFieldProps {
 	placeholder?: string
 	disabled?: boolean
 	maxItems?: number
-	// What is typed but not committed yet, for a parent that filters a catalog
-	// beside the field by it — the field itself stays free text either way.
 	onDraftChange?: (draft: string) => void
 }
 
-// Genres, synonyms, studios and authors are free text — there is no closed
-// vocabulary to pick from, so each becomes a chip the moment it is typed.
 export function TagField({
 	value,
 	onChange,

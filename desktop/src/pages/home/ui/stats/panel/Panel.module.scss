@@ -10,7 +10,6 @@
 	border-radius: var(--radius-lg);
 	background: var(--surface);
 
-	// Same wash as .tile, in whichever accent this card was handed.
 	&::before {
 		position: absolute;
 		inset: 0;

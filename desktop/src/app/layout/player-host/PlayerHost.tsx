@@ -31,9 +31,6 @@ import { $stream, $streamError, $streamTarget, streamCancelled } from '@features
 import styles from './PlayerHost.module.scss'
 import { PreparingStream } from './PreparingStream'
 
-// The player lives at the root of the app and sits over the page behind it, so the
-// page stays visible while the player slides in. Minimised, it is a corner card that
-// stays put across route changes.
 export function PlayerHost() {
 	const { t } = useTranslation()
 
@@ -71,13 +68,10 @@ export function PlayerHost() {
 		streamCancelled
 	])
 
-	// The file whose direct play failed; the transcode takes over for that file only.
 	const [directFailedFor, setDirectFailedFor] = useState<number | null>(null)
 
-	// Set while the player slides away; it is only unmounted once that has finished.
 	const [leaving, setLeaving] = useState(false)
 
-	// The page behind a full player must not draw its scrollbar over the picture.
 	useEffect(() => {
 		if (fileId === null && !streamTarget) {
 			return
@@ -105,23 +99,17 @@ export function PlayerHost() {
 
 	const requestClose = () => setLeaving(true)
 
-	// mpv or FFmpeg is nowhere: the player covers the page, so it slides away to
-	// show the tab that installs them.
 	const openDependencies = () => {
 		requestClose()
 		void navigate({ to: '/extensions', search: { tab: 'dependencies' } })
 	}
 
-	// Closing covers both the built-in player, which may or may not be open, and a
-	// stream still being readied: whichever applies, the other call is a no-op.
 	const finish = () => {
 		setLeaving(false)
 		close()
 		cancelStream()
 	}
 
-	// A stream opens the player the moment it is asked for, so there is something to
-	// watch fill in rather than a wait with nothing to show for it, as Seanime does.
 	if (fileId === null) {
 		if (!streamTarget) {
 			return null
@@ -239,9 +227,6 @@ interface PanelProps {
 function Panel({ onClose, leaving, onLeft, children }: PanelProps) {
 	const { t } = useTranslation()
 
-	// The same slide-in and slide-out as the player's, so loading never shows a static
-	// screen before the player arrives. The player then carries on this one slide
-	// from wherever it has got to, rather than sliding up over it a second time.
 	const entrance = usePlayerEntrance()
 
 	const onLeftRef = useRef(onLeft)

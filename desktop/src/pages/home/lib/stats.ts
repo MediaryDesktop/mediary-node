@@ -15,7 +15,6 @@ export interface GenreCount {
 }
 
 export interface ScoreBucket {
-	// 1–10: a raw score of 0–100 read on the ten-point scale.
 	score: number
 	count: number
 }
@@ -25,11 +24,9 @@ export interface TrackerStats {
 	completed: number
 	completedThisMonth: number
 	episodes: number
-	// Titles the episodes were watched in.
 	watchedTitles: number
 	chapters: number
 	readTitles: number
-	// On the ten-point scale; null until something is scored.
 	meanScore: number | null
 	scored: number
 	scores: ScoreBucket[]
@@ -37,7 +34,6 @@ export interface TrackerStats {
 	byStatus: StatusCounts
 	byType: TypeBreakdown[]
 	genres: GenreCount[]
-	// Genre tags counted, for the share each genre takes.
 	genreTags: number
 }
 
@@ -49,14 +45,10 @@ export function emptyCounts(): StatusCounts {
 	return Object.fromEntries(TRACKER_STATUSES.map(status => [status, 0])) as StatusCounts
 }
 
-// A title can sit in two of the node's lists (a dorama is a series too); it is
-// one title all the same.
 export function uniqueEntries(entries: TrackerEntry[]): TrackerEntry[] {
 	return [...new Map(entries.map(entry => [entry.media_ref, entry])).values()]
 }
 
-// Everything is counted from the user's own lists, which the node keeps offline:
-// the numbers never wait for a source.
 export function trackerStats(entries: TrackerEntry[], now = new Date()): TrackerStats {
 	const unique = uniqueEntries(entries)
 
@@ -110,7 +102,6 @@ export function trackerStats(entries: TrackerEntry[], now = new Date()): Tracker
 			completedThisMonth++
 		}
 
-		// A plan says what the user might like; what they started says what they do.
 		if (status !== 'PLANNING') {
 			for (const genre of entry.media.genres ?? []) {
 				genres.set(genre, (genres.get(genre) ?? 0) + 1)
@@ -149,15 +140,11 @@ export type ActivityRange = '6m' | '1y' | 'all'
 
 export interface ActivityPoint {
 	year: number
-	// 1–12, or null for a whole year.
 	month: number | null
 	started: number
 	completed: number
 }
 
-// How many titles the user started and finished, month by month — or year by
-// year over all time, where months would be too many to read. Only dates the
-// tracker has count: a title without one simply is not on the chart.
 export function activity(entries: TrackerEntry[], range: ActivityRange, now = new Date()): ActivityPoint[] {
 	const unique = uniqueEntries(entries)
 

@@ -99,8 +99,6 @@ export interface MediaPreviewProps {
 	title: string
 	active: boolean
 	tracking?: MediaTracking | null
-	// Whatever the caller knows that the catalog doesn't — file counts, scan
-	// state — rendered in the same meta row as the score and the year.
 	extra?: ReactNode
 }
 
@@ -110,8 +108,6 @@ export function MediaPreview({ mediaRef, title, active, tracking, extra }: Media
 		mediaPreviewModel.previewRequested
 	])
 
-	// Only this card's own entry: every card on a page is mounted with a preview,
-	// and a fetch for one title should not re-render all of them.
 	const details = useStoreMap({
 		store: mediaPreviewModel.$previews,
 		keys: [mediaRef],
@@ -119,8 +115,6 @@ export function MediaPreview({ mediaRef, title, active, tracking, extra }: Media
 	})
 	const trailerId = details?.trailer?.site === 'youtube' ? details.trailer.id : null
 
-	// A tracked card shows only what the list knows, but the details are still
-	// fetched: by the time the card is clicked the title page has them to open with.
 	useEffect(() => {
 		if (active) {
 			requestPreview(mediaRef)
@@ -168,8 +162,6 @@ export function MediaPreview({ mediaRef, title, active, tracking, extra }: Media
 
 	const thumbnail = details?.trailer?.thumbnail ?? null
 	const backdrop = thumbnail ?? details?.banner_image ?? null
-	// Books never have a trailer or a banner — with nothing to fill the frame,
-	// keep the poster readable underneath instead of covering it in flat gray.
 	const bare = !backdrop && !trailerId
 
 	return (

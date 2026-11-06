@@ -24,8 +24,6 @@ function step(
 	onChange({ [field]: Math.max(0, (current ?? 0) + delta) })
 }
 
-// How long it runs and its counts — the kind already picked in the card
-// above decides which of these apply.
 export function BasicsTab({ draft, onChange, aiFilled, disabled }: BasicsTabProps) {
 	const { t } = useTranslation()
 

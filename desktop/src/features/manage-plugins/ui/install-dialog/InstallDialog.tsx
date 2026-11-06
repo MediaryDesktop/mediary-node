@@ -26,8 +26,6 @@ import { languageName } from '../../lib/languages'
 
 import styles from './InstallDialog.module.scss'
 
-// What the dialog is for: a plugin to install — from an address typed in, or
-// one picked in the catalog — or a newer version of one installed.
 export type InstallTarget = { kind: 'install'; url?: string } | { kind: 'update'; extension: Extension }
 
 export interface InstallDialogProps {
@@ -35,9 +33,6 @@ export interface InstallDialogProps {
 	onClose: () => void
 }
 
-// The last target stays on screen while the dialog closes, so the closing
-// animation shows what was there rather than an empty box. Every new target
-// starts the steps over.
 export function InstallDialog({ target, onClose }: InstallDialogProps) {
 	const [shown, setShown] = useState(target)
 	const [generation, setGeneration] = useState(0)
@@ -54,7 +49,6 @@ export function InstallDialog({ target, onClose }: InstallDialogProps) {
 	return <Steps key={generation} target={shown} open={target !== null} onClose={onClose} />
 }
 
-// The node's own explanation of a failed request, or the fallback.
 function failure(error: unknown, fallback: string): string {
 	return problemDetail((error as RequestFailure['error'] | undefined) ?? {}, fallback)
 }
@@ -90,9 +84,6 @@ function Steps({ target, open, onClose }: StepsProps) {
 			)
 	}
 
-	// An address from the catalog or an installed plugin is read at once; the
-	// dialog starts on "reading" for it. An answer after the dialog closed is
-	// dropped.
 	useEffect(() => {
 		if (!initialURL) {
 			return
@@ -263,21 +254,16 @@ function Steps({ target, open, onClose }: StepsProps) {
 
 interface ConsentProps {
 	preview: ExtensionPreview
-	// The hosts the installed version reaches, when this is an update: the ones
-	// not among them are marked new.
 	before: string[] | null
 	alreadyInstalled: boolean
 }
 
-// Everything the user agrees to, in the order it matters: who the plugin is,
-// where it goes, what it gets, what it asks for, and what it cannot do.
 function Consent({ preview: p, before, alreadyInstalled }: ConsentProps) {
 	const { t } = useTranslation()
 	const [broken, setBroken] = useState(false)
 
 	const hosts = p.network ?? []
 	const settings = p.config ?? []
-	// A manga plugin shows its sites' pages in the reader; say so before it installs.
 	const manga = p.type === 'manga-provider'
 
 	return (
@@ -425,8 +411,6 @@ function Fact({ icon, tone, title, children }: FactProps) {
 	)
 }
 
-// The manifest's address, short enough to fit beside the buttons; the whole of
-// it is in the tooltip and one click away on the clipboard.
 function ManifestAddress({ url }: { url: string }) {
 	const { t } = useTranslation()
 

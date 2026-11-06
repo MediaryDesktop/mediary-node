@@ -26,16 +26,11 @@ export interface MediaActionsProps {
 	mediaType: string
 	siteUrl: string
 	view: MediaView
-	// Absent where torrents make no sense: manga is read, not downloaded as video.
 	onViewChange?: (view: MediaView) => void
-	// Offers the stream view: a debrid service is set up to play without downloading.
 	streamable?: boolean
-	// How many released episodes the library lacks; null when unknown.
 	missingCount?: number | null
-	// Opens the torrent search; absent where there are no torrents.
 	onDownload?: () => void
 	onOpenDetails: () => void
-	// The user described this title themselves — edit and delete are theirs to do.
 	editable?: boolean
 	onEdit?: () => void
 	onDelete?: () => void

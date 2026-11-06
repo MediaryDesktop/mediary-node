@@ -13,12 +13,10 @@ export interface TocDrawerProps {
 	open: boolean
 	onOpenChange: (open: boolean) => void
 	toc: FoliateTocItem[]
-	// The chapter being read, by its label.
 	current: string | null
 	onOpen: (href: string) => void
 }
 
-// The contents beside the page, with how far into the chapters the reader is.
 export function TocDrawer({ open, onOpenChange, toc, current, onOpen }: TocDrawerProps) {
 	const { t } = useTranslation()
 	const tocIndex = useMemo(() => indexToc(toc, current), [toc, current])

@@ -40,15 +40,12 @@ export function MediaPage({ mediaRef }: MediaPageProps) {
 		window.scrollTo({ top: 0 })
 	}, [mediaRef])
 
-	// A reload of this page asks before the node is up, and that request fails.
 	useEffect(() => {
 		if (nodeReady) {
 			requestDetails(mediaRef)
 		}
 	}, [mediaRef, requestDetails, nodeReady])
 
-	// The card's hover preview has usually fetched the title already: open with
-	// that and let the request below only confirm it.
 	const preview = useStoreMap({
 		store: mediaPreviewModel.$previews,
 		keys: [mediaRef],

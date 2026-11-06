@@ -17,14 +17,10 @@ import type { OPDSCheckResult, OPDSServer } from '@entities/manga-source'
 import styles from './OPDSServerForm.module.scss'
 
 export interface OPDSServerFormProps {
-	// The server being changed, or null to add one.
 	server: OPDSServer | null
-	// Called after a successful save, and when the user cancels: either way the
-	// form's local state should go back to matching what is saved.
 	onDone: () => void
 }
 
-// Mounted afresh for every opening, so its fields start from the server.
 export function OPDSServerForm({ server, onDone }: OPDSServerFormProps) {
 	const { t } = useTranslation()
 
@@ -46,10 +42,8 @@ export function OPDSServerForm({ server, onDone }: OPDSServerFormProps) {
 	const submitting = creating || updating
 	const canSubmit = name.trim() !== '' && url.trim() !== '' && !submitting
 
-	// An untouched password field on an existing server keeps the stored password.
 	const passwordValue = server && password === '' ? undefined : password
 
-	// Only one form is mounted at a time, so whatever these mutations report is this form's.
 	const failed = ({ error }: RequestFailure) =>
 		toast.error(problemDetail(error, t('mangaSources.saveFailed')), { id: 'opds-save-failed' })
 

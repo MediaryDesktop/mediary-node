@@ -10,8 +10,6 @@ import {
 	removeExtensionMutation
 } from '@entities/extension'
 
-// What the plugin list's own buttons do — turn on or off, remove, check for
-// updates — says so in a toast when it fails.
 export function usePluginFailures() {
 	const { t } = useTranslation()
 

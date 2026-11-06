@@ -8,11 +8,9 @@ import styles from './SearchFilters.module.scss'
 export interface SearchFiltersProps {
 	kind: ReleaseKind
 	onKind: (kind: ReleaseKind) => void
-	// The "only missing" switch shows only when something is missing.
 	canFilterMissing: boolean
 	onlyMissing: boolean
 	onOnlyMissing: (on: boolean) => void
-	// How many releases pass, or null before the first answer.
 	count: number | null
 }
 

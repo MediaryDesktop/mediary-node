@@ -64,8 +64,6 @@ export const checkTorrentClientMutation = createMutation({
 	name: 'checkTorrentClient'
 })
 
-// The node announces every poll of the client while something downloads, and the
-// list asks again on each; only the answer to the latest may stand.
 concurrency(torrentDownloadsQuery, { strategy: 'TAKE_LATEST' })
 
 sample({
@@ -81,7 +79,6 @@ sample({
 	target: torrentDownloadsQuery.start
 })
 
-// The download whose files are on screen, or null.
 export const torrentFilesOpened = createEvent<number>()
 export const torrentFilesClosed = createEvent()
 
@@ -92,8 +89,6 @@ const $filesOf = createStore<number | null>(null)
 sample({ clock: torrentFilesOpened, target: [torrentFilesQuery.reset, torrentFilesQuery.start] })
 sample({ clock: torrentFilesClosed, target: torrentFilesQuery.reset })
 
-// A magnet's file list arrives with its metadata; until then the list is empty, so
-// it is asked for again on every word from the node.
 concurrency(torrentFilesQuery, { strategy: 'TAKE_LATEST' })
 
 sample({
@@ -106,8 +101,6 @@ sample({
 
 keepFresh(torrentSettingsQuery, { triggers: [putTorrentSettingsMutation.finished.success] })
 
-// The debrid service is set up apart from the client: it plays torrents and
-// marks cached releases whatever the client is.
 export const torrentDebridQuery = createQuery({ effect: fetchTorrentDebridFx, name: 'torrentDebrid' })
 
 export const putTorrentDebridMutation = createMutation({
@@ -120,7 +113,6 @@ export const checkTorrentDebridMutation = createMutation({
 	name: 'checkTorrentDebrid'
 })
 
-// Whether it is in use depends on the client, so either change asks again.
 keepFresh(torrentDebridQuery, {
 	triggers: [putTorrentDebridMutation.finished.success, putTorrentSettingsMutation.finished.success]
 })
@@ -152,14 +144,12 @@ keepFresh(torrentSourcesQuery, {
 		createTorrentSourceMutation.finished.success,
 		updateTorrentSourceMutation.finished.success,
 		deleteTorrentSourceMutation.finished.success,
-		// A plugin installed, turned on or off counts toward being able to search.
 		nodeTopic('extension')
 	]
 })
 
 export const torrentSearchQuery = createQuery({ effect: searchTorrentsFx, name: 'torrentSearch' })
 
-// A new search makes the one still running moot.
 concurrency(torrentSearchQuery, { strategy: 'TAKE_LATEST' })
 
 export const torrentProfileQuery = createQuery({ effect: fetchTorrentProfileFx, name: 'torrentProfile' })
@@ -173,7 +163,6 @@ keepFresh(torrentProfileQuery, { triggers: [putTorrentProfileMutation.finished.s
 
 export const torrentRulesQuery = createQuery({ effect: fetchTorrentRulesFx, name: 'torrentRules' })
 
-// One title's rule, for its page.
 export const torrentRuleQuery = createQuery({ effect: fetchTorrentRuleFx, name: 'torrentRule' })
 
 export const putTorrentRuleMutation = createMutation({ effect: putTorrentRuleFx, name: 'putTorrentRule' })

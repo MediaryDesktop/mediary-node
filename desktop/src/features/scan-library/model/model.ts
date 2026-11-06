@@ -11,7 +11,6 @@ export const scanLibraryModel = atom(() => {
 	const requested = createEvent()
 	const closed = createEvent()
 
-	// 0 walks every folder, which is what the modal means until one is picked.
 	const started = createEvent<number>()
 
 	const $open = createStore(false)
@@ -20,9 +19,6 @@ export const scanLibraryModel = atom(() => {
 
 	sample({ clock: requested, target: libraryScanQuery.start })
 
-	// The modal only starts the scan and gets out of the way: progress is drawn
-	// over whatever page the user moves on to, not inside a dialog they would
-	// have to keep open to watch.
 	sample({ clock: started, target: startLibraryScanMutation.start })
 
 	startLibraryScanMutation.finished.failure.watch(({ error }) => {

@@ -51,8 +51,6 @@
 	cursor: help;
 }
 
-// Rendered through Tooltip's portal, straight under <body>, so it is a rule of
-// its own rather than nested under the card.
 .officialTip {
 	display: flex;
 	flex-direction: column;

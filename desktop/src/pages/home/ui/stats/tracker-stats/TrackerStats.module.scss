@@ -4,7 +4,6 @@
 	gap: 1rem;
 
 	.tiles {
-		// Five tiles across.
 		display: grid;
 		grid-template-columns: repeat(5, minmax(0, 1fr));
 		gap: 1rem;
@@ -26,8 +25,6 @@
 			border-radius: var(--radius-lg);
 			background: var(--surface);
 
-			// A soft wash of the tile's own accent, bleeding from the icon's corner —
-			// the icon badge and this glow read as the same light source.
 			&::before {
 				position: absolute;
 				inset: 0;
@@ -127,7 +124,6 @@
 		grid-template-columns: repeat(12, minmax(0, 1fr));
 		gap: 1rem;
 
-		// Activity and the type table share the top row evenly.
 		.wide {
 			grid-column: span 6;
 		}
@@ -136,8 +132,6 @@
 			grid-column: span 6;
 		}
 
-		// Genres, Your top 5 and Your scores share the row below but not its width
-		// evenly — Your top 5 keeps the wider slot the type table used to sit in.
 		.genres {
 			grid-column: span 3;
 		}

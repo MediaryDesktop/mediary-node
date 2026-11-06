@@ -39,8 +39,6 @@ export function LibraryCollection({ entries }: LibraryCollectionProps) {
 					<li key={entry.media_ref}>
 						<MediaCard
 							media={{
-								// The library knows a title by one name; the card is built for the
-								// catalog's several, so the one there is stands in for all of them.
 								title: {
 									user_preferred: entry.title?.title ?? entry.media_ref,
 									english: null,
@@ -50,9 +48,6 @@ export function LibraryCollection({ entries }: LibraryCollectionProps) {
 								cover_image: entry.title?.cover_image ?? null,
 								cover_color: entry.title?.cover_color ?? null
 							}}
-							// The same hover preview a list or search card shows — from the
-							// tracked entry when the title is on a list, from the catalog
-							// otherwise — so the library shelf reads like the rest of the app.
 							previewRef={entry.media_ref}
 							tracking={trackedEntry ? entryTracking(trackedEntry, t) : null}
 							menu={
@@ -73,9 +68,6 @@ export function LibraryCollection({ entries }: LibraryCollectionProps) {
 									<Icon name='common/play' size={13} />
 									{entry.title?.episodes
 										? t('library.summary.filesOf', {
-												// A missing file isn't one the library has, so it comes
-												// straight off the count the card shows — one number to
-												// read instead of a count and a caveat beside it.
 												count: entry.file_count - entry.missing_count,
 												total: entry.title.episodes
 											})

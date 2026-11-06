@@ -22,24 +22,16 @@ import styles from './TorrentClientForm.module.scss'
 
 export interface TorrentClientFormProps {
 	settings: TorrentSettings
-	// Called after a successful save, and when the user cancels: either way the
-	// form's local state should go back to matching what is saved.
 	onReset: () => void
 }
 
 type CheckState = { ok: true; version: string } | { ok: false; problem: string } | null
 
-// The node's "no client" is an empty string, which a selection cannot hold.
 const NONE = 'none'
 type ClientChoice = Exclude<TorrentClientKind, ''> | typeof NONE
 
-// The node's "its own folder" is root 0, which a selection cannot hold either.
 const DEFAULT_FOLDER = 'default'
 
-// Remounted (by key) after every save or cancel, so its fields start fresh
-// from the saved settings. qBittorrent's address, sign-in and path mapping
-// only show once it is the pick; downloading through the debrid service uses
-// the service set up on its own, in Settings → Debrid service.
 export function TorrentClientForm({ settings, onReset }: TorrentClientFormProps) {
 	const { t } = useTranslation()
 
@@ -67,21 +59,15 @@ export function TorrentClientForm({ settings, onReset }: TorrentClientFormProps)
 	const debrid = readyDebrid(debridSettings)
 	const client: TorrentClientKind = choice === NONE ? '' : choice
 
-	// Once the node's own folder has joined the library it is a root like any
-	// other; it is still offered once, as the default.
 	const otherRoots = (roots?.roots ?? []).filter(root => root.path !== settings.default_folder)
 	const folderValue = otherRoots.some(root => root.id === rootId) ? String(rootId) : DEFAULT_FOLDER
 
-	// An untouched password field keeps the saved password.
 	const passwordValue = settings.has_password && password === '' ? undefined : password
 
-	// The node refuses half a mapping, qBittorrent without an address or the
-	// debrid client without a service; saying so before it does saves a round trip.
 	const mappingHalf = qbittorrent && (mapClient.trim() === '') !== (mapNode.trim() === '')
 	const missingUrl = qbittorrent && url.trim() === ''
 	const missingDebrid = throughDebrid && !debrid
 
-	// Only one form is mounted at a time, so whatever these mutations report is this form's.
 	useUnitWatch(putTorrentSettingsMutation.finished.success, () => onReset())
 	useUnitWatch(putTorrentSettingsMutation.finished.failure, ({ error }) =>
 		toast.error(problemDetail(error, t('torrents.settings.saveFailed')), {
@@ -94,7 +80,6 @@ export function TorrentClientForm({ settings, onReset }: TorrentClientFormProps)
 	useUnitWatch(checkTorrentClientMutation.finished.failure, ({ error }) =>
 		setResult({ ok: false, problem: problemDetail(error, t('torrents.client.notConfigured')) })
 	)
-	// The newly added folder is exactly what the user was about to pick anyway.
 	useUnitWatch(addLibraryRootMutation.finished.success, ({ result }) => setRootId(result.root.id))
 	useUnitWatch(addLibraryRootMutation.finished.failure, ({ error }) =>
 		toast.error(

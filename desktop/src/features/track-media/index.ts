@@ -1,4 +1,3 @@
-// Follows every tracker change with a toast, whichever drawer made it.
 import './model/sync-toast'
 
 export { EntryMenu } from './ui/entry-menu/EntryMenu'

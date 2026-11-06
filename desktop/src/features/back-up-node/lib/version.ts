@@ -1,11 +1,8 @@
-// Compares "1.4.0"-style versions, a leading "v" and any "-dev"/"+build" tail
-// ignored. Only what the cloud's min_supported needs: a build is older or not.
 export function isOlderThan(version: string, minimum: string): boolean {
 	const a = parts(version)
 	const b = parts(minimum)
 
 	if (!a || !b) {
-		// An unreadable version is not a reason to switch backups off.
 		return false
 	}
 

@@ -14,7 +14,6 @@ export interface PluginSettingsDrawerProps {
 	onClose: () => void
 }
 
-// Mounted afresh for every opening, so the fields start from what is saved.
 export function PluginSettingsDrawer({ extension, onClose }: PluginSettingsDrawerProps) {
 	const { t } = useTranslation()
 
@@ -37,7 +36,6 @@ function SettingsForm({ extension, onDone }: { extension: Extension; onDone: () 
 
 	const fields = extension.config ?? []
 
-	// Only what the user touched is sent: a secret left alone stays as saved.
 	const [changes, setChanges] = useState<Record<string, string>>({})
 	const change = (name: string, value: string) => setChanges(current => ({ ...current, [name]: value }))
 
@@ -73,13 +71,11 @@ function SettingsForm({ extension, onDone }: { extension: Extension; onDone: () 
 
 interface FieldProps {
 	field: ExtensionSetting
-	// The value typed, or undefined while the field is as saved.
 	value: string | undefined
 	onChange: (value: string) => void
 	disabled: boolean
 }
 
-// The select's own value for "default": it reads an empty value as nothing chosen.
 const DEFAULT_OPTION = '\u0000default'
 
 function Field({ field, value, onChange, disabled }: FieldProps) {

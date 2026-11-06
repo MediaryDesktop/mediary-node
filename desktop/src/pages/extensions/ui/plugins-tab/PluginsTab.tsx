@@ -43,8 +43,6 @@ export interface PluginsTabProps {
 const TYPES = ['all', 'torrent-provider', 'manga-provider'] as const
 type TypeFilter = (typeof TYPES)[number]
 
-// Plugins of one type are one section, in this order, as the catalog of
-// Seanime keeps anime torrents apart from manga.
 const SECTION_ICONS: Record<string, ReactNode> = {
 	'torrent-provider': <LuMagnet size={20} />,
 	'manga-provider': <LuBookOpen size={20} />
@@ -65,8 +63,6 @@ function byType<T extends { type: string }>(items: T[]): [string, T[]][] {
 	})
 }
 
-// The plugins the user installed, or the ones their repositories offer: two
-// tabs of the page, which owns the dialogs they open.
 export function PluginsTab({
 	view,
 	onBrowseCatalog,

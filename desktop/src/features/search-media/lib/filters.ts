@@ -31,8 +31,6 @@ export function activeGroups(filters: SearchFilters): number {
 	].filter(Boolean).length
 }
 
-// Which genre list a type draws from: AniList shares one between anime and manga,
-// TMDB keeps one for movies and another for shows, books have their own.
 function genreVocabulary(type: MediaSearchType): string {
 	if (isAniListType(type)) {
 		return 'anilist'
@@ -52,7 +50,6 @@ export function applyPatch(filters: SearchFilters, patch: Partial<SearchFilters>
 		return next
 	}
 
-	// A format belongs to one media type, so switching type cannot keep them.
 	next.formats = []
 
 	if (genreVocabulary(patch.type) !== genreVocabulary(filters.type)) {

@@ -67,7 +67,6 @@ keepFresh(opdsServersQuery, { triggers: serversChanged })
 
 keepFresh(mangaSourcesQuery, { triggers: serversChanged })
 
-// Removing a server removes the links to it, and with them its chapters.
 keepFresh(mangaLinksQuery, { triggers: [...serversChanged, ...linksChanged] })
 
 keepFresh(mangaChaptersQuery, { triggers: [...serversChanged, ...linksChanged] })
@@ -104,9 +103,6 @@ export const putMangaDownloadSettingsMutation = createMutation({
 	name: 'putMangaDownloadSettings'
 })
 
-// The node reports every change in the queue, and the list asks again on each one
-// rather than polling. Several arrive while a chapter downloads; only the answer to
-// the last of them may stand, or the list stops on a page count that is long gone.
 concurrency(mangaDownloadsQuery, { strategy: 'TAKE_LATEST' })
 
 sample({

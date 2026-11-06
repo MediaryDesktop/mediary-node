@@ -13,7 +13,6 @@ import { TorznabSourceForm } from './source-form/TorznabSourceForm'
 import { SourceRow } from './source-row/SourceRow'
 import styles from './TorznabSourcesSettings.module.scss'
 
-// The user's Jackett or Prowlarr endpoints the node searches for releases.
 export function TorznabSourcesSettings() {
 	const { t } = useTranslation()
 
@@ -25,9 +24,6 @@ export function TorznabSourcesSettings() {
 		$nodeReady
 	])
 
-	// Shut by default. The form stays mounted through the closing animation
-	// (CollapsibleSection only hides it); addKey remounts it with fresh,
-	// empty fields each time it opens, so a cancelled draft never lingers.
 	const [adding, setAdding] = useState(false)
 	const [addKey, setAddKey] = useState(0)
 

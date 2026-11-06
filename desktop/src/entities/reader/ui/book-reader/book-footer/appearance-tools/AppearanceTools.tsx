@@ -15,11 +15,8 @@ export interface AppearanceToolsProps {
 	onToggleContents: () => void
 }
 
-// Radix closes the tooltip on its own pointerdown/click; marking both prevented
-// keeps it open so the percent stays visible after clicking.
 const keepTooltip = (event: PointerEvent | MouseEvent) => event.preventDefault()
 
-// Contents, text size and the page theme.
 export function AppearanceTools({
 	appearance,
 	onChange,

@@ -18,27 +18,20 @@ export interface PreparingStreamProps {
 	onStop: () => void
 }
 
-// What the player shows in place of the picture while a stream is readied, laid
-// out as Seanime's torrent streaming does: a pill over the player with how far it
-// is, which opens into a card with the releases auto-select lined up, and the
-// status under the spinner. A failure stays on screen until it is closed.
 export function PreparingStream({ target, stream, error, onStop }: PreparingStreamProps) {
 	const { t } = useTranslation()
 	const [expanded, setExpanded] = useState(false)
 
-	// "Title · Episode 7" reads as a title over its episode, as the player heads it.
 	const cut = target.label.lastIndexOf(' · ')
 	const title = cut > 0 ? target.label.slice(0, cut) : target.label
 	const episode = cut > 0 ? target.label.slice(cut + 3) : null
 
 	const embedded = stream?.via === 'embedded'
-	// The numbers are there once the torrent is being fetched; before, the status says what is going on.
 	const fetching = !error && stream?.state === 'preparing'
 	const percent = fetching ? (stream.progress * 100).toFixed(1) : '0.0'
 	const speed = `${formatBytes(fetching ? stream.speed : 0)}/s`
 	const upload = `${formatBytes(fetching ? (stream.upload ?? 0) : 0)}/s`
 	const peers = embedded ? (stream?.peers ?? 0) : (stream?.seeders ?? 0)
-	// The node names its own client in English; the app names it in the user's tongue.
 	const service = embedded ? t('torrents.stream.builtIn') : (stream?.service ?? '')
 
 	const status = error
@@ -84,9 +77,6 @@ export function PreparingStream({ target, stream, error, onStop }: PreparingStre
 		</button>
 	)
 
-	// One surface that opens from the pill into the card and back, as Seanime's does:
-	// its width and corners ease between the two, the bar's line gives way to the
-	// title, and the rest unfolds below.
 	return (
 		<div className={styles.view}>
 			<section className={clsx(styles.box, expanded && styles.open)} aria-label={target.label}>

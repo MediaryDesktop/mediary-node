@@ -1,5 +1,3 @@
-// The part of a name the search matched, marked, so a long list of files shows at
-// a glance why each one is still on it.
 export function Highlighted({ text, search }: { text: string; search: string }) {
 	const needle = search.trim().toLowerCase()
 	const at = needle === '' ? -1 : text.toLowerCase().indexOf(needle)

@@ -20,8 +20,6 @@ export interface RepositoriesDrawerProps {
 	onClose: () => void
 }
 
-// The lists of plugins the user reads the catalog from. Mediary starts with
-// none and vouches for none.
 export function RepositoriesDrawer({ open, onClose }: RepositoriesDrawerProps) {
 	const { t } = useTranslation()
 

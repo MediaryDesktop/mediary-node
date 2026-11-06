@@ -1,7 +1,5 @@
 import { nodeMediaUrl } from '@infra/node'
 
-// The node names a book's format by type; the renderer's own sniffing wants a
-// file name as well, FB2 above all.
 const EXTENSIONS: Record<string, string> = {
 	'application/epub+zip': 'epub',
 	'application/x-fictionbook+xml': 'fb2',
@@ -21,7 +19,6 @@ export function isPdf(contentType: string): boolean {
 
 const PDF_LOCATOR = /^page:(\d+)$/
 
-// A PDF's place is its page, counted from 0.
 export function pdfLocator(page: number): string {
 	return `page:${page}`
 }
@@ -32,8 +29,6 @@ export function pdfPage(locator: string | null | undefined): number | null {
 	return match ? Number(match[1]) : null
 }
 
-// The first page is the start and the last one the end, so opening a book does
-// not count as reading its first page, and reaching the last finishes it.
 export function pdfFraction(page: number, total: number): number {
 	if (total <= 1) {
 		return 1

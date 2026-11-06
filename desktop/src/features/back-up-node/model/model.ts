@@ -38,8 +38,6 @@ export const deleteBackupMutation = createMutation({ effect: deleteBackupFx, nam
 
 export const revokeDeviceMutation = createMutation({ effect: revokeDeviceFx, name: 'revokeDevice' })
 
-// The node announces every pairing, upload and restore on its sync topic,
-// including the automatic ones nobody clicked for.
 const syncChanged = nodeTopic('sync')
 
 keepFresh(syncStatusQuery, { triggers: [syncChanged] })
@@ -52,10 +50,6 @@ keepFresh(devicesQuery, {
 	triggers: [pairMutation.finished.success, revokeDeviceMutation.finished.success]
 })
 
-// Signing in turns backups on for this computer, so a new one picks the user's
-// lists up by itself: the node restores the newest snapshot when it holds
-// nothing yet. Only an explicit sign-in does this — a session restored at start
-// keeps whatever the user last chose, "off" included.
 const linkedFx = createEffect(async () => (await fetchSyncStatusFx()).linked)
 
 sample({
@@ -74,8 +68,6 @@ const $appVersion = createStore<string | null>(null).on(fetchAppVersionFx.doneDa
 
 sample({ clock: clientGateMounted, target: [cloudHealthQuery.start, fetchAppVersionFx] })
 
-// Only backups depend on the cloud, so only backups stop for a build the cloud
-// no longer serves; the player, the library and the tracker never ask it.
 export const $updateRequired = combine(cloudHealthQuery.$data, $appVersion, (health, version) => {
 	const minimum = health?.client.min_supported
 

@@ -19,7 +19,6 @@ export {
 	updateOPDSServerMutation
 } from './model/model'
 
-// The effects behind downloads, for models that are tested with their own answers.
 export { enqueueMangaDownloadsFx, fetchMangaDownloadSettingsFx, putMangaDownloadSettingsFx } from './api/api'
 
 export type {

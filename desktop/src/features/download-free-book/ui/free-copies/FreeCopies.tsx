@@ -29,8 +29,6 @@ export interface FreeCopiesProps {
 	mediaRef: string
 }
 
-// Free copies of this book in the OPDS servers the user added. Not shown at
-// all while none is set up, so a book page does not advertise an empty search.
 export function FreeCopies({ mediaRef }: FreeCopiesProps) {
 	const { t } = useTranslation()
 
@@ -64,8 +62,6 @@ export function FreeCopies({ mediaRef }: FreeCopiesProps) {
 		if (nodeReady) {
 			loadSources()
 			loadDownloads()
-			// So a click already knows whether a folder for books is chosen, and
-			// asks for one instead of reaching the node without one.
 			loadDownloadSettings()
 		}
 	}, [loadSources, loadDownloads, loadDownloadSettings, nodeReady])
@@ -90,7 +86,6 @@ export function FreeCopies({ mediaRef }: FreeCopiesProps) {
 		return null
 	}
 
-	// Shared with the other book pages, so it may still be another book's answer.
 	const current = editions?.mediaRef === mediaRef ? editions : null
 	const found = current?.editions ?? []
 	const failures = (current?.sources ?? []).filter(source => source.error)
@@ -181,7 +176,6 @@ interface FormatActionProps {
 	edition: BookEdition
 	format: BookFormat
 	mediaRef: string
-	// This copy in this format in the queue, if it was asked for before.
 	download: BookDownload | undefined
 }
 

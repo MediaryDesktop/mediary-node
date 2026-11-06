@@ -5,9 +5,6 @@ import { createTrackerListMutation } from '@entities/tracker'
 import { manageListsModel } from '@features/manage-lists'
 import { manageEntryModel } from '@features/track-media'
 
-// Two features that do not know each other: putting a title on a list can ask
-// for a new list, and the list made there comes back ticked. Joining them is the
-// app's job.
 sample({
 	clock: manageEntryModel.createListRequested,
 	source: manageEntryModel.$target,

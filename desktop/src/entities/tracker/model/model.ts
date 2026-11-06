@@ -30,7 +30,6 @@ export const deleteTrackerEntryMutation = createMutation({
 function withEntry(collection: TrackerCollection, entry: TrackerEntry): TrackerCollection {
 	const entries = collection.entries ?? []
 
-	// A title added from search or the library is not in the collection yet.
 	if (!entries.some(current => current.media_ref === entry.media_ref)) {
 		return { ...collection, entries: [...entries, entry] }
 	}
@@ -158,13 +157,10 @@ export function isTrackerMediaType(value: string): value is TrackerMediaType {
 	return (TRACKER_MEDIA_TYPES as readonly string[]).includes(value)
 }
 
-// Movies, shows and books are the node's own list: no AniList account, works offline.
 export function isLocalTrackerType(mediaType: TrackerMediaType): boolean {
 	return mediaType !== 'anime' && mediaType !== 'manga'
 }
 
-// Whether a title of this type can go on a list right now: anime and manga need
-// the AniList account, the node's own types do not.
 export function canTrack(mediaType: string, aniListConnected: boolean): mediaType is TrackerMediaType {
 	return isTrackerMediaType(mediaType) && (aniListConnected || isLocalTrackerType(mediaType))
 }

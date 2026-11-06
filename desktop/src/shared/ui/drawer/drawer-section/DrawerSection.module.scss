@@ -11,8 +11,6 @@
 		padding-bottom: 0.5rem;
 	}
 
-	// For a section that continues the one above it instead of starting a new
-	// group, e.g. a connection check right under the control it tests.
 	&.noDivider {
 		padding-top: 0.375rem;
 		border-top: none;
@@ -62,8 +60,6 @@
 	.body {
 		min-width: 0;
 
-		// A title alone needs only a little air before its control; a title with
-		// a hint below it needs more, so the control doesn't crowd the hint text.
 		&.spaced {
 			padding-top: 0.375rem;
 		}

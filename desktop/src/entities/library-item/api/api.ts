@@ -26,7 +26,6 @@ export const fetchLibraryRootsFx = createNodeRequestFx<void, NodeSchemas['RootsO
 	url: '/v1/library/roots'
 }))
 
-// What a folder's videos are: anime goes to AniList, movies and shows to TMDB.
 export type LibraryContent = LibraryRoot['content']
 
 export interface AddLibraryRootParams {
@@ -64,19 +63,14 @@ export const deleteLibraryRootFx = createNodeRequestFx<number, void>(id => ({
 export const fetchLibraryTreeFx = createNodeRequestFx<void, NodeSchemas['FilesOutputBody']>(() => ({
 	url: '/v1/library/files/tree',
 
-	// The whole library at once, which on a big one is a lot of rows to build.
 	timeout: 20_000
 }))
 
-// One title's files. 500 is the node's page ceiling and far above any real
-// season count, so a title page never has to page.
 export interface TitleFilesParams {
 	mediaRef: string
 	kind: 'video' | 'manga' | 'book'
 }
 
-// One title's files of one kind. 500 is the node's page ceiling and far above any
-// real season or volume count, so a title page never has to page.
 export const fetchTitleFilesFx = createNodeRequestFx<TitleFilesParams, NodeSchemas['FilesOutputBody']>(
 	({ mediaRef, kind }) => ({
 		url: '/v1/library/files',
@@ -94,7 +88,6 @@ export const fetchLibraryCollectionFx = createNodeRequestFx<void, NodeSchemas['C
 	})
 )
 
-// 0 scans every root, which is what the page's button means.
 export const startLibraryScanFx = createNodeRequestFx<number | void, NodeSchemas['ScanOutputBody']>(
 	rootId => ({
 		url: '/v1/library/scan',
@@ -146,7 +139,6 @@ export const fetchLibraryCandidatesFx = createNodeRequestFx<number, NodeSchemas[
 	fileId => ({
 		url: `/v1/library/files/${fileId}/candidates`,
 
-		// The node may have to ask AniList before it can answer.
 		timeout: 20_000
 	})
 )

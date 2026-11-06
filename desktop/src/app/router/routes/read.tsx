@@ -6,7 +6,6 @@ import { ReadPage } from '@pages/read'
 
 import { rootRoute } from './root'
 
-// Outside the framed layout, like the player: a chapter owns the whole window.
 export const readRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: '/read/$ref',
@@ -19,8 +18,6 @@ export const readRoute = createRoute({
 			<ReadPage
 				key={chapterRef}
 				chapterRef={chapterRef}
-				// Replaces, not pushes: turning ten pages and leaving should take one
-				// "back", not ten — to wherever the reader was opened from.
 				onOpenChapter={next =>
 					void router.navigate({ to: '/read/$ref', params: { ref: next }, replace: true })
 				}

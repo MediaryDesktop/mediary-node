@@ -14,7 +14,6 @@ export interface SearchCriteria {
 export interface SearchBarProps {
 	criteria: SearchCriteria
 	onChange: (criteria: SearchCriteria) => void
-	// A show's releases are named by season, and its episodes count within one.
 	seasonal: boolean
 	pending: boolean
 	disabled: boolean
@@ -26,8 +25,6 @@ export function SearchBar({ criteria, onChange, seasonal, pending, disabled, onS
 
 	const set = (field: keyof SearchCriteria) => (value: string) => onChange({ ...criteria, [field]: value })
 
-	// The sheet is itself a form whose submit downloads; Enter in a search field
-	// searches instead.
 	const searchOnEnter = (event: KeyboardEvent<HTMLInputElement>) => {
 		if (event.key === 'Enter') {
 			event.preventDefault()

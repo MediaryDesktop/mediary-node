@@ -29,7 +29,6 @@ export const fetchExtensionsFx = createNodeRequestFx<void, NodeSchemas['Extensio
 	url: '/v1/extensions'
 }))
 
-// Reads a manifest for the user to agree to; nothing is installed.
 export const previewExtensionFx = createNodeRequestFx<string, ExtensionPreview>(url => ({
 	url: '/v1/extensions/preview',
 	method: 'POST',

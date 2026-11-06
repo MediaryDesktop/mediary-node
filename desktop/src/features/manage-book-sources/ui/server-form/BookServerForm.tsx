@@ -16,21 +16,13 @@ import type { BookOPDSCheckResult, BookOPDSServer } from '@entities/book-source'
 
 import styles from './BookServerForm.module.scss'
 
-// Standard Ebooks opens its OPDS feed to members of its Patrons Circle, who sign
-// in with their e-mail and no password.
 const STANDARD_EBOOKS_OPDS = 'https://standardebooks.org/feeds/opds'
 
 export interface BookServerFormProps {
-	// The server being changed, or null to add one.
 	server: BookOPDSServer | null
-	// Called after a successful save, and when the user cancels: either way the
-	// form's local state should go back to matching what is saved.
 	onDone: () => void
 }
 
-// The same form as for manga servers, with Standard Ebooks spelt out: its
-// patrons sign in by e-mail alone. Mounted afresh for every opening, so its
-// fields start from the server.
 export function BookServerForm({ server, onDone }: BookServerFormProps) {
 	const { t } = useTranslation()
 
@@ -52,10 +44,8 @@ export function BookServerForm({ server, onDone }: BookServerFormProps) {
 	const submitting = creating || updating
 	const canSubmit = name.trim() !== '' && url.trim() !== '' && !submitting
 
-	// An untouched password field on an existing server keeps the stored password.
 	const passwordValue = server && password === '' ? undefined : password
 
-	// Only one form is mounted at a time, so whatever these mutations report is this form's.
 	const failed = ({ error }: RequestFailure) =>
 		toast.error(problemDetail(error, t('bookSources.servers.saveFailed')), {
 			id: 'book-opds-save-failed'
