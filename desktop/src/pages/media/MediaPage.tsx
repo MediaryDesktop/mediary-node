@@ -58,9 +58,7 @@ export function MediaPage({ mediaRef }: MediaPageProps) {
 
 	return (
 		<PageTransition className={styles.root}>
-			{/* Floating over the hero rather than above it: anything in flow here pushes
-			    the banner down and uncovers the page behind its negative top inset. */}
-			<div className={styles.topBar}>
+			<div className={styles.floatingBar}>
 				<Button
 					variant='ghost'
 					size='small'

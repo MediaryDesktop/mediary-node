@@ -75,7 +75,6 @@ export function UnmatchedFilesDrawer() {
 						</div>
 					)}
 
-					{/* Keyed by folder, so a new page starts from its own defaults. */}
 					<GroupPage key={current.key} group={current} />
 				</div>
 			)}

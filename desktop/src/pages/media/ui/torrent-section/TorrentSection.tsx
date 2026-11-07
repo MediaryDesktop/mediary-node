@@ -4,7 +4,7 @@ import { useCallback, useState } from 'react'
 import { useTranslation } from '@shared/i18n'
 import { Button, Icon } from '@shared/ui'
 
-import { AutoDownloadPanel } from '@features/auto-download-torrents'
+import { AutoDownloadPanel, supportsAutoDownload } from '@features/auto-download-torrents'
 import { AddTorrentDrawer, TorrentDownloadList } from '@features/download-torrent'
 import { searchOpened } from '@features/search-torrents'
 
@@ -54,9 +54,7 @@ export function TorrentSection({ mediaRef, title, poster }: TorrentSectionProps)
 				</div>
 			</div>
 
-			{/* Rules count one run of episodes, as anime numbers them; a show
-			    numbered by season is not supported by the node yet. */}
-			{!mediaRef.startsWith('tmdb:tv:') && <AutoDownloadPanel mediaRef={mediaRef} title={title} />}
+			{supportsAutoDownload(mediaRef) && <AutoDownloadPanel mediaRef={mediaRef} title={title} />}
 
 			<TorrentDownloadList mediaRef={mediaRef} title={title} poster={poster} />
 

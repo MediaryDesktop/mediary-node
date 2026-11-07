@@ -5,6 +5,9 @@ import { createTrackerListMutation } from '@entities/tracker'
 import { manageListsModel } from '@features/manage-lists'
 import { manageEntryModel } from '@features/track-media'
 
+// The list drawer opens over the entry drawer it was asked from, so AppLayout
+// renders <ListDrawer /> after <ManageEntryDrawer />: of two open drawers, the
+// later one is on top.
 sample({
 	clock: manageEntryModel.createListRequested,
 	source: manageEntryModel.$target,

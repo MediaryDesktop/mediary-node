@@ -3,6 +3,7 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, relative, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import ts from 'typescript'
 
 const SRC = fileURLToPath(new URL('../src', import.meta.url))
 const SOURCE_EXTENSIONS = ['.ts', '.tsx']
@@ -201,12 +202,81 @@ if (misplaced.length === 0) {
 	console.error('')
 }
 
+// Markup and styles carry no comments (architecture.md §5): what a component
+// needs explained goes into a clearer name, a smaller part, or the .ts beside it.
+// Directives are code, not comments, and stay.
+const DIRECTIVE = /^\/[/*]\s*(eslint-|@ts-|prettier-ignore)/
+
+function tsxComments(path) {
+	const text = readFileSync(path, 'utf8')
+	const source = ts.createSourceFile(path, text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
+	const found = new Map()
+
+	const collect = ranges => {
+		for (const range of ranges ?? []) {
+			const comment = text.slice(range.pos, range.end)
+			if (!DIRECTIVE.test(comment)) {
+				found.set(range.pos, source.getLineAndCharacterOfPosition(range.pos).line + 1)
+			}
+		}
+	}
+
+	const visit = node => {
+		collect(ts.getLeadingCommentRanges(text, node.getFullStart()))
+		collect(ts.getTrailingCommentRanges(text, node.getEnd()))
+		node.getChildren(source).forEach(visit)
+	}
+	visit(source)
+
+	return [...found.values()]
+}
+
+function scssComments(path) {
+	const lines = readFileSync(path, 'utf8')
+		.replace(/url\([^)]*\)/g, 'url()')
+		.replace(/(["'])(?:\\.|(?!\1).)*\1/g, '""')
+		.split('\n')
+
+	return lines.flatMap((line, index) => (/\/\*|(^|\s)\/\//.test(line) ? [index + 1] : []))
+}
+
+function collectStyleFiles(dir, found = []) {
+	for (const entry of readdirSync(dir)) {
+		const path = join(dir, entry)
+
+		if (statSync(path).isDirectory()) {
+			collectStyleFiles(path, found)
+		} else if (entry.endsWith('.scss')) {
+			found.push(path)
+		}
+	}
+
+	return found
+}
+
+const commented = [
+	...files.filter(file => file.endsWith('.tsx')).map(file => [file, tsxComments(file)]),
+	...collectStyleFiles(SRC).map(file => [file, scssComments(file)])
+].flatMap(([file, lines]) => lines.map(line => `${relative(SRC, file).split(sep).join('/')}:${line}`))
+
+if (commented.length === 0) {
+	console.log('✔ No comments in .tsx or .scss.')
+} else {
+	console.error(`✖ ${commented.length} comment(s) in .tsx or .scss (architecture.md §5):\n`)
+
+	for (const place of commented) {
+		console.error(`   ${place}`)
+	}
+
+	console.error('')
+}
+
 const cycles = findCycles(edges)
 const nodeCount = [...edges.keys()].filter(node => edges.get(node).size > 0 || node !== 'root').length
 
 if (cycles.length === 0) {
 	console.log(`✔ No slice cycles (${files.length} files, ${nodeCount} nodes).`)
-	process.exit(misplaced.length === 0 ? 0 : 1)
+	process.exit(misplaced.length === 0 && commented.length === 0 ? 0 : 1)
 }
 
 console.error(`✖ Found ${cycles.length} slice cycle(s) across ${files.length} files:\n`)

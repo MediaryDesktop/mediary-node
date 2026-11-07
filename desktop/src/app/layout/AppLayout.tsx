@@ -31,7 +31,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
 			<ManageEntryDrawer />
 			<RateEntryDrawer />
-			{/* After the entry drawer, so a list created from it opens on top. */}
 			<ListDrawer />
 			<DeleteListDialog />
 			<DownloadFolderPrompt />

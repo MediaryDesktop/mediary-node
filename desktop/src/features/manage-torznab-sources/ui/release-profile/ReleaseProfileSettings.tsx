@@ -51,6 +51,8 @@ export function ReleaseProfileSettings() {
 		return null
 	}
 
+	const savedVersion = JSON.stringify(profile)
+
 	return (
 		<div className={styles.card}>
 			<div className={styles.header}>
@@ -58,8 +60,7 @@ export function ReleaseProfileSettings() {
 				<p className={styles.hint}>{t('settings.releaseProfile.hint')}</p>
 			</div>
 
-			{/* Mounted afresh when the saved profile changes, so the fields start from it. */}
-			<ProfileForm key={JSON.stringify(profile)} profile={profile} />
+			<ProfileForm key={savedVersion} profile={profile} />
 		</div>
 	)
 }
