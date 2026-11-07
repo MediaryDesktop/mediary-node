@@ -28,6 +28,18 @@ export const $streamVia = createStore<StreamVia>(
 
 streamViaChanged.watch(via => writeStored(VIA_KEY, via))
 
+const AUTO_SELECT_KEY = 'mediary.stream.autoSelect'
+
+// Whether "play" picks a release by itself or opens the search to choose one.
+export const autoSelectChanged = createEvent<boolean>()
+
+export const $autoSelect = createStore(readStored(AUTO_SELECT_KEY) !== 'off').on(
+	autoSelectChanged,
+	(_, on) => on
+)
+
+autoSelectChanged.watch(on => writeStored(AUTO_SELECT_KEY, on ? 'on' : 'off'))
+
 export const streamRequested = createEvent<StreamTarget>()
 export const streamCancelled = createEvent()
 export const streamPlaying = createEvent<number>()

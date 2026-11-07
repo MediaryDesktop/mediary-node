@@ -8,3 +8,4 @@ export { useGoBack } from './hooks/useGoBack'
 export { useUnitWatch } from './hooks/useUnitWatch'
 
 export { readStored, writeStored } from './storage/storage'
+export { useStoredToggle } from './storage/useStoredToggle'

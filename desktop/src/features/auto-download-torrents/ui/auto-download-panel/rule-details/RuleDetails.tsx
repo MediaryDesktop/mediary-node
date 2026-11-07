@@ -7,7 +7,7 @@ import { IoIosRefresh } from 'react-icons/io'
 
 import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
-import { formatRelativeTime, readStored, useUnitWatch, writeStored } from '@shared/lib'
+import { formatRelativeTime, useStoredToggle, useUnitWatch } from '@shared/lib'
 import { Button, CollapsibleSection, Icon, Input, RippleButton, Stepper, toast } from '@shared/ui'
 
 import {
@@ -43,7 +43,7 @@ export function RuleDetails({ rule }: { rule: TorrentRule }) {
 	const [query, setQuery] = useState(rule.query)
 	const [result, setResult] = useState<{ check: TorrentRuleCheck; preview: boolean } | null>(null)
 	const [lastPreview, setLastPreview] = useState(false)
-	const [settingsOpen, setSettingsOpen] = useState(() => readStored(SETTINGS_OPEN_KEY) === 'on')
+	const [settingsOpen, toggleSettings] = useStoredToggle(SETTINGS_OPEN_KEY)
 
 	useUnitWatch(panelCheck.succeeded, ({ params, result: check }) =>
 		setResult({ check, preview: params.preview })
@@ -57,13 +57,6 @@ export function RuleDetails({ rule }: { rule: TorrentRule }) {
 	const dirty = from !== rule.from_episode || query.trim() !== rule.query
 
 	const setupMissing = setup.incomplete
-
-	const toggleSettings = () => {
-		setSettingsOpen(on => {
-			writeStored(SETTINGS_OPEN_KEY, on ? 'off' : 'on')
-			return !on
-		})
-	}
 
 	const save = () =>
 		put({

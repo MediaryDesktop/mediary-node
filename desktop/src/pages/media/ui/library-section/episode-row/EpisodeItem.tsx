@@ -1,19 +1,14 @@
-import clsx from 'clsx'
-
 import { useTranslation } from '@shared/i18n'
-import { Badge, Icon } from '@shared/ui'
+import { Badge } from '@shared/ui'
 
 import { fileName } from '@entities/library-item'
 import type { LibraryFile } from '@entities/library-item'
 import type { MediaEpisode } from '@entities/media'
 
-import { EpisodeImage } from '@features/continue-watching'
-
 import { useEpisodeText } from '../lib/useEpisodeText'
 
-import { EpisodeAside } from './EpisodeAside'
 import styles from './EpisodeRow.module.scss'
-import { EpisodeText } from './EpisodeText'
+import { EpisodeRowItem } from './EpisodeRowItem'
 
 export interface EpisodeItemProps {
 	file: LibraryFile
@@ -40,38 +35,24 @@ export function EpisodeItem({
 }: EpisodeItemProps) {
 	const { t } = useTranslation()
 	const text = useEpisodeText()
-	const label = text.label(file, seasonal)
 
 	return (
-		<li className={clsx(styles.episode, watched && styles.watched)}>
-			<button
-				type='button'
-				className={styles.episodeImage}
-				style={{ backgroundColor: coverColor ?? undefined }}
-				disabled={disabled || file.missing}
-				aria-label={t('media.library.play', { name: label })}
-				onClick={() => onPlay(file.id)}
-			>
-				<EpisodeImage sources={images} />
-				<span className={styles.episodePlay}>
-					<Icon name='common/play' size={24} />
-				</span>
-			</button>
-
-			<EpisodeText
-				label={label}
-				name={text.name(episode)}
-				duration={text.minutes(file, episode)}
-				overview={episode?.overview ?? null}
-				badge={playing && <Badge tone='accent'>{t('media.library.playing')}</Badge>}
-			>
-				<span className={styles.episodeFile} title={file.rel_path}>
-					{fileName(file)}
-				</span>
-				{file.missing && <span className={styles.missing}>{t('media.library.missing')}</span>}
-			</EpisodeText>
-
-			<EpisodeAside episode={episode} watched={watched} />
-		</li>
+		<EpisodeRowItem
+			label={text.label(file, seasonal)}
+			name={text.name(episode)}
+			duration={text.minutes(file, episode)}
+			episode={episode}
+			images={images}
+			coverColor={coverColor}
+			watched={watched}
+			disabled={disabled || file.missing}
+			onPlay={() => onPlay(file.id)}
+			badge={playing && <Badge tone='accent'>{t('media.library.playing')}</Badge>}
+		>
+			<span className={styles.episodeFile} title={file.rel_path}>
+				{fileName(file)}
+			</span>
+			{file.missing && <span className={styles.missing}>{t('media.library.missing')}</span>}
+		</EpisodeRowItem>
 	)
 }
