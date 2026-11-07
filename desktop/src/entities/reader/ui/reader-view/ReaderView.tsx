@@ -7,6 +7,8 @@ import { useTranslation } from '@shared/i18n'
 import { useAfterDelay } from '@shared/lib'
 import { Button, Icon, Tooltip, WindowControls } from '@shared/ui'
 
+import { useWindowControls } from '@infra/window'
+
 import type { ReaderChapter } from '../../api/api'
 import { clampPage, isLastPage, prefetchIndexes } from '../../lib/pages'
 import { pageUrl } from '../../lib/urls'
@@ -43,6 +45,8 @@ export function ReaderView({
 	next,
 	onOpenChapter
 }: ReaderViewProps) {
+	const windowControls = useWindowControls()
+
 	const { t } = useTranslation()
 	const [pageTurned, counted] = useUnit([readerModel.pageTurned, readerModel.$counted])
 
@@ -294,7 +298,7 @@ export function ReaderView({
 					</span>
 				)}
 
-				<WindowControls className={styles.window} />
+				<WindowControls {...windowControls} className={styles.window} />
 			</header>
 
 			<footer className={clsx(styles.bottom, controlsVisible && styles.visible)}>

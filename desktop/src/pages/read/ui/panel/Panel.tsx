@@ -5,6 +5,8 @@ import { useState } from 'react'
 import { useTranslation } from '@shared/i18n'
 import { Button, Icon, WindowControls } from '@shared/ui'
 
+import { useWindowControls } from '@infra/window'
+
 import { useBookEntrance } from '@entities/reader'
 
 import styles from './Panel.module.scss'
@@ -16,6 +18,8 @@ export interface PanelProps {
 }
 
 export function Panel({ onClose, children, openedAt }: PanelProps) {
+	const windowControls = useWindowControls()
+
 	const { t } = useTranslation()
 	const [fallbackOpenedAt] = useState(() => performance.now())
 	const entrance = useBookEntrance(openedAt ?? fallbackOpenedAt)
@@ -34,7 +38,7 @@ export function Panel({ onClose, children, openedAt }: PanelProps) {
 					startIcon={<Icon name='common/arrow-left' size={18} />}
 					onClick={onClose}
 				/>
-				<WindowControls className={styles.window} />
+				<WindowControls {...windowControls} className={styles.window} />
 			</header>
 
 			<div className={styles.body}>{children}</div>

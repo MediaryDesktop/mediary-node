@@ -326,6 +326,31 @@ if (offScale.length === 0) {
 	console.error('')
 }
 
+// The Electron bridge is the outside world: it is reached from infrastructure,
+// from the app's composition, or as an effect in a slice's api/ or model/ —
+// never from a component or the design system, which then could not render
+// without a shell behind it.
+const BRIDGE = /\bwindow\.mediary\b/
+
+const bridgeOutside = files
+	.map(file => relative(SRC, file).split(sep).join('/'))
+	.filter(file => !/^(infrastructure|app)\//.test(file))
+	.filter(file => !/\/(api|model)\/[^/]+\.ts$/.test(file))
+	.filter(file => !/\.test\.tsx?$/.test(file))
+	.filter(file => BRIDGE.test(readFileSync(join(SRC, file), 'utf8')))
+
+if (bridgeOutside.length === 0) {
+	console.log('✔ The Electron bridge is reached only from infrastructure, app, api and model.')
+} else {
+	console.error(`✖ ${bridgeOutside.length} file(s) reach window.mediary directly:\n`)
+
+	for (const file of bridgeOutside) {
+		console.error(`   ${file}`)
+	}
+
+	console.error('')
+}
+
 // When to ask the node is one rule (infra/node, whenNodeReady), not each screen's.
 // A component or hook that reads $nodeReady to decide for itself is the thing
 // that rule replaced.
@@ -360,9 +385,9 @@ const nodeCount = [...edges.keys()].filter(node => edges.get(node).size > 0 || n
 
 if (cycles.length === 0) {
 	console.log(`✔ No slice cycles (${files.length} files, ${nodeCount} nodes).`)
-	process.exit(
-		misplaced.length + commented.length + askingForThemselves.length + rawColours.length === 0 ? 0 : 1
-	)
+	const problems = [misplaced, commented, askingForThemselves, rawColours, offScale, bridgeOutside]
+
+	process.exit(problems.every(found => found.length === 0) ? 0 : 1)
 }
 
 console.error(`✖ Found ${cycles.length} slice cycle(s) across ${files.length} files:\n`)

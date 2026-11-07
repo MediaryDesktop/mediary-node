@@ -7,6 +7,8 @@ import { useTranslation } from '@shared/i18n'
 import { useAfterDelay } from '@shared/lib'
 import { Button, Icon, WindowControls } from '@shared/ui'
 
+import { useWindowControls } from '@infra/window'
+
 import type { ReaderBook } from '../../api/api'
 import { isPdf } from '../../lib/book'
 
@@ -33,6 +35,8 @@ export interface BookReaderViewProps {
 }
 
 export function BookReaderView({ book, file, locator, openedAt, onClose, onRelocate }: BookReaderViewProps) {
+	const windowControls = useWindowControls()
+
 	const { t } = useTranslation()
 	const viewRef = useRef<BookViewHandle>(null)
 
@@ -95,7 +99,7 @@ export function BookReaderView({ book, file, locator, openedAt, onClose, onReloc
 					{location?.chapter && <span className={styles.subtitle}>{location.chapter}</span>}
 				</div>
 
-				<WindowControls className={styles.window} />
+				<WindowControls {...windowControls} className={styles.window} />
 			</header>
 
 			<main className={styles.stage}>

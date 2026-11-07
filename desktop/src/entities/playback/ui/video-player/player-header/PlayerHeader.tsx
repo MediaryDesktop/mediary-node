@@ -3,6 +3,8 @@ import clsx from 'clsx'
 import { useTranslation } from '@shared/i18n'
 import { Button, Icon, WindowControls } from '@shared/ui'
 
+import { useWindowControls } from '@infra/window'
+
 import styles from './PlayerHeader.module.scss'
 
 export interface PlayerHeaderProps {
@@ -26,6 +28,8 @@ export function PlayerHeader({
 	onExpand,
 	onClose
 }: PlayerHeaderProps) {
+	const windowControls = useWindowControls()
+
 	const { t } = useTranslation()
 
 	if (mini) {
@@ -66,7 +70,7 @@ export function PlayerHeader({
 				{subheading && <span className={styles.subtitle}>{subheading}</span>}
 			</div>
 
-			{!fullscreen && <WindowControls className={styles.window} />}
+			{!fullscreen && <WindowControls {...windowControls} className={styles.window} />}
 		</header>
 	)
 }

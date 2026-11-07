@@ -1,7 +1,11 @@
 import { WindowControls } from '@shared/ui'
 
+import { useWindowControls } from '@infra/window'
+
 import styles from './WindowChrome.module.scss'
 
 export function WindowChrome() {
-	return <WindowControls className={styles.chrome} />
+	const windowControls = useWindowControls()
+
+	return <WindowControls {...windowControls} className={styles.chrome} />
 }

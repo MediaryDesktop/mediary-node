@@ -1,35 +1,30 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { IoCloudOfflineOutline, IoCloudOutline } from 'react-icons/io5'
-import { MdRestore } from 'react-icons/md'
 
 import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
-import { formatBytes, formatDateTime, formatRelativeTime, useUnitWatch } from '@shared/lib'
-import { Button, Icon, Modal, toast } from '@shared/ui'
+import { formatDateTime, formatRelativeTime, useUnitWatch } from '@shared/lib'
+import { Button, Icon, toast } from '@shared/ui'
 
 import { useNodeData } from '@infra/node'
 
 import { returnAfterAuthRequested, sessionModel } from '@entities/session'
 
-import type { SyncBackup } from '../../api/api'
+import { BACKUP_TOAST_ID } from '../../config/toast'
 import {
 	$updateRequired,
 	$updateUrl,
 	backUpNowMutation,
-	backupsQuery,
 	clientGateMounted,
-	deleteBackupMutation,
 	pairMutation,
-	restoreMutation,
 	syncStatusQuery,
 	unpairMutation
 } from '../../model/model'
 
+import { BackupList } from './backup-list/BackupList'
 import styles from './BackupSettings.module.scss'
-
-const TOAST_ID = 'backup-settings'
 
 export function BackupSettings() {
 	const { t, i18n } = useTranslation()
@@ -66,14 +61,16 @@ export function BackupSettings() {
 	useNodeData(syncStatusQuery)
 
 	useUnitWatch(pairMutation.finished.failure, ({ error }) =>
-		toast.error(problemDetail(error, t('backup.pairFailed')), { id: TOAST_ID })
+		toast.error(problemDetail(error, t('backup.pairFailed')), { id: BACKUP_TOAST_ID })
 	)
-	useUnitWatch(pairMutation.finished.success, () => toast.success(t('backup.paired'), { id: TOAST_ID }))
+	useUnitWatch(pairMutation.finished.success, () =>
+		toast.success(t('backup.paired'), { id: BACKUP_TOAST_ID })
+	)
 	useUnitWatch(backUpNowMutation.finished.failure, ({ error }) =>
-		toast.error(problemDetail(error, t('backup.backUpFailed')), { id: TOAST_ID })
+		toast.error(problemDetail(error, t('backup.backUpFailed')), { id: BACKUP_TOAST_ID })
 	)
 	useUnitWatch(backUpNowMutation.finished.success, ({ result }) =>
-		toast.success(t(result.created ? 'backup.backedUp' : 'backup.unchanged'), { id: TOAST_ID })
+		toast.success(t(result.created ? 'backup.backedUp' : 'backup.unchanged'), { id: BACKUP_TOAST_ID })
 	)
 
 	return (
@@ -178,127 +175,5 @@ export function BackupSettings() {
 				</>
 			)}
 		</div>
-	)
-}
-
-function BackupList() {
-	const { t, i18n } = useTranslation()
-	const [restoring, setRestoring] = useState<SyncBackup | null>(null)
-
-	const [backups, failed, remove, removing] = useUnit([
-		backupsQuery.$data,
-		backupsQuery.$failed,
-		deleteBackupMutation.start,
-		deleteBackupMutation.$pending
-	])
-
-	useNodeData(backupsQuery)
-
-	useUnitWatch(deleteBackupMutation.finished.failure, ({ error }) =>
-		toast.error(problemDetail(error, t('backup.deleteFailed')), { id: TOAST_ID })
-	)
-
-	if (failed) {
-		return <p className={styles.note}>{t('backup.listFailed')}</p>
-	}
-
-	if (!backups) {
-		return null
-	}
-
-	if (backups.backups.length === 0) {
-		return <p className={styles.note}>{t('backup.empty')}</p>
-	}
-
-	return (
-		<>
-			<div className={styles.listSection}>
-				<span className={styles.listLabel}>{t('backup.allBackups')}</span>
-
-				<ul className={styles.list}>
-					{backups.backups.map(backup => (
-						<li key={backup.id} className={styles.item}>
-							<div className={styles.details}>
-								<span className={styles.when}>
-									{formatDateTime(backup.created_at, i18n.language)}
-								</span>
-								<span className={styles.meta}>
-									{backup.device_label} · {formatBytes(backup.size_bytes)}
-								</span>
-							</div>
-
-							<div className={styles.itemActions}>
-								<Button
-									variant='ghost'
-									size='small'
-									startIcon={<MdRestore size={16} />}
-									onClick={() => setRestoring(backup)}
-								>
-									{t('backup.restore')}
-								</Button>
-								<Button
-									variant='glass-accent'
-									size='small'
-									iconOnly
-									disabled={removing}
-									aria-label={t('backup.delete')}
-									onClick={() => remove(backup.id)}
-								>
-									<Icon name='common/trash' size={16} />
-								</Button>
-							</div>
-						</li>
-					))}
-				</ul>
-			</div>
-
-			<RestoreDialog backup={restoring} onClose={() => setRestoring(null)} />
-		</>
-	)
-}
-
-function RestoreDialog({ backup, onClose }: { backup: SyncBackup | null; onClose: () => void }) {
-	const { t, i18n } = useTranslation()
-	const [restore, restoring] = useUnit([restoreMutation.start, restoreMutation.$pending])
-
-	useUnitWatch(restoreMutation.finished.success, () => {
-		toast.success(t('backup.restored'), { id: TOAST_ID })
-		onClose()
-	})
-	useUnitWatch(restoreMutation.finished.failure, ({ error }) =>
-		toast.error(problemDetail(error, t('backup.restoreFailed')), { id: TOAST_ID })
-	)
-
-	return (
-		<Modal
-			open={backup !== null}
-			onOpenChange={next => !next && !restoring && onClose()}
-			size='sm'
-			title={t('backup.restoreTitle')}
-			description={
-				backup
-					? t('backup.restoreHint', {
-							device: backup.device_label,
-							when: formatDateTime(backup.created_at, i18n.language)
-						})
-					: undefined
-			}
-			footer={
-				<>
-					<Button variant='secondary' onClick={onClose} disabled={restoring}>
-						{t('common.cancel')}
-					</Button>
-
-					<Button
-						variant='primary'
-						loading={restoring}
-						startIcon={<MdRestore size={16} />}
-						onClick={() => backup && restore(backup.id)}
-					>
-						{t('backup.restore')}
-					</Button>
-				</>
-			}
-		/>
 	)
 }

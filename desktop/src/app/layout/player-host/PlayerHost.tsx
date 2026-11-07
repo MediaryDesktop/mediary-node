@@ -9,6 +9,7 @@ import { useTranslation } from '@shared/i18n'
 import { Button, Icon, ReelLoader, WindowControls } from '@shared/ui'
 
 import { useNodeData } from '@infra/node'
+import { useWindowControls } from '@infra/window'
 
 import {
 	$playerExpanded,
@@ -211,6 +212,8 @@ interface PanelProps {
 }
 
 function Panel({ onClose, leaving, onLeft, children }: PanelProps) {
+	const windowControls = useWindowControls()
+
 	const { t } = useTranslation()
 
 	const entrance = usePlayerEntrance()
@@ -243,7 +246,7 @@ function Panel({ onClose, leaving, onLeft, children }: PanelProps) {
 					startIcon={<Icon name='common/arrow-left' size={18} />}
 					onClick={onClose}
 				/>
-				<WindowControls className={styles.window} />
+				<WindowControls {...windowControls} className={styles.window} />
 			</header>
 
 			<div className={styles.body}>{children}</div>
