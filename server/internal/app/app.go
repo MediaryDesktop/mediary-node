@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
 	"os/signal"
 	"path/filepath"
 	"syscall"
@@ -66,6 +67,13 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 
 	ctx, stop := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
+
+	if cfg.ShutdownOnStdinEOF {
+		go stopWhenClosed(os.Stdin, func() {
+			logger.Info().Msg("the shell closed standard input; shutting down")
+			stop()
+		})
+	}
 
 	database, err := db.Open(ctx, cfg.DatabasePath())
 	if err != nil {

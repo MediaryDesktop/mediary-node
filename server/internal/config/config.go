@@ -22,6 +22,14 @@ type Config struct {
 
 	DataDir string `env:"NODE_DATA_DIR"`
 
+	// ShutdownOnStdinEOF stops the node when its standard input closes, the way
+	// a signal would. The desktop shell sets it: on Windows there are no signals
+	// to send — killing a child there ends it at once, with nothing shut down
+	// cleanly — and closing a pipe works the same everywhere. It also ends the
+	// node when the shell itself dies, since the OS closes the shell's end. Off
+	// for a node started by hand, whose stdin may be a terminal or nothing.
+	ShutdownOnStdinEOF bool `env:"NODE_SHUTDOWN_ON_STDIN_EOF" envDefault:"false"`
+
 	HTTP        HTTP
 	Library     Library
 	Torrent     Torrent

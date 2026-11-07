@@ -35,6 +35,17 @@ const DEFAULT_STARTUP_TIMEOUT_MS = 20_000
 
 const RESTART_DELAYS_MS = [500, 1_000, 2_000, 5_000, 10_000]
 
+// A node that stayed up this long before exiting counts as having run, and its
+// restarts start again from the shortest delay. One that exits sooner is
+// crashing, and after MAX_QUICK_RESTARTS of those the supervisor gives up and
+// reports failed rather than restarting it every few seconds for ever.
+const STABLE_RUN_MS = 60_000
+const MAX_QUICK_RESTARTS = 5
+
+// How long a node is given to shut down cleanly once asked, before it is
+// killed. Room for the HTTP server to drain and the modules to close.
+const GRACEFUL_STOP_MS = 10_000
+
 interface ExternalNode {
 	baseUrl: string
 	token: string
@@ -55,6 +66,7 @@ export class NodeSupervisor {
 	private child: ChildProcess | null = null
 	private state: SupervisorState = 'stopped'
 	private restartAttempt = 0
+	private readyAt = 0
 	private stopping = false
 
 	private readonly host: string
@@ -173,13 +185,19 @@ export class NodeSupervisor {
 				NODE_HTTP_PORT: String(this.port),
 				NODE_TOKEN: this.token,
 				NODE_HTTP_ALLOWED_ORIGINS: allowedOrigins().join(','),
-				NODE_LOG_PRETTY: 'false'
+				NODE_LOG_PRETTY: 'false',
+				// The node runs for as long as its stdin is open; stop() closes it.
+				// See config.ShutdownOnStdinEOF in the node.
+				NODE_SHUTDOWN_ON_STDIN_EOF: '1'
 			},
 
 			detached: false,
-			stdio: ['ignore', 'pipe', 'pipe']
+			stdio: ['pipe', 'pipe', 'pipe']
 		})
 
+		// Writing never happens, but ending a pipe whose reader is already gone
+		// raises EPIPE, which would otherwise surface as an uncaught error.
+		this.child.stdin?.on('error', () => undefined)
 		this.child.stdout?.on('data', (chunk: Buffer) => this.forwardLog(chunk, 'stdout'))
 		this.child.stderr?.on('data', (chunk: Buffer) => this.forwardLog(chunk, 'stderr'))
 
@@ -191,13 +209,18 @@ export class NodeSupervisor {
 				return
 			}
 
+			if (this.readyAt !== 0 && Date.now() - this.readyAt >= STABLE_RUN_MS) {
+				this.restartAttempt = 0
+			}
+			this.readyAt = 0
+
 			this.options.onLog?.(`node exited (code=${code} signal=${signal})`, 'stderr')
 			void this.restart()
 		})
 
 		await this.waitUntilHealthy()
 
-		this.restartAttempt = 0
+		this.readyAt = Date.now()
 		this.setState('ready')
 	}
 
@@ -215,11 +238,18 @@ export class NodeSupervisor {
 			return
 		}
 
-		child.kill('SIGTERM')
+		// Closing stdin is the request to shut down cleanly. Not a signal: on
+		// Windows, child.kill('SIGTERM') is TerminateProcess, which ends the node
+		// on the spot — no module closed, no transcoder stopped, no torrent store
+		// flushed. Killing stays the fallback for a node that does not answer.
+		const exited = new Promise<void>(resolve => child.once('exit', () => resolve()))
 
-		await Promise.race([new Promise<void>(resolve => child.once('exit', () => resolve())), delay(5_000)])
+		child.stdin?.end()
+
+		await Promise.race([exited, delay(GRACEFUL_STOP_MS)])
 
 		if (this.child) {
+			this.options.onLog?.('node did not shut down in time; killing it', 'stderr')
 			this.child.kill('SIGKILL')
 			this.child = null
 		}
@@ -228,6 +258,15 @@ export class NodeSupervisor {
 	}
 
 	private async restart(): Promise<void> {
+		if (this.restartAttempt >= MAX_QUICK_RESTARTS) {
+			this.options.onLog?.(
+				`node crashed ${this.restartAttempt} times in a row soon after starting; not restarting it again`,
+				'stderr'
+			)
+			this.setState('failed')
+			return
+		}
+
 		this.setState('restarting')
 
 		const wait = RESTART_DELAYS_MS[Math.min(this.restartAttempt, RESTART_DELAYS_MS.length - 1)]
