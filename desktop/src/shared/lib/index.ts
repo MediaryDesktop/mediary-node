@@ -5,6 +5,8 @@ export { firstPresent } from './format/text'
 
 export { useAfterDelay } from './hooks/useAfterDelay'
 export { useGoBack } from './hooks/useGoBack'
+export { rowWindow, useRowWindow } from './hooks/useRowWindow'
+export type { RowWindow } from './hooks/useRowWindow'
 export { useUnitWatch } from './hooks/useUnitWatch'
 
 export { readStored, writeStored } from './storage/storage'
