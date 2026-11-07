@@ -10,8 +10,17 @@ function file(): string {
 	return join(app.getPath('userData'), FILE_NAME)
 }
 
+// On Linux without a keyring safeStorage falls back to "basic_text": it still
+// says encryption is available, but the session is only scrambled with a key
+// built into Chromium, which anyone can undo. That is no better than plain
+// text, so the session is not kept on disk then — the user signs in each time,
+// as on any system where encryption is unavailable.
 export function canPersistSession(): boolean {
-	return safeStorage.isEncryptionAvailable()
+	if (!safeStorage.isEncryptionAvailable()) {
+		return false
+	}
+
+	return process.platform !== 'linux' || safeStorage.getSelectedStorageBackend() !== 'basic_text'
 }
 
 export async function readStoredSession(): Promise<StoredSession | null> {

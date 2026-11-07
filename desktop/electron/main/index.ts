@@ -1,9 +1,10 @@
-import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain, type IpcMainInvokeEvent, session, shell } from 'electron'
 import { join } from 'node:path'
 
 import { IPC } from '../shared/ipc.js'
 
 import { webAddress } from './external.js'
+import { type AppOrigin, isAllowedPermission, isAppUrl } from './guards.js'
 import { NodeSupervisor, type SupervisorState } from './node-supervisor.js'
 import { authorizeOAuth, prepareOAuth, releaseOAuthListener } from './oauth.js'
 import {
@@ -16,6 +17,40 @@ import { runSplash, type SplashHandoff } from './splash.js'
 import { stopTrailerHost, trailerHostOrigin } from './trailer-host.js'
 
 app.commandLine.appendSwitch('disable-quic')
+
+// The app's own pages, the only ones that may hold the preload's API (see guards.ts).
+const appOrigin: AppOrigin = {
+	devServerUrl: process.env.ELECTRON_RENDERER_URL,
+	rendererDir: join(__dirname, '../renderer')
+}
+
+// Every window — the splash and any added later: nothing in it navigates away
+// from the app, follows a redirect elsewhere, or embeds a webview. Moving inside
+// the app is a change of hash and never reaches these.
+app.on('web-contents-created', (_event, contents) => {
+	const stayHome = (event: { preventDefault: () => void }, url: string) => {
+		if (!isAppUrl(url, appOrigin)) {
+			event.preventDefault()
+			process.stderr.write(`[shell] refused to navigate a window to ${url.slice(0, 200)}\n`)
+		}
+	}
+
+	contents.on('will-navigate', stayHome)
+	contents.on('will-redirect', stayHome)
+	contents.on('will-attach-webview', event => event.preventDefault())
+})
+
+// ipcMain.handle for calls from the app's own pages only. Should a window ever
+// show anything else, that page finds the API there and every call refused.
+function handle(channel: string, listener: (event: IpcMainInvokeEvent, ...args: unknown[]) => unknown): void {
+	ipcMain.handle(channel, (event, ...args: unknown[]) => {
+		if (!isAppUrl(event.senderFrame?.url ?? '', appOrigin)) {
+			throw new Error(`ipc: ${channel} refused for a page that is not the app's own`)
+		}
+
+		return listener(event, ...args)
+	})
+}
 
 const supervisor = new NodeSupervisor({
 	onLog: (line, stream) => {
@@ -124,12 +159,12 @@ function openAniListAuthorize(authorizeUrl: unknown): Promise<void> {
 }
 
 function registerIpc(): void {
-	ipcMain.handle(IPC.nodeConnection, () => supervisor.connection)
-	ipcMain.handle(IPC.nodeState, (): SupervisorState => supervisor.currentState)
-	ipcMain.handle(IPC.appVersion, () => app.getVersion())
-	ipcMain.handle(IPC.oauthPrepare, () => prepareOAuth())
-	ipcMain.handle(IPC.oauthRelease, () => releaseOAuthListener())
-	ipcMain.handle(IPC.oauthAuthorize, (_event, consentUrl: unknown) => {
+	handle(IPC.nodeConnection, () => supervisor.connection)
+	handle(IPC.nodeState, (): SupervisorState => supervisor.currentState)
+	handle(IPC.appVersion, () => app.getVersion())
+	handle(IPC.oauthPrepare, () => prepareOAuth())
+	handle(IPC.oauthRelease, () => releaseOAuthListener())
+	handle(IPC.oauthAuthorize, (_event, consentUrl: unknown) => {
 		if (typeof consentUrl !== 'string') {
 			throw new TypeError('oauth: the consent URL must be a string')
 		}
@@ -137,15 +172,13 @@ function registerIpc(): void {
 		return authorizeOAuth(consentUrl)
 	})
 
-	ipcMain.handle(IPC.aniListOpenAuthorize, (_event, authorizeUrl: unknown) =>
-		openAniListAuthorize(authorizeUrl)
-	)
+	handle(IPC.aniListOpenAuthorize, (_event, authorizeUrl: unknown) => openAniListAuthorize(authorizeUrl))
 
-	ipcMain.handle(IPC.trailerHost, () => trailerHostOrigin())
+	handle(IPC.trailerHost, () => trailerHostOrigin())
 
 	// The renderer has no filesystem access, so a library folder can only be
 	// chosen through the OS dialog the main process owns.
-	ipcMain.handle(IPC.dialogPickFolder, async (event): Promise<string | null> => {
+	handle(IPC.dialogPickFolder, async (event): Promise<string | null> => {
 		const parent = BrowserWindow.fromWebContents(event.sender)
 
 		const result = parent
@@ -159,14 +192,14 @@ function registerIpc(): void {
 		return result.filePaths[0] ?? null
 	})
 
-	ipcMain.handle(IPC.sessionCanPersist, () => canPersistSession())
-	ipcMain.handle(IPC.sessionRead, () => readStoredSession())
-	ipcMain.handle(IPC.sessionWrite, (_event, session: unknown) => {
-		if (typeof session !== 'object' || session === null) {
+	handle(IPC.sessionCanPersist, () => canPersistSession())
+	handle(IPC.sessionRead, () => readStoredSession())
+	handle(IPC.sessionWrite, (_event, stored: unknown) => {
+		if (typeof stored !== 'object' || stored === null) {
 			throw new TypeError('session: expected a record to store')
 		}
 
-		const { token, account } = session as { token?: unknown; account?: unknown }
+		const { token, account } = stored as { token?: unknown; account?: unknown }
 
 		if (token !== null && typeof token !== 'string') {
 			throw new TypeError('session: the token must be a string or null')
@@ -174,10 +207,10 @@ function registerIpc(): void {
 
 		return writeStoredSession({ token: token ?? null, account: account ?? null })
 	})
-	ipcMain.handle(IPC.sessionClear, () => clearStoredSession())
+	handle(IPC.sessionClear, () => clearStoredSession())
 
-	ipcMain.handle(IPC.windowMinimize, event => BrowserWindow.fromWebContents(event.sender)?.minimize())
-	ipcMain.handle(IPC.windowToggleMaximize, event => {
+	handle(IPC.windowMinimize, event => BrowserWindow.fromWebContents(event.sender)?.minimize())
+	handle(IPC.windowToggleMaximize, event => {
 		const window = BrowserWindow.fromWebContents(event.sender)
 
 		if (window?.isMaximized()) {
@@ -186,14 +219,14 @@ function registerIpc(): void {
 			window?.maximize()
 		}
 	})
-	ipcMain.handle(IPC.windowClose, event => BrowserWindow.fromWebContents(event.sender)?.close())
-	ipcMain.handle(
+	handle(IPC.windowClose, event => BrowserWindow.fromWebContents(event.sender)?.close())
+	handle(
 		IPC.windowIsMaximized,
 		event => BrowserWindow.fromWebContents(event.sender)?.isMaximized() ?? false
 	)
 
-	ipcMain.handle(IPC.appBooted, () => splashHandoff?.reportBooted())
-	ipcMain.handle(IPC.splashDismiss, () => splashHandoff?.reportDismissed())
+	handle(IPC.appBooted, () => splashHandoff?.reportBooted())
+	handle(IPC.splashDismiss, () => splashHandoff?.reportDismissed())
 }
 
 if (!app.requestSingleInstanceLock()) {
@@ -210,6 +243,14 @@ if (!app.requestSingleInstanceLock()) {
 
 	void app.whenReady().then(async () => {
 		await supervisor.reservePort()
+
+		// Electron grants every permission a page asks for unless told otherwise.
+		session.defaultSession.setPermissionRequestHandler((_contents, permission, callback) =>
+			callback(isAllowedPermission(permission))
+		)
+		session.defaultSession.setPermissionCheckHandler((_contents, permission) =>
+			isAllowedPermission(permission)
+		)
 
 		registerIpc()
 
