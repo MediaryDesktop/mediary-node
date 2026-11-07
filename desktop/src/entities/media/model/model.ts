@@ -1,4 +1,4 @@
-import { createMutation, createQuery, keepFresh } from '@farfetched/core'
+import { concurrency, createMutation, createQuery, keepFresh } from '@farfetched/core'
 import { createEffect, createEvent, createStore, sample } from 'effector'
 import type { TFunction } from 'i18next'
 
@@ -45,6 +45,14 @@ export const mediaFilterOptionsQuery = createQuery({
 	effect: fetchMediaFilterOptionsFx,
 	name: 'mediaFilterOptions'
 })
+
+// Each of these holds one answer for whichever title or search was asked last.
+// Asked again before the first answer came, the older call is dropped: arriving
+// late, it would replace what the screen now shows.
+concurrency(mediaDetailsQuery, { strategy: 'TAKE_LATEST' })
+concurrency(mediaEpisodesQuery, { strategy: 'TAKE_LATEST' })
+concurrency(mediaSearchQuery, { strategy: 'TAKE_LATEST' })
+concurrency(mediaFilterOptionsQuery, { strategy: 'TAKE_LATEST' })
 
 export const tmdbSettingsQuery = createQuery({
 	effect: fetchTMDBSettingsFx,
@@ -106,6 +114,8 @@ export const manualCoverSearchQuery = createQuery({
 	effect: searchManualCoversFx,
 	name: 'manualCoverSearch'
 })
+
+concurrency(manualCoverSearchQuery, { strategy: 'TAKE_LATEST' })
 
 export const setManualCoverMutation = createMutation({
 	effect: setManualCoverFx,

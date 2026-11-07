@@ -165,6 +165,8 @@ export const torrentRulesQuery = createQuery({ effect: fetchTorrentRulesFx, name
 
 export const torrentRuleQuery = createQuery({ effect: fetchTorrentRuleFx, name: 'torrentRule' })
 
+concurrency(torrentRuleQuery, { strategy: 'TAKE_LATEST' })
+
 export const putTorrentRuleMutation = createMutation({ effect: putTorrentRuleFx, name: 'putTorrentRule' })
 
 export const deleteTorrentRuleMutation = createMutation({

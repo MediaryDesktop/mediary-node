@@ -34,6 +34,10 @@ export const mangaChaptersQuery = createQuery({ effect: fetchMangaChaptersFx, na
 
 export const mangaSearchQuery = createQuery({ effect: searchMangaSourceFx, name: 'mangaSearch' })
 
+concurrency(mangaLinksQuery, { strategy: 'TAKE_LATEST' })
+concurrency(mangaChaptersQuery, { strategy: 'TAKE_LATEST' })
+concurrency(mangaSearchQuery, { strategy: 'TAKE_LATEST' })
+
 export const createOPDSServerMutation = createMutation({
 	effect: createOPDSServerFx,
 	name: 'createOPDSServer'

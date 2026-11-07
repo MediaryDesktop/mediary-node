@@ -1,4 +1,4 @@
-import { createMutation, createQuery } from '@farfetched/core'
+import { concurrency, createMutation, createQuery } from '@farfetched/core'
 import { createEvent, createStore, sample } from 'effector'
 
 import { atom } from '@shared/factory'
@@ -30,6 +30,8 @@ export const controlPlaybackMutation = createMutation({
 export const stopPlaybackMutation = createMutation({ effect: stopPlaybackFx, name: 'stopPlayback' })
 
 export const playbackStreamQuery = createQuery({ effect: fetchPlaybackStreamFx, name: 'playbackStream' })
+
+concurrency(playbackStreamQuery, { strategy: 'TAKE_LATEST' })
 
 function numberIn(payload: Record<string, unknown> | undefined, key: string): number {
 	const value = payload?.[key]

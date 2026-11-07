@@ -108,6 +108,32 @@ describe('search paging', () => {
 		expect(scope.getState(searchMediaModel.$items)).toHaveLength(2)
 	})
 
+	it('shows what was typed last even when an earlier search answers later', async () => {
+		let answerEarlier = () => {}
+		const search = vi.fn((query: MediaSearchQuery) =>
+			query.q === 'nar'
+				? new Promise<MediaSearchResponse>(resolve => {
+						answerEarlier = () => resolve(page(['anilist:nar'], true))
+					})
+				: Promise.resolve(page(['anilist:naruto'], false))
+		)
+		const scope = searchScope(search)
+
+		const earlier = allSettled(searchMediaModel.titleChanged, { scope, params: 'nar' })
+		await vi.waitFor(() => expect(search).toHaveBeenCalledWith(expect.objectContaining({ q: 'nar' })))
+
+		const later = allSettled(searchMediaModel.titleChanged, { scope, params: 'naruto' })
+		await vi.waitFor(() => expect(search).toHaveBeenCalledWith(expect.objectContaining({ q: 'naruto' })))
+
+		answerEarlier()
+		await Promise.all([earlier, later])
+
+		expect(scope.getState(searchMediaModel.$items).map(media => media.media_ref)).toEqual([
+			'anilist:naruto'
+		])
+		expect(scope.getState(searchMediaModel.$hasNextPage)).toBe(false)
+	})
+
 	it('collapses a burst of filter changes into one request', async () => {
 		const search = vi.fn().mockResolvedValue(page(['anilist:1'], false))
 		const scope = searchScope(search)

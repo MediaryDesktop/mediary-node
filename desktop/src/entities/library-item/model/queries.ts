@@ -52,6 +52,9 @@ export const libraryCandidatesQuery = createQuery({
 	name: 'libraryCandidates'
 })
 
+concurrency(libraryScanRunQuery, { strategy: 'TAKE_LATEST' })
+concurrency(libraryCandidatesQuery, { strategy: 'TAKE_LATEST' })
+
 export const addLibraryRootMutation = createMutation({ effect: addLibraryRootFx, name: 'addLibraryRoot' })
 
 export const updateLibraryRootMutation = createMutation({

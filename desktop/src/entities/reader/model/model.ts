@@ -1,4 +1,4 @@
-import { createMutation, createQuery } from '@farfetched/core'
+import { concurrency, createMutation, createQuery } from '@farfetched/core'
 import { createEvent, createStore, sample } from 'effector'
 
 import { atom } from '@shared/factory'
@@ -11,6 +11,9 @@ export const chapterQuery = createQuery({ effect: fetchChapterFx, name: 'readerC
 export const reportPageMutation = createMutation({ effect: reportReaderPageFx, name: 'reportReaderPage' })
 
 export const bookStateQuery = createQuery({ effect: fetchBookStateFx, name: 'readerBookState' })
+
+concurrency(chapterQuery, { strategy: 'TAKE_LATEST' })
+concurrency(bookStateQuery, { strategy: 'TAKE_LATEST' })
 
 export const saveBookPositionMutation = createMutation({
 	effect: saveBookPositionFx,
