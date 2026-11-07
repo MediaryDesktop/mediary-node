@@ -7,16 +7,11 @@ import { Button, EmptyState, Icon, Input, Modal, SegmentedControl, toast } from 
 
 import { manualCoverSearchQuery } from '@entities/media'
 
+import type { CoverSelection } from '../../lib/cover'
 import type { ManualMediaType } from '../../lib/draft'
 import { readImageFile } from '../../lib/read-image-file'
 
 import styles from './PosterModal.module.scss'
-
-export type CoverSelection =
-	| { kind: 'keep' }
-	| { kind: 'remove' }
-	| { kind: 'url'; value: string; previewUrl: string; source: 'search' | 'url' }
-	| { kind: 'data'; value: string; previewUrl: string; name: string; size: number }
 
 export interface PosterModalProps {
 	open: boolean

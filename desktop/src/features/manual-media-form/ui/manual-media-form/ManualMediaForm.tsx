@@ -240,7 +240,7 @@ export function ManualMediaForm({
 							{t('manualMedia.cancel')}
 						</Button>
 
-						<Button variant='primary' onClick={() => void confirmDelete()} loading={deleting}>
+						<Button variant='primary' onClick={confirmDelete} loading={deleting}>
 							{t('manualMedia.delete.confirm')}
 						</Button>
 					</>

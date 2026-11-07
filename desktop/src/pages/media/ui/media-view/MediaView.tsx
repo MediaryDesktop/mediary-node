@@ -2,17 +2,16 @@ import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
 import { useState } from 'react'
 
-import { HttpRequestError, problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
 import { formatRelativeTime, formatWeekday, useUnitWatch } from '@shared/lib'
-import { Button, Icon, Modal, PhaseTransition, toast } from '@shared/ui'
+import { Button, Icon, Modal, PhaseTransition } from '@shared/ui'
 
-import { deleteManualMediaFx, mediaTitle } from '@entities/media'
+import { mediaTitle } from '@entities/media'
 import type { MediaDetails, MediaSource } from '@entities/media'
 import { useTorrentSetup } from '@entities/torrent'
 import type { TrackerEntry } from '@entities/tracker'
 
-import { manualId } from '@features/manual-media-form'
+import { manualId, useManualMediaDeletion } from '@features/manual-media-form'
 import {
 	searchClosed,
 	searchOpened,
@@ -20,7 +19,13 @@ import {
 	useMissingEpisodes
 } from '@features/search-torrents'
 import type { ReleaseWatching } from '@features/search-torrents'
-import { $streamTarget, $streamVia, streamCancelled, streamRequested } from '@features/stream-torrent'
+import {
+	$streamTarget,
+	$streamVia,
+	effectiveVia,
+	streamCancelled,
+	streamRequested
+} from '@features/stream-torrent'
 
 import { resolveSubject } from '../../lib/media-view'
 import { LibrarySection } from '../library-section/LibrarySection'
@@ -50,7 +55,6 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 	const [descriptionOpen, setDescriptionOpen] = useState(false)
 	const [detailsOpen, setDetailsOpen] = useState(false)
 	const [deleteOpen, setDeleteOpen] = useState(false)
-	const [deleting, setDeleting] = useState(false)
 	const [view, setView] = useState<MediaViewKind>('library')
 	const [openSearch, closeSearch, streamTarget, requestStream, cancelStream, chosenVia] = useUnit([
 		searchOpened,
@@ -73,21 +77,12 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 		torrents
 	)
 
-	const confirmDelete = async () => {
-		setDeleting(true)
+	const { remove, deleting } = useManualMediaDeletion(() => {
+		setDeleteOpen(false)
+		void navigate({ to: '/library' })
+	})
 
-		try {
-			await deleteManualMediaFx(manualId(mediaRef))
-			setDeleteOpen(false)
-			void navigate({ to: '/library' })
-		} catch (error) {
-			toast.error(problemDetail(HttpRequestError.fromUnknown(error), t('manualMedia.delete.failed')), {
-				id: 'manual-media-delete'
-			})
-		} finally {
-			setDeleting(false)
-		}
-	}
+	const confirmDelete = () => remove(manualId(mediaRef))
 
 	if (!subject) {
 		return null
@@ -101,7 +96,7 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 
 	const streamable = torrents && VIDEO_TYPES.includes(mediaType)
 	const shown: MediaViewKind = view === 'stream' && !streamable ? 'library' : view
-	const via = setup.debrid ? chosenVia : 'embedded'
+	const via = effectiveVia(chosenVia, Boolean(setup.debrid))
 
 	const releaseKey = (id: string) => `${mediaRef}/release:${id}`
 	const watching: ReleaseWatching | undefined = streamable
@@ -269,7 +264,7 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 								{t('manualMedia.cancel')}
 							</Button>
 
-							<Button variant='primary' onClick={() => void confirmDelete()} loading={deleting}>
+							<Button variant='primary' onClick={confirmDelete} loading={deleting}>
 								{t('manualMedia.delete.confirm')}
 							</Button>
 						</>

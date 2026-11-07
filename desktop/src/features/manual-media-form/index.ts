@@ -3,3 +3,4 @@ export type { ManualMediaType } from './lib/draft'
 
 export { ManualMediaForm } from './ui/manual-media-form/ManualMediaForm'
 export type { ManualMediaFormProps } from './ui/manual-media-form/ManualMediaForm'
+export { useManualMediaDeletion } from './lib/useManualMediaDeletion'

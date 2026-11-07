@@ -7,22 +7,15 @@ import { isLanguage, useTranslation } from '@shared/i18n'
 import { useGoBack } from '@shared/lib'
 import { toast } from '@shared/ui'
 
-import {
-	aiSettingsQuery,
-	createManualMediaFx,
-	deleteManualCoverFx,
-	deleteManualMediaFx,
-	searchManualCoversFx,
-	setManualCoverFx,
-	suggestManualMediaFx,
-	updateManualMediaFx
-} from '@entities/media'
+import { aiSettingsQuery, searchManualCoversFx, suggestManualMediaFx } from '@entities/media'
 import type { ManualDraft, ManualHint } from '@entities/media'
 
-import type { CoverSelection } from '../ui/poster-modal/PosterModal'
+import { saveManualMediaFx } from '../model/model'
 
-import { formatAfterTypeChange, hintNote, manualId, mergeSuggestion, withoutAiFilled } from './draft'
+import type { CoverSelection } from './cover'
+import { formatAfterTypeChange, hintNote, mergeSuggestion, withoutAiFilled } from './draft'
 import type { AiMergeField } from './draft'
+import { useManualMediaDeletion } from './useManualMediaDeletion'
 
 export interface UseManualMediaFormOptions {
 	mode: 'create' | 'edit'
@@ -32,18 +25,6 @@ export interface UseManualMediaFormOptions {
 	cancelTo: string
 	typeUnset?: boolean
 	onInvalid?: (field: 'media_type' | 'title', action: 'save' | 'suggest') => void
-}
-
-function coverSource(selection: CoverSelection): { url?: string; data?: string } | null {
-	if (selection.kind === 'url') {
-		return { url: selection.value }
-	}
-
-	if (selection.kind === 'data') {
-		return { data: selection.value }
-	}
-
-	return null
 }
 
 export function useManualMediaForm({
@@ -58,7 +39,7 @@ export function useManualMediaForm({
 	const { t, i18n } = useTranslation()
 	const navigate = useNavigate()
 	const goBack = useGoBack(cancelTo)
-	const refreshAISettings = useUnit(aiSettingsQuery.start)
+	const [refreshAISettings, saveManual] = useUnit([aiSettingsQuery.start, saveManualMediaFx])
 
 	const [draft, setDraft] = useState<ManualDraft>(initialDraft)
 	const [aiFilled, setAiFilled] = useState<ReadonlySet<AiMergeField>>(new Set())
@@ -68,7 +49,6 @@ export function useManualMediaForm({
 	const [typePicked, setTypePicked] = useState(!typeUnset)
 	const [saving, setSaving] = useState(false)
 	const [suggesting, setSuggesting] = useState(false)
-	const [deleting, setDeleting] = useState(false)
 	const [deleteOpen, setDeleteOpen] = useState(false)
 	const [posterOpen, setPosterOpen] = useState(false)
 
@@ -223,18 +203,6 @@ export function useManualMediaForm({
 		}
 	}
 
-	const applyCover = async (coverId: string) => {
-		if (cover.kind === 'remove') {
-			await deleteManualCoverFx(coverId)
-			return
-		}
-
-		const source = coverSource(cover)
-		if (source) {
-			await setManualCoverFx({ id: coverId, source })
-		}
-	}
-
 	const save = async () => {
 		if (!requireType('save')) {
 			return
@@ -247,38 +215,23 @@ export function useManualMediaForm({
 			return
 		}
 
+		if (mode === 'edit' && !id) {
+			return
+		}
+
 		setSaving(true)
 
 		try {
-			if (mode === 'create') {
-				const created = await createManualMediaFx(draft)
-				const newId = manualId(created.media.media_ref)
+			const saved = await saveManual({ id: mode === 'create' ? null : (id ?? null), draft, cover })
 
-				try {
-					await applyCover(newId)
-				} catch {
-					toast.error(t('manualMedia.cover.failed'), { id: 'manual-media-cover' })
-				}
-
-				toast.success(t('manualMedia.saved'), { id: 'manual-media-save' })
-				void navigate({ to: '/media/$mediaRef', params: { mediaRef: created.media.media_ref } })
-				return
-			}
-
-			if (!id) {
-				return
-			}
-
-			const updated = await updateManualMediaFx({ id, draft })
-
-			try {
-				await applyCover(id)
-			} catch {
+			if (!saved.coverSaved) {
 				toast.error(t('manualMedia.cover.failed'), { id: 'manual-media-cover' })
 			}
 
-			toast.success(t('manualMedia.updated'), { id: 'manual-media-save' })
-			void navigate({ to: '/media/$mediaRef', params: { mediaRef: updated.media.media_ref } })
+			toast.success(t(mode === 'create' ? 'manualMedia.saved' : 'manualMedia.updated'), {
+				id: 'manual-media-save'
+			})
+			void navigate({ to: '/media/$mediaRef', params: { mediaRef: saved.mediaRef } })
 		} catch (error) {
 			const failure = HttpRequestError.fromUnknown(error)
 			const problems = getApiProblems(failure)
@@ -301,23 +254,14 @@ export function useManualMediaForm({
 		}
 	}
 
-	const confirmDelete = async () => {
-		if (!id) {
-			return
-		}
+	const { remove, deleting } = useManualMediaDeletion(() => {
+		setDeleteOpen(false)
+		void navigate({ to: '/library' })
+	})
 
-		setDeleting(true)
-
-		try {
-			await deleteManualMediaFx(id)
-			setDeleteOpen(false)
-			void navigate({ to: '/library' })
-		} catch (error) {
-			toast.error(problemDetail(HttpRequestError.fromUnknown(error), t('manualMedia.delete.failed')), {
-				id: 'manual-media-delete'
-			})
-		} finally {
-			setDeleting(false)
+	const confirmDelete = () => {
+		if (id) {
+			remove(id)
 		}
 	}
 
