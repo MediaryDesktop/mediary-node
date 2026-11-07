@@ -33,7 +33,7 @@ export function ServerForm({ kind }: ServerFormProps) {
 		closed: editor.closed
 	})
 
-	const server = editing?.server ?? null
+	const server = editing?.item ?? null
 	const patrons = patronsFeed !== null && fields.url.trim() === patronsFeed
 
 	return (

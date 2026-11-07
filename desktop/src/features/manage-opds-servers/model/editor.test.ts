@@ -70,7 +70,7 @@ describe('OPDS server editor', () => {
 		await allSettled(editor.submitted, { scope })
 
 		expect(create).not.toHaveBeenCalled()
-		expect(scope.getState(editor.$editing)).toEqual({ server: null })
+		expect(scope.getState(editor.$editing)).toEqual({ item: null })
 	})
 
 	it('ignores a save it did not send', async () => {
@@ -80,7 +80,7 @@ describe('OPDS server editor', () => {
 		await allSettled(editor.opened, { scope, params: SAVED })
 		await allSettled(units.create.start, { scope, params: { name: 'Other', url: 'http://elsewhere' } })
 
-		expect(scope.getState(editor.$editing)).toEqual({ server: SAVED })
+		expect(scope.getState(editor.$editing)).toEqual({ item: SAVED })
 	})
 
 	it('reports its own failed save and stays open', async () => {
@@ -96,7 +96,7 @@ describe('OPDS server editor', () => {
 		await allSettled(editor.submitted, { scope })
 
 		expect(failed).toHaveBeenCalledWith({ body: { detail: 'taken' } })
-		expect(scope.getState(editor.$editing)).toEqual({ server: null })
+		expect(scope.getState(editor.$editing)).toEqual({ item: null })
 	})
 
 	it('shows the answer to its check', async () => {

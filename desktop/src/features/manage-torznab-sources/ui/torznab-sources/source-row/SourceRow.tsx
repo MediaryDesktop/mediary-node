@@ -1,11 +1,12 @@
 import clsx from 'clsx'
-import { useState } from 'react'
+import { useUnit } from 'effector-react'
 
 import { useTranslation } from '@shared/i18n'
 import { CollapsibleSection, Icon, MoreMenu } from '@shared/ui'
 
 import type { TorrentSource } from '@entities/torrent'
 
+import { sourceEditor } from '../../../model/editor'
 import { TorznabSourceForm } from '../source-form/TorznabSourceForm'
 
 import styles from './SourceRow.module.scss'
@@ -19,16 +20,14 @@ export interface SourceRowProps {
 export function SourceRow({ source, removing, onRemove }: SourceRowProps) {
 	const { t } = useTranslation()
 
-	const [open, setOpen] = useState(false)
-	const [formKey, setFormKey] = useState(0)
+	const [editing, opened, closed] = useUnit([
+		sourceEditor.$editing,
+		sourceEditor.opened,
+		sourceEditor.closed
+	])
 
-	const toggle = () =>
-		setOpen(current => {
-			if (!current) {
-				setFormKey(key => key + 1)
-			}
-			return !current
-		})
+	const open = editing?.item?.id === source.id
+	const toggle = () => (open ? closed() : opened(source))
 
 	return (
 		<div className={clsx(styles.row, open && styles.open)}>
@@ -67,7 +66,7 @@ export function SourceRow({ source, removing, onRemove }: SourceRowProps) {
 
 			<CollapsibleSection open={open}>
 				<div className={styles.form}>
-					<TorznabSourceForm key={formKey} source={source} onDone={() => setOpen(false)} />
+					<TorznabSourceForm />
 				</div>
 			</CollapsibleSection>
 		</div>

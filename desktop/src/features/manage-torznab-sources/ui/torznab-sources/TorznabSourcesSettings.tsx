@@ -1,6 +1,6 @@
 import { useUnit } from 'effector-react'
-import { useState } from 'react'
 
+import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
 import { Button, CollapsibleSection, EmptyCard, Icon, toast } from '@shared/ui'
@@ -8,6 +8,8 @@ import { Button, CollapsibleSection, EmptyCard, Icon, toast } from '@shared/ui'
 import { useNodeData } from '@infra/node'
 
 import { deleteTorrentSourceMutation, torrentSourcesQuery } from '@entities/torrent'
+
+import { sourceEditor } from '../../model/editor'
 
 import { TorznabSourceForm } from './source-form/TorznabSourceForm'
 import { SourceRow } from './source-row/SourceRow'
@@ -22,21 +24,22 @@ export function TorznabSourcesSettings() {
 		deleteTorrentSourceMutation.$pending
 	])
 
-	const [adding, setAdding] = useState(false)
-	const [addKey, setAddKey] = useState(0)
+	const [editing, opened, closed] = useUnit([
+		sourceEditor.$editing,
+		sourceEditor.opened,
+		sourceEditor.closed
+	])
 
-	const toggleAdding = () =>
-		setAdding(current => {
-			if (!current) {
-				setAddKey(key => key + 1)
-			}
-			return !current
-		})
+	const adding = editing !== null && editing.item === null
+	const toggleAdding = () => (adding ? closed() : opened(null))
 
 	useNodeData(torrentSourcesQuery)
 
 	useUnitWatch(deleteTorrentSourceMutation.finished.failure, () =>
 		toast.error(t('torrents.sources.removeFailed'), { id: 'torznab-remove-failed' })
+	)
+	useUnitWatch(sourceEditor.saveFailed, error =>
+		toast.error(problemDetail(error, t('torrents.sources.saveFailed')), { id: 'torznab-save-failed' })
 	)
 
 	const sources = data?.sources ?? []
@@ -79,7 +82,7 @@ export function TorznabSourcesSettings() {
 
 			<CollapsibleSection open={adding}>
 				<div className={styles.addSection}>
-					<TorznabSourceForm key={addKey} source={null} onDone={() => setAdding(false)} />
+					<TorznabSourceForm />
 				</div>
 			</CollapsibleSection>
 		</div>

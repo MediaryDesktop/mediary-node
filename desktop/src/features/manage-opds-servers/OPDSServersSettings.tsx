@@ -26,7 +26,7 @@ export function OPDSServersSettings({ kind }: OPDSServersSettingsProps) {
 	const [data, remove, removing] = useUnit([query.$data, removal.start, removal.$pending])
 	const [editing, opened, closed] = useUnit([editor.$editing, editor.opened, editor.closed])
 
-	const adding = editing !== null && editing.server === null
+	const adding = editing !== null && editing.item === null
 
 	useNodeData(query)
 

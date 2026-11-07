@@ -26,7 +26,7 @@ export function ServerRow({ kind, server, removing, onRemove }: ServerRowProps) 
 
 	const [editing, opened, closed] = useUnit([editor.$editing, editor.opened, editor.closed])
 
-	const open = editing?.server?.id === server.id
+	const open = editing?.item?.id === server.id
 
 	return (
 		<div className={clsx(styles.row, open && styles.open)}>
