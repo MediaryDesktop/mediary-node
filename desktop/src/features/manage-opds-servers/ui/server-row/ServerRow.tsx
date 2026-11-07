@@ -1,34 +1,32 @@
 import clsx from 'clsx'
-import { useState } from 'react'
+import { useUnit } from 'effector-react'
 
 import { useTranslation } from '@shared/i18n'
 import { CollapsibleSection, Icon, MoreMenu } from '@shared/ui'
 
-import type { OPDSServer } from '@entities/manga-source'
-
-import { OPDSServerForm } from '../server-form/OPDSServerForm'
+import { OPDS_KINDS } from '../../config/kinds'
+import type { OPDSKind } from '../../config/kinds'
+import type { EditedServer } from '../../lib/form'
+import { serverEditors } from '../../model/editor'
+import { ServerForm } from '../server-form/ServerForm'
 
 import styles from './ServerRow.module.scss'
 
 export interface ServerRowProps {
-	server: OPDSServer
+	kind: OPDSKind
+	server: EditedServer
 	removing: boolean
 	onRemove: () => void
 }
 
-export function ServerRow({ server, removing, onRemove }: ServerRowProps) {
+export function ServerRow({ kind, server, removing, onRemove }: ServerRowProps) {
 	const { t } = useTranslation()
+	const { text } = OPDS_KINDS[kind]
+	const editor = serverEditors[kind]
 
-	const [open, setOpen] = useState(false)
-	const [formKey, setFormKey] = useState(0)
+	const [editing, opened, closed] = useUnit([editor.$editing, editor.opened, editor.closed])
 
-	const toggle = () =>
-		setOpen(current => {
-			if (!current) {
-				setFormKey(key => key + 1)
-			}
-			return !current
-		})
+	const open = editing?.server?.id === server.id
 
 	return (
 		<div className={clsx(styles.row, open && styles.open)}>
@@ -45,17 +43,17 @@ export function ServerRow({ server, removing, onRemove }: ServerRowProps) {
 				</span>
 
 				<MoreMenu
-					label={t('mangaSources.menu')}
+					label={t(`${text}.menu`)}
 					items={[
 						{
 							id: 'edit',
-							label: open ? t('common.cancel') : t('mangaSources.edit'),
+							label: open ? t('common.cancel') : t(`${text}.edit`),
 							icon: open ? 'common/close' : 'common/pencil',
-							onSelect: toggle
+							onSelect: () => (open ? closed() : opened(server))
 						},
 						{
 							id: 'remove',
-							label: t('mangaSources.remove'),
+							label: t(`${text}.remove`),
 							icon: 'common/trash',
 							danger: true,
 							disabled: removing,
@@ -67,7 +65,7 @@ export function ServerRow({ server, removing, onRemove }: ServerRowProps) {
 
 			<CollapsibleSection open={open}>
 				<div className={styles.form}>
-					<OPDSServerForm key={formKey} server={server} onDone={() => setOpen(false)} />
+					<ServerForm kind={kind} />
 				</div>
 			</CollapsibleSection>
 		</div>

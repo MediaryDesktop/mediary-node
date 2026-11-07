@@ -13,7 +13,6 @@ import { MissingPlayerNotice, PlayerModeSwitcher } from '@features/choose-player
 import { AniListAccountSettings } from '@features/connect-anilist'
 import { DownloadFolderSetting } from '@features/download-chapters'
 import { BookFolderSetting } from '@features/download-free-book'
-import { BookServersSettings } from '@features/manage-book-sources'
 import { DebridServiceSettings } from '@features/manage-debrid-service'
 import { LibraryRootsSettings } from '@features/manage-library-roots'
 import { OPDSServersSettings } from '@features/manage-opds-servers'
@@ -156,7 +155,7 @@ function SectionContent({ section }: { section: SectionInfo }) {
 		case 'manga':
 			return (
 				<>
-					<OPDSServersSettings />
+					<OPDSServersSettings kind='manga' />
 
 					<Card>
 						<Row
@@ -171,7 +170,7 @@ function SectionContent({ section }: { section: SectionInfo }) {
 		case 'books':
 			return (
 				<>
-					<BookServersSettings />
+					<OPDSServersSettings kind='books' />
 
 					<Card>
 						<Row name={t('settings.bookDownloads.name')} hint={t('settings.bookDownloads.hint')}>

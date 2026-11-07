@@ -1,42 +1,40 @@
 import { useUnit } from 'effector-react'
-import { useState } from 'react'
 
+import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
 import { Button, CollapsibleSection, EmptyCard, Icon, toast } from '@shared/ui'
 
 import { useNodeData } from '@infra/node'
 
-import { deleteOPDSServerMutation, opdsServersQuery } from '@entities/manga-source'
-
+import { OPDS_KINDS } from './config/kinds'
+import type { OPDSKind } from './config/kinds'
+import { serverEditors } from './model/editor'
 import styles from './OPDSServersSettings.module.scss'
-import { OPDSServerForm } from './ui/server-form/OPDSServerForm'
+import { ServerForm } from './ui/server-form/ServerForm'
 import { ServerRow } from './ui/server-row/ServerRow'
 
-export function OPDSServersSettings() {
+export interface OPDSServersSettingsProps {
+	kind: OPDSKind
+}
+
+export function OPDSServersSettings({ kind }: OPDSServersSettingsProps) {
 	const { t } = useTranslation()
+	const { servers: query, remove: removal, section, text, toast: toastId } = OPDS_KINDS[kind]
+	const editor = serverEditors[kind]
 
-	const [data, remove, removing] = useUnit([
-		opdsServersQuery.$data,
-		deleteOPDSServerMutation.start,
-		deleteOPDSServerMutation.$pending
-	])
+	const [data, remove, removing] = useUnit([query.$data, removal.start, removal.$pending])
+	const [editing, opened, closed] = useUnit([editor.$editing, editor.opened, editor.closed])
 
-	const [adding, setAdding] = useState(false)
-	const [addKey, setAddKey] = useState(0)
+	const adding = editing !== null && editing.server === null
 
-	const toggleAdding = () =>
-		setAdding(current => {
-			if (!current) {
-				setAddKey(key => key + 1)
-			}
-			return !current
-		})
+	useNodeData(query)
 
-	useNodeData(opdsServersQuery)
-
-	useUnitWatch(deleteOPDSServerMutation.finished.failure, () =>
-		toast.error(t('mangaSources.removeFailed'), { id: 'opds-remove-failed' })
+	useUnitWatch(removal.finished.failure, () =>
+		toast.error(t(`${text}.removeFailed`), { id: `${toastId}-remove-failed` })
+	)
+	useUnitWatch(editor.saveFailed, error =>
+		toast.error(problemDetail(error, t(`${text}.saveFailed`)), { id: `${toastId}-save-failed` })
 	)
 
 	const servers = data?.servers ?? []
@@ -45,16 +43,16 @@ export function OPDSServersSettings() {
 		<div className={styles.card}>
 			<div className={styles.header}>
 				<div className={styles.headerText}>
-					<h3 className={styles.title}>{t('settings.mangaSources.name')}</h3>
-					<p className={styles.hint}>{t('settings.mangaSources.hint')}</p>
+					<h3 className={styles.title}>{t(`${section}.name`)}</h3>
+					<p className={styles.hint}>{t(`${section}.hint`)}</p>
 				</div>
 
 				<Button
 					size='small'
 					iconOnly
-					aria-label={adding ? t('common.cancel') : t('mangaSources.add')}
+					aria-label={adding ? t('common.cancel') : t(`${text}.add`)}
 					startIcon={<Icon name={adding ? 'common/close' : 'common/plus'} size={16} />}
-					onClick={toggleAdding}
+					onClick={() => (adding ? closed() : opened(null))}
 				/>
 			</div>
 
@@ -63,6 +61,7 @@ export function OPDSServersSettings() {
 					{servers.map(server => (
 						<ServerRow
 							key={server.id}
+							kind={kind}
 							server={server}
 							removing={removing}
 							onRemove={() => remove(server.id)}
@@ -72,14 +71,14 @@ export function OPDSServersSettings() {
 			) : (
 				<EmptyCard
 					icon='common/database'
-					title={t('mangaSources.none')}
-					description={t('mangaSources.noneHint')}
+					title={t(`${text}.none`)}
+					description={t(`${text}.noneHint`)}
 				/>
 			)}
 
 			<CollapsibleSection open={adding}>
 				<div className={styles.addSection}>
-					<OPDSServerForm key={addKey} server={null} onDone={() => setAdding(false)} />
+					<ServerForm kind={kind} />
 				</div>
 			</CollapsibleSection>
 		</div>
