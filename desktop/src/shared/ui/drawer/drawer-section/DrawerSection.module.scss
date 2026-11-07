@@ -19,7 +19,7 @@
 	.title {
 		display: block;
 		margin: 0 0 0.2rem;
-		font-size: 1.05rem;
+		font-size: var(--font-size-lg);
 		font-weight: 650;
 		color: var(--text);
 	}
@@ -52,7 +52,7 @@
 
 	.description {
 		margin: 0;
-		font-size: 0.9rem;
+		font-size: var(--font-size-md);
 		line-height: 1.45;
 		color: var(--text-secondary);
 	}

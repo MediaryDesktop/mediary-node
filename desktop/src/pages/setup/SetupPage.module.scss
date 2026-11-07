@@ -21,7 +21,7 @@ $step-gap: 4rem;
 			margin: 0.625rem auto 0;
 			max-width: 30rem;
 			color: var(--text-secondary);
-			font-size: 0.9375rem;
+			font-size: var(--font-size-base);
 			line-height: 1.55;
 		}
 	}

@@ -28,7 +28,7 @@
 		background: color-mix(in srgb, var(--bg) 72%, transparent);
 		box-shadow: var(--shadow-sm);
 		color: var(--text-secondary);
-		font-size: 0.8125rem;
+		font-size: var(--font-size-sm);
 		backdrop-filter: blur(12px);
 		-webkit-backdrop-filter: blur(12px);
 		animation: chip-in 0.4s cubic-bezier(0.2, 0, 0, 1) 0.1s backwards;

@@ -23,14 +23,14 @@
 
 			.title {
 				margin: 0;
-				font-size: 1.0625rem;
+				font-size: var(--font-size-lg);
 				font-weight: 600;
 				color: var(--text);
 			}
 
 			.hint {
 				margin: 0;
-				font-size: 0.875rem;
+				font-size: var(--font-size-md);
 				line-height: 1.25rem;
 				color: var(--text-secondary);
 			}
@@ -39,14 +39,14 @@
 
 	.note {
 		margin: 0;
-		font-size: 0.875rem;
+		font-size: var(--font-size-md);
 		line-height: 1.3125rem;
 		color: var(--text-secondary);
 	}
 
 	.error {
 		margin: 0;
-		font-size: 0.8125rem;
+		font-size: var(--font-size-sm);
 		line-height: 1.3125rem;
 		color: var(--danger-text);
 	}
@@ -68,7 +68,7 @@
 		border-radius: var(--radius);
 		background: transparent;
 		color: var(--text-secondary);
-		font-size: 0.8125rem;
+		font-size: var(--font-size-sm);
 		line-height: 1.125rem;
 
 		svg {
@@ -105,14 +105,14 @@
 			gap: 0.125rem;
 
 			.lastBackupTitle {
-				font-size: 0.9375rem;
+				font-size: var(--font-size-base);
 				font-weight: 600;
 				line-height: 1.25rem;
 				color: var(--text);
 			}
 
 			.lastBackupWhen {
-				font-size: 0.8125rem;
+				font-size: var(--font-size-sm);
 				line-height: 1.125rem;
 				color: var(--text-secondary);
 			}
@@ -127,7 +127,7 @@
 		.listLabel {
 			padding: 0 0.25rem;
 			color: var(--text-secondary);
-			font-size: 0.75rem;
+			font-size: var(--font-size-xs);
 			font-weight: 600;
 			line-height: 1rem;
 			letter-spacing: 0.04em;
@@ -159,7 +159,7 @@
 					gap: 0.25rem;
 
 					.when {
-						font-size: 0.9375rem;
+						font-size: var(--font-size-base);
 						font-weight: 600;
 						line-height: 1.25rem;
 						color: var(--text);
@@ -168,7 +168,7 @@
 					.meta {
 						overflow: hidden;
 						color: var(--text-secondary);
-						font-size: 0.8125rem;
+						font-size: var(--font-size-sm);
 						line-height: 1.125rem;
 						text-overflow: ellipsis;
 						white-space: nowrap;

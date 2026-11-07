@@ -43,7 +43,7 @@
 
 		.episodeLabel {
 			color: var(--text);
-			font-size: 1rem;
+			font-size: var(--font-size-lg);
 			font-weight: 650;
 		}
 
@@ -51,7 +51,7 @@
 			margin: 0;
 			overflow: hidden;
 			color: var(--text-muted);
-			font-size: 0.8125rem;
+			font-size: var(--font-size-sm);
 			text-overflow: ellipsis;
 			white-space: nowrap;
 		}
@@ -61,7 +61,7 @@
 			flex-wrap: wrap;
 			gap: 0.75rem;
 			color: var(--text-secondary);
-			font-size: 0.8125rem;
+			font-size: var(--font-size-sm);
 
 			.seeds {
 				color: var(--success-text);

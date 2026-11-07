@@ -15,14 +15,14 @@
 
 		.title {
 			margin: 0;
-			font-size: 1.0625rem;
+			font-size: var(--font-size-lg);
 			font-weight: 600;
 			color: var(--text);
 		}
 
 		.hint {
 			margin: 0;
-			font-size: 0.875rem;
+			font-size: var(--font-size-md);
 			line-height: 1.25rem;
 			color: var(--text-secondary);
 		}
@@ -40,7 +40,7 @@
 			align-items: center;
 			gap: 0.5rem;
 			margin: 0;
-			font-size: 0.875rem;
+			font-size: var(--font-size-md);
 			line-height: 1.25rem;
 			color: var(--text-secondary);
 
@@ -76,7 +76,7 @@
 		gap: 0.5rem;
 		width: fit-content;
 		color: var(--text-secondary);
-		font-size: 0.8125rem;
+		font-size: var(--font-size-sm);
 		font-weight: 600;
 		text-decoration: underline;
 		text-underline-offset: 3px;
@@ -88,7 +88,7 @@
 
 	.note {
 		margin: 0;
-		font-size: 0.8125rem;
+		font-size: var(--font-size-sm);
 		line-height: 1.125rem;
 		color: var(--text-secondary);
 	}

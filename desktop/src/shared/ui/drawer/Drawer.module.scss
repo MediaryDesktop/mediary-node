@@ -140,7 +140,7 @@ $ease-in: cubic-bezier(0.32, 0.72, 0, 1);
 				flex: 1;
 				min-width: 0;
 				margin: 0;
-				font-size: 1.45rem;
+				font-size: var(--font-size-2xl);
 				font-weight: 650;
 			}
 
@@ -178,7 +178,7 @@ $ease-in: cubic-bezier(0.32, 0.72, 0, 1);
 
 		.description {
 			margin: 0;
-			font-size: 1rem;
+			font-size: var(--font-size-lg);
 			color: var(--text-secondary);
 		}
 	}

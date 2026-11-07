@@ -10,6 +10,17 @@
 
 	--motion-duration: 160ms;
 
+	--font-size-2xs: 0.6875rem;
+	--font-size-xs: 0.75rem;
+	--font-size-sm: 0.8125rem;
+	--font-size-md: 0.875rem;
+	--font-size-base: 0.9375rem;
+	--font-size-lg: 1rem;
+	--font-size-xl: 1.25rem;
+	--font-size-2xl: 1.375rem;
+	--font-size-display: 2rem;
+	--font-size-hero: 2.75rem;
+
 	--layer-sidebar: 20;
 	--layer-scroll-progress: 30;
 	--layer-floating: 40;
@@ -56,7 +67,7 @@ body {
 	background: var(--bg);
 	color: var(--text);
 	font-family: var(--font-ui);
-	font-size: 15px;
+	font-size: var(--font-size-base);
 	line-height: 1.5;
 	-webkit-font-smoothing: antialiased;
 	overscroll-behavior: none;

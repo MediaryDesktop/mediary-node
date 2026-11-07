@@ -10,21 +10,21 @@
 
 		.title {
 			margin: 0;
-			font-size: 1.375rem;
+			font-size: var(--font-size-2xl);
 			font-weight: 650;
 		}
 
 		.subtitle {
 			margin: 0;
 			color: var(--text-muted);
-			font-size: 0.875rem;
+			font-size: var(--font-size-md);
 		}
 	}
 
 	.note {
 		margin: 0;
 		color: var(--text-muted);
-		font-size: 0.8125rem;
+		font-size: var(--font-size-sm);
 		line-height: 1.45;
 	}
 
@@ -38,7 +38,7 @@
 
 		.emptyTitle {
 			margin: 0;
-			font-size: 0.9375rem;
+			font-size: var(--font-size-base);
 			font-weight: 550;
 		}
 	}
@@ -46,7 +46,7 @@
 	.failure {
 		margin: 0;
 		color: var(--danger-text);
-		font-size: 0.8125rem;
+		font-size: var(--font-size-sm);
 	}
 
 	.list {
@@ -86,7 +86,7 @@
 				.name {
 					overflow: hidden;
 					margin: 0;
-					font-size: 0.9375rem;
+					font-size: var(--font-size-base);
 					font-weight: 550;
 					text-overflow: ellipsis;
 					white-space: nowrap;
@@ -95,7 +95,7 @@
 				.meta {
 					overflow: hidden;
 					color: var(--text-muted);
-					font-size: 0.8125rem;
+					font-size: var(--font-size-sm);
 					text-overflow: ellipsis;
 					white-space: nowrap;
 				}

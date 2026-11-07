@@ -7,7 +7,7 @@
 
 	.subtitle {
 		margin: 0;
-		font-size: 1.0625rem;
+		font-size: var(--font-size-lg);
 		font-weight: 650;
 
 		& + .list {

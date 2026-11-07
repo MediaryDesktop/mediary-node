@@ -63,7 +63,7 @@
 			.rankTitle {
 				overflow: hidden;
 				color: var(--text);
-				font-size: 0.875rem;
+				font-size: var(--font-size-md);
 				font-weight: 600;
 				text-overflow: ellipsis;
 				white-space: nowrap;
@@ -71,7 +71,7 @@
 
 			.rankType {
 				color: var(--text-muted);
-				font-size: 0.75rem;
+				font-size: var(--font-size-xs);
 			}
 		}
 
@@ -84,7 +84,7 @@
 			border-radius: var(--radius-full);
 			background: var(--accent-muted);
 			color: var(--accent-text);
-			font-size: 0.8125rem;
+			font-size: var(--font-size-sm);
 			font-weight: 650;
 			font-variant-numeric: tabular-nums;
 		}

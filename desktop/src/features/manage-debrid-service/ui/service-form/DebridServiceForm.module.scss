@@ -24,7 +24,7 @@
 			align-items: center;
 			gap: 0.5rem;
 			margin: 0;
-			font-size: 0.8125rem;
+			font-size: var(--font-size-sm);
 			line-height: 1.125rem;
 			color: var(--text-secondary);
 
@@ -47,7 +47,7 @@
 
 			.sectionHint {
 				margin: 0;
-				font-size: 0.8125rem;
+				font-size: var(--font-size-sm);
 				line-height: 1.125rem;
 				color: var(--text-secondary);
 			}
@@ -84,7 +84,7 @@
 
 .sectionTitle {
 	margin: 0;
-	font-size: 0.9375rem;
+	font-size: var(--font-size-base);
 	font-weight: 600;
 	color: var(--text);
 }

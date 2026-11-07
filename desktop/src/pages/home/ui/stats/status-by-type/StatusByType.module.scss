@@ -18,7 +18,7 @@
 				align-items: center;
 				gap: 0.25rem;
 				color: var(--text-muted);
-				font-size: 0.625rem;
+				font-size: var(--font-size-2xs);
 				line-height: 1.15;
 				text-align: center;
 
@@ -31,7 +31,7 @@
 
 			.totalHead {
 				color: var(--text-muted);
-				font-size: 0.625rem;
+				font-size: var(--font-size-2xs);
 				text-align: right;
 				padding-right: 0.125rem;
 			}
@@ -39,7 +39,7 @@
 			.typeLabel {
 				color: var(--text);
 				font-weight: 650;
-				font-size: 0.8125rem;
+				font-size: var(--font-size-sm);
 			}
 
 			.cell,
@@ -48,7 +48,7 @@
 				place-items: center;
 				height: 1.875rem;
 				border-radius: 0.4375rem;
-				font-size: 0.8125rem;
+				font-size: var(--font-size-sm);
 				font-weight: 700;
 				font-variant-numeric: tabular-nums;
 			}
@@ -62,7 +62,7 @@
 			.rowTotal {
 				color: var(--text);
 				font-weight: 700;
-				font-size: 0.8125rem;
+				font-size: var(--font-size-sm);
 				text-align: right;
 				padding-right: 0.125rem;
 				font-variant-numeric: tabular-nums;
@@ -80,12 +80,12 @@
 
 			.allLabel {
 				color: var(--text-muted);
-				font-size: 0.8125rem;
+				font-size: var(--font-size-sm);
 			}
 
 			.footerCell {
 				text-align: center;
-				font-size: 0.8125rem;
+				font-size: var(--font-size-sm);
 				font-weight: 700;
 				font-variant-numeric: tabular-nums;
 			}
@@ -93,7 +93,7 @@
 			.grandTotal {
 				color: var(--tile-accent, var(--accent));
 				font-weight: 800;
-				font-size: 0.8125rem;
+				font-size: var(--font-size-sm);
 				text-align: right;
 				padding-right: 0.125rem;
 				font-variant-numeric: tabular-nums;

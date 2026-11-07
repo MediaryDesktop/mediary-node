@@ -101,7 +101,7 @@
 		&.avatar {
 			background: var(--accent-muted);
 			color: var(--accent-text);
-			font-size: 0.9375rem;
+			font-size: var(--font-size-base);
 			font-weight: 650;
 			cursor: default;
 
@@ -121,7 +121,7 @@
 			background: var(--surface);
 			box-shadow: var(--shadow-md);
 			color: var(--text);
-			font-size: 0.8125rem;
+			font-size: var(--font-size-sm);
 			white-space: nowrap;
 			opacity: 0;
 			visibility: hidden;

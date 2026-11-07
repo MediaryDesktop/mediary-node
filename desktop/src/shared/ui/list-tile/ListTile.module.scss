@@ -32,13 +32,13 @@
 
 		.title {
 			color: var(--text);
-			font-size: 0.875rem;
+			font-size: var(--font-size-md);
 		}
 
 		.subtitle {
 			margin-top: 0.125rem;
 			color: var(--text-muted);
-			font-size: 0.75rem;
+			font-size: var(--font-size-xs);
 		}
 	}
 

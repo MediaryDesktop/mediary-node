@@ -46,7 +46,7 @@
 
 		.title {
 			overflow: hidden;
-			font-size: 1rem;
+			font-size: var(--font-size-lg);
 			font-weight: 650;
 			text-overflow: ellipsis;
 			white-space: nowrap;
@@ -57,7 +57,7 @@
 			gap: 0.5rem;
 			min-width: 0;
 			color: var(--text-secondary);
-			font-size: 0.875rem;
+			font-size: var(--font-size-md);
 
 			.label {
 				flex: none;

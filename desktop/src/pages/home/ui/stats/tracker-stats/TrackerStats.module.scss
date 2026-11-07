@@ -59,7 +59,7 @@
 
 				.tileLabel {
 					color: var(--tile-accent, var(--text-secondary));
-					font-size: 0.875rem;
+					font-size: var(--font-size-md);
 					font-weight: 500;
 				}
 			}
@@ -70,14 +70,14 @@
 				gap: 0.25rem;
 				margin: 0.25rem 0 0;
 				color: var(--text);
-				font-size: 2rem;
+				font-size: var(--font-size-display);
 				font-weight: 700;
 				line-height: 1.1;
 				font-variant-numeric: tabular-nums;
 
 				.tileUnit {
 					color: var(--text-muted);
-					font-size: 1rem;
+					font-size: var(--font-size-lg);
 					font-weight: 600;
 				}
 			}
@@ -106,7 +106,7 @@
 				.tileBadge {
 					padding: 0.1875rem 0.5625rem;
 					border-radius: var(--radius-full);
-					font-size: 0.75rem;
+					font-size: var(--font-size-xs);
 					font-weight: 650;
 				}
 			}
@@ -114,7 +114,7 @@
 			.tileNote {
 				margin: 0;
 				color: var(--text-muted);
-				font-size: 0.8125rem;
+				font-size: var(--font-size-sm);
 			}
 		}
 	}

@@ -34,14 +34,14 @@
 
 			.title {
 				margin: 0;
-				font-size: 1.25rem;
+				font-size: var(--font-size-xl);
 				font-weight: 650;
 			}
 
 			.subtitle {
 				margin: 0;
 				color: var(--text-secondary);
-				font-size: 0.875rem;
+				font-size: var(--font-size-md);
 			}
 		}
 
@@ -62,7 +62,7 @@
 	.problem,
 	.message {
 		margin: 0;
-		font-size: 0.875rem;
+		font-size: var(--font-size-md);
 	}
 
 	.problem {
@@ -93,7 +93,7 @@
 
 			.picked {
 				color: var(--text-secondary);
-				font-size: 0.8125rem;
+				font-size: var(--font-size-sm);
 				font-variant-numeric: tabular-nums;
 			}
 		}

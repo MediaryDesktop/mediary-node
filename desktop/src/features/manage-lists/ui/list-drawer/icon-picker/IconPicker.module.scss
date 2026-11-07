@@ -53,7 +53,7 @@
 			min-width: 0;
 			padding: 0 12px;
 			overflow: hidden;
-			font-size: 14px;
+			font-size: var(--font-size-md);
 			font-weight: 500;
 			text-overflow: ellipsis;
 			white-space: nowrap;
@@ -101,7 +101,7 @@
 				background: none;
 				color: var(--text);
 				font: inherit;
-				font-size: 14px;
+				font-size: var(--font-size-md);
 				outline: none;
 
 				&::placeholder {
@@ -112,7 +112,7 @@
 			.count {
 				flex-shrink: 0;
 				color: var(--text-muted);
-				font-size: 12px;
+				font-size: var(--font-size-xs);
 				font-variant-numeric: tabular-nums;
 			}
 		}
@@ -170,7 +170,7 @@
 			margin: 0;
 			padding: 20px 12px;
 			color: var(--text-secondary);
-			font-size: 13px;
+			font-size: var(--font-size-sm);
 			text-align: center;
 		}
 	}

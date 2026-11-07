@@ -17,7 +17,7 @@
 	.text {
 		margin: 0;
 		color: var(--text-secondary);
-		font-size: 0.875rem;
+		font-size: var(--font-size-md);
 		line-height: 1.55;
 		text-align: center;
 	}
@@ -31,13 +31,13 @@
 		margin-bottom: 0.5rem;
 
 		.label {
-			font-size: 0.875rem;
+			font-size: var(--font-size-md);
 			font-weight: 600;
 		}
 
 		.required {
 			color: var(--danger-text);
-			font-size: 0.875rem;
+			font-size: var(--font-size-md);
 		}
 	}
 
@@ -48,14 +48,14 @@
 	.hint {
 		margin: 0.5rem 0 0;
 		color: var(--text-secondary);
-		font-size: 0.8125rem;
+		font-size: var(--font-size-sm);
 		line-height: 1.5;
 	}
 
 	.install {
 		margin: 1.25rem 0 0;
 		color: var(--text-secondary);
-		font-size: 0.8125rem;
+		font-size: var(--font-size-sm);
 		line-height: 1.6;
 	}
 }

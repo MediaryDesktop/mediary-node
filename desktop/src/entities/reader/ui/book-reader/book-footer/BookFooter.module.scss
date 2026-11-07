@@ -40,7 +40,7 @@
 	.count {
 		flex: none;
 		color: var(--chrome-muted);
-		font-size: 0.8125rem;
+		font-size: var(--font-size-sm);
 		font-variant-numeric: tabular-nums;
 		white-space: nowrap;
 	}

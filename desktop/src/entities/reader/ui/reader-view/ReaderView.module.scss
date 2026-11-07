@@ -101,7 +101,7 @@
 
 			.title {
 				overflow: hidden;
-				font-size: 1.0625rem;
+				font-size: var(--font-size-lg);
 				font-weight: 650;
 				text-overflow: ellipsis;
 				white-space: nowrap;
@@ -109,7 +109,7 @@
 
 			.subtitle {
 				color: color-mix(in srgb, var(--on-media) 70%, transparent);
-				font-size: 0.8125rem;
+				font-size: var(--font-size-sm);
 			}
 		}
 
@@ -118,7 +118,7 @@
 			align-items: center;
 			gap: 0.25rem;
 			color: var(--success-text);
-			font-size: 0.8125rem;
+			font-size: var(--font-size-sm);
 		}
 
 		.window {
@@ -182,7 +182,7 @@
 
 		.count {
 			color: var(--text-primary);
-			font-size: 0.8125rem;
+			font-size: var(--font-size-sm);
 			font-variant-numeric: tabular-nums;
 			font-weight: 700;
 

@@ -78,7 +78,7 @@ $morph: 380ms cubic-bezier(0.32, 0.72, 0, 1);
 						gap: 1rem;
 						padding-right: 0.5rem;
 						color: color-mix(in srgb, var(--on-media) 55%, transparent);
-						font-size: 0.9375rem;
+						font-size: var(--font-size-base);
 						font-weight: 600;
 						font-variant-numeric: tabular-nums;
 						white-space: nowrap;
@@ -99,7 +99,7 @@ $morph: 380ms cubic-bezier(0.32, 0.72, 0, 1);
 						overflow: hidden;
 						padding-right: 0.5rem;
 						color: color-mix(in srgb, var(--on-media) 85%, transparent);
-						font-size: 0.9375rem;
+						font-size: var(--font-size-base);
 						font-weight: 600;
 						white-space: nowrap;
 						text-overflow: ellipsis;
@@ -115,7 +115,7 @@ $morph: 380ms cubic-bezier(0.32, 0.72, 0, 1);
 					.title {
 						overflow: hidden;
 						color: var(--text);
-						font-size: 1.0625rem;
+						font-size: var(--font-size-lg);
 						font-weight: 700;
 						white-space: nowrap;
 						text-overflow: ellipsis;
@@ -123,7 +123,7 @@ $morph: 380ms cubic-bezier(0.32, 0.72, 0, 1);
 
 					.episode {
 						color: var(--text-secondary);
-						font-size: 0.875rem;
+						font-size: var(--font-size-md);
 					}
 				}
 			}
@@ -209,7 +209,7 @@ $morph: 380ms cubic-bezier(0.32, 0.72, 0, 1);
 					border: 1px solid color-mix(in srgb, var(--on-media) 9%, transparent);
 					border-radius: 1.125rem;
 					color: color-mix(in srgb, var(--on-media) 90%, transparent);
-					font-size: 0.9375rem;
+					font-size: var(--font-size-base);
 					font-weight: 600;
 
 					.spinner {
@@ -231,7 +231,7 @@ $morph: 380ms cubic-bezier(0.32, 0.72, 0, 1);
 					.section {
 						margin: 0 0 0 0.375rem;
 						color: color-mix(in srgb, var(--on-media) 45%, transparent);
-						font-size: 0.75rem;
+						font-size: var(--font-size-xs);
 						font-weight: 700;
 						letter-spacing: 0.05em;
 						text-transform: uppercase;
@@ -274,7 +274,7 @@ $morph: 380ms cubic-bezier(0.32, 0.72, 0, 1);
 							.candidateTitle {
 								overflow: hidden;
 								color: var(--on-media);
-								font-size: 0.9375rem;
+								font-size: var(--font-size-base);
 								font-weight: 600;
 								white-space: nowrap;
 								text-overflow: ellipsis;
@@ -282,13 +282,13 @@ $morph: 380ms cubic-bezier(0.32, 0.72, 0, 1);
 
 							.candidateSource {
 								color: color-mix(in srgb, var(--on-media) 40%, transparent);
-								font-size: 0.75rem;
+								font-size: var(--font-size-xs);
 							}
 
 							.score {
 								flex: none;
 								color: color-mix(in srgb, var(--on-media) 50%, transparent);
-								font-size: 0.8125rem;
+								font-size: var(--font-size-sm);
 								font-weight: 600;
 							}
 
@@ -296,7 +296,7 @@ $morph: 380ms cubic-bezier(0.32, 0.72, 0, 1);
 								flex: none;
 								padding: 0.375rem 0.75rem;
 								border-radius: var(--radius-full);
-								font-size: 0.6875rem;
+								font-size: var(--font-size-2xs);
 								font-weight: 700;
 								letter-spacing: 0.05em;
 								text-transform: uppercase;
@@ -328,7 +328,7 @@ $morph: 380ms cubic-bezier(0.32, 0.72, 0, 1);
 					border: 1px solid color-mix(in srgb, var(--on-media) 9%, transparent);
 					border-radius: 1.125rem;
 					color: color-mix(in srgb, var(--on-media) 55%, transparent);
-					font-size: 0.875rem;
+					font-size: var(--font-size-md);
 					font-weight: 600;
 					font-variant-numeric: tabular-nums;
 
@@ -344,7 +344,7 @@ $morph: 380ms cubic-bezier(0.32, 0.72, 0, 1);
 
 						&.muted {
 							color: color-mix(in srgb, var(--on-media) 45%, transparent);
-							font-size: 0.8125rem;
+							font-size: var(--font-size-sm);
 						}
 					}
 
@@ -383,7 +383,7 @@ $morph: 380ms cubic-bezier(0.32, 0.72, 0, 1);
 			max-width: 34rem;
 			margin: 0;
 			color: color-mix(in srgb, var(--on-media) 85%, transparent);
-			font-size: 1.125rem;
+			font-size: var(--font-size-xl);
 			font-weight: 600;
 		}
 
@@ -398,7 +398,7 @@ $morph: 380ms cubic-bezier(0.32, 0.72, 0, 1);
 			.failureTitle {
 				margin: 0;
 				color: var(--on-media);
-				font-size: 1.25rem;
+				font-size: var(--font-size-xl);
 				font-weight: 700;
 			}
 

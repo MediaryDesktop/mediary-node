@@ -28,7 +28,7 @@
 
 		.path {
 			overflow: hidden;
-			font-size: 0.9375rem;
+			font-size: var(--font-size-base);
 			font-weight: 600;
 			line-height: 1.25rem;
 			color: var(--text);
@@ -44,7 +44,7 @@
 			gap: 0.5rem;
 
 			.count {
-				font-size: 0.8125rem;
+				font-size: var(--font-size-sm);
 				line-height: 1.125rem;
 				color: var(--text-secondary);
 			}

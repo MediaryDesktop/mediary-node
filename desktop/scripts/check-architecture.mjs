@@ -301,6 +301,31 @@ if (rawColours.length === 0) {
 	console.error('')
 }
 
+// Type sizes come from the scale (--font-size-*), so a new screen cannot add a
+// thirtieth size by accident. A fluid clamp() for a hero heading is the one
+// thing that stays outside it.
+const OFF_SCALE = /font-size:(?!\s*(var\(--font-size-|clamp\(|inherit))/
+
+const offScale = collectStyleFiles(SRC).flatMap(file =>
+	readFileSync(file, 'utf8')
+		.split('\n')
+		.flatMap((line, index) =>
+			OFF_SCALE.test(line) ? [`${relative(SRC, file).split(sep).join('/')}:${index + 1}`] : []
+		)
+)
+
+if (offScale.length === 0) {
+	console.log('✔ Type sizes come from the scale.')
+} else {
+	console.error(`✖ ${offScale.length} font size(s) off the scale; use a --font-size-* token:\n`)
+
+	for (const place of offScale) {
+		console.error(`   ${place}`)
+	}
+
+	console.error('')
+}
+
 // When to ask the node is one rule (infra/node, whenNodeReady), not each screen's.
 // A component or hook that reads $nodeReady to decide for itself is the thing
 // that rule replaced.

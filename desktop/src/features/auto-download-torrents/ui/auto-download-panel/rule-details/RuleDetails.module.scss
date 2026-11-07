@@ -32,14 +32,14 @@
 
 			dt {
 				color: var(--text-muted);
-				font-size: 0.75rem;
+				font-size: var(--font-size-xs);
 			}
 
 			dd {
 				overflow: hidden;
 				margin: 0;
 				color: var(--text);
-				font-size: 1rem;
+				font-size: var(--font-size-lg);
 				font-weight: 650;
 				font-variant-numeric: tabular-nums;
 				text-overflow: ellipsis;
@@ -124,7 +124,7 @@
 			.settingsTitle {
 				flex: 1;
 				color: var(--text);
-				font-size: 0.9375rem;
+				font-size: var(--font-size-base);
 				font-weight: 650;
 			}
 
@@ -166,13 +166,13 @@
 
 					.label {
 						color: var(--text-secondary);
-						font-size: 0.8125rem;
+						font-size: var(--font-size-sm);
 						font-weight: 600;
 					}
 
 					.fieldHint {
 						color: var(--text-muted);
-						font-size: 0.75rem;
+						font-size: var(--font-size-xs);
 					}
 
 					.stepper {
@@ -212,7 +212,7 @@
 
 				.saveState {
 					color: var(--text-muted);
-					font-size: 0.8125rem;
+					font-size: var(--font-size-sm);
 				}
 			}
 		}

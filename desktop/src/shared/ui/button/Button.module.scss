@@ -15,7 +15,7 @@
 	background: transparent;
 	color: var(--text);
 	font-family: inherit;
-	font-size: 14px;
+	font-size: var(--font-size-md);
 	font-weight: 600;
 	cursor: pointer;
 	transition:
@@ -143,7 +143,7 @@
 		min-height: var(--control-height-sm);
 		padding: 0 calc(12px - var(--ring-width));
 		border-radius: var(--radius-md);
-		font-size: 12px;
+		font-size: var(--font-size-xs);
 	}
 
 	&.fullWidth {

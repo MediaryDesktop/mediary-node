@@ -34,7 +34,7 @@
 
 .detailLabel {
 	display: block;
-	font-size: 0.9375rem;
+	font-size: var(--font-size-base);
 	font-weight: 600;
 	line-height: 1.25rem;
 	color: var(--text);
@@ -43,7 +43,7 @@
 .detailHint {
 	display: block;
 	margin: 0;
-	font-size: 0.8125rem;
+	font-size: var(--font-size-sm);
 	line-height: 1.125rem;
 	color: var(--text-secondary);
 }
@@ -70,7 +70,7 @@
 }
 
 .fieldLabel {
-	font-size: 0.8125rem;
+	font-size: var(--font-size-sm);
 	font-weight: 500;
 	color: var(--text-secondary);
 }
@@ -101,14 +101,14 @@
 
 		.sectionTitle {
 			margin: 0;
-			font-size: 0.9375rem;
+			font-size: var(--font-size-base);
 			font-weight: 600;
 			color: var(--text);
 		}
 
 		.sectionHint {
 			margin: 0;
-			font-size: 0.8125rem;
+			font-size: var(--font-size-sm);
 			line-height: 1.3;
 			color: var(--text-secondary);
 		}

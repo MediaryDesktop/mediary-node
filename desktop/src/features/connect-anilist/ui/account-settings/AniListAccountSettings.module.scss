@@ -15,14 +15,14 @@
 
 		.title {
 			margin: 0;
-			font-size: 1.0625rem;
+			font-size: var(--font-size-lg);
 			font-weight: 600;
 			color: var(--text);
 		}
 
 		.hint {
 			margin: 0;
-			font-size: 0.875rem;
+			font-size: var(--font-size-md);
 			line-height: 1.25rem;
 			color: var(--text-secondary);
 		}

@@ -15,7 +15,7 @@
 		margin: 0;
 		padding: 1rem 0.5rem;
 		color: var(--text-muted);
-		font-size: 0.8125rem;
+		font-size: var(--font-size-sm);
 		text-align: center;
 	}
 
@@ -48,7 +48,7 @@
 		.name {
 			margin: 0;
 			color: var(--text);
-			font-size: 0.9375rem;
+			font-size: var(--font-size-base);
 			font-weight: 600;
 			word-break: break-word;
 		}
@@ -58,7 +58,7 @@
 			border: 1px solid var(--border);
 			border-radius: var(--radius-sm);
 			color: var(--text-secondary);
-			font-size: 0.6875rem;
+			font-size: var(--font-size-2xs);
 			font-weight: 600;
 			letter-spacing: 0.04em;
 		}
@@ -84,7 +84,7 @@
 
 		dt {
 			color: var(--text-muted);
-			font-size: 0.6875rem;
+			font-size: var(--font-size-2xs);
 			font-weight: 600;
 			letter-spacing: 0.06em;
 			text-transform: uppercase;
@@ -93,7 +93,7 @@
 		dd {
 			margin: 0;
 			color: var(--text);
-			font-size: 0.875rem;
+			font-size: var(--font-size-md);
 			font-weight: 500;
 		}
 
@@ -115,7 +115,7 @@
 			border-radius: var(--radius-sm);
 			background: var(--bg-subtle);
 			color: var(--text-secondary);
-			font-size: 0.75rem;
+			font-size: var(--font-size-xs);
 			word-break: break-all;
 		}
 
@@ -150,7 +150,7 @@
 		.mediaTitle {
 			margin: 0;
 			color: var(--text-secondary);
-			font-size: 0.8125rem;
+			font-size: var(--font-size-sm);
 			font-weight: 500;
 			text-align: center;
 		}

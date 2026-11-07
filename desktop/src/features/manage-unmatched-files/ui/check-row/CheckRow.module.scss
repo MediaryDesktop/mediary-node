@@ -13,7 +13,7 @@
 	.label {
 		min-width: 0;
 		color: var(--text);
-		font-size: 0.875rem;
+		font-size: var(--font-size-md);
 		letter-spacing: 0.01em;
 		word-break: break-all;
 	}

@@ -57,7 +57,7 @@
 		padding: 12px;
 		border-radius: calc(var(--radius) - 2px);
 		color: var(--text);
-		font-size: 14px;
+		font-size: var(--font-size-md);
 		outline: none;
 		overflow: hidden;
 		cursor: pointer;
@@ -109,7 +109,7 @@
 			background: transparent;
 			color: var(--text);
 			font: inherit;
-			font-size: 14px;
+			font-size: var(--font-size-md);
 			text-align: left;
 			cursor: pointer;
 

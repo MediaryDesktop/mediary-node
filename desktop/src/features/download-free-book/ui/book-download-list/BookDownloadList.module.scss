@@ -48,7 +48,7 @@
 				margin: 0;
 				overflow: hidden;
 				color: var(--text-secondary);
-				font-size: 0.8125rem;
+				font-size: var(--font-size-sm);
 				text-overflow: ellipsis;
 				white-space: nowrap;
 			}
@@ -56,7 +56,7 @@
 			.error {
 				margin: 0;
 				color: var(--danger-text);
-				font-size: 0.8125rem;
+				font-size: var(--font-size-sm);
 
 				&::first-letter {
 					text-transform: uppercase;

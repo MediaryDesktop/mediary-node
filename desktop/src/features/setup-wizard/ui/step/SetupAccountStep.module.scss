@@ -5,7 +5,7 @@
 	.blurb {
 		margin: 0 0 1.25rem;
 		color: var(--text-secondary);
-		font-size: 0.875rem;
+		font-size: var(--font-size-md);
 		line-height: 1.55;
 		text-align: center;
 	}
@@ -16,7 +16,7 @@
 		gap: 0.875rem;
 		margin: 1.25rem 0;
 		color: var(--text-secondary);
-		font-size: 0.8125rem;
+		font-size: var(--font-size-sm);
 
 		&::before,
 		&::after {

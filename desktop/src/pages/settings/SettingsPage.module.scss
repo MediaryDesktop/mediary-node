@@ -42,7 +42,7 @@
 				background: none;
 				color: var(--text-secondary);
 				font: inherit;
-				font-size: 0.95rem;
+				font-size: var(--font-size-base);
 				text-align: left;
 				cursor: pointer;
 				transition:
@@ -98,14 +98,14 @@
 
 			.headerTitle {
 				margin: 0;
-				font-size: 1.5rem;
+				font-size: var(--font-size-2xl);
 				font-weight: 700;
 			}
 
 			.headerSubtitle {
 				margin: 0.125rem 0 0;
 				color: var(--text-secondary);
-				font-size: 0.95rem;
+				font-size: var(--font-size-base);
 			}
 		}
 
@@ -144,7 +144,7 @@
 
 				.hint {
 					color: var(--text-secondary);
-					font-size: 0.8125rem;
+					font-size: var(--font-size-sm);
 					line-height: 1.4;
 				}
 
@@ -173,7 +173,7 @@
 
 					.link {
 						color: var(--accent-text);
-						font-size: 0.9375rem;
+						font-size: var(--font-size-base);
 						text-decoration: none;
 						white-space: nowrap;
 

@@ -21,7 +21,7 @@
 		border-radius: 0.625rem;
 		background: transparent;
 		color: var(--text);
-		font-size: 0.875rem;
+		font-size: var(--font-size-md);
 		text-align: left;
 		cursor: pointer;
 		transition: background 0.15s ease;
@@ -43,7 +43,7 @@
 			height: 1.375rem;
 			border-radius: 6px;
 			color: var(--text-secondary);
-			font-size: 0.75rem;
+			font-size: var(--font-size-xs);
 			font-weight: 650;
 			font-variant-numeric: tabular-nums;
 		}

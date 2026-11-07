@@ -1,6 +1,6 @@
 .timer {
 	color: var(--text-secondary);
-	font-size: 0.875rem;
+	font-size: var(--font-size-md);
 	font-variant-numeric: tabular-nums;
 
 	&.expired {

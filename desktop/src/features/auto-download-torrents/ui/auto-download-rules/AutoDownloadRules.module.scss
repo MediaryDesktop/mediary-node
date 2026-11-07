@@ -61,12 +61,12 @@
 
 				.meta {
 					color: var(--text-secondary);
-					font-size: 0.8125rem;
+					font-size: var(--font-size-sm);
 				}
 
 				.problem {
 					color: var(--danger-text);
-					font-size: 0.8125rem;
+					font-size: var(--font-size-sm);
 				}
 			}
 

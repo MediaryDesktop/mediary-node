@@ -56,14 +56,14 @@ $indent: calc(1rem + 2.5rem + 0.875rem);
 			gap: 0.125rem;
 
 			.title {
-				font-size: 0.9375rem;
+				font-size: var(--font-size-base);
 				font-weight: 600;
 				line-height: 1.25rem;
 				color: var(--text);
 			}
 
 			.description {
-				font-size: 0.8125rem;
+				font-size: var(--font-size-sm);
 				line-height: 1.125rem;
 				color: var(--text-secondary);
 			}
