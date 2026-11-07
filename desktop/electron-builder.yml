@@ -21,9 +21,22 @@ extraResources:
       - mediary-node*
       - nodesrv*
 
-# Never bundle a development build's data directory or logs.
-asarUnpack:
-  - resources/bin/**
+# Electron's fuses, flipped in the packaged binary. Off, they would let anything
+# on the machine run Mediary.exe as plain Node (ELECTRON_RUN_AS_NODE), inject
+# code through NODE_OPTIONS, or attach a debugger with --inspect — all under the
+# app's own name. The app is loaded only from its asar, and an asar that was
+# tampered with is refused.
+#
+# grantFileProtocolExtraPrivileges stays on: the renderer is still loaded from
+# file://, and its module scripts, the pdf.js worker and the subtitle wasm need
+# those privileges until it moves to a custom protocol.
+electronFuses:
+  runAsNode: false
+  enableNodeOptionsEnvironmentVariable: false
+  enableNodeCliInspectArguments: false
+  enableEmbeddedAsarIntegrityValidation: true
+  onlyLoadAppFromAsar: true
+  enableCookieEncryption: true
 
 win:
   target:
