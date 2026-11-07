@@ -1,13 +1,13 @@
 import { Link } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
 import { Badge, Button, Icon, Input, ProgressBar, SelectDropdown, toast } from '@shared/ui'
 
-import { $nodeReady } from '@infra/node'
+import { useNodeData } from '@infra/node'
 
 import { aiSettingsQuery, setAISettingsMutation } from '@entities/media'
 import type { AIProvider, SetAISettingsParams, AISettings as Settings } from '@entities/media'
@@ -32,19 +32,13 @@ const ENDPOINT_PRESETS = [
 export function AISettings() {
 	const { t } = useTranslation()
 
-	const [settings, load, save, saving, nodeReady] = useUnit([
+	const [settings, save, saving] = useUnit([
 		aiSettingsQuery.$data,
-		aiSettingsQuery.start,
 		setAISettingsMutation.start,
-		setAISettingsMutation.$pending,
-		$nodeReady
+		setAISettingsMutation.$pending
 	])
 
-	useEffect(() => {
-		if (nodeReady) {
-			load()
-		}
-	}, [load, nodeReady])
+	useNodeData(aiSettingsQuery)
 
 	useUnitWatch(setAISettingsMutation.finished.failure, ({ error }) =>
 		toast.error(problemDetail(error, t('ai.saveFailed')), { id: 'ai-settings' })

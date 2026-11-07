@@ -1,8 +1,10 @@
 import { useUnit } from 'effector-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { Button, Drawer, EmptyState, Icon } from '@shared/ui'
+
+import { useNodeData } from '@infra/node'
 
 import { libraryTreeQuery, setLibraryFilesIgnoredMutation } from '@entities/library-item'
 
@@ -15,7 +17,7 @@ export function IgnoredFilesDrawer() {
 	const { t } = useTranslation()
 
 	const [open, closed] = useUnit([unmatchedFilesModel.$ignoredOpen, unmatchedFilesModel.ignoredClosed])
-	const [treeData, startTree] = useUnit([libraryTreeQuery.$data, libraryTreeQuery.start])
+	const [treeData] = useUnit([libraryTreeQuery.$data])
 	const [unignore, pending] = useUnit([
 		setLibraryFilesIgnoredMutation.start,
 		setLibraryFilesIgnoredMutation.$pending
@@ -23,11 +25,7 @@ export function IgnoredFilesDrawer() {
 
 	const [selected, setSelected] = useState<Set<number>>(new Set())
 
-	useEffect(() => {
-		if (open) {
-			startTree()
-		}
-	}, [open, startTree])
+	useNodeData(libraryTreeQuery, { enabled: Boolean(open) })
 
 	const files = useMemo(() => (treeData?.files.items ?? []).filter(file => file.ignored), [treeData])
 

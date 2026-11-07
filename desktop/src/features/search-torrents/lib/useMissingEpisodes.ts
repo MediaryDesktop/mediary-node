@@ -1,7 +1,7 @@
 import { useUnit } from 'effector-react'
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 
-import { $nodeReady } from '@infra/node'
+import { useNodeData } from '@infra/node'
 
 import { titleFilesQuery } from '@entities/library-item'
 import { torrentDownloadsQuery } from '@entities/torrent'
@@ -13,18 +13,9 @@ export function useMissingEpisodes(
 	released: number | null,
 	enabled = true
 ): number[] | null {
-	const [files, loadFiles, downloads, nodeReady] = useUnit([
-		titleFilesQuery.$data,
-		titleFilesQuery.start,
-		torrentDownloadsQuery.$data,
-		$nodeReady
-	])
+	const [files, downloads] = useUnit([titleFilesQuery.$data, torrentDownloadsQuery.$data])
 
-	useEffect(() => {
-		if (nodeReady && enabled) {
-			loadFiles({ mediaRef, kind: 'video' })
-		}
-	}, [loadFiles, mediaRef, nodeReady, enabled])
+	useNodeData(titleFilesQuery, { params: { mediaRef, kind: 'video' }, enabled: Boolean(enabled) })
 
 	return useMemo(() => {
 		const have: number[] = []

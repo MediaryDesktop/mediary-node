@@ -1,7 +1,6 @@
 import { useUnit } from 'effector-react'
-import { useEffect } from 'react'
 
-import { $nodeReady } from '@infra/node'
+import { useNodeData } from '@infra/node'
 
 import { torrentDebridQuery, torrentDownloadsQuery, torrentSourcesQuery } from '../model/model'
 
@@ -20,30 +19,15 @@ export interface TorrentSetup {
 }
 
 export function useTorrentSetup(): TorrentSetup {
-	const [downloads, sources, debrid, loadDownloads, loadSources, loadDebrid, nodeReady] = useUnit([
+	const [downloads, sources, debrid] = useUnit([
 		torrentDownloadsQuery.$data,
 		torrentSourcesQuery.$data,
-		torrentDebridQuery.$data,
-		torrentDownloadsQuery.start,
-		torrentSourcesQuery.start,
-		torrentDebridQuery.start,
-		$nodeReady
+		torrentDebridQuery.$data
 	])
 
-	useEffect(() => {
-		if (!nodeReady) {
-			return
-		}
-		if (!downloads) {
-			loadDownloads()
-		}
-		if (!sources) {
-			loadSources()
-		}
-		if (!debrid) {
-			loadDebrid()
-		}
-	}, [nodeReady, downloads, sources, debrid, loadDownloads, loadSources, loadDebrid])
+	useNodeData(torrentDownloadsQuery, { enabled: !downloads })
+	useNodeData(torrentSourcesQuery, { enabled: !sources })
+	useNodeData(torrentDebridQuery, { enabled: !debrid })
 
 	const client = downloads?.client
 

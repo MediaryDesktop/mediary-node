@@ -11,6 +11,7 @@ import {
 	episodeTitle,
 	formatMediaDate,
 	mediaDetailsModel,
+	mediaPreviewModel,
 	mediaTitle,
 	scoreTone
 } from './model'
@@ -38,6 +39,25 @@ describe('media details model', () => {
 		await allSettled(mediaDetailsModel.detailsRequested, { scope, params: 'anilist:2' })
 		expect(scope.getState(mediaDetailsModel.$failedMediaRef)).toBeNull()
 		expect(scope.getState(mediaDetailsModel.$data)?.media.media_ref).toBe('anilist:2')
+	})
+})
+
+describe('media previews', () => {
+	it('asks for each title it does not have yet, once', async () => {
+		const fetch = vi.fn((mediaRef: string) => Promise.resolve(response(mediaRef)))
+		const scope = fork({
+			handlers: [[fetchMediaDetailsFx, fetch]]
+		})
+
+		await allSettled(mediaPreviewModel.previewsRequested, { scope, params: ['anilist:1', 'anilist:2'] })
+		await allSettled(mediaPreviewModel.previewsRequested, { scope, params: ['anilist:2', 'anilist:3'] })
+
+		expect(fetch.mock.calls.map(([ref]) => ref)).toEqual(['anilist:1', 'anilist:2', 'anilist:3'])
+		expect(Object.keys(scope.getState(mediaPreviewModel.$previews))).toEqual([
+			'anilist:1',
+			'anilist:2',
+			'anilist:3'
+		])
 	})
 })
 

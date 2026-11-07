@@ -1,5 +1,5 @@
 import { useUnit } from 'effector-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import {
 	LuBlocks,
@@ -14,7 +14,7 @@ import {
 import { useTranslation } from '@shared/i18n'
 import { Button, Skeleton } from '@shared/ui'
 
-import { $nodeReady } from '@infra/node'
+import { useNodeData } from '@infra/node'
 
 import { extensionCatalogQuery, extensionsQuery } from '@entities/extension'
 import type { CatalogPlugin, Extension } from '@entities/extension'
@@ -73,24 +73,14 @@ export function PluginsTab({
 	const { t } = useTranslation()
 	usePluginFailures()
 
-	const [installed, catalog, loadInstalled, loadCatalog, nodeReady] = useUnit([
-		extensionsQuery.$data,
-		extensionCatalogQuery.$data,
-		extensionsQuery.start,
-		extensionCatalogQuery.start,
-		$nodeReady
-	])
+	const [installed, catalog] = useUnit([extensionsQuery.$data, extensionCatalogQuery.$data])
 
 	const [type, setType] = useState<TypeFilter>('all')
 	const [language, setLanguage] = useState('all')
 	const [search, setSearch] = useState('')
 
-	useEffect(() => {
-		if (nodeReady) {
-			loadInstalled()
-			loadCatalog(false)
-		}
-	}, [loadInstalled, loadCatalog, nodeReady])
+	useNodeData(extensionsQuery)
+	useNodeData(extensionCatalogQuery, { params: false })
 
 	const extensions = installed?.extensions ?? null
 	const offered = catalog?.plugins ?? null

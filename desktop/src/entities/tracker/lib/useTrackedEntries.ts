@@ -2,7 +2,7 @@ import { combine, createStore } from 'effector'
 import { useUnit } from 'effector-react'
 import { useEffect, useMemo } from 'react'
 
-import { $nodeReady } from '@infra/node'
+import { $nodeReady, whenNodeReady } from '@infra/node'
 
 import type { TrackerEntry } from '../api/api'
 import type { TrackerMediaType } from '../api/api'
@@ -48,28 +48,22 @@ export function useTrackedEntries(enabled: boolean): TrackerEntry[] {
 		book: trackerQueries.book.$status
 	})
 
-	const start = useUnit({
-		anime: trackerQueries.anime.start,
-		manga: trackerQueries.manga.start,
-		movie: trackerQueries.movie.start,
-		series: trackerQueries.series.start,
-		dorama: trackerQueries.dorama.start,
-		book: trackerQueries.book.start
+	const ask = useUnit({
+		anime: whenNodeReady(trackerQueries.anime),
+		manga: whenNodeReady(trackerQueries.manga),
+		movie: whenNodeReady(trackerQueries.movie),
+		series: whenNodeReady(trackerQueries.series),
+		dorama: whenNodeReady(trackerQueries.dorama),
+		book: whenNodeReady(trackerQueries.book)
 	})
 
-	const nodeReady = useUnit($nodeReady)
-
 	useEffect(() => {
-		if (!nodeReady) {
-			return
-		}
-
 		for (const mediaType of TRACKER_MEDIA_TYPES) {
 			if (status[mediaType] === 'initial' && (enabled || isLocalTrackerType(mediaType))) {
-				start[mediaType]()
+				ask[mediaType]()
 			}
 		}
-	}, [nodeReady, enabled, status, start])
+	}, [enabled, status, ask])
 
 	return useMemo(() => TRACKER_MEDIA_TYPES.flatMap(mediaType => data[mediaType]?.entries ?? []), [data])
 }

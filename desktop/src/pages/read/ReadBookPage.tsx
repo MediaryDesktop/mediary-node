@@ -6,7 +6,7 @@ import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
 import { Button, ReelLoader } from '@shared/ui'
 
-import { $nodeReady } from '@infra/node'
+import { useNodeData } from '@infra/node'
 
 import { BookReaderView, bookStateQuery, loadBookFile, saveBookPositionMutation } from '@entities/reader'
 import type { BookLocation } from '@entities/reader'
@@ -23,13 +23,12 @@ export function ReadBookPage({ fileId }: ReadBookPageProps) {
 	const { t } = useTranslation()
 	const router = useRouter()
 
-	const [state, stateError, statePending, loadState, savePosition, nodeReady] = useUnit([
+	const [state, stateError, statePending, loadState, savePosition] = useUnit([
 		bookStateQuery.$data,
 		bookStateQuery.$error,
 		bookStateQuery.$pending,
 		bookStateQuery.start,
-		saveBookPositionMutation.start,
-		$nodeReady
+		saveBookPositionMutation.start
 	])
 
 	const [file, setFile] = useState<File | null>(null)
@@ -37,11 +36,7 @@ export function ReadBookPage({ fileId }: ReadBookPageProps) {
 	const [attempt, setAttempt] = useState(0)
 	const [openedAt] = useState(() => performance.now())
 
-	useEffect(() => {
-		if (nodeReady) {
-			loadState(fileId)
-		}
-	}, [fileId, loadState, nodeReady])
+	useNodeData(bookStateQuery, { params: fileId })
 
 	const book = state?.book.file_id === fileId ? state.book : null
 

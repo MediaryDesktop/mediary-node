@@ -1,12 +1,11 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
-import { useEffect } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { formatBytes } from '@shared/lib'
 import { Badge, Button, Icon } from '@shared/ui'
 
-import { $nodeReady } from '@infra/node'
+import { useNodeData } from '@infra/node'
 
 import { fileName, titleFilesQuery } from '@entities/library-item'
 
@@ -31,13 +30,9 @@ export function BookFiles({ mediaRef }: BookFilesProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
 
-	const [data, load, nodeReady] = useUnit([titleFilesQuery.$data, titleFilesQuery.start, $nodeReady])
+	const [data] = useUnit([titleFilesQuery.$data])
 
-	useEffect(() => {
-		if (nodeReady) {
-			load({ mediaRef, kind: 'book' })
-		}
-	}, [mediaRef, load, nodeReady])
+	useNodeData(titleFilesQuery, { params: { mediaRef, kind: 'book' } })
 
 	const files = (data?.files.items ?? []).filter(
 		file => file.kind === 'book' && file.match?.media_ref === mediaRef

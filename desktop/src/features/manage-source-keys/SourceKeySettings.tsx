@@ -1,7 +1,7 @@
 import type { Mutation, Query } from '@farfetched/core'
 import clsx from 'clsx'
 import { useUnit } from 'effector-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import type { HttpRequestError } from '@shared/api'
 import { problemDetail } from '@shared/api'
@@ -9,7 +9,7 @@ import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
 import { Button, Icon, Input, toast } from '@shared/ui'
 
-import { $nodeReady } from '@infra/node'
+import { useNodeData } from '@infra/node'
 
 import {
 	googleBooksSettingsQuery,
@@ -36,19 +36,9 @@ function SourceKeySettings<Settings extends { enabled: boolean; key_source: stri
 	const { t } = useTranslation()
 	const [key, setKey] = useState('')
 
-	const [settings, load, save, saving, nodeReady] = useUnit([
-		settingsQuery.$data,
-		settingsQuery.start,
-		saveMutation.start,
-		saveMutation.$pending,
-		$nodeReady
-	])
+	const [settings, save, saving] = useUnit([settingsQuery.$data, saveMutation.start, saveMutation.$pending])
 
-	useEffect(() => {
-		if (nodeReady) {
-			load()
-		}
-	}, [load, nodeReady])
+	useNodeData(settingsQuery)
 
 	useUnitWatch(saveMutation.finished.failure, ({ error }) =>
 		toast.error(problemDetail(error, t(`${texts}.saveFailed`)), { id: `${texts}-settings` })

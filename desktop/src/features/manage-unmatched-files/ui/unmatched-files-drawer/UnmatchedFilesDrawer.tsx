@@ -1,8 +1,10 @@
 import { useUnit } from 'effector-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { Button, Drawer, EmptyState, Icon } from '@shared/ui'
+
+import { useNodeData } from '@infra/node'
 
 import { libraryRootsQuery, libraryTreeQuery } from '@entities/library-item'
 
@@ -16,17 +18,13 @@ export function UnmatchedFilesDrawer() {
 	const { t } = useTranslation()
 
 	const [open, closed] = useUnit([unmatchedFilesModel.$unmatchedOpen, unmatchedFilesModel.unmatchedClosed])
-	const [treeData, startTree] = useUnit([libraryTreeQuery.$data, libraryTreeQuery.start])
-	const [rootsData, startRoots] = useUnit([libraryRootsQuery.$data, libraryRootsQuery.start])
+	const [treeData] = useUnit([libraryTreeQuery.$data])
+	const [rootsData] = useUnit([libraryRootsQuery.$data])
 
 	const [page, setPage] = useState(0)
 
-	useEffect(() => {
-		if (open) {
-			startTree()
-			startRoots()
-		}
-	}, [open, startTree, startRoots])
+	useNodeData(libraryTreeQuery, { enabled: Boolean(open) })
+	useNodeData(libraryRootsQuery, { enabled: Boolean(open) })
 
 	const groups = useMemo(
 		() => unmatchedGroups(treeData?.files.items ?? [], rootsData?.roots ?? []),

@@ -1,10 +1,11 @@
 import { useUnit } from 'effector-react'
-import { useEffect } from 'react'
 
 import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
 import { Button, Icon, Modal, toast } from '@shared/ui'
+
+import { useNodeData } from '@infra/node'
 
 import { libraryRootsQuery } from '@entities/library-item'
 import { enqueueMangaDownloadsMutation, putMangaDownloadSettingsMutation } from '@entities/manga-source'
@@ -16,20 +17,15 @@ import styles from './DownloadFolderPrompt.module.scss'
 export function DownloadFolderPrompt() {
 	const { t } = useTranslation()
 
-	const [open, choose, close, roots, loadRoots, saving] = useUnit([
+	const [open, choose, close, roots, saving] = useUnit([
 		$promptOpen,
 		folderChosen,
 		promptClosed,
 		libraryRootsQuery.$data,
-		libraryRootsQuery.start,
 		putMangaDownloadSettingsMutation.$pending
 	])
 
-	useEffect(() => {
-		if (open) {
-			loadRoots()
-		}
-	}, [open, loadRoots])
+	useNodeData(libraryRootsQuery, { enabled: Boolean(open) })
 
 	useUnitWatch(enqueueMangaDownloadsMutation.finished.success, ({ result }) =>
 		toast.success(t('mangaSources.downloads.queued', { count: result.downloads?.length ?? 0 }), {

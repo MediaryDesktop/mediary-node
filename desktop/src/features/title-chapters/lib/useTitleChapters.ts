@@ -1,9 +1,9 @@
 import { useUnit } from 'effector-react'
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 
-import { $nodeReady } from '@infra/node'
+import { useNodeData } from '@infra/node'
 
 import { fileName, fileTitle, titleFilesQuery } from '@entities/library-item'
 import { mangaChaptersQuery, mangaLinksQuery, mangaSourcesQuery } from '@entities/manga-source'
@@ -22,38 +22,21 @@ export interface TitleChapters {
 export function useTitleChapters(mediaRef: string | undefined): TitleChapters {
 	const { t } = useTranslation()
 
-	const [
-		files,
-		loadFiles,
-		sourcesData,
-		loadSources,
-		linksData,
-		loadLinks,
-		chaptersData,
-		loadChapters,
-		chaptersPending,
-		nodeReady
-	] = useUnit([
+	const [files, sourcesData, linksData, chaptersData, chaptersPending] = useUnit([
 		titleFilesQuery.$data,
-		titleFilesQuery.start,
 		mangaSourcesQuery.$data,
-		mangaSourcesQuery.start,
 		mangaLinksQuery.$data,
-		mangaLinksQuery.start,
 		mangaChaptersQuery.$data,
-		mangaChaptersQuery.start,
-		mangaChaptersQuery.$pending,
-		$nodeReady
+		mangaChaptersQuery.$pending
 	])
 
-	useEffect(() => {
-		if (mediaRef && nodeReady) {
-			loadFiles({ mediaRef, kind: 'manga' })
-			loadSources()
-			loadLinks(mediaRef)
-			loadChapters(mediaRef)
-		}
-	}, [mediaRef, loadFiles, loadSources, loadLinks, loadChapters, nodeReady])
+	useNodeData(titleFilesQuery, {
+		params: { mediaRef: mediaRef ?? '', kind: 'manga' },
+		enabled: Boolean(mediaRef)
+	})
+	useNodeData(mangaSourcesQuery, { enabled: Boolean(mediaRef) })
+	useNodeData(mangaLinksQuery, { params: mediaRef, enabled: Boolean(mediaRef) })
+	useNodeData(mangaChaptersQuery, { params: mediaRef, enabled: Boolean(mediaRef) })
 
 	const online = chaptersData && chaptersData.mediaRef === mediaRef ? chaptersData : null
 	const links = (linksData && linksData.mediaRef === mediaRef ? linksData.links : null) ?? []

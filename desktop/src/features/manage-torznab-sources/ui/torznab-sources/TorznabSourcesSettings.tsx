@@ -1,11 +1,11 @@
 import { useUnit } from 'effector-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
 import { Button, CollapsibleSection, EmptyCard, Icon, toast } from '@shared/ui'
 
-import { $nodeReady } from '@infra/node'
+import { useNodeData } from '@infra/node'
 
 import { deleteTorrentSourceMutation, torrentSourcesQuery } from '@entities/torrent'
 
@@ -16,12 +16,10 @@ import styles from './TorznabSourcesSettings.module.scss'
 export function TorznabSourcesSettings() {
 	const { t } = useTranslation()
 
-	const [data, load, remove, removing, nodeReady] = useUnit([
+	const [data, remove, removing] = useUnit([
 		torrentSourcesQuery.$data,
-		torrentSourcesQuery.start,
 		deleteTorrentSourceMutation.start,
-		deleteTorrentSourceMutation.$pending,
-		$nodeReady
+		deleteTorrentSourceMutation.$pending
 	])
 
 	const [adding, setAdding] = useState(false)
@@ -35,11 +33,7 @@ export function TorznabSourcesSettings() {
 			return !current
 		})
 
-	useEffect(() => {
-		if (nodeReady) {
-			load()
-		}
-	}, [load, nodeReady])
+	useNodeData(torrentSourcesQuery)
 
 	useUnitWatch(deleteTorrentSourceMutation.finished.failure, () =>
 		toast.error(t('torrents.sources.removeFailed'), { id: 'torznab-remove-failed' })

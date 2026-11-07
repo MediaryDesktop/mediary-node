@@ -1,22 +1,17 @@
 import { useUnit } from 'effector-react'
-import { useEffect } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 
-import { $nodeReady } from '@infra/node'
+import { useNodeData } from '@infra/node'
 
 import { aiSettingsQuery } from '@entities/media'
 
 export function useAiStatus() {
 	const { t } = useTranslation()
 
-	const [settings, load, nodeReady] = useUnit([aiSettingsQuery.$data, aiSettingsQuery.start, $nodeReady])
+	const [settings] = useUnit([aiSettingsQuery.$data])
 
-	useEffect(() => {
-		if (nodeReady) {
-			load()
-		}
-	}, [load, nodeReady])
+	useNodeData(aiSettingsQuery)
 
 	const ready = settings?.ready ?? false
 

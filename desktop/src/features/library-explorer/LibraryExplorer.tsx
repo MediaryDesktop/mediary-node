@@ -1,9 +1,11 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { Drawer, EmptyState, Icon, Input } from '@shared/ui'
+
+import { useNodeData } from '@infra/node'
 
 import { libraryRootsQuery, libraryTreeQuery } from '@entities/library-item'
 import type { LibraryFile } from '@entities/library-item'
@@ -40,7 +42,7 @@ export function LibraryExplorer({ onMatchMany }: LibraryExplorerProps) {
 		libraryTreeQuery.start
 	])
 
-	const [rootsData, startRoots] = useUnit([libraryRootsQuery.$data, libraryRootsQuery.start])
+	const [rootsData] = useUnit([libraryRootsQuery.$data])
 
 	const [filter, setFilter] = useState<ExplorerFilter | null>(null)
 	const [expanded, setExpanded] = useState<Set<string>>(new Set())
@@ -49,12 +51,8 @@ export function LibraryExplorer({ onMatchMany }: LibraryExplorerProps) {
 	const [confirmingDelete, setConfirmingDelete] = useState(false)
 	const selection = useTreeSelection()
 
-	useEffect(() => {
-		if (open) {
-			startTree()
-			startRoots()
-		}
-	}, [open, startTree, startRoots])
+	useNodeData(libraryTreeQuery, { enabled: Boolean(open) })
+	useNodeData(libraryRootsQuery, { enabled: Boolean(open) })
 
 	const files = useMemo(() => treeData?.files.items ?? [], [treeData])
 	const titles = useMemo(() => treeData?.files.titles ?? [], [treeData])

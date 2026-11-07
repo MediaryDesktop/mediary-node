@@ -1,9 +1,9 @@
 import { useUnit } from 'effector-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 
-import { $nodeReady } from '@infra/node'
+import { useNodeData } from '@infra/node'
 
 import { torrentDebridQuery } from '@entities/torrent'
 
@@ -13,20 +13,12 @@ import { DebridServiceForm } from './ui/service-form/DebridServiceForm'
 export function DebridServiceSettings() {
 	const { t } = useTranslation()
 
-	const [debrid, load, nodeReady] = useUnit([
-		torrentDebridQuery.$data,
-		torrentDebridQuery.start,
-		$nodeReady
-	])
+	const [debrid] = useUnit([torrentDebridQuery.$data])
 
 	const [formKey, setFormKey] = useState(0)
 	const reset = useCallback(() => setFormKey(key => key + 1), [])
 
-	useEffect(() => {
-		if (nodeReady) {
-			load()
-		}
-	}, [load, nodeReady])
+	useNodeData(torrentDebridQuery)
 
 	if (!debrid) {
 		return null

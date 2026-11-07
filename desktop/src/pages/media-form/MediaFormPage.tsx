@@ -1,10 +1,9 @@
 import { useUnit } from 'effector-react'
-import { useEffect } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { EmptyState, PageTransition, Skeleton } from '@shared/ui'
 
-import { $nodeReady } from '@infra/node'
+import { useNodeData } from '@infra/node'
 
 import { mediaDetailsModel } from '@entities/media'
 
@@ -37,18 +36,12 @@ export function MediaFormPage(props: MediaFormPageProps) {
 function EditMediaForm({ mediaRef }: { mediaRef: string }) {
 	const { t } = useTranslation()
 
-	const { data, failedRef, requestDetails, nodeReady } = useUnit({
+	const { data, failedRef } = useUnit({
 		data: mediaDetailsModel.$data,
-		failedRef: mediaDetailsModel.$failedMediaRef,
-		requestDetails: mediaDetailsModel.detailsRequested,
-		nodeReady: $nodeReady
+		failedRef: mediaDetailsModel.$failedMediaRef
 	})
 
-	useEffect(() => {
-		if (nodeReady) {
-			requestDetails(mediaRef)
-		}
-	}, [mediaRef, requestDetails, nodeReady])
+	useNodeData(mediaDetailsModel.detailsRequested, { params: mediaRef })
 
 	const media = data?.media.media_ref === mediaRef ? data.media : null
 	const failed = !media && failedRef === mediaRef

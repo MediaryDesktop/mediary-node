@@ -1,5 +1,4 @@
 import { useUnit } from 'effector-react'
-import { useEffect } from 'react'
 import { IoIosRefresh } from 'react-icons/io'
 
 import { problemDetail } from '@shared/api'
@@ -8,7 +7,7 @@ import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
 import { Switch, toast } from '@shared/ui'
 
-import { $nodeReady } from '@infra/node'
+import { useNodeData } from '@infra/node'
 
 import { deleteTorrentRuleMutation, putTorrentRuleMutation, torrentRuleQuery } from '@entities/torrent'
 
@@ -23,19 +22,13 @@ export interface AutoDownloadPanelProps {
 export function AutoDownloadPanel({ mediaRef, title }: AutoDownloadPanelProps) {
 	const { t } = useTranslation()
 
-	const [data, load, put, saving, nodeReady] = useUnit([
+	const [data, put, saving] = useUnit([
 		torrentRuleQuery.$data,
-		torrentRuleQuery.start,
 		putTorrentRuleMutation.start,
-		putTorrentRuleMutation.$pending,
-		$nodeReady
+		putTorrentRuleMutation.$pending
 	])
 
-	useEffect(() => {
-		if (nodeReady) {
-			load(mediaRef)
-		}
-	}, [load, mediaRef, nodeReady])
+	useNodeData(torrentRuleQuery, { params: mediaRef })
 
 	const failed = ({ error }: RequestFailure) =>
 		toast.error(problemDetail(error, t('torrents.auto.saveFailed')), { id: 'torrent-rule' })

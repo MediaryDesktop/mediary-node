@@ -6,7 +6,7 @@ import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
 import { toast } from '@shared/ui'
 
-import { $nodeReady } from '@infra/node'
+import { useNodeData } from '@infra/node'
 
 import { fileTitle, libraryCollectionQuery } from '@entities/library-item'
 import { $playerMode, playbackModel, playerOpened } from '@entities/playback'
@@ -35,20 +35,14 @@ export interface ContinueWatchingState {
 }
 
 export function useContinueWatching(entries: TrackerEntry[]): ContinueWatchingState {
-	const [collection, loadCollection, nodeReady, items, loading, changed] = useUnit([
+	const [collection, items, loading, changed] = useUnit([
 		libraryCollectionQuery.$data,
-		libraryCollectionQuery.start,
-		$nodeReady,
 		$items,
 		$loading,
 		candidatesChanged
 	])
 
-	useEffect(() => {
-		if (nodeReady) {
-			loadCollection()
-		}
-	}, [nodeReady, loadCollection])
+	useNodeData(libraryCollectionQuery)
 
 	const byEntry = useMemo(() => new Map(entries.map(entry => [entry.media_ref, entry])), [entries])
 

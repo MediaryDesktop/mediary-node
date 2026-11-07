@@ -1,6 +1,5 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
-import { useEffect } from 'react'
 import { IoIosRefresh } from 'react-icons/io'
 
 import { problemDetail } from '@shared/api'
@@ -8,7 +7,7 @@ import { useTranslation } from '@shared/i18n'
 import { formatBytes, useUnitWatch } from '@shared/lib'
 import { Button, Icon, toast } from '@shared/ui'
 
-import { $nodeReady } from '@infra/node'
+import { useNodeData } from '@infra/node'
 
 import {
 	bookDownloadSettingsQuery,
@@ -32,45 +31,22 @@ export interface FreeCopiesProps {
 export function FreeCopies({ mediaRef }: FreeCopiesProps) {
 	const { t } = useTranslation()
 
-	const [
-		sources,
-		loadSources,
-		editions,
-		loadEditions,
-		searching,
-		downloads,
-		loadDownloads,
-		loadDownloadSettings,
-		nodeReady
-	] = useUnit([
+	const [sources, editions, searching, downloads] = useUnit([
 		bookSourcesQuery.$data,
-		bookSourcesQuery.start,
 		bookEditionsQuery.$data,
-		bookEditionsQuery.start,
 		bookEditionsQuery.$pending,
-		bookDownloadsQuery.$data,
-		bookDownloadsQuery.start,
-		bookDownloadSettingsQuery.start,
-		$nodeReady
+		bookDownloadsQuery.$data
 	])
 
 	const folderAction = useBookFolderAction()
 
 	const anySource = (sources?.sources?.length ?? 0) > 0
 
-	useEffect(() => {
-		if (nodeReady) {
-			loadSources()
-			loadDownloads()
-			loadDownloadSettings()
-		}
-	}, [loadSources, loadDownloads, loadDownloadSettings, nodeReady])
+	useNodeData(bookSourcesQuery)
+	useNodeData(bookDownloadsQuery)
+	useNodeData(bookDownloadSettingsQuery)
 
-	useEffect(() => {
-		if (nodeReady && anySource) {
-			loadEditions(mediaRef)
-		}
-	}, [mediaRef, loadEditions, anySource, nodeReady])
+	useNodeData(bookEditionsQuery, { params: mediaRef, enabled: Boolean(anySource) })
 
 	useUnitWatch(enqueueBookDownloadMutation.finished.success, () =>
 		toast.success(t('bookSources.copies.queued'), { id: 'book-download-queued' })

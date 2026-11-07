@@ -1,12 +1,11 @@
 import { useUnit } from 'effector-react'
-import { useEffect } from 'react'
 
 import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
 import { toast } from '@shared/ui'
 
-import { $nodeReady } from '@infra/node'
+import { useNodeData } from '@infra/node'
 
 import { titleFilesQuery } from '@entities/library-item'
 import type { LibraryFile } from '@entities/library-item'
@@ -46,14 +45,12 @@ export function EpisodeLibrary({
 	const { t } = useTranslation()
 	const { meta, count } = useEpisodeMeta(mediaRef)
 
-	const [data, load, playExternally, session, starting, playerMode, nodeReady, openPlayer] = useUnit([
+	const [data, playExternally, session, starting, playerMode, openPlayer] = useUnit([
 		titleFilesQuery.$data,
-		titleFilesQuery.start,
 		playbackModel.playRequested,
 		playbackModel.$session,
 		playbackModel.$starting,
 		$playerMode,
-		$nodeReady,
 		playerOpened
 	])
 
@@ -65,11 +62,7 @@ export function EpisodeLibrary({
 		}
 	}
 
-	useEffect(() => {
-		if (nodeReady) {
-			load({ mediaRef, kind: 'video' })
-		}
-	}, [mediaRef, load, nodeReady])
+	useNodeData(titleFilesQuery, { params: { mediaRef, kind: 'video' } })
 
 	const missingTool = useMissingToolAction()
 

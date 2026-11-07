@@ -174,7 +174,17 @@ export const mediaPreviewModel = atom(() => {
 		target: fetchTrailerHostFx
 	})
 
-	return { $previews, $trailerHost, previewRequested }
+	const previewsRequested = createEvent<string[]>()
+
+	const requestEachFx = createEffect((refs: string[]) => {
+		for (const ref of refs) {
+			previewRequested(ref)
+		}
+	})
+
+	sample({ clock: previewsRequested, target: requestEachFx })
+
+	return { $previews, $trailerHost, previewRequested, previewsRequested }
 })
 
 export function mediaTitle(title: MediaTitle): string {

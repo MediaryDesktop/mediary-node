@@ -1,8 +1,9 @@
 import { useUnit } from 'effector-react'
-import { useEffect } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { Button, Icon, Modal } from '@shared/ui'
+
+import { useNodeData } from '@infra/node'
 
 import { putBookDownloadSettingsMutation } from '@entities/book-source'
 import { libraryRootsQuery } from '@entities/library-item'
@@ -14,20 +15,15 @@ import styles from './BookFolderPrompt.module.scss'
 export function BookFolderPrompt() {
 	const { t } = useTranslation()
 
-	const [open, choose, close, roots, loadRoots, saving] = useUnit([
+	const [open, choose, close, roots, saving] = useUnit([
 		$promptOpen,
 		folderChosen,
 		promptClosed,
 		libraryRootsQuery.$data,
-		libraryRootsQuery.start,
 		putBookDownloadSettingsMutation.$pending
 	])
 
-	useEffect(() => {
-		if (open) {
-			loadRoots()
-		}
-	}, [open, loadRoots])
+	useNodeData(libraryRootsQuery, { enabled: Boolean(open) })
 
 	const folders = (roots?.roots ?? []).filter(root => root.content === 'books')
 

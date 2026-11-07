@@ -1,8 +1,10 @@
 import clsx from 'clsx'
 import { useUnit } from 'effector-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
+
+import { useNodeData } from '@infra/node'
 
 import { mediaFilterOptionsQuery } from '@entities/media'
 
@@ -24,11 +26,9 @@ export function GenresPanel({ mediaType, genres, onGenresChange, aiGenres, disab
 	const { t } = useTranslation()
 	const [query, setQuery] = useState('')
 
-	const [options, start] = useUnit([mediaFilterOptionsQuery.$data, mediaFilterOptionsQuery.start])
+	const [options] = useUnit([mediaFilterOptionsQuery.$data])
 
-	useEffect(() => {
-		start(mediaType)
-	}, [mediaType, start])
+	useNodeData(mediaFilterOptionsQuery, { params: mediaType })
 
 	const catalog = options?.options.genres ?? []
 	const needle = query.trim().toLowerCase()

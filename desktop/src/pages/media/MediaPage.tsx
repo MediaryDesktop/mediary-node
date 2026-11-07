@@ -7,7 +7,7 @@ import { IoCloudOutline } from 'react-icons/io5'
 import { useTranslation } from '@shared/i18n'
 import { Button, EmptyState, Icon, PageTransition, PhaseTransition } from '@shared/ui'
 
-import { $nodeReady } from '@infra/node'
+import { useNodeData } from '@infra/node'
 
 import { aniListAccountModel } from '@entities/anilist-account'
 import { mediaDetailsModel, mediaPreviewModel } from '@entities/media'
@@ -25,13 +25,12 @@ export function MediaPage({ mediaRef }: MediaPageProps) {
 	const { t } = useTranslation()
 	const router = useRouter()
 
-	const { data, failedMediaRef, pending, requestDetails, connected, nodeReady } = useUnit({
+	const { data, failedMediaRef, pending, requestDetails, connected } = useUnit({
 		data: mediaDetailsModel.$data,
 		failedMediaRef: mediaDetailsModel.$failedMediaRef,
 		pending: mediaDetailsModel.$pending,
 		requestDetails: mediaDetailsModel.detailsRequested,
-		connected: aniListAccountModel.$connected,
-		nodeReady: $nodeReady
+		connected: aniListAccountModel.$connected
 	})
 
 	const entry = useTrackedEntry(mediaRef, connected)
@@ -40,11 +39,7 @@ export function MediaPage({ mediaRef }: MediaPageProps) {
 		window.scrollTo({ top: 0 })
 	}, [mediaRef])
 
-	useEffect(() => {
-		if (nodeReady) {
-			requestDetails(mediaRef)
-		}
-	}, [mediaRef, requestDetails, nodeReady])
+	useNodeData(mediaDetailsModel.detailsRequested, { params: mediaRef })
 
 	const preview = useStoreMap({
 		store: mediaPreviewModel.$previews,

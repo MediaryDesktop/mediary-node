@@ -1,11 +1,11 @@
 import { useUnit } from 'effector-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
 import { Button, CollapsibleSection, EmptyCard, Icon, toast } from '@shared/ui'
 
-import { $nodeReady } from '@infra/node'
+import { useNodeData } from '@infra/node'
 
 import { deleteOPDSServerMutation, opdsServersQuery } from '@entities/manga-source'
 
@@ -16,12 +16,10 @@ import { ServerRow } from './ui/server-row/ServerRow'
 export function OPDSServersSettings() {
 	const { t } = useTranslation()
 
-	const [data, load, remove, removing, nodeReady] = useUnit([
+	const [data, remove, removing] = useUnit([
 		opdsServersQuery.$data,
-		opdsServersQuery.start,
 		deleteOPDSServerMutation.start,
-		deleteOPDSServerMutation.$pending,
-		$nodeReady
+		deleteOPDSServerMutation.$pending
 	])
 
 	const [adding, setAdding] = useState(false)
@@ -35,11 +33,7 @@ export function OPDSServersSettings() {
 			return !current
 		})
 
-	useEffect(() => {
-		if (nodeReady) {
-			load()
-		}
-	}, [load, nodeReady])
+	useNodeData(opdsServersQuery)
 
 	useUnitWatch(deleteOPDSServerMutation.finished.failure, () =>
 		toast.error(t('mangaSources.removeFailed'), { id: 'opds-remove-failed' })

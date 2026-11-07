@@ -1,7 +1,7 @@
 import { useNavigate } from '@tanstack/react-router'
 import clsx from 'clsx'
 import { useUnit } from 'effector-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { CiGrid2H, CiGrid41 } from 'react-icons/ci'
 
 import { useTranslation } from '@shared/i18n'
@@ -19,6 +19,8 @@ import {
 	SelectionGroup
 } from '@shared/ui'
 import type { IconLike } from '@shared/ui'
+
+import { useNodeData } from '@infra/node'
 
 import { LIST_MEDIA_TYPES, listTitleCount, MediaTypeIcon, trackerListsQuery } from '@entities/tracker'
 import type { ListMediaType, TrackerCustomList } from '@entities/tracker'
@@ -76,9 +78,7 @@ export function ListsPage() {
 	const [sort, setSort] = useState<SortKey>('recent')
 	const [view, setView] = useState<View>('grid')
 
-	useEffect(() => {
-		startLists()
-	}, [startLists])
+	useNodeData(trackerListsQuery)
 
 	const allLists = useMemo(() => lists?.lists ?? [], [lists])
 

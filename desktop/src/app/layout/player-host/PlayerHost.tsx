@@ -8,7 +8,7 @@ import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
 import { Button, Icon, ReelLoader, WindowControls } from '@shared/ui'
 
-import { $nodeReady } from '@infra/node'
+import { useNodeData } from '@infra/node'
 
 import {
 	$playerExpanded,
@@ -42,7 +42,6 @@ export function PlayerHost() {
 		pending,
 		load,
 		playExternally,
-		nodeReady,
 		minimize,
 		expand,
 		close,
@@ -58,7 +57,6 @@ export function PlayerHost() {
 		playbackStreamQuery.$pending,
 		playbackStreamQuery.start,
 		playbackModel.playRequested,
-		$nodeReady,
 		playerMinimized,
 		playerExpanded,
 		playerClosed,
@@ -89,11 +87,7 @@ export function PlayerHost() {
 		}
 	}, [full, fileId, streamTarget])
 
-	useEffect(() => {
-		if (fileId !== null && nodeReady) {
-			load(fileId)
-		}
-	}, [fileId, load, nodeReady])
+	useNodeData(playbackStreamQuery, { params: fileId ?? 0, enabled: fileId !== null })
 
 	const navigate = useNavigate()
 

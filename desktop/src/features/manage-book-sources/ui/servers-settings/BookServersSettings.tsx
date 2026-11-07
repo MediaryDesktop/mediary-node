@@ -1,11 +1,11 @@
 import { useUnit } from 'effector-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
 import { Button, CollapsibleSection, EmptyCard, Icon, toast } from '@shared/ui'
 
-import { $nodeReady } from '@infra/node'
+import { useNodeData } from '@infra/node'
 
 import { bookOPDSServersQuery, deleteBookOPDSServerMutation } from '@entities/book-source'
 
@@ -17,12 +17,10 @@ import styles from './BookServersSettings.module.scss'
 export function BookServersSettings() {
 	const { t } = useTranslation()
 
-	const [data, load, remove, removing, nodeReady] = useUnit([
+	const [data, remove, removing] = useUnit([
 		bookOPDSServersQuery.$data,
-		bookOPDSServersQuery.start,
 		deleteBookOPDSServerMutation.start,
-		deleteBookOPDSServerMutation.$pending,
-		$nodeReady
+		deleteBookOPDSServerMutation.$pending
 	])
 
 	const [adding, setAdding] = useState(false)
@@ -36,11 +34,7 @@ export function BookServersSettings() {
 			return !current
 		})
 
-	useEffect(() => {
-		if (nodeReady) {
-			load()
-		}
-	}, [load, nodeReady])
+	useNodeData(bookOPDSServersQuery)
 
 	useUnitWatch(deleteBookOPDSServerMutation.finished.failure, () =>
 		toast.error(t('bookSources.servers.removeFailed'), { id: 'book-opds-remove-failed' })

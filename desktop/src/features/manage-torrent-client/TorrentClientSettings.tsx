@@ -1,9 +1,9 @@
 import { useUnit } from 'effector-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 
-import { $nodeReady } from '@infra/node'
+import { useNodeData } from '@infra/node'
 
 import { libraryRootsQuery } from '@entities/library-item'
 import { torrentDebridQuery, torrentSettingsQuery } from '@entities/torrent'
@@ -14,24 +14,14 @@ import { TorrentClientForm } from './ui/client-form/TorrentClientForm'
 export function TorrentClientSettings() {
 	const { t } = useTranslation()
 
-	const [settings, load, loadRoots, loadDebrid, nodeReady] = useUnit([
-		torrentSettingsQuery.$data,
-		torrentSettingsQuery.start,
-		libraryRootsQuery.start,
-		torrentDebridQuery.start,
-		$nodeReady
-	])
+	const [settings] = useUnit([torrentSettingsQuery.$data])
 
 	const [formKey, setFormKey] = useState(0)
 	const reset = useCallback(() => setFormKey(key => key + 1), [])
 
-	useEffect(() => {
-		if (nodeReady) {
-			load()
-			loadRoots()
-			loadDebrid()
-		}
-	}, [load, loadRoots, loadDebrid, nodeReady])
+	useNodeData(torrentSettingsQuery)
+	useNodeData(libraryRootsQuery)
+	useNodeData(torrentDebridQuery)
 
 	if (!settings) {
 		return null

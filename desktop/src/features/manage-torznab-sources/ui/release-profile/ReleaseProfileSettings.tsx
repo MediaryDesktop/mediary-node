@@ -1,12 +1,12 @@
 import { useUnit } from 'effector-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
 import { Button, Input, SelectDropdown, Switch, toast } from '@shared/ui'
 
-import { $nodeReady } from '@infra/node'
+import { useNodeData } from '@infra/node'
 
 import {
 	putTorrentProfileMutation,
@@ -33,19 +33,10 @@ function words(line: string): string[] {
 export function ReleaseProfileSettings() {
 	const { t } = useTranslation()
 
-	const [profile, load, loadDebrid, nodeReady] = useUnit([
-		torrentProfileQuery.$data,
-		torrentProfileQuery.start,
-		torrentDebridQuery.start,
-		$nodeReady
-	])
+	const [profile] = useUnit([torrentProfileQuery.$data])
 
-	useEffect(() => {
-		if (nodeReady) {
-			load()
-			loadDebrid()
-		}
-	}, [load, loadDebrid, nodeReady])
+	useNodeData(torrentProfileQuery)
+	useNodeData(torrentDebridQuery)
 
 	if (!profile) {
 		return null

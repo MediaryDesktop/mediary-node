@@ -1,11 +1,10 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
-import { useEffect } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { Notice } from '@shared/ui'
 
-import { $nodeReady } from '@infra/node'
+import { useNodeData } from '@infra/node'
 
 import { $playerMode } from '@entities/playback'
 import { toolsQuery } from '@entities/tool'
@@ -18,18 +17,9 @@ export function MissingPlayerNotice({ className }: MissingPlayerNoticeProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
 
-	const [mode, data, load, nodeReady] = useUnit([
-		$playerMode,
-		toolsQuery.$data,
-		toolsQuery.start,
-		$nodeReady
-	])
+	const [mode, data] = useUnit([$playerMode, toolsQuery.$data])
 
-	useEffect(() => {
-		if (nodeReady) {
-			load()
-		}
-	}, [load, nodeReady])
+	useNodeData(toolsQuery)
 
 	const mpv = data?.tools?.find(tool => tool.id === 'mpv')
 

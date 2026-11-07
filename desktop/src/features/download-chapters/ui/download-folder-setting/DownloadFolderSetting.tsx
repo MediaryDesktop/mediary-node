@@ -1,10 +1,9 @@
 import { useUnit } from 'effector-react'
-import { useEffect } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { SelectDropdown } from '@shared/ui'
 
-import { $nodeReady } from '@infra/node'
+import { useNodeData } from '@infra/node'
 
 import { libraryRootsQuery } from '@entities/library-item'
 import { mangaDownloadSettingsQuery, putMangaDownloadSettingsMutation } from '@entities/manga-source'
@@ -12,22 +11,15 @@ import { mangaDownloadSettingsQuery, putMangaDownloadSettingsMutation } from '@e
 export function DownloadFolderSetting() {
 	const { t } = useTranslation()
 
-	const [settings, loadSettings, roots, loadRoots, save, saving, nodeReady] = useUnit([
+	const [settings, roots, save, saving] = useUnit([
 		mangaDownloadSettingsQuery.$data,
-		mangaDownloadSettingsQuery.start,
 		libraryRootsQuery.$data,
-		libraryRootsQuery.start,
 		putMangaDownloadSettingsMutation.start,
-		putMangaDownloadSettingsMutation.$pending,
-		$nodeReady
+		putMangaDownloadSettingsMutation.$pending
 	])
 
-	useEffect(() => {
-		if (nodeReady) {
-			loadSettings()
-			loadRoots()
-		}
-	}, [loadSettings, loadRoots, nodeReady])
+	useNodeData(mangaDownloadSettingsQuery)
+	useNodeData(libraryRootsQuery)
 
 	const folders = roots?.roots ?? []
 	const defaultFolder = settings?.default_folder ?? ''

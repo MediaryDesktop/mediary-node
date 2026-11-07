@@ -1,6 +1,6 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { formatDateTime } from '@shared/lib'
@@ -14,6 +14,8 @@ import {
 	ReelLoader,
 	SelectDropdown
 } from '@shared/ui'
+
+import { useNodeData } from '@infra/node'
 
 import { libraryScanHistoryQuery, libraryScanRunQuery } from '@entities/library-item'
 
@@ -29,13 +31,11 @@ export function ScanHistoryPage() {
 	const { t, i18n } = useTranslation()
 	const navigate = useNavigate()
 
-	const [history, historyPending, startHistory, run, runPending, startRun] = useUnit([
+	const [history, historyPending, run, runPending] = useUnit([
 		libraryScanHistoryQuery.$data,
 		libraryScanHistoryQuery.$pending,
-		libraryScanHistoryQuery.start,
 		libraryScanRunQuery.$data,
-		libraryScanRunQuery.$pending,
-		libraryScanRunQuery.start
+		libraryScanRunQuery.$pending
 	])
 
 	const [openExplorer, matchRequestedMany] = useUnit([
@@ -46,19 +46,13 @@ export function ScanHistoryPage() {
 	const [picked, setPicked] = useState<string | null>(null)
 	const [search, setSearch] = useState('')
 
-	useEffect(() => {
-		startHistory({ limit: HISTORY_LIMIT })
-	}, [startHistory])
+	useNodeData(libraryScanHistoryQuery, { params: { limit: HISTORY_LIMIT } })
 
 	const runs = history?.history.items ?? []
 
 	const selected = picked ?? (runs[0] ? String(runs[0].id) : null)
 
-	useEffect(() => {
-		if (selected !== null) {
-			startRun(Number(selected))
-		}
-	}, [selected, startRun])
+	useNodeData(libraryScanRunQuery, { params: Number(selected), enabled: selected !== null })
 
 	const detail = run?.run && String(run.run.id) === selected ? run.run : null
 

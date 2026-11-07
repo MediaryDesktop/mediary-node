@@ -1,10 +1,9 @@
 import { useUnit } from 'effector-react'
-import { useEffect } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { SelectDropdown } from '@shared/ui'
 
-import { $nodeReady } from '@infra/node'
+import { useNodeData } from '@infra/node'
 
 import { bookDownloadSettingsQuery, putBookDownloadSettingsMutation } from '@entities/book-source'
 import { libraryRootsQuery } from '@entities/library-item'
@@ -12,22 +11,15 @@ import { libraryRootsQuery } from '@entities/library-item'
 export function BookFolderSetting() {
 	const { t } = useTranslation()
 
-	const [settings, loadSettings, roots, loadRoots, save, saving, nodeReady] = useUnit([
+	const [settings, roots, save, saving] = useUnit([
 		bookDownloadSettingsQuery.$data,
-		bookDownloadSettingsQuery.start,
 		libraryRootsQuery.$data,
-		libraryRootsQuery.start,
 		putBookDownloadSettingsMutation.start,
-		putBookDownloadSettingsMutation.$pending,
-		$nodeReady
+		putBookDownloadSettingsMutation.$pending
 	])
 
-	useEffect(() => {
-		if (nodeReady) {
-			loadSettings()
-			loadRoots()
-		}
-	}, [loadSettings, loadRoots, nodeReady])
+	useNodeData(bookDownloadSettingsQuery)
+	useNodeData(libraryRootsQuery)
 
 	const folders = (roots?.roots ?? []).filter(root => root.content === 'books')
 	const defaultFolder = settings?.default_folder ?? ''

@@ -1,6 +1,6 @@
-import { useUnit } from 'effector-react'
-import { useEffect } from 'react'
 import type { ReactNode } from 'react'
+
+import { useNodeData } from '@infra/node'
 
 import { NowPlayingBar, playbackQuery } from '@entities/playback'
 
@@ -15,11 +15,7 @@ import './lib/list-wiring'
 import { Sidebar } from './sidebar/Sidebar'
 
 export function AppLayout({ children }: { children: ReactNode }) {
-	const startPlayback = useUnit(playbackQuery.start)
-
-	useEffect(() => {
-		startPlayback()
-	}, [startPlayback])
+	useNodeData(playbackQuery)
 
 	return (
 		<div className={styles.root}>

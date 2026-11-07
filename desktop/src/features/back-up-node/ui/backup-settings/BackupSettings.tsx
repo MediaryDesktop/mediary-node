@@ -9,7 +9,7 @@ import { useTranslation } from '@shared/i18n'
 import { formatBytes, formatDateTime, formatRelativeTime, useUnitWatch } from '@shared/lib'
 import { Button, Icon, Modal, toast } from '@shared/ui'
 
-import { $nodeReady } from '@infra/node'
+import { useNodeData } from '@infra/node'
 
 import { returnAfterAuthRequested, sessionModel } from '@entities/session'
 
@@ -35,11 +35,9 @@ export function BackupSettings() {
 	const { t, i18n } = useTranslation()
 	const navigate = useNavigate()
 
-	const [account, nodeReady, status, loadStatus, requestReturn] = useUnit([
+	const [account, status, requestReturn] = useUnit([
 		sessionModel.$account,
-		$nodeReady,
 		syncStatusQuery.$data,
-		syncStatusQuery.start,
 		returnAfterAuthRequested
 	])
 
@@ -65,11 +63,7 @@ export function BackupSettings() {
 		mounted()
 	}, [mounted])
 
-	useEffect(() => {
-		if (nodeReady) {
-			loadStatus()
-		}
-	}, [loadStatus, nodeReady])
+	useNodeData(syncStatusQuery)
 
 	useUnitWatch(pairMutation.finished.failure, ({ error }) =>
 		toast.error(problemDetail(error, t('backup.pairFailed')), { id: TOAST_ID })
@@ -191,15 +185,14 @@ function BackupList() {
 	const { t, i18n } = useTranslation()
 	const [restoring, setRestoring] = useState<SyncBackup | null>(null)
 
-	const [backups, load, failed, remove, removing] = useUnit([
+	const [backups, failed, remove, removing] = useUnit([
 		backupsQuery.$data,
-		backupsQuery.start,
 		backupsQuery.$failed,
 		deleteBackupMutation.start,
 		deleteBackupMutation.$pending
 	])
 
-	useEffect(() => load(), [load])
+	useNodeData(backupsQuery)
 
 	useUnitWatch(deleteBackupMutation.finished.failure, ({ error }) =>
 		toast.error(problemDetail(error, t('backup.deleteFailed')), { id: TOAST_ID })

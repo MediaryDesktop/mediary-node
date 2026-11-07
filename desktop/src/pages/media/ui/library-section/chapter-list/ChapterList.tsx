@@ -1,12 +1,12 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { readStored, writeStored } from '@shared/lib'
 import { Button, EmptyState, Icon, Pagination } from '@shared/ui'
 
-import { $nodeReady } from '@infra/node'
+import { useNodeData } from '@infra/node'
 
 import { extensionsQuery } from '@entities/extension'
 import {
@@ -56,35 +56,17 @@ const ORDER_KEY = 'mediary.chapterOrder'
 export function ChapterList({ mediaRef, title, progress, listed }: ChapterListProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
-	const [
-		unlink,
-		updateEntry,
-		downloadsData,
-		loadDownloads,
-		loadDownloadSettings,
-		save,
-		extensions,
-		loadExtensions,
-		nodeReady
-	] = useUnit([
+	const [unlink, updateEntry, downloadsData, save, extensions] = useUnit([
 		deleteMangaLinkMutation.start,
 		updateTrackerEntryMutation.start,
 		mangaDownloadsQuery.$data,
-		mangaDownloadsQuery.start,
-		mangaDownloadSettingsQuery.start,
 		downloadRequested,
-		extensionsQuery.$data,
-		extensionsQuery.start,
-		$nodeReady
+		extensionsQuery.$data
 	])
 
-	useEffect(() => {
-		if (nodeReady) {
-			loadDownloads()
-			loadDownloadSettings()
-			loadExtensions()
-		}
-	}, [loadDownloads, loadDownloadSettings, loadExtensions, nodeReady])
+	useNodeData(mangaDownloadsQuery)
+	useNodeData(mangaDownloadSettingsQuery)
+	useNodeData(extensionsQuery)
 
 	const { rows, sources, links, problems, loadingOnline } = useTitleChapters(mediaRef)
 

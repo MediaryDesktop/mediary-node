@@ -1,10 +1,11 @@
 import { Link } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
-import { useEffect } from 'react'
 import { LuFolderSync } from 'react-icons/lu'
 
 import { useTranslation } from '@shared/i18n'
 import { Button, EmptyState, Icon, PageHeader, PageTransition, PhaseTransition } from '@shared/ui'
+
+import { useNodeData } from '@infra/node'
 
 import { libraryCollectionQuery, libraryRootsQuery, libraryScanQuery } from '@entities/library-item'
 
@@ -20,26 +21,19 @@ import { LibraryToolbar } from './ui/library-toolbar/LibraryToolbar'
 export function LibraryPage() {
 	const { t } = useTranslation()
 
-	const [collectionData, collectionPending, startCollection] = useUnit([
+	const [collectionData, collectionPending] = useUnit([
 		libraryCollectionQuery.$data,
-		libraryCollectionQuery.$pending,
-		libraryCollectionQuery.start
+		libraryCollectionQuery.$pending
 	])
 
-	const [rootsData, startRoots, startScanStatus] = useUnit([
-		libraryRootsQuery.$data,
-		libraryRootsQuery.start,
-		libraryScanQuery.start
-	])
+	const [rootsData] = useUnit([libraryRootsQuery.$data])
 
 	const scanRequested = useUnit(scanLibraryModel.requested)
 	const matchRequestedMany = useUnit(matchFileModel.requestedMany)
 
-	useEffect(() => {
-		startCollection()
-		startRoots()
-		startScanStatus()
-	}, [startCollection, startRoots, startScanStatus])
+	useNodeData(libraryCollectionQuery)
+	useNodeData(libraryRootsQuery)
+	useNodeData(libraryScanQuery)
 
 	const collection = collectionData?.collection ?? null
 	const entries = collection?.entries ?? []

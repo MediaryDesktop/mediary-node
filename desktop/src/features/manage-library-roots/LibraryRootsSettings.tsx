@@ -1,10 +1,11 @@
 import { useUnit } from 'effector-react'
-import { useEffect } from 'react'
 
 import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
 import { Button, Icon, toast } from '@shared/ui'
+
+import { useNodeData } from '@infra/node'
 
 import {
 	AddRootMenu,
@@ -20,16 +21,14 @@ import { RootRow } from './ui/root-row/RootRow'
 export function LibraryRootsSettings() {
 	const { t } = useTranslation()
 
-	const [rootsData, startRoots] = useUnit([libraryRootsQuery.$data, libraryRootsQuery.start])
+	const [rootsData] = useUnit([libraryRootsQuery.$data])
 
 	const [pickingFolder, scanRequested] = useUnit([libraryModel.$pickingFolder, libraryModel.scanRequested])
 
 	const [remove, removing] = useUnit([deleteLibraryRootMutation.start, deleteLibraryRootMutation.$pending])
 	const [update, updating] = useUnit([updateLibraryRootMutation.start, updateLibraryRootMutation.$pending])
 
-	useEffect(() => {
-		startRoots()
-	}, [startRoots])
+	useNodeData(libraryRootsQuery)
 
 	useUnitWatch(libraryModel.rootAddFailed, ({ error }) =>
 		toast.error(

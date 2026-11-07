@@ -8,7 +8,7 @@ import { useTranslation } from '@shared/i18n'
 import { formatRelativeTime, useUnitWatch } from '@shared/lib'
 import { Button, EmptyState, Icon, MoreMenu, PosterFade, Switch, toast } from '@shared/ui'
 
-import { $nodeReady } from '@infra/node'
+import { useNodeData } from '@infra/node'
 
 import { mediaPreviewModel } from '@entities/media'
 import {
@@ -28,19 +28,13 @@ export function AutoDownloadRules() {
 	const navigate = useNavigate()
 	const setup = useTorrentSetup()
 
-	const [data, load, nodeReady, previews, requestPreview] = useUnit([
+	const [data, previews, requestPreview] = useUnit([
 		torrentRulesQuery.$data,
-		torrentRulesQuery.start,
-		$nodeReady,
 		mediaPreviewModel.$previews,
 		mediaPreviewModel.previewRequested
 	])
 
-	useEffect(() => {
-		if (nodeReady) {
-			load()
-		}
-	}, [load, nodeReady])
+	useNodeData(torrentRulesQuery)
 
 	useUnitWatch(checkTorrentRuleMutation.finished.success, ({ result }) =>
 		toast.success(

@@ -7,6 +7,8 @@ import { useTranslation } from '@shared/i18n'
 import { formatBytes, useUnitWatch } from '@shared/lib'
 import { Button, Checkbox, Drawer, DrawerForm, DrawerSection, toast } from '@shared/ui'
 
+import { useNodeData } from '@infra/node'
+
 import { titleFilesQuery } from '@entities/library-item'
 import {
 	selectTorrentFilesMutation,
@@ -62,18 +64,15 @@ function baseName(path: string): string {
 function FilesForm({ download, onDone }: { download: TorrentDownload; onDone: () => void }) {
 	const { t } = useTranslation()
 
-	const [data, pending, select, saving, library, loadLibrary] = useUnit([
+	const [data, pending, select, saving, library] = useUnit([
 		torrentFilesQuery.$data,
 		torrentFilesQuery.$pending,
 		selectTorrentFilesMutation.start,
 		selectTorrentFilesMutation.$pending,
-		titleFilesQuery.$data,
-		titleFilesQuery.start
+		titleFilesQuery.$data
 	])
 
-	useEffect(() => {
-		loadLibrary({ mediaRef: download.media_ref, kind: 'video' })
-	}, [download.media_ref, loadLibrary])
+	useNodeData(titleFilesQuery, { params: { mediaRef: download.media_ref, kind: 'video' } })
 
 	useUnitWatch(selectTorrentFilesMutation.finished.success, () => onDone())
 	useUnitWatch(selectTorrentFilesMutation.finished.failure, ({ error }) =>

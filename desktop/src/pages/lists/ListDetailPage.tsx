@@ -1,9 +1,11 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { EmptyState, PageHeader, PageTransition, PhaseTransition } from '@shared/ui'
+
+import { useNodeData } from '@infra/node'
 
 import { aniListAccountModel } from '@entities/anilist-account'
 import { MediaCard } from '@entities/media'
@@ -52,9 +54,8 @@ export function ListDetailPage({ listId }: ListDetailPageProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
 
-	const [lists, startLists, connected, deleted, deletionHandled] = useUnit([
+	const [lists, connected, deleted, deletionHandled] = useUnit([
 		trackerListsQuery.$data,
-		trackerListsQuery.start,
 		aniListAccountModel.$connected,
 		manageListsModel.$deleted,
 		manageListsModel.deletionHandled
@@ -64,9 +65,7 @@ export function ListDetailPage({ listId }: ListDetailPageProps) {
 
 	const tracked = useTrackedEntries(connected)
 
-	useEffect(() => {
-		startLists()
-	}, [startLists])
+	useNodeData(trackerListsQuery)
 
 	const [filters, setFilters] = useState(INITIAL_ENTRY_FILTERS)
 

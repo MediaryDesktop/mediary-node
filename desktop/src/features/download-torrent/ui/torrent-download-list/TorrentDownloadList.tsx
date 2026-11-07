@@ -8,7 +8,7 @@ import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
 import { EmptyState, toast } from '@shared/ui'
 
-import { $nodeReady } from '@infra/node'
+import { useNodeData } from '@infra/node'
 
 import { mediaPreviewModel } from '@entities/media'
 import {
@@ -40,37 +40,20 @@ export function TorrentDownloadList({ mediaRef, title, poster }: TorrentDownload
 	const navigate = useNavigate()
 	const setup = useTorrentSetup()
 
-	const [
-		data,
-		load,
-		pause,
-		resume,
-		remove,
-		nodeReady,
-		filesFor,
-		requestFiles,
-		dismissFiles,
-		previews,
-		requestPreview
-	] = useUnit([
-		torrentDownloadsQuery.$data,
-		torrentDownloadsQuery.start,
-		pauseTorrentMutation.start,
-		resumeTorrentMutation.start,
-		removeTorrentMutation.start,
-		$nodeReady,
-		$filesFor,
-		filesRequested,
-		filesDismissed,
-		mediaPreviewModel.$previews,
-		mediaPreviewModel.previewRequested
-	])
+	const [data, pause, resume, remove, filesFor, requestFiles, dismissFiles, previews, requestPreview] =
+		useUnit([
+			torrentDownloadsQuery.$data,
+			pauseTorrentMutation.start,
+			resumeTorrentMutation.start,
+			removeTorrentMutation.start,
+			$filesFor,
+			filesRequested,
+			filesDismissed,
+			mediaPreviewModel.$previews,
+			mediaPreviewModel.previewRequested
+		])
 
-	useEffect(() => {
-		if (nodeReady) {
-			load()
-		}
-	}, [load, nodeReady])
+	useNodeData(torrentDownloadsQuery)
 
 	const failed = ({ error }: RequestFailure) =>
 		toast.error(problemDetail(error, t('torrents.actionFailed')), { id: 'torrent-action' })

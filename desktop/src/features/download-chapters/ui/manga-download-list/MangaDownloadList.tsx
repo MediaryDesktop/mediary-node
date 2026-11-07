@@ -1,6 +1,5 @@
 import clsx from 'clsx'
 import { useUnit } from 'effector-react'
-import { useEffect } from 'react'
 import { IoIosRefresh } from 'react-icons/io'
 
 import { problemDetail } from '@shared/api'
@@ -9,7 +8,7 @@ import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
 import { Button, EmptyState, Icon, ProgressBar, toast } from '@shared/ui'
 
-import { $nodeReady } from '@infra/node'
+import { useNodeData } from '@infra/node'
 
 import {
 	cancelMangaDownloadMutation,
@@ -28,20 +27,14 @@ export interface MangaDownloadListProps {
 export function MangaDownloadList({ hideTitle }: MangaDownloadListProps = {}) {
 	const { t } = useTranslation()
 
-	const [data, load, cancel, retry, forget, nodeReady] = useUnit([
+	const [data, cancel, retry, forget] = useUnit([
 		mangaDownloadsQuery.$data,
-		mangaDownloadsQuery.start,
 		cancelMangaDownloadMutation.start,
 		retryMangaDownloadMutation.start,
-		forgetMangaDownloadMutation.start,
-		$nodeReady
+		forgetMangaDownloadMutation.start
 	])
 
-	useEffect(() => {
-		if (nodeReady) {
-			load()
-		}
-	}, [load, nodeReady])
+	useNodeData(mangaDownloadsQuery)
 
 	const failed = ({ error }: RequestFailure) =>
 		toast.error(problemDetail(error, t('mangaSources.downloads.failedToQueue')), {

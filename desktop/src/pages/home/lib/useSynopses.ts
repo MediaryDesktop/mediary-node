@@ -1,9 +1,9 @@
 import { useUnit } from 'effector-react'
-import { useEffect, useState } from 'react'
+import { useMemo } from 'react'
 
-import { $nodeReady } from '@infra/node'
+import { useNodeData } from '@infra/node'
 
-import { fetchMediaDetailsFx } from '@entities/media'
+import { mediaPreviewModel } from '@entities/media'
 import type { MediaDate } from '@entities/media'
 
 export interface Synopsis {
@@ -12,40 +12,23 @@ export interface Synopsis {
 }
 
 export function useSynopses(refs: string[]): Record<string, Synopsis> {
-	const nodeReady = useUnit($nodeReady)
-	const [details, setDetails] = useState<Record<string, Synopsis>>({})
+	const previews = useUnit(mediaPreviewModel.$previews)
 	const key = refs.join('|')
 
-	useEffect(() => {
-		if (!nodeReady) {
-			return
-		}
+	useNodeData(mediaPreviewModel.previewsRequested, { params: refs, enabled: refs.length > 0 })
 
-		let cancelled = false
-		const missing = key.split('|').filter(ref => ref && !(ref in details))
+	return useMemo(
+		() =>
+			Object.fromEntries(
+				refs.flatMap(ref => {
+					const media = previews[ref]
 
-		for (const ref of missing) {
-			fetchMediaDetailsFx(ref)
-				.then(({ media }) => {
-					if (!cancelled) {
-						setDetails(state => ({
-							...state,
-							[ref]: { description: media.description, start_date: media.start_date }
-						}))
-					}
+					return media
+						? [[ref, { description: media.description, start_date: media.start_date }]]
+						: []
 				})
-				.catch(() => {
-					if (!cancelled) {
-						setDetails(state => ({ ...state, [ref]: {} }))
-					}
-				})
-		}
-
-		return () => {
-			cancelled = true
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [key, nodeReady])
-
-	return details
+			),
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- `key` stands for `refs`, a new array on every render.
+		[key, previews]
+	)
 }

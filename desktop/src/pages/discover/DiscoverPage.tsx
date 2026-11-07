@@ -1,12 +1,12 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { Button, EmptyState, Icon, PageTransition, PhaseTransition, SegmentedControl } from '@shared/ui'
 import type { IconName } from '@shared/ui'
 
-import { $nodeReady } from '@infra/node'
+import { useNodeData } from '@infra/node'
 
 import { enumLabel, FeaturedBanner } from '@entities/media'
 import type { MediaSummary } from '@entities/media'
@@ -37,20 +37,11 @@ export function DiscoverPage({ tab, onTabChange }: DiscoverPageProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
 
-	const [sections, request, retry, nodeReady] = useUnit([
-		discoverModel.$sections,
-		discoverModel.sectionsRequested,
-		discoverModel.sectionRetried,
-		$nodeReady
-	])
+	const [sections, retry] = useUnit([discoverModel.$sections, discoverModel.sectionRetried])
 
 	const rows = useMemo(() => discoverSections(tab, new Date()), [tab])
 
-	useEffect(() => {
-		if (nodeReady) {
-			request(rows)
-		}
-	}, [nodeReady, request, rows])
+	useNodeData(discoverModel.sectionsRequested, { params: rows })
 
 	const first = rows[0] ? sections[rows[0].key] : undefined
 

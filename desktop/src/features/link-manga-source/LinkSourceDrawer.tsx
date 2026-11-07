@@ -16,6 +16,8 @@ import {
 	toast
 } from '@shared/ui'
 
+import { useNodeData } from '@infra/node'
+
 import { extensionsQuery } from '@entities/extension'
 import { mangaSearchQuery, putMangaLinkMutation } from '@entities/manga-source'
 import type { MangaSource } from '@entities/manga-source'
@@ -62,7 +64,7 @@ interface LinkFormProps extends Omit<LinkSourceDrawerProps, 'open' | 'onClose'> 
 function LinkForm({ mediaRef, title, sources, initialSource, onDone }: LinkFormProps) {
 	const { t } = useTranslation()
 
-	const [search, reset, data, error, pending, link, linking, loadExtensions, extensions] = useUnit([
+	const [search, reset, data, error, pending, link, linking, extensions] = useUnit([
 		mangaSearchQuery.start,
 		mangaSearchQuery.reset,
 		mangaSearchQuery.$data,
@@ -70,7 +72,6 @@ function LinkForm({ mediaRef, title, sources, initialSource, onDone }: LinkFormP
 		mangaSearchQuery.$pending,
 		putMangaLinkMutation.start,
 		putMangaLinkMutation.$pending,
-		extensionsQuery.start,
 		extensionsQuery.$data
 	])
 
@@ -79,14 +80,14 @@ function LinkForm({ mediaRef, title, sources, initialSource, onDone }: LinkFormP
 
 	useEffect(() => {
 		reset()
-		if (source && title.trim()) {
-			search({ source, query: title.trim(), mediaRef })
-		}
-	}, [reset, search, source, title, mediaRef])
+	}, [reset, source])
 
-	useEffect(() => {
-		loadExtensions()
-	}, [loadExtensions])
+	useNodeData(mangaSearchQuery, {
+		params: { source, query: title.trim(), mediaRef },
+		enabled: Boolean(source && title.trim())
+	})
+
+	useNodeData(extensionsQuery)
 
 	const icons = new Map<string, string>(
 		(extensions?.extensions ?? []).flatMap(ext => (ext.icon ? [[`plugin:${ext.id}`, ext.icon]] : []))

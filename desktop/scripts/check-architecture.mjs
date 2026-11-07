@@ -271,12 +271,41 @@ if (commented.length === 0) {
 	console.error('')
 }
 
+// When to ask the node is one rule (infra/node, whenNodeReady), not each screen's.
+// A component or hook that reads $nodeReady to decide for itself is the thing
+// that rule replaced.
+const NODE_READY_IN_COMPONENT = /\$nodeReady\b/
+const NODE_READY_IN_HOOK = /useUnit\([^)]*\$nodeReady/
+
+const askingForThemselves = files
+	.filter(file => !relative(SRC, file).startsWith('infrastructure'))
+	.filter(file => {
+		const text = readFileSync(file, 'utf8')
+
+		return file.endsWith('.tsx') ? NODE_READY_IN_COMPONENT.test(text) : NODE_READY_IN_HOOK.test(text)
+	})
+	.map(file => relative(SRC, file).split(sep).join('/'))
+
+if (askingForThemselves.length === 0) {
+	console.log('✔ No component decides for itself whether the node is ready.')
+} else {
+	console.error(
+		`✖ ${askingForThemselves.length} file(s) read $nodeReady in a component or hook; use useNodeData:\n`
+	)
+
+	for (const file of askingForThemselves) {
+		console.error(`   ${file}`)
+	}
+
+	console.error('')
+}
+
 const cycles = findCycles(edges)
 const nodeCount = [...edges.keys()].filter(node => edges.get(node).size > 0 || node !== 'root').length
 
 if (cycles.length === 0) {
 	console.log(`✔ No slice cycles (${files.length} files, ${nodeCount} nodes).`)
-	process.exit(misplaced.length === 0 && commented.length === 0 ? 0 : 1)
+	process.exit(misplaced.length + commented.length + askingForThemselves.length === 0 ? 0 : 1)
 }
 
 console.error(`✖ Found ${cycles.length} slice cycle(s) across ${files.length} files:\n`)
