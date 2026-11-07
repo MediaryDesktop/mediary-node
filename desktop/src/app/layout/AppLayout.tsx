@@ -12,6 +12,7 @@ import { ManageEntryDrawer, RateEntryDrawer } from '@features/track-media'
 
 import styles from './AppLayout.module.scss'
 import './lib/list-wiring'
+import { NodeBanner } from './node-banner/NodeBanner'
 import { Sidebar } from './sidebar/Sidebar'
 
 export function AppLayout({ children }: { children: ReactNode }) {
@@ -21,7 +22,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
 		<div className={styles.root}>
 			<Sidebar />
 
-			<main className={styles.main}>{children}</main>
+			<main className={styles.main}>
+				<NodeBanner />
+				{children}
+			</main>
 
 			<NowPlayingBar />
 

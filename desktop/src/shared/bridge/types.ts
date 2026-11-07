@@ -29,6 +29,7 @@ export interface MediaryBridge {
 	node: {
 		connection: () => Promise<NodeConnection>
 		state: () => Promise<NodeState>
+		retry: () => Promise<void>
 		onStateChange: (listener: (state: NodeState) => void) => () => void
 	}
 	app: {

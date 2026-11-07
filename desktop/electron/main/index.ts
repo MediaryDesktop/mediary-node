@@ -161,6 +161,7 @@ function openAniListAuthorize(authorizeUrl: unknown): Promise<void> {
 function registerIpc(): void {
 	handle(IPC.nodeConnection, () => supervisor.connection)
 	handle(IPC.nodeState, (): SupervisorState => supervisor.currentState)
+	handle(IPC.nodeRetry, () => supervisor.retry())
 	handle(IPC.appVersion, () => app.getVersion())
 	handle(IPC.oauthPrepare, () => prepareOAuth())
 	handle(IPC.oauthRelease, () => releaseOAuthListener())

@@ -47,6 +47,7 @@ Object.defineProperty(window, 'mediary', {
 				token: 'test-token'
 			}),
 			state: async () => 'ready' as const,
+			retry: async () => undefined,
 			onStateChange: () => () => {}
 		},
 		app: {

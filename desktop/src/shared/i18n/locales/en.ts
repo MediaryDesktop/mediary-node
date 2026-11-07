@@ -22,6 +22,17 @@ export const en = {
 			ready: 'Node connected',
 			restarting: 'Node restarting…',
 			failed: 'Node failed to start'
+		},
+		banner: {
+			recovering: {
+				title: 'The node is restarting',
+				text: 'Your library, the catalogue and the player will be back in a moment.'
+			},
+			failed: {
+				title: 'The node has stopped',
+				text: 'It crashed several times in a row and no longer restarts by itself. Until it runs, the library, the catalogue and the player are unavailable.'
+			},
+			retry: 'Start it again'
 		}
 	},
 

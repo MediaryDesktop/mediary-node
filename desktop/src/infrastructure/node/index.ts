@@ -1,4 +1,11 @@
-export { $nodeReady, $nodeState, nodeBridgeMounted, subscribeToNodeState } from './bridge'
+export {
+	$nodeReady,
+	$nodeRetrying,
+	$nodeState,
+	nodeBridgeMounted,
+	nodeRetryRequested,
+	subscribeToNodeState
+} from './bridge'
 
 export { createNodeRequestFx, nodeMediaUrl, openNodeEventStream } from './client'
 

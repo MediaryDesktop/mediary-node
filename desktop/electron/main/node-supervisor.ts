@@ -257,6 +257,30 @@ export class NodeSupervisor {
 		this.setState('stopped')
 	}
 
+	// The user asking for another try after the node was given up on. The count
+	// of quick crashes starts over: this is a new attempt, not the sixth of a run
+	// that already failed. Anything but "failed" is left alone — a node that is
+	// starting or running needs no second start.
+	async retry(): Promise<void> {
+		if (this.state !== 'failed' || this.child) {
+			return
+		}
+
+		this.restartAttempt = 0
+
+		try {
+			await this.start()
+		} catch (error) {
+			this.options.onLog?.(`retry failed: ${String(error)}`, 'stderr')
+
+			// A node that exited on its way up is already being restarted by the
+			// exit handler; only a start that failed outright is given up on here.
+			if (this.currentState === 'starting') {
+				this.setState('failed')
+			}
+		}
+	}
+
 	private async restart(): Promise<void> {
 		if (this.restartAttempt >= MAX_QUICK_RESTARTS) {
 			this.options.onLog?.(

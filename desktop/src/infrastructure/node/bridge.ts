@@ -29,6 +29,20 @@ sample({
 	target: readNodeConnectionFx
 })
 
+// Asks the shell to start the node again once it has given up on it. The answer
+// comes back as the node's own state; until then the attempt is pending.
+export const nodeRetryRequested = createEvent()
+
+const retryNodeFx = createEffect<void, void>(() => window.mediary.node.retry())
+
+sample({
+	clock: nodeRetryRequested,
+	filter: retryNodeFx.pending.map(pending => !pending),
+	target: retryNodeFx
+})
+
+export const $nodeRetrying = retryNodeFx.pending
+
 export function subscribeToNodeState(): () => void {
 	return window.mediary.node.onStateChange(state => nodeStateChanged(state))
 }

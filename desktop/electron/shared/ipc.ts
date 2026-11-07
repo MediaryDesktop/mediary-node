@@ -2,6 +2,7 @@ export const IPC = {
 	nodeConnection: 'node:connection',
 
 	nodeState: 'node:state',
+	nodeRetry: 'node:retry',
 
 	appVersion: 'app:version',
 

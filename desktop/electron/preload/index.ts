@@ -10,6 +10,9 @@ const api = {
 
 		state: (): Promise<NodeState> => ipcRenderer.invoke(IPC.nodeState),
 
+		// Starts the node again after it was given up on; does nothing otherwise.
+		retry: (): Promise<void> => ipcRenderer.invoke(IPC.nodeRetry),
+
 		onStateChange: (listener: (state: NodeState) => void): (() => void) => {
 			const handler = (_event: unknown, state: NodeState) => listener(state)
 			ipcRenderer.on(IPC.nodeState, handler)
