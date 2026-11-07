@@ -175,7 +175,9 @@ export function StreamSection({
 							<Notice
 								title={t('media.stream.debridPitch')}
 								actionLabel={t('torrents.setup.openSettings')}
-								onAction={() => navigate({ to: '/settings', search: { section: 'torrents' } })}
+								onAction={() =>
+									navigate({ to: '/settings', search: { section: 'torrents' } })
+								}
 							>
 								{t('media.stream.debridPitchHint')}
 							</Notice>

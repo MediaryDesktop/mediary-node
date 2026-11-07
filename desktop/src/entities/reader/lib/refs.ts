@@ -1,4 +1,3 @@
-
 export function localRef(fileId: number): string {
 	return `local:${fileId}`
 }

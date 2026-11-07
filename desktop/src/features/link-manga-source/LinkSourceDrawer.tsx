@@ -20,8 +20,8 @@ import { extensionsQuery } from '@entities/extension'
 import { mangaSearchQuery, putMangaLinkMutation } from '@entities/manga-source'
 import type { MangaSource } from '@entities/manga-source'
 
-import { SourceOptionIcon } from './source-option-icon/SourceOptionIcon'
 import styles from './LinkSourceDrawer.module.scss'
+import { SourceOptionIcon } from './source-option-icon/SourceOptionIcon'
 
 export interface LinkSourceDrawerProps {
 	open: boolean
@@ -117,7 +117,13 @@ function LinkForm({ mediaRef, title, sources, initialSource, onDone }: LinkFormP
 						options={sources.map(item => ({
 							value: item.id,
 							label: item.name,
-							icon: <SourceOptionIcon source={item.id} name={item.name} image={icons.get(item.id)} />
+							icon: (
+								<SourceOptionIcon
+									source={item.id}
+									name={item.name}
+									image={icons.get(item.id)}
+								/>
+							)
 						}))}
 						value={source}
 						onValueChange={setSource}

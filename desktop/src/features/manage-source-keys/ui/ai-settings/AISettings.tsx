@@ -73,11 +73,7 @@ export function AISettings() {
 						selected={settings.provider === provider}
 						disabled={saving}
 						onSelect={() => save({ provider })}
-						badge={
-							provider === 'cloud' ? (
-								<Badge size='sm'>{t('ai.free')}</Badge>
-							) : undefined
-						}
+						badge={provider === 'cloud' ? <Badge size='sm'>{t('ai.free')}</Badge> : undefined}
 					/>
 				))}
 			</div>

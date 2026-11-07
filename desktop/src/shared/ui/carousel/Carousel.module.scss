@@ -35,12 +35,14 @@
 				padding: 0;
 				color: var(--text-muted);
 				cursor: pointer;
-				transition: color 160ms, transform 160ms;
+				transition:
+					color 160ms,
+					transform 160ms;
 
 				&:hover,
 				&:focus-visible {
 					color: var(--text);
-					transform: scale(1.1)
+					transform: scale(1.1);
 				}
 
 				.chevron {

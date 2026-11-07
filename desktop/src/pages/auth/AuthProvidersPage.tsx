@@ -28,7 +28,10 @@ export function AuthProvidersPage({ mode }: AuthProvidersPageProps) {
 					() => navigate({ to: copy.emailRoute, replace: true }),
 					[navigate, copy]
 				)}
-				onSwitch={useCallback(() => navigate({ to: copy.otherRoute, replace: true }), [navigate, copy])}
+				onSwitch={useCallback(
+					() => navigate({ to: copy.otherRoute, replace: true }),
+					[navigate, copy]
+				)}
 			/>
 		</AuthFormWrapper>
 	)

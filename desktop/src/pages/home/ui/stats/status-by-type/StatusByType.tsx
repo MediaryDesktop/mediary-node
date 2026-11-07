@@ -6,7 +6,7 @@ import type { TrackerStatus } from '@entities/tracker'
 import { useChartTheme } from '../../../config/chart-theme'
 import { emptyCounts } from '../../../lib/stats'
 import type { StatusCounts, TypeBreakdown } from '../../../lib/stats'
-import { Panel, PanelEmpty, iconStyle } from '../panel/Panel'
+import { iconStyle, Panel, PanelEmpty } from '../panel/Panel'
 
 import styles from './StatusByType.module.scss'
 

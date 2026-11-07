@@ -2212,7 +2212,8 @@ export const uk: Translation = {
 			torrents: {
 				label: 'Торенти',
 				title: 'Торент-клієнт',
-				description: 'Оберіть, як Mediary завантажує торенти: вбудованим клієнтом, своїм qBittorrent чи зовсім ні'
+				description:
+					'Оберіть, як Mediary завантажує торенти: вбудованим клієнтом, своїм qBittorrent чи зовсім ні'
 			},
 			debrid: {
 				label: 'Debrid',

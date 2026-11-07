@@ -1,4 +1,3 @@
-
 export interface ChapterOption {
 	ref: string
 	number: string | null

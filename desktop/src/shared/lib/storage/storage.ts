@@ -1,4 +1,3 @@
-
 export function readStored(key: string): string | null {
 	try {
 		return window.localStorage.getItem(key)

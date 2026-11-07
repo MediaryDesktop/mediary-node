@@ -32,7 +32,12 @@ export function usePlayerKeyboard(options: PlayerKeyboardOptions): void {
 		const onKey = (event: KeyboardEvent) => {
 			const onRangeInput = event.target instanceof HTMLInputElement && event.target.type === 'range'
 
-			if ((event.target instanceof HTMLInputElement && !onRangeInput) || event.ctrlKey || event.metaKey || event.altKey) {
+			if (
+				(event.target instanceof HTMLInputElement && !onRangeInput) ||
+				event.ctrlKey ||
+				event.metaKey ||
+				event.altKey
+			) {
 				return
 			}
 

@@ -2214,7 +2214,8 @@ export const ru: Translation = {
 			torrents: {
 				label: 'Торренты',
 				title: 'Торрент-клиент',
-				description: 'Выберите, как Mediary загружает торренты: встроенным клиентом, своим qBittorrent или вовсе никак'
+				description:
+					'Выберите, как Mediary загружает торренты: встроенным клиентом, своим qBittorrent или вовсе никак'
 			},
 			debrid: {
 				label: 'Debrid',

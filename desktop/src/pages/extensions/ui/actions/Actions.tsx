@@ -9,7 +9,6 @@ import { Button, toast } from '@shared/ui'
 import { checkExtensionUpdatesMutation, extensionCatalogQuery } from '@entities/extension'
 import { toolsQuery } from '@entities/tool'
 
-
 export function InstalledActions() {
 	const { t } = useTranslation()
 	const [check, checking] = useUnit([

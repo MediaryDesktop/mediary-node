@@ -19,7 +19,7 @@
 	}
 
 	&::before {
-		content: '';
+		content: "";
 		position: absolute;
 		top: -20%;
 		bottom: -20%;
@@ -27,10 +27,10 @@
 		pointer-events: none;
 		width: 42%;
 		background-color: var(--row-glow, transparent);
-		mask-image: url('/illustrations/mask.png');
+		mask-image: url("/illustrations/mask.png");
 		mask-repeat: no-repeat;
 		mask-size: 100% 100%;
-		-webkit-mask-image: url('/illustrations/mask.png');
+		-webkit-mask-image: url("/illustrations/mask.png");
 		-webkit-mask-repeat: no-repeat;
 		-webkit-mask-size: 100% 100%;
 		backdrop-filter: blur(50px);
@@ -103,7 +103,6 @@
 			font: inherit;
 			text-align: left;
 			cursor: pointer;
-
 
 			&:focus-visible {
 				outline: none;

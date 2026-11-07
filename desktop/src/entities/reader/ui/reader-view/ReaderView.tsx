@@ -55,9 +55,13 @@ export function ReaderView({
 	const [pan, setPan] = useState({ x: 0, y: 0 })
 	const [dragging, setDragging] = useState(false)
 	const clickTimer = useRef<number | undefined>(undefined)
-	const dragRef = useRef<{ pointerId: number; startX: number; startY: number; panX: number; panY: number } | null>(
-		null
-	)
+	const dragRef = useRef<{
+		pointerId: number
+		startX: number
+		startY: number
+		panX: number
+		panY: number
+	} | null>(null)
 	const draggedRef = useRef(false)
 	const entrance = useBookEntrance(openedAt)
 

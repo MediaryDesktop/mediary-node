@@ -74,7 +74,9 @@ export function ChapterRow({
 
 	const label = row.number === null ? first.title : t('reader.chapterNumber', { number: row.number })
 	const subtitle = first.title !== label ? first.title : first.source === LOCAL_SOURCE ? first.detail : ''
-	const readLabel = t(read ? 'mangaSources.chapters.markUnread' : 'mangaSources.chapters.markRead', { label })
+	const readLabel = t(read ? 'mangaSources.chapters.markUnread' : 'mangaSources.chapters.markRead', {
+		label
+	})
 
 	return (
 		<div role='row' className={clsx(styles.row, read && styles.read, selected && styles.selected)}>

@@ -31,7 +31,9 @@ export function LibraryCollection({ entries }: LibraryCollectionProps) {
 	return (
 		<ul className={styles.grid}>
 			{entries.map(rawEntry => {
-				const entry = rawEntry.title ? rawEntry : { ...rawEntry, title: resolvedByRef[rawEntry.media_ref] }
+				const entry = rawEntry.title
+					? rawEntry
+					: { ...rawEntry, title: resolvedByRef[rawEntry.media_ref] }
 				const trackedEntry = trackedByRef.get(entry.media_ref)
 				const mediaType = trackedEntry?.media_type ?? entry.title?.media_type
 

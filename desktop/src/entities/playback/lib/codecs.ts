@@ -1,4 +1,3 @@
-
 type CanPlayType = (type: string) => CanPlayTypeResult
 
 const MATROSKA = ['video/x-matroska', 'video/matroska']

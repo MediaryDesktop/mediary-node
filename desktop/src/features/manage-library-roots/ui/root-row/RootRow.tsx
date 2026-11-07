@@ -31,7 +31,9 @@ export function RootRow({ root, onRescan, onSwitch, onRemove, switching, removin
 				</span>
 
 				<div className={styles.meta}>
-					<Badge tone='accent' size='sm'>{t(`library.root.content.${root.content}`)}</Badge>
+					<Badge tone='accent' size='sm'>
+						{t(`library.root.content.${root.content}`)}
+					</Badge>
 
 					{root.unmatched_count > 0 && (
 						<Badge tone='warning' size='sm'>

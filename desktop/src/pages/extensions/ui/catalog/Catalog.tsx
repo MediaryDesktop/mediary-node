@@ -6,7 +6,6 @@ import type { SelectDropdownOption } from '@shared/ui'
 
 import styles from './Catalog.module.scss'
 
-
 export interface CatalogFiltersProps<Type extends string> {
 	types: readonly { value: Type; label: string }[]
 	type: Type

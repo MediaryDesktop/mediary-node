@@ -153,8 +153,7 @@ export function useManualMediaForm({
 			} else {
 				dropAutoCover()
 			}
-		} catch {
-		}
+		} catch {}
 	}
 
 	const suggest = async () => {

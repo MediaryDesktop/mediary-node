@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react'
 import { useUnit } from 'effector-react'
+import type { ReactNode } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { DropdownMenu } from '@shared/ui'

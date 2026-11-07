@@ -18,8 +18,7 @@ export function useBookFolderAction() {
 			isMissingBookFolderError(error)
 				? {
 						label: t('bookSources.copies.chooseFolder'),
-						onClick: () =>
-							void navigate({ to: '/settings', search: { section: 'books' } })
+						onClick: () => void navigate({ to: '/settings', search: { section: 'books' } })
 					}
 				: undefined,
 		[navigate, t]
