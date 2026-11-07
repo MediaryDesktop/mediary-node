@@ -14,7 +14,8 @@ import {
 	$playerExpanded,
 	$playerFileId,
 	browserCanPlayType,
-	canDirectPlay,
+	canFallBack,
+	chooseSource,
 	playbackModel,
 	playbackStreamQuery,
 	playerClosed,
@@ -23,7 +24,6 @@ import {
 	usePlayerEntrance,
 	VideoPlayer
 } from '@entities/playback'
-import type { VideoSource } from '@entities/playback'
 import { isMissingToolError } from '@entities/tool'
 
 import { $stream, $streamError, $streamTarget, streamCancelled } from '@features/stream-torrent'
@@ -160,14 +160,10 @@ export function PlayerHost() {
 			? t('playback.episode', { number: loadedStream.episode })
 			: undefined
 
-	const direct =
-		directFailedFor !== fileId && canDirectPlay(loadedStream.info.mime_codec, browserCanPlayType)
-
-	const source: VideoSource | null = direct
-		? { kind: 'direct' }
-		: loadedStream.hls_url
-			? { kind: 'hls', path: loadedStream.hls_url }
-			: null
+	const source = chooseSource(loadedStream, {
+		directFailed: directFailedFor === fileId,
+		canPlayType: browserCanPlayType
+	})
 
 	if (!source) {
 		if (!full) {
@@ -202,11 +198,7 @@ export function PlayerHost() {
 					? { label: t('player.openDependencies'), onClick: openDependencies }
 					: undefined
 			}
-			onFallback={
-				source.kind === 'direct' && loadedStream.hls_url
-					? () => setDirectFailedFor(fileId)
-					: undefined
-			}
+			onFallback={canFallBack(source, loadedStream) ? () => setDirectFailedFor(fileId) : undefined}
 		/>
 	)
 }

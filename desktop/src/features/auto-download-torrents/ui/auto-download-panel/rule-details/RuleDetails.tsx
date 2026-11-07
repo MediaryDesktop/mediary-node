@@ -56,8 +56,7 @@ export function RuleDetails({ rule }: { rule: TorrentRule }) {
 
 	const dirty = from !== rule.from_episode || query.trim() !== rule.query
 
-	const setupMissing =
-		setup.loaded && (!setup.clientConfigured || setup.clientReachable === false || !setup.hasSources)
+	const setupMissing = setup.incomplete
 
 	const toggleSettings = () => {
 		setSettingsOpen(on => {

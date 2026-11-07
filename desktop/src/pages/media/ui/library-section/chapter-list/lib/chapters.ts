@@ -1,6 +1,7 @@
 import type { MangaDownload } from '@entities/manga-source'
 import { isChapterRead, LOCAL_SOURCE } from '@entities/reader'
 import type { ChapterOption, ChapterRow } from '@entities/reader'
+import type { TrackerEntryPatch } from '@entities/tracker'
 
 export function presentSources(rows: ChapterRow[]): Map<string, string> {
 	const present = new Map<string, string>()
@@ -60,6 +61,22 @@ export function readProgress(number: string | null, read: boolean, progress: num
 	const next = read ? Math.max(progress, value) : Math.min(progress, value - 1)
 
 	return next === progress ? null : next
+}
+
+// What marking a chapter read or unread writes to the tracker. A title not on
+// any list yet is put on "reading" with it: marking a chapter is starting it.
+export function readProgressPatch(
+	number: string | null,
+	read: boolean,
+	{ progress, listed }: { progress: number; listed: boolean }
+): TrackerEntryPatch | null {
+	const next = readProgress(number, read, progress)
+
+	if (next === null) {
+		return null
+	}
+
+	return listed ? { progress: next } : { status: 'CURRENT', progress: next }
 }
 
 export function matchesSearch(row: ChapterRow, query: string): boolean {

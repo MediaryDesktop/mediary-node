@@ -35,6 +35,7 @@ import {
 	pageOf,
 	presentSources,
 	readProgress,
+	readProgressPatch,
 	savableOption,
 	sortRows,
 	sourceCounts
@@ -159,15 +160,11 @@ export function ChapterList({ mediaRef, title, progress, listed }: ChapterListPr
 	}
 
 	const markRead = (row: Row, read: boolean) => {
-		const next = readProgress(row.number, read, progress)
-		if (next === null) {
-			return
-		}
+		const patch = readProgressPatch(row.number, read, { progress, listed })
 
-		updateEntry({
-			mediaRef,
-			patch: listed ? { progress: next } : { status: 'CURRENT', progress: next }
-		})
+		if (patch) {
+			updateEntry({ mediaRef, patch })
+		}
 	}
 
 	return (

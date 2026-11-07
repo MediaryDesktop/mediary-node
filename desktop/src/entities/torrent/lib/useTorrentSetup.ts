@@ -6,6 +6,7 @@ import { torrentDebridQuery, torrentDownloadsQuery, torrentSourcesQuery } from '
 
 import { readyDebrid } from './clients'
 import type { DebridService, TorrentClientKind } from './clients'
+import { isSetupIncomplete } from './setup'
 
 export interface TorrentSetup {
 	loaded: boolean
@@ -16,6 +17,7 @@ export interface TorrentSetup {
 	clientError: string
 	hasSources: boolean
 	debrid: DebridService | undefined
+	incomplete: boolean
 }
 
 export function useTorrentSetup(): TorrentSetup {
@@ -31,7 +33,7 @@ export function useTorrentSetup(): TorrentSetup {
 
 	const client = downloads?.client
 
-	return {
+	const parts = {
 		loaded: Boolean(downloads && sources),
 		clientKind: client?.kind ?? '',
 		clientService: client?.service ?? '',
@@ -41,4 +43,6 @@ export function useTorrentSetup(): TorrentSetup {
 		hasSources: (sources?.sources ?? []).length > 0 || (sources?.plugins ?? 0) > 0,
 		debrid: readyDebrid(debrid)
 	}
+
+	return { ...parts, incomplete: isSetupIncomplete(parts) }
 }

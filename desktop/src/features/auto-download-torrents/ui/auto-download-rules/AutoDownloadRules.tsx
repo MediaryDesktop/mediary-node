@@ -60,8 +60,7 @@ export function AutoDownloadRules() {
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- `rules` is stable enough: it only grows a new identity when `data` itself does.
 	}, [data, requestPreview])
 
-	const setupMissing =
-		setup.loaded && (!setup.clientConfigured || setup.clientReachable === false || !setup.hasSources)
+	const setupMissing = setup.incomplete
 
 	return (
 		<section className={styles.root}>

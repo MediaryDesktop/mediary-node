@@ -5,6 +5,7 @@ import { useTranslation } from '@shared/i18n'
 import { useAfterDelay } from '@shared/lib'
 
 import type { PlaybackStream } from '../../api/api'
+import type { VideoSource } from '../../lib/source'
 import { initialAudio, initialSubtitle } from '../../lib/tracks'
 import { directUrl } from '../../lib/urls'
 
@@ -23,8 +24,6 @@ import { PlayerHeader } from './player-header/PlayerHeader'
 import styles from './VideoPlayer.module.scss'
 
 const LEAVE_MS = 240
-
-export type VideoSource = { kind: 'direct' } | { kind: 'hls'; path: string }
 
 export interface VideoPlayerProps {
 	stream: PlaybackStream
