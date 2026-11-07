@@ -8,3 +8,7 @@ export type { NodeEvent } from './events'
 export { nodeHealthQuery } from './health.query'
 
 export type { NodeOperation, NodeSchemas } from './schema'
+
+export { whenNodeReady } from './node-data'
+export { useNodeData } from './useNodeData'
+export type { NodeDataOptions } from './useNodeData'
