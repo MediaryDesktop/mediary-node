@@ -132,7 +132,7 @@ func (c *Client) Search(ctx context.Context, src Source, query string) ([]Item, 
 			Indexer: strings.TrimSpace(firstOf(raw.Jackett, raw.Prowlarr)),
 			GUID:    raw.GUID,
 			Link:    firstOf(raw.Link, raw.Enclosure.URL),
-			PageURL: raw.Comments,
+			PageURL: webPage(raw.Comments),
 		}
 
 		item.Size, _ = strconv.ParseInt(firstOf(raw.Size, raw.Enclosure.Length), 10, 64)
@@ -288,4 +288,19 @@ func firstOf(values ...string) string {
 	}
 
 	return ""
+}
+
+// webPage is a release page the user may open, or "" for anything else. The
+// address comes from the indexer — and behind Jackett, from whatever tracker it
+// scraped — and the desktop hands it to the operating system, which acts on any
+// scheme it is given: only a web address is ever passed on, as plugins' are.
+func webPage(raw string) string {
+	raw = strings.TrimSpace(raw)
+
+	u, err := url.Parse(raw)
+	if err != nil || (u.Scheme != "https" && u.Scheme != "http") || u.Host == "" || u.User != nil {
+		return ""
+	}
+
+	return raw
 }

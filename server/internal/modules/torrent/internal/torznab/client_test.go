@@ -158,3 +158,44 @@ func TestParseURLDropsThePastedKey(t *testing.T) {
 		t.Fatalf("err = %v, want invalid", err)
 	}
 }
+
+// The page an indexer names for a release is opened by the operating system on
+// a click, so only a web address survives the parse.
+func TestOnlyAWebPageIsKeptAsTheReleasePage(t *testing.T) {
+	cases := map[string]string{
+		"https://nyaa.si/view/1":                        "https://nyaa.si/view/1",
+		" http://tracker.example/t/2 ":                  "http://tracker.example/t/2",
+		`search-ms:query=x&crumb=location:\\host\share`: "",
+		`file://\\attacker\share\setup.exe`:             "",
+		"ms-msdt:/id PCWDiagnostic":                     "",
+		"javascript:alert(1)":                           "",
+		"https://user:pass@tracker.example/":            "",
+		"":                                              "",
+	}
+
+	for comments, want := range cases {
+		feed := `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"><channel><item>
+  <title>Release</title>
+  <comments>` + xmlEscape(comments) + `</comments>
+  <link>magnet:?xt=urn:btih:bbbb</link>
+</item></channel></rss>`
+
+		server := serve(t, func(w http.ResponseWriter, _ *http.Request) {
+			_, _ = w.Write([]byte(feed))
+		})
+
+		items, err := New(5*time.Second, "test").Search(context.Background(), Source{URL: server.URL + "/api"}, "x")
+		if err != nil || len(items) != 1 {
+			t.Fatalf("%q: items = %+v, %v", comments, items, err)
+		}
+
+		if items[0].PageURL != want {
+			t.Errorf("comments %q became page %q, want %q", comments, items[0].PageURL, want)
+		}
+	}
+}
+
+func xmlEscape(s string) string {
+	return strings.NewReplacer("&", "&amp;", "<", "&lt;", ">", "&gt;").Replace(s)
+}

@@ -3,6 +3,7 @@ import { join } from 'node:path'
 
 import { IPC } from '../shared/ipc.js'
 
+import { webAddress } from './external.js'
 import { NodeSupervisor, type SupervisorState } from './node-supervisor.js'
 import { authorizeOAuth, prepareOAuth, releaseOAuthListener } from './oauth.js'
 import {
@@ -73,8 +74,19 @@ function createWindow(): BrowserWindow {
 	window.on('maximize', () => window.webContents.send(IPC.windowIsMaximized, true))
 	window.on('unmaximize', () => window.webContents.send(IPC.windowIsMaximized, false))
 
+	// No window ever opens inside the app: a link meant for a new one goes to
+	// the system browser, and only if it is a web page (see external.ts).
 	window.webContents.setWindowOpenHandler(({ url }) => {
-		void shell.openExternal(url)
+		const address = webAddress(url)
+
+		if (address) {
+			void shell.openExternal(address)
+		} else {
+			process.stderr.write(
+				`[shell] refused to open a link that is not a web page: ${url.slice(0, 200)}\n`
+			)
+		}
+
 		return { action: 'deny' }
 	})
 
