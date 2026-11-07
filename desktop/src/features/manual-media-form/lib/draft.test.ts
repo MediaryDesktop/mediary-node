@@ -2,15 +2,10 @@ import { describe, expect, it } from 'vitest'
 
 import type { ManualDraft } from '@entities/media'
 
-import type { AiMergeField } from './draft'
-import {
-	completeness,
-	completenessFields,
-	fieldFilled,
-	formatAfterTypeChange,
-	mergeSuggestion,
-	withoutAiFilled
-} from './draft'
+import type { AiMergeField } from './ai-merge'
+import { mergeSuggestion, withoutAiFilled } from './ai-merge'
+import { completeness, completenessFields, fieldFilled } from './completeness'
+import { formatAfterTypeChange } from './draft'
 
 describe('formatAfterTypeChange', () => {
 	it('keeps a format the new kind accepts', () => {

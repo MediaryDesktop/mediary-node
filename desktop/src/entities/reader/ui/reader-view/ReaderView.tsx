@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import { useUnit } from 'effector-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { CSSProperties, MouseEvent, PointerEvent } from 'react'
+import type { CSSProperties, MouseEvent } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { useAfterDelay } from '@shared/lib'
@@ -10,19 +10,19 @@ import { Button, Icon, Tooltip, WindowControls } from '@shared/ui'
 import { useWindowControls } from '@infra/window'
 
 import type { ReaderChapter } from '../../api/api'
-import { clampPage, isLastPage, prefetchIndexes } from '../../lib/pages'
+import { clampPage, isLastPage } from '../../lib/pages'
 import { pageUrl } from '../../lib/urls'
 import { readerModel } from '../../model/model'
 import { useBookEntrance } from '../book-reader/lib/useBookEntrance'
 
+import { usePagePrefetch } from './lib/usePagePrefetch'
+import { useReaderKeyboard } from './lib/useReaderKeyboard'
+import { useZoomPan } from './lib/useZoomPan'
 import styles from './ReaderView.module.scss'
 
 const LEAVE_MS = 240
 
 const CLICK_DELAY_MS = 220
-
-const ZOOM_SCALE = 2.2
-const DRAG_THRESHOLD_PX = 4
 
 export interface ReaderViewProps {
 	chapter: ReaderChapter
@@ -54,20 +54,9 @@ export function ReaderView({
 	const current = clampPage(page, total)
 	const [controlsVisible, setControlsVisible] = useState(true)
 	const [leaving, setLeaving] = useState(false)
-	const [zoomed, setZoomed] = useState(false)
-	const [zoomOrigin, setZoomOrigin] = useState({ x: 50, y: 50 })
-	const [pan, setPan] = useState({ x: 0, y: 0 })
-	const [dragging, setDragging] = useState(false)
 	const clickTimer = useRef<number | undefined>(undefined)
-	const dragRef = useRef<{
-		pointerId: number
-		startX: number
-		startY: number
-		panX: number
-		panY: number
-	} | null>(null)
-	const draggedRef = useRef(false)
 	const entrance = useBookEntrance(openedAt)
+	const zoom = useZoomPan(current)
 
 	const requestClose = useCallback(() => setLeaving(true), [])
 
@@ -91,76 +80,18 @@ export function ReaderView({
 		}
 	}, [current, ref, total, pageTurned])
 
-	const [zoomedPage, setZoomedPage] = useState(current)
-	if (zoomedPage !== current) {
-		setZoomedPage(current)
-		setZoomed(false)
-		setPan({ x: 0, y: 0 })
-	}
-
 	useEffect(() => () => window.clearTimeout(clickTimer.current), [])
 
-	useEffect(() => {
-		const preloaded = prefetchIndexes(current, total).map(index => {
-			const image = new Image()
-			image.src = pageUrl(ref, index)
-
-			return image
-		})
-
-		return () => {
-			for (const image of preloaded) {
-				image.src = ''
-			}
-		}
-	}, [current, total, ref])
-
-	useEffect(() => {
-		const onKey = (event: KeyboardEvent) => {
-			if (event.ctrlKey || event.metaKey || event.altKey) {
-				return
-			}
-
-			switch (event.key) {
-				case 'ArrowRight':
-				case 'PageDown':
-				case ' ':
-					goTo(current + 1)
-					break
-				case 'ArrowLeft':
-				case 'PageUp':
-					goTo(current - 1)
-					break
-				case 'Home':
-					goTo(0)
-					break
-				case 'End':
-					goTo(total - 1)
-					break
-				case 'Escape':
-					requestClose()
-					break
-				default:
-					return
-			}
-
-			event.preventDefault()
-		}
-
-		window.addEventListener('keydown', onKey)
-
-		return () => window.removeEventListener('keydown', onKey)
-	}, [current, total, goTo, requestClose])
+	usePagePrefetch(ref, current, total)
+	useReaderKeyboard({ current, total, goTo, onEscape: requestClose })
 
 	const onStageClick = (event: MouseEvent<HTMLDivElement>) => {
-		if (draggedRef.current) {
-			draggedRef.current = false
+		if (zoom.consumeDrag()) {
 			return
 		}
 
-		if (zoomed) {
-			setZoomed(false)
-			setPan({ x: 0, y: 0 })
+		if (zoom.zoomed) {
+			zoom.zoomOut()
 			return
 		}
 
@@ -183,54 +114,10 @@ export function ReaderView({
 		window.clearTimeout(clickTimer.current)
 
 		const rect = event.currentTarget.getBoundingClientRect()
-		setZoomOrigin({
-			x: ((event.clientX - rect.left) / rect.width) * 100,
-			y: ((event.clientY - rect.top) / rect.height) * 100
-		})
-		setPan({ x: 0, y: 0 })
-		setZoomed(zoom => !zoom)
-	}
-
-	const onPagePointerDown = (event: PointerEvent<HTMLImageElement>) => {
-		if (!zoomed) {
-			return
-		}
-
-		event.currentTarget.setPointerCapture(event.pointerId)
-		dragRef.current = {
-			pointerId: event.pointerId,
-			startX: event.clientX,
-			startY: event.clientY,
-			panX: pan.x,
-			panY: pan.y
-		}
-	}
-
-	const onPagePointerMove = (event: PointerEvent<HTMLImageElement>) => {
-		const drag = dragRef.current
-		if (!drag || drag.pointerId !== event.pointerId) {
-			return
-		}
-
-		const dx = event.clientX - drag.startX
-		const dy = event.clientY - drag.startY
-
-		if (!draggedRef.current && Math.hypot(dx, dy) > DRAG_THRESHOLD_PX) {
-			draggedRef.current = true
-			setDragging(true)
-		}
-
-		if (draggedRef.current) {
-			setPan({ x: drag.panX + dx / ZOOM_SCALE, y: drag.panY + dy / ZOOM_SCALE })
-		}
-	}
-
-	const onPagePointerUp = (event: PointerEvent<HTMLImageElement>) => {
-		if (dragRef.current?.pointerId === event.pointerId) {
-			event.currentTarget.releasePointerCapture(event.pointerId)
-			dragRef.current = null
-			setDragging(false)
-		}
+		zoom.toggleAt(
+			((event.clientX - rect.left) / rect.width) * 100,
+			((event.clientY - rect.top) / rect.height) * 100
+		)
 	}
 
 	const label = chapter.number ? t('reader.chapterNumber', { number: chapter.number }) : null
@@ -242,7 +129,7 @@ export function ReaderView({
 			style={entrance.entering && !leaving ? entrance.style : undefined}
 		>
 			<div
-				className={clsx(styles.stage, total === 0 && styles.empty, zoomed && styles.zoomed)}
+				className={clsx(styles.stage, total === 0 && styles.empty, zoom.zoomed && styles.zoomed)}
 				onClick={onStageClick}
 				onDoubleClick={onStageDoubleClick}
 				role='presentation'
@@ -250,20 +137,21 @@ export function ReaderView({
 				{total > 0 ? (
 					<img
 						key={`${ref}-${current}`}
-						className={clsx(styles.page, zoomed && styles.zoomed, dragging && styles.dragging)}
+						className={clsx(
+							styles.page,
+							zoom.zoomed && styles.zoomed,
+							zoom.dragging && styles.dragging
+						)}
 						src={pageUrl(ref, current)}
 						alt={t('reader.pageAlt', { number: current + 1 })}
 						draggable={false}
-						onPointerDown={onPagePointerDown}
-						onPointerMove={onPagePointerMove}
-						onPointerUp={onPagePointerUp}
-						onPointerCancel={onPagePointerUp}
+						{...zoom.pointer}
 						style={
 							{
-								'--zoom-x': `${zoomOrigin.x}%`,
-								'--zoom-y': `${zoomOrigin.y}%`,
-								'--pan-x': `${pan.x}px`,
-								'--pan-y': `${pan.y}px`
+								'--zoom-x': `${zoom.origin.x}%`,
+								'--zoom-y': `${zoom.origin.y}%`,
+								'--pan-x': `${zoom.pan.x}px`,
+								'--pan-y': `${zoom.pan.y}px`
 							} as CSSProperties
 						}
 					/>

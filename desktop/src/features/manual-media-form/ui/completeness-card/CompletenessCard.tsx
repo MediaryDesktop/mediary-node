@@ -1,7 +1,7 @@
 import { useTranslation } from '@shared/i18n'
 import { Icon, Tooltip } from '@shared/ui'
 
-import type { Completeness } from '../../lib/draft'
+import type { Completeness } from '../../lib/completeness'
 
 import styles from './CompletenessCard.module.scss'
 

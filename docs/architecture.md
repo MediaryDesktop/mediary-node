@@ -19,51 +19,44 @@
 ```
 src/
 ├── app/              композиція: роути, провайдери, каркас
-│   ├── layout/       AppLayout, індикатор стану ноди
+│   ├── layout/       AppLayout, сайдбар, банер «нода недоступна», плеєр поверх сторінок
+│   ├── model/        готовність застосунку до показу (splash)
 │   ├── providers/    контекст, оверлеї, крос-слайсове wiring
 │   └── router/       дерево маршрутів
 │
-├── pages/            один слайс = один маршрут
-│   ├── home/
-│   ├── sign-in/      вибір способу входу
-│   ├── sign-in-email/
-│   ├── sign-up/
-│   ├── sign-up-email/
-│   ├── verify-email/
-│   ├── reset-password/
-│   └── new-password/
-│
+├── pages/            один слайс = один маршрут (або кілька споріднених)
 ├── features/         сценарій, що щось змінює
-│   ├── auth/         вхід, реєстрація, підтвердження пошти, відновлення пароля
-│   └── switch-language/
-│
 ├── entities/         доменне поняття і стан, який ним є
-│   └── session/      хто увійшов у хмару
 │
 ├── infrastructure/   зовнішній світ: з чим ми говоримо
 │   ├── cloud/        хмарний API: адреса, сесійний токен, фабрика запитів
-│   └── node/         локальна нода: міст до Electron, токен, HTTP, події
+│   ├── node/         локальна нода: міст, токен, HTTP, події, коли її питати
+│   └── window/       вікно застосунку: розгорнуте чи ні, кнопки рамки
 │
 └── shared/           інструментарій без домену
     ├── api/          createRequestFx, нормалізація помилок, подія 401
+    ├── bridge/       типи мосту preload (структурна копія контракту)
+    ├── factory/      atom, record-editor, own-request
     ├── i18n/         локалі, інстанс i18next, збережений вибір мови
-    ├── factory/      atom
-    ├── ui/           дизайн-система: Button, Input, іконки, тема
-    └── lib/          generic технічні утиліти
+    ├── lib/          generic утиліти й хуки (сховище, вікно рядків, формат)
+    ├── style/        токени й глобальні стилі: theme/palette, global
+    └── ui/           дизайн-система: Button, Input, Notice, іконки
 ```
 
 Аліаси: `@app`, `@pages`, `@features`, `@entities`, `@infra`, `@shared`.
 `@infra` — єдиний, чиє імʼя коротше за теку (`infrastructure`): він трапляється
 в імпортах частіше за всі інші, і повне слово щоразу нічого не додає.
 
-### Карта слайсів фази 1
+### Карта слайсів
+
+Поточна; актуальний список — `ls src/<шар>`.
 
 | Шар | Слайси |
 |---|---|
-| `entities` | `session` · `media` · `episode` · `library-item` · `torrent` · `download` · `playback` |
-| `features` | `auth` · `switch-language` · `search-media` · `add-to-library` · `download-media` · `select-source` · `select-quality` · `pair-node` |
-| `pages` | `home` · `media` · `watch` · `read` · `library` · `downloads` · `settings` · `sign-in` · `sign-in-email` · `sign-up` · `sign-up-email` · `verify-email` · `reset-password` · `new-password` |
-| `infrastructure` | `cloud` · `node` (далі: `realtime`, `storage`) |
+| `entities` | `anilist-account` · `book-source` · `extension` · `library-item` · `manga-source` · `media` · `playback` · `reader` · `session` · `tool` · `torrent` · `tracker` |
+| `features` | `auth` · `auto-download-torrents` · `back-up-node` · `choose-player` · `connect-anilist` · `continue-watching` · `download-chapters` · `download-free-book` · `download-torrent` · `library-explorer` · `link-manga-source` · `manage-debrid-service` · `manage-library-roots` · `manage-lists` · `manage-opds-servers` · `manage-plugins` · `manage-source-keys` · `manage-tools` · `manage-torrent-client` · `manage-torznab-sources` · `manage-unmatched-files` · `manual-media-form` · `match-library-file` · `scan-library` · `search-media` · `search-torrents` · `setup-wizard` · `stream-torrent` · `switch-language` · `switch-theme` · `title-chapters` · `track-media` |
+| `pages` | `auth` · `discover` · `downloads` · `extensions` · `fallback` · `home` · `library` · `lists` · `media` · `media-form` · `read` · `search` · `settings` · `setup` · `watch` |
+| `infrastructure` | `cloud` · `node` · `window` |
 
 ---
 
@@ -79,10 +72,12 @@ src/
 | Обмеження | rate limit, CORS | немає |
 | Свіжість даних | `staleTime`, refetch при фокусі | завжди свіжі |
 | Інвалідація | час + мутація | **подія з WebSocket ноди** |
-| Коли недоступна | каталог із кешу | локальне не працює взагалі |
+| Коли недоступна | вхід, синхронізація, резервні копії | бібліотека, плеєр — і зараз каталог |
 
-Каталог мусить рендеритися, коли нода мертва. Плеєр мусить працювати, коли
-хмари немає. Це вже не напрямок залежності, а **ізоляція відмов** — і тому два
+Плеєр мусить працювати, коли хмари немає. Задум і для каталогу — рендеритися,
+коли нода мертва; але сьогодні пошук і деталі тайтлів ідуть через ноду
+(`entities/media` на `createNodeRequestFx`), тож без неї каталог теж
+недоступний. Це відома розбіжність, а не правило. Це вже не напрямок залежності, а **ізоляція відмов** — і тому два
 з'єднання живуть окремими слайсами (`infra/cloud`, `infra/node`), а не за
 спільним фасадом, який довелося б розгалужувати на кожному виклику.
 
@@ -98,6 +93,43 @@ src/
 - **`infrastructure/*`** — *конкретна система*: яка адреса, який credential, як
   він потрапляє в заголовок, як відкрити її потік подій.
 - **`entities/*`** — *значення*: які там ендпоїнти й що їхні відповіді означають.
+
+### Коли питати ноду — одне правило
+
+Нода стартує після вікна, падає й перезапускається незалежно від інтерфейсу.
+Тому компонент не вирішує сам, чи можна її питати: він лише каже, *що* йому
+потрібно, а *коли* — вирішує `infrastructure/node`:
+
+```tsx
+useNodeData(libraryRootsQuery)
+useNodeData(chapterQuery, { params: chapterRef })
+useNodeData(mediaDetailsModel.detailsRequested, { params: mediaRef, enabled: open })
+```
+
+Нода готова — запит іде одразу; ще ні — чекає й іде, щойно вона піднялась;
+після перезапуску ноди чи перепідключення потоку подій останнє питання
+ставиться знову з тими самими параметрами. Модель може взяти те саме правило
+напряму — `whenNodeReady(query)`. Читати `$nodeReady` у компоненті чи хуку
+`arch:check` не дає (§10). Дії користувача («Повторити», пошук) запускають
+запит самі: це не «екран відкрився», а відповідь на натискання.
+
+Запит, що бере параметр, тримає лише останню відповідь
+(`concurrency(…, { strategy: 'TAKE_LATEST' })`): одна комірка `$data` на всі
+параметри, і без цього повільна відповідь на старе питання затирає свіжу.
+
+Коли супервізор Electron здається після кількох падінь поспіль, каркас показує
+банер з кнопкою «Запустити знову» (`app/layout/node-banner`, IPC `node:retry`).
+
+### Чия відповідь
+
+Мутацію можуть стартувати кілька форм, а `finished.*` чують усі. Форма, що
+слухає мутацію напряму, приймає чужий успіх чи стару перевірку за свою. Тому:
+
+- список «додати / змінити запис» — `shared/factory/record-editor`: один
+  відкритий запис, поля й результат перевірки в моделі, приймається лише
+  відповідь на *свій* запит;
+- окрема форма — `shared/factory/own-request(mutation)`: `sent` / `succeeded` /
+  `failed` лише для свого запиту, `forgotten` — коли поля змінились.
 
 ---
 
@@ -177,7 +209,7 @@ bundler їх не відтрусить. Заміряно на попереднь
 `entities/media`.
 
 На відміну від решти шарів, у `shared` немає слайсів із власником — це набір
-незалежних сегментів, і глибокий імпорт (`@shared/ui/theme/global.scss`) тут
+незалежних сегментів, і глибокий імпорт (`@shared/style/main.scss`) тут
 дозволений.
 
 ---
@@ -305,7 +337,7 @@ styles.invalid)`), пишеться через `&.invalid`; вкладений �
 }
 ```
 
-Глобальні файли (`shared/ui/theme/global.scss`) правила не стосуються: у них
+Глобальні файли (`shared/style/global/_global.scss`, палітра) правила не стосуються: у них
 немає компонента, структуру якого можна віддзеркалити.
 
 ---
@@ -499,26 +531,41 @@ i18next уже тримає поточну мову й уже повідомля
 ## 8. Теми
 
 Інтерфейс має дві теми: **темна за замовчуванням** і світла. Механіка —
-`shared/ui/theme`, перемикач — `features/switch-theme`. Розкладка дзеркальна до
+`shared/style/theme`, перемикач — `features/switch-theme`. Розкладка дзеркальна до
 мультимовності (§7) навмисно: це два налаштування одного роду — локальні,
 поза доменом, без жодного впливу на дані.
 
 ```
-shared/ui/theme/
-├── palette.scss   токени обох тем, єдине місце з сирими кольорами
-├── global.scss    метрики, шрифти, базові стилі
-├── config.ts      список тем, дефолт, збережений вибір
-├── theme.ts       поточне значення, атрибут на <html>, підписка
-└── useTheme.ts    читання теми в React
+shared/style/
+├── theme/palette/_palette.scss   кольори обох тем — єдине місце з сирими кольорами
+├── global/_global.scss           метрики й шкали: радіус, шари, рух, розміри шрифту
+├── theme/config/config.ts        список тем, дефолт, збережений вибір
+├── theme/lib/theme.ts            поточне значення, атрибут на <html>, підписка
+└── theme/hooks/useTheme.ts       читання теми в React
 ```
 
 ### Компонент не знає жодного кольору
 
-У `.module.scss` немає ні hex, ні `rgba()` — тільки `var(--token)`. Це не
+У `.module.scss` немає ні hex, ні `rgba()` — тільки `var(--token)`; `arch:check`
+це перевіряє (виняток — `mask-image`, де колір означає лише альфу). Це не
 охайність заради охайності: тема перемикається підміною значень токенів на
 `<html>`, тож будь-який вписаний колір лишається таким, яким його вписали, і
 світла тема отримує білий текст на білому тлі рівно в тих місцях, де хтось
 поспішив.
+
+Поверхні, темні в будь-якій темі — плеєр, рідер, затемнення поверх постера, —
+беруть незалежні від теми токени `--media`, `--on-media`, `--media-veil`,
+`--shadow-ink` та ін. Прозорість — через `color-mix(in srgb, var(--on-media)
+55%, transparent)`, а не через окремий токен на кожну альфу.
+
+### Шкали замість чисел
+
+Розміри шрифту — лише зі шкали `--font-size-*` (2xs 11 · xs 12 · sm 13 · md 14
+· base 15 · lg 16 · xl 20 · 2xl 22 · display 32 · hero 44 px), і `arch:check`
+не пропускає іншого; плаваючий `clamp()` великого заголовка — єдиний виняток.
+Шари — `--layer-*` за призначенням (`sidebar`, `overlay`, `dialog`, `popover`,
+`menu`, `player` …), а не числа `z-index`; пігулка — `--radius-full`; основна
+тривалість переходу — `--motion-duration`.
 
 Звідси й напівпрозорі токени (`--field`, `--glass`, `--scrim-veil`): поля вводу
 й картка входу лежать і на суцільному тлі, і поверх фонового відео, тож їм
@@ -546,7 +593,7 @@ CSS читає `[data-theme='dark']`; блоку `@media (prefers-color-scheme)`
 палітрі немає, бо атрибут не буває відсутнім. Початкове значення вписане
 статично в `index.html` — CSP renderer'а забороняє inline-скрипти, тож прочитати
 `localStorage` до першого кадру нема чим, а без атрибута вікно на мить
-малюється світлим. `shared/ui/theme` переписує його на збережений вибір під час
+малюється світлим. `shared/style/theme` переписує його на збережений вибір під час
 імпорту в `app/main.tsx` — до `createRoot`, тобто до першого рендера.
 
 ### Дефолт темний, а не системний
@@ -569,7 +616,7 @@ CSS читає `[data-theme='dark']`; блоку `@media (prefers-color-scheme)`
 1. **Токен** — рядок у `:root` палітри **і** в `@mixin dark-theme`. Токен,
    визначений лише в одному з двох блоків, — це колір, який в іншій темі
    лишиться від попередньої.
-2. **Тема** — блок токенів у `palette.scss`, значення в `THEMES` (`config.ts`)
+2. **Тема** — блок токенів у `_palette.scss`, значення в `THEMES` (`config.ts`)
    і фраза `theme.<назва>` у кожній локалі. Перемикач читає `THEMES` і
    з'явиться сам; про фрази нагадає компілятор.
 
@@ -621,8 +668,9 @@ Auth-стек не писався з нуля — його взято з `mediar
 (GNOME Keyring, KWallet) Electron мовчки переходить на бекенд `basic_text` —
 той самий жорстко зашитий ключ для всіх застосунків на машині, а
 `safeStorage.isEncryptionAvailable()` про цю деградацію не повідомляє: він
-повертає `true` й для цього бекенду теж. `canPersistSession()` зараз цю різницю
-не бачить.
+повертає `true` й для цього бекенду теж. Тому `canPersistSession()` на Linux
+перевіряє `safeStorage.getSelectedStorageBackend()` і за `basic_text` сесію на
+диску не тримає — користувач входить щоразу, як і там, де шифрування немає.
 
 **Капчі немає.** У попереднього клієнта reCAPTCHA вмикалась після трьох невдалих
 спроб. Хмара такого заголовка не читає взагалі — обмеження там серверне
@@ -668,6 +716,10 @@ consent-URL, який видала хмара. Одна адреса, один �
 | ESLint `no-restricted-imports` | один файл | **напрямок** імпортів, імпорти вбік, обхід публічного API слайса |
 | `scripts/check-architecture.mjs` | увесь граф (Tarjan SCC) | **цикли** між слайсами |
 | `scripts/check-architecture.mjs` | корені слайсів | файли, що лежать **поза своєю текою** (§6) |
+| `scripts/check-architecture.mjs` | `.tsx`, `.scss` | **коментарі** в розмітці й стилях (§5; директиви `eslint-`/`@ts-` дозволені) |
+| `scripts/check-architecture.mjs` | `.module.scss` | **сирі кольори** й **розміри шрифту поза шкалою** (§8) |
+| `scripts/check-architecture.mjs` | компоненти й хуки | читання **`$nodeReady`** — коли питати ноду, вирішує `useNodeData` (§2) |
+| `scripts/check-architecture.mjs` | усе, крім `infrastructure`, `app`, `api/`, `model/` | звернення до **`window.mediary`** (§11) |
 
 Цикл `media ↔ library-item` не порушує жодного правила в окремо взятому файлі:
 `entities/media/lib/*` імпортує типи, `entities/library-item/ui/*` імпортує
@@ -698,8 +750,14 @@ consent-URL, який видала хмара. Одна адреса, один �
 Це різні процеси. Імпорт, який «наче працює», затягнув би код renderer'а в
 main-процес. Форситься правилом у [eslint.config.mjs](../desktop/eslint.config.mjs).
 `window.mediary` типізується через
-[infrastructure/node/bridge-types.ts](../desktop/src/infrastructure/node/bridge-types.ts) —
+[shared/bridge/types.ts](../desktop/src/shared/bridge/types.ts) —
 структурну копію контракту preload'а, а не імпорт із нього.
+
+Сам міст — зовнішній світ, і досягають його лише `infrastructure/`, `app/` або
+ефект у `api/` чи `model/` слайса. Дизайн-система про Electron не знає:
+`WindowControls` у `shared/ui` отримує стан і обробники пропсами, а бере їх у
+`useWindowControls()` з `infrastructure/window`. Інакше примітив не можна було
+б відрендерити без оболонки за спиною — ні в тесті, ні в іншому вікні.
 
 ### Generated API types не визначають архітектуру
 
@@ -788,4 +846,10 @@ npm run build          # ловить регресії збірки
 - Чи лежить новий файл у теці за тим, що він є (`ui/`, `model/`, `lib/`,
   `config/`), а не в корені слайса?
 - Чи не лишився користувацький текст у коді замість `en.ts` і двох перекладів?
+- Чи не вирішує компонент сам, коли питати ноду, замість `useNodeData`?
+- Чи не слухає форма чужу мутацію напряму, замість `own-request` чи
+  `record-editor`?
+- Чи має запит з параметром `TAKE_LATEST`?
+- Чи не потрібна логіці, що опинилась у компоненті, своя функція в `lib/` з
+  тестом?
 - Чи ловить порушення тулінг, а не тільки рев'ю?

@@ -2,8 +2,8 @@ import { useTranslation } from '@shared/i18n'
 
 import type { ManualDraft } from '@entities/media'
 
-import { dateFromParts, partsFromDate } from '../../lib/draft'
-import type { AiMergeField } from '../../lib/draft'
+import type { AiMergeField } from '../../lib/ai-merge'
+import { dateFromParts, partsFromDate } from '../../lib/dates'
 import { DatePickerField } from '../date-picker-field/DatePickerField'
 
 import styles from './ReleaseHistory.module.scss'

@@ -3,7 +3,7 @@ import { Checkbox } from '@shared/ui'
 
 import type { ManualDraft } from '@entities/media'
 
-import type { AiMergeField } from '../../lib/draft'
+import type { AiMergeField } from '../../lib/ai-merge'
 import { Field } from '../field/Field'
 import { TagField } from '../tag-field/TagField'
 

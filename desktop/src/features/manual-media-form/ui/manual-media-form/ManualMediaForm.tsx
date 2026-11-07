@@ -3,7 +3,7 @@ import { Badge, Button, Icon, Modal, PageHeader, Textarea } from '@shared/ui'
 
 import type { ManualDraft } from '@entities/media'
 
-import { completeness } from '../../lib/draft'
+import { completeness } from '../../lib/completeness'
 import { useManualMediaForm } from '../../lib/useManualMediaForm'
 import { AIAssistantCard } from '../ai-assistant-card/AIAssistantCard'
 import { BasicsTab } from '../basics-tab/BasicsTab'

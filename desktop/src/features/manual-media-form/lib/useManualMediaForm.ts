@@ -12,9 +12,10 @@ import type { ManualDraft, ManualHint } from '@entities/media'
 
 import { saveManualMediaFx } from '../model/model'
 
+import { hintNote, mergeSuggestion, withoutAiFilled } from './ai-merge'
+import type { AiMergeField } from './ai-merge'
 import type { CoverSelection } from './cover'
-import { formatAfterTypeChange, hintNote, mergeSuggestion, withoutAiFilled } from './draft'
-import type { AiMergeField } from './draft'
+import { formatAfterTypeChange } from './draft'
 import { useManualMediaDeletion } from './useManualMediaDeletion'
 
 export interface UseManualMediaFormOptions {
