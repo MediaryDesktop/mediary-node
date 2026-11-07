@@ -89,7 +89,7 @@
 	border: 1px solid var(--border);
 	border-radius: var(--radius);
 	background: var(--bg);
-	box-shadow: 0 8px 24px rgb(0 0 0 / 25%);
+	box-shadow: 0 8px 24px color-mix(in srgb, var(--shadow-ink) 25%, transparent);
 	font-size: 0.8125rem;
 
 	.tooltipTitle {

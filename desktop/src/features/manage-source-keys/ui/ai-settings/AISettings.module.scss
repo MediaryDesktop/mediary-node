@@ -133,7 +133,7 @@
 				height: 2rem;
 				padding: 0 0.875rem;
 				border: 1px solid transparent;
-				border-radius: 999px;
+				border-radius: var(--radius-full);
 				background: var(--field);
 				color: var(--text-secondary);
 				font: inherit;

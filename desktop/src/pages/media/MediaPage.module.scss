@@ -24,7 +24,7 @@
 		min-width: 0;
 		padding: 0.25rem 0.25rem 0.25rem 0.75rem;
 		border: 1px solid var(--glass-border);
-		border-radius: 999px;
+		border-radius: var(--radius-full);
 		background: color-mix(in srgb, var(--bg) 72%, transparent);
 		box-shadow: var(--shadow-sm);
 		color: var(--text-secondary);
@@ -48,7 +48,7 @@
 			flex: none;
 			height: var(--control-height-xs);
 			min-height: var(--control-height-xs);
-			border-radius: 999px;
+			border-radius: var(--radius-full);
 
 			&:not(:disabled):hover {
 				background: var(--surface-hover);

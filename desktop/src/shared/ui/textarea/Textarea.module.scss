@@ -11,8 +11,8 @@
 	line-height: 1.5;
 	resize: vertical;
 	transition:
-		border-color 160ms,
-		background-color 160ms;
+		border-color var(--motion-duration),
+		background-color var(--motion-duration);
 
 	&::placeholder {
 		color: var(--text-secondary);

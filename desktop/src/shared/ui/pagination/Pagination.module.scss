@@ -20,8 +20,8 @@
 		font-variant-numeric: tabular-nums;
 		cursor: pointer;
 		transition:
-			background 160ms,
-			color 160ms;
+			background var(--motion-duration),
+			color var(--motion-duration);
 
 		&:hover:not(:disabled) {
 			background: var(--surface-hover);

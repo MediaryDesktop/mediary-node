@@ -17,8 +17,8 @@
 		text-align: left;
 		cursor: pointer;
 		transition:
-			border-color 160ms,
-			background-color 160ms;
+			border-color var(--motion-duration),
+			background-color var(--motion-duration);
 
 		&:hover:not(:disabled),
 		&.isOpen {

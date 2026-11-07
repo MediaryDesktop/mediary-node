@@ -8,17 +8,17 @@
 	flex-direction: column;
 	gap: 0.5rem;
 	padding: 2.5rem 1.25rem 1rem;
-	background: linear-gradient(to top, rgb(0 0 0 / 80%), transparent);
+	background: linear-gradient(to top, color-mix(in srgb, var(--media) 80%, transparent), transparent);
 
 	.seek,
 	.bar .volume {
 		height: 0.3rem;
 		margin: 0;
-		border-radius: 999px;
+		border-radius: var(--radius-full);
 		background: linear-gradient(
 			to right,
 			var(--accent) var(--progress),
-			rgb(255 255 255 / 25%) var(--progress)
+			color-mix(in srgb, var(--on-media) 25%, transparent) var(--progress)
 		);
 		cursor: pointer;
 		appearance: none;
@@ -27,7 +27,7 @@
 			width: 0.875rem;
 			height: 0.875rem;
 			border-radius: 50%;
-			background: #fff;
+			background: var(--on-media);
 			appearance: none;
 		}
 

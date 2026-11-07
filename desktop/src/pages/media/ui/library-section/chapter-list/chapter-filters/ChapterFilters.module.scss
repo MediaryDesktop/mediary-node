@@ -24,7 +24,7 @@
 			height: var(--control-height-sm);
 			padding: 0 1rem;
 			border: 1px solid var(--border);
-			border-radius: 999px;
+			border-radius: var(--radius-full);
 			background: var(--surface);
 			color: var(--text-secondary);
 			font: inherit;
@@ -33,9 +33,9 @@
 			line-height: 1;
 			cursor: pointer;
 			transition:
-				background 160ms,
-				border-color 160ms,
-				color 160ms;
+				background var(--motion-duration),
+				border-color var(--motion-duration),
+				color var(--motion-duration);
 
 			&:hover {
 				background: var(--surface-hover);

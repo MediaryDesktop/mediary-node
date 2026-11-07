@@ -3,7 +3,7 @@
 	right: 1.25rem;
 	bottom: 1.25rem;
 	left: auto;
-	z-index: 40;
+	z-index: var(--layer-floating);
 	display: flex;
 	align-items: center;
 	gap: 1rem;
@@ -76,8 +76,8 @@
 			color: var(--text-muted);
 			cursor: pointer;
 			transition:
-				border-color 160ms ease,
-				color 160ms ease;
+				border-color var(--motion-duration) ease,
+				color var(--motion-duration) ease;
 
 			&:hover {
 				border-color: var(--border-strong);

@@ -27,10 +27,10 @@
 		font: inherit;
 		text-align: left;
 		cursor: pointer;
-		transition: background 160ms ease;
+		transition: background var(--motion-duration) ease;
 
 		&:hover {
-			background: #3f3f3f39;
+			background: var(--row-hover);
 		}
 
 		&:focus-visible {
@@ -81,7 +81,7 @@
 			align-items: center;
 			gap: 0.25rem;
 			padding: 0.25rem 0.5rem;
-			border-radius: 999px;
+			border-radius: var(--radius-full);
 			background: var(--accent-muted);
 			color: var(--accent-text);
 			font-size: 0.8125rem;

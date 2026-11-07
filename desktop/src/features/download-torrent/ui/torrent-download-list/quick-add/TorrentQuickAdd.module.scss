@@ -9,8 +9,8 @@
 	background: var(--surface);
 	text-align: center;
 	transition:
-		border-color 160ms,
-		background-color 160ms;
+		border-color var(--motion-duration),
+		background-color var(--motion-duration);
 
 	&.dragOver {
 		border-color: var(--accent);

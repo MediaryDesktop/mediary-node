@@ -11,7 +11,7 @@
 		height: 30px;
 		padding: 0;
 		border: 1px solid var(--border-strong);
-		border-radius: 999px;
+		border-radius: var(--radius-full);
 		background: var(--field);
 		cursor: pointer;
 		transition:

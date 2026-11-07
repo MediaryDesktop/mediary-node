@@ -181,7 +181,7 @@
 					.divider {
 						width: 2px;
 						height: 1.25rem;
-						border-radius: 999px;
+						border-radius: var(--radius-full);
 						background: var(--border-strong);
 					}
 
@@ -217,8 +217,8 @@
 					.genre {
 						color: var(--text-secondary);
 						transition:
-							color 160ms,
-							transform 160ms;
+							color var(--motion-duration),
+							transform var(--motion-duration);
 
 						&:hover {
 							color: var(--text);
@@ -275,7 +275,7 @@
 					.iconLink {
 						display: inline-flex;
 						color: var(--text-secondary);
-						transition: color 160ms;
+						transition: color var(--motion-duration);
 
 						&:hover {
 							color: var(--text);
@@ -293,7 +293,7 @@
 							font: inherit;
 							font-size: 0.9375rem;
 							cursor: pointer;
-							transition: color 160ms;
+							transition: color var(--motion-duration);
 
 							&:hover:not(:disabled) {
 								color: var(--text);

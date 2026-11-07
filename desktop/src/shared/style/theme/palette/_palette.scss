@@ -115,6 +115,31 @@ $shadow-rgb: 10, 10, 10;
 		rgba(255, 255, 255, 0.88) 100%
 	);
 	--scrim-glow: radial-gradient(120% 90% at 78% 50%, rgba(#{$accent-rgb}, 0.16) 0%, transparent 60%);
+
+	--text-faint: rgba(9, 9, 11, 0.4);
+	--control-glass: rgba(9, 9, 11, 0.08);
+	--control-chrome-hover: rgba(9, 9, 11, 0.08);
+	--badge-neutral-bg: rgba(9, 9, 11, 0.04);
+	--badge-neutral-border: #{$light-800};
+	--bar-veil: rgba(9, 9, 11, 0.03);
+	--row-hover: rgba(9, 9, 11, 0.05);
+
+	--media: #000000;
+	--on-media: #ffffff;
+	--media-raised: #0e0e0e;
+	--media-veil: #08080a;
+	--on-media-warning: #fdba74;
+	--media-warning-muted: rgb(234 88 12 / 22%);
+	--on-media-danger: #fca5a5;
+	--media-danger-muted: rgb(239 68 68 / 18%);
+	--on-media-error: #f87171;
+	--paper: #ffffff;
+	--shadow-ink: #000000;
+	--success-glow: rgba(42, 249, 35, 0.5);
+	--danger-glow: rgba(249, 35, 45, 0.5);
+	--accent-soft: #{$accent-400};
+	--glass-sheen: rgba(255, 255, 255, 0.1);
+	--glass-edge: rgba(255, 255, 255, 0.18);
 }
 
 @mixin dark-theme {
@@ -195,6 +220,14 @@ $shadow-rgb: 10, 10, 10;
 		rgba(24, 24, 24, 0.78) 100%
 	);
 	--scrim-glow: radial-gradient(120% 90% at 78% 50%, rgba(#{$accent-rgb}, 0.22) 0%, transparent 60%);
+
+	--text-faint: #99999965;
+	--control-glass: #3232326b;
+	--control-chrome-hover: #23232374;
+	--badge-neutral-bg: #0707075d;
+	--badge-neutral-border: #2f2f2f;
+	--bar-veil: #23232320;
+	--row-hover: #3f3f3f39;
 }
 
 [data-theme="dark"] {

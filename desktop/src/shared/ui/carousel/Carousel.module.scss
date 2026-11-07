@@ -36,8 +36,8 @@
 				color: var(--text-muted);
 				cursor: pointer;
 				transition:
-					color 160ms,
-					transform 160ms;
+					color var(--motion-duration),
+					transform var(--motion-duration);
 
 				&:hover,
 				&:focus-visible {
@@ -61,12 +61,12 @@
 				height: 0.3rem;
 				padding: 0;
 				border: none;
-				border-radius: 999px;
+				border-radius: var(--radius-full);
 				background: var(--border-strong);
 				cursor: pointer;
 				transition:
-					background-color 160ms,
-					height 160ms;
+					background-color var(--motion-duration),
+					height var(--motion-duration);
 
 				&:hover {
 					background: var(--text-muted);

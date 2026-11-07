@@ -1,7 +1,7 @@
 @use "../../style/animation/popover-motion" as motion;
 
 .content {
-	z-index: 40;
+	z-index: var(--layer-floating);
 	width: 20rem;
 	max-width: calc(100vw - 2rem);
 	border: 1px solid var(--border);

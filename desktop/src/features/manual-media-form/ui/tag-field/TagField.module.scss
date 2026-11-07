@@ -8,7 +8,7 @@
 	border: 1px solid transparent;
 	border-radius: var(--radius);
 	background: var(--field);
-	transition: border-color 160ms;
+	transition: border-color var(--motion-duration);
 
 	&:focus-within {
 		border-color: var(--border-strong);
@@ -20,7 +20,7 @@
 		gap: 0.125rem;
 		height: 1.875rem;
 		padding: 0 0.25rem 0 0.75rem;
-		border-radius: 999px;
+		border-radius: var(--radius-full);
 		background: var(--accent-muted);
 		color: var(--accent-on-muted);
 		font-size: 0.8125rem;

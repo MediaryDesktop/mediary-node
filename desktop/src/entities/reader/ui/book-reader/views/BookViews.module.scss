@@ -23,7 +23,7 @@
 
 	.canvas {
 		display: block;
-		box-shadow: 0 0.5rem 2rem rgb(0 0 0 / 45%);
-		background: #fff;
+		box-shadow: 0 0.5rem 2rem color-mix(in srgb, var(--shadow-ink) 45%, transparent);
+		background: var(--paper);
 	}
 }

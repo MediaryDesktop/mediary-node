@@ -69,7 +69,7 @@
 			color: var(--text-secondary);
 			font: inherit;
 			cursor: pointer;
-			transition: color 160ms;
+			transition: color var(--motion-duration);
 
 			&:disabled {
 				cursor: default;
@@ -91,9 +91,9 @@
 				border-radius: 12px;
 				background: var(--surface);
 				transition:
-					background-color 160ms,
-					border-color 160ms,
-					color 160ms;
+					background-color var(--motion-duration),
+					border-color var(--motion-duration),
+					color var(--motion-duration);
 			}
 
 			.label {

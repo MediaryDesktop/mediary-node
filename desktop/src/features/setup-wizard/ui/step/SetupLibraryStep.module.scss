@@ -29,9 +29,9 @@
 				color: var(--text-secondary);
 				cursor: pointer;
 				transition:
-					background-color 160ms,
-					border-color 160ms,
-					color 160ms;
+					background-color var(--motion-duration),
+					border-color var(--motion-duration),
+					color var(--motion-duration);
 
 				&:hover {
 					border-color: var(--border);

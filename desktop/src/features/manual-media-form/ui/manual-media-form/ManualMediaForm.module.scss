@@ -59,7 +59,7 @@
 				}
 
 				> :nth-child(5) {
-					animation-delay: 160ms;
+					animation-delay: var(--motion-duration);
 				}
 
 				.descriptionAi {

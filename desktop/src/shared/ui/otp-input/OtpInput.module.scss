@@ -18,9 +18,9 @@
 		font-weight: 600;
 		text-align: center;
 		transition:
-			border-color 160ms,
-			background-color 160ms,
-			box-shadow 160ms;
+			border-color var(--motion-duration),
+			background-color var(--motion-duration),
+			box-shadow var(--motion-duration);
 
 		&:focus {
 			outline: none;

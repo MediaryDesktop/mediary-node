@@ -64,7 +64,7 @@
 
 	.ignore {
 		border-color: var(--warning-muted);
-		border-radius: 999px;
+		border-radius: var(--radius-full);
 		background: var(--warning-muted);
 		color: var(--warning-text);
 	}

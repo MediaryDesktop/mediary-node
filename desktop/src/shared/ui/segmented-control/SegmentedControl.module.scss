@@ -2,8 +2,8 @@ $padding: 0.125rem;
 
 .root {
 	--option-size: 1.75rem;
-	--shape: 999px;
-	--shape-inner: 999px;
+	--shape: var(--radius-full);
+	--shape-inner: var(--radius-full);
 
 	position: relative;
 	isolation: isolate;
@@ -53,7 +53,7 @@ $padding: 0.125rem;
 		font-weight: 600;
 		line-height: 1;
 		cursor: pointer;
-		transition: color 160ms;
+		transition: color var(--motion-duration);
 
 		&:hover {
 			color: var(--text);

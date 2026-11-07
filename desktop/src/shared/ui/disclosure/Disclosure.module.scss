@@ -31,7 +31,7 @@
 
 		.chevron {
 			flex: none;
-			transition: transform 160ms ease;
+			transition: transform var(--motion-duration) ease;
 		}
 	}
 

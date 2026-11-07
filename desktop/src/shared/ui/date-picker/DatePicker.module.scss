@@ -30,7 +30,7 @@
 }
 
 .popper {
-	z-index: 60;
+	z-index: var(--layer-popover);
 
 	&[data-placement^="bottom"] :global(.react-datepicker__triangle) {
 		fill: var(--field) !important;
@@ -78,8 +78,8 @@
 			color: var(--text-secondary);
 			cursor: pointer;
 			transition:
-				background-color 160ms,
-				color 160ms;
+				background-color var(--motion-duration),
+				color var(--motion-duration);
 
 			&:hover {
 				background: var(--surface-hover);
@@ -117,7 +117,7 @@
 		line-height: 32px;
 		margin: 2px;
 		border-radius: 6px;
-		transition: background-color 160ms;
+		transition: background-color var(--motion-duration);
 
 		&:hover {
 			background: var(--surface-hover);

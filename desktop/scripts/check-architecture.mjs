@@ -271,6 +271,36 @@ if (commented.length === 0) {
 	console.error('')
 }
 
+// A component's styles name colours by token only (architecture.md §8): the
+// theme swaps token values on <html>, so a colour written out stays what it was
+// in the other theme. A mask's colour is only its alpha, and a colour built from
+// a token (rgba(var(--accent-rgb), …)) is a token.
+const RAW_COLOUR = /#[0-9a-fA-F]{3,8}\b|\b(rgba?|hsla?)\((?!\s*var\()/
+
+const rawColours = collectStyleFiles(SRC)
+	.filter(file => file.endsWith('.module.scss'))
+	.flatMap(file =>
+		readFileSync(file, 'utf8')
+			.split('\n')
+			.flatMap((line, index) =>
+				RAW_COLOUR.test(line) && !/mask-image/.test(line)
+					? [`${relative(SRC, file).split(sep).join('/')}:${index + 1}`]
+					: []
+			)
+	)
+
+if (rawColours.length === 0) {
+	console.log('✔ Component styles use colour tokens only.')
+} else {
+	console.error(`✖ ${rawColours.length} raw colour(s) in component styles; use a palette token:\n`)
+
+	for (const place of rawColours) {
+		console.error(`   ${place}`)
+	}
+
+	console.error('')
+}
+
 // When to ask the node is one rule (infra/node, whenNodeReady), not each screen's.
 // A component or hook that reads $nodeReady to decide for itself is the thing
 // that rule replaced.
@@ -305,7 +335,9 @@ const nodeCount = [...edges.keys()].filter(node => edges.get(node).size > 0 || n
 
 if (cycles.length === 0) {
 	console.log(`✔ No slice cycles (${files.length} files, ${nodeCount} nodes).`)
-	process.exit(misplaced.length + commented.length + askingForThemselves.length === 0 ? 0 : 1)
+	process.exit(
+		misplaced.length + commented.length + askingForThemselves.length + rawColours.length === 0 ? 0 : 1
+	)
 }
 
 console.error(`✖ Found ${cycles.length} slice cycle(s) across ${files.length} files:\n`)

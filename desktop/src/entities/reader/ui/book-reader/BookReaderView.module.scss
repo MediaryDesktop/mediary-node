@@ -1,6 +1,6 @@
 .root {
-	--chrome-bg: #000;
-	--chrome-text: #fff;
+	--chrome-bg: var(--media);
+	--chrome-text: var(--on-media);
 	--chrome-muted: color-mix(in srgb, var(--chrome-text) 65%, transparent);
 	--chrome-hover: color-mix(in srgb, var(--chrome-text) 12%, transparent);
 

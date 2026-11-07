@@ -41,8 +41,8 @@
 				inset: 0;
 				display: grid;
 				place-items: center;
-				background: rgb(0 0 0 / 45%);
-				color: #fff;
+				background: color-mix(in srgb, var(--media) 45%, transparent);
+				color: var(--on-media);
 				opacity: 0;
 				transition: opacity 0.2s ease;
 			}

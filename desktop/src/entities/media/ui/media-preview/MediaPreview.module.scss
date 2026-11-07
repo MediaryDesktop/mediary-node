@@ -9,7 +9,7 @@
 
 	&.tracked,
 	&.bare {
-		background: rgba(8, 8, 10, 0.88);
+		background: color-mix(in srgb, var(--media-veil) 88%, transparent);
 
 		.info {
 			background: none;
@@ -41,7 +41,7 @@
 
 		&.visible {
 			opacity: 1;
-			background: #000;
+			background: var(--media);
 		}
 
 		iframe {
@@ -60,8 +60,8 @@
 		padding: 2.5rem 0.875rem 0.875rem;
 		background: linear-gradient(
 			to top,
-			rgba(8, 8, 10, 0.96) 0%,
-			rgba(8, 8, 10, 0.86) 60%,
+			color-mix(in srgb, var(--media-veil) 96%, transparent) 0%,
+			color-mix(in srgb, var(--media-veil) 86%, transparent) 60%,
 			transparent 100%
 		);
 
@@ -117,7 +117,7 @@
 
 			.personalScore {
 				padding: 0.1875rem 0.5rem;
-				border-radius: 999px;
+				border-radius: var(--radius-full);
 				background: var(--accent-muted);
 				color: var(--accent-text);
 			}

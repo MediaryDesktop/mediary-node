@@ -2,11 +2,11 @@ $card-padding: 2rem;
 
 @mixin glass {
 	border-radius: var(--radius-lg);
-	background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+	background: linear-gradient(135deg, var(--glass-sheen), transparent);
 	backdrop-filter: blur(10px);
 	-webkit-backdrop-filter: blur(10px);
-	border: 1px solid rgba(255, 255, 255, 0.18);
-	box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+	border: 1px solid var(--glass-edge);
+	box-shadow: 0 8px 32px 0 color-mix(in srgb, var(--shadow-ink) 37%, transparent);
 }
 
 .page {

@@ -34,8 +34,8 @@
 			text-align: left;
 			cursor: pointer;
 			transition:
-				border-color 160ms ease,
-				background 160ms ease;
+				border-color var(--motion-duration) ease,
+				background var(--motion-duration) ease;
 
 			&:hover:not(:disabled) {
 				border-color: var(--border-strong);

@@ -94,10 +94,10 @@
 				height: 0.3rem;
 				padding: 0;
 				border: 0;
-				border-radius: 999px;
+				border-radius: var(--radius-full);
 				background: var(--border-strong);
 				cursor: pointer;
-				transition: background-color 160ms;
+				transition: background-color var(--motion-duration);
 
 				&:hover {
 					background: var(--text-muted);
@@ -182,7 +182,7 @@
 
 						.genre {
 							padding: 0.125rem 0.625rem;
-							border-radius: 999px;
+							border-radius: var(--radius-full);
 							background: var(--accent-muted);
 							color: var(--accent-text);
 							font-size: 0.8125rem;
@@ -224,7 +224,7 @@
 						text-decoration: underline;
 						text-underline-offset: 0.2em;
 						cursor: pointer;
-						transition: color 160ms;
+						transition: color var(--motion-duration);
 
 						&:hover {
 							color: var(--text);

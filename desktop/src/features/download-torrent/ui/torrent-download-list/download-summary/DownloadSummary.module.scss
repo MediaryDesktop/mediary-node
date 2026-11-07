@@ -15,7 +15,7 @@
 		.dot {
 			width: 0.5rem;
 			height: 0.5rem;
-			border-radius: 999px;
+			border-radius: var(--radius-full);
 			background: var(--text-disabled);
 
 			&.up {

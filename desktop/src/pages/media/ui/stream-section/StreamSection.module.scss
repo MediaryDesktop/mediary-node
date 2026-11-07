@@ -17,7 +17,7 @@
 		padding: 1rem 1.125rem;
 		border: none;
 		border-radius: var(--radius);
-		color: #99999965;
+		color: var(--text-faint);
 		background: none;
 		cursor: pointer;
 		text-align: left;
@@ -64,7 +64,7 @@
 			color: var(--text-muted);
 
 			svg {
-				transition: transform 160ms ease;
+				transition: transform var(--motion-duration) ease;
 			}
 
 			&.chevronOpen svg {

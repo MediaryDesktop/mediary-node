@@ -1,7 +1,7 @@
 .overlay {
 	position: fixed;
 	inset: 0;
-	z-index: 50;
+	z-index: var(--layer-overlay);
 	background: var(--overlay);
 	-webkit-app-region: no-drag;
 
@@ -18,7 +18,7 @@
 	position: fixed;
 	top: 50%;
 	left: 50%;
-	z-index: 51;
+	z-index: var(--layer-dialog);
 	display: flex;
 	flex-direction: column;
 	width: calc(100vw - 2rem);
@@ -82,8 +82,8 @@
 			color: var(--text-secondary);
 			cursor: pointer;
 			transition:
-				background-color 160ms,
-				color 160ms;
+				background-color var(--motion-duration),
+				color var(--motion-duration);
 
 			&:hover {
 				background: var(--surface-hover);

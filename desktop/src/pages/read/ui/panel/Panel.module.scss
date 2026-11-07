@@ -3,8 +3,8 @@
 	inset: 0;
 	display: flex;
 	flex-direction: column;
-	background: #000;
-	color: #fff;
+	background: var(--media);
+	color: var(--on-media);
 
 	&.enter {
 		animation: panel-in 340ms cubic-bezier(0.32, 0.72, 0, 1) both;
@@ -40,7 +40,7 @@
 		p {
 			max-width: 34rem;
 			margin: 0;
-			color: rgb(255 255 255 / 80%);
+			color: color-mix(in srgb, var(--on-media) 80%, transparent);
 		}
 	}
 }

@@ -76,8 +76,8 @@ export function BookReaderView({ book, file, locator, openedAt, onClose, onReloc
 			style={
 				{
 					...(entrance.entering && !leaving ? entrance.style : undefined),
-					'--chrome-bg': pdf ? '#000' : colors.background,
-					'--chrome-text': pdf ? '#fff' : colors.text
+					'--chrome-bg': pdf ? 'var(--media)' : colors.background,
+					'--chrome-text': pdf ? 'var(--on-media)' : colors.text
 				} as CSSProperties
 			}
 		>

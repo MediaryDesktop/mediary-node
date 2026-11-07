@@ -5,8 +5,8 @@
 
 	position: fixed;
 	overflow: hidden;
-	background: #000;
-	color: #fff;
+	background: var(--media);
+	color: var(--on-media);
 	transition:
 		left 0.4s var(--ease),
 		top 0.4s var(--ease),
@@ -16,7 +16,7 @@
 		box-shadow 0.4s var(--ease);
 
 	&.full {
-		z-index: 1100;
+		z-index: var(--layer-player);
 		top: 0;
 		left: 0;
 		width: 100vw;
@@ -24,7 +24,7 @@
 	}
 
 	&.mini {
-		z-index: 880;
+		z-index: var(--layer-mini-player);
 		top: calc(100vh - var(--mini-height) - 20px);
 		left: calc(100vw - var(--mini-width) - 20px);
 		width: var(--mini-width);
@@ -55,7 +55,7 @@
 			width: 100%;
 			height: 100%;
 			object-fit: contain;
-			background: #000;
+			background: var(--media);
 		}
 	}
 
@@ -81,9 +81,9 @@
 		gap: 1rem;
 		padding: 1.5rem;
 		text-align: center;
-		background: rgb(0 0 0 / 0.72);
+		background: color-mix(in srgb, var(--media) 72%, transparent);
 		backdrop-filter: blur(6px);
-		color: #fff;
+		color: var(--on-media);
 
 		p {
 			max-width: 32rem;

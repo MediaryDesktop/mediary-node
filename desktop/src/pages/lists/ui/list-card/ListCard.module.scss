@@ -5,8 +5,8 @@
 	background: var(--surface);
 	overflow: hidden;
 	transition:
-		border-color 160ms ease,
-		background 160ms ease;
+		border-color var(--motion-duration) ease,
+		background var(--motion-duration) ease;
 
 	&:hover {
 		border-color: var(--border-strong);

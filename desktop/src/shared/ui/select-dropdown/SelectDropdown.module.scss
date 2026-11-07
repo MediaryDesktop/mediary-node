@@ -14,8 +14,8 @@
 		background: var(--field);
 		cursor: pointer;
 		transition:
-			border-color 160ms,
-			background-color 160ms;
+			border-color var(--motion-duration),
+			background-color var(--motion-duration);
 
 		&:focus-within,
 		&.isOpen {
@@ -43,7 +43,7 @@
 			width: 44px;
 			border-right: 1px solid var(--border-strong);
 			color: var(--text-secondary);
-			transition: color 160ms;
+			transition: color var(--motion-duration);
 
 			&.leadingActive {
 				color: var(--accent);
@@ -66,7 +66,7 @@
 			align-items: stretch;
 			min-width: 0;
 			border-radius: calc(var(--radius) - 2px);
-			transition: background-color 160ms;
+			transition: background-color var(--motion-duration);
 
 			.body {
 				display: flex;
@@ -116,8 +116,8 @@
 							color: var(--text);
 							cursor: pointer;
 							transition:
-								background-color 160ms,
-								color 160ms;
+								background-color var(--motion-duration),
+								color var(--motion-duration);
 
 							&:hover {
 								background: var(--surface-muted-hover);
@@ -171,8 +171,8 @@
 					color: var(--text-secondary);
 					cursor: pointer;
 					transition:
-						background-color 160ms,
-						color 160ms;
+						background-color var(--motion-duration),
+						color var(--motion-duration);
 
 					&:hover {
 						background: var(--surface-muted-hover);
@@ -202,7 +202,7 @@
 
 .panel {
 	position: fixed;
-	z-index: 900;
+	z-index: var(--layer-select);
 	pointer-events: auto;
 	overflow: hidden;
 	border: 1px solid var(--border-strong);
@@ -233,7 +233,7 @@
 			border-radius: calc(var(--radius) - 2px);
 			color: var(--text);
 			cursor: pointer;
-			transition: background-color 160ms;
+			transition: background-color var(--motion-duration);
 
 			:global(.ripple__container) {
 				z-index: 0;
@@ -279,8 +279,8 @@
 				border: 2px solid var(--border-stronger);
 				border-radius: 3px;
 				transition:
-					background-color 160ms,
-					border-color 160ms;
+					background-color var(--motion-duration),
+					border-color var(--motion-duration);
 
 				&.isChecked {
 					border-color: var(--accent);

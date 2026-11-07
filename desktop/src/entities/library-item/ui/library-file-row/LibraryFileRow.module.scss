@@ -7,8 +7,8 @@
 	border: 1px solid transparent;
 	border-radius: var(--radius-sm);
 	transition:
-		border-color 160ms ease,
-		background 160ms ease;
+		border-color var(--motion-duration) ease,
+		background var(--motion-duration) ease;
 
 	&:hover {
 		background: var(--surface-hover);
@@ -94,9 +94,9 @@
 			white-space: nowrap;
 			cursor: pointer;
 			transition:
-				border-color 160ms ease,
-				color 160ms ease,
-				background 160ms ease;
+				border-color var(--motion-duration) ease,
+				color var(--motion-duration) ease,
+				background var(--motion-duration) ease;
 
 			&:hover {
 				border-color: var(--border-strong);
@@ -123,8 +123,8 @@
 			color: var(--text-muted);
 			cursor: pointer;
 			transition:
-				color 160ms ease,
-				background 160ms ease;
+				color var(--motion-duration) ease,
+				background var(--motion-duration) ease;
 
 			&:hover {
 				background: var(--surface-hover);
