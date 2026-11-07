@@ -103,3 +103,12 @@ export interface RequestFailure {
 export function problemDetail(error: RequestFailure['error'], fallback: string): string {
 	return error.body?.detail ?? fallback
 }
+
+// 428 Precondition Required is how the node says "set something up first", and
+// its detail says what. Callers still tell one setup from another by that text:
+// the node sends no problem type yet. This is the one place that reads it.
+export function setupRequired(error: unknown): string | null {
+	const failure = error as { status?: number; body?: { detail?: string } | null } | null | undefined
+
+	return failure?.status === 428 ? (failure.body?.detail ?? '') : null
+}

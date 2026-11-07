@@ -1,12 +1,11 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useCallback } from 'react'
 
+import { setupRequired } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
 
 export function isMissingToolError(error: unknown): boolean {
-	const failure = error as { status?: number; body?: { detail?: string } | null } | null
-
-	return failure?.status === 428 && (failure.body?.detail ?? '').includes('was not found')
+	return setupRequired(error)?.includes('was not found') ?? false
 }
 
 export function useMissingToolAction() {

@@ -1,5 +1,6 @@
 import { createEffect, createEvent, createStore, sample } from 'effector'
 
+import { setupRequired } from '@shared/api'
 import { atom } from '@shared/factory'
 
 import { searchMediaFx } from '@entities/media'
@@ -46,19 +47,15 @@ export const discoverModel = atom(() => {
 			...state,
 			[params.key]: { status: 'done', items: result, setupNeeded: null, fetchedAt: Date.now() }
 		}))
-		.on(loadSectionFx.fail, (state, { params, error }) => {
-			const failure = error as { status?: number; body?: { detail?: string } }
-
-			return {
-				...state,
-				[params.key]: {
-					status: 'failed',
-					items: state[params.key]?.items ?? [],
-					setupNeeded: failure.status === 428 ? (failure.body?.detail ?? '') : null,
-					fetchedAt: 0
-				}
+		.on(loadSectionFx.fail, (state, { params, error }) => ({
+			...state,
+			[params.key]: {
+				status: 'failed',
+				items: state[params.key]?.items ?? [],
+				setupNeeded: setupRequired(error),
+				fetchedAt: 0
 			}
-		})
+		}))
 
 	const staleFound = sample({
 		clock: sectionsRequested,

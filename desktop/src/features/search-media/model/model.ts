@@ -1,6 +1,7 @@
 import { combine, createEvent, createStore, sample } from 'effector'
 import { debounce } from 'patronum'
 
+import { setupRequired } from '@shared/api'
 import { atom } from '@shared/factory'
 
 import { mediaFilterOptionsQuery, mediaSearchQuery } from '@entities/media'
@@ -127,9 +128,7 @@ export const searchMediaModel = atom(() => {
 		(error, pending, page) => error !== null && !pending && page === 1
 	)
 
-	const $setupNeeded = mediaSearchQuery.$error.map(error =>
-		error?.status === 428 ? (error.body?.detail ?? '') : null
-	)
+	const $setupNeeded = mediaSearchQuery.$error.map(error => setupRequired(error))
 
 	const $loadMoreFailed = combine(
 		mediaSearchQuery.$error,

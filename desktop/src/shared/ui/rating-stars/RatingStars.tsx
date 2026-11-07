@@ -2,6 +2,7 @@ import clsx from 'clsx'
 import { useCallback, useRef, useState } from 'react'
 import type { MouseEvent, TouchEvent } from 'react'
 
+import { useTranslation } from '../../i18n'
 import { Icon } from '../icon/Icon'
 
 import styles from './RatingStars.module.scss'
@@ -19,6 +20,7 @@ export interface RatingStarsProps {
 	showValue?: boolean
 	onChange?: (value: number) => void
 	onPreviewChange?: (value: number | null) => void
+	label?: string
 }
 
 function formatValue(value: number, min: number, max: number): string {
@@ -37,8 +39,10 @@ export function RatingStars({
 	starSize = 24,
 	showValue = false,
 	onChange,
-	onPreviewChange
+	onPreviewChange,
+	label
 }: RatingStarsProps) {
+	const { t } = useTranslation()
 	const [hoverValue, setHoverValue] = useState<number | null>(null)
 	const [isDragging, setIsDragging] = useState(false)
 	const containerRef = useRef<HTMLDivElement>(null)
@@ -231,7 +235,7 @@ export function RatingStars({
 					style={{ fontSize: `${starSize}px` }}
 					onMouseLeave={handleLeave}
 					role='group'
-					aria-label='Rating'
+					aria-label={label}
 				>
 					<div className={styles.row}>
 						{Array.from({ length: starsCount }, (_, index) => {
@@ -248,7 +252,7 @@ export function RatingStars({
 									onFocus={() => handleDiscreteStarEnter(starValue)}
 									onBlur={handleLeave}
 									onClick={() => handleDiscreteStarClick(starValue)}
-									aria-label={`Rate ${starValue} out of ${max}`}
+									aria-label={t('rating.star', { value: starValue, max })}
 								>
 									{filled ? (
 										<Icon name='common/star' size={starSize} color={starColor} />
@@ -283,7 +287,7 @@ export function RatingStars({
 				onTouchMove={handleTouchMove}
 				onTouchEnd={handleTouchEnd}
 				role='group'
-				aria-label='Rating'
+				aria-label={label}
 			>
 				<div className={styles.background}>
 					{Array.from({ length: starsCount }, (_, index) => (

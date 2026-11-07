@@ -2068,6 +2068,10 @@ export const ru: Translation = {
 		close: 'Закрыть'
 	},
 
+	rating: {
+		star: 'Оценить на {{value}} из {{max}}'
+	},
+
 	auth: {
 		pitch: {
 			titleLead: 'Твоя',

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { getApiProblems, HttpRequestError } from './api-error'
+import { getApiProblems, HttpRequestError, setupRequired } from './api-error'
 
 function problem(errors: { message: string; location: string }[]) {
 	return new HttpRequestError('rejected', {
@@ -48,5 +48,26 @@ describe('getApiProblems', () => {
 
 	it('finds nothing in an error that carries no problem body', () => {
 		expect(getApiProblems(new Error('offline'))).toEqual([])
+	})
+})
+
+describe('setupRequired', () => {
+	it('names what the node wants set up first', () => {
+		const error = new HttpRequestError('setup', {
+			status: 428,
+			body: { detail: 'choose a folder for books first' }
+		})
+
+		expect(setupRequired(error)).toBe('choose a folder for books first')
+	})
+
+	it('is empty, not absent, when the node says nothing more', () => {
+		expect(setupRequired(new HttpRequestError('setup', { status: 428 }))).toBe('')
+	})
+
+	it('ignores any other failure', () => {
+		expect(setupRequired(new HttpRequestError('gone', { status: 404, body: { detail: 'x' } }))).toBeNull()
+		expect(setupRequired(null)).toBeNull()
+		expect(setupRequired(new Error('offline'))).toBeNull()
 	})
 })

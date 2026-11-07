@@ -2,6 +2,7 @@ import { useRouter } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
 import { Button, ReelLoader } from '@shared/ui'
 
@@ -94,7 +95,7 @@ export function ReadBookPage({ fileId }: ReadBookPageProps) {
 		if ((stateError && !statePending) || fileFailed) {
 			return (
 				<Panel onClose={close} openedAt={openedAt}>
-					<p>{stateError?.body?.detail ?? t('reader.book.loadFailed')}</p>
+					<p>{problemDetail(stateError ?? {}, t('reader.book.loadFailed'))}</p>
 					<Button
 						onClick={() => {
 							setFileFailed(false)

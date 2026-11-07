@@ -82,6 +82,7 @@ export function RateEntryDrawer() {
 						mode='editable'
 						starSize={30}
 						showValue
+						label={t('lists.editor.score')}
 						onChange={next => scoreChanged(Math.round(next * RAW_PER_STAR_POINT))}
 					/>
 				</DrawerSection>

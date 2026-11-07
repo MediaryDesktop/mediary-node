@@ -2064,6 +2064,10 @@ export const en = {
 		close: 'Close'
 	},
 
+	rating: {
+		star: 'Rate {{value}} out of {{max}}'
+	},
+
 	auth: {
 		pitch: {
 			titleLead: 'Your',

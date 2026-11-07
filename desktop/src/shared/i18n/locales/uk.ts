@@ -2067,6 +2067,10 @@ export const uk: Translation = {
 		close: 'Закрити'
 	},
 
+	rating: {
+		star: 'Оцінити на {{value}} з {{max}}'
+	},
+
 	auth: {
 		pitch: {
 			titleLead: 'Твоя',
