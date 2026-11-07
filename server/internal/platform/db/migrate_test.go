@@ -49,6 +49,16 @@ func TestMigrateAppliesEveryMigrationToAFreshDatabase(t *testing.T) {
 	if version != latest {
 		t.Errorf("version = %d, want the latest migration, %d", version, latest)
 	}
+
+	// A database created a moment ago holds nothing to protect.
+	path, err := mainDatabaseFile(t.Context(), database)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if copies, _ := filepath.Glob(path + ".pre-v*"); len(copies) != 0 {
+		t.Errorf("a fresh database was copied before its first migration: %v", copies)
+	}
 }
 
 // Running the same build twice must be a no-op the second time, with nothing

@@ -48,7 +48,9 @@ func Migrate(ctx context.Context, database *sql.DB, logger zerolog.Logger) error
 		)
 	}
 
-	if before < latest {
+	// A database at version 0 has never been migrated: it was created a moment
+	// ago and holds nothing to protect.
+	if before > 0 && before < latest {
 		if backupErr := backupBeforeMigration(ctx, database, logger, before); backupErr != nil {
 			// Losing the safety copy is not a reason to refuse an otherwise
 			// legitimate migration — only to log loudly that it is unprotected.
