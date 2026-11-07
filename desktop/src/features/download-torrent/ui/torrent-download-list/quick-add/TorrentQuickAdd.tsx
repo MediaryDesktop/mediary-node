@@ -8,9 +8,8 @@ import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
 import { Button, Icon, Input, toast } from '@shared/ui'
 
-import { addTorrentMutation } from '@entities/torrent'
-
 import { readTorrentFile } from '../../../lib/read-torrent-file'
+import { quickAdd } from '../../../model/model'
 
 import styles from './TorrentQuickAdd.module.scss'
 
@@ -22,13 +21,13 @@ export interface TorrentQuickAddProps {
 export function TorrentQuickAdd({ mediaRef, title }: TorrentQuickAddProps) {
 	const { t } = useTranslation()
 
-	const [add, adding] = useUnit([addTorrentMutation.start, addTorrentMutation.$pending])
+	const [add, adding] = useUnit([quickAdd.sent, quickAdd.$pending])
 
 	const [magnet, setMagnet] = useState('')
 	const [dragOver, setDragOver] = useState(false)
 
-	useUnitWatch(addTorrentMutation.finished.success, () => setMagnet(''))
-	useUnitWatch(addTorrentMutation.finished.failure, ({ error }) =>
+	useUnitWatch(quickAdd.succeeded, () => setMagnet(''))
+	useUnitWatch(quickAdd.failed, ({ error }) =>
 		toast.error(problemDetail(error, t('torrents.drawer.failed')), { id: 'torrent-add' })
 	)
 

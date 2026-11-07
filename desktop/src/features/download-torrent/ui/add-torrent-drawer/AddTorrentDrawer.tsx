@@ -16,9 +16,8 @@ import {
 	toast
 } from '@shared/ui'
 
-import { addTorrentMutation } from '@entities/torrent'
-
 import { readTorrentFile } from '../../lib/read-torrent-file'
+import { drawerAdd } from '../../model/model'
 
 import styles from './AddTorrentDrawer.module.scss'
 
@@ -53,15 +52,15 @@ interface TorrentFile {
 function AddForm({ mediaRef, title, onDone }: { mediaRef: string; title: string; onDone: () => void }) {
 	const { t } = useTranslation()
 
-	const [add, adding] = useUnit([addTorrentMutation.start, addTorrentMutation.$pending])
+	const [add, adding] = useUnit([drawerAdd.sent, drawerAdd.$pending])
 
 	const [magnet, setMagnet] = useState('')
 	const [file, setFile] = useState<TorrentFile | null>(null)
 	const [chooseFiles, setChooseFiles] = useState(true)
 	const picker = useRef<HTMLInputElement>(null)
 
-	useUnitWatch(addTorrentMutation.finished.success, () => onDone())
-	useUnitWatch(addTorrentMutation.finished.failure, ({ error }) =>
+	useUnitWatch(drawerAdd.succeeded, () => onDone())
+	useUnitWatch(drawerAdd.failed, ({ error }) =>
 		toast.error(problemDetail(error, t('torrents.drawer.failed')), { id: 'torrent-add' })
 	)
 

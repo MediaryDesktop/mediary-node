@@ -12,6 +12,8 @@ import { useNodeData } from '@infra/node'
 import { aiSettingsQuery, setAISettingsMutation } from '@entities/media'
 import type { AIProvider, SetAISettingsParams, AISettings as Settings } from '@entities/media'
 
+import { savedKey } from '../../lib/saved-key'
+
 import styles from './AISettings.module.scss'
 import { ProviderOption } from './provider-option/ProviderOption'
 
@@ -162,7 +164,11 @@ function KeyPanel({ provider, settings, saving, save }: KeyPanelProps) {
 	const { t } = useTranslation()
 	const [key, setKey] = useState('')
 
-	useUnitWatch(setAISettingsMutation.finished.success, () => setKey(''))
+	useUnitWatch(setAISettingsMutation.finished.success, ({ params }) => {
+		if (savedKey(params, provider)) {
+			setKey('')
+		}
+	})
 
 	const name = t(`ai.providers.${provider}`)
 
@@ -245,7 +251,11 @@ function OpenAIPanel({ settings, saving, save }: OpenAIPanelProps) {
 	const [model, setModel] = useState(settings.model)
 	const [key, setKey] = useState('')
 
-	useUnitWatch(setAISettingsMutation.finished.success, () => setKey(''))
+	useUnitWatch(setAISettingsMutation.finished.success, ({ params }) => {
+		if (savedKey(params, 'openai')) {
+			setKey('')
+		}
+	})
 
 	const dirty =
 		endpoint.trim() !== settings.endpoint || model.trim() !== settings.model || key.trim() !== ''

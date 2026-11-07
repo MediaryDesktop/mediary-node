@@ -11,13 +11,14 @@ import { formatRelativeTime, readStored, useUnitWatch, writeStored } from '@shar
 import { Button, CollapsibleSection, Icon, Input, RippleButton, Stepper, toast } from '@shared/ui'
 
 import {
-	checkTorrentRuleMutation,
 	deleteTorrentRuleMutation,
 	putTorrentRuleMutation,
 	TorrentSetupNotice,
 	useTorrentSetup
 } from '@entities/torrent'
 import type { TorrentRule, TorrentRuleCheck } from '@entities/torrent'
+
+import { panelCheck } from '../../../model/model'
 
 import { CheckResult } from './check-result/CheckResult'
 import styles from './RuleDetails.module.scss'
@@ -32,10 +33,10 @@ export function RuleDetails({ rule }: { rule: TorrentRule }) {
 
 	const [put, check, remove, saving, checking] = useUnit([
 		putTorrentRuleMutation.start,
-		checkTorrentRuleMutation.start,
+		panelCheck.sent,
 		deleteTorrentRuleMutation.start,
 		putTorrentRuleMutation.$pending,
-		checkTorrentRuleMutation.$pending
+		panelCheck.$pending
 	])
 
 	const [from, setFrom] = useState(rule.from_episode)
@@ -44,10 +45,10 @@ export function RuleDetails({ rule }: { rule: TorrentRule }) {
 	const [lastPreview, setLastPreview] = useState(false)
 	const [settingsOpen, setSettingsOpen] = useState(() => readStored(SETTINGS_OPEN_KEY) === 'on')
 
-	useUnitWatch(checkTorrentRuleMutation.finished.success, ({ params, result: check }) =>
+	useUnitWatch(panelCheck.succeeded, ({ params, result: check }) =>
 		setResult({ check, preview: params.preview })
 	)
-	useUnitWatch(checkTorrentRuleMutation.finished.failure, ({ error }) =>
+	useUnitWatch(panelCheck.failed, ({ error }) =>
 		toast.error(problemDetail(error, t('torrents.auto.checkFailed')), {
 			id: 'torrent-rule-check'
 		})

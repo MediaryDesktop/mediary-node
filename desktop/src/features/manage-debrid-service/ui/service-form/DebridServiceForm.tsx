@@ -6,13 +6,10 @@ import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
 import { Badge, Button, ConnectionCheck, Icon, Input, toast, Tooltip } from '@shared/ui'
 
-import {
-	checkTorrentDebridMutation,
-	DEBRID_SERVICES,
-	debridService,
-	putTorrentDebridMutation
-} from '@entities/torrent'
+import { DEBRID_SERVICES, debridService } from '@entities/torrent'
 import type { DebridKind, TorrentDebrid } from '@entities/torrent'
+
+import { debridCheck, debridSave } from '../../model/model'
 
 import styles from './DebridServiceForm.module.scss'
 import { ServiceOption } from './service-option/ServiceOption'
@@ -28,11 +25,12 @@ export function DebridServiceForm({ debrid, onReset }: DebridServiceFormProps) {
 	const { t } = useTranslation()
 
 	const [save, check, saving, checking] = useUnit([
-		putTorrentDebridMutation.start,
-		checkTorrentDebridMutation.start,
-		putTorrentDebridMutation.$pending,
-		checkTorrentDebridMutation.$pending
+		debridSave.sent,
+		debridCheck.sent,
+		debridSave.$pending,
+		debridCheck.$pending
 	])
+	const forget = useUnit(debridCheck.forgotten)
 
 	const [kind, setKind] = useState<DebridKind>(
 		debridService(debrid.service)?.kind ?? DEBRID_SERVICES[0]!.kind
@@ -47,20 +45,19 @@ export function DebridServiceForm({ debrid, onReset }: DebridServiceFormProps) {
 	const apiKeyValue = keySaved && apiKey.trim() === '' ? undefined : apiKey.trim()
 	const missingKey = apiKeyValue === ''
 
-	useUnitWatch(putTorrentDebridMutation.finished.success, () => onReset())
-	useUnitWatch(putTorrentDebridMutation.finished.failure, ({ error }) =>
+	useUnitWatch(debridSave.succeeded, () => onReset())
+	useUnitWatch(debridSave.failed, ({ error }) =>
 		toast.error(problemDetail(error, t('debrid.saveFailed')), { id: 'torrent-debrid' })
 	)
-	useUnitWatch(checkTorrentDebridMutation.finished.success, ({ result }) =>
-		setResult({ ok: true, account: result.version })
-	)
-	useUnitWatch(checkTorrentDebridMutation.finished.failure, ({ error }) =>
+	useUnitWatch(debridCheck.succeeded, ({ result }) => setResult({ ok: true, account: result.version }))
+	useUnitWatch(debridCheck.failed, ({ error }) =>
 		setResult({ ok: false, problem: problemDetail(error, t('debrid.checkFailed')) })
 	)
 
 	const pick = (next: DebridKind) => {
 		setKind(next)
 		setApiKey('')
+		forget()
 		setResult(null)
 	}
 
@@ -127,7 +124,11 @@ export function DebridServiceForm({ debrid, onReset }: DebridServiceFormProps) {
 						type='password'
 						revealable
 						value={apiKey}
-						onChange={event => setApiKey(event.target.value)}
+						onChange={event => {
+							setApiKey(event.target.value)
+							forget()
+							setResult(null)
+						}}
 						disabled={saving}
 						autoComplete='off'
 						spellCheck={false}

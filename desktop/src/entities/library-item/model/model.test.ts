@@ -59,10 +59,34 @@ describe('library roots', () => {
 			]
 		})
 
-		await allSettled(libraryModel.folderRequested, { scope, params: 'anime' })
+		await allSettled(libraryModel.folderRequested, { scope, params: { content: 'anime' } })
 
 		expect(addRoot).toHaveBeenCalledWith({ path: 'D:\\Anime', content: 'anime' })
 		expect(startScan).toHaveBeenCalledWith(0)
+	})
+
+	it('says who asked for the folder it added', async () => {
+		pickFolder.mockResolvedValue('D:\\Anime')
+
+		const scope = fork({
+			handlers: [
+				[addLibraryRootFx, () => Promise.resolve({ root: ROOT })],
+				[startLibraryScanFx, () => Promise.resolve(EMPTY_SCAN)],
+				[fetchLibraryRootsFx, () => Promise.resolve({ roots: [ROOT] })]
+			]
+		})
+
+		const added = vi.fn()
+		const unwatch = libraryModel.rootAdded.watch(added)
+
+		await allSettled(libraryModel.folderRequested, {
+			scope,
+			params: { content: 'anime', requester: 'torrent-client' }
+		})
+		await allSettled(libraryModel.folderRequested, { scope, params: { content: 'anime' } })
+		unwatch()
+
+		expect(added.mock.calls.map(([event]) => event.requester)).toEqual(['torrent-client', null])
 	})
 
 	it('does nothing when the dialog is cancelled', async () => {
@@ -72,7 +96,7 @@ describe('library roots', () => {
 
 		const scope = fork({ handlers: [[addLibraryRootFx, addRoot]] })
 
-		await allSettled(libraryModel.folderRequested, { scope, params: 'anime' })
+		await allSettled(libraryModel.folderRequested, { scope, params: { content: 'anime' } })
 
 		expect(addRoot).not.toHaveBeenCalled()
 	})
@@ -87,7 +111,7 @@ describe('library roots', () => {
 		const failures = vi.fn()
 		const unwatch = libraryModel.rootAddFailed.watch(failures)
 
-		await allSettled(libraryModel.folderRequested, { scope, params: 'anime' })
+		await allSettled(libraryModel.folderRequested, { scope, params: { content: 'anime' } })
 		unwatch()
 
 		expect(failures).toHaveBeenCalledTimes(1)

@@ -8,14 +8,11 @@ import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
 import { Button, ConnectionCheck, Icon, Input, SelectDropdown, toast } from '@shared/ui'
 
-import { addLibraryRootMutation, AddRootMenu, libraryModel, libraryRootsQuery } from '@entities/library-item'
-import {
-	checkTorrentClientMutation,
-	putTorrentSettingsMutation,
-	readyDebrid,
-	torrentDebridQuery
-} from '@entities/torrent'
+import { AddRootMenu, libraryModel, libraryRootsQuery } from '@entities/library-item'
+import { readyDebrid, torrentDebridQuery } from '@entities/torrent'
 import type { TorrentClientKind, TorrentSettings } from '@entities/torrent'
+
+import { clientCheck, clientSave, FOLDER_REQUESTER } from '../../model/model'
 
 import { OptionCard } from './option-card/OptionCard'
 import styles from './TorrentClientForm.module.scss'
@@ -36,10 +33,10 @@ export function TorrentClientForm({ settings, onReset }: TorrentClientFormProps)
 	const { t } = useTranslation()
 
 	const [save, check, saving, checking, roots, debridSettings, pickingFolder] = useUnit([
-		putTorrentSettingsMutation.start,
-		checkTorrentClientMutation.start,
-		putTorrentSettingsMutation.$pending,
-		checkTorrentClientMutation.$pending,
+		clientSave.sent,
+		clientCheck.sent,
+		clientSave.$pending,
+		clientCheck.$pending,
 		libraryRootsQuery.$data,
 		torrentDebridQuery.$data,
 		libraryModel.$pickingFolder
@@ -68,30 +65,43 @@ export function TorrentClientForm({ settings, onReset }: TorrentClientFormProps)
 	const missingUrl = qbittorrent && url.trim() === ''
 	const missingDebrid = throughDebrid && !debrid
 
-	useUnitWatch(putTorrentSettingsMutation.finished.success, () => onReset())
-	useUnitWatch(putTorrentSettingsMutation.finished.failure, ({ error }) =>
+	useUnitWatch(clientSave.succeeded, () => onReset())
+	useUnitWatch(clientSave.failed, ({ error }) =>
 		toast.error(problemDetail(error, t('torrents.settings.saveFailed')), {
 			id: 'torrent-settings'
 		})
 	)
-	useUnitWatch(checkTorrentClientMutation.finished.success, ({ result }) =>
-		setResult({ ok: true, version: result.version })
-	)
-	useUnitWatch(checkTorrentClientMutation.finished.failure, ({ error }) =>
+	useUnitWatch(clientCheck.succeeded, ({ result }) => setResult({ ok: true, version: result.version }))
+	useUnitWatch(clientCheck.failed, ({ error }) =>
 		setResult({ ok: false, problem: problemDetail(error, t('torrents.client.notConfigured')) })
 	)
-	useUnitWatch(addLibraryRootMutation.finished.success, ({ result }) => setRootId(result.root.id))
-	useUnitWatch(addLibraryRootMutation.finished.failure, ({ error }) =>
-		toast.error(
-			error.status === 409
-				? problemDetail(error, t('library.root.overlap'))
-				: problemDetail(error, t('library.root.failed')),
-			{ id: 'library-root-failed' }
-		)
-	)
+	useUnitWatch(libraryModel.rootAdded, ({ root, requester }) => {
+		if (requester === FOLDER_REQUESTER) {
+			setRootId(root.id)
+		}
+	})
+	useUnitWatch(libraryModel.rootAddFailedFor, ({ error, requester }) => {
+		if (requester === FOLDER_REQUESTER) {
+			toast.error(
+				error.status === 409
+					? problemDetail(error, t('library.root.overlap'))
+					: problemDetail(error, t('library.root.failed')),
+				{ id: 'library-root-failed' }
+			)
+		}
+	})
+
+	const forget = useUnit(clientCheck.forgotten)
+
+	const connectionChanged = (set: (value: string) => void, value: string) => {
+		set(value)
+		forget()
+		setResult(null)
+	}
 
 	const pick = (next: ClientChoice) => {
 		setChoice(next)
+		forget()
 		setResult(null)
 	}
 
@@ -175,7 +185,7 @@ export function TorrentClientForm({ settings, onReset }: TorrentClientFormProps)
 									</span>
 									<Input
 										value={url}
-										onChange={event => setUrl(event.target.value)}
+										onChange={event => connectionChanged(setUrl, event.target.value)}
 										disabled={saving}
 										autoComplete='off'
 										spellCheck={false}
@@ -189,7 +199,7 @@ export function TorrentClientForm({ settings, onReset }: TorrentClientFormProps)
 									</span>
 									<Input
 										value={username}
-										onChange={event => setUsername(event.target.value)}
+										onChange={event => connectionChanged(setUsername, event.target.value)}
 										disabled={saving}
 										autoComplete='off'
 										spellCheck={false}
@@ -206,7 +216,7 @@ export function TorrentClientForm({ settings, onReset }: TorrentClientFormProps)
 									type='password'
 									revealable
 									value={password}
-									onChange={event => setPassword(event.target.value)}
+									onChange={event => connectionChanged(setPassword, event.target.value)}
 									disabled={saving}
 									autoComplete='new-password'
 									placeholder={
@@ -328,6 +338,7 @@ export function TorrentClientForm({ settings, onReset }: TorrentClientFormProps)
 					footer={
 						<AddRootMenu
 							align='center'
+							requester={FOLDER_REQUESTER}
 							trigger={
 								<Button
 									variant='ghost'

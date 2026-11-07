@@ -1,4 +1,4 @@
-import { createEffect, createEvent, sample } from 'effector'
+import { createEffect, createEvent, createStore, sample } from 'effector'
 
 import { atom } from '@shared/factory'
 
@@ -13,8 +13,20 @@ import {
 } from './queries'
 import { createScanActivity, scanFinished } from './scan'
 
+export interface FolderRequest {
+	content: LibraryContent
+	requester?: string
+}
+
 export const libraryModel = atom(() => {
-	const folderRequested = createEvent<LibraryContent>()
+	const folderRequested = createEvent<FolderRequest>()
+
+	// Who asked for the folder, so that the form which asked — and only it —
+	// can pick the new folder once it is added.
+	const $requester = createStore<string | null>(null).on(
+		folderRequested,
+		(_, { requester }) => requester ?? null
+	)
 
 	const pickFolderFx = createEffect<LibraryContent, AddLibraryRootParams | null>(async content => {
 		const path = await window.mediary.dialog.pickFolder()
@@ -22,7 +34,19 @@ export const libraryModel = atom(() => {
 		return path === null ? null : { path, content }
 	})
 
-	sample({ clock: folderRequested, target: pickFolderFx })
+	sample({ clock: folderRequested, fn: ({ content }) => content, target: pickFolderFx })
+
+	const rootAdded = sample({
+		clock: addLibraryRootMutation.finished.success,
+		source: $requester,
+		fn: (requester, { result }) => ({ root: result.root, requester })
+	})
+
+	const rootAddFailedFor = sample({
+		clock: addLibraryRootMutation.finished.failure,
+		source: $requester,
+		fn: (requester, { error }) => ({ error, requester })
+	})
 
 	sample({
 		clock: pickFolderFx.doneData,
@@ -51,6 +75,8 @@ export const libraryModel = atom(() => {
 		$activity,
 		$pickingFolder: pickFolderFx.pending,
 		folderRequested,
+		rootAdded,
+		rootAddFailedFor,
 		scanRequested: startLibraryScanMutation.start,
 		scanFinished,
 		rootAddFailed: addLibraryRootMutation.finished.failure,

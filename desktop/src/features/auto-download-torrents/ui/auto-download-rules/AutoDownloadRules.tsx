@@ -1,7 +1,7 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 import clsx from 'clsx'
 import { useUnit } from 'effector-react'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 
 import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
@@ -12,7 +12,6 @@ import { useNodeData } from '@infra/node'
 
 import { mediaPreviewModel } from '@entities/media'
 import {
-	checkTorrentRuleMutation,
 	deleteTorrentRuleMutation,
 	putTorrentRuleMutation,
 	torrentRulesQuery,
@@ -20,6 +19,8 @@ import {
 	useTorrentSetup
 } from '@entities/torrent'
 import type { TorrentRule } from '@entities/torrent'
+
+import { listCheck } from '../../model/model'
 
 import styles from './AutoDownloadRules.module.scss'
 
@@ -36,7 +37,7 @@ export function AutoDownloadRules() {
 
 	useNodeData(torrentRulesQuery)
 
-	useUnitWatch(checkTorrentRuleMutation.finished.success, ({ result }) =>
+	useUnitWatch(listCheck.succeeded, ({ result }) =>
 		toast.success(
 			result.added > 0
 				? t('torrents.auto.addedToast', { count: result.added })
@@ -44,7 +45,7 @@ export function AutoDownloadRules() {
 			{ id: 'torrent-rule-check' }
 		)
 	)
-	useUnitWatch(checkTorrentRuleMutation.finished.failure, ({ error }) =>
+	useUnitWatch(listCheck.failed, ({ error }) =>
 		toast.error(problemDetail(error, t('torrents.auto.checkFailed')), {
 			id: 'torrent-rule-check'
 		})
@@ -109,15 +110,15 @@ function RuleRow({
 }) {
 	const { t, i18n } = useTranslation()
 
-	const [put, check, remove, checking] = useUnit([
+	const [put, check, remove, checking, checkingRule] = useUnit([
 		putTorrentRuleMutation.start,
-		checkTorrentRuleMutation.start,
+		listCheck.sent,
 		deleteTorrentRuleMutation.start,
-		checkTorrentRuleMutation.$pending
+		listCheck.$pending,
+		listCheck.$params
 	])
 
-	const [mine, setMine] = useState(false)
-	useUnitWatch(checkTorrentRuleMutation.finished.finally, () => setMine(false))
+	const mine = checkingRule?.mediaRef === rule.media_ref
 
 	return (
 		<li className={clsx(styles.row, !rule.enabled && styles.off)}>
@@ -152,10 +153,7 @@ function RuleRow({
 					startIcon={<Icon name='common/download' size={14} />}
 					loading={checking && mine}
 					disabled={checking || setupMissing}
-					onClick={() => {
-						setMine(true)
-						check({ mediaRef: rule.media_ref, preview: false })
-					}}
+					onClick={() => check({ mediaRef: rule.media_ref, preview: false })}
 				>
 					{t('torrents.auto.checkNow')}
 				</Button>

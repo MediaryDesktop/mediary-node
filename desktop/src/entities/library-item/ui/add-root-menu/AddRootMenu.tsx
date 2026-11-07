@@ -29,9 +29,10 @@ export const LIBRARY_CONTENT_ICONS: Record<LibraryContent, IconName> = {
 export interface AddRootMenuProps {
 	trigger: ReactNode
 	align?: 'start' | 'center' | 'end'
+	requester?: string
 }
 
-export function AddRootMenu({ trigger, align }: AddRootMenuProps) {
+export function AddRootMenu({ trigger, align, requester }: AddRootMenuProps) {
 	const { t } = useTranslation()
 	const [pickingFolder, folderRequested] = useUnit([
 		libraryModel.$pickingFolder,
@@ -46,7 +47,7 @@ export function AddRootMenu({ trigger, align }: AddRootMenuProps) {
 				label: t(`library.root.addAs.${content}`),
 				icon: LIBRARY_CONTENT_ICONS[content],
 				disabled: pickingFolder,
-				onSelect: () => folderRequested(content)
+				onSelect: () => folderRequested({ content, requester })
 			}))}
 			trigger={trigger}
 		/>
