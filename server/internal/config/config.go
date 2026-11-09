@@ -159,7 +159,10 @@ type Torrent struct {
 	ListenPort   int    `env:"NODE_TORRENT_LISTEN_PORT" envDefault:"0"`
 	MaxDownloads int    `env:"NODE_TORRENT_MAX_DOWNLOADS" envDefault:"3"`
 
-	EnableUPnP bool `env:"NODE_TORRENT_ENABLE_UPNP" envDefault:"false"`
+	// A home router usually answers UPnP; without it, the node's own client can
+	// only reach peers that opened their own port, which most of a swarm never
+	// does — on by default, the way every other torrent client ships.
+	EnableUPnP bool `env:"NODE_TORRENT_ENABLE_UPNP" envDefault:"true"`
 
 	ExternalURL      string `env:"NODE_TORRENT_EXTERNAL_URL"`
 	ExternalUser     string `env:"NODE_TORRENT_EXTERNAL_USER"`

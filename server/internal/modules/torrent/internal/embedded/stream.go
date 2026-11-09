@@ -61,21 +61,26 @@ func (c *Client) Stream(_ context.Context, magnet string, torrentFile []byte) (s
 	}
 
 	var spec *torrent.TorrentSpec
+	var mi *metainfo.MetaInfo
 	if magnet != "" {
 		if spec, err = torrent.TorrentSpecFromMagnetUri(magnet); err != nil {
 			return "", apperr.Invalid("magnet", "the magnet link cannot be read: %v", err)
 		}
 	} else {
-		mi, loadErr := metainfo.Load(bytes.NewReader(torrentFile))
+		loaded, loadErr := metainfo.Load(bytes.NewReader(torrentFile))
 		if loadErr != nil {
 			return "", apperr.Invalid("torrent", "the .torrent file cannot be read: %v", loadErr)
 		}
+		mi = loaded
 		if spec, err = torrent.TorrentSpecFromMetaInfoErr(mi); err != nil {
 			return "", apperr.Invalid("torrent", "the .torrent file cannot be read: %v", err)
 		}
 	}
 
 	hash := spec.InfoHash.HexString()
+	if !c.opts.Offline {
+		withTrackers(spec, mi)
+	}
 
 	c.mu.Lock()
 	defer c.mu.Unlock()

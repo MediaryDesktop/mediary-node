@@ -14,6 +14,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -39,9 +40,11 @@ type Options struct {
 	// StateDir keeps the client's own list of torrents and their .torrent files,
 	// so a restarted node resumes them.
 	StateDir string
-	// ListenPort is the port peers connect to; 0 keeps the library's default.
+	// ListenPort is the port peers connect to; 0 picks one and keeps it in
+	// StateDir, so it stays the same across restarts for a router forwarded by
+	// hand.
 	ListenPort int
-	// EnableUPnP opens the port on the router. Off unless the user asks.
+	// EnableUPnP opens the port on the router.
 	EnableUPnP bool
 	// Offline keeps the client off DHT and trackers: it only talks to the peers
 	// it is handed. For tests.
@@ -112,9 +115,17 @@ func (c *Client) start() (*torrent.Client, error) {
 	cfg.Seed = true
 	cfg.NoDefaultPortForwarding = !c.opts.EnableUPnP
 	cfg.Slogger = slog.New(slog.NewTextHandler(discard{}, nil))
-	if c.opts.ListenPort > 0 {
+
+	// A port chosen once and kept lets the router's own mapping, UPnP's or one
+	// the user set up by hand, still find the client after a restart; a new
+	// random port every time a user forwarded for would need redoing each time.
+	configured := c.opts.ListenPort > 0
+	if configured {
 		cfg.ListenPort = c.opts.ListenPort
+	} else if saved := c.savedListenPort(); saved > 0 {
+		cfg.ListenPort = saved
 	}
+
 	if c.opts.Offline {
 		// Any free port: the peers are handed over, never found.
 		cfg.ListenPort = 0
@@ -125,11 +136,23 @@ func (c *Client) start() (*torrent.Client, error) {
 	}
 
 	cl, err := torrent.NewClient(cfg)
+	if err != nil && cfg.ListenPort != 0 {
+		// The remembered or given port may be taken by something else now; a
+		// client on a fresh one beats a client that never starts.
+		cfg.ListenPort = 0
+		cl, err = torrent.NewClient(cfg)
+	}
 	if err != nil {
 		c.startErr = apperr.Wrap(err, apperr.KindUnavailable, "the built-in torrent client could not start")
 		return nil, c.startErr
 	}
 	c.cl = cl
+
+	if !configured && !c.opts.Offline {
+		if port := cl.LocalPort(); port > 0 {
+			c.saveListenPort(port)
+		}
+	}
 
 	// Streams do not outlive the node; what one left behind is only taking space.
 	_ = os.RemoveAll(c.streamsDir())
@@ -155,8 +178,10 @@ func (discard) Write(p []byte) (int, error) { return len(p), nil }
 // had the metadata, from its magnet otherwise.
 func (c *Client) resume(hash string, saved *entry) error {
 	var spec *torrent.TorrentSpec
+	var mi *metainfo.MetaInfo
 
-	if mi, err := metainfo.LoadFromFile(c.metainfoPath(hash)); err == nil {
+	if loaded, err := metainfo.LoadFromFile(c.metainfoPath(hash)); err == nil {
+		mi = loaded
 		if spec, err = torrent.TorrentSpecFromMetaInfoErr(mi); err != nil {
 			return err
 		}
@@ -166,6 +191,10 @@ func (c *Client) resume(hash string, saved *entry) error {
 		}
 	} else {
 		return errors.New("neither a .torrent nor a magnet is left for it")
+	}
+
+	if !c.opts.Offline {
+		withTrackers(spec, mi)
 	}
 
 	return c.addSpec(hash, spec, saved)
@@ -269,6 +298,9 @@ func (c *Client) Add(_ context.Context, req qbittorrent.AddRequest) error {
 	}
 
 	hash := spec.InfoHash.HexString()
+	if !c.opts.Offline {
+		withTrackers(spec, mi)
+	}
 
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -616,6 +648,34 @@ func (c *Client) statePath() string {
 
 func (c *Client) metainfoPath(hash string) string {
 	return filepath.Join(c.opts.StateDir, hash+".torrent")
+}
+
+func (c *Client) listenPortPath() string {
+	return filepath.Join(c.opts.StateDir, "listen-port")
+}
+
+// savedListenPort is the port a past run was handed and kept, or 0 when there
+// is none yet.
+func (c *Client) savedListenPort() int {
+	data, err := os.ReadFile(c.listenPortPath())
+	if err != nil {
+		return 0
+	}
+
+	port, err := strconv.Atoi(strings.TrimSpace(string(data)))
+	if err != nil || port <= 0 || port > 65535 {
+		return 0
+	}
+
+	return port
+}
+
+// saveListenPort keeps the port the library chose, so the next run asks for
+// the same one instead of a fresh random one.
+func (c *Client) saveListenPort(port int) {
+	if err := os.WriteFile(c.listenPortPath(), []byte(strconv.Itoa(port)), 0o600); err != nil {
+		c.opts.Logger.Warn().Err(err).Msg("could not keep the torrent client's listen port")
+	}
 }
 
 // load reads the remembered torrents. Called with mu held.
