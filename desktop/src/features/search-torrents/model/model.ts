@@ -5,10 +5,22 @@ import { HttpRequestError } from '@shared/api'
 import { addTorrentFx } from '@entities/torrent'
 import type { AddTorrentParams } from '@entities/torrent'
 
+// What the stream picker shows of the episode being chosen for: the same card
+// the episode list draws, so the viewer sees what the release is picked for.
+export interface StreamPreview {
+	label: string
+	name: string | null
+	duration: string | null
+	of: number | null
+	images: (string | null | undefined)[]
+	coverColor: string | null
+}
+
 export interface SearchTarget {
 	episode?: number
 	season?: number
 	intent?: 'download' | 'watch'
+	preview?: StreamPreview
 }
 
 export const searchOpened = createEvent<SearchTarget | void>()

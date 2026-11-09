@@ -1,0 +1,32 @@
+.preview {
+	margin: 0;
+
+	.image {
+		position: relative;
+		display: block;
+		width: 100%;
+		aspect-ratio: 16 / 9;
+		max-height: 15rem;
+		overflow: hidden;
+		border-radius: var(--radius-lg);
+		background: var(--bg-subtle);
+
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+
+		.duration {
+			position: absolute;
+			top: 0.625rem;
+			right: 0.625rem;
+			padding: 0.1875rem 0.5rem;
+			border-radius: var(--radius-sm);
+			background: color-mix(in srgb, var(--media) 75%, transparent);
+			color: var(--on-media);
+			font-size: var(--font-size-xs);
+			font-weight: 650;
+		}
+	}
+}

@@ -37,6 +37,14 @@ export function TorrentSearchDrawer({
 			description={
 				<span className={styles.descriptionRow}>
 					{title}
+					{watchOnly && target.preview && (
+						<>
+							<span className={styles.dot} aria-hidden>
+								·
+							</span>
+							{target.preview.label}
+						</>
+					)}
 					{!watchOnly && missing && (
 						<Badge tone={missing.length > 0 ? 'warning' : 'success'}>
 							{missing.length > 0
@@ -48,6 +56,7 @@ export function TorrentSearchDrawer({
 			}
 			side='bottom'
 			size='sheet'
+			closable={!watchOnly}
 		>
 			{open && (
 				<SearchForm

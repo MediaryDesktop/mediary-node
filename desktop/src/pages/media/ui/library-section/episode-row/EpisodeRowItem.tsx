@@ -2,11 +2,9 @@ import clsx from 'clsx'
 import type { ReactNode } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Icon } from '@shared/ui'
+import { FallbackImage, Icon } from '@shared/ui'
 
 import type { MediaEpisode } from '@entities/media'
-
-import { EpisodeImage } from '@features/continue-watching'
 
 import { EpisodeAside } from './EpisodeAside'
 import styles from './EpisodeRow.module.scss'
@@ -51,7 +49,7 @@ export function EpisodeRowItem({
 				aria-label={t('media.library.play', { name: label })}
 				onClick={onPlay}
 			>
-				<EpisodeImage sources={images} />
+				<FallbackImage sources={images} />
 				<span className={styles.episodePlay}>
 					<Icon name='common/play' size={24} />
 				</span>

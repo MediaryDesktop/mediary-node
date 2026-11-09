@@ -1384,6 +1384,51 @@ export const en = {
 			match: {
 				episode: 'This episode',
 				batch: 'Batch'
+			},
+			picker: {
+				source: 'Source',
+				allSources: 'All sources',
+				sort: {
+					label: 'Sort releases',
+					relevance: 'Best match',
+					seeders: 'Seeders',
+					size: 'Size',
+					date: 'Date',
+					resolution: 'Resolution'
+				},
+				queryPlaceholder: 'Title or your own query',
+				sortBy: 'Sort by',
+				direction: {
+					desc: 'Largest first',
+					asc: 'Smallest first'
+				},
+				quick: {
+					label: 'Quick filters',
+					best: 'Best only',
+					hd: '1080p and up',
+					seeded: 'Has seeders'
+				},
+				selected: 'Selected release',
+				cancel: 'Cancel',
+				tip: 'Not the one you need? Switch to Episodes, try another source, or change the episode on the left.',
+				tipSeasonal:
+					'Not the one you need? Switch to Episodes, try another source, or change the season and episode on the left.',
+				seeders_one: 'seeder',
+				seeders_few: 'seeders',
+				seeders_many: 'seeders',
+				seeders_other: 'seeders',
+				stream: 'Stream',
+				pick: 'Pick a release from the list',
+				noEpisode: 'No release holds episode {{episode}}',
+				noEpisodeHint_one:
+					'The sources found {{count}} release of the title, but its name does not cover this episode.',
+				noEpisodeHint_few:
+					'The sources found {{count}} releases of the title, but none of their names covers this episode.',
+				noEpisodeHint_many:
+					'The sources found {{count}} releases of the title, but none of their names covers this episode.',
+				noEpisodeHint_other:
+					'The sources found {{count}} releases of the title, but none of their names covers this episode.',
+				showAll: 'Show every episode'
 			}
 		},
 		sources: {

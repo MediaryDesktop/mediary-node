@@ -89,6 +89,7 @@ export function StreamSection({
 	const toWatch = upNext(items, progress, RAIL_SIZE)
 	const fallback = banner ?? cover
 	const busy = target !== null
+	const ofReleased = (item: StreamItem) => (!meta.seasonal && item.episode !== undefined ? released : null)
 
 	const play = (item: StreamItem) => {
 		if (autoSelect) {
@@ -105,7 +106,19 @@ export function StreamSection({
 				}
 			})
 		} else {
-			openSearch({ episode: item.episode, season: item.season, intent: 'watch' })
+			openSearch({
+				episode: item.episode,
+				season: item.season,
+				intent: 'watch',
+				preview: {
+					label: item.label,
+					name: text.name(item.meta),
+					duration: text.minutes(null, item.meta),
+					of: ofReleased(item),
+					images: [item.meta?.image, fallback],
+					coverColor
+				}
+			})
 		}
 	}
 
@@ -204,7 +217,7 @@ export function StreamSection({
 							key={item.key}
 							label={item.label}
 							name={text.name(item.meta)}
-							of={!meta.seasonal && item.episode !== undefined ? released : null}
+							of={ofReleased(item)}
 							images={[item.meta?.image, fallback]}
 							coverColor={coverColor}
 							disabled={busy || !setup.hasSources}

@@ -1,7 +1,5 @@
 import { useTranslation } from '@shared/i18n'
-import { Icon } from '@shared/ui'
-
-import { EpisodeImage } from '@features/continue-watching'
+import { FallbackImage, Icon } from '@shared/ui'
 
 import styles from './ToWatchRail.module.scss'
 
@@ -38,7 +36,7 @@ export function EpisodeCard({
 				onClick={onPlay}
 			>
 				<span className={styles.cardImage} style={{ backgroundColor: coverColor ?? undefined }}>
-					<EpisodeImage sources={images} />
+					<FallbackImage sources={images} />
 					<span className={styles.cardPlay}>
 						<Icon name='common/play' size={32} />
 					</span>

@@ -62,3 +62,23 @@ export function downloadRequests(
 		}
 	})
 }
+
+export type ResolutionTone = 'uhd' | 'fhd' | 'hd' | 'sd'
+
+export function resolutionTone(resolution: string): ResolutionTone {
+	const lines = Number.parseInt(resolution, 10) || 0
+
+	if (lines >= 1440) return 'uhd'
+	if (lines >= 1080) return 'fhd'
+	if (lines >= 720) return 'hd'
+	return 'sd'
+}
+
+export type SeedersLevel = 'high' | 'good' | 'low' | 'none'
+
+export function seedersLevel(seeders: number): SeedersLevel {
+	if (seeders >= 50) return 'high'
+	if (seeders >= 10) return 'good'
+	if (seeders >= 5) return 'low'
+	return 'none'
+}

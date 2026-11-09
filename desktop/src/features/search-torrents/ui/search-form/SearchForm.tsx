@@ -1,11 +1,11 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { DrawerForm, EmptyState, Skeleton, toast } from '@shared/ui'
 
-import { torrentSearchQuery, TorrentSetupNotice, useTorrentSetup } from '@entities/torrent'
+import { TorrentSetupNotice } from '@entities/torrent'
 import type { TorrentRelease } from '@entities/torrent'
 
 import { coveredEpisodes } from '../../lib/episodes'
@@ -13,11 +13,12 @@ import { downloadRequests, filterReleases } from '../../lib/releases'
 import type { ReleaseKind } from '../../lib/releases'
 import { streamEpisode } from '../../lib/stream-episode'
 import type { ReleaseWatching } from '../../lib/stream-episode'
+import { useReleaseSearch } from '../../lib/useReleaseSearch'
 import { $searchTarget, downloadReleasesFx } from '../../model/model'
+import { StreamPicker } from '../stream-picker/StreamPicker'
 
 import { ReleaseCard } from './release-card/ReleaseCard'
 import { SearchBar } from './search-bar/SearchBar'
-import type { SearchCriteria } from './search-bar/SearchBar'
 import { SearchFilters } from './search-filters/SearchFilters'
 import styles from './SearchForm.module.scss'
 
@@ -33,27 +34,31 @@ export interface SearchFormProps {
 export function SearchForm({ mediaRef, title, missing, poster, watching, onDone }: SearchFormProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
-	const setup = useTorrentSetup()
 
-	const [result, error, pending, search, downloading, target] = useUnit([
-		torrentSearchQuery.$data,
-		torrentSearchQuery.$error,
-		torrentSearchQuery.$pending,
-		torrentSearchQuery.start,
-		downloadReleasesFx.pending,
-		$searchTarget
-	])
+	const [downloading, target] = useUnit([downloadReleasesFx.pending, $searchTarget])
+	const search = useReleaseSearch(mediaRef, target)
+	const { setup, result, pending, criteria } = search
 
-	const [criteria, setCriteria] = useState<SearchCriteria>(() => ({
-		query: '',
-		season: target.season ? String(target.season) : '',
-		episode: target.episode ? String(target.episode) : ''
-	}))
 	const [kind, setKind] = useState<ReleaseKind>('all')
 	const [onlyMissing, setOnlyMissing] = useState(false)
 	const [selected, setSelected] = useState<Set<string>>(new Set())
 
-	const canStream = Boolean(watching)
+	const releases = useMemo(
+		() => filterReleases(result?.releases ?? [], { kind, onlyMissing, missing }),
+		[result, kind, onlyMissing, missing]
+	)
+
+	if (target.intent === 'watch' && watching) {
+		return (
+			<StreamPicker
+				mediaRef={mediaRef}
+				poster={poster}
+				search={search}
+				watching={watching}
+				onCancel={onDone}
+			/>
+		)
+	}
 
 	const watchOf = (release: TorrentRelease) => {
 		const episode = streamEpisode(release, criteria)
@@ -68,25 +73,8 @@ export function SearchForm({ mediaRef, title, missing, poster, watching, onDone 
 
 	const run = () => {
 		setSelected(new Set())
-		search({
-			mediaRef,
-			episode: Number(criteria.episode) || 0,
-			season: Number(criteria.season) || 0,
-			query: criteria.query
-		})
+		search.run(criteria)
 	}
-
-	useEffect(() => {
-		if (setup.loaded && setup.hasSources) {
-			search({ mediaRef, episode: target.episode ?? 0, season: target.season ?? 0, query: '' })
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [setup.loaded, setup.hasSources, mediaRef])
-
-	const releases = useMemo(
-		() => filterReleases(result?.releases ?? [], { kind, onlyMissing, missing }),
-		[result, kind, onlyMissing, missing]
-	)
 
 	const toggle = (id: string, on: boolean) => {
 		const next = new Set(selected)
@@ -114,86 +102,6 @@ export function SearchForm({ mediaRef, title, missing, poster, watching, onDone 
 		}
 	}
 
-	const problem =
-		error && 'body' in error ? (error.body as { detail?: string; status?: number } | null) : null
-	const failedSources = (result?.sources ?? []).filter(source => source.error)
-
-	const watchOnly = target.intent === 'watch'
-
-	const content = (
-		<div className={styles.root}>
-			<TorrentSetupNotice
-				setup={setup}
-				needSearch
-				onOpenSettings={() =>
-					navigate({
-						to: '/settings',
-						search: { section: 'torrents' }
-					})
-				}
-			/>
-
-			<SearchBar
-				criteria={criteria}
-				onChange={setCriteria}
-				seasonal={mediaRef.startsWith('tmdb:tv:')}
-				pending={pending}
-				disabled={!setup.hasSources}
-				onSearch={run}
-			/>
-
-			<SearchFilters
-				kind={kind}
-				onKind={setKind}
-				canFilterMissing={Boolean(missing?.length)}
-				onlyMissing={onlyMissing}
-				onOnlyMissing={setOnlyMissing}
-				count={result ? releases.length : null}
-			/>
-
-			{problem && problem.status !== 428 && (
-				<p className={styles.problem}>{problem.detail ?? t('torrents.search.failed')}</p>
-			)}
-			{failedSources.map(source => (
-				<p key={source.plugin ?? source.id} className={styles.problem}>
-					{t('torrents.search.sourceFailed', { name: source.name, error: source.error ?? '' })}
-				</p>
-			))}
-
-			{pending ? (
-				<ul className={styles.list}>
-					{Array.from({ length: 4 }, (_, index) => (
-						<li key={index}>
-							<Skeleton height='5.25rem' radius='12px' />
-						</li>
-					))}
-				</ul>
-			) : result && releases.length === 0 ? (
-				<EmptyState title={t('torrents.search.empty')} description={t('torrents.search.emptyHint')} />
-			) : (
-				<ul className={styles.list}>
-					{releases.map(found => (
-						<li key={found.id}>
-							<ReleaseCard
-								release={found}
-								covered={coveredEpisodes(found, missing)}
-								poster={poster}
-								cacheService={result?.cache_service}
-								watch={canStream ? watchOf(found) : undefined}
-								checked={watchOnly ? undefined : selected.has(found.id)}
-								onCheckedChange={watchOnly ? undefined : on => toggle(found.id, on)}
-							/>
-						</li>
-					))}
-				</ul>
-			)}
-		</div>
-	)
-
-	if (watchOnly) {
-		return content
-	}
-
 	return (
 		<DrawerForm
 			onSubmit={() => void download()}
@@ -203,7 +111,71 @@ export function SearchForm({ mediaRef, title, missing, poster, watching, onDone 
 			cancelDisabled={downloading}
 			submitting={downloading}
 		>
-			{content}
+			<div className={styles.root}>
+				<TorrentSetupNotice
+					setup={setup}
+					needSearch
+					onOpenSettings={() => navigate({ to: '/settings', search: { section: 'torrents' } })}
+				/>
+
+				<SearchBar
+					criteria={criteria}
+					onChange={search.setCriteria}
+					seasonal={mediaRef.startsWith('tmdb:tv:')}
+					pending={pending}
+					disabled={!setup.hasSources}
+					onSearch={run}
+				/>
+
+				<SearchFilters
+					kind={kind}
+					onKind={setKind}
+					canFilterMissing={Boolean(missing?.length)}
+					onlyMissing={onlyMissing}
+					onOnlyMissing={setOnlyMissing}
+					count={result ? releases.length : null}
+				/>
+
+				{search.problem && (
+					<p className={styles.problem}>{search.problem.detail ?? t('torrents.search.failed')}</p>
+				)}
+				{search.failedSources.map(source => (
+					<p key={source.plugin ?? source.id} className={styles.problem}>
+						{t('torrents.search.sourceFailed', { name: source.name, error: source.error ?? '' })}
+					</p>
+				))}
+
+				{pending ? (
+					<ul className={styles.list}>
+						{Array.from({ length: 4 }, (_, index) => (
+							<li key={index}>
+								<Skeleton height='5.25rem' radius='12px' />
+							</li>
+						))}
+					</ul>
+				) : result && releases.length === 0 ? (
+					<EmptyState
+						title={t('torrents.search.empty')}
+						description={t('torrents.search.emptyHint')}
+					/>
+				) : (
+					<ul className={styles.list}>
+						{releases.map(found => (
+							<li key={found.id}>
+								<ReleaseCard
+									release={found}
+									covered={coveredEpisodes(found, missing)}
+									poster={poster}
+									cacheService={result?.cache_service}
+									watch={watching ? watchOf(found) : undefined}
+									checked={selected.has(found.id)}
+									onCheckedChange={on => toggle(found.id, on)}
+								/>
+							</li>
+						))}
+					</ul>
+				)}
+			</div>
 		</DrawerForm>
 	)
 }

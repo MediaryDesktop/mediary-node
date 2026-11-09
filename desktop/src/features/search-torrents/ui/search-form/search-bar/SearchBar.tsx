@@ -3,13 +3,9 @@ import type { KeyboardEvent } from 'react'
 import { useTranslation } from '@shared/i18n'
 import { Button, Icon, Input } from '@shared/ui'
 
-import styles from './SearchBar.module.scss'
+import type { SearchCriteria } from '../../../lib/useReleaseSearch'
 
-export interface SearchCriteria {
-	query: string
-	season: string
-	episode: string
-}
+import styles from './SearchBar.module.scss'
 
 export interface SearchBarProps {
 	criteria: SearchCriteria

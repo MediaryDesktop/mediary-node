@@ -1,5 +1,5 @@
 import { useTranslation } from '@shared/i18n'
-import { Carousel, Icon, Skeleton } from '@shared/ui'
+import { Carousel, FallbackImage, Icon, Skeleton } from '@shared/ui'
 
 import { episodeTitle } from '@entities/media'
 import { thumbnailUrl } from '@entities/playback'
@@ -7,7 +7,6 @@ import { preferredTitle } from '@entities/tracker'
 
 import { usePlayFile, useUpNextLabel } from '../../lib/useContinueWatching'
 import type { ContinueWatchingState, UpNextEntry } from '../../lib/useContinueWatching'
-import { EpisodeImage } from '../episode-image/EpisodeImage'
 
 import styles from './ContinueWatching.module.scss'
 
@@ -71,7 +70,7 @@ function UpNextCard({
 			onClick={() => onPlay(item.file.id)}
 		>
 			<span className={styles.image} style={{ backgroundColor: entry.media.cover_color ?? undefined }}>
-				<EpisodeImage
+				<FallbackImage
 					sources={[
 						item.episode?.image,
 						thumbnailUrl(item.file.id),

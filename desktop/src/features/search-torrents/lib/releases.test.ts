@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { TorrentRelease } from '@entities/torrent'
 
-import { downloadRequests, filterReleases } from './releases'
+import { downloadRequests, filterReleases, resolutionTone, seedersLevel } from './releases'
 
 function release(id: string, from: number, to: number): TorrentRelease {
 	return {
@@ -61,5 +61,23 @@ describe('downloadRequests', () => {
 
 	it('gives a single episode its own number even when nothing is missing', () => {
 		expect(downloadRequests([other], target)[0]?.episodes).toEqual([20])
+	})
+})
+
+describe('resolutionTone', () => {
+	it('groups resolutions the way the badge colours them', () => {
+		expect(resolutionTone('2160p')).toBe('uhd')
+		expect(resolutionTone('1080p')).toBe('fhd')
+		expect(resolutionTone('720p')).toBe('hd')
+		expect(resolutionTone('480p')).toBe('sd')
+	})
+})
+
+describe('seedersLevel', () => {
+	it('marks how healthy the swarm is', () => {
+		expect(seedersLevel(56)).toBe('high')
+		expect(seedersLevel(45)).toBe('good')
+		expect(seedersLevel(5)).toBe('low')
+		expect(seedersLevel(0)).toBe('none')
 	})
 })

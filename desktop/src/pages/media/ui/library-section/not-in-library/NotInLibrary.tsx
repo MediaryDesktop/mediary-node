@@ -2,11 +2,10 @@ import clsx from 'clsx'
 import { IoLibraryOutline } from 'react-icons/io5'
 
 import { useTranslation } from '@shared/i18n'
-import { Skeleton } from '@shared/ui'
+import { FallbackImage, Skeleton } from '@shared/ui'
 
 import type { MediaEpisode } from '@entities/media'
 
-import { EpisodeImage } from '@features/continue-watching'
 import type { EpisodeIndex } from '@features/continue-watching'
 
 import { EpisodeAside } from '../episode-row/EpisodeAside'
@@ -78,7 +77,7 @@ export function NotInLibrary({ cover, coverColor, banner, total, meta }: NotInLi
 							)}
 							style={{ backgroundColor: coverColor ?? undefined }}
 						>
-							<EpisodeImage sources={[episode?.image, banner ?? cover]} />
+							<FallbackImage sources={[episode?.image, banner ?? cover]} />
 						</span>
 
 						{known ? (
