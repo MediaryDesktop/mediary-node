@@ -64,6 +64,19 @@ var (
 	// anime's rarely are, and "2nd Season" names a title rather than a season.
 	seasonPattern = regexp.MustCompile(`(?i)\bs(\d{1,2})(?:e\d|\b)|\bseason[\s._-]?(\d{1,2})\b`)
 
+	// S01-S07, S1-7, Season 1-7 — a release spanning several seasons, as an
+	// indexer's catalogue entry for a complete series sometimes reads. No
+	// single season fits it the way S02E05 does, so season() reports none
+	// here instead of picking the first number and calling it the only one.
+	seasonSpan = regexp.MustCompile(`(?i)\bs(?:eason)?\d{1,2}\s?[-~]\s?(?:s(?:eason)?)?\d{1,2}(?:e\d|\b)`)
+
+	// S1-7E1-151 — a season span glued straight to an episode range, with no
+	// space or punctuation between the two, the way that catalogue entry
+	// names the whole run. rangePattern needs a separator before the episode
+	// numbers that this format does not have, so this reads the range on its
+	// own, ahead of the generic patterns.
+	seasonSpanEpisodes = regexp.MustCompile(`(?i)\bs\d{1,2}\s?[-~]\s?(?:s)?\d{1,2}e(\d{1,4})\s?[-~]\s?(?:e)?(\d{1,4})\b`)
+
 	batchWords = regexp.MustCompile(`(?i)\b(?:batch|complete|season\s*pack|full\s*season)\b`)
 
 	// Numbers that look like episodes but are not.
@@ -114,6 +127,10 @@ func Parse(name string) Info {
 }
 
 func season(name string) *int {
+	if seasonSpan.MatchString(name) {
+		return nil
+	}
+
 	match := seasonPattern.FindStringSubmatch(name)
 	if match == nil {
 		return nil
@@ -133,6 +150,14 @@ func season(name string) *int {
 }
 
 func episodes(name string) *Episodes {
+	if match := seasonSpanEpisodes.FindStringSubmatch(name); match != nil {
+		from, _ := strconv.Atoi(match[1])
+		to, _ := strconv.Atoi(match[2])
+		if from > 0 && to >= from && to-from < 2000 {
+			return &Episodes{From: from, To: to}
+		}
+	}
+
 	if match := rangePattern.FindStringSubmatch(name); match != nil {
 		from, _ := strconv.Atoi(match[1])
 		to, _ := strconv.Atoi(match[2])

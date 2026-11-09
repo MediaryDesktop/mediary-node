@@ -99,3 +99,30 @@ func TestParseSeasons(t *testing.T) {
 		}
 	}
 }
+
+// A release spanning several seasons has no single season — it would mislead a
+// release that is really the whole series into looking like only one season of
+// it, and would keep it from matching a search for any other season.
+func TestParseSeasonSpan(t *testing.T) {
+	cases := []struct {
+		name     string
+		from, to int
+	}{
+		{"Менталіст / The Mentalist, S1-7E1-151 of 151 (2008-2015) WEB-DL", 1, 151},
+		{"The Mentalist S01-S07 E01-151 (2008-2015) WEB-DL", 1, 151},
+	}
+
+	for _, c := range cases {
+		info := Parse(c.name)
+
+		if info.Season != nil {
+			t.Errorf("Parse(%q).Season = %d, want none", c.name, *info.Season)
+		}
+		if info.Episodes == nil || info.Episodes.From != c.from || info.Episodes.To != c.to {
+			t.Errorf("Parse(%q).Episodes = %+v, want %d-%d", c.name, info.Episodes, c.from, c.to)
+		}
+		if !info.Batch {
+			t.Errorf("Parse(%q).Batch = false, want true", c.name)
+		}
+	}
+}
