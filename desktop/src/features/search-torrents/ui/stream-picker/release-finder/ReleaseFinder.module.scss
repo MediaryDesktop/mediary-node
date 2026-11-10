@@ -3,6 +3,22 @@
 	flex-direction: column;
 	gap: 0.75rem;
 
+	.top {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem;
+
+		.source {
+			flex: 1 1 10rem;
+			min-width: 0;
+		}
+
+		.kind {
+			flex: 2 1 16rem;
+			width: auto;
+		}
+	}
+
 	.query {
 		display: flex;
 		align-items: center;
@@ -20,25 +36,49 @@
 		align-items: flex-end;
 		gap: 0.75rem;
 
-		.source {
-			display: flex;
-			flex: 1 1 10rem;
-			flex-direction: column;
-			gap: 0.375rem;
-			min-width: 0;
-		}
-
 		.step {
 			display: flex;
 			flex: none;
 			flex-direction: column;
 			gap: 0.375rem;
 		}
+	}
 
-		.label {
-			color: var(--text-muted);
-			font-size: var(--font-size-xs);
-			font-weight: 600;
+	.step {
+		display: flex;
+		flex-direction: column;
+		gap: 0.375rem;
+	}
+
+	.label {
+		color: var(--text-muted);
+		font-size: var(--font-size-xs);
+		font-weight: 600;
+	}
+
+	.stepperInput {
+		width: 2rem;
+		padding: 0;
+		border: 0;
+		background: transparent;
+		color: var(--text);
+		font: inherit;
+		font-weight: 700;
+		text-align: center;
+		appearance: textfield;
+
+		&::-webkit-outer-spin-button,
+		&::-webkit-inner-spin-button {
+			margin: 0;
+			appearance: none;
+		}
+
+		&:focus {
+			outline: none;
+		}
+
+		&:disabled {
+			color: var(--text-disabled);
 		}
 	}
 }

@@ -39,7 +39,7 @@ function MenuItem({ item, index }: MenuItemProps) {
 			ref={ripple}
 			disabled={item.disabled}
 			onSelect={item.onSelect}
-			className={clsx(styles.item, item.danger && styles.danger)}
+			className={clsx(styles.item, item.danger && styles.danger, item.checked && styles.checked)}
 			style={{ '--index': index } as CSSProperties}
 		>
 			{typeof item.icon === 'string' ? (

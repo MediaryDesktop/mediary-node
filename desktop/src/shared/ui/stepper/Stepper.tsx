@@ -35,7 +35,11 @@ export function Stepper({
 	return (
 		<div className={clsx(styles.stepper, className)}>
 			<Button
+				variant='ghost'
 				size='small'
+				iconOnly
+				disableRipple
+				className={styles.step}
 				disabled={disabled || decrementDisabled}
 				aria-label={decrementLabel ?? t('lists.decrement')}
 				onClick={onDecrement}
@@ -45,7 +49,11 @@ export function Stepper({
 			<span className={styles.value}>{value}</span>
 
 			<Button
+				variant='ghost'
 				size='small'
+				iconOnly
+				disableRipple
+				className={styles.step}
 				disabled={disabled || incrementDisabled}
 				aria-label={incrementLabel ?? t('lists.increment')}
 				onClick={onIncrement}

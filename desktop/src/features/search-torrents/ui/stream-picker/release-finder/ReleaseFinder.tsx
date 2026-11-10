@@ -1,5 +1,5 @@
 import { useTranslation } from '@shared/i18n'
-import { Button, Icon, Input, SelectDropdown, SelectionGroup, Stepper } from '@shared/ui'
+import { Button, Icon, Input, SegmentedControl, SelectDropdown, Stepper } from '@shared/ui'
 
 import type { ReleaseKind } from '../../../lib/releases'
 import { ALL_SOURCES } from '../../../lib/sources'
@@ -44,17 +44,32 @@ export function ReleaseFinder({
 
 	return (
 		<section className={styles.finder}>
-			<SelectionGroup
-				stretch
-				options={[
-					{ value: 'all', label: t('torrents.search.kind.all') },
-					{ value: 'episodes', label: t('torrents.search.kind.episodes') },
-					{ value: 'batches', label: t('torrents.search.kind.batches') }
-				]}
-				value={kind}
-				onValueChange={onKind}
-				label={t('torrents.search.kind.label')}
-			/>
+			<div className={styles.top}>
+				<div className={styles.source} role='group' aria-label={t('torrents.search.picker.source')}>
+					<SelectDropdown
+						options={[
+							{ value: ALL_SOURCES, label: t('torrents.search.picker.allSources') },
+							...sources.map(option => ({ value: option.key, label: option.name }))
+						]}
+						value={source}
+						onChange={value => onSource(value ?? ALL_SOURCES)}
+						disabled={sources.length === 0}
+					/>
+				</div>
+
+				<SegmentedControl
+					className={styles.kind}
+					size='large'
+					items={[
+						{ value: 'all', label: t('torrents.search.kind.all') },
+						{ value: 'episodes', label: t('torrents.search.kind.episodes') },
+						{ value: 'batches', label: t('torrents.search.kind.batches') }
+					]}
+					value={kind}
+					onValueChange={onKind}
+					label={t('torrents.search.kind.label')}
+				/>
+			</div>
 
 			<form
 				className={styles.query}
@@ -72,30 +87,33 @@ export function ReleaseFinder({
 					startIcon={<Icon name='common/search' size={16} />}
 					disabled={disabled}
 				/>
-				<Button type='submit' variant='primary' size='small' loading={pending} disabled={disabled}>
+				<Button type='submit' variant='primary' loading={pending} disabled={disabled}>
 					{t('torrents.search.submit')}
 				</Button>
 			</form>
 
 			<div className={styles.fields}>
-				<div className={styles.source}>
-					<span className={styles.label}>{t('torrents.search.picker.source')}</span>
-					<SelectDropdown
-						options={[
-							{ value: ALL_SOURCES, label: t('torrents.search.picker.allSources') },
-							...sources.map(option => ({ value: option.key, label: option.name }))
-						]}
-						value={source}
-						onChange={value => onSource(value ?? ALL_SOURCES)}
-						disabled={sources.length === 0}
-					/>
-				</div>
-
 				{seasonal && (
 					<div className={styles.step} role='group' aria-label={t('torrents.search.season')}>
 						<span className={styles.label}>{t('torrents.search.season')}</span>
 						<Stepper
-							value={season}
+							value={
+								<input
+									type='number'
+									min={1}
+									className={styles.stepperInput}
+									aria-label={t('torrents.search.season')}
+									value={criteria.season}
+									disabled={disabled}
+									onChange={event => onCriteria({ ...criteria, season: event.target.value })}
+									onBlur={() => onSearch({ ...criteria, season: String(season) })}
+									onKeyDown={event => {
+										if (event.key === 'Enter') {
+											event.currentTarget.blur()
+										}
+									}}
+								/>
+							}
 							decrementDisabled={season <= 1}
 							disabled={disabled}
 							onDecrement={() => onSearch({ ...criteria, season: String(season - 1) })}
@@ -108,7 +126,23 @@ export function ReleaseFinder({
 					<div className={styles.step} role='group' aria-label={t('torrents.search.episode')}>
 						<span className={styles.label}>{t('torrents.search.episode')}</span>
 						<Stepper
-							value={episode}
+							value={
+								<input
+									type='number'
+									min={1}
+									className={styles.stepperInput}
+									aria-label={t('torrents.search.episode')}
+									value={criteria.episode}
+									disabled={disabled}
+									onChange={event => onCriteria({ ...criteria, episode: event.target.value })}
+									onBlur={() => onSearch({ ...criteria, episode: String(episode) })}
+									onKeyDown={event => {
+										if (event.key === 'Enter') {
+											event.currentTarget.blur()
+										}
+									}}
+								/>
+							}
 							decrementDisabled={episode <= 1}
 							disabled={disabled}
 							onDecrement={() => onSearch({ ...criteria, episode: String(episode - 1) })}

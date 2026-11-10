@@ -40,7 +40,7 @@ describe('releaseSourceKey', () => {
 })
 
 describe('sourceOptions', () => {
-	it('lists the sources that found something, by name', () => {
+	it('lists every source that was searched, by name, even those that found nothing', () => {
 		const result = {
 			queries: [],
 			releases: [],
@@ -53,7 +53,8 @@ describe('sourceOptions', () => {
 
 		expect(sourceOptions(result)).toEqual([
 			{ key: 'plugin:anilibria', name: 'AniLiberty', results: 2 },
-			{ key: 'source:3', name: 'Jackett', results: 4 }
+			{ key: 'source:3', name: 'Jackett', results: 4 },
+			{ key: 'source:5', name: 'Prowlarr', results: 0 }
 		])
 	})
 

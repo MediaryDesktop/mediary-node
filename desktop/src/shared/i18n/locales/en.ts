@@ -844,7 +844,6 @@ export const en = {
 			pages: 'Pages',
 			duration: 'Episode length (min)',
 			score: 'Score',
-			scoreDialHint: 'Drag, or use ←→',
 			country: 'Country of origin',
 			isAdult: 'Adult content',
 			description: 'Description',

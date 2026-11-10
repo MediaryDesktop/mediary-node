@@ -43,6 +43,16 @@ export function ReleaseRow({ release, poster, cacheService, selected, onSelect, 
 							{release.resolution}
 						</span>
 					)}
+					{release.codec && (
+						<span
+							className={clsx(
+								styles.codec,
+								release.resolution && styles[resolutionTone(release.resolution)]
+							)}
+						>
+							{release.codec}
+						</span>
+					)}
 				</span>
 
 				<span className={styles.body}>
@@ -56,7 +66,6 @@ export function ReleaseRow({ release, poster, cacheService, selected, onSelect, 
 								className={clsx(styles.fits, release.best && styles.best)}
 							/>
 						)}
-						{release.codec && <span className={styles.codec}>{release.codec}</span>}
 					</span>
 
 					<span className={styles.name} title={release.title}>

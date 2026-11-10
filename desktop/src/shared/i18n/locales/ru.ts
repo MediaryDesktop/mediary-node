@@ -845,7 +845,6 @@ export const ru: Translation = {
 			pages: 'Страницы',
 			duration: 'Длительность эпизода (мин)',
 			score: 'Оценка',
-			scoreDialHint: 'Перетащите, или стрелки ←→',
 			country: 'Страна происхождения',
 			isAdult: 'Контент для взрослых',
 			description: 'Описание',

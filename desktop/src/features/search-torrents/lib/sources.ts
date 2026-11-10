@@ -16,7 +16,6 @@ export function releaseSourceKey(release: Pick<TorrentRelease, 'plugin' | 'sourc
 
 export function sourceOptions(result: TorrentSearchResult | null | undefined): ReleaseSourceOption[] {
 	return (result?.sources ?? [])
-		.filter(source => source.results > 0)
 		.map(source => ({
 			key: releaseSourceKey({ plugin: source.plugin, source_id: source.id }),
 			name: source.name,

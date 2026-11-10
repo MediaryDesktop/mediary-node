@@ -12,7 +12,6 @@ import { COMMON_COUNTRIES, flagEmoji } from '../../lib/countries'
 import { MANUAL_MEDIA_TYPES, MANUAL_STATUSES } from '../../lib/draft'
 import type { ManualMediaType } from '../../lib/draft'
 import { Field } from '../field/Field'
-import { ScoreDial } from '../score-dial/ScoreDial'
 
 import styles from './IdentityCard.module.scss'
 
@@ -106,7 +105,6 @@ export function IdentityCard({
 
 					<Field label={t('manualMedia.fields.title')} required>
 						<Input
-							className={styles.titleInput}
 							value={draft.title}
 							onChange={event => onChange({ title: event.target.value })}
 							placeholder={t('manualMedia.fields.titlePlaceholder')}
@@ -168,6 +166,25 @@ export function IdentityCard({
 							disabled={disabled}
 						/>
 					</Field>
+
+					<Field label={t('manualMedia.fields.score')}>
+						<Input
+							type='number'
+							min={0}
+							max={10}
+							step={0.1}
+							value={draft.score === undefined ? '' : draft.score / 10}
+							onChange={event => {
+								const raw = event.target.value
+
+								onChange({
+									score: raw === '' ? undefined : Math.round(Number(raw) * 10)
+								})
+							}}
+							placeholder='—'
+							disabled={disabled}
+						/>
+					</Field>
 				</div>
 
 				{lockType && (
@@ -177,13 +194,6 @@ export function IdentityCard({
 					</span>
 				)}
 			</div>
-
-			<ScoreDial
-				className={styles.dial}
-				value={draft.score}
-				onChange={score => onChange({ score })}
-				disabled={disabled}
-			/>
 		</section>
 	)
 }

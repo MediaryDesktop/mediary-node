@@ -96,6 +96,15 @@ $settle: cubic-bezier(0.34, 1.1, 0.64, 1);
 			}
 		}
 
+		&.checked {
+			background: var(--accent-muted);
+			color: var(--accent);
+
+			&[data-highlighted] {
+				background: var(--accent-muted-hover);
+			}
+		}
+
 		.icon {
 			display: inline-flex;
 			flex-shrink: 0;

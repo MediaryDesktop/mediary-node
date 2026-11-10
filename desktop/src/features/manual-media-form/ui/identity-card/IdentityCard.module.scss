@@ -1,6 +1,6 @@
 .card {
 	display: grid;
-	grid-template-columns: 12rem minmax(0, 1fr) auto;
+	grid-template-columns: 12rem minmax(0, 1fr);
 	align-items: stretch;
 	gap: 1.75rem;
 	padding: 1.5rem;
@@ -8,21 +8,8 @@
 	background: var(--surface);
 	box-shadow: var(--shadow-sm);
 
-	@media (max-width: 960px) {
-		grid-template-columns: 12rem minmax(0, 1fr);
-
-		.dial {
-			grid-column: 2;
-			justify-self: start;
-		}
-	}
-
 	@media (max-width: 640px) {
 		grid-template-columns: minmax(0, 1fr);
-
-		.dial {
-			grid-column: 1;
-		}
 	}
 
 	.thumb {
@@ -109,11 +96,6 @@
 			@media (max-width: 760px) {
 				grid-template-columns: minmax(0, 1fr);
 			}
-
-			.titleInput input {
-				font-size: var(--font-size-lg);
-				font-weight: 650;
-			}
 		}
 
 		.row {
@@ -130,11 +112,5 @@
 			color: var(--text-muted);
 			font-size: var(--font-size-xs);
 		}
-	}
-
-	.dial {
-		display: flex;
-		align-items: center;
-		justify-content: center;
 	}
 }

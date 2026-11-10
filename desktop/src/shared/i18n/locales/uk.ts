@@ -843,7 +843,6 @@ export const uk: Translation = {
 			pages: 'Сторінки',
 			duration: 'Тривалість епізоду (хв)',
 			score: 'Оцінка',
-			scoreDialHint: 'Перетягніть, або стрілки ←→',
 			country: 'Країна походження',
 			isAdult: 'Контент для дорослих',
 			description: 'Опис',
