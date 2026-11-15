@@ -56,7 +56,6 @@ export function TorrentSearchDrawer({
 			}
 			side='bottom'
 			size='sheet'
-			closable={!watchOnly}
 		>
 			{open && (
 				<SearchForm

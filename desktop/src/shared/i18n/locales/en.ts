@@ -1423,8 +1423,6 @@ export const en = {
 					hd: '1080p and up',
 					seeded: 'Has seeders'
 				},
-				selected: 'Selected release',
-				cancel: 'Cancel',
 				tip: 'Not the one you need? Switch to Episodes, try another source, or change the episode on the left.',
 				tipSeasonal:
 					'Not the one you need? Switch to Episodes, try another source, or change the season and episode on the left.',
@@ -1433,7 +1431,6 @@ export const en = {
 				seeders_many: 'seeders',
 				seeders_other: 'seeders',
 				stream: 'Stream',
-				pick: 'Pick a release from the list',
 				noEpisode: 'No release holds episode {{episode}}',
 				noEpisodeHint_one:
 					'The sources found {{count}} release of the title, but its name does not cover this episode.',

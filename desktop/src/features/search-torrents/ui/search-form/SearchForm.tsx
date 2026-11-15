@@ -49,15 +49,7 @@ export function SearchForm({ mediaRef, title, missing, poster, watching, onDone 
 	)
 
 	if (target.intent === 'watch' && watching) {
-		return (
-			<StreamPicker
-				mediaRef={mediaRef}
-				poster={poster}
-				search={search}
-				watching={watching}
-				onCancel={onDone}
-			/>
-		)
+		return <StreamPicker mediaRef={mediaRef} poster={poster} search={search} watching={watching} />
 	}
 
 	const watchOf = (release: TorrentRelease) => {

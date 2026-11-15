@@ -33,10 +33,9 @@ export interface StreamPickerProps {
 	poster?: string | null
 	search: ReleaseSearch
 	watching: ReleaseWatching
-	onCancel: () => void
 }
 
-export function StreamPicker({ mediaRef, poster, search, watching, onCancel }: StreamPickerProps) {
+export function StreamPicker({ mediaRef, poster, search, watching }: StreamPickerProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
 	const target = useUnit($searchTarget)
@@ -169,7 +168,6 @@ export function StreamPicker({ mediaRef, poster, search, watching, onCancel }: S
 				playable={episode !== null}
 				busy={watching.busy}
 				preparing={selected !== null && watching.activeId === selected.id}
-				onCancel={onCancel}
 				onStream={() => selected && stream(selected)}
 			/>
 		</div>
