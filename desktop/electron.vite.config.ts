@@ -2,8 +2,26 @@ import svg from '@neodx/svg/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'electron-vite'
 import { fileURLToPath } from 'node:url'
+import type { Plugin } from 'vite'
 
 const dir = (path: string) => fileURLToPath(new URL(path, import.meta.url))
+
+// The subtitle renderer asks for a "desynchronized" canvas, which Chromium on
+// Windows presents on its own, outside the page's compositing. With such a canvas
+// over a <video> inside a rounded, clipped box (the mini player), the picture
+// goes black while the subtitles stay. An ordinary canvas costs a frame of
+// latency that subtitles never notice.
+const jassubSynchronizedCanvas = (): Plugin => ({
+	name: 'jassub-synchronized-canvas',
+	enforce: 'pre',
+	transform(code, id) {
+		if (!id.includes('/jassub/dist/worker/renderers/')) {
+			return null
+		}
+
+		return code.replaceAll('desynchronized: true', 'desynchronized: false')
+	}
+})
 
 export default defineConfig({
 	main: {
@@ -27,6 +45,8 @@ export default defineConfig({
 		plugins: [
 			react(),
 
+			jassubSynchronizedCanvas(),
+
 			svg({
 				inputRoot: 'src/shared/ui/icon/assets',
 				output: 'src/public/sprite',
@@ -39,7 +59,7 @@ export default defineConfig({
 		],
 
 		// The subtitle renderer's worker splits into chunks, which only ES workers allow.
-		worker: { format: 'es' },
+		worker: { format: 'es', plugins: () => [jassubSynchronizedCanvas()] },
 
 		// Pre-bundling moves the worker away from the .wasm files it finds next to
 		// itself, and subtitles silently stop rendering in development.
