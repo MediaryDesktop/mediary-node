@@ -5,5 +5,6 @@ export type {
 	OAuthAuthorization,
 	OAuthListener,
 	OAuthRedirect,
-	StoredSession
+	StoredSession,
+	UpdateState
 } from './types'

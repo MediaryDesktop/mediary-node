@@ -14,6 +14,7 @@ vars:
   # Task's own template function rather than `date` — the embedded shell has no
   # `date` on Windows. See the same note in mediary-cloud/Taskfile.yml.
   BUILT: '{{now | date "2006-01-02T15:04:05Z"}}'
+  LDFLAGS: -s -w -X main.version={{.VERSION}} -X main.commit={{.COMMIT}} -X main.built={{.BUILT}}
 
 env:
   # modernc.org/sqlite is pure Go, so the node cross-compiles from one CI job to
@@ -37,18 +38,17 @@ tasks:
 
   build:
     desc: Build the node binary into bin/
-    cmd: >-
-      go build
-      -ldflags "-s -w -X main.version={{.VERSION}} -X main.commit={{.COMMIT}} -X main.built={{.BUILT}}"
-      -o bin/{{.BINARY}}{{exeExt}} ./cmd/nodesrv
+    cmd: go build -ldflags "{{.LDFLAGS}}" -o bin/{{.BINARY}}{{exeExt}} ./cmd/nodesrv
 
+  # Named with electron-builder's ${os}-${arch}, so each installer picks up only
+  # its own binary and ships it as bin/nodesrv[.exe] (desktop/electron-builder.yml).
   build:all:
     desc: Cross-compile the node for every desktop platform
     cmds:
-      - GOOS=windows GOARCH=amd64 go build -ldflags "-s -w -X main.version={{.VERSION}}" -o bin/{{.BINARY}}-windows-amd64.exe ./cmd/nodesrv
-      - GOOS=darwin  GOARCH=amd64 go build -ldflags "-s -w -X main.version={{.VERSION}}" -o bin/{{.BINARY}}-darwin-amd64 ./cmd/nodesrv
-      - GOOS=darwin  GOARCH=arm64 go build -ldflags "-s -w -X main.version={{.VERSION}}" -o bin/{{.BINARY}}-darwin-arm64 ./cmd/nodesrv
-      - GOOS=linux   GOARCH=amd64 go build -ldflags "-s -w -X main.version={{.VERSION}}" -o bin/{{.BINARY}}-linux-amd64 ./cmd/nodesrv
+      - GOOS=windows GOARCH=amd64 go build -ldflags "{{.LDFLAGS}}" -o bin/{{.BINARY}}-win-x64.exe ./cmd/nodesrv
+      - GOOS=darwin  GOARCH=amd64 go build -ldflags "{{.LDFLAGS}}" -o bin/{{.BINARY}}-mac-x64 ./cmd/nodesrv
+      - GOOS=darwin  GOARCH=arm64 go build -ldflags "{{.LDFLAGS}}" -o bin/{{.BINARY}}-mac-arm64 ./cmd/nodesrv
+      - GOOS=linux   GOARCH=amd64 go build -ldflags "{{.LDFLAGS}}" -o bin/{{.BINARY}}-linux-x64 ./cmd/nodesrv
 
   test:
     desc: Run the test suite

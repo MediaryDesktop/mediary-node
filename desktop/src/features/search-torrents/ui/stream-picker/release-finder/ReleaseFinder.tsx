@@ -105,7 +105,9 @@ export function ReleaseFinder({
 									aria-label={t('torrents.search.season')}
 									value={criteria.season}
 									disabled={disabled}
-									onChange={event => onCriteria({ ...criteria, season: event.target.value })}
+									onChange={event =>
+										onCriteria({ ...criteria, season: event.target.value })
+									}
 									onBlur={() => onSearch({ ...criteria, season: String(season) })}
 									onKeyDown={event => {
 										if (event.key === 'Enter') {
@@ -134,7 +136,9 @@ export function ReleaseFinder({
 									aria-label={t('torrents.search.episode')}
 									value={criteria.episode}
 									disabled={disabled}
-									onChange={event => onCriteria({ ...criteria, episode: event.target.value })}
+									onChange={event =>
+										onCriteria({ ...criteria, episode: event.target.value })
+									}
 									onBlur={() => onSearch({ ...criteria, episode: String(episode) })}
 									onKeyDown={event => {
 										if (event.key === 'Enter') {

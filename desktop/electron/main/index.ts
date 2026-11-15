@@ -15,6 +15,7 @@ import {
 } from './session-store.js'
 import { runSplash, type SplashHandoff } from './splash.js'
 import { stopTrailerHost, trailerHostOrigin } from './trailer-host.js'
+import { currentUpdateState, installUpdate, startUpdater } from './updater.js'
 
 app.commandLine.appendSwitch('disable-quic')
 
@@ -65,6 +66,7 @@ const supervisor = new NodeSupervisor({
 
 let mainWindow: BrowserWindow | null = null
 let splashHandoff: SplashHandoff | null = null
+let shuttingDown = false
 
 // electron-builder's own `icon:` config (see electron-builder.yml) only bakes
 // the icon into the packaged exe/app bundle — an unpackaged dev run still
@@ -226,6 +228,9 @@ function registerIpc(): void {
 		event => BrowserWindow.fromWebContents(event.sender)?.isMaximized() ?? false
 	)
 
+	handle(IPC.updateState, () => currentUpdateState())
+	handle(IPC.updateInstall, () => installUpdate())
+
 	handle(IPC.appBooted, () => splashHandoff?.reportBooted())
 	handle(IPC.splashDismiss, () => splashHandoff?.reportDismissed())
 }
@@ -269,6 +274,14 @@ if (!app.requestSingleInstanceLock()) {
 			process.stderr.write(`[shell] node failed to start: ${String(error)}\n`)
 		})
 
+		startUpdater({
+			onStateChange: state => broadcast(IPC.updateState, state),
+			beforeInstall: async () => {
+				shuttingDown = true
+				await supervisor.stop()
+			}
+		})
+
 		app.on('activate', () => {
 			if (BrowserWindow.getAllWindows().length === 0) {
 				// No splash on a reopen — the app has already booted once this run.
@@ -286,8 +299,6 @@ if (!app.requestSingleInstanceLock()) {
 			app.quit()
 		}
 	})
-
-	let shuttingDown = false
 
 	app.on('before-quit', event => {
 		if (shuttingDown) {

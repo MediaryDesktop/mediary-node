@@ -8,6 +8,8 @@ const dir = (path: string) => fileURLToPath(new URL(path, import.meta.url))
 export default defineConfig({
 	main: {
 		build: {
+			// Bundled rather than left in node_modules, which the package leaves out.
+			externalizeDeps: { exclude: ['electron-updater'] },
 			outDir: 'out/main',
 			rollupOptions: { input: { index: dir('./electron/main/index.ts') } }
 		}

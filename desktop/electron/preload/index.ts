@@ -3,6 +3,7 @@ import { contextBridge, ipcRenderer } from 'electron'
 import { IPC } from '../shared/ipc.js'
 import type { OAuthAuthorization, OAuthListener } from '../shared/oauth.js'
 import type { StoredSession } from '../shared/session.js'
+import type { UpdateState } from '../shared/update.js'
 
 const api = {
 	node: {
@@ -28,6 +29,21 @@ const api = {
 		// Tells the main process the app has actually booted (node ready, session
 		// restored) — it's what the splash window waits on before handing off.
 		booted: (): Promise<void> => ipcRenderer.invoke(IPC.appBooted)
+	},
+
+	update: {
+		state: (): Promise<UpdateState> => ipcRenderer.invoke(IPC.updateState),
+
+		// Stops the node, quits, and lets the installer put the new release in place.
+		install: (): Promise<void> => ipcRenderer.invoke(IPC.updateInstall),
+
+		onStateChange: (listener: (state: UpdateState) => void): (() => void) => {
+			const handler = (_event: unknown, state: UpdateState) => listener(state)
+			ipcRenderer.on(IPC.updateState, handler)
+			return () => {
+				ipcRenderer.off(IPC.updateState, handler)
+			}
+		}
 	},
 
 	splash: {
@@ -94,6 +110,7 @@ export type NodeState = 'stopped' | 'starting' | 'ready' | 'restarting' | 'faile
 
 export type { OAuthAuthorization, OAuthListener, OAuthRedirect } from '../shared/oauth.js'
 export type { StoredSession } from '../shared/session.js'
+export type { UpdateState } from '../shared/update.js'
 
 export type MediaryBridge = typeof api
 

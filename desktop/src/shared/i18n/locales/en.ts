@@ -36,6 +36,20 @@ export const en = {
 		}
 	},
 
+	update: {
+		ready: {
+			title: 'Mediary {{version}} is ready',
+			text: 'Restart to install it. Otherwise it installs the next time you quit.'
+		},
+		manual: {
+			title: 'Mediary {{version}} is available',
+			text: 'This build cannot update itself. Download the new version from the releases page.'
+		},
+		restart: 'Restart and update',
+		later: 'Later',
+		download: 'Download'
+	},
+
 	splash: {
 		failed: 'The node failed to start. Check Settings for details.',
 		continue: 'Continue anyway'

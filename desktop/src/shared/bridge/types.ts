@@ -20,6 +20,12 @@ export interface OAuthListener {
 	callbackPort: number
 }
 
+export type UpdateState =
+	| { kind: 'none' }
+	| { kind: 'downloading'; version: string }
+	| { kind: 'ready'; version: string }
+	| { kind: 'manual'; version: string; url: string }
+
 export interface StoredSession {
 	token: string | null
 	account: unknown
@@ -35,6 +41,11 @@ export interface MediaryBridge {
 	app: {
 		version: () => Promise<string>
 		booted: () => Promise<void>
+	}
+	update: {
+		state: () => Promise<UpdateState>
+		install: () => Promise<void>
+		onStateChange: (listener: (state: UpdateState) => void) => () => void
 	}
 	splash: {
 		dismiss: () => Promise<void>

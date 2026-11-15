@@ -14,6 +14,7 @@ import styles from './AppLayout.module.scss'
 import './lib/list-wiring'
 import { NodeBanner } from './node-banner/NodeBanner'
 import { Sidebar } from './sidebar/Sidebar'
+import { UpdateBanner } from './update-banner/UpdateBanner'
 
 export function AppLayout({ children }: { children: ReactNode }) {
 	useNodeData(playbackQuery)
@@ -24,6 +25,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
 			<main className={styles.main}>
 				<NodeBanner />
+				<UpdateBanner />
 				{children}
 			</main>
 

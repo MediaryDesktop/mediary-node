@@ -7,19 +7,19 @@ directories:
   output: release
   buildResources: resources
 
+# Everything the app runs is bundled by electron-vite into out/ (electron-updater
+# too); a dependency in node_modules would only be dead weight in the asar.
 files:
   - out/**
   - package.json
+  - '!node_modules/**'
 
 # The Go node binary is not a Node dependency — it is a separate executable
-# built by `task build:all` in ../server and copied in here. It must land in
-# resources/bin/, which is where NodeSupervisor looks when app.isPackaged.
-extraResources:
-  - from: ../server/bin
-    to: bin
-    filter:
-      - mediary-node*
-      - nodesrv*
+# built by `task build:all` in ../server. Each installer takes only the binary
+# for its own platform and architecture and ships it as resources/bin/nodesrv,
+# which is where NodeSupervisor looks when app.isPackaged. scripts/after-pack.cjs
+# refuses an installer without it.
+afterPack: scripts/after-pack.cjs
 
 # Electron's fuses, flipped in the packaged binary. Off, they would let anything
 # on the machine run Mediary.exe as plain Node (ELECTRON_RUN_AS_NODE), inject
@@ -39,6 +39,9 @@ electronFuses:
   enableCookieEncryption: true
 
 win:
+  extraResources:
+    - from: ../server/bin/nodesrv-win-${arch}.exe
+      to: bin/nodesrv.exe
   target:
     - target: nsis
       arch: [x64]
@@ -51,6 +54,9 @@ nsis:
   deleteAppDataOnUninstall: false
 
 mac:
+  extraResources:
+    - from: ../server/bin/nodesrv-mac-${arch}
+      to: bin/nodesrv
   target:
     - target: dmg
       arch: [x64, arm64]
@@ -61,10 +67,20 @@ mac:
   entitlementsInherit: resources/entitlements.mac.plist
 
 linux:
+  extraResources:
+    - from: ../server/bin/nodesrv-linux-${arch}
+      to: bin/nodesrv
   target:
     - AppImage
     - deb
   category: AudioVideo
   maintainer: Mediary
 
-publish: null
+# Unsigned for now (docs/audits/electron-shell.md, stage 5): Windows and Linux
+# update themselves from these releases; macOS is told about a release and
+# downloads it by hand, since Squirrel.Mac installs only signed apps.
+publish:
+  provider: github
+  owner: MediaryDesktop
+  repo: mediary-node
+  releaseType: draft
