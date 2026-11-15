@@ -3,9 +3,9 @@ import { useUnit } from 'effector-react'
 import { LuFolderSync } from 'react-icons/lu'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, EmptyState, Icon, PageHeader, PageTransition, PhaseTransition } from '@shared/ui'
+import { Button, EmptyState, Icon, LoadFailed, PageHeader, PageTransition, PhaseTransition } from '@shared/ui'
 
-import { useNodeData } from '@infra/node'
+import { useNodeData, useNodeQuery } from '@infra/node'
 
 import { libraryCollectionQuery, libraryRootsQuery, libraryScanQuery } from '@entities/library-item'
 
@@ -21,32 +21,33 @@ import { LibraryToolbar } from './ui/library-toolbar/LibraryToolbar'
 export function LibraryPage() {
 	const { t } = useTranslation()
 
-	const [collectionData, collectionPending] = useUnit([
-		libraryCollectionQuery.$data,
-		libraryCollectionQuery.$pending
-	])
-
-	const [rootsData] = useUnit([libraryRootsQuery.$data])
+	const collectionState = useNodeQuery(libraryCollectionQuery)
+	const rootsState = useNodeQuery(libraryRootsQuery)
 
 	const scanRequested = useUnit(scanLibraryModel.requested)
 	const matchRequestedMany = useUnit(matchFileModel.requestedMany)
 
-	useNodeData(libraryCollectionQuery)
-	useNodeData(libraryRootsQuery)
 	useNodeData(libraryScanQuery)
 
-	const collection = collectionData?.collection ?? null
+	const collection = collectionState.data?.collection ?? null
 	const entries = collection?.entries ?? []
-	const roots = rootsData?.roots ?? []
+	const roots = rootsState.data?.roots ?? []
 
 	const phase =
 		entries.length > 0
 			? 'collection'
-			: collectionPending
-				? 'loading'
-				: roots.length === 0
-					? 'noRoots'
-					: 'noFiles'
+			: collectionState.phase === 'failed' || rootsState.phase === 'failed'
+				? 'failed'
+				: collectionState.phase === 'loading' || rootsState.phase === 'loading'
+					? 'loading'
+					: roots.length === 0
+						? 'noRoots'
+						: 'noFiles'
+
+	const retry = () => {
+		collectionState.retry()
+		rootsState.retry()
+	}
 
 	const summary = collection
 		? [
@@ -77,6 +78,8 @@ export function LibraryPage() {
 
 			<PhaseTransition phase={phase}>
 				{phase === 'collection' && <LibraryCollection entries={entries} />}
+
+				{phase === 'failed' && <LoadFailed onRetry={retry} />}
 
 				{phase === 'noRoots' && (
 					<EmptyState

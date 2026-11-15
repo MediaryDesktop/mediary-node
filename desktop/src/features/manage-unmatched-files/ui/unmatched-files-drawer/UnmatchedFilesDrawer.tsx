@@ -2,9 +2,9 @@ import { useUnit } from 'effector-react'
 import { useMemo, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, Drawer, EmptyState, Icon } from '@shared/ui'
+import { Button, Drawer, EmptyState, Icon, LoadFailed } from '@shared/ui'
 
-import { useNodeData } from '@infra/node'
+import { useNodeQuery } from '@infra/node'
 
 import { libraryRootsQuery, libraryTreeQuery } from '@entities/library-item'
 
@@ -18,13 +18,13 @@ export function UnmatchedFilesDrawer() {
 	const { t } = useTranslation()
 
 	const [open, closed] = useUnit([unmatchedFilesModel.$unmatchedOpen, unmatchedFilesModel.unmatchedClosed])
-	const [treeData] = useUnit([libraryTreeQuery.$data])
-	const [rootsData] = useUnit([libraryRootsQuery.$data])
+	const tree = useNodeQuery(libraryTreeQuery, { enabled: Boolean(open) })
+	const roots = useNodeQuery(libraryRootsQuery, { enabled: Boolean(open) })
+	const treeData = tree.data
+	const rootsData = roots.data
+	const failed = tree.phase === 'failed' || roots.phase === 'failed'
 
 	const [page, setPage] = useState(0)
-
-	useNodeData(libraryTreeQuery, { enabled: Boolean(open) })
-	useNodeData(libraryRootsQuery, { enabled: Boolean(open) })
 
 	const groups = useMemo(
 		() => unmatchedGroups(treeData?.files.items ?? [], rootsData?.roots ?? []),
@@ -43,7 +43,14 @@ export function UnmatchedFilesDrawer() {
 			size='xl'
 			closable={false}
 		>
-			{current === null ? (
+			{failed ? (
+				<LoadFailed
+					onRetry={() => {
+						tree.retry()
+						roots.retry()
+					}}
+				/>
+			) : current === null ? (
 				<EmptyState title={t('library.unmatched.empty')} />
 			) : (
 				<div className={styles.body}>

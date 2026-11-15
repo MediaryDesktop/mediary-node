@@ -2,9 +2,9 @@ import { useUnit } from 'effector-react'
 import { useMemo, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, Drawer, EmptyState, Icon } from '@shared/ui'
+import { Button, Drawer, EmptyState, Icon, LoadFailed } from '@shared/ui'
 
-import { useNodeData } from '@infra/node'
+import { useNodeQuery } from '@infra/node'
 
 import { libraryTreeQuery, setLibraryFilesIgnoredMutation } from '@entities/library-item'
 
@@ -17,15 +17,14 @@ export function IgnoredFilesDrawer() {
 	const { t } = useTranslation()
 
 	const [open, closed] = useUnit([unmatchedFilesModel.$ignoredOpen, unmatchedFilesModel.ignoredClosed])
-	const [treeData] = useUnit([libraryTreeQuery.$data])
+	const tree = useNodeQuery(libraryTreeQuery, { enabled: Boolean(open) })
+	const treeData = tree.data
 	const [unignore, pending] = useUnit([
 		setLibraryFilesIgnoredMutation.start,
 		setLibraryFilesIgnoredMutation.$pending
 	])
 
 	const [selected, setSelected] = useState<Set<number>>(new Set())
-
-	useNodeData(libraryTreeQuery, { enabled: Boolean(open) })
 
 	const files = useMemo(() => (treeData?.files.items ?? []).filter(file => file.ignored), [treeData])
 
@@ -44,7 +43,9 @@ export function IgnoredFilesDrawer() {
 			title={t('library.unmatched.ignoredTitle')}
 			size='xl'
 		>
-			{files.length === 0 ? (
+			{tree.phase === 'failed' ? (
+				<LoadFailed onRetry={tree.retry} />
+			) : files.length === 0 ? (
 				<EmptyState title={t('library.unmatched.noneIgnored')} />
 			) : (
 				<div className={styles.body}>

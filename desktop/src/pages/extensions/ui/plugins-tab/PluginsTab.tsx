@@ -1,4 +1,3 @@
-import { useUnit } from 'effector-react'
 import { useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import {
@@ -12,9 +11,9 @@ import {
 } from 'react-icons/lu'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, Skeleton } from '@shared/ui'
+import { Button, LoadFailed, Skeleton } from '@shared/ui'
 
-import { useNodeData } from '@infra/node'
+import { useNodeQuery } from '@infra/node'
 
 import { extensionCatalogQuery, extensionsQuery } from '@entities/extension'
 import type { CatalogPlugin, Extension } from '@entities/extension'
@@ -73,14 +72,14 @@ export function PluginsTab({
 	const { t } = useTranslation()
 	usePluginFailures()
 
-	const [installed, catalog] = useUnit([extensionsQuery.$data, extensionCatalogQuery.$data])
+	const installedState = useNodeQuery(extensionsQuery)
+	const catalogState = useNodeQuery(extensionCatalogQuery, { params: false })
+	const installed = installedState.data
+	const catalog = catalogState.data
 
 	const [type, setType] = useState<TypeFilter>('all')
 	const [language, setLanguage] = useState('all')
 	const [search, setSearch] = useState('')
-
-	useNodeData(extensionsQuery)
-	useNodeData(extensionCatalogQuery, { params: false })
 
 	const extensions = installed?.extensions ?? null
 	const offered = catalog?.plugins ?? null
@@ -116,6 +115,9 @@ export function PluginsTab({
 				</CatalogSection>
 			)
 
+			if (installedState.phase === 'failed') {
+				return <LoadFailed onRetry={installedState.retry} />
+			}
 			if (extensions === null) {
 				return <Skeleton height='14rem' radius='var(--radius-lg)' />
 			}
@@ -165,6 +167,9 @@ export function PluginsTab({
 			))
 		}
 
+		if (catalogState.phase === 'failed') {
+			return <LoadFailed onRetry={catalogState.retry} />
+		}
 		if (offered === null) {
 			return <Skeleton height='14rem' radius='var(--radius-lg)' />
 		}

@@ -8,6 +8,7 @@ import {
 	EmptyState,
 	Icon,
 	Input,
+	LoadFailed,
 	PageHeader,
 	PageTransition,
 	PhaseTransition,
@@ -15,7 +16,7 @@ import {
 	SelectDropdown
 } from '@shared/ui'
 
-import { useNodeData } from '@infra/node'
+import { useNodeQuery } from '@infra/node'
 
 import { libraryScanHistoryQuery, libraryScanRunQuery } from '@entities/library-item'
 
@@ -31,12 +32,11 @@ export function ScanHistoryPage() {
 	const { t, i18n } = useTranslation()
 	const navigate = useNavigate()
 
-	const [history, historyPending, run, runPending] = useUnit([
-		libraryScanHistoryQuery.$data,
-		libraryScanHistoryQuery.$pending,
-		libraryScanRunQuery.$data,
-		libraryScanRunQuery.$pending
-	])
+	const historyState = useNodeQuery(libraryScanHistoryQuery, {
+		params: { limit: HISTORY_LIMIT },
+		isEmpty: data => !data.history.items?.length
+	})
+	const [runPending, runFailed] = useUnit([libraryScanRunQuery.$pending, libraryScanRunQuery.$failed])
 
 	const [openExplorer, matchRequestedMany] = useUnit([
 		libraryExplorerModel.requested,
@@ -46,15 +46,16 @@ export function ScanHistoryPage() {
 	const [picked, setPicked] = useState<string | null>(null)
 	const [search, setSearch] = useState('')
 
-	useNodeData(libraryScanHistoryQuery, { params: { limit: HISTORY_LIMIT } })
-
-	const runs = history?.history.items ?? []
+	const runs = historyState.data?.history.items ?? []
 
 	const selected = picked ?? (runs[0] ? String(runs[0].id) : null)
 
-	useNodeData(libraryScanRunQuery, { params: Number(selected), enabled: selected !== null })
+	const runState = useNodeQuery(libraryScanRunQuery, {
+		params: Number(selected),
+		enabled: selected !== null
+	})
 
-	const detail = run?.run && String(run.run.id) === selected ? run.run : null
+	const detail = runState.data?.run && String(runState.data.run.id) === selected ? runState.data.run : null
 
 	const options = runs.map(item => ({
 		value: String(item.id),
@@ -73,11 +74,10 @@ export function ScanHistoryPage() {
 				]}
 			/>
 
-			<PhaseTransition
-				className={styles.body}
-				phase={historyPending || runs.length > 0 ? 'history' : 'empty'}
-			>
-				{!historyPending && runs.length === 0 ? (
+			<PhaseTransition className={styles.body} phase={historyState.phase}>
+				{historyState.phase === 'failed' ? (
+					<LoadFailed onRetry={historyState.retry} />
+				) : historyState.phase === 'empty' ? (
 					<EmptyState title={t('library.history.empty')} />
 				) : (
 					<>
@@ -99,13 +99,23 @@ export function ScanHistoryPage() {
 						</div>
 
 						<PhaseTransition
-							phase={detail ? `run:${detail.id}` : runPending ? 'loading' : 'idle'}
+							phase={
+								detail
+									? `run:${detail.id}`
+									: runPending
+										? 'loading'
+										: runFailed
+											? 'failed'
+											: 'idle'
+							}
 						>
 							{!detail ? (
-								runPending && (
+								runPending ? (
 									<div className={styles.loading}>
 										<ReelLoader spinning />
 									</div>
+								) : (
+									runFailed && selected !== null && <LoadFailed onRetry={runState.retry} />
 								)
 							) : (
 								<ScanRun

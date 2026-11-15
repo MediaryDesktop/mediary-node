@@ -3,9 +3,9 @@ import { useUnit } from 'effector-react'
 import { useMemo, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { EmptyState, PageHeader, PageTransition, PhaseTransition } from '@shared/ui'
+import { EmptyState, LoadFailed, PageHeader, PageTransition, PhaseTransition } from '@shared/ui'
 
-import { useNodeData } from '@infra/node'
+import { useNodeQuery } from '@infra/node'
 
 import { aniListAccountModel } from '@entities/anilist-account'
 import { MediaCard } from '@entities/media'
@@ -54,8 +54,10 @@ export function ListDetailPage({ listId }: ListDetailPageProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
 
-	const [lists, connected, deleted, deletionHandled] = useUnit([
-		trackerListsQuery.$data,
+	const listsState = useNodeQuery(trackerListsQuery)
+	const lists = listsState.data
+
+	const [connected, deleted, deletionHandled] = useUnit([
 		aniListAccountModel.$connected,
 		manageListsModel.$deleted,
 		manageListsModel.deletionHandled
@@ -64,8 +66,6 @@ export function ListDetailPage({ listId }: ListDetailPageProps) {
 	const leaving = deleted === listId
 
 	const tracked = useTrackedEntries(connected)
-
-	useNodeData(trackerListsQuery)
 
 	const [filters, setFilters] = useState(INITIAL_ENTRY_FILTERS)
 
@@ -136,8 +136,18 @@ export function ListDetailPage({ listId }: ListDetailPageProps) {
 					/>
 				)}
 
-				<PhaseTransition phase={visible.length === 0 ? 'empty' : 'entries'}>
-					{visible.length === 0 ? (
+				<PhaseTransition
+					phase={
+						!status && listsState.phase === 'failed'
+							? 'failed'
+							: visible.length === 0
+								? 'empty'
+								: 'entries'
+					}
+				>
+					{!status && listsState.phase === 'failed' ? (
+						<LoadFailed onRetry={listsState.retry} />
+					) : visible.length === 0 ? (
 						<EmptyState
 							title={entries.length === 0 ? t('lists.empty') : t('lists.filters.noMatches')}
 						/>

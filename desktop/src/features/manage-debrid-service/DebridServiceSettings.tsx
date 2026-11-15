@@ -1,9 +1,9 @@
-import { useUnit } from 'effector-react'
 import { useCallback, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
+import { LoadFailed } from '@shared/ui'
 
-import { useNodeData } from '@infra/node'
+import { useNodeQuery } from '@infra/node'
 
 import { torrentDebridQuery } from '@entities/torrent'
 
@@ -13,14 +13,12 @@ import { DebridServiceForm } from './ui/service-form/DebridServiceForm'
 export function DebridServiceSettings() {
 	const { t } = useTranslation()
 
-	const [debrid] = useUnit([torrentDebridQuery.$data])
+	const { phase, data: debrid, retry } = useNodeQuery(torrentDebridQuery)
 
 	const [formKey, setFormKey] = useState(0)
 	const reset = useCallback(() => setFormKey(key => key + 1), [])
 
-	useNodeData(torrentDebridQuery)
-
-	if (!debrid) {
+	if (phase === 'loading') {
 		return null
 	}
 
@@ -31,7 +29,11 @@ export function DebridServiceSettings() {
 				<p className={styles.hint}>{t('settings.debrid.hint')}</p>
 			</div>
 
-			<DebridServiceForm key={formKey} debrid={debrid} onReset={reset} />
+			{debrid ? (
+				<DebridServiceForm key={formKey} debrid={debrid} onReset={reset} />
+			) : (
+				<LoadFailed onRetry={retry} />
+			)}
 		</div>
 	)
 }

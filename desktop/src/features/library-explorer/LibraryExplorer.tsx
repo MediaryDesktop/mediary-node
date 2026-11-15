@@ -4,7 +4,7 @@ import { useDeferredValue, useMemo, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { useRowWindow } from '@shared/lib'
-import { Drawer, EmptyState, Icon, Input } from '@shared/ui'
+import { Drawer, EmptyState, Icon, Input, LoadFailed } from '@shared/ui'
 
 import { useNodeData } from '@infra/node'
 
@@ -38,9 +38,10 @@ export function LibraryExplorer({ onMatchMany }: LibraryExplorerProps) {
 		libraryExplorerModel.searchChanged
 	])
 
-	const [treeData, treePending, startTree] = useUnit([
+	const [treeData, treePending, treeFailed, startTree] = useUnit([
 		libraryTreeQuery.$data,
 		libraryTreeQuery.$pending,
+		libraryTreeQuery.$failed,
 		libraryTreeQuery.start
 	])
 
@@ -172,9 +173,12 @@ export function LibraryExplorer({ onMatchMany }: LibraryExplorerProps) {
 												}
 											/>
 										))
-								: !treePending && (
+								: !treePending &&
+									(treeFailed && !treeData ? (
+										<LoadFailed onRetry={() => startTree()} />
+									) : (
 										<EmptyState size='small' title={t('library.explorer.nothing')} />
-									)}
+									))}
 							{rows.length > 0 && <div role='presentation' style={{ height: shown.after }} />}
 						</div>
 					</div>

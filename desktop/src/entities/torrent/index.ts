@@ -29,7 +29,7 @@ export {
 	updateTorrentSourceMutation
 } from './model/model'
 
-export { addTorrentFx } from './api/api'
+export { addTorrentFx, checkTorrentClientFx, putTorrentSettingsFx } from './api/api'
 
 export { fetchTorrentStreamFx, startTorrentStreamFx } from './api/api'
 export type { StartTorrentStreamParams, TorrentStream } from './api/api'

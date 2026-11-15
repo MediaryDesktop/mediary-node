@@ -2,7 +2,7 @@ import { useUnit } from 'effector-react'
 import { useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, Icon, Input, ReelLoader } from '@shared/ui'
+import { Button, Icon, Input, LoadFailed, ReelLoader } from '@shared/ui'
 
 import {
 	fileName,
@@ -23,9 +23,10 @@ const ANILIST = 'anilist:'
 export function GroupPage({ group }: { group: UnmatchedGroup }) {
 	const { t } = useTranslation()
 
-	const [candidates, suggesting, startSuggestions] = useUnit([
+	const [candidates, suggesting, suggestionsFailed, startSuggestions] = useUnit([
 		libraryCandidatesQuery.$data,
 		libraryCandidatesQuery.$pending,
+		libraryCandidatesQuery.$failed,
 		libraryCandidatesQuery.start
 	])
 
@@ -158,7 +159,14 @@ export function GroupPage({ group }: { group: UnmatchedGroup }) {
 				</div>
 			)}
 
-			{asked && !suggesting && suggestions.length === 0 && (
+			{asked && !suggesting && suggestionsFailed && picked[0] && (
+				<LoadFailed
+					message={t('library.match.loadFailed')}
+					onRetry={() => picked[0] && startSuggestions(picked[0].id)}
+				/>
+			)}
+
+			{asked && !suggesting && !suggestionsFailed && suggestions.length === 0 && (
 				<p className={styles.muted}>{t('library.match.none')}</p>
 			)}
 
