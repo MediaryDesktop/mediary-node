@@ -380,12 +380,85 @@ if (askingForThemselves.length === 0) {
 	console.error('')
 }
 
+// Windows and macOS find './logo.module.scss' when the file is Logo.module.scss;
+// Linux does not, and the build and the tests there fail on a file that "exists".
+const listings = new Map()
+
+function namesIn(dir) {
+	if (!listings.has(dir)) {
+		let names = null
+
+		try {
+			names = new Set(readdirSync(dir))
+		} catch {
+			names = null
+		}
+
+		listings.set(dir, names)
+	}
+
+	return listings.get(dir)
+}
+
+function existsWithCase(path) {
+	const segments = relative(SRC, path).split(sep)
+
+	if (segments[0] === '..') {
+		return true
+	}
+
+	let dir = SRC
+
+	for (const segment of segments) {
+		if (!namesIn(dir)?.has(segment)) {
+			return false
+		}
+
+		dir = join(dir, segment)
+	}
+
+	return true
+}
+
+const RESOLVE_SUFFIXES = ['', '.ts', '.tsx', `${sep}index.ts`, `${sep}index.tsx`]
+
+const wrongCase = files.flatMap(file => {
+	const found = []
+
+	for (const [, specifier] of readFileSync(file, 'utf8').matchAll(IMPORT_PATTERN)) {
+		if (!specifier.startsWith('.')) {
+			continue
+		}
+
+		const target = join(file, '..', specifier)
+		const candidates = RESOLVE_SUFFIXES.map(suffix => target + suffix)
+
+		if (!candidates.some(existsWithCase)) {
+			found.push(`${relative(SRC, file).split(sep).join('/')} → ${specifier}`)
+		}
+	}
+
+	return found
+})
+
+if (wrongCase.length === 0) {
+	console.log('✔ Relative imports name their files with the right case.')
+} else {
+	console.error(`✖ ${wrongCase.length} relative import(s) that only resolve on a case-insensitive disk:\n`)
+
+	for (const line of wrongCase) {
+		console.error(`   ${line}`)
+	}
+
+	console.error('')
+}
+
 const cycles = findCycles(edges)
 const nodeCount = [...edges.keys()].filter(node => edges.get(node).size > 0 || node !== 'root').length
 
 if (cycles.length === 0) {
 	console.log(`✔ No slice cycles (${files.length} files, ${nodeCount} nodes).`)
-	const problems = [misplaced, commented, askingForThemselves, rawColours, offScale, bridgeOutside]
+	const problems = [misplaced, commented, askingForThemselves, rawColours, offScale, bridgeOutside, wrongCase]
 
 	process.exit(problems.every(found => found.length === 0) ? 0 : 1)
 }

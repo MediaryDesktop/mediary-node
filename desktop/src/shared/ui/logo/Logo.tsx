@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 
-import styles from './logo.module.scss'
+import styles from './Logo.module.scss'
 
 export interface LogoProps {
 	iconSize?: number
