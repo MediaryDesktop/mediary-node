@@ -20,6 +20,13 @@ export const IPC = {
 
 	trailerHost: 'trailer:host',
 
+	pipOpen: 'pip:open',
+	pipDismiss: 'pip:dismiss',
+	pipClosed: 'pip:closed',
+	pipParams: 'pip:params',
+	pipReport: 'pip:report',
+	pipFinish: 'pip:finish',
+
 	sessionRead: 'session:read',
 	sessionWrite: 'session:write',
 	sessionClear: 'session:clear',

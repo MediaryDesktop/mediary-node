@@ -2,6 +2,7 @@ import { contextBridge, ipcRenderer } from 'electron'
 
 import { IPC } from '../shared/ipc.js'
 import type { OAuthAuthorization, OAuthListener } from '../shared/oauth.js'
+import type { PipIntent, PipOpenOptions, PipResult, PipSnapshot } from '../shared/pip.js'
 import type { StoredSession } from '../shared/session.js'
 import type { UpdateState } from '../shared/update.js'
 
@@ -73,6 +74,29 @@ const api = {
 
 	trailer: {
 		host: (): Promise<string> => ipcRenderer.invoke(IPC.trailerHost)
+	},
+
+	pip: {
+		// The page that plays: hands the video over to the pinned window.
+		open: (options: PipOpenOptions): Promise<boolean> => ipcRenderer.invoke(IPC.pipOpen, options),
+
+		dismiss: (): Promise<void> => ipcRenderer.invoke(IPC.pipDismiss),
+
+		onClosed: (listener: (result: PipResult) => void): (() => void) => {
+			const handler = (_event: unknown, result: PipResult) => listener(result)
+			ipcRenderer.on(IPC.pipClosed, handler)
+			return () => {
+				ipcRenderer.off(IPC.pipClosed, handler)
+			}
+		},
+
+		// The pinned window's own side.
+		params: (): Promise<PipOpenOptions | null> => ipcRenderer.invoke(IPC.pipParams),
+
+		report: (snapshot: PipSnapshot): void => ipcRenderer.send(IPC.pipReport, snapshot),
+
+		finish: (intent: PipIntent, snapshot: PipSnapshot | null): Promise<void> =>
+			ipcRenderer.invoke(IPC.pipFinish, intent, snapshot)
 	},
 
 	session: {

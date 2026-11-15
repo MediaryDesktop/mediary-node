@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { useAfterDelay } from '@shared/lib'
@@ -25,16 +25,30 @@ import styles from './VideoPlayer.module.scss'
 
 const LEAVE_MS = 240
 
+// Where playback stands, so a player built anew — in the pinned window, say —
+// carries on from the same moment.
+export interface PlayerSnapshot {
+	position: number
+	playing: boolean
+}
+
 export interface VideoPlayerProps {
 	stream: PlaybackStream
 	source: VideoSource
 	heading: string
 	subheading?: string
-	mode: 'full' | 'mini'
+	mode: 'full' | 'mini' | 'pip'
 	onMinimize: () => void
 	onExpand: () => void
 	onClose: () => void
 	onOpenExternally: () => void
+	/** Shows the pin button: pins the mini player, or (in 'pip') brings it back. */
+	onPin?: (snapshot: PlayerSnapshot) => void
+	/** Where to carry on when the player starts. */
+	startAt?: PlayerSnapshot | null
+	onStartApplied?: () => void
+	/** Told where playback is, as it moves. */
+	onSnapshot?: (snapshot: PlayerSnapshot) => void
 	failureAction?: (failure: PlayerFailure) => { label: string; onClick: () => void } | undefined
 
 	onFallback?: () => void
@@ -53,12 +67,18 @@ export function VideoPlayer({
 	onExpand,
 	onClose,
 	onOpenExternally,
+	onPin,
+	startAt,
+	onStartApplied,
+	onSnapshot,
 	failureAction,
 	onFallback,
 	leaving = false,
 	onLeft
 }: VideoPlayerProps) {
-	const mini = mode === 'mini'
+	// Mini and pip are both the small player: no controls bar, no keys.
+	const mini = mode !== 'full'
+	const pinned = mode === 'pip'
 	const { t } = useTranslation()
 
 	const rootRef = useRef<HTMLDivElement>(null)
@@ -80,6 +100,43 @@ export function VideoPlayer({
 	const failed = failure !== null
 	const [subtitle, setSubtitle] = useState<number | null>(() => initialSubtitle(subtitles))
 	const [audio, setAudio] = useState(() => initialAudio(audios))
+
+	const startAtRef = useRef(startAt)
+	const onStartAppliedRef = useRef(onStartApplied)
+
+	useEffect(() => {
+		const video = videoRef.current
+		const start = startAtRef.current
+
+		if (!video || !start) {
+			return
+		}
+
+		const apply = () => {
+			video.currentTime = start.position
+
+			if (!start.playing) {
+				video.pause()
+			}
+
+			onStartAppliedRef.current?.()
+		}
+
+		if (video.readyState >= 1) {
+			apply()
+
+			return
+		}
+
+		video.addEventListener('loadedmetadata', apply, { once: true })
+
+		return () => video.removeEventListener('loadedmetadata', apply)
+	}, [])
+
+	const snapshotOf = (video: HTMLVideoElement): PlayerSnapshot => ({
+		position: video.currentTime,
+		playing: !video.paused
+	})
 
 	const entrance = usePlayerEntrance()
 	const entering = entrance.entering && !mini
@@ -122,7 +179,7 @@ export function VideoPlayer({
 			ref={rootRef}
 			className={clsx(
 				styles.root,
-				mini ? styles.mini : styles.full,
+				mode === 'full' ? styles.full : pinned ? styles.pip : styles.mini,
 				entering && styles.enter,
 				leaving && styles.leave,
 				!shown && styles.idle
@@ -140,13 +197,20 @@ export function VideoPlayer({
 					autoPlay
 					onClick={actions.togglePlay}
 					onDoubleClick={() => (mini ? onExpand() : toggleFullscreen())}
-					onPlay={() => setPlaying(true)}
-					onPause={() => {
+					onPlay={event => {
+						setPlaying(true)
+						onSnapshot?.(snapshotOf(event.currentTarget))
+					}}
+					onPause={event => {
 						setPlaying(false)
 						report()
+						onSnapshot?.(snapshotOf(event.currentTarget))
 					}}
 					onEnded={() => report(true)}
-					onTimeUpdate={event => setPosition(event.currentTarget.currentTime)}
+					onTimeUpdate={event => {
+						setPosition(event.currentTarget.currentTime)
+						onSnapshot?.(snapshotOf(event.currentTarget))
+					}}
 					onDurationChange={event => {
 						const value = event.currentTarget.duration
 						if (info.duration <= 0 && Number.isFinite(value)) setDuration(value)
@@ -167,6 +231,16 @@ export function VideoPlayer({
 
 			<PlayerHeader
 				mini={mini}
+				pinned={pinned}
+				onPin={
+					onPin
+						? () => {
+								const video = videoRef.current
+
+								onPin(video ? snapshotOf(video) : { position: 0, playing: false })
+							}
+						: undefined
+				}
 				visible={shown}
 				fullscreen={fullscreen}
 				heading={heading}

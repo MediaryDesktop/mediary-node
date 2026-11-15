@@ -9,6 +9,8 @@ import styles from './PlayerHeader.module.scss'
 
 export interface PlayerHeaderProps {
 	mini: boolean
+	pinned?: boolean
+	onPin?: () => void
 	visible: boolean
 	fullscreen: boolean
 	heading: string
@@ -20,6 +22,8 @@ export interface PlayerHeaderProps {
 
 export function PlayerHeader({
 	mini,
+	pinned = false,
+	onPin,
 	visible,
 	fullscreen,
 	heading,
@@ -34,7 +38,9 @@ export function PlayerHeader({
 
 	if (mini) {
 		return (
-			<header className={clsx(styles.top, styles.mini, visible && styles.visible)}>
+			<header
+				className={clsx(styles.top, styles.mini, pinned && styles.pinned, visible && styles.visible)}
+			>
 				<Button
 					variant='chrome'
 					iconOnly
@@ -42,6 +48,16 @@ export function PlayerHeader({
 					startIcon={<Icon name='common/maximize' size={18} />}
 					onClick={onExpand}
 				/>
+
+				{onPin && (
+					<Button
+						variant='chrome'
+						iconOnly
+						aria-label={t(pinned ? 'player.unpin' : 'player.pin')}
+						startIcon={<Icon name={pinned ? 'common/pin-off' : 'common/pin'} size={16} />}
+						onClick={onPin}
+					/>
+				)}
 
 				<Button
 					variant='chrome-close'

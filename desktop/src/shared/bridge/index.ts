@@ -5,6 +5,10 @@ export type {
 	OAuthAuthorization,
 	OAuthListener,
 	OAuthRedirect,
+	PipIntent,
+	PipOpenOptions,
+	PipResult,
+	PipSnapshot,
 	StoredSession,
 	UpdateState
 } from './types'

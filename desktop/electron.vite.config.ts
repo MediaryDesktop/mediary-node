@@ -80,7 +80,13 @@ export default defineConfig({
 		},
 		build: {
 			outDir: 'out/renderer',
-			rollupOptions: { input: { index: dir('./src/index.html'), splash: dir('./src/splash.html') } }
+			rollupOptions: {
+				input: {
+					index: dir('./src/index.html'),
+					splash: dir('./src/splash.html'),
+					pip: dir('./src/pip.html')
+				}
+			}
 		},
 		server: {
 			port: 5173,

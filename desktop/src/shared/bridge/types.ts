@@ -31,6 +31,23 @@ export interface StoredSession {
 	account: unknown
 }
 
+export interface PipSnapshot {
+	position: number
+	playing: boolean
+}
+
+export interface PipOpenOptions extends PipSnapshot {
+	fileId: number
+	/** Width over height of the picture. */
+	aspect: number
+}
+
+export type PipIntent = 'mini' | 'expand' | 'stop'
+
+export interface PipResult extends PipSnapshot {
+	intent: PipIntent
+}
+
 export interface MediaryBridge {
 	node: {
 		connection: () => Promise<NodeConnection>
@@ -65,6 +82,18 @@ export interface MediaryBridge {
 	}
 	trailer: {
 		host: () => Promise<string>
+	}
+	pip: {
+		/** Hands the video over to an always-on-top window. False when it could not open. */
+		open: (options: PipOpenOptions) => Promise<boolean>
+		/** Closes that window without a word to the page that asks. */
+		dismiss: () => Promise<void>
+		/** The window went: why, and where playback stood. */
+		onClosed: (listener: (result: PipResult) => void) => () => void
+		/** For the pinned window itself: what it was opened to play. */
+		params: () => Promise<PipOpenOptions | null>
+		report: (snapshot: PipSnapshot) => void
+		finish: (intent: PipIntent, snapshot: PipSnapshot | null) => Promise<void>
 	}
 	session: {
 		canPersist: () => Promise<boolean>

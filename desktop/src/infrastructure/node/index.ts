@@ -1,4 +1,5 @@
 export {
+	$nodeConnection,
 	$nodeReady,
 	$nodeRetrying,
 	$nodeState,

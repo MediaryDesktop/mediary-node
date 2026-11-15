@@ -1,0 +1,25 @@
+.message {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 1rem;
+	width: 100vw;
+	height: 100vh;
+	padding: 1.5rem;
+	background: var(--media);
+	color: var(--on-media);
+	text-align: center;
+
+	// The window has no frame, so the page is what drags it.
+	-webkit-app-region: drag;
+
+	p {
+		margin: 0;
+		font-size: var(--font-size-md);
+	}
+
+	button {
+		-webkit-app-region: no-drag;
+	}
+}

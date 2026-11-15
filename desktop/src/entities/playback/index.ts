@@ -12,11 +12,14 @@ export { $playerMode, PLAYER_MODES, playerModeChanged } from './model/player-mod
 export {
 	$playerExpanded,
 	$playerFileId,
+	$playerPinned,
 	playerClosed,
 	playerExpanded,
 	playerMinimized,
 	playerOpened,
-	playerOpening
+	playerOpening,
+	playerPinned,
+	playerUnpinned
 } from './model/player-session'
 export type { PlayerMode } from './model/player-mode'
 
@@ -28,7 +31,7 @@ export { NowPlayingBar } from './ui/now-playing-bar/NowPlayingBar'
 export { VideoPlayer } from './ui/video-player/VideoPlayer'
 export { usePlayerEntrance } from './ui/video-player/lib/usePlayerEntrance'
 export type { VideoSource } from './lib/source'
-export type { VideoPlayerProps } from './ui/video-player/VideoPlayer'
+export type { PlayerSnapshot, VideoPlayerProps } from './ui/video-player/VideoPlayer'
 export type { PlayerFailure } from './ui/video-player/lib/useMediaPipeline'
 
 export { fetchPlaybackStreamFx } from './api/api'

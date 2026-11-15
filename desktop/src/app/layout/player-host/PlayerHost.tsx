@@ -14,6 +14,7 @@ import { useWindowControls } from '@infra/window'
 import {
 	$playerExpanded,
 	$playerFileId,
+	$playerPinned,
 	browserCanPlayType,
 	canFallBack,
 	chooseSource,
@@ -22,9 +23,12 @@ import {
 	playerClosed,
 	playerExpanded,
 	playerMinimized,
+	playerPinned,
+	playerUnpinned,
 	usePlayerEntrance,
 	VideoPlayer
 } from '@entities/playback'
+import type { PlayerSnapshot } from '@entities/playback'
 import { isMissingToolError } from '@entities/tool'
 
 import { $stream, $streamError, $streamTarget, streamCancelled } from '@features/stream-torrent'
@@ -49,7 +53,10 @@ export function PlayerHost() {
 		streamTarget,
 		stream,
 		streamError,
-		cancelStream
+		cancelStream,
+		pinned,
+		pin,
+		unpin
 	] = useUnit([
 		$playerFileId,
 		$playerExpanded,
@@ -64,10 +71,47 @@ export function PlayerHost() {
 		$streamTarget,
 		$stream,
 		$streamError,
-		streamCancelled
+		streamCancelled,
+		$playerPinned,
+		playerPinned,
+		playerUnpinned
 	])
 
 	const [directFailedFor, setDirectFailedFor] = useState<number | null>(null)
+
+	// Where playback stood when the pinned window gave the player back; the
+	// player built again takes it up and clears it.
+	const [resume, setResume] = useState<PlayerSnapshot | null>(null)
+
+	useEffect(
+		() =>
+			window.mediary.pip.onClosed(result => {
+				unpin()
+
+				if (result.intent === 'stop') {
+					close()
+					cancelStream()
+
+					return
+				}
+
+				setResume({ position: result.position, playing: result.playing })
+
+				if (result.intent === 'expand') {
+					expand()
+				}
+			}),
+		[unpin, close, cancelStream, expand]
+	)
+
+	// Whatever ends the pinned state from this side — another video, the player
+	// closed — takes the pinned window with it; when the window itself went,
+	// there is nothing left to close.
+	useEffect(() => {
+		if (!pinned) {
+			void window.mediary.pip.dismiss()
+		}
+	}, [pinned])
 
 	const [leaving, setLeaving] = useState(false)
 
@@ -101,8 +145,13 @@ export function PlayerHost() {
 
 	const finish = () => {
 		setLeaving(false)
+		setResume(null)
 		close()
 		cancelStream()
+	}
+
+	if (pinned) {
+		return null
 	}
 
 	if (fileId === null) {
@@ -190,6 +239,23 @@ export function PlayerHost() {
 			mode={full ? 'full' : 'mini'}
 			onMinimize={minimize}
 			onExpand={expand}
+			onPin={
+				full
+					? undefined
+					: snapshot => {
+							const video = loadedStream.info.video ?? loadedStream.info.videos?.[0]
+
+							void window.mediary.pip
+								.open({
+									fileId,
+									...snapshot,
+									aspect: video?.width && video.height ? video.width / video.height : 16 / 9
+								})
+								.then(opened => opened && pin())
+						}
+			}
+			startAt={resume}
+			onStartApplied={() => setResume(null)}
 			leaving={leaving}
 			onClose={requestClose}
 			onLeft={finish}

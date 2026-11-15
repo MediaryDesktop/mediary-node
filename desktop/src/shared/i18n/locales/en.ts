@@ -1017,6 +1017,8 @@ export const en = {
 		exitFullscreen: 'Exit full screen',
 		minimize: 'Back to the page',
 		expand: 'Open the player',
+		pin: 'Pin on top of other windows',
+		unpin: 'Unpin',
 		failed: 'There were problems transcoding this video. Choose another player to keep watching.',
 		loadFailed: 'Could not read this file.',
 		needsTranscode: 'This file uses codecs the built-in player cannot decode yet. It plays in mpv.',

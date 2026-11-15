@@ -9,6 +9,7 @@ import { webAddress } from './external.js'
 import { type AppOrigin, isAllowedPermission, isAppUrl } from './guards.js'
 import { NodeSupervisor, type SupervisorState } from './node-supervisor.js'
 import { authorizeOAuth, prepareOAuth, releaseOAuthListener } from './oauth.js'
+import { dismissPip, registerPipIpc } from './pip-window.js'
 import {
 	canPersistSession,
 	clearStoredSession,
@@ -111,6 +112,9 @@ function createWindow(): BrowserWindow {
 		}
 	})
 
+	// The pinned player has nothing to show without the app that feeds it.
+	window.on('closed', () => dismissPip())
+
 	window.on('maximize', () => window.webContents.send(IPC.windowIsMaximized, true))
 	window.on('unmaximize', () => window.webContents.send(IPC.windowIsMaximized, false))
 
@@ -181,6 +185,16 @@ function registerIpc(): void {
 	handle(IPC.aniListOpenAuthorize, (_event, authorizeUrl: unknown) => openAniListAuthorize(authorizeUrl))
 
 	handle(IPC.trailerHost, () => trailerHostOrigin())
+
+	registerPipIpc(handle, {
+		preloadPath: join(__dirname, '../preload/index.js'),
+		pageUrl: () =>
+			process.env.ELECTRON_RENDERER_URL
+				? new URL('pip.html', process.env.ELECTRON_RENDERER_URL).href
+				: appPageUrl('pip.html'),
+		iconPath: appIconPath(),
+		mainWindow: () => mainWindow
+	})
 
 	// The renderer has no filesystem access, so a library folder can only be
 	// chosen through the OS dialog the main process owns.

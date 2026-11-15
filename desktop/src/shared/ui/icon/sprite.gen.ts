@@ -311,6 +311,8 @@ export const sprites = defineSpriteMap([
 				defineSpriteSymbol(['node'], [288]),
 				defineSpriteSymbol(['pause'], [24]),
 				defineSpriteSymbol(['pencil'], [24]),
+				defineSpriteSymbol(['pin-off'], [24]),
+				defineSpriteSymbol(['pin'], [24]),
 				defineSpriteSymbol(['play-circle'], [24]),
 				defineSpriteSymbol(['play'], [24]),
 				defineSpriteSymbol(['player'], [24]),
@@ -408,6 +410,8 @@ export type SpritesMeta = {
 		| 'node'
 		| 'pause'
 		| 'pencil'
+		| 'pin-off'
+		| 'pin'
 		| 'play-circle'
 		| 'play'
 		| 'player'

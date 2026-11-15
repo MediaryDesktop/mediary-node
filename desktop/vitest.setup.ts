@@ -64,6 +64,14 @@ Object.defineProperty(window, 'mediary', {
 		trailer: {
 			host: async () => 'http://127.0.0.1:45999'
 		},
+		pip: {
+			open: async () => false,
+			dismiss: async () => {},
+			onClosed: () => () => {},
+			params: async () => null,
+			report: () => {},
+			finish: async () => {}
+		},
 		session: {
 			canPersist: async () => true,
 			read: async () => null,

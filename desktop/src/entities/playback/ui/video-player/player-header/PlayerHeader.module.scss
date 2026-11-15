@@ -55,5 +55,10 @@
 			transparent
 		);
 		-webkit-app-region: no-drag;
+
+		// The pinned window has no frame of its own: this strip is how it is moved.
+		&.pinned {
+			-webkit-app-region: drag;
+		}
 	}
 }
