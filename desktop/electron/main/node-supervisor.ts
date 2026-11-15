@@ -6,6 +6,7 @@ import { createServer } from 'node:net'
 import { join } from 'node:path'
 import { setTimeout as delay } from 'node:timers/promises'
 
+import { APP_ORIGIN } from './app-origin'
 import { urlToken } from './url-token'
 
 export interface NodeConnection {
@@ -446,7 +447,7 @@ function resolveBinaryPath(): string | null {
 }
 
 function allowedOrigins(): string[] {
-	const origins = ['app://-', 'file://']
+	const origins = [APP_ORIGIN]
 
 	const devServer = process.env.ELECTRON_RENDERER_URL
 	if (devServer) {

@@ -1,4 +1,4 @@
-import { pathToFileURL } from 'node:url'
+import { isAppOrigin } from './app-origin.js'
 
 // What may live in the app's windows, and what those pages may ask for.
 //
@@ -8,10 +8,9 @@ import { pathToFileURL } from 'node:url'
 // anywhere else is refused, and the permissions a page may be granted are the
 // two the app uses.
 
-/** Where the app's own pages are served from: the dev server, or the bundle. */
+/** Where the app's own pages are served from: the dev server, or app://-. */
 export interface AppOrigin {
 	devServerUrl?: string
-	rendererDir: string
 }
 
 export function isAppUrl(raw: string, origin: AppOrigin): boolean {
@@ -27,15 +26,7 @@ export function isAppUrl(raw: string, origin: AppOrigin): boolean {
 		return url.origin === new URL(origin.devServerUrl).origin
 	}
 
-	if (url.protocol !== 'file:') {
-		return false
-	}
-
-	// The renderer folder itself, with a trailing slash, so that a sibling
-	// folder whose name merely starts the same way does not pass.
-	const root = pathToFileURL(origin.rendererDir).href.replace(/\/?$/u, '/')
-
-	return url.href.startsWith(root)
+	return isAppOrigin(url)
 }
 
 // The video player goes fullscreen, and the plugin dialog copies an address.

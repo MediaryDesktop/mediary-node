@@ -1,5 +1,6 @@
 import { BrowserWindow } from 'electron'
-import { join } from 'node:path'
+
+import { appPageUrl } from './app-protocol.js'
 
 const SPLASH_SIZE = 600
 
@@ -34,7 +35,6 @@ async function fade(window: BrowserWindow, from: number, to: number): Promise<vo
 function createSplashWindow(
 	preloadPath: string,
 	devServerUrl: string | undefined,
-	rendererDir: string,
 	iconPath: string,
 	onShown: () => void
 ): BrowserWindow {
@@ -72,7 +72,7 @@ function createSplashWindow(
 	if (devServerUrl) {
 		void window.loadURL(`${devServerUrl}/splash.html`)
 	} else {
-		void window.loadFile(join(rendererDir, 'splash.html'))
+		void window.loadURL(appPageUrl('splash.html'))
 	}
 
 	return window
@@ -94,11 +94,10 @@ export interface SplashHandoff {
 export function runSplash(params: {
 	preloadPath: string
 	devServerUrl: string | undefined
-	rendererDir: string
 	iconPath: string
 	mainWindow: BrowserWindow
 }): SplashHandoff {
-	const { preloadPath, devServerUrl, rendererDir, iconPath, mainWindow } = params
+	const { preloadPath, devServerUrl, iconPath, mainWindow } = params
 
 	let booted = false
 	let dismissed = false
@@ -106,7 +105,7 @@ export function runSplash(params: {
 	let handedOff = false
 	let minTimeTimer: ReturnType<typeof setTimeout> | undefined
 
-	const splashWindow = createSplashWindow(preloadPath, devServerUrl, rendererDir, iconPath, () => {
+	const splashWindow = createSplashWindow(preloadPath, devServerUrl, iconPath, () => {
 		// The minimum-visible clock only starts once the splash is actually on
 		// screen — the show delay before it isn't time the user spent looking at it.
 		minTimeTimer = setTimeout(() => {

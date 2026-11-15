@@ -3,6 +3,7 @@ import { join } from 'node:path'
 
 import { IPC } from '../shared/ipc.js'
 
+import { appPageUrl, registerAppScheme, serveAppScheme } from './app-protocol.js'
 import { webAddress } from './external.js'
 import { type AppOrigin, isAllowedPermission, isAppUrl } from './guards.js'
 import { NodeSupervisor, type SupervisorState } from './node-supervisor.js'
@@ -19,11 +20,12 @@ import { currentUpdateState, installUpdate, startUpdater } from './updater.js'
 
 app.commandLine.appendSwitch('disable-quic')
 
+registerAppScheme()
+
+const rendererDir = join(__dirname, '../renderer')
+
 // The app's own pages, the only ones that may hold the preload's API (see guards.ts).
-const appOrigin: AppOrigin = {
-	devServerUrl: process.env.ELECTRON_RENDERER_URL,
-	rendererDir: join(__dirname, '../renderer')
-}
+const appOrigin: AppOrigin = { devServerUrl: process.env.ELECTRON_RENDERER_URL }
 
 // Every window — the splash and any added later: nothing in it navigates away
 // from the app, follows a redirect elsewhere, or embeds a webview. Moving inside
@@ -132,7 +134,7 @@ function createWindow(): BrowserWindow {
 	if (devServer) {
 		void window.loadURL(devServer)
 	} else {
-		void window.loadFile(join(__dirname, '../renderer/index.html'))
+		void window.loadURL(appPageUrl('index.html'))
 	}
 
 	return window
@@ -258,6 +260,7 @@ if (!app.requestSingleInstanceLock()) {
 			isAllowedPermission(permission)
 		)
 
+		serveAppScheme(rendererDir)
 		registerIpc()
 
 		mainWindow = createWindow()
@@ -265,7 +268,6 @@ if (!app.requestSingleInstanceLock()) {
 		splashHandoff = runSplash({
 			preloadPath: join(__dirname, '../preload/index.js'),
 			devServerUrl: process.env.ELECTRON_RENDERER_URL,
-			rendererDir: join(__dirname, '../renderer'),
 			iconPath: appIconPath(),
 			mainWindow
 		})

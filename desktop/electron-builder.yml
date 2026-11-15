@@ -25,11 +25,8 @@ afterPack: scripts/after-pack.cjs
 # on the machine run Mediary.exe as plain Node (ELECTRON_RUN_AS_NODE), inject
 # code through NODE_OPTIONS, or attach a debugger with --inspect — all under the
 # app's own name. The app is loaded only from its asar, and an asar that was
-# tampered with is refused.
-#
-# grantFileProtocolExtraPrivileges stays on: the renderer is still loaded from
-# file://, and its module scripts, the pdf.js worker and the subtitle wasm need
-# those privileges until it moves to a custom protocol.
+# tampered with is refused. The renderer is served from app://- (see
+# electron/main/app-protocol.ts), so file:// pages need no extra privileges.
 electronFuses:
   runAsNode: false
   enableNodeOptionsEnvironmentVariable: false
@@ -37,6 +34,7 @@ electronFuses:
   enableEmbeddedAsarIntegrityValidation: true
   onlyLoadAppFromAsar: true
   enableCookieEncryption: true
+  grantFileProtocolExtraPrivileges: false
 
 win:
   extraResources:
