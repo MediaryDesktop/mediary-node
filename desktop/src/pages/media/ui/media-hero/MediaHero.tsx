@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { formatCompact } from '@shared/lib'
-import { Badge, Icon, Tooltip } from '@shared/ui'
+import { Badge, Icon } from '@shared/ui'
 
 import { alternativeTitles, enumLabel, formatMediaDate, mediaTitle, scoreTone } from '@entities/media'
 import type { MediaDetails, MediaSource } from '@entities/media'
@@ -27,6 +27,8 @@ export interface MediaHeroProps {
 	total: number | null | undefined
 	locale: string
 	onOpenDescription: () => void
+	hasTrailer: boolean
+	onOpenTrailer: () => void
 }
 
 export function MediaHero({
@@ -37,7 +39,9 @@ export function MediaHero({
 	mediaType,
 	total,
 	locale,
-	onOpenDescription
+	onOpenDescription,
+	hasTrailer,
+	onOpenTrailer
 }: MediaHeroProps) {
 	const { t } = useTranslation()
 	let line = 0
@@ -206,14 +210,12 @@ export function MediaHero({
 								</a>
 							)}
 
-							{mediaType !== 'manga' && mediaType !== 'book' && (
-								<Tooltip content={t('media.comingSoon')}>
-									<span className={styles.iconActionWrap}>
-										<button type='button' disabled className={styles.textLink}>
-											{t('media.trailer')}
-										</button>
-									</span>
-								</Tooltip>
+							{mediaType !== 'manga' && mediaType !== 'book' && hasTrailer && (
+								<span className={styles.iconActionWrap}>
+									<button type='button' className={styles.textLink} onClick={onOpenTrailer}>
+										{t('media.trailer')}
+									</button>
+								</span>
 							)}
 						</div>
 					</div>

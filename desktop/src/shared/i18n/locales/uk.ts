@@ -668,7 +668,7 @@ export const uk: Translation = {
 		trailer: 'Трейлер',
 		trailerFor: 'Трейлер: {{title}}',
 		downloadBatch: 'Завантажити пакет / {{count}} епізодів',
-		comingSoon: 'Скоро буде',
+		trailerEmbedBlocked: 'Автор вимкнув вбудовування. Дивитись на YouTube',
 		nextAiringDay: 'Епізод {{episode}} {{when}}',
 		views: {
 			library: 'Локальна бібліотека',

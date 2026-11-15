@@ -37,6 +37,7 @@ import { RecommendationsSection } from '../relations-section/RecommendationsSect
 import { RelationsSection } from '../relations-section/RelationsSection'
 import { StreamSection } from '../stream-section/StreamSection'
 import { TorrentSection } from '../torrent-section/TorrentSection'
+import { TrailerModal, youtubeUrl } from '../trailer-modal/TrailerModal'
 
 import styles from './MediaView.module.scss'
 
@@ -54,6 +55,7 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 	const navigate = useNavigate()
 	const [descriptionOpen, setDescriptionOpen] = useState(false)
 	const [detailsOpen, setDetailsOpen] = useState(false)
+	const [trailerOpen, setTrailerOpen] = useState(false)
 	const [deleteOpen, setDeleteOpen] = useState(false)
 	const [view, setView] = useState<MediaViewKind>('library')
 	const [openSearch, closeSearch, streamTarget, requestStream, cancelStream, chosenVia] = useUnit([
@@ -134,6 +136,8 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 				total={total}
 				locale={locale}
 				onOpenDescription={() => setDescriptionOpen(true)}
+				hasTrailer={youtubeUrl(media?.trailer) !== null}
+				onOpenTrailer={() => setTrailerOpen(true)}
 			/>
 
 			<MediaActions
@@ -235,6 +239,8 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 			>
 				<p className={styles.fullDescription}>{description || t('media.noDescription')}</p>
 			</Modal>
+
+			<TrailerModal open={trailerOpen} onOpenChange={setTrailerOpen} title={title} trailer={media?.trailer} />
 
 			{media && (
 				<Modal

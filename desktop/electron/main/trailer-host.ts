@@ -20,10 +20,20 @@ function framePolicy(nonce: string): string {
 	].join('; ')
 }
 
-function playerPage(id: string, nonce: string): string {
+const BACKGROUND_LAYOUT =
+	'iframe{--video-width:max(100vw,calc(100vh*16/9));position:absolute;top:50%;left:50%;width:var(--video-width);height:calc(var(--video-width)*27/16);border:0;transform:translate(-50%,-50%);pointer-events:none}'
+
+const WATCH_LAYOUT = 'iframe{position:absolute;inset:0;width:100%;height:100%;border:0}'
+
+const BACKGROUND_VARS =
+	'autoplay: 1, mute: 1, controls: 0, modestbranding: 1, rel: 0, playsinline: 1, disablekb: 1, fs: 0, iv_load_policy: 3'
+
+const WATCH_VARS = 'autoplay: 1, controls: 1, modestbranding: 1, rel: 0, playsinline: 1, fs: 1'
+
+function playerPage(id: string, nonce: string, watch: boolean): string {
 	return `<!doctype html><html lang="en"><head><meta charset="utf-8"><style>
 html,body{margin:0;height:100%;overflow:hidden;background:#000}
-iframe{--video-width:max(100vw,calc(100vh*16/9));position:absolute;top:50%;left:50%;width:var(--video-width);height:calc(var(--video-width)*27/16);border:0;transform:translate(-50%,-50%);pointer-events:none}
+${watch ? WATCH_LAYOUT : BACKGROUND_LAYOUT}
 </style></head><body><div id="player"></div><script nonce="${nonce}">
 const report = state => parent.postMessage({ source: 'mediary-trailer', state }, '*')
 let revealed = false
@@ -31,9 +41,9 @@ window.onYouTubeIframeAPIReady = () => {
 	new YT.Player('player', {
 		host: 'https://www.youtube-nocookie.com',
 		videoId: '${id}',
-		playerVars: { autoplay: 1, mute: 1, controls: 0, modestbranding: 1, rel: 0, playsinline: 1, disablekb: 1, fs: 0, iv_load_policy: 3 },
+		playerVars: { ${watch ? WATCH_VARS : BACKGROUND_VARS} },
 		events: {
-			onReady: event => { event.target.mute(); event.target.playVideo() },
+			onReady: event => { ${watch ? '' : 'event.target.mute(); '}event.target.playVideo() },
 			onStateChange: event => {
 				if (event.data === YT.PlayerState.PLAYING && !revealed) {
 					revealed = true
@@ -76,7 +86,7 @@ export async function trailerHostOrigin(): Promise<string> {
 			return
 		}
 
-		respond(response, 200, playerPage(id, nonce), nonce)
+		respond(response, 200, playerPage(id, nonce, url.searchParams.get('mode') === 'watch'), nonce)
 	})
 
 	await new Promise<void>((resolve, reject) => {

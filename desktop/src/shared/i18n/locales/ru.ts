@@ -670,7 +670,7 @@ export const ru: Translation = {
 		trailer: 'Трейлер',
 		trailerFor: 'Трейлер: {{title}}',
 		downloadBatch: 'Скачать пакет / {{count}} эпизодов',
-		comingSoon: 'Скоро будет',
+		trailerEmbedBlocked: 'Автор отключил встраивание. Смотреть на YouTube',
 		nextAiringDay: 'Эпизод {{episode}} {{when}}',
 		views: {
 			library: 'Локальная библиотека',

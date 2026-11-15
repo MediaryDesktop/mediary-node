@@ -670,7 +670,7 @@ export const en = {
 		trailer: 'Trailer',
 		trailerFor: 'Trailer for {{title}}',
 		downloadBatch: 'Download batch / {{count}} episodes',
-		comingSoon: 'Coming soon',
+		trailerEmbedBlocked: 'Embedding is disabled for this video. Watch on YouTube',
 		nextAiringDay: 'Episode {{episode}} {{when}}',
 		views: {
 			library: 'Local library',

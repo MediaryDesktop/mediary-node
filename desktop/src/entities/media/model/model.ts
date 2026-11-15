@@ -167,8 +167,10 @@ export const mediaPreviewModel = atom(() => {
 
 	const $trailerHost = createStore<string | null>(null).on(fetchTrailerHostFx.doneData, (_, host) => host)
 
+	const trailerHostRequested = createEvent()
+
 	sample({
-		clock: previewRequested,
+		clock: [previewRequested, trailerHostRequested],
 		source: { host: $trailerHost, asking: fetchTrailerHostFx.pending },
 		filter: ({ host, asking }) => host === null && !asking,
 		target: fetchTrailerHostFx
@@ -184,7 +186,7 @@ export const mediaPreviewModel = atom(() => {
 
 	sample({ clock: previewsRequested, target: requestEachFx })
 
-	return { $previews, $trailerHost, previewRequested, previewsRequested }
+	return { $previews, $trailerHost, trailerHostRequested, previewRequested, previewsRequested }
 })
 
 export function mediaTitle(title: MediaTitle): string {
