@@ -341,6 +341,8 @@ func TestQueueingNeedsAFolderOfBooks(t *testing.T) {
 	if _, err := h.queue.Enqueue(ctx, frankenstein()); apperr.KindOf(err) != apperr.KindPrecondition ||
 		!strings.Contains(err.Error(), "choose a library folder for books") {
 		t.Errorf("without a folder: %v", err)
+	} else if apperr.CodeOf(err) != apperr.CodeBooksFolderMissing {
+		t.Errorf("without a folder the client is not told to offer a folder: code %q", apperr.CodeOf(err))
 	}
 
 	if err := h.queue.SetRoot(ctx, 1); err != nil {

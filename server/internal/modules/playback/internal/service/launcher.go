@@ -37,7 +37,7 @@ func (l MPVLauncher) Start(ctx context.Context, path string, startAt float64) (P
 		// The reason is the whole value of this error — the user has to install mpv
 		// or point the node at it — so it is the message, not a cause buried under a
 		// tidier sentence the client would show instead.
-		return nil, apperr.Wrap(err, apperr.KindPrecondition, "%v", err)
+		return nil, apperr.Wrap(err, apperr.KindPrecondition, "%v", err).WithCode(apperr.CodeToolMissing)
 	}
 
 	command, err := mpv.Launch(mpv.LaunchOptions{

@@ -21,6 +21,10 @@ var statusByKind = map[apperr.Kind]int{
 	apperr.KindInternal:     http.StatusInternalServerError,
 }
 
+// ProblemTypePrefix turns an apperr.Code into the problem's type, a URI as
+// RFC 9457 wants; the desktop reads the code back from it.
+const ProblemTypePrefix = "urn:mediary:problem:"
+
 func ToHTTP(err error) error {
 	if err == nil {
 		return nil
@@ -41,12 +45,16 @@ func ToHTTP(err error) error {
 		status = http.StatusInternalServerError
 	}
 
+	var details []error
 	if appErr.Field != "" {
-		return huma.NewError(status, appErr.Message, &huma.ErrorDetail{
-			Message:  appErr.Message,
-			Location: appErr.Field,
-		})
+		details = append(details, &huma.ErrorDetail{Message: appErr.Message, Location: appErr.Field})
 	}
 
-	return huma.NewError(status, appErr.Message)
+	problem := huma.NewError(status, appErr.Message, details...)
+
+	if model, isModel := problem.(*huma.ErrorModel); isModel && appErr.Code != "" {
+		model.Type = ProblemTypePrefix + string(appErr.Code)
+	}
+
+	return problem
 }

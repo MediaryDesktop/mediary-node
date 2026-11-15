@@ -107,7 +107,8 @@ func (c *Client) call(ctx context.Context, path string, query url.Values, out an
 	}
 
 	if key == "" {
-		return apperr.Wrap(ErrNoKey, apperr.KindPrecondition, "Google Books is not set up: add an API key in the settings")
+		return apperr.Wrap(ErrNoKey, apperr.KindPrecondition, "Google Books is not set up: add an API key in the settings").
+			WithCode(apperr.CodeSetupRequired)
 	}
 
 	return c.get(ctx, key, path, query, out)
@@ -205,7 +206,8 @@ func statusError(status int, raw []byte) error {
 	case status == http.StatusForbidden:
 		// The key exists but may not call the Books API: it is not enabled in the
 		// key's project, or the key is restricted to other APIs.
-		return apperr.New(apperr.KindPrecondition, "Google Books refused the API key: %s", body.Error.Message)
+		return apperr.New(apperr.KindPrecondition, "Google Books refused the API key: %s", body.Error.Message).
+			WithCode(apperr.CodeSetupRequired)
 	case status >= http.StatusInternalServerError:
 		return apperr.New(apperr.KindUnavailable, "Google Books returned %d", status)
 	default:
@@ -216,7 +218,7 @@ func statusError(status int, raw []byte) error {
 // rejected is a precondition, not unauthorized: the desktop reads a 401 as the
 // end of its own session with the node.
 func rejected() error {
-	return apperr.New(apperr.KindPrecondition, "Google Books rejected the API key")
+	return apperr.New(apperr.KindPrecondition, "Google Books rejected the API key").WithCode(apperr.CodeSetupRequired)
 }
 
 func (c *Client) wait(ctx context.Context) error {

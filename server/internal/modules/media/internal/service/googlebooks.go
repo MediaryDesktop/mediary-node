@@ -32,7 +32,7 @@ func googleBookMediaRef(volumeID string) string {
 
 func (s *Service) googleBooks() (*googlebooks.Client, error) {
 	if s.opts.GoogleBooks == nil {
-		return nil, apperr.New(apperr.KindPrecondition, "Google Books is turned off on this node")
+		return nil, apperr.New(apperr.KindPrecondition, "Google Books is turned off on this node").WithCode(apperr.CodeSetupRequired)
 	}
 
 	return s.opts.GoogleBooks, nil

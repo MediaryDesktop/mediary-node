@@ -295,9 +295,10 @@ func missingTool(err error, program string) error {
 		MissingProgram() string
 	}
 	if errors.As(err, &missing) {
-		return apperr.Wrap(err, apperr.KindPrecondition, "%v", missing)
+		return apperr.Wrap(err, apperr.KindPrecondition, "%v", missing).WithCode(apperr.CodeToolMissing)
 	}
 
 	return apperr.Wrap(err, apperr.KindPrecondition,
-		"%s was not found: install FFmpeg on the Extensions page, under Dependencies", program)
+		"%s was not found: install FFmpeg on the Extensions page, under Dependencies", program).
+		WithCode(apperr.CodeToolMissing)
 }

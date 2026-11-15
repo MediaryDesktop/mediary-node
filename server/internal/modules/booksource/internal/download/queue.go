@@ -419,7 +419,7 @@ func (q *Queue) downloadRoot(ctx context.Context) (int64, error) {
 	}
 
 	if q.defaultDir == "" {
-		return 0, apperr.New(apperr.KindPrecondition, "choose a library folder for books first")
+		return 0, apperr.New(apperr.KindPrecondition, "choose a library folder for books first").WithCode(apperr.CodeBooksFolderMissing)
 	}
 
 	rootID, _, err = q.library.EnsureRootOf(ctx, q.defaultDir, ContentBooks)
@@ -439,10 +439,12 @@ func (q *Queue) checkRoot(ctx context.Context, rootID int64) error {
 		return err
 	}
 	if !found {
-		return apperr.New(apperr.KindPrecondition, "the folder for books is no longer in the library; choose another")
+		return apperr.New(apperr.KindPrecondition, "the folder for books is no longer in the library; choose another").
+			WithCode(apperr.CodeBooksFolderMissing)
 	}
 	if content != ContentBooks {
-		return apperr.New(apperr.KindPrecondition, "the folder for books holds %s; choose a folder of books", content)
+		return apperr.New(apperr.KindPrecondition, "the folder for books holds %s; choose a folder of books", content).
+			WithCode(apperr.CodeBooksFolderMissing)
 	}
 
 	return nil

@@ -28,10 +28,29 @@ const (
 	KindInternal Kind = "internal"
 )
 
+// A Code names, for a client, one of the few failures it acts on: it is sent as
+// the problem's type, and a message may be reworded without it changing. Most
+// errors have none, and a client shows their message as it is.
+type Code string
+
+const (
+	// Something a metadata source needs is off or has no key: the client says
+	// what to set up, in the message.
+	CodeSetupRequired Code = "setup-required"
+
+	// No usable library folder for books: the client offers to choose one.
+	CodeBooksFolderMissing Code = "books-folder-missing"
+
+	// A program the node runs, such as FFmpeg, is not installed: the client
+	// offers the page that installs it.
+	CodeToolMissing Code = "tool-missing"
+)
+
 type Error struct {
 	Kind    Kind
 	Message string
 
+	Code  Code
 	Field string
 	cause error
 }
@@ -53,8 +72,24 @@ func Wrap(err error, kind Kind, format string, args ...any) *Error {
 	return &Error{Kind: kind, Message: fmt.Sprintf(format, args...), cause: err}
 }
 
+// WithCode names the failure for a client; see Code.
+func (e *Error) WithCode(code Code) *Error {
+	e.Code = code
+
+	return e
+}
+
 func Invalid(field, format string, args ...any) *Error {
 	return &Error{Kind: KindInvalid, Field: field, Message: fmt.Sprintf(format, args...)}
+}
+
+func CodeOf(err error) Code {
+	var appErr *Error
+	if errors.As(err, &appErr) {
+		return appErr.Code
+	}
+
+	return ""
 }
 
 func KindOf(err error) Kind {

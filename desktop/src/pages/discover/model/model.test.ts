@@ -72,7 +72,10 @@ describe('discover model', () => {
 				? Promise.reject(
 						new HttpRequestError('precondition', {
 							status: 428,
-							body: { detail: 'TMDB is not set up: add an API key in the settings' }
+							body: {
+								type: 'urn:mediary:problem:setup-required',
+								detail: 'TMDB is not set up: add an API key in the settings'
+							}
 						})
 					)
 				: Promise.resolve(response('tmdb:movie:603'))

@@ -1,11 +1,11 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useCallback } from 'react'
 
-import { setupRequired } from '@shared/api'
+import { problemCode } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
 
 export function isMissingBookFolderError(error: unknown): boolean {
-	return setupRequired(error)?.includes('folder for books') ?? false
+	return problemCode(error) === 'books-folder-missing'
 }
 
 export function useBookFolderAction() {

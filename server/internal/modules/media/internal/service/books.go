@@ -83,7 +83,7 @@ func bookMediaRef(workID string) string {
 
 func (s *Service) openLibrary() (*openlibrary.Client, error) {
 	if s.opts.OpenLibrary == nil {
-		return nil, apperr.New(apperr.KindPrecondition, "Open Library is turned off on this node")
+		return nil, apperr.New(apperr.KindPrecondition, "Open Library is turned off on this node").WithCode(apperr.CodeSetupRequired)
 	}
 
 	return s.opts.OpenLibrary, nil

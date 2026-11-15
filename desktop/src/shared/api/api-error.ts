@@ -104,11 +104,26 @@ export function problemDetail(error: RequestFailure['error'], fallback: string):
 	return error.body?.detail ?? fallback
 }
 
-// 428 Precondition Required is how the node says "set something up first", and
-// its detail says what. Callers still tell one setup from another by that text:
-// the node sends no problem type yet. This is the one place that reads it.
-export function setupRequired(error: unknown): string | null {
-	const failure = error as { status?: number; body?: { detail?: string } | null } | null | undefined
+// The failures a screen acts on, as the node names them in the problem's type.
+// The wording of a message may change on the node; a code does not.
+export type ProblemCode = 'setup-required' | 'books-folder-missing' | 'tool-missing'
 
-	return failure?.status === 428 ? (failure.body?.detail ?? '') : null
+const PROBLEM_TYPE_PREFIX = 'urn:mediary:problem:'
+
+export function problemCode(error: unknown): ProblemCode | null {
+	const failure = error as { body?: { type?: string } | null } | null | undefined
+	const type = failure?.body?.type
+
+	if (typeof type !== 'string' || !type.startsWith(PROBLEM_TYPE_PREFIX)) {
+		return null
+	}
+
+	return type.slice(PROBLEM_TYPE_PREFIX.length) as ProblemCode
+}
+
+// A metadata source is off or has no key: the message says what to set up.
+export function setupRequired(error: unknown): string | null {
+	const failure = error as { body?: { detail?: string } | null } | null | undefined
+
+	return problemCode(error) === 'setup-required' ? (failure?.body?.detail ?? '') : null
 }

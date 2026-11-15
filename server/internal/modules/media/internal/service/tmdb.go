@@ -86,7 +86,7 @@ func tmdbKind(mediaType string) tmdb.Kind {
 
 func (s *Service) tmdbClient() (*tmdb.Client, error) {
 	if s.opts.TMDB == nil {
-		return nil, apperr.New(apperr.KindPrecondition, "TMDB is turned off on this node")
+		return nil, apperr.New(apperr.KindPrecondition, "TMDB is turned off on this node").WithCode(apperr.CodeSetupRequired)
 	}
 
 	return s.opts.TMDB, nil

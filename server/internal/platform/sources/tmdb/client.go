@@ -105,7 +105,8 @@ func (c *Client) call(ctx context.Context, path string, query url.Values, out an
 	}
 
 	if key == "" {
-		return apperr.Wrap(ErrNoKey, apperr.KindPrecondition, "TMDB is not set up: add an API key in the settings")
+		return apperr.Wrap(ErrNoKey, apperr.KindPrecondition, "TMDB is not set up: add an API key in the settings").
+			WithCode(apperr.CodeSetupRequired)
 	}
 
 	return c.get(ctx, key, path, query, out)
@@ -184,7 +185,7 @@ func (c *Client) send(ctx context.Context, key, path string, query url.Values, o
 // rejected is a precondition, not unauthorized: the desktop reads a 401 as the
 // end of its own session with the node.
 func rejected() error {
-	return apperr.New(apperr.KindPrecondition, "TMDB rejected the API key")
+	return apperr.New(apperr.KindPrecondition, "TMDB rejected the API key").WithCode(apperr.CodeSetupRequired)
 }
 
 func isAccessToken(key string) bool {
