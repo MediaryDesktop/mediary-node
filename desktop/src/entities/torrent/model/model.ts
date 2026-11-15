@@ -20,7 +20,6 @@ import {
 	fetchTorrentRulesFx,
 	fetchTorrentSettingsFx,
 	fetchTorrentSourcesFx,
-	fetchTorrentStreamFx,
 	pauseTorrentFx,
 	putTorrentDebridFx,
 	putTorrentProfileFx,
@@ -103,11 +102,6 @@ sample({
 keepFresh(torrentSettingsQuery, { triggers: [putTorrentSettingsMutation.finished.success] })
 
 export const torrentDebridQuery = createQuery({ effect: fetchTorrentDebridFx, name: 'torrentDebrid' })
-
-// A stream by its id, as the player asks for the files it could play instead.
-export const torrentStreamQuery = createQuery({ effect: fetchTorrentStreamFx, name: 'torrentStream' })
-
-concurrency(torrentStreamQuery, { strategy: 'TAKE_LATEST' })
 
 export const putTorrentDebridMutation = createMutation({
 	effect: putTorrentDebridFx,

@@ -76,16 +76,6 @@ export const startTorrentStreamFx = createNodeRequestFx<StartTorrentStreamParams
 	timeout: 30_000
 }))
 
-export type StreamVideo = NodeSchemas['StreamVideo']
-
-export const chooseTorrentStreamFileFx = createNodeRequestFx<{ id: number; fileId: number }, TorrentStream>(
-	({ id, fileId }) => ({
-		url: `/v1/torrent/streams/${id}/file`,
-		method: 'POST',
-		body: { file_id: fileId }
-	})
-)
-
 export const fetchTorrentStreamFx = createNodeRequestFx<number, TorrentStream>(id => ({
 	url: `/v1/torrent/streams/${id}`
 }))

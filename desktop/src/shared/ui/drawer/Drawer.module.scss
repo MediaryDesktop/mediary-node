@@ -14,10 +14,6 @@ $ease-in: cubic-bezier(0.32, 0.72, 0, 1);
 	&[data-state="closed"] {
 		animation: overlay-out 180ms ease-in forwards;
 	}
-
-	&.overPlayer {
-		z-index: var(--layer-player-sheet);
-	}
 }
 
 .panel {
@@ -33,10 +29,6 @@ $ease-in: cubic-bezier(0.32, 0.72, 0, 1);
 
 	&:focus-visible {
 		outline: none;
-	}
-
-	&.overPlayer {
-		z-index: calc(var(--layer-player-sheet) + 1);
 	}
 
 	&.right,

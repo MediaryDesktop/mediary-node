@@ -102,15 +102,6 @@ type TorrentStream struct {
 	Episode  *int    `json:"episode,omitempty"`
 
 	Candidates []StreamCandidate `json:"candidates,omitempty" doc:"With auto: the releases lined up, best first. When one cannot be played the next is tried."`
-
-	Files []StreamVideo `json:"files,omitempty" doc:"The videos in the torrent, once the service or the built-in client knows them: what POST .../streams/{id}/file picks from when the file the node chose is not the one wanted."`
-}
-
-// StreamVideo is a video in a stream's torrent.
-type StreamVideo struct {
-	ID   int    `json:"id" doc:"The file's ID in the torrent; the file_id POST .../streams/{id}/file takes."`
-	Path string `json:"path" doc:"Relative to the torrent, folder included."`
-	Size int64  `json:"size" doc:"Bytes."`
 }
 
 // StreamCandidate is one release auto-select lined up for the episode.
@@ -543,21 +534,11 @@ func (s *Service) streamFor(hash string, req StreamRequest) *streamEntry {
 		}
 	}
 
-	// The newest of them: a file picked by hand is a later stream of the same
-	// torrent and episode, and what the user chose is what plays again.
-	var same *streamEntry
-
 	for _, entry := range s.streams.byID {
-		if entry.via == req.Via && entry.hash == hash && sameEpisode(entry.episode, req.Episode) &&
-			sameEpisode(entry.season, req.Season) && (same == nil || entry.id > same.id) {
-			same = entry
+		if entry.via == req.Via && entry.hash == hash && sameEpisode(entry.episode, req.Episode) && sameEpisode(entry.season, req.Season) {
+			entry.usedAt, entry.askedAt = now, now
+			return entry
 		}
-	}
-
-	if same != nil {
-		same.usedAt, same.askedAt = now, now
-
-		return same
 	}
 
 	if s.streams.byID == nil {
@@ -669,8 +650,6 @@ func (s *Service) streamView(ctx context.Context, streamer Streamer, entry *stre
 		return view, nil
 	}
 
-	view.Files = s.streamVideos(remote.Files)
-
 	s.streams.mu.Lock()
 	chosen := entry.file
 	s.streams.mu.Unlock()
@@ -716,91 +695,6 @@ func (s *Service) streamView(ctx context.Context, streamer Streamer, entry *stre
 	return view, nil
 }
 
-// streamVideos are the videos among a torrent's files, in the order given.
-func (s *Service) streamVideos(files []debrid.RemoteFile) []StreamVideo {
-	var videos []StreamVideo
-
-	for _, file := range files {
-		if video, _ := s.library.NameEpisode(file.Path); video {
-			videos = append(videos, StreamVideo{ID: file.ID, Path: file.Path, Size: file.Size})
-		}
-	}
-
-	return videos
-}
-
-// ChooseStreamFile has the given file of a stream's torrent play, for when the
-// file the node chose is not the one wanted. It is a stream of its own, with its
-// own ID, so a player showing the first one opens the new file afresh instead
-// of finding another file behind the ID it holds; the first is left as it was.
-// The episode the stream is for does not change: it is what the user asked for,
-// and what gets marked watched.
-func (s *Service) ChooseStreamFile(ctx context.Context, id int64, fileID int) (*TorrentStream, error) {
-	entry := s.streamEntry(id)
-	if entry == nil {
-		return nil, apperr.New(apperr.KindNotFound, "stream %d does not exist: start it again", id)
-	}
-
-	streamer, err := s.streamer(ctx, entry.via)
-	if err != nil {
-		return nil, err
-	}
-
-	s.streams.mu.Lock()
-	hash := entry.hash
-	s.streams.mu.Unlock()
-
-	remote, err := streamer.StreamState(ctx, hash)
-	if err != nil {
-		return nil, err
-	}
-
-	var chosen *debrid.RemoteFile
-
-	for i := range remote.Files {
-		if remote.Files[i].ID == fileID {
-			chosen = &remote.Files[i]
-		}
-	}
-
-	if chosen == nil {
-		return nil, apperr.Invalid("file_id", "the torrent has no file %d", fileID)
-	}
-
-	if video, _ := s.library.NameEpisode(chosen.Path); !video {
-		return nil, apperr.Invalid("file_id", "%s is not a video", path.Base(chosen.Path))
-	}
-
-	s.streams.mu.Lock()
-	now := s.opts.Now()
-
-	if s.streams.byID == nil {
-		s.streams.byID = map[int64]*streamEntry{}
-	}
-
-	s.streams.last++
-	picked := &streamEntry{
-		id:        s.streams.last,
-		via:       entry.via,
-		hash:      entry.hash,
-		mediaRef:  entry.mediaRef,
-		title:     entry.title,
-		episode:   entry.episode,
-		season:    entry.season,
-		file:      chosen.ID,
-		name:      path.Base(chosen.Path),
-		size:      chosen.Size,
-		release:   entry.release,
-		releaseID: entry.releaseID,
-		usedAt:    now,
-		askedAt:   now,
-	}
-	s.streams.byID[picked.id] = picked
-	s.streams.mu.Unlock()
-
-	return s.streamView(ctx, streamer, picked)
-}
-
 // giveUp drops the release being readied. With auto-select it moves on to the
 // next candidate the service or the client takes; otherwise, or when none is
 // left, the stream fails with why.
@@ -836,7 +730,7 @@ func (s *Service) giveUp(ctx context.Context, streamer Streamer, entry *streamEn
 		entry.askedAt = s.opts.Now()
 		s.streams.mu.Unlock()
 
-		view.State, view.Error, view.Release, view.Name, view.Files = "preparing", "", release.Title, "", nil
+		view.State, view.Error, view.Release, view.Name = "preparing", "", release.Title, ""
 		view.Progress, view.Speed, view.Upload, view.Peers, view.Seeders = 0, 0, 0, 0, release.Seeders
 		view.Candidates = s.candidatesView(entry)
 

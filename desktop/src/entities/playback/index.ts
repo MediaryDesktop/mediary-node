@@ -25,7 +25,6 @@ export { canFallBack, chooseSource } from './lib/source'
 export { thumbnailUrl } from './lib/urls'
 
 export { NowPlayingBar } from './ui/now-playing-bar/NowPlayingBar'
-export { ControlButton } from './ui/video-player/player-controls/control-button/ControlButton'
 export { VideoPlayer } from './ui/video-player/VideoPlayer'
 export { usePlayerEntrance } from './ui/video-player/lib/usePlayerEntrance'
 export type { VideoSource } from './lib/source'

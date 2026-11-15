@@ -14,7 +14,6 @@ export interface DrawerProps {
 	description?: ReactNode
 	headerAction?: ReactNode
 	closable?: boolean
-	overPlayer?: boolean
 	side?: 'right' | 'left' | 'bottom'
 	size?: 'sm' | 'md' | 'lg' | 'xl' | 'sheet'
 	children?: ReactNode
@@ -28,7 +27,6 @@ export function Drawer({
 	description,
 	headerAction,
 	closable = true,
-	overPlayer = false,
 	side = 'right',
 	size = 'md',
 	children,
@@ -39,15 +37,10 @@ export function Drawer({
 	return (
 		<Dialog.Root open={open} onOpenChange={onOpenChange}>
 			<Dialog.Portal>
-				<Dialog.Overlay className={clsx(styles.overlay, overPlayer && styles.overPlayer)} />
+				<Dialog.Overlay className={styles.overlay} />
 
 				<Dialog.Content
-					className={clsx(
-						styles.panel,
-						styles[side],
-						styles[size],
-						overPlayer && styles.overPlayer
-					)}
+					className={clsx(styles.panel, styles[side], styles[size])}
 					aria-describedby={undefined}
 					onOpenAutoFocus={onOpenAutoFocus}
 					onInteractOutside={event => {

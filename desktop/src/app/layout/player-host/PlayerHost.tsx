@@ -27,7 +27,7 @@ import {
 } from '@entities/playback'
 import { isMissingToolError } from '@entities/tool'
 
-import { $stream, $streamError, $streamTarget, streamCancelled, StreamFiles } from '@features/stream-torrent'
+import { $stream, $streamError, $streamTarget, streamCancelled } from '@features/stream-torrent'
 
 import styles from './PlayerHost.module.scss'
 import { PreparingStream } from './PreparingStream'
@@ -200,7 +200,6 @@ export function PlayerHost() {
 					: undefined
 			}
 			onFallback={canFallBack(source, loadedStream) ? () => setDirectFailedFor(fileId) : undefined}
-			extraControls={fileId < 0 ? <StreamFiles fileId={fileId} /> : undefined}
 		/>
 	)
 }
