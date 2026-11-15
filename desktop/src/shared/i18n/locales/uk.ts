@@ -102,7 +102,9 @@ export const uk: Translation = {
 		cancel: 'Скасувати',
 		breadcrumbs: 'Шлях навігації',
 		connected: 'Підключено',
-		connectionFailed: 'Не вдалося підключитися'
+		connectionFailed: 'Не вдалося підключитися',
+		loadFailed: 'Не вдалося завантажити. Перевірте, що нода працює, і спробуйте ще раз.',
+		retry: 'Спробувати ще раз'
 	},
 
 	lists: {

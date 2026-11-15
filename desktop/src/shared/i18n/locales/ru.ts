@@ -102,7 +102,9 @@ export const ru: Translation = {
 		cancel: 'Отменить',
 		breadcrumbs: 'Путь навигации',
 		connected: 'Подключено',
-		connectionFailed: 'Не удалось подключиться'
+		connectionFailed: 'Не удалось подключиться',
+		loadFailed: 'Не удалось загрузить. Проверьте, что нода работает, и попробуйте ещё раз.',
+		retry: 'Попробовать ещё раз'
 	},
 
 	lists: {

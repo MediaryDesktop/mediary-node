@@ -128,6 +128,9 @@ export type { TooltipProps } from './tooltip/Tooltip'
 export { Notice, noticeActionVariant } from './notice/Notice'
 export type { NoticeProps, NoticeTone } from './notice/Notice'
 
+export { LoadFailed } from './load-failed/LoadFailed'
+export type { LoadFailedProps } from './load-failed/LoadFailed'
+
 export { ListTile } from './list-tile/ListTile'
 export type { ListTileProps } from './list-tile/ListTile'
 

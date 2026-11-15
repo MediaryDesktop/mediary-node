@@ -104,7 +104,9 @@ export const en = {
 		cancel: 'Cancel',
 		breadcrumbs: 'Breadcrumb',
 		connected: 'Connected',
-		connectionFailed: 'Connection failed'
+		connectionFailed: 'Connection failed',
+		loadFailed: 'Could not load this. Check that the node is running and try again.',
+		retry: 'Try again'
 	},
 
 	lists: {

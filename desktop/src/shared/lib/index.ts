@@ -11,3 +11,6 @@ export { useUnitWatch } from './hooks/useUnitWatch'
 
 export { readStored, writeStored } from './storage/storage'
 export { useStoredToggle } from './storage/useStoredToggle'
+
+export { queryPhase } from './query/phase'
+export type { QueryPhase, QueryPhaseInput } from './query/phase'
