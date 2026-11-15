@@ -93,7 +93,7 @@ func TestStreamPlaysOneFileWithoutTheLibrary(t *testing.T) {
 // Downloading what is playing: the download gets the library's folder, not the
 // stream's, the stream plays on from it, and the next stream leaves it alone.
 func TestADownloadOfTheTorrentPlayingTakesItOver(t *testing.T) {
-	seeder, torrentFile, episodes := seed(t)
+	_, torrentFile, episodes, seederPort := seedOn(t)
 	stateDir := t.TempDir()
 	saveDir := filepath.Join(t.TempDir(), "Frieren")
 	c := newClient(t, stateDir)
@@ -121,7 +121,7 @@ func TestADownloadOfTheTorrentPlayingTakesItOver(t *testing.T) {
 	if err = c.Add(ctx, qbittorrent.AddRequest{Torrent: torrentFile, SavePath: saveDir}); err != nil {
 		t.Fatal(err)
 	}
-	seeder.AddClientPeer(c.cl)
+	dialSeeder(t, c, hash, seederPort)
 
 	waitFor(t, "the download", func() bool {
 		got, _ := c.Torrents(ctx, []string{hash})

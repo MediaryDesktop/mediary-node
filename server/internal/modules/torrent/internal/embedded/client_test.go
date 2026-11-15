@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/rand"
+	"net"
 	"os"
 	"path/filepath"
 	"testing"
@@ -117,6 +118,28 @@ func newClient(t *testing.T, stateDir string) *Client {
 	return c
 }
 
+// dialSeeder has the client dial the seeder on the loopback, as it would a peer
+// a tracker named. The seeder dialling the client instead is a single attempt
+// at its unspecified listen address, and on Windows that one is sometimes lost.
+func dialSeeder(t *testing.T, c *Client, hash string, port int) {
+	t.Helper()
+
+	var h metainfo.Hash
+	if err := h.FromHexString(hash); err != nil {
+		t.Fatal(err)
+	}
+
+	tt, ok := c.cl.Torrent(h)
+	if !ok {
+		t.Fatalf("the client does not hold %s", hash)
+	}
+
+	tt.AddPeers([]torrent.PeerInfo{{
+		Addr:    &net.TCPAddr{IP: net.IPv4(127, 0, 0, 1), Port: port},
+		Trusted: true,
+	}})
+}
+
 func waitFor(t *testing.T, what string, done func() bool) {
 	t.Helper()
 
@@ -131,7 +154,7 @@ func waitFor(t *testing.T, what string, done func() bool) {
 
 func TestDownloadsWhatItIsAskedForAndKeepsItAcrossARestart(t *testing.T) {
 	ctx := context.Background()
-	seeder, torrentFile, episodes := seed(t)
+	seeder, torrentFile, episodes, seederPort := seedOn(t)
 	hash := seeder.InfoHash().HexString()
 
 	stateDir := t.TempDir()
@@ -170,7 +193,7 @@ func TestDownloadsWhatItIsAskedForAndKeepsItAcrossARestart(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	seeder.AddClientPeer(c.cl)
+	dialSeeder(t, c, hash, seederPort)
 
 	waitFor(t, "the episode", func() bool {
 		got, _ := c.Torrents(ctx, []string{hash})

@@ -212,13 +212,9 @@ func TestAniListListsCarryCoversAndTheirNewestChange(t *testing.T) {
 		t.Fatalf("lists: %v", err)
 	}
 
-	var custom *CustomList
-
-	for i := range lists {
-		if lists[i].Name == "Favourites 2025" {
-			custom = &lists[i]
-		}
-	}
+	// A manga list of the same name joins once the manga collection, fetched in
+	// the background, arrives.
+	custom := findList(lists, ListMediaTypeAnime, "Favourites 2025")
 
 	if custom == nil {
 		t.Fatalf("the custom list must be listed, got %+v", lists)
