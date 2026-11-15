@@ -34,6 +34,9 @@ const (
 	maxFileSize = 1 << 30
 
 	publishInterval = 500 * time.Millisecond
+
+	// About ten seconds in all, with the delays of renamePatiently.
+	renameAttempts = 14
 )
 
 // install downloads, checks and unpacks one package, then switches the node to
@@ -82,7 +85,7 @@ func (s *Service) install(ctx context.Context, pkg *manifest.Package, archive ma
 	if err := os.RemoveAll(target); err != nil {
 		return fmt.Errorf("%s %s is in use: close it and try again: %w", pkg.Name, pkg.Version, err)
 	}
-	if err := os.Rename(staging, target); err != nil {
+	if err := renamePatiently(ctx, staging, target); err != nil {
 		return fmt.Errorf("move %s into place: %w", pkg.Name, err)
 	}
 
@@ -98,6 +101,28 @@ func (s *Service) install(ctx context.Context, pkg *manifest.Package, archive ma
 	s.removeOthers(base, pkg.Version)
 
 	return nil
+}
+
+// On Windows the programs just run for their version, or an antivirus scanning
+// them, keep the folder locked for a moment after they exit, and the rename
+// fails with "Access is denied". It goes through once they let go.
+func renamePatiently(ctx context.Context, from, to string) error {
+	delay := 50 * time.Millisecond
+
+	for attempt := 1; ; attempt++ {
+		err := os.Rename(from, to)
+		if err == nil || attempt == renameAttempts {
+			return err
+		}
+
+		select {
+		case <-ctx.Done():
+			return errors.Join(err, ctx.Err())
+		case <-time.After(delay):
+		}
+
+		delay = min(delay*2, time.Second)
+	}
 }
 
 func (s *Service) download(ctx context.Context, archive manifest.Archive, part string, j *job) error {
