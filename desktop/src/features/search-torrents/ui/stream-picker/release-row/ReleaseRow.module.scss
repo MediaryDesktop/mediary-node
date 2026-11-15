@@ -233,7 +233,7 @@
 
 	&.selected {
 		border-color: var(--border-stronger);
-		background: #63636336;
+		background: var(--row-selected);
 
 		.art img {
 			opacity: 0.45;

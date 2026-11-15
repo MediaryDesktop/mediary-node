@@ -123,6 +123,7 @@ $shadow-rgb: 10, 10, 10;
 	--badge-neutral-border: #{$light-800};
 	--bar-veil: rgba(9, 9, 11, 0.03);
 	--row-hover: rgba(9, 9, 11, 0.05);
+	--row-selected: rgba(9, 9, 11, 0.09);
 
 	--media: #000000;
 	--on-media: #ffffff;
@@ -228,6 +229,7 @@ $shadow-rgb: 10, 10, 10;
 	--badge-neutral-border: #2f2f2f;
 	--bar-veil: #23232320;
 	--row-hover: #3f3f3f39;
+	--row-selected: #63636336;
 }
 
 [data-theme="dark"] {
