@@ -239,33 +239,34 @@ func TestStreamNobodySharesGivesUp(t *testing.T) {
 	}
 }
 
-func TestAStreamThatFoundNoEpisodeOffersItsVideosAndPlaysTheOneChosen(t *testing.T) {
+func TestAFileChosenByHandIsAStreamOfItsOwn(t *testing.T) {
 	h := newHarness(t)
 	client := withStreaming(t, h)
 	client.set(debrid.Remote{Hash: frierenHash, Ready: true, Files: batchFiles()})
 	ctx := context.Background()
 
-	episode := 9
-	failed, err := h.svc.StartStream(ctx, StreamRequest{MediaRef: "anilist:154587", Magnet: frierenMagnet, Episode: &episode})
+	episode := 1
+	first, err := h.svc.StartStream(ctx, StreamRequest{MediaRef: "anilist:154587", Magnet: frierenMagnet, Episode: &episode})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if failed.State != "failed" {
-		t.Fatalf("state %q, want failed", failed.State)
+	if first.State != "ready" || first.Name != "Sousou no Frieren - 01.mkv" {
+		t.Fatalf("first %+v", first)
 	}
 
-	// The subtitle file is not offered: only what can be played.
-	if len(failed.Files) != 2 || failed.Files[0].ID != 0 || failed.Files[1].ID != 1 {
-		t.Fatalf("files %+v, want the two videos", failed.Files)
+	// The videos stay on offer while it plays, and the subtitle file is not one.
+	if len(first.Files) != 2 || first.Files[0].ID != 0 || first.Files[1].ID != 1 {
+		t.Fatalf("files %+v, want the two videos", first.Files)
 	}
 
-	chosen, err := h.svc.ChooseStreamFile(ctx, failed.ID, 1)
+	chosen, err := h.svc.ChooseStreamFile(ctx, first.ID, 1)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if chosen.State != "ready" || chosen.Name != "Sousou no Frieren - 02.mkv" || chosen.FileID != -failed.ID || chosen.Files != nil {
+	// Its own ID, so a player that holds the first one opens it afresh.
+	if chosen.ID == first.ID || chosen.State != "ready" || chosen.FileID != -chosen.ID || chosen.Name != "Sousou no Frieren - 02.mkv" {
 		t.Fatalf("chosen %+v", chosen)
 	}
 
@@ -275,12 +276,39 @@ func TestAStreamThatFoundNoEpisodeOffersItsVideosAndPlaysTheOneChosen(t *testing
 	}
 
 	// What gets marked watched is what the user asked for, not the file's own number.
-	if file.Episode == nil || *file.Episode != 9 || file.Key != "stream-"+frierenHash+"-1" {
+	if file.Episode == nil || *file.Episode != 1 || file.Key != "stream-"+frierenHash+"-1" {
 		t.Errorf("file %+v, episode %v", file, file.Episode)
 	}
 
-	if status, statusErr := h.svc.StreamStatus(ctx, failed.ID); statusErr != nil || status.State != "ready" {
-		t.Errorf("a later poll gave %+v, %v; the choice must stick", status, statusErr)
+	// The first still plays its own file.
+	if again, statusErr := h.svc.StreamStatus(ctx, first.ID); statusErr != nil || again.Name != "Sousou no Frieren - 01.mkv" {
+		t.Errorf("the first stream became %+v, %v", again, statusErr)
+	}
+
+	// Asking again for the same torrent and episode gives what was chosen.
+	asked, err := h.svc.StartStream(ctx, StreamRequest{MediaRef: "anilist:154587", Magnet: frierenMagnet, Episode: &episode})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if asked.ID != chosen.ID {
+		t.Errorf("asking again gave stream %d, want the chosen one %d", asked.ID, chosen.ID)
+	}
+}
+
+func TestAStreamThatFoundNoEpisodeStillOffersItsVideos(t *testing.T) {
+	h := newHarness(t)
+	client := withStreaming(t, h)
+	client.set(debrid.Remote{Hash: frierenHash, Ready: true, Files: batchFiles()})
+
+	episode := 9
+	failed, err := h.svc.StartStream(context.Background(), StreamRequest{MediaRef: "anilist:154587", Magnet: frierenMagnet, Episode: &episode})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if failed.State != "failed" || len(failed.Files) != 2 {
+		t.Fatalf("state %q, files %+v", failed.State, failed.Files)
 	}
 }
 
@@ -308,5 +336,9 @@ func TestOnlyAVideoOfTheStreamsTorrentCanBeChosen(t *testing.T) {
 
 	if status, statusErr := h.svc.StreamStatus(ctx, failed.ID); statusErr != nil || status.State != "failed" {
 		t.Errorf("refused choices changed the stream: %+v, %v", status, statusErr)
+	}
+
+	if len(h.svc.streams.byID) != 1 {
+		t.Errorf("refused choices left %d streams, want the one", len(h.svc.streams.byID))
 	}
 }

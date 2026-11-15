@@ -2198,7 +2198,7 @@ export interface paths {
 		put?: never
 		/**
 		 * Play another file of a stream's torrent
-		 * @description For when the file the node chose is not the one wanted, or it found none: pick one of the stream's files. A stream that failed for want of a video comes back to life; ask GET .../streams/{id} as before.
+		 * @description For when the file the node chose is not the one wanted: pick one of the stream's files. The answer is a stream of its own, with its own id and file_id; the first one is left as it was. Ask GET .../streams/{id} of the new one until it is ready.
 		 */
 		post: operations['chooseTorrentStreamFile']
 		delete?: never
@@ -5816,7 +5816,7 @@ export interface components {
 			 * @description Once ready: a negative ID the player takes like a library file's — /v1/playback/files/{id}/stream, /direct, /hls and POST /v1/playback all accept it.
 			 */
 			file_id?: number
-			/** @description The videos in the torrent, once the service or the built-in client knows them and until the stream is ready: what POST .../streams/{id}/file picks from when the file the node chose is not the one wanted, or it found none. */
+			/** @description The videos in the torrent, once the service or the built-in client knows them: what POST .../streams/{id}/file picks from when the file the node chose is not the one wanted. */
 			files?: components['schemas']['StreamVideo'][] | null
 			/** Format: int64 */
 			id: number

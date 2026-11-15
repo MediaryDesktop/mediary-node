@@ -13,6 +13,7 @@ import {
 	pollPauseFx,
 	streamCancelled,
 	streamFileChosen,
+	streamFileRefused,
 	streamRequested
 } from './model'
 import type { StreamTarget } from './model'
@@ -110,79 +111,92 @@ describe('torrent stream', () => {
 		expect(scope.getState($streamError)).toBeNull()
 	})
 
-	it('plays the file picked by hand after the node found none, and clears the failure', async () => {
-		const files = [{ id: 1, path: 'Frieren/Frieren - 02.mkv', size: 300 }]
-		const choose = vi.fn(() => Promise.resolve(ready))
+	describe('a file picked by hand while playing', () => {
+		const files = [
+			{ id: 0, path: 'Frieren/Frieren - 01.mkv', size: 300 },
+			{ id: 1, path: 'Frieren/Frieren - 02.mkv', size: 310 }
+		]
+		const playing = stream({ state: 'ready', progress: 1, file_id: -3, files })
 
-		const scope = fork({
-			handlers: [
-				[
-					startTorrentStreamFx,
-					() =>
-						Promise.resolve(
-							stream({
-								state: 'failed',
-								error: 'the torrent has no video for this episode',
-								files
-							})
-						)
-				],
-				[chooseTorrentStreamFileFx, choose]
-			]
+		it('opens the new file afresh once it is ready', async () => {
+			const choose = vi.fn(() =>
+				Promise.resolve(stream({ id: 4, state: 'ready', progress: 1, file_id: -4 }))
+			)
+			const scope = fork({
+				handlers: [
+					[startTorrentStreamFx, () => Promise.resolve(playing)],
+					[chooseTorrentStreamFileFx, choose]
+				]
+			})
+
+			await allSettled(streamRequested, { scope, params: TARGET })
+			expect(scope.getState($playerFileId)).toBe(-3)
+
+			await allSettled(streamFileChosen, { scope, params: { id: 3, fileId: 1 } })
+
+			expect(choose).toHaveBeenCalledWith({ id: 3, fileId: 1 })
+			expect(scope.getState($playerFileId)).toBe(-4)
 		})
 
-		await allSettled(streamRequested, { scope, params: TARGET })
+		it('goes back to preparing while the file is fetched, and plays it when it is', async () => {
+			const fetched = vi.fn(() =>
+				Promise.resolve(stream({ id: 4, state: 'ready', progress: 1, file_id: -4 }))
+			)
+			const scope = fork({
+				handlers: [
+					[startTorrentStreamFx, () => Promise.resolve(playing)],
+					[chooseTorrentStreamFileFx, () => Promise.resolve(stream({ id: 4, progress: 0.2 }))],
+					[fetchTorrentStreamFx, fetched],
+					[pollPauseFx, () => Promise.resolve()]
+				]
+			})
 
-		expect(scope.getState($stream)?.files).toEqual(files)
-		expect(scope.getState($streamError)).toBe('the torrent has no video for this episode')
+			await allSettled(streamRequested, { scope, params: TARGET })
+			await allSettled(streamFileChosen, { scope, params: { id: 3, fileId: 1 } })
 
-		await allSettled(streamFileChosen, { scope, params: 1 })
-
-		expect(choose).toHaveBeenCalledWith({ id: 3, fileId: 1 })
-		expect(scope.getState($playerFileId)).toBe(-3)
-		expect(scope.getState($streamError)).toBeNull()
-	})
-
-	it('keeps waiting when the picked file is still being fetched', async () => {
-		const fetched = vi.fn(() => Promise.resolve(ready))
-
-		const scope = fork({
-			handlers: [
-				[startTorrentStreamFx, () => Promise.resolve(stream({ state: 'failed', error: 'no video' }))],
-				[chooseTorrentStreamFileFx, () => Promise.resolve(stream({ progress: 0.2 }))],
-				[fetchTorrentStreamFx, fetched],
-				[pollPauseFx, () => Promise.resolve()]
-			]
+			expect(fetched).toHaveBeenCalledWith(4)
+			expect(scope.getState($playerFileId)).toBe(-4)
 		})
 
-		await allSettled(streamRequested, { scope, params: TARGET })
-		await allSettled(streamFileChosen, { scope, params: 0 })
+		it('says why a pick was refused and leaves the player on its file', async () => {
+			const refused: string[] = []
+			const scope = fork({
+				handlers: [
+					[startTorrentStreamFx, () => Promise.resolve(playing)],
+					[chooseTorrentStreamFileFx, () => Promise.reject(new Error('the torrent has no file 7'))]
+				]
+			})
+			const stop = streamFileRefused.watch(message => refused.push(message))
 
-		expect(fetched).toHaveBeenCalledTimes(1)
-		expect(scope.getState($playerFileId)).toBe(-3)
-	})
+			await allSettled(streamRequested, { scope, params: TARGET })
+			await allSettled(streamFileChosen, { scope, params: { id: 3, fileId: 7 } })
 
-	it('shows why the pick was refused', async () => {
-		const scope = fork({
-			handlers: [
-				[startTorrentStreamFx, () => Promise.resolve(stream({ state: 'failed', error: 'no video' }))],
-				[chooseTorrentStreamFileFx, () => Promise.reject(new Error('the torrent has no file 7'))]
-			]
+			stop()
+
+			expect(refused).toHaveLength(1)
+			expect(scope.getState($playerFileId)).toBe(-3)
 		})
 
-		await allSettled(streamRequested, { scope, params: TARGET })
-		await allSettled(streamFileChosen, { scope, params: 7 })
+		it('treats a pick the node gave up on as refused too', async () => {
+			const refused: string[] = []
+			const scope = fork({
+				handlers: [
+					[startTorrentStreamFx, () => Promise.resolve(playing)],
+					[
+						chooseTorrentStreamFileFx,
+						() => Promise.resolve(stream({ id: 4, state: 'failed', error: 'no seeds' }))
+					]
+				]
+			})
+			const stop = streamFileRefused.watch(message => refused.push(message))
 
-		expect(scope.getState($streamError)).not.toBeNull()
-		expect(scope.getState($playerFileId)).toBeNull()
-	})
+			await allSettled(streamRequested, { scope, params: TARGET })
+			await allSettled(streamFileChosen, { scope, params: { id: 3, fileId: 1 } })
 
-	it('does nothing without a stream to choose from', async () => {
-		const choose = vi.fn(() => Promise.resolve(ready))
-		const scope = fork({ handlers: [[chooseTorrentStreamFileFx, choose]] })
+			stop()
 
-		await allSettled(streamFileChosen, { scope, params: 0 })
-
-		expect(choose).not.toHaveBeenCalled()
+			expect(refused).toEqual(['no seeds'])
+			expect(scope.getState($playerFileId)).toBe(-3)
+		})
 	})
 })

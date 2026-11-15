@@ -32,6 +32,11 @@ export function usePlayerKeyboard(options: PlayerKeyboardOptions): void {
 		const onKey = (event: KeyboardEvent) => {
 			const onRangeInput = event.target instanceof HTMLInputElement && event.target.type === 'range'
 
+			// Keys typed into a panel opened over the player are the panel's.
+			if (event.target instanceof Element && event.target.closest('[role="dialog"]')) {
+				return
+			}
+
 			if (
 				(event.target instanceof HTMLInputElement && !onRangeInput) ||
 				event.ctrlKey ||

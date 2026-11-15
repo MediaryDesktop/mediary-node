@@ -5,6 +5,7 @@ export {
 	$streamVia,
 	streamCancelled,
 	streamFileChosen,
+	streamFileRefused,
 	streamPlaying,
 	streamRequested,
 	streamViaChanged
@@ -12,3 +13,4 @@ export {
 export type { StreamTarget, StreamVia } from './model/model'
 export { $autoSelect, autoSelectChanged } from './model/model'
 export { effectiveVia } from './lib/via'
+export { StreamFiles } from './ui/stream-files/StreamFiles'

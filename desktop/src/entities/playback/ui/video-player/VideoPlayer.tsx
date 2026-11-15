@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import { useMemo, useRef, useState } from 'react'
+import type { ReactNode } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { useAfterDelay } from '@shared/lib'
@@ -39,6 +40,8 @@ export interface VideoPlayerProps {
 
 	onFallback?: () => void
 
+	extraControls?: ReactNode
+
 	leaving?: boolean
 	onLeft?: () => void
 }
@@ -55,6 +58,7 @@ export function VideoPlayer({
 	onOpenExternally,
 	failureAction,
 	onFallback,
+	extraControls,
 	leaving = false,
 	onLeft
 }: VideoPlayerProps) {
@@ -218,6 +222,8 @@ export function VideoPlayer({
 						subtitle={subtitle}
 						onSubtitle={setSubtitle}
 					/>
+
+					{extraControls}
 				</PlayerControls>
 			)}
 		</div>

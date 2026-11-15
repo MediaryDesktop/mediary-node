@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { matchingFiles } from './PreparingStream'
+import { canChooseFile, matchingFiles, splitPath } from './files'
 
 const FILES = [
 	{ id: 0, path: 'Tempal Item no Chikara/Tempal_Item_no_Chikara_[01].mkv', size: 300 },
@@ -22,5 +22,23 @@ describe('matchingFiles', () => {
 
 	it('finds nothing for a word no file has', () => {
 		expect(matchingFiles(FILES, 'tempal 03')).toEqual([])
+	})
+})
+
+describe('splitPath', () => {
+	it('separates the file from the folder it is in', () => {
+		expect(splitPath('Show/Season 1/Show - 01.mkv')).toEqual({
+			name: 'Show - 01.mkv',
+			folder: 'Show/Season 1'
+		})
+		expect(splitPath('Show - 01.mkv')).toEqual({ name: 'Show - 01.mkv', folder: '' })
+	})
+})
+
+describe('canChooseFile', () => {
+	it('needs more than one video', () => {
+		expect(canChooseFile(undefined)).toBe(false)
+		expect(canChooseFile(FILES.slice(0, 1))).toBe(false)
+		expect(canChooseFile(FILES)).toBe(true)
 	})
 })

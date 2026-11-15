@@ -103,7 +103,7 @@ type TorrentStream struct {
 
 	Candidates []StreamCandidate `json:"candidates,omitempty" doc:"With auto: the releases lined up, best first. When one cannot be played the next is tried."`
 
-	Files []StreamVideo `json:"files,omitempty" doc:"The videos in the torrent, once the service or the built-in client knows them and until the stream is ready: what POST .../streams/{id}/file picks from when the file the node chose is not the one wanted, or it found none."`
+	Files []StreamVideo `json:"files,omitempty" doc:"The videos in the torrent, once the service or the built-in client knows them: what POST .../streams/{id}/file picks from when the file the node chose is not the one wanted."`
 }
 
 // StreamVideo is a video in a stream's torrent.
@@ -543,11 +543,21 @@ func (s *Service) streamFor(hash string, req StreamRequest) *streamEntry {
 		}
 	}
 
+	// The newest of them: a file picked by hand is a later stream of the same
+	// torrent and episode, and what the user chose is what plays again.
+	var same *streamEntry
+
 	for _, entry := range s.streams.byID {
-		if entry.via == req.Via && entry.hash == hash && sameEpisode(entry.episode, req.Episode) && sameEpisode(entry.season, req.Season) {
-			entry.usedAt, entry.askedAt = now, now
-			return entry
+		if entry.via == req.Via && entry.hash == hash && sameEpisode(entry.episode, req.Episode) &&
+			sameEpisode(entry.season, req.Season) && (same == nil || entry.id > same.id) {
+			same = entry
 		}
+	}
+
+	if same != nil {
+		same.usedAt, same.askedAt = now, now
+
+		return same
 	}
 
 	if s.streams.byID == nil {
@@ -701,7 +711,7 @@ func (s *Service) streamView(ctx context.Context, streamer Streamer, entry *stre
 		}
 	}
 
-	view.State, view.Progress, view.FileID, view.Files = "ready", 1, -entry.id, nil
+	view.State, view.Progress, view.FileID = "ready", 1, -entry.id
 
 	return view, nil
 }
@@ -719,8 +729,10 @@ func (s *Service) streamVideos(files []debrid.RemoteFile) []StreamVideo {
 	return videos
 }
 
-// ChooseStreamFile has a stream play the given file of its torrent, for when
-// the file the node chose is not the one wanted, or it found none to choose.
+// ChooseStreamFile has the given file of a stream's torrent play, for when the
+// file the node chose is not the one wanted. It is a stream of its own, with its
+// own ID, so a player showing the first one opens the new file afresh instead
+// of finding another file behind the ID it holds; the first is left as it was.
 // The episode the stream is for does not change: it is what the user asked for,
 // and what gets marked watched.
 func (s *Service) ChooseStreamFile(ctx context.Context, id int64, fileID int) (*TorrentStream, error) {
@@ -760,14 +772,33 @@ func (s *Service) ChooseStreamFile(ctx context.Context, id int64, fileID int) (*
 	}
 
 	s.streams.mu.Lock()
-	entry.file, entry.name, entry.size, entry.link = chosen.ID, path.Base(chosen.Path), chosen.Size, ""
-	entry.askedAt = s.opts.Now()
-	if len(entry.candidates) > 0 {
-		entry.candidates[entry.current].failed = ""
+	now := s.opts.Now()
+
+	if s.streams.byID == nil {
+		s.streams.byID = map[int64]*streamEntry{}
 	}
+
+	s.streams.last++
+	picked := &streamEntry{
+		id:        s.streams.last,
+		via:       entry.via,
+		hash:      entry.hash,
+		mediaRef:  entry.mediaRef,
+		title:     entry.title,
+		episode:   entry.episode,
+		season:    entry.season,
+		file:      chosen.ID,
+		name:      path.Base(chosen.Path),
+		size:      chosen.Size,
+		release:   entry.release,
+		releaseID: entry.releaseID,
+		usedAt:    now,
+		askedAt:   now,
+	}
+	s.streams.byID[picked.id] = picked
 	s.streams.mu.Unlock()
 
-	return s.streamView(ctx, streamer, entry)
+	return s.streamView(ctx, streamer, picked)
 }
 
 // giveUp drops the release being readied. With auto-select it moves on to the

@@ -26,6 +26,7 @@ export {
 	torrentSearchQuery,
 	torrentSettingsQuery,
 	torrentSourcesQuery,
+	torrentStreamQuery,
 	updateTorrentSourceMutation
 } from './model/model'
 

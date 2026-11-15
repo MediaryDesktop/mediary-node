@@ -71,7 +71,7 @@ func (h *Handler) registerStreams(api huma.API) {
 		Method:      http.MethodPost,
 		Path:        "/v1/torrent/streams/{id}/file",
 		Summary:     "Play another file of a stream's torrent",
-		Description: "For when the file the node chose is not the one wanted, or it found none: pick one of the stream's files. A stream that failed for want of a video comes back to life; ask GET .../streams/{id} as before.",
+		Description: "For when the file the node chose is not the one wanted: pick one of the stream's files. The answer is a stream of its own, with its own id and file_id; the first one is left as it was. Ask GET .../streams/{id} of the new one until it is ready.",
 		Tags:        []string{"torrent"},
 	}, func(ctx context.Context, in *ChooseTorrentStreamFileInput) (*TorrentStreamOutput, error) {
 		stream, err := h.svc.ChooseStreamFile(ctx, in.ID, in.Body.FileID)
