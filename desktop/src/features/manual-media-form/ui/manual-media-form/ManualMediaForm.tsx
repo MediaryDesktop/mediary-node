@@ -1,5 +1,5 @@
 import { useTranslation } from '@shared/i18n'
-import { Badge, Button, Icon, Modal, PageHeader, Textarea } from '@shared/ui'
+import { Button, Icon, Modal, PageHeader, Textarea } from '@shared/ui'
 
 import type { ManualDraft } from '@entities/media'
 
@@ -11,6 +11,7 @@ import { CompletenessCard } from '../completeness-card/CompletenessCard'
 import { DetailsTab } from '../details-tab/DetailsTab'
 import { GenresPanel } from '../genres-panel/GenresPanel'
 import { IdentityCard } from '../identity-card/IdentityCard'
+import { ListCard } from '../list-card/ListCard'
 import { PosterModal } from '../poster-modal/PosterModal'
 import { ReleaseHistory } from '../release-history/ReleaseHistory'
 import { SaveBar } from '../save-bar/SaveBar'
@@ -25,6 +26,7 @@ export interface ManualMediaFormProps {
 	initialCoverUrl?: string | null
 	cancelTo: string
 	typeUnset?: boolean
+	onCreateList?: (mediaType: ManualDraft['media_type']) => void
 }
 
 export function ManualMediaForm({
@@ -33,16 +35,20 @@ export function ManualMediaForm({
 	initialDraft,
 	initialCoverUrl,
 	cancelTo,
-	typeUnset = false
+	typeUnset = false,
+	onCreateList
 }: ManualMediaFormProps) {
 	const { t } = useTranslation()
 
 	const {
 		draft,
 		patch,
-		aiFilled,
 		errors,
 		typePicked,
+		listOffered,
+		lists,
+		listNames,
+		pickLists,
 		cover,
 		pickCover,
 		previewCoverUrl,
@@ -98,80 +104,76 @@ export function ManualMediaForm({
 
 					{typePicked && (
 						<div className={styles.cards}>
-							<SectionCard
-								icon='common/clapperboard'
-								title={t('manualMedia.sections.basics')}
-								subtitle={t('manualMedia.sections.basicsHint')}
-							>
-								<BasicsTab
-									draft={draft}
-									onChange={patch}
-									aiFilled={aiFilled}
-									disabled={saving}
-								/>
-							</SectionCard>
-
-							<SectionCard
-								icon='common/calendar-clock'
-								title={t('manualMedia.sections.releaseHistory')}
-								subtitle={t('manualMedia.sections.releaseHistoryHint')}
-							>
-								<ReleaseHistory
-									draft={draft}
-									onChange={patch}
-									aiFilled={aiFilled}
-									error={errors.year}
-									disabled={saving}
-								/>
-							</SectionCard>
-
-							<SectionCard
-								icon='common/tag'
-								title={t('manualMedia.sections.genres')}
-								subtitle={t('manualMedia.sections.genresHint')}
-							>
-								<GenresPanel
-									mediaType={draft.media_type}
-									genres={draft.genres ?? []}
-									onGenresChange={genres => patch({ genres })}
-									aiGenres={aiFilled.has('genres')}
-									disabled={saving}
-								/>
-							</SectionCard>
-
-							<SectionCard
-								icon='common/users'
-								title={t('manualMedia.sections.credits')}
-								subtitle={t('manualMedia.sections.creditsHint')}
-							>
-								<DetailsTab
-									draft={draft}
-									onChange={patch}
-									aiFilled={aiFilled}
-									disabled={saving}
-								/>
-							</SectionCard>
-
-							<SectionCard
-								icon='common/subtitles'
-								title={t('manualMedia.fields.description')}
-								subtitle={t('manualMedia.sections.descriptionHint')}
-							>
-								{aiFilled.has('description') && (
-									<Badge tone='accent' size='sm' className={styles.descriptionAi}>
-										{t('manualMedia.ai.filledBadge')}
-									</Badge>
+							<div className={styles.column}>
+								{listOffered && (
+									<ListCard
+										lists={lists}
+										value={listNames}
+										onChange={pickLists}
+										onCreateList={onCreateList && (() => onCreateList(draft.media_type))}
+										disabled={saving}
+									/>
 								)}
 
-								<Textarea
-									value={draft.description ?? ''}
-									onChange={event => patch({ description: event.target.value })}
-									placeholder={t('manualMedia.fields.descriptionPlaceholder')}
-									rows={8}
-									maxLength={10000}
-									disabled={saving}
-								/>
-							</SectionCard>
+								<SectionCard
+									icon='common/calendar-clock'
+									title={t('manualMedia.sections.releaseHistory')}
+									subtitle={t('manualMedia.sections.releaseHistoryHint')}
+								>
+									<ReleaseHistory
+										draft={draft}
+										onChange={patch}
+										error={errors.year}
+										disabled={saving}
+									/>
+								</SectionCard>
+
+								<SectionCard
+									icon='common/users'
+									title={t('manualMedia.sections.credits')}
+									subtitle={t('manualMedia.sections.creditsHint')}
+								>
+									<DetailsTab draft={draft} onChange={patch} disabled={saving} />
+								</SectionCard>
+							</div>
+
+							<div className={styles.column}>
+								<SectionCard
+									icon='common/clapperboard'
+									title={t('manualMedia.sections.basics')}
+									subtitle={t('manualMedia.sections.basicsHint')}
+								>
+									<BasicsTab draft={draft} onChange={patch} disabled={saving} />
+								</SectionCard>
+
+								<SectionCard
+									icon='common/tag'
+									title={t('manualMedia.sections.genres')}
+									subtitle={t('manualMedia.sections.genresHint')}
+								>
+									<GenresPanel
+										mediaType={draft.media_type}
+										genres={draft.genres ?? []}
+										onGenresChange={genres => patch({ genres })}
+										disabled={saving}
+									/>
+								</SectionCard>
+
+								<SectionCard
+									icon='common/subtitles'
+									title={t('manualMedia.fields.description')}
+									subtitle={t('manualMedia.sections.descriptionHint')}
+								>
+									<Textarea
+										value={draft.description ?? ''}
+										onChange={event => patch({ description: event.target.value })}
+										placeholder={t('manualMedia.fields.descriptionPlaceholder')}
+										rows={8}
+										maxLength={10000}
+										disabled={saving}
+									/>
+								</SectionCard>
+							</div>
 						</div>
 					)}
 				</div>

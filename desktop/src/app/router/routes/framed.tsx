@@ -10,7 +10,7 @@ import { ExtensionsPage, isExtensionsTab } from '@pages/extensions'
 import type { ExtensionsTab } from '@pages/extensions'
 import { HomePage } from '@pages/home'
 import { LibraryPage, ScanHistoryPage } from '@pages/library'
-import { ListDetailPage, ListsPage } from '@pages/lists'
+import { ListDetailPage, ListsPage, MyTitlesPage } from '@pages/lists'
 import { MediaPage } from '@pages/media'
 import { MediaFormPage } from '@pages/media-form'
 import { SearchPage } from '@pages/search'
@@ -67,6 +67,12 @@ const listsRoute = createRoute({
 	getParentRoute: () => framedRoute,
 	path: '/lists',
 	component: ListsPage
+})
+
+const myTitlesRoute = createRoute({
+	getParentRoute: () => framedRoute,
+	path: '/lists/my-titles',
+	component: MyTitlesPage
 })
 
 const listDetailRoute = createRoute({
@@ -161,6 +167,7 @@ export const framedTree = framedRoute.addChildren([
 	discoverRoute,
 	searchRoute,
 	listsRoute,
+	myTitlesRoute,
 	listDetailRoute,
 	mediaRoute,
 	createManualMediaRoute,

@@ -22,10 +22,11 @@ import type { IconLike } from '@shared/ui'
 
 import { useNodeData } from '@infra/node'
 
+import { manualTitlesQuery } from '@entities/media'
 import { LIST_MEDIA_TYPES, listTitleCount, MediaTypeIcon, trackerListsQuery } from '@entities/tracker'
 import type { ListMediaType, TrackerCustomList } from '@entities/tracker'
 
-import { manageListsModel } from '@features/manage-lists'
+import { ListOptionsMenu, manageListsModel } from '@features/manage-lists'
 
 import styles from './ListsPage.module.scss'
 import { ListCard } from './ui/list-card/ListCard'
@@ -78,7 +79,10 @@ export function ListsPage() {
 	const [sort, setSort] = useState<SortKey>('recent')
 	const [view, setView] = useState<View>('grid')
 
+	const manual = useUnit(manualTitlesQuery.$data)
+
 	useNodeData(trackerListsQuery)
+	useNodeData(manualTitlesQuery)
 
 	const allLists = useMemo(() => lists?.lists ?? [], [lists])
 
@@ -95,8 +99,29 @@ export function ListsPage() {
 		return sortLists(matched, sort)
 	}, [allLists, filter, search, sort])
 
+	// "My titles" is not one of the user's lists: it gathers every title they
+	// described, of every kind, and is always first.
+	const myTitles = useMemo(() => {
+		const titles = manual?.titles ?? []
+		const ofFilter = filter === 'all' ? titles : titles.filter(title => title.media_type === filter)
+		const needle = search.trim().toLowerCase()
+		const name = t('lists.myTitles.name')
+
+		const shown =
+			(filter === 'all' || ofFilter.length > 0) &&
+			(needle === '' || name.toLowerCase().includes(needle))
+
+		return shown
+			? {
+					name,
+					count: ofFilter.length,
+					covers: ofFilter.flatMap(title => (title.cover_image ? [title.cover_image] : []))
+				}
+			: null
+	}, [manual, filter, search, t])
+
 	const phase =
-		visible.length > 0
+		visible.length > 0 || myTitles
 			? 'lists'
 			: listsPending && allLists.length === 0
 				? 'loading'
@@ -198,10 +223,36 @@ export function ListsPage() {
 
 					{phase === 'lists' && (
 						<div className={clsx(styles.grid, view === 'rows' && styles.rows)}>
+							{myTitles && (
+								<ListCard
+									name={myTitles.name}
+									count={myTitles.count}
+									covers={myTitles.covers}
+									badge={
+										<>
+											<Icon name='common/wand-sparkles' size={18} />
+											{t('lists.myTitles.badge')}
+										</>
+									}
+									view={view}
+									onOpen={() => navigate({ to: '/lists/my-titles' })}
+								/>
+							)}
+
 							{visible.map(list => (
 								<ListCard
 									key={list.id}
-									list={list}
+									name={list.name}
+									count={list.count}
+									covers={list.covers ?? []}
+									updatedAt={list.updated_at}
+									badge={
+										<>
+											<MediaTypeIcon type={list.media_type} size={18} />
+											{t(`lists.mediaType.${list.media_type}`)}
+										</>
+									}
+									menu={<ListOptionsMenu list={list} />}
 									view={view}
 									onOpen={() =>
 										navigate({ to: '/lists/$listId', params: { listId: list.id } })

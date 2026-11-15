@@ -7,6 +7,7 @@ import { useNodeData } from '@infra/node'
 
 import { mediaDetailsModel } from '@entities/media'
 
+import { manageListsModel } from '@features/manage-lists'
 import { draftFromDetails, manualId, ManualMediaForm } from '@features/manual-media-form'
 import type { ManualMediaType } from '@features/manual-media-form'
 
@@ -16,6 +17,8 @@ export type MediaFormPageProps =
 	{ mode: 'create'; mediaType?: ManualMediaType; title: string } | { mode: 'edit'; mediaRef: string }
 
 export function MediaFormPage(props: MediaFormPageProps) {
+	const createList = useUnit(manageListsModel.createRequested)
+
 	if (props.mode === 'create') {
 		return (
 			<PageTransition className={styles.root}>
@@ -25,6 +28,7 @@ export function MediaFormPage(props: MediaFormPageProps) {
 					typeUnset={props.mediaType === undefined}
 					initialDraft={{ media_type: props.mediaType ?? 'anime', title: props.title }}
 					cancelTo='/search'
+					onCreateList={createList}
 				/>
 			</PageTransition>
 		)

@@ -1,31 +1,31 @@
 import clsx from 'clsx'
+import type { ReactNode } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { formatRelativeTime } from '@shared/lib'
 
-import { MediaTypeIcon } from '@entities/tracker'
-import type { TrackerCustomList } from '@entities/tracker'
-
-import { ListOptionsMenu } from '@features/manage-lists'
-
 import styles from './ListCard.module.scss'
 
 export interface ListCardProps {
-	list: TrackerCustomList
+	name: string
+	count: number
+	covers: string[]
+	updatedAt?: string | null
+	badge: ReactNode
+	menu?: ReactNode
 	view: 'grid' | 'rows'
 	onOpen: () => void
 }
 
-export function ListCard({ list, view, onOpen }: ListCardProps) {
+export function ListCard({ name, count, covers, updatedAt, badge, menu, view, onOpen }: ListCardProps) {
 	const { t, i18n } = useTranslation()
 
-	const covers = (list.covers ?? []).slice(0, 3)
-	const hidden = Math.max(list.count - covers.length, 0)
+	const shown = covers.slice(0, 3)
+	const hidden = Math.max(count - shown.length, 0)
 
 	const meta = [
-		list.count > 0 ? t('lists.titleCount', { count: list.count }) : t('lists.card.empty'),
-		list.updated_at &&
-			t('lists.card.updated', { when: formatRelativeTime(list.updated_at, i18n.language) })
+		count > 0 ? t('lists.titleCount', { count }) : t('lists.card.empty'),
+		updatedAt && t('lists.card.updated', { when: formatRelativeTime(updatedAt, i18n.language) })
 	].filter(Boolean)
 
 	return (
@@ -34,9 +34,7 @@ export function ListCard({ list, view, onOpen }: ListCardProps) {
 				<span className={styles.collage} aria-hidden>
 					{[0, 1, 2].map(slot => (
 						<span key={slot} className={styles.tile}>
-							{covers[slot] && (
-								<img src={covers[slot]} alt='' loading='lazy' draggable={false} />
-							)}
+							{shown[slot] && <img src={shown[slot]} alt='' loading='lazy' draggable={false} />}
 						</span>
 					))}
 
@@ -46,18 +44,13 @@ export function ListCard({ list, view, onOpen }: ListCardProps) {
 				</span>
 
 				<span className={styles.text}>
-					<span className={styles.name}>{list.name}</span>
+					<span className={styles.name}>{name}</span>
 					<span className={styles.meta}>{meta.join(' · ')}</span>
-					<span className={styles.badge}>
-						<MediaTypeIcon type={list.media_type} size={18} />
-						{t(`lists.mediaType.${list.media_type}`)}
-					</span>
+					<span className={styles.badge}>{badge}</span>
 				</span>
 			</button>
 
-			<div className={styles.menu}>
-				<ListOptionsMenu list={list} />
-			</div>
+			{menu && <div className={styles.menu}>{menu}</div>}
 		</article>
 	)
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 )
@@ -235,5 +236,39 @@ func TestSearchListsMatchingManualTitlesFirst(t *testing.T) {
 
 	if none := h.svc.searchManual(ctx, "anime", "  "); len(none) != 0 {
 		t.Fatalf("an empty query browses the source, not the user's titles: %+v", none)
+	}
+}
+
+func TestAllManualTitlesListsEveryKindLatestFirst(t *testing.T) {
+	h := newDetailsHarness(t)
+	ctx := context.Background()
+
+	empty, err := h.svc.AllManualTitles(ctx)
+	if err != nil || len(empty) != 0 {
+		t.Fatalf("no titles yet, got %v %v", empty, err)
+	}
+
+	donghua, err := h.svc.CreateManual(ctx, ManualDraft{MediaType: "anime", Title: "Donghua"})
+	if err != nil {
+		t.Fatalf("create anime: %v", err)
+	}
+
+	h.now = h.now.Add(time.Minute)
+
+	book, err := h.svc.CreateManual(ctx, ManualDraft{MediaType: "book", Title: "Zine"})
+	if err != nil {
+		t.Fatalf("create book: %v", err)
+	}
+
+	titles, err := h.svc.AllManualTitles(ctx)
+	if err != nil {
+		t.Fatalf("list: %v", err)
+	}
+
+	if len(titles) != 2 || titles[0].MediaRef != book.MediaRef || titles[1].MediaRef != donghua.MediaRef {
+		t.Fatalf("both kinds, the latest changed first, got %+v", titles)
+	}
+	if !titles[0].Editable || titles[1].MediaType != "anime" {
+		t.Fatalf("each is a summary of the manual title, got %+v", titles)
 	}
 }

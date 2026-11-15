@@ -10,6 +10,7 @@ import {
 	updateManualMediaFx
 } from '@entities/media'
 import type { ManualDraft } from '@entities/media'
+import { updateTrackerEntryFx } from '@entities/tracker'
 
 import { coverSource } from '../lib/cover'
 import type { CoverSelection } from '../lib/cover'
@@ -19,11 +20,14 @@ export interface ManualSave {
 	id: string | null
 	draft: ManualDraft
 	cover: CoverSelection
+	// The personal lists a new title goes into; empty for a title that needs none.
+	listNames?: string[]
 }
 
 export interface ManualSaved {
 	mediaRef: string
 	coverSaved: boolean
+	listSaved: boolean
 }
 
 // Saving a hand-made title is two requests: the title, then its cover. The cover
@@ -31,10 +35,24 @@ export interface ManualSaved {
 // that fails does not undo a title that was saved — the title is kept, and the
 // caller is told the cover did not take.
 export const saveManualMediaFx = createEffect(
-	async ({ id, draft, cover }: ManualSave): Promise<ManualSaved> => {
+	async ({ id, draft, cover, listNames }: ManualSave): Promise<ManualSaved> => {
 		const saved =
 			id === null ? await createManualMediaFx(draft) : await updateManualMediaFx({ id, draft })
 		const savedId = id ?? manualId(saved.media.media_ref)
+		const mediaRef = saved.media.media_ref
+
+		// Like the cover, a list that does not take leaves the saved title in place.
+		let listSaved = true
+		if (id === null && listNames && listNames.length > 0) {
+			try {
+				await updateTrackerEntryFx({
+					mediaRef,
+					patch: { status: 'PLANNING', custom_lists: listNames }
+				})
+			} catch {
+				listSaved = false
+			}
+		}
 
 		try {
 			if (cover.kind === 'remove') {
@@ -47,9 +65,9 @@ export const saveManualMediaFx = createEffect(
 				}
 			}
 
-			return { mediaRef: saved.media.media_ref, coverSaved: true }
+			return { mediaRef, coverSaved: true, listSaved }
 		} catch {
-			return { mediaRef: saved.media.media_ref, coverSaved: false }
+			return { mediaRef, coverSaved: false, listSaved }
 		}
 	}
 )

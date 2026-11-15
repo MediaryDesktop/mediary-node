@@ -115,6 +115,12 @@ type ManualOutput struct {
 	}
 }
 
+type ManualListOutput struct {
+	Body struct {
+		Titles []service.MediaSummary `json:"titles" doc:"Every title the user described, of every kind, the latest changed first."`
+	}
+}
+
 type SuggestInput struct {
 	Body service.ManualHint
 }
@@ -171,6 +177,25 @@ func (h *Handler) registerManual(api huma.API) {
 
 		out := &ManualOutput{}
 		out.Body.Media = details
+
+		return out, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "listManualMedia",
+		Method:      http.MethodGet,
+		Path:        "/v1/media/manual",
+		Summary:     "Every title the user described",
+		Description: "The user's own titles of every kind — \"My titles\". A title is here whether or not it is on a list, and anime and manga are here without AniList: it is the one place every manual title can be found.",
+		Tags:        []string{"media"},
+	}, func(ctx context.Context, _ *struct{}) (*ManualListOutput, error) {
+		titles, err := h.svc.AllManualTitles(ctx)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		out := &ManualListOutput{}
+		out.Body.Titles = titles
 
 		return out, nil
 	})

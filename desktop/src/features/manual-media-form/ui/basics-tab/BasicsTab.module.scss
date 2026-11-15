@@ -1,7 +1,7 @@
 .grid {
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
-	gap: 1.25rem 1rem;
+	grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
+	gap: 1.25rem 0.75rem;
 
 	.counter {
 		display: flex;

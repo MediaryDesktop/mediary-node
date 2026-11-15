@@ -2875,6 +2875,26 @@ components:
         - media_type
         - title
       type: object
+    ManualListOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/ManualListOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        titles:
+          description: Every title the user described, of every kind, the latest changed first.
+          items:
+            $ref: "#/components/schemas/MediaSummary"
+          type:
+            - array
+            - "null"
+      required:
+        - titles
+      type: object
     ManualOutputBody:
       additionalProperties: false
       properties:
@@ -8281,6 +8301,25 @@ paths:
       tags:
         - media
   /v1/media/manual:
+    get:
+      description: "The user's own titles of every kind — \"My titles\". A title is here whether or not it is on a list, and anime and manga are here without AniList: it is the one place every manual title can be found."
+      operationId: listManualMedia
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ManualListOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Every title the user described
+      tags:
+        - media
     post:
       description: Keeps a title the user describes themselves, for anything AniList, TMDB and the book sources do not have. It is the user's own data and never ages out. It gets a manual:<id> reference that every other endpoint takes — the tracker's, the library's — like a source's.
       operationId: createManualMedia

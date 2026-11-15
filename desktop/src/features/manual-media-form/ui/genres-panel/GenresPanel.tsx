@@ -18,11 +18,10 @@ export interface GenresPanelProps {
 	mediaType: ManualMediaType
 	genres: string[]
 	onGenresChange: (next: string[]) => void
-	aiGenres?: boolean
 	disabled?: boolean
 }
 
-export function GenresPanel({ mediaType, genres, onGenresChange, aiGenres, disabled }: GenresPanelProps) {
+export function GenresPanel({ mediaType, genres, onGenresChange, disabled }: GenresPanelProps) {
 	const { t } = useTranslation()
 	const [query, setQuery] = useState('')
 
@@ -38,7 +37,7 @@ export function GenresPanel({ mediaType, genres, onGenresChange, aiGenres, disab
 		onGenresChange(genres.includes(genre) ? genres.filter(item => item !== genre) : [...genres, genre])
 
 	return (
-		<Field as='div' label={t('manualMedia.fields.genres')} ai={aiGenres}>
+		<Field as='div' label={t('manualMedia.fields.genres')}>
 			<div className={styles.genres}>
 				<TagField
 					value={genres}

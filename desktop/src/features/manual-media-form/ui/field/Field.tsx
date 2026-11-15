@@ -1,33 +1,18 @@
 import type { ReactNode } from 'react'
 
-import { useTranslation } from '@shared/i18n'
-import { Badge } from '@shared/ui'
-
 import styles from './Field.module.scss'
 
 export interface FieldProps {
 	label: string
 	hint?: string
 	error?: string
-	ai?: boolean
 	required?: boolean
 	as?: 'label' | 'div'
 	children: ReactNode
 	className?: string
 }
 
-export function Field({
-	label,
-	hint,
-	error,
-	ai,
-	required,
-	as: Tag = 'label',
-	children,
-	className
-}: FieldProps) {
-	const { t } = useTranslation()
-
+export function Field({ label, hint, error, required, as: Tag = 'label', children, className }: FieldProps) {
 	return (
 		<Tag className={[styles.field, className].filter(Boolean).join(' ')}>
 			<span className={styles.labelRow}>
@@ -35,12 +20,6 @@ export function Field({
 					{label}
 					{required && <span className={styles.required}>*</span>}
 				</span>
-
-				{ai && (
-					<Badge tone='accent' size='sm'>
-						{t('manualMedia.ai.filledBadge')}
-					</Badge>
-				)}
 			</span>
 
 			{children}

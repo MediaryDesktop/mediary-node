@@ -164,6 +164,15 @@ export const deleteManualMediaFx = createNodeRequestFx<string, void>(id => ({
 	timeout: 15_000
 }))
 
+export interface ManualTitlesResponse {
+	titles: MediaSummary[] | null
+}
+
+// Every title the user described, of every kind — "My titles".
+export const fetchManualTitlesFx = createNodeRequestFx<void, ManualTitlesResponse>(() => ({
+	url: '/v1/media/manual'
+}))
+
 export const suggestManualMediaFx = createNodeRequestFx<ManualHint, ManualSuggestion>(hint => ({
 	url: '/v1/media/manual/suggest',
 	method: 'POST',

@@ -11,6 +11,7 @@ import {
 	deleteManualMediaFx,
 	fetchAISettingsFx,
 	fetchGoogleBooksSettingsFx,
+	fetchManualTitlesFx,
 	fetchMediaDetailsFx,
 	fetchMediaEpisodesFx,
 	fetchMediaFilterOptionsFx,
@@ -103,6 +104,22 @@ export const updateManualMediaMutation = createMutation({
 export const deleteManualMediaMutation = createMutation({
 	effect: deleteManualMediaFx,
 	name: 'deleteManualMedia'
+})
+
+export const manualTitlesQuery = createQuery({
+	effect: fetchManualTitlesFx,
+	name: 'manualTitles'
+})
+
+// The form saves through the effects themselves, so they are what refreshes it.
+keepFresh(manualTitlesQuery, {
+	triggers: [
+		createManualMediaFx.done,
+		updateManualMediaFx.done,
+		deleteManualMediaFx.done,
+		setManualCoverFx.done,
+		deleteManualCoverFx.done
+	]
 })
 
 export const suggestManualMediaMutation = createMutation({

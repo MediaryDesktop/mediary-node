@@ -1,6 +1,6 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { getApiProblems, HttpRequestError, problemDetail } from '@shared/api'
 import { isLanguage, useTranslation } from '@shared/i18n'
@@ -9,6 +9,7 @@ import { toast } from '@shared/ui'
 
 import { aiSettingsQuery, searchManualCoversFx, suggestManualMediaFx } from '@entities/media'
 import type { ManualDraft, ManualHint } from '@entities/media'
+import { createTrackerListMutation, isLocalTrackerType, trackerListsQuery } from '@entities/tracker'
 
 import { saveManualMediaFx } from '../model/model'
 
@@ -40,7 +41,12 @@ export function useManualMediaForm({
 	const { t, i18n } = useTranslation()
 	const navigate = useNavigate()
 	const goBack = useGoBack(cancelTo)
-	const [refreshAISettings, saveManual] = useUnit([aiSettingsQuery.start, saveManualMediaFx])
+	const [refreshAISettings, saveManual, loadLists] = useUnit([
+		aiSettingsQuery.start,
+		saveManualMediaFx,
+		trackerListsQuery.start
+	])
+	const listCollection = useUnit(trackerListsQuery.$data)
 
 	const [draft, setDraft] = useState<ManualDraft>(initialDraft)
 	const [aiFilled, setAiFilled] = useState<ReadonlySet<AiMergeField>>(new Set())
@@ -48,10 +54,37 @@ export function useManualMediaForm({
 	const autoCover = useRef(false)
 	const [errors, setErrors] = useState<Record<string, string>>({})
 	const [typePicked, setTypePicked] = useState(!typeUnset)
+	const [listNames, setListNames] = useState<string[]>([])
 	const [saving, setSaving] = useState(false)
 	const [suggesting, setSuggesting] = useState(false)
 	const [deleteOpen, setDeleteOpen] = useState(false)
 	const [posterOpen, setPosterOpen] = useState(false)
+
+	// Every new title is in "My titles" already; one of the user's own lists is
+	// an extra place for it. Anime and manga have none to offer: their lists are
+	// AniList's, which a hand-made title is not on.
+	const listOffered = mode === 'create' && typePicked && isLocalTrackerType(draft.media_type)
+	const lists = (listCollection?.lists ?? []).filter(list => list.media_type === draft.media_type)
+
+	useEffect(() => {
+		if (mode === 'create') {
+			loadLists()
+		}
+	}, [mode, loadLists])
+
+	const draftTypeRef = useRef(draft.media_type)
+
+	useEffect(() => {
+		draftTypeRef.current = draft.media_type
+	}, [draft.media_type])
+
+	useEffect(() => {
+		return createTrackerListMutation.finished.success.watch(({ result }) => {
+			if (mode === 'create' && result.media_type === draftTypeRef.current) {
+				setListNames(current => (current.includes(result.name) ? current : [...current, result.name]))
+			}
+		})
+	}, [mode])
 
 	const requireType = (action: 'save' | 'suggest') => {
 		if (typePicked) {
@@ -67,6 +100,10 @@ export function useManualMediaForm({
 	const patch = (next: Partial<ManualDraft>) => {
 		if (next.media_type) {
 			setTypePicked(true)
+
+			if (next.media_type !== draft.media_type) {
+				setListNames([])
+			}
 		}
 
 		setDraft(current => ({
@@ -223,10 +260,19 @@ export function useManualMediaForm({
 		setSaving(true)
 
 		try {
-			const saved = await saveManual({ id: mode === 'create' ? null : (id ?? null), draft, cover })
+			const saved = await saveManual({
+				id: mode === 'create' ? null : (id ?? null),
+				draft,
+				cover,
+				listNames: listOffered ? listNames : []
+			})
 
 			if (!saved.coverSaved) {
 				toast.error(t('manualMedia.cover.failed'), { id: 'manual-media-cover' })
+			}
+
+			if (!saved.listSaved) {
+				toast.error(t('manualMedia.list.failed'), { id: 'manual-media-list' })
 			}
 
 			toast.success(t(mode === 'create' ? 'manualMedia.saved' : 'manualMedia.updated'), {
@@ -282,6 +328,10 @@ export function useManualMediaForm({
 		aiFilled,
 		errors,
 		typePicked,
+		listOffered,
+		lists,
+		listNames,
+		pickLists: setListNames,
 		cover,
 		pickCover,
 		previewCoverUrl,

@@ -33,6 +33,11 @@ interface SelectDropdownBaseProps {
 	startIcon?: ReactNode
 	accentWhenSelected?: boolean
 	footer?: ReactNode
+	// The panel sits above nearly everything by default, so it does not vanish
+	// under its own anchor. A select whose footer can open a dialog (a "new
+	// list" button and the like) needs the opposite: a dialog opened afterward
+	// should cover it, not the other way round. Pass a lower value for that case.
+	panelZIndex?: string | number
 }
 
 export type SelectDropdownProps = SelectDropdownBaseProps &
@@ -53,7 +58,8 @@ export function SelectDropdown(props: SelectDropdownProps) {
 		id,
 		startIcon,
 		accentWhenSelected = false,
-		footer
+		footer,
+		panelZIndex
 	} = props
 
 	const { t } = useTranslation()
@@ -77,6 +83,10 @@ export function SelectDropdown(props: SelectDropdownProps) {
 	const selectedOptions = selectedOptionsOf(options, selected)
 	const visible = filterOptions(options, query)
 	const activeIndex = activeIndexOf(visible, activeValue ?? selected[0])
+	// Only a real hover or keyboard step should paint an option as active — the
+	// fallback above (to the selected item) exists purely to give aria-activedescendant
+	// and keyboard stepping a sensible starting point, not to highlight anything visually.
+	const visualActiveIndex = activeValue === null ? -1 : activeIndex
 
 	const commit = (next: string[]) => {
 		if (props.mode === 'multiple') {
@@ -323,7 +333,12 @@ export function SelectDropdown(props: SelectDropdownProps) {
 						ref={panelRef}
 						className={styles.panel}
 						data-floating-panel=''
-						style={{ top: position.top, left: position.left, width: position.width }}
+						style={{
+							top: position.top,
+							left: position.left,
+							width: position.width,
+							...(panelZIndex !== undefined ? { zIndex: panelZIndex } : {})
+						}}
 					>
 						<div
 							id={listId}
@@ -331,6 +346,7 @@ export function SelectDropdown(props: SelectDropdownProps) {
 							aria-multiselectable={multiple || undefined}
 							className={styles.list}
 							style={{ maxHeight: position.maxHeight }}
+							onMouseLeave={() => setActiveValue(null)}
 						>
 							{visible.map((option, index) => (
 								<Option
@@ -338,7 +354,7 @@ export function SelectDropdown(props: SelectDropdownProps) {
 									id={`${listId}-${index}`}
 									option={option}
 									selected={selected.includes(option.value)}
-									active={index === activeIndex}
+									active={index === visualActiveIndex}
 									multiple={multiple}
 									onSelect={toggleOption}
 									onHover={() => setActiveValue(option.value)}

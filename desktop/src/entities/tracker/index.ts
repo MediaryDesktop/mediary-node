@@ -36,7 +36,7 @@ export {
 	trackerListsQuery
 } from './model/lists'
 
-export { createTrackerListFx, fetchTrackerListsFx } from './api/api'
+export { createTrackerListFx, fetchTrackerListsFx, updateTrackerEntryFx } from './api/api'
 
 export type { TrackerStatus } from './model/model'
 

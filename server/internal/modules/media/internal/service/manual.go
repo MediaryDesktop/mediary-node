@@ -225,6 +225,46 @@ func (s *Service) ManualTitles(ctx context.Context, mediaType string) ([]MediaDe
 	return titles, nil
 }
 
+// manualKinds are the kinds a title can be described as, in the order "My
+// titles" groups them when two were changed at the same moment.
+var manualKinds = []string{mediaTypeAnime, mediaTypeManga, MediaTypeMovie, MediaTypeSeries, MediaTypeDorama, MediaTypeBook}
+
+// AllManualTitles lists every title the user described, of every kind, the
+// latest changed first. It is "My titles": unlike the tracker's lists it does
+// not depend on a list entry or on AniList, so a title made here is never out
+// of sight.
+func (s *Service) AllManualTitles(ctx context.Context) ([]MediaSummary, error) {
+	var rows []store.ManualTitle
+
+	for _, kind := range manualKinds {
+		kindRows, err := s.store.ManualTitles(ctx, kind)
+		if err != nil {
+			return nil, apperr.Wrap(err, apperr.KindInternal, "list manual titles")
+		}
+
+		rows = append(rows, kindRows...)
+	}
+
+	slices.SortStableFunc(rows, func(a, b store.ManualTitle) int {
+		return b.UpdatedAt.Compare(a.UpdatedAt)
+	})
+
+	titles := make([]MediaSummary, 0, len(rows))
+
+	for i := range rows {
+		draft, err := decodeManual(rows[i].Details)
+		if err != nil {
+			s.logger.Warn().Err(err).Str("id", rows[i].ID).Msg("skip an unreadable manual title")
+			continue
+		}
+
+		details := s.manualDetails(rows[i].ID, draft, rows[i].UpdatedAt, rows[i].Cover)
+		titles = append(titles, summaryOf(&details))
+	}
+
+	return titles, nil
+}
+
 // manualTitle reads one title; nil when there is none.
 func (s *Service) manualTitle(ctx context.Context, id string) (*MediaDetails, error) {
 	row, err := s.store.ManualTitle(ctx, id)

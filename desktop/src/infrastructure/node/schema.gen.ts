@@ -1019,7 +1019,11 @@ export interface paths {
 			path?: never
 			cookie?: never
 		}
-		get?: never
+		/**
+		 * Every title the user described
+		 * @description The user's own titles of every kind — "My titles". A title is here whether or not it is on a list, and anime and manga are here without AniList: it is the one place every manual title can be found.
+		 */
+		get: operations['listManualMedia']
 		put?: never
 		/**
 		 * Describe a title no source knows
@@ -3898,6 +3902,16 @@ export interface components {
 			 */
 			year?: number
 		}
+		ManualListOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ManualListOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description Every title the user described, of every kind, the latest changed first. */
+			titles: components['schemas']['MediaSummary'][] | null
+		}
 		ManualOutputBody: {
 			/**
 			 * Format: uri
@@ -6071,6 +6085,7 @@ export type SchemaMangaSourceProblemBody = components['schemas']['MangaSourcePro
 export type SchemaMangaSourcesOutputBody = components['schemas']['MangaSourcesOutputBody']
 export type SchemaManualDraft = components['schemas']['ManualDraft']
 export type SchemaManualHint = components['schemas']['ManualHint']
+export type SchemaManualListOutputBody = components['schemas']['ManualListOutputBody']
 export type SchemaManualOutputBody = components['schemas']['ManualOutputBody']
 export type SchemaManualSuggestion = components['schemas']['ManualSuggestion']
 export type SchemaMatch = components['schemas']['Match']
@@ -8313,6 +8328,35 @@ export interface operations {
 				}
 				content: {
 					'application/json': components['schemas']['FilterOptionsOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listManualMedia: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ManualListOutputBody']
 				}
 			}
 			/** @description Error */

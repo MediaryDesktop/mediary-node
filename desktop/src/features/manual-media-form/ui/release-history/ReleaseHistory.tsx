@@ -2,7 +2,6 @@ import { useTranslation } from '@shared/i18n'
 
 import type { ManualDraft } from '@entities/media'
 
-import type { AiMergeField } from '../../lib/ai-merge'
 import { dateFromParts, partsFromDate } from '../../lib/dates'
 import { DatePickerField } from '../date-picker-field/DatePickerField'
 
@@ -11,12 +10,11 @@ import styles from './ReleaseHistory.module.scss'
 export interface ReleaseHistoryProps {
 	draft: ManualDraft
 	onChange: (patch: Partial<ManualDraft>) => void
-	aiFilled: ReadonlySet<AiMergeField>
 	error?: string
 	disabled?: boolean
 }
 
-export function ReleaseHistory({ draft, onChange, aiFilled, error, disabled }: ReleaseHistoryProps) {
+export function ReleaseHistory({ draft, onChange, error, disabled }: ReleaseHistoryProps) {
 	const { t } = useTranslation()
 
 	return (
@@ -39,7 +37,6 @@ export function ReleaseHistory({ draft, onChange, aiFilled, error, disabled }: R
 				<DatePickerField
 					label={t('manualMedia.fields.endDate')}
 					value={dateFromParts(draft.end_year, draft.end_month, draft.end_day)}
-					ai={aiFilled.has('end_year')}
 					onChange={value => {
 						const parts = partsFromDate(value)
 						onChange({ end_year: parts.year, end_month: parts.month, end_day: parts.day })

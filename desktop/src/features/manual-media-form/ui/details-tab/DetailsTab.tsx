@@ -3,7 +3,6 @@ import { Checkbox } from '@shared/ui'
 
 import type { ManualDraft } from '@entities/media'
 
-import type { AiMergeField } from '../../lib/ai-merge'
 import { Field } from '../field/Field'
 import { TagField } from '../tag-field/TagField'
 
@@ -12,11 +11,10 @@ import styles from './DetailsTab.module.scss'
 export interface DetailsTabProps {
 	draft: ManualDraft
 	onChange: (patch: Partial<ManualDraft>) => void
-	aiFilled: ReadonlySet<AiMergeField>
 	disabled?: boolean
 }
 
-export function DetailsTab({ draft, onChange, aiFilled, disabled }: DetailsTabProps) {
+export function DetailsTab({ draft, onChange, disabled }: DetailsTabProps) {
 	const { t } = useTranslation()
 	const bookish = draft.media_type === 'manga' || draft.media_type === 'book'
 
@@ -25,7 +23,6 @@ export function DetailsTab({ draft, onChange, aiFilled, disabled }: DetailsTabPr
 			<Field
 				as='div'
 				label={bookish ? t('manualMedia.fields.authors') : t('manualMedia.fields.studios')}
-				ai={aiFilled.has(bookish ? 'authors' : 'studios')}
 			>
 				<TagField
 					value={(bookish ? draft.authors : draft.studios) ?? []}
@@ -39,7 +36,6 @@ export function DetailsTab({ draft, onChange, aiFilled, disabled }: DetailsTabPr
 				as='div'
 				label={t('manualMedia.fields.synonyms')}
 				hint={t('manualMedia.fields.synonymsHint')}
-				ai={aiFilled.has('synonyms')}
 			>
 				<TagField
 					value={draft.synonyms ?? []}

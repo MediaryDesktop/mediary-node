@@ -8,6 +8,7 @@ import {
 	updateManualMediaFx
 } from '@entities/media'
 import type { ManualDraft } from '@entities/media'
+import { updateTrackerEntryFx } from '@entities/tracker'
 
 import { saveManualMediaFx } from './model'
 
@@ -34,7 +35,7 @@ describe('saving a hand-made title', () => {
 		})
 
 		expect(status).toBe('done')
-		expect(value).toEqual({ mediaRef: 'manual:abc', coverSaved: true })
+		expect(value).toEqual({ mediaRef: 'manual:abc', coverSaved: true, listSaved: true })
 		expect(calls).toEqual(['create', JSON.stringify({ id: 'abc', source: { url: 'https://img/x.jpg' } })])
 	})
 
@@ -71,7 +72,7 @@ describe('saving a hand-made title', () => {
 		})
 
 		expect(status).toBe('done')
-		expect(value).toEqual({ mediaRef: 'manual:abc', coverSaved: false })
+		expect(value).toEqual({ mediaRef: 'manual:abc', coverSaved: false, listSaved: true })
 	})
 
 	it('fails as a whole when the title itself is refused', async () => {
@@ -110,5 +111,43 @@ describe('saving a hand-made title', () => {
 
 		expect(setCover).not.toHaveBeenCalled()
 		expect(removeCover).not.toHaveBeenCalled()
+	})
+
+	it('puts a new title into the chosen lists', async () => {
+		const track = vi.fn(() => Promise.resolve({} as never))
+		const scope = fork({
+			handlers: [
+				[createManualMediaFx, () => saved('manual:abc')],
+				[updateTrackerEntryFx, track]
+			]
+		})
+
+		const { value } = await allSettled(saveManualMediaFx, {
+			scope,
+			params: { id: null, draft: DRAFT, cover: { kind: 'keep' }, listNames: ['Cosy', 'Weekend'] }
+		})
+
+		expect(track).toHaveBeenCalledWith({
+			mediaRef: 'manual:abc',
+			patch: { status: 'PLANNING', custom_lists: ['Cosy', 'Weekend'] }
+		})
+		expect(value).toMatchObject({ listSaved: true })
+	})
+
+	it('keeps a saved title that could not join its lists, and says so', async () => {
+		const scope = fork({
+			handlers: [
+				[createManualMediaFx, () => saved('manual:abc')],
+				[updateTrackerEntryFx, () => Promise.reject(new Error('offline'))]
+			]
+		})
+
+		const { status, value } = await allSettled(saveManualMediaFx, {
+			scope,
+			params: { id: null, draft: DRAFT, cover: { kind: 'keep' }, listNames: ['Cosy'] }
+		})
+
+		expect(status).toBe('done')
+		expect(value).toMatchObject({ mediaRef: 'manual:abc', listSaved: false })
 	})
 })

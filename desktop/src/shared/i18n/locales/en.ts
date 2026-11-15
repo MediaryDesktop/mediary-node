@@ -156,6 +156,12 @@ export const en = {
 			grid: 'Grid view',
 			rows: 'List view'
 		},
+		myTitles: {
+			name: 'My titles',
+			badge: 'Every kind',
+			empty: 'No titles of your own yet',
+			emptyHint: 'Titles you add by hand land here, whatever their kind.'
+		},
 		card: {
 			empty: 'Empty',
 			updated: 'Updated {{when}}',
@@ -894,6 +900,14 @@ export const en = {
 			recommended: 'Recommended',
 			additional: 'Additional'
 		},
+		list: {
+			title: 'Your lists',
+			hint: 'The title is in My titles either way. A list of your own is an extra place for it.',
+			label: 'Lists',
+			placeholder: 'Choose a list…',
+			create: 'New list',
+			failed: 'The title was saved, but could not be added to the list'
+		},
 		validation: {
 			titleRequired: 'A title needs a name',
 			typeRequired: 'Choose a kind first: anime, manga, a book…'
@@ -908,8 +922,7 @@ export const en = {
 			needsKey: 'Set up the AI in Settings to use this',
 			openSettings: 'Open AI settings',
 			limitReached: "Today's free AI requests are used up",
-			addOwn: 'Add your own AI',
-			filledBadge: 'AI'
+			addOwn: 'Add your own AI'
 		},
 		assistant: {
 			title: 'AI assistant',
