@@ -103,7 +103,8 @@ services:
 |---|---|
 | `npm run dev` | Electron + renderer із HMR |
 | `npm run build` | typecheck + продакшн-збірка трьох бандлів |
-| `npm run dist` | інсталятор через electron-builder |
+| `npm run package` | розпакований застосунок у `desktop/release/` (потрібен `task build:all`) |
+| `npm run dist` | інсталятор через electron-builder (потрібен `task build:all`) |
 | `npm run check` | формат, arch:check, typecheck, тести |
 | `npm run api:types` | TS-типи з обох OpenAPI-специфікацій |
 | `npm run server:dev` \| `server:build` \| `server:check` | проксі в `server/Taskfile.yml` |
@@ -119,11 +120,29 @@ Go-частина має власні команди — див. [server/Taskfil
 її хмарі в `User-Agent: mediary-node/<версія>`, тож гейт хмари й банер desktop
 перевіряють одне й те саме.
 
-Реліз: підняти `version` у `desktop/package.json`, зібрати й поставити тег
-`v<версія>` на коміт релізу. Docker-образ ноди отримує версію через
-`--build-arg VERSION=...` (див. [server/Dockerfile](server/Dockerfile)). Збірка
-без Node.js у PATH має версію `0.0.0-dev` — старішу за будь-який мінімум, який
-може задати хмара.
+Docker-образ ноди отримує версію через `--build-arg VERSION=...` (див.
+[server/Dockerfile](server/Dockerfile)). Збірка без Node.js у PATH має версію
+`0.0.0-dev` — старішу за будь-який мінімум, який може задати хмара.
+
+## Реліз
+
+1. Підняти `version` у [desktop/package.json](desktop/package.json) і закомітити.
+2. Поставити тег `v<версія>` на цей коміт і відправити його: `git push origin v<версія>`.
+3. [release.yml](.github/workflows/release.yml) перевіряє, що тег збігається з
+   версією, збирає ноду для всіх платформ і інсталятори для Windows, macOS і
+   Linux, і складає їх у **чернетку** релізу на GitHub.
+4. Переглянути чернетку й опублікувати. Лише опублікований реліз бачать
+   встановлені застосунки: вони перевіряють GitHub Releases на старті й кожні
+   6 годин, завантажують оновлення у фоні й пропонують перезапуститися.
+
+Підпису коду поки немає. Windows покаже SmartScreen при першому встановленні,
+але оновлюється сама; macOS лише повідомляє про нову версію й веде на сторінку
+релізу, бо Squirrel.Mac ставить тільки підписані застосунки. `MEDIARY_DISABLE_UPDATES=1`
+вимикає перевірку оновлень.
+
+Локально інсталятор збирається так: `task build:all` у `server/`, потім
+`npm run dist` у `desktop/`. Кожен інсталятор бере лише бінарник ноди своєї
+платформи (`nodesrv-<os>-<arch>`), а збірка без нього зупиняється з помилкою.
 
 ## Архітектура
 
@@ -136,13 +155,7 @@ Go-частина має власні команди — див. [server/Taskfil
 ## Залежність від контракту
 
 `server/internal/platform/cloud` імпортує згенерований клієнт із
-`mediary-contracts`. Поки цей модуль не опублікований, він резолвиться через
-`go.work` у корені воркспейсу — навмисно **не** через `replace` у `go.mod`, який
-зламав би збірку всім, у кого немає цієї розкладки тек. Подробиці — у
-[mediary-contracts/docs/contracts-and-codegen.md](../mediary-contracts/docs/contracts-and-codegen.md) §6.
-
-## Стан
-
-Фаза 0: скелет без бізнес-логіки. Кожен модуль ноди віддає один
-`GET /v1/<module>/status`; десктоп показує одну сторінку, яка доводить, що вся
-вертикаль зібрана — оболонка → нода → токен → згенеровані типи → Effector → React.
+`mediary-contracts`; `server/go.mod` закріплює його комітом (псевдоверсією), доки
+контракти не мають тегів. Desktop генерує типи хмари зі спеки того самого коміту,
+і CI перевіряє, що закомічені типи з нею збігаються. Подробиці — у
+[mediary-contracts/docs/contracts-and-codegen.md](../mediary-contracts/docs/contracts-and-codegen.md) §5–§7.
