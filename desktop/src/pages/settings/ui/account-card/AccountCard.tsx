@@ -6,6 +6,8 @@ import { Button, Icon } from '@shared/ui'
 
 import { sessionModel } from '@entities/session'
 
+import { accountDeletionOpened, DeleteAccountDialog } from '@features/auth'
+
 import styles from './AccountCard.module.scss'
 
 export function AccountCard() {
@@ -40,6 +42,12 @@ export function AccountCard() {
 			>
 				{t('settings.account.signOut')}
 			</Button>
+
+			<Button variant='ghost' onClick={() => accountDeletionOpened()}>
+				{t('settings.account.delete')}
+			</Button>
+
+			<DeleteAccountDialog />
 		</div>
 	)
 }

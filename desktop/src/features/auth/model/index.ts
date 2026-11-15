@@ -1,5 +1,6 @@
 export { createAuthForm, createField } from './form'
 export type { AuthForm, Field } from './form'
+export { deleteAccountForm } from './delete-account'
 export { newPasswordForm } from './new-password'
 export { oauthPanel } from './oauth'
 export { resetPasswordForm } from './reset-password'

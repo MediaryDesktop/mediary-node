@@ -11,6 +11,7 @@ export type ConfirmEmailInput = CloudSchemas['ConfirmEmailInputBody']
 export type PasswordResetRequest = CloudSchemas['RequestPasswordResetInputBody']
 export type PasswordResetInput = CloudSchemas['CompletePasswordResetInputBody']
 export type Accepted = CloudSchemas['AcceptedOutputBody']
+export type DeleteAccountInput = CloudSchemas['DeleteAccountInputBody']
 
 export type OAuthCallbackInput = CloudSchemas['OAuthCallbackInputBody'] & { provider: string }
 
@@ -59,6 +60,17 @@ export const completePasswordResetFx = createCloudRequestFx<PasswordResetInput, 
 	method: 'POST',
 	body,
 	expectsUnauthorized: true
+}))
+
+export const requestAccountDeletionFx = createCloudRequestFx<void, Accepted>({
+	url: '/v1/account/deletion',
+	method: 'POST'
+})
+
+export const deleteAccountFx = createCloudRequestFx<DeleteAccountInput, void>(body => ({
+	url: '/v1/account/deletion/confirm',
+	method: 'POST',
+	body
 }))
 
 export const fetchOAuthProvidersFx = createCloudRequestFx<void, OAuthProviders>({

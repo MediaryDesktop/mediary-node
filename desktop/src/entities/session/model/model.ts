@@ -19,15 +19,24 @@ import type { OAuthRedirect } from '@infra/cloud'
 import {
 	completeOAuthFx,
 	confirmEmailFx,
+	deleteAccountFx,
 	fetchAccountFx,
 	fetchOAuthProvidersFx,
+	requestAccountDeletionFx,
 	sendEmailVerificationFx,
 	signInFx,
 	signOutFx,
 	signUpFx,
 	startOAuthFx
 } from '../api/api'
-import type { Account, ConfirmEmailInput, LoginInput, RegisterInput, Session } from '../api/api'
+import type {
+	Account,
+	ConfirmEmailInput,
+	DeleteAccountInput,
+	LoginInput,
+	RegisterInput,
+	Session
+} from '../api/api'
 
 export const accountQuery = createQuery({ effect: fetchAccountFx, name: 'account' })
 
@@ -63,6 +72,8 @@ export const sessionModel = atom(() => {
 	const oauthCancelRequested = createEvent()
 	const emailVerificationRequested = createEvent()
 	const emailConfirmationRequested = createEvent<ConfirmEmailInput>()
+	const accountDeletionRequested = createEvent()
+	const accountDeletionConfirmed = createEvent<DeleteAccountInput>()
 
 	const authenticated = createEvent<Account>()
 	const emailVerified = createEvent<Account>()
@@ -185,6 +196,13 @@ export const sessionModel = atom(() => {
 	sample({ clock: signOutRequested, target: signOutFx })
 	sample({ clock: signOutFx.finally, target: signedOut })
 
+	// The cloud ends every session of a deleted account, so this one is gone too.
+	const accountDeleted = deleteAccountFx.done.map(() => undefined)
+
+	sample({ clock: accountDeletionRequested, target: requestAccountDeletionFx })
+	sample({ clock: accountDeletionConfirmed, target: deleteAccountFx })
+	sample({ clock: accountDeleted, target: signedOut })
+
 	sample({ clock: unauthorized, filter: () => hasCloudToken(), target: cloudSessionLost })
 
 	$token.on(cloudSessionLost, () => null).reset(signedOut)
@@ -227,6 +245,8 @@ export const sessionModel = atom(() => {
 		oauthCancelRequested,
 		emailVerificationRequested,
 		emailConfirmationRequested,
+		accountDeletionRequested,
+		accountDeletionConfirmed,
 
 		authenticated,
 		restored,
@@ -239,6 +259,10 @@ export const sessionModel = atom(() => {
 		emailVerified,
 		emailConfirmationFailed,
 		emailVerificationFailed,
+		accountDeletionCodeSent: requestAccountDeletionFx.doneData,
+		accountDeletionCodeFailed: requestAccountDeletionFx.failData,
+		accountDeleted,
+		accountDeletionFailed: deleteAccountFx.failData,
 
 		$account,
 		$isAuthenticated,
@@ -253,7 +277,9 @@ export const sessionModel = atom(() => {
 		$oauthStarting,
 		$emailConfirmationPending: confirmEmailFx.pending,
 		$emailVerificationPending: sendEmailVerificationFx.pending,
-		$signOutPending: signOutFx.pending
+		$signOutPending: signOutFx.pending,
+		$accountDeletionCodePending: requestAccountDeletionFx.pending,
+		$accountDeletionPending: deleteAccountFx.pending
 	}
 })
 

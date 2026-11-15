@@ -2111,7 +2111,8 @@ export const en = {
 		account: {
 			name: 'Account',
 			hint: 'Signed in as {{email}}',
-			signOut: 'Sign out'
+			signOut: 'Sign out',
+			delete: 'Delete account'
 		}
 	},
 	pagination: {
@@ -2195,6 +2196,17 @@ export const en = {
 			submit: 'Verify email',
 			resendLabel: 'Did not get the code?',
 			resend: 'Send a new one'
+		},
+		deleteAccount: {
+			title: 'Delete your account',
+			warning:
+				'Your account, every paired computer and every backup in the cloud are erased for good. There is no undo. What is on this computer — the library, the files, the local lists — stays.',
+			sendCode: 'Email me a code',
+			codeHint: 'Enter the {{length}}-digit code we sent to {{email}} to confirm.',
+			confirm: 'Delete forever',
+			cancel: 'Cancel',
+			resend: 'Send a new code',
+			deleted: 'The account is deleted.'
 		},
 		reset: {
 			eyebrow: 'Account recovery',

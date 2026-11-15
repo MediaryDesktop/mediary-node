@@ -9,6 +9,12 @@ export {
 } from './model/return-after-auth'
 export type { ReturnTarget } from './model/return-after-auth'
 
-export { completePasswordResetFx, fetchOAuthProvidersFx, requestPasswordResetFx } from './api/api'
+export {
+	completePasswordResetFx,
+	deleteAccountFx,
+	fetchOAuthProvidersFx,
+	requestAccountDeletionFx,
+	requestPasswordResetFx
+} from './api/api'
 
 export type { Account, PasswordResetInput } from './api/api'
