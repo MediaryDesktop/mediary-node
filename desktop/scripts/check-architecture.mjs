@@ -458,7 +458,15 @@ const nodeCount = [...edges.keys()].filter(node => edges.get(node).size > 0 || n
 
 if (cycles.length === 0) {
 	console.log(`✔ No slice cycles (${files.length} files, ${nodeCount} nodes).`)
-	const problems = [misplaced, commented, askingForThemselves, rawColours, offScale, bridgeOutside, wrongCase]
+	const problems = [
+		misplaced,
+		commented,
+		askingForThemselves,
+		rawColours,
+		offScale,
+		bridgeOutside,
+		wrongCase
+	]
 
 	process.exit(problems.every(found => found.length === 0) ? 0 : 1)
 }
