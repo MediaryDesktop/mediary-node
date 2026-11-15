@@ -18,12 +18,10 @@ import (
 // want of a reader on the node's side, dropping the client every forty seconds
 // and with it whatever was published until it came back.
 func TestClientSurvivesPings(t *testing.T) {
-	previousPing, previousWrite := pingInterval, writeTimeout
-	pingInterval, writeTimeout = 20*time.Millisecond, 100*time.Millisecond
-	t.Cleanup(func() { pingInterval, writeTimeout = previousPing, previousWrite })
-
 	hub := events.NewHub(8)
-	server := httptest.NewServer(New(hub, zerolog.Nop(), nil))
+	handler := New(hub, zerolog.Nop(), nil)
+	handler.pingInterval, handler.writeTimeout = 20*time.Millisecond, 100*time.Millisecond
+	server := httptest.NewServer(handler)
 	t.Cleanup(server.Close)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

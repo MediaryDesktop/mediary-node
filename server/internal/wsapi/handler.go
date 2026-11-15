@@ -13,21 +13,30 @@ import (
 	"github.com/MediaryDesktop/mediary-node/server/internal/platform/events"
 )
 
-// Variables so a test can run through several pings quickly.
-var (
-	writeTimeout = 10 * time.Second
-
-	pingInterval = 30 * time.Second
+const (
+	defaultWriteTimeout = 10 * time.Second
+	defaultPingInterval = 30 * time.Second
 )
 
 type Handler struct {
 	hub            *events.Hub
 	logger         zerolog.Logger
 	allowedOrigins []string
+
+	// Fields rather than package variables, so a test can run through several
+	// pings quickly without racing another test's connection still reading them.
+	writeTimeout time.Duration
+	pingInterval time.Duration
 }
 
 func New(hub *events.Hub, logger zerolog.Logger, allowedOrigins []string) *Handler {
-	return &Handler{hub: hub, logger: logger, allowedOrigins: allowedOrigins}
+	return &Handler{
+		hub:            hub,
+		logger:         logger,
+		allowedOrigins: allowedOrigins,
+		writeTimeout:   defaultWriteTimeout,
+		pingInterval:   defaultPingInterval,
+	}
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -52,7 +61,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	h.logger.Debug().Int("subscribers", h.hub.SubscriberCount()).Msg("websocket client attached")
 
-	ticker := time.NewTicker(pingInterval)
+	ticker := time.NewTicker(h.pingInterval)
 	defer ticker.Stop()
 
 	// seen is how many dropped events the client has been told about. Checked
@@ -68,7 +77,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		seen = dropped
 
-		writeCtx, cancel := context.WithTimeout(ctx, writeTimeout)
+		writeCtx, cancel := context.WithTimeout(ctx, h.writeTimeout)
 		defer cancel()
 
 		return wsjson.Write(writeCtx, conn, events.Event{Topic: events.TopicOverflow, At: time.Now().UTC()})
@@ -86,7 +95,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			writeCtx, cancel := context.WithTimeout(ctx, writeTimeout)
+			writeCtx, cancel := context.WithTimeout(ctx, h.writeTimeout)
 			err := wsjson.Write(writeCtx, conn, event)
 			cancel()
 
@@ -101,7 +110,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 
 		case <-ticker.C:
-			pingCtx, cancel := context.WithTimeout(ctx, writeTimeout)
+			pingCtx, cancel := context.WithTimeout(ctx, h.writeTimeout)
 			err := conn.Ping(pingCtx)
 			cancel()
 
