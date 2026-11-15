@@ -4,6 +4,46 @@
  */
 
 export interface paths {
+	'/v1/account/deletion': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Ask to delete the account
+		 * @description Mails the signed-in account a code that confirms deleting it. The session alone is not enough: one left open, or stolen, must not be able to erase everything its owner stored. A code rather than the password, so an account that signed up through a provider can be deleted too.
+		 */
+		post: operations['requestAccountDeletion']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/account/deletion/confirm': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Delete the account with the mailed code
+		 * @description Spends the code and deletes the account for good, with everything it owns: every session ends, every paired device is unpaired, every backup is erased. There is no undo.
+		 */
+		post: operations['deleteAccount']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/v1/account/devices': {
 		parameters: {
 			query?: never
@@ -590,6 +630,16 @@ export interface components {
 			/** @description The 6-digit code from the confirmation email. */
 			code: string
 		}
+		DeleteAccountInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/DeleteAccountInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The 6-digit code from the account deletion email. */
+			code: string
+		}
 		DeviceBody: {
 			/**
 			 * Format: date-time
@@ -938,6 +988,7 @@ export type SchemaChangePasswordInputBody = components['schemas']['ChangePasswor
 export type SchemaClientRequirements = components['schemas']['ClientRequirements']
 export type SchemaCompletePasswordResetInputBody = components['schemas']['CompletePasswordResetInputBody']
 export type SchemaConfirmEmailInputBody = components['schemas']['ConfirmEmailInputBody']
+export type SchemaDeleteAccountInputBody = components['schemas']['DeleteAccountInputBody']
 export type SchemaDeviceBody = components['schemas']['DeviceBody']
 export type SchemaDeviceListOutputBody = components['schemas']['DeviceListOutputBody']
 export type SchemaErrorDetail = components['schemas']['ErrorDetail']
@@ -960,6 +1011,111 @@ export type SchemaStructuredInputBody = components['schemas']['StructuredInputBo
 export type SchemaStructuredOutputBody = components['schemas']['StructuredOutputBody']
 export type $defs = Record<string, never>
 export interface operations {
+	requestAccountDeletion: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description Accepted */
+			202: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['AcceptedOutputBody']
+				}
+			}
+			/** @description Unauthorized */
+			401: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Too Many Requests */
+			429: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	deleteAccount: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['DeleteAccountInputBody']
+			}
+		}
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Unauthorized */
+			401: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Unprocessable Entity */
+			422: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Too Many Requests */
+			429: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
 	listDevices: {
 		parameters: {
 			query?: never

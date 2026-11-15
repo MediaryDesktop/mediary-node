@@ -18,7 +18,7 @@ go 1.27
 
 require (
 	github.com/5rahim/habari v0.1.12
-	github.com/MediaryDesktop/mediary-contracts/go v0.0.0-20261106232727-3ed273175e8b
+	github.com/MediaryDesktop/mediary-contracts/go v0.0.0-20261115130434-74c0715cac30
 	github.com/Microsoft/go-winio v0.6.2
 	github.com/PuerkitoBio/goquery v1.13.0
 	github.com/anacrolix/torrent v1.61.0

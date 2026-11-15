@@ -18,8 +18,12 @@ github.com/5rahim/habari v0.1.12/go.mod h1:0nBj4/5OxTAoIICP4P3+/YJGNf8L7w+gnU1iv
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/Masterminds/semver/v3 v3.5.0 h1:kQceYJfbupGfZOKZQg0kou0DgAKhzDg2NZPAwZ/2OOE=
 github.com/Masterminds/semver/v3 v3.5.0/go.mod h1:4V+yj/TJE1HU9XfppCwVMZq3I84lprf4nC11bSS5beM=
+github.com/MediaryDesktop/mediary-contracts v0.0.0-20261115130434-74c0715cac30 h1:r1Dn7mg8gDKNJaNVWqbVbp6W6DuH+aPcfI5GLfNfBwg=
+github.com/MediaryDesktop/mediary-contracts v0.0.0-20261115130434-74c0715cac30/go.mod h1:RNd9cId3bmzOcSheGdv+PImDY3vepJVlNHjAtErRf9g=
 github.com/MediaryDesktop/mediary-contracts/go v0.0.0-20261106232727-3ed273175e8b h1:BLaShH4Ed/WP+AGbV0NvmoyKBtKJ+TKdmomPhDgtoN4=
 github.com/MediaryDesktop/mediary-contracts/go v0.0.0-20261106232727-3ed273175e8b/go.mod h1:NStqYPRTPOuBsCnk3Y8U/0CeGSiL0V03vky9uBbrjxo=
+github.com/MediaryDesktop/mediary-contracts/go v0.0.0-20261115130434-74c0715cac30 h1:GIoPx4Ove1jpbC7IzSXCYw3rja6UaIzNqTck9Lh0NC0=
+github.com/MediaryDesktop/mediary-contracts/go v0.0.0-20261115130434-74c0715cac30/go.mod h1:NStqYPRTPOuBsCnk3Y8U/0CeGSiL0V03vky9uBbrjxo=
 github.com/Microsoft/go-winio v0.6.2 h1:F2VQgta7ecxGYO8k3ZZz3RS8fVIXVxONVUPlNERoyfY=
 github.com/Microsoft/go-winio v0.6.2/go.mod h1:yd8OoFMLzJbo9gZq8j5qaps8bJ9aShtEA8Ipt1oGCvU=
 github.com/OneOfOne/xxhash v1.2.2 h1:KMrpdQIwFcEqXDklaen+P1axHaj9BSKzvpUUfnHldSE=

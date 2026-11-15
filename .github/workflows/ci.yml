@@ -63,15 +63,24 @@ jobs:
       # that no longer exists. Formatted the way the committed file is, or the
       # diff would only ever show Prettier's changes.
       #
-      # Only the node's types: the cloud's come from mediary-contracts, which
-      # this job does not check out until the contracts are published
-      # (docs/audits/contracts.md, stage 2 in the workspace).
+      # The cloud's types and input limits come from mediary-contracts at the
+      # commit server/go.mod pins, so the node and the UI of one release see the
+      # same contract. The scripts read it from the workspace's sibling folder.
+      - name: Check out the pinned contracts
+        run: |
+          version=$(grep -oE 'mediary-contracts/go v[^ ]+' server/go.mod | cut -d' ' -f2)
+          case "$version" in
+            v0.0.0-*) ref=${version##*-} ;;
+            *) ref="go/$version" ;;
+          esac
+          git clone --quiet https://github.com/MediaryDesktop/mediary-contracts.git ../mediary-contracts
+          git -C ../mediary-contracts checkout --quiet "$ref"
+
       - name: Generated API types are current
         working-directory: desktop
         run: |
-          npm run api:types:node
-          npx prettier --write --log-level warn src/infrastructure/node/schema.gen.ts
-          git diff --exit-code -- src/infrastructure/node/schema.gen.ts
+          npm run api:types
+          git diff --exit-code -- src/infrastructure/node/schema.gen.ts src/infrastructure/cloud/schema.gen.ts src/features/auth/validation/limits.gen.ts
 
       - name: Format, architecture, types, tests
         working-directory: desktop
