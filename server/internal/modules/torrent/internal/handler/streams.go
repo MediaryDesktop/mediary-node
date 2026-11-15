@@ -28,6 +28,13 @@ type TorrentStreamIDInput struct {
 	ID int64 `path:"id" minimum:"1"`
 }
 
+type ChooseTorrentStreamFileInput struct {
+	ID   int64 `path:"id" minimum:"1"`
+	Body struct {
+		FileID int `json:"file_id" minimum:"0" doc:"A file from the stream's files."`
+	}
+}
+
 type TorrentStreamOutput struct {
 	Body service.TorrentStream
 }
@@ -52,6 +59,22 @@ func (h *Handler) registerStreams(api huma.API) {
 			Season:    in.Body.Season,
 			Via:       in.Body.Via,
 		})
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		return &TorrentStreamOutput{Body: *stream}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "chooseTorrentStreamFile",
+		Method:      http.MethodPost,
+		Path:        "/v1/torrent/streams/{id}/file",
+		Summary:     "Play another file of a stream's torrent",
+		Description: "For when the file the node chose is not the one wanted, or it found none: pick one of the stream's files. A stream that failed for want of a video comes back to life; ask GET .../streams/{id} as before.",
+		Tags:        []string{"torrent"},
+	}, func(ctx context.Context, in *ChooseTorrentStreamFileInput) (*TorrentStreamOutput, error) {
+		stream, err := h.svc.ChooseStreamFile(ctx, in.ID, in.Body.FileID)
 		if err != nil {
 			return nil, httpapi.ToHTTP(err)
 		}

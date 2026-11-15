@@ -27,7 +27,13 @@ import {
 } from '@entities/playback'
 import { isMissingToolError } from '@entities/tool'
 
-import { $stream, $streamError, $streamTarget, streamCancelled } from '@features/stream-torrent'
+import {
+	$stream,
+	$streamError,
+	$streamTarget,
+	streamCancelled,
+	streamFileChosen
+} from '@features/stream-torrent'
 
 import styles from './PlayerHost.module.scss'
 import { PreparingStream } from './PreparingStream'
@@ -49,7 +55,8 @@ export function PlayerHost() {
 		streamTarget,
 		stream,
 		streamError,
-		cancelStream
+		cancelStream,
+		chooseStreamFile
 	] = useUnit([
 		$playerFileId,
 		$playerExpanded,
@@ -64,7 +71,8 @@ export function PlayerHost() {
 		$streamTarget,
 		$stream,
 		$streamError,
-		streamCancelled
+		streamCancelled,
+		streamFileChosen
 	])
 
 	const [directFailedFor, setDirectFailedFor] = useState<number | null>(null)
@@ -117,6 +125,7 @@ export function PlayerHost() {
 					stream={stream}
 					error={streamError}
 					onStop={requestClose}
+					onChooseFile={chooseStreamFile}
 				/>
 			</Panel>
 		)

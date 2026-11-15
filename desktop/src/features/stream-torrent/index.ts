@@ -4,6 +4,7 @@ export {
 	$streamTarget,
 	$streamVia,
 	streamCancelled,
+	streamFileChosen,
 	streamPlaying,
 	streamRequested,
 	streamViaChanged

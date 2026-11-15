@@ -238,3 +238,75 @@ func TestStreamNobodySharesGivesUp(t *testing.T) {
 		t.Fatalf("moving = %+v", moving)
 	}
 }
+
+func TestAStreamThatFoundNoEpisodeOffersItsVideosAndPlaysTheOneChosen(t *testing.T) {
+	h := newHarness(t)
+	client := withStreaming(t, h)
+	client.set(debrid.Remote{Hash: frierenHash, Ready: true, Files: batchFiles()})
+	ctx := context.Background()
+
+	episode := 9
+	failed, err := h.svc.StartStream(ctx, StreamRequest{MediaRef: "anilist:154587", Magnet: frierenMagnet, Episode: &episode})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if failed.State != "failed" {
+		t.Fatalf("state %q, want failed", failed.State)
+	}
+
+	// The subtitle file is not offered: only what can be played.
+	if len(failed.Files) != 2 || failed.Files[0].ID != 0 || failed.Files[1].ID != 1 {
+		t.Fatalf("files %+v, want the two videos", failed.Files)
+	}
+
+	chosen, err := h.svc.ChooseStreamFile(ctx, failed.ID, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if chosen.State != "ready" || chosen.Name != "Sousou no Frieren - 02.mkv" || chosen.FileID != -failed.ID || chosen.Files != nil {
+		t.Fatalf("chosen %+v", chosen)
+	}
+
+	file, err := h.svc.StreamFile(ctx, chosen.FileID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// What gets marked watched is what the user asked for, not the file's own number.
+	if file.Episode == nil || *file.Episode != 9 || file.Key != "stream-"+frierenHash+"-1" {
+		t.Errorf("file %+v, episode %v", file, file.Episode)
+	}
+
+	if status, statusErr := h.svc.StreamStatus(ctx, failed.ID); statusErr != nil || status.State != "ready" {
+		t.Errorf("a later poll gave %+v, %v; the choice must stick", status, statusErr)
+	}
+}
+
+func TestOnlyAVideoOfTheStreamsTorrentCanBeChosen(t *testing.T) {
+	h := newHarness(t)
+	client := withStreaming(t, h)
+	client.set(debrid.Remote{Hash: frierenHash, Ready: true, Files: batchFiles()})
+	ctx := context.Background()
+
+	episode := 9
+	failed, err := h.svc.StartStream(ctx, StreamRequest{MediaRef: "anilist:154587", Magnet: frierenMagnet, Episode: &episode})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for name, fileID := range map[string]int{"a subtitle": 2, "no such file": 7} {
+		if _, chooseErr := h.svc.ChooseStreamFile(ctx, failed.ID, fileID); apperr.KindOf(chooseErr) != apperr.KindInvalid {
+			t.Errorf("%s: err = %v, want invalid", name, chooseErr)
+		}
+	}
+
+	if _, chooseErr := h.svc.ChooseStreamFile(ctx, failed.ID+100, 0); apperr.KindOf(chooseErr) != apperr.KindNotFound {
+		t.Errorf("unknown stream: err = %v, want not found", chooseErr)
+	}
+
+	if status, statusErr := h.svc.StreamStatus(ctx, failed.ID); statusErr != nil || status.State != "failed" {
+		t.Errorf("refused choices changed the stream: %+v, %v", status, statusErr)
+	}
+}

@@ -1616,6 +1616,10 @@ export const uk: Translation = {
 			collapse: 'Сховати деталі',
 			expand: 'Показати деталі',
 			candidates: 'Найкращі кандидати',
+			chooseFile: 'Обрати файл',
+			files: 'Файли в торенті',
+			filesFilter: 'Фільтр файлів…',
+			filesNone: 'Жоден файл не підходить',
 			candidate: {
 				trying: 'Перевіряємо',
 				waiting: 'У черзі',

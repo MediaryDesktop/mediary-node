@@ -2187,6 +2187,26 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/v1/torrent/streams/{id}/file': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Play another file of a stream's torrent
+		 * @description For when the file the node chose is not the one wanted, or it found none: pick one of the stream's files. A stream that failed for want of a video comes back to life; ask GET .../streams/{id} as before.
+		 */
+		post: operations['chooseTorrentStreamFile']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/v1/tracker/entries': {
 		parameters: {
 			query?: never
@@ -2831,6 +2851,19 @@ export interface components {
 			 */
 			source_id?: number
 			url: string
+		}
+		ChooseTorrentStreamFileInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ChooseTorrentStreamFileInputBody.json
+			 */
+			readonly $schema?: string
+			/**
+			 * Format: int64
+			 * @description A file from the stream's files.
+			 */
+			file_id: number
 		}
 		CloudAISettings: {
 			/** @description Whether the cloud offers AI at all. */
@@ -5088,6 +5121,20 @@ export interface components {
 			/** @description What the file holds and where to fetch it. */
 			stream: components['schemas']['Stream']
 		}
+		StreamVideo: {
+			/**
+			 * Format: int64
+			 * @description The file's ID in the torrent; the file_id POST .../streams/{id}/file takes.
+			 */
+			id: number
+			/** @description Relative to the torrent, folder included. */
+			path: string
+			/**
+			 * Format: int64
+			 * @description Bytes.
+			 */
+			size: number
+		}
 		Subtitle: {
 			codec: string
 			extension: string
@@ -5769,6 +5816,8 @@ export interface components {
 			 * @description Once ready: a negative ID the player takes like a library file's — /v1/playback/files/{id}/stream, /direct, /hls and POST /v1/playback all accept it.
 			 */
 			file_id?: number
+			/** @description The videos in the torrent, once the service or the built-in client knows them and until the stream is ready: what POST .../streams/{id}/file picks from when the file the node chose is not the one wanted, or it found none. */
+			files?: components['schemas']['StreamVideo'][] | null
 			/** Format: int64 */
 			id: number
 			media_ref: string
@@ -5947,6 +5996,7 @@ export type SchemaCheckOpdsServerOutputBody = components['schemas']['CheckOPDSSe
 export type SchemaCheckTorrentClientInputBody = components['schemas']['CheckTorrentClientInputBody']
 export type SchemaCheckTorrentDebridInputBody = components['schemas']['CheckTorrentDebridInputBody']
 export type SchemaCheckTorrentSourceInputBody = components['schemas']['CheckTorrentSourceInputBody']
+export type SchemaChooseTorrentStreamFileInputBody = components['schemas']['ChooseTorrentStreamFileInputBody']
 export type SchemaCloudAiSettings = components['schemas']['CloudAISettings']
 export type SchemaCollectionOutputBody = components['schemas']['CollectionOutputBody']
 export type SchemaConfigureExtensionInputBody = components['schemas']['ConfigureExtensionInputBody']
@@ -6071,6 +6121,7 @@ export type SchemaStatusOutputBody1 = components['schemas']['StatusOutputBody1']
 export type SchemaStream = components['schemas']['Stream']
 export type SchemaStreamCandidate = components['schemas']['StreamCandidate']
 export type SchemaStreamOutputBody = components['schemas']['StreamOutputBody']
+export type SchemaStreamVideo = components['schemas']['StreamVideo']
 export type SchemaSubtitle = components['schemas']['Subtitle']
 export type SchemaSuggestion = components['schemas']['Suggestion']
 export type SchemaSuggestionsOutputBody = components['schemas']['SuggestionsOutputBody']
@@ -10822,6 +10873,41 @@ export interface operations {
 			cookie?: never
 		}
 		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TorrentStream']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	chooseTorrentStreamFile: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: number
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['ChooseTorrentStreamFileInputBody']
+			}
+		}
 		responses: {
 			/** @description OK */
 			200: {

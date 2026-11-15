@@ -1616,6 +1616,10 @@ export const ru: Translation = {
 			collapse: 'Скрыть детали',
 			expand: 'Показать детали',
 			candidates: 'Лучшие кандидаты',
+			chooseFile: 'Выбрать файл',
+			files: 'Файлы в торренте',
+			filesFilter: 'Фильтр файлов…',
+			filesNone: 'Ни один файл не подходит',
 			candidate: {
 				trying: 'Проверяем',
 				waiting: 'В очереди',

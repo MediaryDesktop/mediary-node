@@ -1,11 +1,11 @@
-import { createEffect, createEvent, createStore, merge, sample } from 'effector'
+import { combine, createEffect, createEvent, createStore, merge, sample } from 'effector'
 
 import { HttpRequestError, problemDetail } from '@shared/api'
 import { translate } from '@shared/i18n'
 import { readStored, writeStored } from '@shared/lib'
 
 import { $playerMode, playbackModel, playerClosed, playerOpened, playerOpening } from '@entities/playback'
-import { fetchTorrentStreamFx, startTorrentStreamFx } from '@entities/torrent'
+import { chooseTorrentStreamFileFx, fetchTorrentStreamFx, startTorrentStreamFx } from '@entities/torrent'
 import type { StartTorrentStreamParams, TorrentStream } from '@entities/torrent'
 
 const POLL_MS = 2000
@@ -43,6 +43,8 @@ autoSelectChanged.watch(on => writeStored(AUTO_SELECT_KEY, on ? 'on' : 'off'))
 export const streamRequested = createEvent<StreamTarget>()
 export const streamCancelled = createEvent()
 export const streamPlaying = createEvent<number>()
+// A file of the stream's torrent picked by hand, when the node's own pick was wrong or it found none.
+export const streamFileChosen = createEvent<number>()
 const streamFailed = createEvent<string>()
 
 export const $streamTarget = createStore<StreamTarget | null>(null)
@@ -57,7 +59,7 @@ export const $stream = createStore<TorrentStream | null>(null).reset(
 
 export const $streamError = createStore<string | null>(null)
 	.on(streamFailed, (_, message) => message)
-	.reset(streamRequested, streamCancelled, streamPlaying)
+	.reset(streamRequested, streamCancelled, streamPlaying, streamFileChosen)
 
 interface Answer {
 	key: string
@@ -78,12 +80,31 @@ const pollFx = createEffect(async ({ key, id }: { key: string; id: number }): Pr
 	return { key, stream: await fetchTorrentStreamFx(id) }
 })
 
+const chooseFx = createEffect(
+	async ({ key, id, fileId }: { key: string; id: number; fileId: number }): Promise<Answer> => ({
+		key,
+		stream: await chooseTorrentStreamFileFx({ id, fileId })
+	})
+)
+
 sample({ clock: streamRequested, target: startFx })
+
+const $choosable = combine($streamTarget, $stream, (target, stream) =>
+	target && stream ? { key: target.key, id: stream.id } : null
+)
+
+sample({
+	clock: streamFileChosen,
+	source: $choosable,
+	filter: Boolean,
+	fn: (stream, fileId) => ({ ...stream, fileId }),
+	target: chooseFx
+})
 
 sample({ clock: streamRequested, target: playerOpening })
 
 const current = sample({
-	clock: merge([startFx.doneData, pollFx.doneData]),
+	clock: merge([startFx.doneData, pollFx.doneData, chooseFx.doneData]),
 	source: $streamTarget,
 	filter: (target, answer) => target?.key === answer.key,
 	fn: (_, answer) => answer.stream
@@ -121,7 +142,8 @@ sample({
 sample({
 	clock: [
 		startFx.fail.map(({ params, error }) => ({ key: params.key, error })),
-		pollFx.fail.map(({ params, error }) => ({ key: params.key, error }))
+		pollFx.fail.map(({ params, error }) => ({ key: params.key, error })),
+		chooseFx.fail.map(({ params, error }) => ({ key: params.key, error }))
 	],
 	source: $streamTarget,
 	filter: (target, failure) => target?.key === failure.key,

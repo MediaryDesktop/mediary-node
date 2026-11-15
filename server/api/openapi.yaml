@@ -976,6 +976,24 @@ components:
       required:
         - url
       type: object
+    ChooseTorrentStreamFileInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/ChooseTorrentStreamFileInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        file_id:
+          description: A file from the stream's files.
+          format: int64
+          minimum: 0
+          type: integer
+      required:
+        - file_id
+      type: object
     CloudAISettings:
       additionalProperties: false
       properties:
@@ -4964,6 +4982,25 @@ components:
       required:
         - stream
       type: object
+    StreamVideo:
+      additionalProperties: false
+      properties:
+        id:
+          description: The file's ID in the torrent; the file_id POST .../streams/{id}/file takes.
+          format: int64
+          type: integer
+        path:
+          description: Relative to the torrent, folder included.
+          type: string
+        size:
+          description: Bytes.
+          format: int64
+          type: integer
+      required:
+        - id
+        - path
+        - size
+      type: object
     Subtitle:
       additionalProperties: false
       properties:
@@ -6218,6 +6255,13 @@ components:
           description: "Once ready: a negative ID the player takes like a library file's — /v1/playback/files/{id}/stream, /direct, /hls and POST /v1/playback all accept it."
           format: int64
           type: integer
+        files:
+          description: "The videos in the torrent, once the service or the built-in client knows them and until the stream is ready: what POST .../streams/{id}/file picks from when the file the node chose is not the one wanted, or it found none."
+          items:
+            $ref: "#/components/schemas/StreamVideo"
+          type:
+            - array
+            - "null"
         id:
           format: int64
           type: integer
@@ -10574,6 +10618,40 @@ paths:
                 $ref: "#/components/schemas/ErrorModel"
           description: Error
       summary: How far a stream is
+      tags:
+        - torrent
+  /v1/torrent/streams/{id}/file:
+    post:
+      description: "For when the file the node chose is not the one wanted, or it found none: pick one of the stream's files. A stream that failed for want of a video comes back to life; ask GET .../streams/{id} as before."
+      operationId: chooseTorrentStreamFile
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            format: int64
+            minimum: 1
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChooseTorrentStreamFileInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TorrentStream"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Play another file of a stream's torrent
       tags:
         - torrent
   /v1/tracker/entries:

@@ -3,9 +3,9 @@ import { useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { formatBytes } from '@shared/lib'
-import { Button, Icon, ReelLoader } from '@shared/ui'
+import { Button, Icon, Input, ReelLoader } from '@shared/ui'
 
-import type { TorrentStream } from '@entities/torrent'
+import type { StreamVideo, TorrentStream } from '@entities/torrent'
 
 import type { StreamTarget } from '@features/stream-torrent'
 
@@ -16,11 +16,35 @@ export interface PreparingStreamProps {
 	stream: TorrentStream | null
 	error: string | null
 	onStop: () => void
+	onChooseFile: (fileId: number) => void
 }
 
-export function PreparingStream({ target, stream, error, onStop }: PreparingStreamProps) {
+const FILTER_FROM = 10
+
+function splitPath(path: string): { name: string; folder: string } {
+	const cut = path.lastIndexOf('/')
+
+	return cut < 0 ? { name: path, folder: '' } : { name: path.slice(cut + 1), folder: path.slice(0, cut) }
+}
+
+export function matchingFiles(files: readonly StreamVideo[], filter: string): StreamVideo[] {
+	const words = filter.toLowerCase().split(/\s+/u).filter(Boolean)
+
+	return files.filter(file => words.every(word => file.path.toLowerCase().includes(word)))
+}
+
+export function PreparingStream({ target, stream, error, onStop, onChooseFile }: PreparingStreamProps) {
 	const { t } = useTranslation()
 	const [expanded, setExpanded] = useState(false)
+	const [choosing, setChoosing] = useState(false)
+	const [filter, setFilter] = useState('')
+
+	const files = stream?.files ?? []
+	const shownFiles = matchingFiles(files, filter)
+	const chooseFile = () => {
+		setExpanded(true)
+		setChoosing(true)
+	}
 
 	const cut = target.label.lastIndexOf(' · ')
 	const title = cut > 0 ? target.label.slice(0, cut) : target.label
@@ -154,6 +178,61 @@ export function PreparingStream({ target, stream, error, onStop }: PreparingStre
 							</div>
 						)}
 
+						{files.length > 0 &&
+							(choosing ? (
+								<div className={styles.block}>
+									<p className={styles.section}>{t('torrents.stream.files')}</p>
+
+									{files.length >= FILTER_FROM && (
+										<Input
+											value={filter}
+											onChange={event => setFilter(event.target.value)}
+											placeholder={t('torrents.stream.filesFilter')}
+											startIcon={<Icon name='common/search' size={16} />}
+										/>
+									)}
+
+									<ul className={styles.files}>
+										{shownFiles.map(file => {
+											const { name, folder } = splitPath(file.path)
+
+											return (
+												<li key={file.id}>
+													<button
+														type='button'
+														className={clsx(
+															styles.file,
+															name === stream?.name && styles.current
+														)}
+														title={file.path}
+														onClick={() => onChooseFile(file.id)}
+													>
+														<span className={styles.fileText}>
+															<span className={styles.fileName}>{name}</span>
+															{folder && (
+																<span className={styles.fileFolder}>
+																	{folder}
+																</span>
+															)}
+														</span>
+														<span className={styles.score}>
+															{formatBytes(file.size)}
+														</span>
+													</button>
+												</li>
+											)
+										})}
+										{shownFiles.length === 0 && (
+											<li className={styles.none}>{t('torrents.stream.filesNone')}</li>
+										)}
+									</ul>
+								</div>
+							) : (
+								<Button variant='secondary' onClick={() => setChoosing(true)}>
+									{t('torrents.stream.chooseFile')}
+								</Button>
+							))}
+
 						{fetching && (
 							<div className={styles.stats}>
 								<div className={styles.statsRow}>
@@ -182,7 +261,14 @@ export function PreparingStream({ target, stream, error, onStop }: PreparingStre
 					<div className={styles.failure} role='alert'>
 						<p className={styles.failureTitle}>{t('torrents.stream.failedTitle')}</p>
 						<p className={styles.failureText}>{error}</p>
-						<Button onClick={onStop}>{t('torrents.stream.close')}</Button>
+						<div className={styles.failureActions}>
+							{files.length > 0 && (
+								<Button variant='primary' onClick={chooseFile}>
+									{t('torrents.stream.chooseFile')}
+								</Button>
+							)}
+							<Button onClick={onStop}>{t('torrents.stream.close')}</Button>
+						</div>
 					</div>
 				) : (
 					<>

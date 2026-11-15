@@ -1613,6 +1613,10 @@ export const en = {
 			collapse: 'Hide details',
 			expand: 'Show details',
 			candidates: 'Top candidates',
+			chooseFile: 'Choose a file',
+			files: 'Files in the torrent',
+			filesFilter: 'Filter files…',
+			filesNone: 'No file matches',
 			candidate: {
 				trying: 'Analyzing',
 				waiting: 'Waiting',

@@ -31,8 +31,8 @@ export {
 
 export { addTorrentFx, checkTorrentClientFx, putTorrentSettingsFx } from './api/api'
 
-export { fetchTorrentStreamFx, startTorrentStreamFx } from './api/api'
-export type { StartTorrentStreamParams, TorrentStream } from './api/api'
+export { chooseTorrentStreamFileFx, fetchTorrentStreamFx, startTorrentStreamFx } from './api/api'
+export type { StartTorrentStreamParams, StreamVideo, TorrentStream } from './api/api'
 
 export { useTorrentSetup } from './lib/useTorrentSetup'
 export { DEBRID_SERVICES, debridService, readyDebrid } from './lib/clients'
