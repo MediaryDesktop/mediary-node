@@ -64,12 +64,20 @@
 	}
 
 	@media (max-width: 1100px) {
+		flex: none;
 		grid-template-columns: minmax(0, 1fr);
 		grid-template-rows: auto;
+		min-height: auto;
 
 		.aside,
+		.results,
 		.results .box {
+			min-height: auto;
 			overflow: visible;
+		}
+
+		.results .box {
+			flex: none;
 		}
 
 		.footer {
