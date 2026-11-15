@@ -174,7 +174,9 @@ func (s *Service) matchFiles(ctx context.Context) matchOutcome {
 	outcome.Considered = len(files)
 	trackedByType := map[string][]matcher.Candidate{}
 
-	for _, group := range groupUnmatched(files) {
+	groups := groupUnmatched(files)
+	for i := range groups {
+		group := &groups[i]
 		if ctx.Err() != nil {
 			break
 		}
@@ -184,7 +186,7 @@ func (s *Service) matchFiles(ctx context.Context) matchOutcome {
 			continue
 		}
 
-		best, matched := s.bestOfTypes(ctx, group, mediaTypes, trackedByType)
+		best, matched := s.bestOfTypes(ctx, *group, mediaTypes, trackedByType)
 		if !matched {
 			for i := range group.files {
 				file := &group.files[i]

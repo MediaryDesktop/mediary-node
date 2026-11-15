@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -221,7 +222,7 @@ func (s *Store) ScanRuns(ctx context.Context, filter ScanHistoryFilter) ([]ScanR
 func (s *Store) ScanRun(ctx context.Context, id int64) (*ScanRun, error) {
 	row, err := sqlc.New(s.db).GetScanRun(ctx, id)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
 
@@ -282,7 +283,8 @@ func (s *Store) ScanRunFileLogs(ctx context.Context, scanRunID int64) ([]ScanRun
 	}
 
 	logs := make([]ScanRunFileLog, 0, len(rows))
-	for _, row := range rows {
+	for i := range rows {
+		row := &rows[i]
 		logs = append(logs, ScanRunFileLog{
 			FileID:      ptrFromOptionalInt64(row.FileID),
 			RelPath:     row.RelPath,

@@ -17,8 +17,11 @@ const recordScanRunTimeout = 10 * time.Second
 // from the scan's — a scan that ran into its own timeout must still get to write
 // down what it managed before that happened, which the scan's own (by then
 // expired) context could no longer allow.
-func (s *Service) recordScanRun(status ScanStatus, outcome matchOutcome, startedAt, finishedAt time.Time, partial bool) {
-	ctx, cancel := context.WithTimeout(context.Background(), recordScanRunTimeout)
+// The run is recorded even when the scan was cancelled: a partial run is history too.
+func (s *Service) recordScanRun(
+	ctx context.Context, status ScanStatus, outcome matchOutcome, startedAt, finishedAt time.Time, partial bool,
+) {
+	ctx, cancel := context.WithTimeout(context.WithoutCancel(ctx), recordScanRunTimeout)
 	defer cancel()
 
 	scanStatus := "completed"

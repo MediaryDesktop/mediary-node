@@ -308,8 +308,8 @@ func TestAFolderOfShowsKeepsOnlyVideo(t *testing.T) {
 
 func fileKinds(files []File) string {
 	kinds := map[string]bool{}
-	for _, file := range files {
-		kinds[file.Kind] = true
+	for i := range files {
+		kinds[files[i].Kind] = true
 	}
 
 	sorted := make([]string, 0, len(kinds))

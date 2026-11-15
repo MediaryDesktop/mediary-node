@@ -262,7 +262,7 @@ func Run(ctx context.Context, build httpapi.BuildInfo) error {
 
 		logger.Info().Msg("shutdown signal received")
 
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), cfg.HTTP.ShutdownTimeout)
+		shutdownCtx, cancel := context.WithTimeout(context.WithoutCancel(groupCtx), cfg.HTTP.ShutdownTimeout)
 		defer cancel()
 
 		return server.Shutdown(shutdownCtx)

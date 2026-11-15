@@ -156,7 +156,7 @@ func (s *Service) runScan(ctx context.Context, roots []store.Root) {
 	status := s.snapshotLocked()
 	s.mu.Unlock()
 
-	s.recordScanRun(status, outcome, startedAt, finishedAt, partial)
+	s.recordScanRun(ctx, status, outcome, startedAt, finishedAt, partial)
 
 	s.publishScan("finished", map[string]any{
 		"roots_total": status.RootsTotal,

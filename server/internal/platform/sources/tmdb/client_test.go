@@ -18,13 +18,13 @@ import (
 
 const accessToken = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJ4In0.c2lnbmF0dXJl"
 
-func newClient(t *testing.T, fallback string, handler http.HandlerFunc) (*Client, *Keys) {
+func newClient(t *testing.T, fallback string, handler http.HandlerFunc) (client *Client, keys *Keys) {
 	t.Helper()
 
 	server := httptest.NewServer(handler)
 	t.Cleanup(server.Close)
 
-	keys := NewKeys(secrets.New(filepath.Join(t.TempDir(), "tmdb-secrets.json")), fallback)
+	keys = NewKeys(secrets.New(filepath.Join(t.TempDir(), "tmdb-secrets.json")), fallback)
 
 	return New(Options{Endpoint: server.URL, Keys: keys, MinInterval: time.Millisecond}), keys
 }

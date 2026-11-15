@@ -546,13 +546,15 @@ func (s *Service) emptyAniListList(ctx context.Context, userID int, mediaType Me
 
 	membership := make(map[int][]string)
 
-	for _, list := range source.Lists {
+	for i := range source.Lists {
+		list := &source.Lists[i]
 		if !list.IsCustomList {
 			continue
 		}
 
-		for _, entry := range list.Entries {
-			membership[entry.MediaID] = append(membership[entry.MediaID], list.Name)
+		for j := range list.Entries {
+			mediaID := list.Entries[j].MediaID
+			membership[mediaID] = append(membership[mediaID], list.Name)
 		}
 	}
 
