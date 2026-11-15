@@ -553,3 +553,65 @@ func TestPairingANodeWithOnlyManualTitlesKeepsThem(t *testing.T) {
 		t.Fatalf("pairing replaced a node that held manual titles: %+v", own.part.document())
 	}
 }
+
+func TestExportedFileRestoresOnAnotherNodeWithoutAnAccount(t *testing.T) {
+	ctx := context.Background()
+
+	source := newNode(t, "http://127.0.0.1:1")
+	source.seed(t)
+
+	exported, err := source.svc.Export(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !strings.HasSuffix(exported.FileName, ".json.gz") || exported.Sha256 != backup.Hash(exported.Body) {
+		t.Fatalf("export is not a named, hashed backup file: %+v", exported.FileName)
+	}
+
+	target := newNode(t, "http://127.0.0.1:1")
+	target.part.mu.Lock()
+	target.part.doc = backup.Document{CustomLists: []backup.CustomList{{ID: 1, MediaType: "movie", Name: "Old"}}}
+	target.part.mu.Unlock()
+
+	if err := target.svc.ImportFile(ctx, exported.Body); err != nil {
+		t.Fatal(err)
+	}
+
+	if target.count(t, "tracker_entry") != 2 || target.count(t, "custom_list") != 1 {
+		t.Fatal("the imported file did not replace the node's state")
+	}
+
+	if doc := target.part.document(); doc.CustomLists[0].Name != "Sci-fi" {
+		t.Fatalf("the old list survived the import: %+v", doc.CustomLists)
+	}
+
+	copies, _ := filepath.Glob(filepath.Join(target.dataDir, "pre-restore", "pre-restore-*.json.gz"))
+	if len(copies) != 1 {
+		t.Fatalf("an import should keep one copy of the state it replaces, found %d", len(copies))
+	}
+}
+
+func TestImportRefusesAFileItCannotReadAndKeepsTheState(t *testing.T) {
+	ctx := context.Background()
+
+	n := newNode(t, "http://127.0.0.1:1")
+	n.seed(t)
+
+	if err := n.svc.ImportFile(ctx, []byte("not a backup")); apperr.KindOf(err) != apperr.KindInvalid {
+		t.Fatalf("garbage should be invalid, got %v", err)
+	}
+
+	var buf bytes.Buffer
+	writer := gzip.NewWriter(&buf)
+	_, _ = writer.Write([]byte(`{"format_version": 99}`))
+	_ = writer.Close()
+
+	if err := n.svc.ImportFile(ctx, buf.Bytes()); apperr.KindOf(err) != apperr.KindPrecondition {
+		t.Fatalf("a newer file should be a precondition, got %v", err)
+	}
+
+	if n.count(t, "tracker_entry") != 2 {
+		t.Fatal("a refused import changed the local state")
+	}
+}

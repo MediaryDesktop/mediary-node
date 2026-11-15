@@ -62,6 +62,7 @@ export type {
 	MediaAiringEpisode,
 	MediaDate,
 	MediaDetails,
+	MediaTrailer,
 	MediaDetailsResponse,
 	MediaEpisode,
 	MediaEpisodeList,

@@ -8,11 +8,13 @@ import { sessionModel } from '@entities/session'
 import {
 	backUpNowFx,
 	deleteBackupFx,
+	exportBackupFx,
 	fetchAppVersionFx,
 	fetchBackupsFx,
 	fetchCloudHealthFx,
 	fetchDevicesFx,
 	fetchSyncStatusFx,
+	importBackupFileFx,
 	pairThisNodeFx,
 	restoreBackupFx,
 	revokeDeviceFx,
@@ -33,6 +35,10 @@ export const unpairMutation = createMutation({ effect: unpairNodeFx, name: 'unpa
 export const backUpNowMutation = createMutation({ effect: backUpNowFx, name: 'backUpNow' })
 
 export const restoreMutation = createMutation({ effect: restoreBackupFx, name: 'restoreBackup' })
+
+export const exportBackupMutation = createMutation({ effect: exportBackupFx, name: 'exportBackup' })
+
+export const importBackupMutation = createMutation({ effect: importBackupFileFx, name: 'importBackup' })
 
 export const deleteBackupMutation = createMutation({ effect: deleteBackupFx, name: 'deleteBackup' })
 

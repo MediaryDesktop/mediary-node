@@ -25,6 +25,7 @@ import {
 
 import { BackupList } from './backup-list/BackupList'
 import styles from './BackupSettings.module.scss'
+import { FileBackup } from './file-backup/FileBackup'
 
 export function BackupSettings() {
 	const { t, i18n } = useTranslation()
@@ -174,6 +175,8 @@ export function BackupSettings() {
 					</div>
 				</>
 			)}
+
+			<FileBackup />
 		</div>
 	)
 }

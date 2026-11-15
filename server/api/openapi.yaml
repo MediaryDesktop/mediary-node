@@ -5125,6 +5125,49 @@ components:
         - backup
         - created
       type: object
+    SyncExportOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/SyncExportOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        data:
+          contentEncoding: base64
+          description: The backup file's bytes, base64-encoded in JSON.
+          type: string
+        file_name:
+          description: A name for the file, with the date in it.
+          type: string
+        sha256:
+          description: Hash of the file's bytes.
+          type: string
+      required:
+        - file_name
+        - sha256
+        - data
+      type: object
+    SyncImportInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/SyncImportInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        data:
+          contentEncoding: base64
+          description: The bytes of a backup file saved by export, base64-encoded in JSON.
+          minLength: 1
+          type: string
+      required:
+        - data
+      type: object
     SyncPairInputBody:
       additionalProperties: false
       properties:
@@ -9608,6 +9651,60 @@ paths:
                 $ref: "#/components/schemas/ErrorModel"
           description: Bad Gateway
       summary: Restore a backup
+      tags:
+        - sync
+  /v1/sync/export:
+    get:
+      description: The current state as a backup file to keep by hand. It needs no account and is the same format the cloud stores, so any node that restores backups can read it.
+      operationId: exportBackup
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SyncExportOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Export a backup file
+      tags:
+        - sync
+  /v1/sync/import:
+    post:
+      description: Replaces the local tracker and lists with the file's, as a whole and without merging. It needs no account. A copy of the current state is kept in the data folder first. A file written by a newer version of Mediary answers 428 and changes nothing.
+      operationId: importBackup
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SyncImportInputBody"
+        required: true
+      responses:
+        "204":
+          description: No Content
+        "422":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Unprocessable Entity
+        "428":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Precondition Required
+        "500":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Internal Server Error
+      summary: Restore from a backup file
       tags:
         - sync
   /v1/sync/pairing:

@@ -1657,6 +1657,46 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/v1/sync/export': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Export a backup file
+		 * @description The current state as a backup file to keep by hand. It needs no account and is the same format the cloud stores, so any node that restores backups can read it.
+		 */
+		get: operations['exportBackup']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/sync/import': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		/**
+		 * Restore from a backup file
+		 * @description Replaces the local tracker and lists with the file's, as a whole and without merging. It needs no account. A copy of the current state is kept in the data folder first. A file written by a newer version of Mediary answers 428 and changes nothing.
+		 */
+		post: operations['importBackup']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/v1/sync/pairing': {
 		parameters: {
 			query?: never
@@ -5179,6 +5219,30 @@ export interface components {
 			/** @description False when the state had not changed since the last backup and nothing new was stored. */
 			created: boolean
 		}
+		SyncExportOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/SyncExportOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The backup file's bytes, base64-encoded in JSON. */
+			data: string
+			/** @description A name for the file, with the date in it. */
+			file_name: string
+			/** @description Hash of the file's bytes. */
+			sha256: string
+		}
+		SyncImportInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/SyncImportInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description The bytes of a backup file saved by export, base64-encoded in JSON. */
+			data: string
+		}
 		SyncPairInputBody: {
 			/**
 			 * Format: uri
@@ -6077,6 +6141,8 @@ export type SchemaSuggestionsOutputBody = components['schemas']['SuggestionsOutp
 export type SchemaSyncBackupBody = components['schemas']['SyncBackupBody']
 export type SchemaSyncBackupListOutputBody = components['schemas']['SyncBackupListOutputBody']
 export type SchemaSyncBackupNowOutputBody = components['schemas']['SyncBackupNowOutputBody']
+export type SchemaSyncExportOutputBody = components['schemas']['SyncExportOutputBody']
+export type SchemaSyncImportInputBody = components['schemas']['SyncImportInputBody']
 export type SchemaSyncPairInputBody = components['schemas']['SyncPairInputBody']
 export type SchemaSyncPairOutputBody = components['schemas']['SyncPairOutputBody']
 export type SchemaSyncStatusOutputBody = components['schemas']['SyncStatusOutputBody']
@@ -9638,6 +9704,84 @@ export interface operations {
 			}
 			/** @description Bad Gateway */
 			502: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	exportBackup: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['SyncExportOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	importBackup: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['SyncImportInputBody']
+			}
+		}
+		responses: {
+			/** @description No Content */
+			204: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Unprocessable Entity */
+			422: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Precondition Required */
+			428: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+			/** @description Internal Server Error */
+			500: {
 				headers: {
 					[name: string]: unknown
 				}

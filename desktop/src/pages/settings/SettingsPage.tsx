@@ -26,6 +26,7 @@ import { SECTION_GROUPS } from './config/sections'
 import type { SectionInfo, SettingsSection } from './config/sections'
 import styles from './SettingsPage.module.scss'
 import { AccountCard } from './ui/account-card/AccountCard'
+import { DeleteAccountCard } from './ui/delete-account-card/DeleteAccountCard'
 
 export interface SettingsPageProps {
 	section: SettingsSection
@@ -128,6 +129,7 @@ function SectionContent({ section }: { section: SectionInfo }) {
 				<>
 					<AccountCard />
 					<AniListAccountSettings />
+					<DeleteAccountCard />
 				</>
 			)
 		case 'backup':

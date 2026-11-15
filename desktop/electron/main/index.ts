@@ -1,5 +1,6 @@
 import { app, BrowserWindow, dialog, ipcMain, type IpcMainInvokeEvent, session, shell } from 'electron'
-import { join } from 'node:path'
+import { writeFile } from 'node:fs/promises'
+import { basename, join } from 'node:path'
 
 import { IPC } from '../shared/ipc.js'
 
@@ -195,6 +196,32 @@ function registerIpc(): void {
 		}
 
 		return result.filePaths[0] ?? null
+	})
+
+	// The same reason: the renderer cannot write files. Saving here, rather than
+	// through a browser download, keeps the name and the extension the app chose.
+	handle(IPC.dialogSaveFile, async (event, name: unknown, base64: unknown): Promise<boolean> => {
+		if (typeof name !== 'string' || typeof base64 !== 'string' || name === '') {
+			throw new TypeError('dialog: expected a file name and its bytes')
+		}
+
+		const options = {
+			defaultPath: join(app.getPath('downloads'), basename(name)),
+			filters: [{ name: 'Mediary backup', extensions: ['gz'] }]
+		}
+
+		const parent = BrowserWindow.fromWebContents(event.sender)
+		const result = parent
+			? await dialog.showSaveDialog(parent, options)
+			: await dialog.showSaveDialog(options)
+
+		if (result.canceled || !result.filePath) {
+			return false
+		}
+
+		await writeFile(result.filePath, Buffer.from(base64, 'base64'))
+
+		return true
 	})
 
 	handle(IPC.sessionCanPersist, () => canPersistSession())

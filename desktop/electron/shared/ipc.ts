@@ -10,6 +10,7 @@ export const IPC = {
 	updateInstall: 'update:install',
 
 	dialogPickFolder: 'dialog:pick-folder',
+	dialogSaveFile: 'dialog:save-file',
 
 	oauthPrepare: 'oauth:prepare',
 	oauthAuthorize: 'oauth:authorize',

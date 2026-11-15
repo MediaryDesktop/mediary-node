@@ -11,6 +11,7 @@ export type SyncStatus = NodeSchemas['SyncStatusOutputBody']
 export type SyncBackup = NodeSchemas['SyncBackupBody']
 export type Paired = NodeSchemas['SyncPairOutputBody']
 export type BackupResult = NodeSchemas['SyncBackupNowOutputBody']
+export type ExportedBackup = NodeSchemas['SyncExportOutputBody']
 export type Device = CloudSchemas['DeviceBody']
 export type CloudHealth = CloudSchemas['HealthOutputBody']
 
@@ -47,6 +48,34 @@ export const restoreBackupFx = createNodeRequestFx<string, void>(id => ({
 	timeout: 120_000,
 	expectsUnauthorized: true
 }))
+
+export const exportBackupFx = createNodeRequestFx<void, ExportedBackup>({
+	url: '/v1/sync/export',
+	timeout: 60_000
+})
+
+const importBackupRequestFx = createNodeRequestFx<string, void>(data => ({
+	url: '/v1/sync/import',
+	method: 'POST',
+	body: { data },
+	timeout: 120_000
+}))
+
+function toBase64(bytes: Uint8Array): string {
+	// In chunks: spreading a whole backup into one call overflows the stack.
+	const CHUNK = 0x8000
+	let binary = ''
+
+	for (let offset = 0; offset < bytes.length; offset += CHUNK) {
+		binary += String.fromCharCode(...bytes.subarray(offset, offset + CHUNK))
+	}
+
+	return btoa(binary)
+}
+
+export const importBackupFileFx = createEffect<File, void, HttpRequestError>(async file =>
+	importBackupRequestFx(toBase64(new Uint8Array(await file.arrayBuffer())))
+)
 
 const createPairingCodeFx = createCloudRequestFx<void, PairingCode>({
 	url: '/v1/account/devices/pairing-codes',

@@ -51,7 +51,7 @@ export function DeleteAccountDialog() {
 					<>
 						{cancel}
 						<Button
-							variant='glass-danger'
+							variant='primary'
 							loading={codePending}
 							onClick={() => deleteAccountForm.codeRequested()}
 						>
@@ -61,7 +61,7 @@ export function DeleteAccountDialog() {
 				) : (
 					<>
 						{cancel}
-						<Button type='submit' form={FORM_ID} variant='glass-danger' loading={pending}>
+						<Button type='submit' form={FORM_ID} variant='primary' loading={pending}>
 							{t('auth.deleteAccount.confirm')}
 						</Button>
 					</>

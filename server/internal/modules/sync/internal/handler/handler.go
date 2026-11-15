@@ -73,6 +73,24 @@ type SyncRestoreInput struct {
 	ID string `path:"id" format:"uuid" doc:"Snapshot to restore."`
 }
 
+type SyncExportOutput struct {
+	Body struct {
+		FileName string `json:"file_name" doc:"A name for the file, with the date in it."`
+		Sha256   string `json:"sha256" doc:"Hash of the file's bytes."`
+		Data     []byte `json:"data" doc:"The backup file's bytes, base64-encoded in JSON."`
+	}
+}
+
+type SyncImportInput struct {
+	Body struct {
+		Data []byte `json:"data" minLength:"1" doc:"The bytes of a backup file saved by export, base64-encoded in JSON."`
+	}
+}
+
+// A backup file is gzip, and base64 makes it a third larger; the limit leaves
+// room for posters of manual titles without letting a body of any size in.
+const maxImportBytes = 96 << 20
+
 func (h *Handler) Register(api huma.API) {
 	huma.Register(api, huma.Operation{
 		OperationID: "getSyncStatus",
@@ -140,6 +158,49 @@ func (h *Handler) Register(api huma.API) {
 			http.StatusUnprocessableEntity, http.StatusBadGateway,
 		},
 	}, h.restore)
+
+	huma.Register(api, huma.Operation{
+		OperationID: "exportBackup",
+		Method:      http.MethodGet,
+		Path:        "/v1/sync/export",
+		Summary:     "Export a backup file",
+		Description: "The current state as a backup file to keep by hand. It needs no account and is the same format the cloud stores, so any node that restores backups can read it.",
+		Tags:        []string{"sync"},
+	}, h.export)
+
+	huma.Register(api, huma.Operation{
+		OperationID:   "importBackup",
+		Method:        http.MethodPost,
+		Path:          "/v1/sync/import",
+		Summary:       "Restore from a backup file",
+		Description:   "Replaces the local tracker and lists with the file's, as a whole and without merging. It needs no account. A copy of the current state is kept in the data folder first. A file written by a newer version of Mediary answers 428 and changes nothing.",
+		Tags:          []string{"sync"},
+		DefaultStatus: http.StatusNoContent,
+		MaxBodyBytes:  maxImportBytes,
+		Errors:        []int{http.StatusPreconditionRequired, http.StatusUnprocessableEntity},
+	}, h.importFile)
+}
+
+func (h *Handler) export(ctx context.Context, _ *struct{}) (*SyncExportOutput, error) {
+	exported, err := h.svc.Export(ctx)
+	if err != nil {
+		return nil, httpapi.ToHTTP(err)
+	}
+
+	out := &SyncExportOutput{}
+	out.Body.FileName = exported.FileName
+	out.Body.Sha256 = exported.Sha256
+	out.Body.Data = exported.Body
+
+	return out, nil
+}
+
+func (h *Handler) importFile(ctx context.Context, in *SyncImportInput) (*struct{}, error) {
+	if err := h.svc.ImportFile(ctx, in.Body.Data); err != nil {
+		return nil, httpapi.ToHTTP(err)
+	}
+
+	return nil, nil
 }
 
 func (h *Handler) status(context.Context, *struct{}) (*SyncStatusOutput, error) {

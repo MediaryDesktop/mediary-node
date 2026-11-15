@@ -318,6 +318,43 @@ func (s *Service) Restore(ctx context.Context, id uuid.UUID) error {
 	return s.restore(ctx, id)
 }
 
+// Exported is the current state as a file the user can keep: the same bytes a
+// cloud backup holds, so any node that reads backups can read it.
+type Exported struct {
+	FileName string
+	Body     []byte
+	Sha256   string
+}
+
+// Export encodes the current state for the user to save by hand. It needs no
+// account: the file is the user's, whether or not this node is paired.
+func (s *Service) Export(ctx context.Context) (*Exported, error) {
+	doc, err := s.store.Read(ctx)
+	if err != nil {
+		return nil, apperr.Wrap(err, apperr.KindInternal, "read state for export")
+	}
+
+	encoded, err := backup.Encode(doc)
+	if err != nil {
+		return nil, apperr.Wrap(err, apperr.KindInternal, "encode backup")
+	}
+
+	return &Exported{
+		FileName: "mediary-backup-" + time.Now().UTC().Format("20060102-150405") + ".json.gz",
+		Body:     encoded.Body,
+		Sha256:   encoded.Sha256,
+	}, nil
+}
+
+// ImportFile restores a file saved by Export, replacing the local state as a
+// whole. Like a restore from the cloud it keeps a copy of what it replaces.
+func (s *Service) ImportFile(ctx context.Context, body []byte) error {
+	s.busy.Lock()
+	defer s.busy.Unlock()
+
+	return s.applyEncoded(ctx, body)
+}
+
 // restoreLatestIfEmpty brings the account's newest snapshot onto a node that
 // holds nothing yet — a new computer. A node with any data of its own is left
 // alone: overwriting it is the user's call, through Restore.
@@ -365,7 +402,14 @@ func (s *Service) restore(ctx context.Context, id uuid.UUID) error {
 		return apperr.New(apperr.KindUpstream, "downloaded backup does not match its hash")
 	}
 
-	doc, err := backup.Decode(resp.Body)
+	return s.applyEncoded(ctx, resp.Body)
+}
+
+// applyEncoded replaces the local state with the snapshot in body, whether it
+// came from the cloud or from a file the user picked. The current state is set
+// aside first, and a snapshot that cannot be read changes nothing.
+func (s *Service) applyEncoded(ctx context.Context, body []byte) error {
+	doc, err := backup.Decode(body)
 	if errors.Is(err, backup.ErrNewerFormat) {
 		return apperr.New(apperr.KindPrecondition, "this backup was made by a newer version of Mediary; update to restore it")
 	}

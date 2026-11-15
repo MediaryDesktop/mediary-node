@@ -52,7 +52,9 @@ const api = {
 	},
 
 	dialog: {
-		pickFolder: (): Promise<string | null> => ipcRenderer.invoke(IPC.dialogPickFolder)
+		pickFolder: (): Promise<string | null> => ipcRenderer.invoke(IPC.dialogPickFolder),
+		saveFile: (name: string, base64: string): Promise<boolean> =>
+			ipcRenderer.invoke(IPC.dialogSaveFile, name, base64)
 	},
 
 	oauth: {

@@ -37,7 +37,7 @@ const pickFolder = vi.hoisted(() => vi.fn())
 
 beforeEach(() => {
 	pickFolder.mockReset()
-	window.mediary.dialog = { pickFolder }
+	window.mediary.dialog = { pickFolder, saveFile: vi.fn() }
 })
 
 function scanEvent(phase: string, payload: Record<string, unknown> = {}) {

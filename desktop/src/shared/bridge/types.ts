@@ -52,6 +52,8 @@ export interface MediaryBridge {
 	}
 	dialog: {
 		pickFolder: () => Promise<string | null>
+		/** Asks where to save, writes the bytes (base64) there. False when the user cancelled. */
+		saveFile: (name: string, base64: string) => Promise<boolean>
 	}
 	oauth: {
 		prepare: () => Promise<OAuthListener>

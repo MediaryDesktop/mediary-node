@@ -1962,6 +1962,18 @@ export const en = {
 		restored: 'Backup restored',
 		restoreFailed: 'Could not restore the backup',
 		note: 'A backup holds your movie, series and book tracker and your own lists — no titles or posters, and nothing from AniList: anime and manga live in your AniList account.',
+		file: {
+			title: 'Backup file',
+			hint: 'Save your tracker and lists to a file you keep yourself, or restore from one. It works without an account.',
+			save: 'Save to file',
+			saved: 'Backup file saved',
+			saveFailed: 'Could not save the backup file',
+			load: 'Restore from file',
+			restoreTitle: 'Restore from this file?',
+			restoreHint:
+				'Your local tracker and lists will be replaced by the contents of {{name}}. A copy of the current state is kept in the data folder.',
+			restoreFailed: 'Could not restore from the file'
+		},
 		banner: {
 			outdated:
 				'This version of Mediary can no longer back up — everything else works. Update to turn backups back on.',
@@ -2110,8 +2122,12 @@ export const en = {
 		account: {
 			name: 'Account',
 			hint: 'Signed in as {{email}}',
-			signOut: 'Sign out',
-			delete: 'Delete account'
+			signOut: 'Sign out'
+		},
+		deleteAccount: {
+			title: 'Delete account',
+			hint: "Permanently delete your account and all data. This can't be undone.",
+			action: 'Delete account'
 		}
 	},
 	pagination: {
