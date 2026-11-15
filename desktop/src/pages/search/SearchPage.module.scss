@@ -5,9 +5,9 @@
 		gap: 0;
 		align-items: start;
 		margin-top: 1.5rem;
-		transition:
-			grid-template-columns 320ms cubic-bezier(0.2, 0, 0, 1),
-			column-gap 320ms cubic-bezier(0.2, 0, 0, 1);
+		// Ширину колонок навмисно не анімуємо: auto-fill сітка карток перераховує
+		// кількість колонок на кожному кадрі, і картки стрибають кілька разів.
+		// Розкладка змінюється один раз, а плавність дає лише поява панелі фільтрів.
 
 		.results {
 			min-width: 0;
@@ -42,7 +42,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.root .layout,
 	.root .layout .filters .filtersInner {
 		transition: none;
 	}

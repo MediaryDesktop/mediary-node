@@ -1,6 +1,6 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import type { ReactNode } from 'react'
 
 import { useTranslation } from '@shared/i18n'
@@ -12,6 +12,7 @@ import type { MediaSummary } from '@entities/media'
 import { entryTracking, useTrackedEntries } from '@entities/tracker'
 import type { TrackerEntry } from '@entities/tracker'
 
+import { useFlipGrid } from '../../lib/useFlipGrid'
 import { searchMediaModel } from '../../model/model'
 import { AddManuallyButton } from '../add-manually-button/AddManuallyButton'
 
@@ -44,6 +45,10 @@ export function SearchResults({ renderMenu }: SearchResultsProps) {
 			searchMediaModel.nextPageRequested,
 			searchMediaModel.retried
 		])
+
+	const filtersOpen = useUnit(searchMediaModel.$filtersOpen)
+	const gridRef = useRef<HTMLUListElement>(null)
+	useFlipGrid(gridRef, filtersOpen)
 
 	const phase = loading
 		? 'loading'
@@ -100,7 +105,7 @@ export function SearchResults({ renderMenu }: SearchResultsProps) {
 
 		results: (
 			<div className={styles.results}>
-				<ul className={styles.grid}>
+				<ul ref={gridRef} className={styles.grid}>
 					{items.map(media => {
 						const entry = trackedByRef.get(media.media_ref)
 
