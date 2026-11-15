@@ -25,7 +25,7 @@ export function Modal({ open, onOpenChange, title, description, size = 'md', chi
 			<Dialog.Portal>
 				<Dialog.Overlay className={styles.overlay} />
 
-				<Dialog.Content className={clsx(styles.content, styles[size])}>
+				<Dialog.Content className={clsx(styles.content, styles[size], !children && styles.bare)}>
 					<header className={styles.header}>
 						<Dialog.Title className={styles.title}>{title}</Dialog.Title>
 
