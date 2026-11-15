@@ -64,6 +64,11 @@ export function appFilePath(raw: string, rendererDir: string): string | null {
 		return null
 	}
 
+	// No file in the bundle has one, and on Windows it is a separator to climb with.
+	if (path.includes('\\')) {
+		return null
+	}
+
 	const root = resolve(rendererDir)
 	const file = resolve(root, `.${path === '/' ? '/index.html' : path}`)
 	const inside = relative(root, file)
