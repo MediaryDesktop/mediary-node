@@ -23,6 +23,18 @@ const deepImportRule = {
 	message: 'Import a slice through its public index (`@entities/session`), not a path inside it.'
 }
 
+// Routes belong to the app's route tree, and a typed link is a dependency on it.
+// Pages and features may lead somewhere; an entity or a backend client that
+// knows a route would tie a domain concept to one screen layout. They take the
+// way out as a callback instead (useMissingToolAction(openDependencies)).
+const ROUTE_BLIND_LAYERS = new Set(['infra', 'entities'])
+
+const routerImport = {
+	name: '@tanstack/react-router',
+	message:
+		'Entities and infrastructure do not know routes: take the navigation as a callback from the feature or page.'
+}
+
 function layerRules() {
 	return LAYERS.map(({ alias, dir }, index) => {
 		const forbidden = LAYERS.slice(index).map(layer => layer.alias)
@@ -33,6 +45,7 @@ function layerRules() {
 				'no-restricted-imports': [
 					'error',
 					{
+						paths: ROUTE_BLIND_LAYERS.has(alias) ? [routerImport] : [],
 						patterns: [
 							{
 								group: forbidden.flatMap(patternsFor),

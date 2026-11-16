@@ -1,4 +1,3 @@
-import { useNavigate } from '@tanstack/react-router'
 import { useCallback } from 'react'
 
 import { problemCode } from '@shared/api'
@@ -8,18 +7,19 @@ export function isMissingToolError(error: unknown): boolean {
 	return problemCode(error) === 'tool-missing'
 }
 
-export function useMissingToolAction() {
+// The way out of a missing tool is wherever the screen keeps the dependencies;
+// the caller knows the route, the entity only knows the failure.
+export function useMissingToolAction(openDependencies: () => void) {
 	const { t } = useTranslation()
-	const navigate = useNavigate()
 
 	return useCallback(
 		(error: unknown) =>
 			isMissingToolError(error)
 				? {
 						label: t('tools.open'),
-						onClick: () => void navigate({ to: '/extensions', search: { tab: 'dependencies' } })
+						onClick: openDependencies
 					}
 				: undefined,
-		[navigate, t]
+		[openDependencies, t]
 	)
 }

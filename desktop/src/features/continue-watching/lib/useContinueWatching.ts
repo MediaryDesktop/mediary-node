@@ -1,5 +1,6 @@
+import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
-import { useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 
 import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
@@ -105,7 +106,10 @@ export function usePlayFile(): { play: (fileId: number) => void; starting: boole
 		playerOpened
 	])
 
-	const missingTool = useMissingToolAction()
+	const navigate = useNavigate()
+	const missingTool = useMissingToolAction(
+		useCallback(() => void navigate({ to: '/extensions', search: { tab: 'dependencies' } }), [navigate])
+	)
 
 	useUnitWatch(playbackModel.playFailed, ({ error }) =>
 		toast.error(problemDetail(error, t('playback.failed')), {

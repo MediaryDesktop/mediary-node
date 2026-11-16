@@ -1,4 +1,6 @@
+import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
+import { useCallback } from 'react'
 
 import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
@@ -89,7 +91,10 @@ export function EpisodeLibrary({
 
 	useUnitWatch(playbackModel.progressSettled, () => askProgress(mediaRef))
 
-	const missingTool = useMissingToolAction()
+	const navigate = useNavigate()
+	const missingTool = useMissingToolAction(
+		useCallback(() => void navigate({ to: '/extensions', search: { tab: 'dependencies' } }), [navigate])
+	)
 
 	useUnitWatch(playbackModel.playFailed, ({ error }) =>
 		toast.error(problemDetail(error, t('playback.failed')), {

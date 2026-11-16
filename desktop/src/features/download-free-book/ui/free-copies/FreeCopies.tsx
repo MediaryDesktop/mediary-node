@@ -1,5 +1,6 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
+import { useCallback } from 'react'
 import { IoIosRefresh } from 'react-icons/io'
 
 import { problemDetail } from '@shared/api'
@@ -38,7 +39,10 @@ export function FreeCopies({ mediaRef }: FreeCopiesProps) {
 		bookDownloadsQuery.$data
 	])
 
-	const folderAction = useBookFolderAction()
+	const navigate = useNavigate()
+	const folderAction = useBookFolderAction(
+		useCallback(() => void navigate({ to: '/settings', search: { section: 'books' } }), [navigate])
+	)
 
 	const anySource = (sources?.sources?.length ?? 0) > 0
 
