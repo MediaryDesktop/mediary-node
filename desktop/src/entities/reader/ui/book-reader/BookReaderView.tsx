@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import type { FoliateTocItem } from 'foliate-js/view.js'
-import { useCallback, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 
 import { useTranslation } from '@shared/i18n'
@@ -21,7 +21,8 @@ import { useBookKeyboard } from './lib/useBookKeyboard'
 import { TocDrawer } from './toc-drawer/TocDrawer'
 import type { BookAppearance, BookLocation, BookViewHandle } from './types'
 import { FoliateView } from './views/FoliateView'
-import { PdfView } from './views/PdfView'
+
+const PdfView = lazy(() => import('./views/PdfView').then(module => ({ default: module.PdfView })))
 
 const LEAVE_MS = 240
 
@@ -106,14 +107,16 @@ export function BookReaderView({ book, file, locator, openedAt, onClose, onReloc
 				{failed ? (
 					<p className={styles.message}>{t('reader.book.unreadable')}</p>
 				) : pdf ? (
-					<PdfView
-						ref={viewRef}
-						file={file}
-						locator={locator}
-						onReady={() => setReady(true)}
-						onRelocate={relocate}
-						onError={fail}
-					/>
+					<Suspense fallback={null}>
+						<PdfView
+							ref={viewRef}
+							file={file}
+							locator={locator}
+							onReady={() => setReady(true)}
+							onRelocate={relocate}
+							onError={fail}
+						/>
+					</Suspense>
 				) : (
 					<FoliateView
 						ref={viewRef}

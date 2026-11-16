@@ -80,6 +80,9 @@ export default defineConfig({
 		},
 		build: {
 			outDir: 'out/renderer',
+			// electron-vite leaves the renderer unminified; for a page read from the
+			// app's own disk that is a few megabytes Chromium parses on every start.
+			minify: 'esbuild',
 			rollupOptions: {
 				input: {
 					index: dir('./src/index.html'),
