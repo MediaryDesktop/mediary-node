@@ -89,7 +89,7 @@
 				align-items: flex-end;
 				justify-content: space-between;
 				gap: 0.5rem;
-				padding: 2rem 0.5rem 0.625rem;
+				padding: 2rem 0 0;
 				background: linear-gradient(
 					to bottom,
 					transparent,
@@ -100,37 +100,36 @@
 				font-weight: 600;
 				pointer-events: none;
 
-				.count {
-					font-variant-numeric: tabular-nums;
-				}
-
+				.count,
 				.scoreBadge,
 				.cornerLabel {
 					display: inline-flex;
 					align-items: center;
 					gap: 0.25rem;
-					padding: 0.125rem 0.5rem;
-					border-radius: var(--radius-sm);
+					padding: 0.125rem 0.625rem;
 					font-weight: 700;
+				}
+
+				.count {
+					background: var(--overlay);
+					border-radius: 0 var(--radius-sm) 0 0;
+					font-variant-numeric: tabular-nums;
 				}
 
 				.scoreBadge {
 					background: var(--accent);
+					border-radius: var(--radius-sm) 0 0 0;
 					color: var(--text-on-accent);
+
+					svg {
+						margin-top: -0.1rem;
+					}
 				}
 
 				.cornerLabel {
 					background: var(--overlay);
+					border-radius: var(--radius-sm) 0 0 0;
 				}
-			}
-
-			.bar {
-				position: absolute;
-				left: 0;
-				bottom: 0;
-				width: var(--percent);
-				height: 3px;
-				background: var(--text-on-accent);
 			}
 		}
 

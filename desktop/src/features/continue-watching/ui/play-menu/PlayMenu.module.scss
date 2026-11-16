@@ -93,6 +93,7 @@
 
 	&[data-state="closed"] {
 		animation: play-menu-out 90ms ease-in forwards;
+		pointer-events: none;
 	}
 
 	&.episodes {

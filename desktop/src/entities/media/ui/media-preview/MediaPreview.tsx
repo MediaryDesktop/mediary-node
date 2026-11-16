@@ -171,7 +171,7 @@ export function MediaPreview({
 	const seasons = details?.seasons ?? 0
 
 	const facts = [
-		enumLabel(t, 'format', format),
+		statusLabel,
 		seasons > 1 ? t('media.card.seasons', { count: seasons }) : null,
 		reading
 			? chapters
@@ -247,7 +247,7 @@ export function MediaPreview({
 					</div>
 				)}
 
-				{facts.length > 0 && <p className={styles.facts}>{facts.join(', ')}</p>}
+				{facts.length > 0 && <p className={styles.facts}>{facts.join(' · ')}</p>}
 
 				{genres.length > 0 && <p className={styles.genres}>{genres.join(', ')}</p>}
 
@@ -270,8 +270,6 @@ export function MediaPreview({
 								{tracking.score / 10}
 							</span>
 						)}
-
-						{statusLabel && <span className={styles.status}>{statusLabel}</span>}
 
 						{extra}
 					</div>

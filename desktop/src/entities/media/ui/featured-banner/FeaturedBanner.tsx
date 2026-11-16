@@ -177,7 +177,7 @@ export function FeaturedBanner<T extends FeaturedMedia>({
 										<p className={styles.description}>{current.description}</p>
 									)}
 
-									{extra?.(current)}
+									{extra && <div className={styles.extra}>{extra(current)}</div>}
 
 									<button
 										type='button'

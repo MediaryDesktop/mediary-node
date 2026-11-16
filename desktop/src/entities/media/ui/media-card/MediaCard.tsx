@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import { useUnit } from 'effector-react'
-import type { CSSProperties, ReactNode } from 'react'
-import { useCallback, useRef, useState } from 'react'
+import type { ReactNode } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { HoverCard, Icon } from '@shared/ui'
@@ -65,6 +65,7 @@ export function MediaCard({
 	const title = mediaTitle(media.title)
 	const posterRef = useRef<HTMLSpanElement>(null)
 	const panelRef = useRef<HTMLDivElement>(null)
+	const pointerRef = useRef<{ x: number; y: number } | null>(null)
 	const [hovered, setHovered] = useState(false)
 	const [held, setHeld] = useState(false)
 	const [offset, setOffset] = useState(0)
@@ -79,17 +80,42 @@ export function MediaCard({
 		setHovered(next)
 	}
 
+	useEffect(() => {
+		if (!open) {
+			return undefined
+		}
+
+		const track = (event: PointerEvent) => {
+			pointerRef.current = { x: event.clientX, y: event.clientY }
+		}
+
+		window.addEventListener('pointermove', track)
+
+		return () => window.removeEventListener('pointermove', track)
+	}, [open])
+
 	const hold = useCallback((next: boolean) => {
 		setHeld(next)
 
 		if (!next) {
-			setHovered(panelRef.current?.matches(':hover') ?? false)
+			const point = pointerRef.current
+			const rect = panelRef.current?.getBoundingClientRect()
+
+			setHovered(
+				Boolean(
+					point &&
+					rect &&
+					point.x >= rect.left &&
+					point.x <= rect.right &&
+					point.y >= rect.top &&
+					point.y <= rect.bottom
+				)
+			)
 		}
 	}, [])
 
 	const total = tracking?.total ?? null
 	const progress = tracking ? Math.min(tracking.progress, total ?? tracking.progress) : null
-	const percent = progress != null && total ? Math.round((progress / total) * 100) : 0
 	const year = media.season_year ?? tracking?.year ?? null
 	const kind = enumLabel(t, 'format', media.format)
 	const subtitle = [year, kind].filter(value => value != null && value !== '').join(', ')
@@ -132,10 +158,6 @@ export function MediaCard({
 						)
 					)}
 				</span>
-			)}
-
-			{percent > 0 && (
-				<span className={styles.bar} style={{ '--percent': `${percent}%` } as CSSProperties} />
 			)}
 		</span>
 	)

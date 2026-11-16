@@ -83,6 +83,7 @@ export function HomeBanner({ entries, watching, loading, onOpen }: HomeBannerPro
 					next && (
 						<Button
 							variant='primary'
+							size='small'
 							disabled={starting}
 							startIcon={<Icon name='common/play' size={16} />}
 							onClick={() => play(next.file.id)}

@@ -50,6 +50,7 @@ export function PlayMenu({
 	const { play, starting } = usePlayFile()
 	const nextRef = useRef<HTMLDivElement>(null)
 	const splitRef = useRef<HTMLDivElement>(null)
+	const pointerActiveRef = useRef(false)
 	const [width, setWidth] = useState<number | undefined>(undefined)
 
 	const [request, playExternally, playerMode, changePlayerMode] = useUnit([
@@ -128,6 +129,12 @@ export function PlayMenu({
 
 	const keepFromItem = (event: PointerEvent) => event.stopPropagation()
 
+	const skipFocusReturn = (event: Event) => {
+		if (pointerActiveRef.current) {
+			event.preventDefault()
+		}
+	}
+
 	const mainLabel = next ? t('media.card.play', { episode: next.number }) : label
 
 	const entryTitle = (entry: PlayEntry) =>
@@ -135,7 +142,16 @@ export function PlayMenu({
 		t('media.card.menu.episode', { number: entry.number })
 
 	return (
-		<div ref={splitRef} className={clsx(styles.split, open && styles.open)}>
+		<div
+			ref={splitRef}
+			className={clsx(styles.split, open && styles.open)}
+			onPointerDownCapture={() => {
+				pointerActiveRef.current = true
+			}}
+			onKeyDownCapture={() => {
+				pointerActiveRef.current = false
+			}}
+		>
 			<button
 				type='button'
 				className={styles.main}
@@ -163,6 +179,7 @@ export function PlayMenu({
 						sideOffset={6}
 						collisionPadding={12}
 						style={{ width }}
+						onCloseAutoFocus={skipFocusReturn}
 					>
 						{list.entries.length > 1 && (
 							<Menu.Sub open={episodesOpen} onOpenChange={setEpisodesOpen}>

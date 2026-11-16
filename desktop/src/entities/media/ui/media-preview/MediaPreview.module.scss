@@ -105,16 +105,20 @@
 			display: flex;
 			align-items: center;
 			gap: 0.625rem;
-			color: var(--text-secondary);
+			color: var(--text);
 			font-size: var(--font-size-sm);
 
 			.chip {
-				padding: 0.0625rem 0.4375rem;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				padding: 0.35rem 0.625rem;
 				border: 1px solid var(--border-strong);
-				border-radius: var(--radius-sm);
+				border-radius: var(--radius-full);
 				color: var(--text);
 				font-size: var(--font-size-xs);
 				font-weight: 600;
+				line-height: 1;
 			}
 
 			.score {
@@ -164,16 +168,12 @@
 				display: inline-flex;
 				align-items: center;
 				gap: 0.25rem;
-				padding: 0.125rem 0.5rem;
+				padding: 0.35rem 0.625rem;
 				border-radius: var(--radius-full);
 				background: var(--accent-muted);
 				color: var(--accent-text);
 				font-size: var(--font-size-xs);
 				font-weight: 700;
-			}
-
-			.status {
-				color: var(--text-secondary);
 			}
 		}
 

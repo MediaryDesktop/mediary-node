@@ -196,6 +196,10 @@
 					flex-direction: column;
 					gap: 0.75rem;
 
+					.extra {
+						align-self: flex-start;
+					}
+
 					.description {
 						display: -webkit-box;
 						margin: 0;
