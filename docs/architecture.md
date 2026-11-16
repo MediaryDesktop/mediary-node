@@ -21,6 +21,7 @@ src/
 ├── app/              композиція: роути, провайдери, каркас
 │   ├── layout/       AppLayout, сайдбар, банер «нода недоступна», плеєр поверх сторінок
 │   ├── model/        готовність застосунку до показу (splash)
+│   ├── pip/          сторінка закріпленого вікна: лише плеєр (pip.html)
 │   ├── providers/    контекст, оверлеї, крос-слайсове wiring
 │   └── router/       дерево маршрутів
 │
@@ -36,7 +37,7 @@ src/
 └── shared/           інструментарій без домену
     ├── api/          createRequestFx, нормалізація помилок, подія 401
     ├── bridge/       типи мосту preload (структурна копія контракту)
-    ├── factory/      atom, record-editor, own-request
+    ├── factory/      atom, record-editor, own-request, on-each
     ├── i18n/         локалі, інстанс i18next, збережений вибір мови
     ├── lib/          generic утиліти й хуки (сховище, вікно рядків, формат)
     ├── style/        токени й глобальні стилі: theme/palette, global
@@ -53,8 +54,8 @@ src/
 
 | Шар | Слайси |
 |---|---|
-| `entities` | `anilist-account` · `book-source` · `extension` · `library-item` · `manga-source` · `media` · `playback` · `reader` · `session` · `tool` · `torrent` · `tracker` |
-| `features` | `auth` · `auto-download-torrents` · `back-up-node` · `choose-player` · `connect-anilist` · `continue-watching` · `download-chapters` · `download-free-book` · `download-torrent` · `library-explorer` · `link-manga-source` · `manage-debrid-service` · `manage-library-roots` · `manage-lists` · `manage-opds-servers` · `manage-plugins` · `manage-source-keys` · `manage-tools` · `manage-torrent-client` · `manage-torznab-sources` · `manage-unmatched-files` · `manual-media-form` · `match-library-file` · `scan-library` · `search-media` · `search-torrents` · `setup-wizard` · `stream-torrent` · `switch-language` · `switch-theme` · `title-chapters` · `track-media` |
+| `entities` | `anilist-account` · `book-source` · `extension` · `library-item` · `manga-source` · `media` · `playback` · `progress` · `reader` · `session` · `tool` · `torrent` · `tracker` |
+| `features` | `auth` · `auto-download-torrents` · `back-up-node` · `choose-player` · `connect-anilist` · `continue-watching` · `download-chapters` · `download-free-book` · `download-torrent` · `library-explorer` · `link-manga-source` · `manage-debrid-service` · `manage-library-roots` · `manage-lists` · `manage-opds-servers` · `manage-plugins` · `manage-source-keys` · `manage-tools` · `manage-torrent-client` · `manage-torznab-sources` · `manage-unmatched-files` · `manual-media-form` · `mark-progress` · `match-library-file` · `scan-library` · `search-media` · `search-torrents` · `setup-wizard` · `stream-torrent` · `switch-language` · `switch-theme` · `title-chapters` · `track-media` |
 | `pages` | `auth` · `discover` · `downloads` · `extensions` · `fallback` · `home` · `library` · `lists` · `media` · `media-form` · `read` · `search` · `settings` · `setup` · `watch` |
 | `infrastructure` | `cloud` · `node` · `window` |
 
@@ -111,8 +112,12 @@ useNodeData(mediaDetailsModel.detailsRequested, { params: mediaRef, enabled: ope
 після перезапуску ноди чи перепідключення потоку подій останнє питання
 ставиться знову з тими самими параметрами. Модель може взяти те саме правило
 напряму — `whenNodeReady(query)`. Читати `$nodeReady` у компоненті чи хуку
-`arch:check` не дає (§10). Дії користувача («Повторити», пошук) запускають
-запит самі: це не «екран відкрився», а відповідь на натискання.
+`arch:check` не дає, як і запускати запит ноди (`someQuery.start`) з власного
+`useEffect` (§10). Дії користувача («Повторити», пошук) запускають запит самі:
+це не «екран відкрився», а відповідь на натискання. Якщо та сама форма ще й
+шукає сама при відкритті (пошук релізів), обидва шляхи йдуть через
+`whenNodeReady(query)`: тоді після перезапуску ноди повторюється останній пошук
+користувача, а не початковий.
 
 Запит, що бере параметр, тримає лише останню відповідь
 (`concurrency(…, { strategy: 'TAKE_LATEST' })`): одна комірка `$data` на всі
@@ -152,19 +157,41 @@ useNodeData(mediaDetailsModel.detailsRequested, { params: mediaRef, enabled: ope
 рішення, яких не має права ухвалити ніхто нижче: куди вести після успіху, що
 показати замість вмісту, поки даних немає.
 
-Навігація живе тут і ніде нижче. На попередньому клієнті `auth.model` сам
-викликав `router.push` — і через це модель не можна було відрендерити ніде,
-крім її власної сторінки. Тепер модель віддає подію, а сторінка вирішує, що
-вона означає:
+Навігація живе в компонентах `pages` і `features` — і ніде нижче. Маршрути
+типізовані деревом з `app/router`, тож `Link` чи `navigate` — це залежність від
+нього; сценарій «піти в налаштування, щоб виправити» законно знає, куди веде.
+А от сутність чи клієнт бекенда, що знає маршрут, прив'язали б доменне поняття
+до одного розкладу екранів. Тому `entities` і `infrastructure` роутер не
+імпортують (ESLint, §10) — вихід вони беруть колбеком:
 
 ```tsx
-useEffect(() => sessionModel.authenticated.watch(() => navigate({ to: '/' })), [navigate])
+const missingTool = useMissingToolAction(openDependencies) // сутність знає помилку, не маршрут
 ```
 
-**Маршрут — межа code-splitting.** Barrel, що ре-експортує всі сторінки, змушує
-кожен роут тягнути їх усі: сторінки мають Effector-моделі, тобто сайд-ефекти, і
-bundler їх не відтрусить. Заміряно на попередньому клієнті: +90 kB First Load JS
-**на кожному** маршруті. Тому спільного `pages/index.ts` немає.
+Моделі слайсів не навігують ніде. На попередньому клієнті `auth.model` сам
+викликав `router.push` — і через це модель не можна було відрендерити ніде,
+крім її власної сторінки. Тепер модель віддає подію, а що вона означає для
+навігації, вирішує той, хто знає маршрути: сторінка (`useUnitWatch(event, …)`)
+або, для переходів, що не належать жодному екрану, `app/router/navigation`:
+
+```ts
+sample({ clock: sessionModel.signedOut, fn: () => ({ to: '/' }), target: navigateFx })
+```
+
+**Спільного `pages/index.ts` немає.** Barrel, що ре-експортує всі сторінки,
+змушує кожен роут тягнути їх усі: сторінки мають Effector-моделі, тобто
+сайд-ефекти, і bundler їх не відтрусить. Заміряно на попередньому клієнті:
++90 kB First Load JS **на кожному** маршруті.
+
+**Code splitting — за вагою, а не за маршрутом.** Маршрути імпортують зі
+сторінок не лише компонент, а й валідатори пошуку (`isDiscoverTab`,
+`isSettingsSection`), і `lazy` маршруту нічого не відрізав би: модуль сторінки
+однаково приїжджає через її `index.ts`. Відрізано те, що справді важить і
+потрібне не на старті: `VideoPlayer` (hls.js і рендерер субтитрів —
+`entities/playback/ui/video-player/lazy-video-player.ts`) і `PdfView` (pdfjs,
+всередині `BookReaderView`); foliate вантажиться динамічно сам. Місце рендеру
+лінивого компонента ставить `Suspense`. Renderer збирається мінімізованим
+(`electron.vite.config.ts`): на старті Chromium читає ~2,8 МБ JS замість 7,4.
 
 ### features — сценарії
 
@@ -714,12 +741,15 @@ consent-URL, який видала хмара. Одна адреса, один �
 
 | Інструмент | Що бачить | Що ловить |
 |---|---|---|
-| ESLint `no-restricted-imports` | один файл | **напрямок** імпортів, імпорти вбік, обхід публічного API слайса |
+| ESLint `no-restricted-imports` | один файл | **напрямок** імпортів, імпорти вбік, обхід публічного API слайса, **роутер** в `entities` і `infrastructure` (§3) |
+| ESLint `no-restricted-syntax` | один файл | **`.watch(`** поза тестами: побічна дія на юніт — `onEach(unit, fn)` з `shared/factory`, ефект у скоупі, який тест може підмінити; два свідомі винятки в `entities/session` позначені директивою з причиною |
 | `scripts/check-architecture.mjs` | увесь граф (Tarjan SCC) | **цикли** між слайсами |
 | `scripts/check-architecture.mjs` | корені слайсів | файли, що лежать **поза своєю текою** (§6) |
 | `scripts/check-architecture.mjs` | `.tsx`, `.scss` | **коментарі** в розмітці й стилях (§5; директиви `eslint-`/`@ts-` дозволені) |
 | `scripts/check-architecture.mjs` | `.module.scss` | **сирі кольори** й **розміри шрифту поза шкалою** (§8) |
 | `scripts/check-architecture.mjs` | компоненти й хуки | читання **`$nodeReady`** — коли питати ноду, вирішує `useNodeData` (§2) |
+| `scripts/check-architecture.mjs` | компоненти й хуки | **запит ноди з власного `useEffect`** (`someQuery.start`); чиї запити — ноди, видно з `createNodeRequestFx` в ефекті запиту (§2) |
+| `scripts/check-architecture.mjs` | компоненти й хуки | **прямий виклик ефекту** (`someFx(…)`): він іде повз скоуп; компонент стартує подію чи мутацію, а чекати ефект може лише прив'язаний через `useUnit` |
 | `scripts/check-architecture.mjs` | усе, крім `infrastructure`, `app`, `api/`, `model/` | звернення до **`window.mediary`** (§11) |
 
 Цикл `media ↔ library-item` не порушує жодного правила в окремо взятому файлі:
@@ -848,6 +878,9 @@ npm run build          # ловить регресії збірки
   `config/`), а не в корені слайса?
 - Чи не лишився користувацький текст у коді замість `en.ts` і двох перекладів?
 - Чи не вирішує компонент сам, коли питати ноду, замість `useNodeData`?
+- Чи не знає сутність маршруту, який мала б отримати колбеком?
+- Чи не склеює компонент кілька мутацій різних сутностей — замість фічі з моделлю?
+- Чи не тягне новий важкий модуль у головний чанк те, що потрібне не на старті?
 - Чи не слухає форма чужу мутацію напряму, замість `own-request` чи
   `record-editor`?
 - Чи має запит з параметром `TAKE_LATEST`?
