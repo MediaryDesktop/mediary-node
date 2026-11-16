@@ -15,9 +15,27 @@ export default defineConfig({
 		}
 	},
 	test: {
-		environment: 'jsdom',
 		globals: true,
-		include: ['src/**/*.{test,spec}.{ts,tsx}', 'electron/**/*.{test,spec}.ts'],
-		setupFiles: ['./vitest.setup.ts']
+		// Two processes, two worlds: the renderer runs in a page, the main process in
+		// Node. A main-process test under jsdom would see a `window` it never has.
+		projects: [
+			{
+				extends: true,
+				test: {
+					name: 'renderer',
+					environment: 'jsdom',
+					include: ['src/**/*.{test,spec}.{ts,tsx}'],
+					setupFiles: ['./vitest.setup.ts']
+				}
+			},
+			{
+				extends: true,
+				test: {
+					name: 'main',
+					environment: 'node',
+					include: ['electron/**/*.{test,spec}.ts']
+				}
+			}
+		]
 	}
 })
