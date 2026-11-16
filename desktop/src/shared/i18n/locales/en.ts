@@ -667,7 +667,14 @@ export const en = {
 		downloadMissing_many: 'Download · {{count}} missing',
 		downloadMissing_other: 'Download · {{count}} missing',
 		card: {
+			watch: 'Play',
+			autoDownload: {
+				searching: 'Looking for a release of {{label}}…',
+				started: '{{label}} is downloading',
+				failed: 'Could not download {{label}}'
+			},
 			menu: {
+				download: 'Download {{label}}',
 				more: 'More ways to play',
 				selectEpisode: 'Select episode',
 				playFromStart: 'Play from start',
@@ -678,8 +685,7 @@ export const en = {
 				showAll: 'Show all episodes',
 				next: 'Next',
 				season: 'S{{number}}',
-				episode: 'Episode {{number}}',
-				notInLibrary: 'Not in your library'
+				episode: 'Episode {{number}}'
 			},
 			play: 'Play episode {{episode}}',
 			read: 'Read chapter {{chapter}}',

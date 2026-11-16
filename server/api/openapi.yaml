@@ -181,9 +181,17 @@ components:
           format: uri
           readOnly: true
           type: string
+        auto:
+          description: "Search for the episode and download the best release that holds it: the episode alone before a batch, then by the release profile and seeders; from a batch only the episode's files. In place of magnet, torrent or release_id."
+          type: boolean
         choose_files:
           description: Hold the torrent in the client until its files are chosen with PUT .../files.
           type: boolean
+        episode:
+          description: "With auto: the episode to download."
+          format: int64
+          minimum: 0
+          type: integer
         episodes:
           description: The episodes the download is for. With choose_files, the node itself takes only their files once the file list arrives.
           items:
@@ -205,6 +213,11 @@ components:
           description: A search result to download. Give this, magnet or torrent.
           maxLength: 100
           type: string
+        season:
+          description: "With auto, for a show numbered by season: the episode counts within it."
+          format: int64
+          minimum: 0
+          type: integer
         title:
           description: The title's name, which names the folder the torrent is saved into.
           maxLength: 500

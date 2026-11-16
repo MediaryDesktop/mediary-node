@@ -665,7 +665,14 @@ export const uk: Translation = {
 		downloadMissing_many: 'Завантажити · бракує {{count}}',
 		downloadMissing_other: 'Завантажити · бракує {{count}}',
 		card: {
+			watch: 'Дивитися',
+			autoDownload: {
+				searching: 'Шукаю реліз {{label}}…',
+				started: '{{label}} завантажується',
+				failed: 'Не вдалося завантажити {{label}}'
+			},
 			menu: {
+				download: 'Завантажити «{{label}}»',
 				more: 'Інші способи відтворення',
 				selectEpisode: 'Вибрати епізод',
 				playFromStart: 'Дивитися з початку',
@@ -676,8 +683,7 @@ export const uk: Translation = {
 				showAll: 'Усі епізоди',
 				next: 'Далі',
 				season: 'С{{number}}',
-				episode: 'Епізод {{number}}',
-				notInLibrary: 'Немає в бібліотеці'
+				episode: 'Епізод {{number}}'
 			},
 			play: 'Дивитися епізод {{episode}}',
 			read: 'Читати розділ {{chapter}}',

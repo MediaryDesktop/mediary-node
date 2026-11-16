@@ -1,6 +1,6 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { formatRelativeTime, formatWeekday, useUnitWatch } from '@shared/lib'
@@ -81,6 +81,15 @@ export function MediaView({ mediaRef, media, sources, entry, initialView, initia
 		seasonal ? null : releasedEpisodes(media, subject?.total),
 		torrents
 	)
+
+	const searchOnArrival = useRef(initialView === 'torrent')
+
+	useEffect(() => {
+		if (searchOnArrival.current && torrents) {
+			searchOnArrival.current = false
+			openSearch()
+		}
+	}, [torrents, openSearch])
 
 	const { remove, deleting } = useManualMediaDeletion(() => {
 		setDeleteOpen(false)

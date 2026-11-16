@@ -282,7 +282,8 @@ export function MediaPreview({
 						slots.play({
 							mediaRef,
 							mediaType,
-							label: primaryLabel,
+							title,
+							label: movie ? t('media.card.watch') : primaryLabel,
 							progress: tracking?.progress ?? 0,
 							listed: Boolean(tracking),
 							trailer: trailerId !== null,

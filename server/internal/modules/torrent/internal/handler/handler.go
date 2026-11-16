@@ -36,6 +36,9 @@ type AddTorrentDownloadInput struct {
 		ChooseFiles bool   `json:"choose_files,omitempty" doc:"Hold the torrent in the client until its files are chosen with PUT .../files."`
 		ReleaseID   string `json:"release_id,omitempty" maxLength:"100" doc:"A search result to download. Give this, magnet or torrent."`
 		Episodes    []int  `json:"episodes,omitempty" maxItems:"2000" doc:"The episodes the download is for. With choose_files, the node itself takes only their files once the file list arrives."`
+		Auto        bool   `json:"auto,omitempty" doc:"Search for the episode and download the best release that holds it: the episode alone before a batch, then by the release profile and seeders; from a batch only the episode's files. In place of magnet, torrent or release_id."`
+		Episode     *int   `json:"episode,omitempty" minimum:"0" doc:"With auto: the episode to download."`
+		Season      *int   `json:"season,omitempty" minimum:"0" doc:"With auto, for a show numbered by season: the episode counts within it."`
 	}
 }
 
@@ -138,6 +141,9 @@ func (h *Handler) Register(api huma.API) {
 			ChooseFiles: in.Body.ChooseFiles,
 			ReleaseID:   in.Body.ReleaseID,
 			Episodes:    in.Body.Episodes,
+			Auto:        in.Body.Auto,
+			Episode:     in.Body.Episode,
+			Season:      in.Body.Season,
 		})
 		if err != nil {
 			return nil, httpapi.ToHTTP(err)

@@ -2,6 +2,7 @@ import * as Menu from '@radix-ui/react-dropdown-menu'
 import clsx from 'clsx'
 import { useStoreMap, useUnit } from 'effector-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import type { MouseEvent, PointerEvent } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { Icon } from '@shared/ui'
@@ -26,6 +27,9 @@ export interface PlayMenuProps {
 	onDownload?: () => void
 	onTrailer?: () => void
 	onMarkWatched?: (episode: number) => void
+	onStream?: (entry: PlayEntry | null) => void
+	onDownloadEpisode?: (entry: PlayEntry) => void
+	busy?: boolean
 }
 
 export function PlayMenu({
@@ -36,7 +40,10 @@ export function PlayMenu({
 	onOpen,
 	onDownload,
 	onTrailer,
-	onMarkWatched
+	onMarkWatched,
+	onStream,
+	onDownloadEpisode,
+	busy = false
 }: PlayMenuProps) {
 	const { t, i18n } = useTranslation()
 	const hold = useCardHold()
@@ -100,15 +107,26 @@ export function PlayMenu({
 		}
 	}
 
-	const playEntry = (entry: PlayEntry) => {
-		if (entry.file) {
+	const playEntry = (entry: PlayEntry | null) => {
+		if (entry?.file) {
 			play(entry.file.id)
+		} else if (onStream) {
+			onStream(entry)
 		} else if (onDownload) {
 			onDownload()
 		} else {
 			onOpen?.()
 		}
 	}
+
+	const downloadEntry = (event: MouseEvent, entry: PlayEntry) => {
+		event.preventDefault()
+		event.stopPropagation()
+		changeOpen(false)
+		onDownloadEpisode?.(entry)
+	}
+
+	const keepFromItem = (event: PointerEvent) => event.stopPropagation()
 
 	const mainLabel = next ? t('media.card.play', { episode: next.number }) : label
 
@@ -121,8 +139,8 @@ export function PlayMenu({
 			<button
 				type='button'
 				className={styles.main}
-				disabled={starting}
-				onClick={() => (next?.file ? play(next.file.id) : onOpen?.())}
+				disabled={starting || busy}
+				onClick={() => playEntry(next)}
 			>
 				<Icon name='common/play' size={14} />
 				<span className={styles.label}>{mainLabel}</span>
@@ -194,11 +212,6 @@ export function PlayMenu({
 															isNext && styles.next,
 															!entry.file && styles.absent
 														)}
-														title={
-															entry.file
-																? undefined
-																: t('media.card.menu.notInLibrary')
-														}
 														onSelect={() => playEntry(entry)}
 													>
 														<span className={styles.number}>{entry.number}</span>
@@ -218,12 +231,23 @@ export function PlayMenu({
 																size={14}
 																className={styles.aside}
 															/>
-														) : !entry.file ? (
-															<Icon
-																name='common/download'
-																size={14}
-																className={styles.aside}
-															/>
+														) : !entry.file && onDownloadEpisode ? (
+															<button
+																type='button'
+																tabIndex={-1}
+																className={styles.download}
+																aria-label={t('media.card.menu.download', {
+																	label: entryTitle(entry)
+																})}
+																title={t('media.card.menu.download', {
+																	label: entryTitle(entry)
+																})}
+																onPointerDown={keepFromItem}
+																onPointerUp={keepFromItem}
+																onClick={event => downloadEntry(event, entry)}
+															>
+																<Icon name='common/download' size={14} />
+															</button>
 														) : entry.episode?.runtime_minutes ? (
 															<span className={styles.aside}>
 																{t('media.library.minutes', {
@@ -253,8 +277,8 @@ export function PlayMenu({
 
 						<Menu.Item
 							className={styles.item}
-							disabled={!first?.file}
-							onSelect={() => first?.file && play(first.file.id)}
+							disabled={!first?.file && !onStream}
+							onSelect={() => playEntry(first)}
 						>
 							<Icon name='common/reset' size={16} className={styles.icon} />
 							<span className={styles.text}>{t('media.card.menu.playFromStart')}</span>

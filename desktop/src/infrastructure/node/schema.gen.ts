@@ -2531,8 +2531,15 @@ export interface components {
 			 * @example https://example.com/schemas/AddTorrentDownloadInputBody.json
 			 */
 			readonly $schema?: string
+			/** @description Search for the episode and download the best release that holds it: the episode alone before a batch, then by the release profile and seeders; from a batch only the episode's files. In place of magnet, torrent or release_id. */
+			auto?: boolean
 			/** @description Hold the torrent in the client until its files are chosen with PUT .../files. */
 			choose_files?: boolean
+			/**
+			 * Format: int64
+			 * @description With auto: the episode to download.
+			 */
+			episode?: number
 			/** @description The episodes the download is for. With choose_files, the node itself takes only their files once the file list arrives. */
 			episodes?: number[] | null
 			/** @description A magnet link with a BitTorrent v1 hash. Give this or torrent. */
@@ -2541,6 +2548,11 @@ export interface components {
 			media_ref: string
 			/** @description A search result to download. Give this, magnet or torrent. */
 			release_id?: string
+			/**
+			 * Format: int64
+			 * @description With auto, for a show numbered by season: the episode counts within it.
+			 */
+			season?: number
 			/** @description The title's name, which names the folder the torrent is saved into. */
 			title?: string
 			/** @description A .torrent file, base64-encoded. Give this or magnet. */

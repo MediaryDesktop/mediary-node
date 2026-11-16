@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 export interface CardPlayContext {
 	mediaRef: string
 	mediaType: string
+	title: string
 	label: string
 	progress: number
 	listed: boolean

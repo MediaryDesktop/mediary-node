@@ -1,6 +1,7 @@
 export { ContinueWatching } from './ui/continue-watching/ContinueWatching'
 export { PlayMenu } from './ui/play-menu/PlayMenu'
 export type { PlayMenuProps } from './ui/play-menu/PlayMenu'
+export type { PlayEntry } from './lib/play-list'
 export type { ContinueWatchingProps } from './ui/continue-watching/ContinueWatching'
 
 export { useContinueWatching, usePlayFile, useUpNextLabel } from './lib/useContinueWatching'

@@ -31,6 +31,11 @@ type AddRequest struct {
 	// Episodes the download is for, when it is for some. With ChooseFiles, the
 	// node itself picks their files once the torrent's file list arrives.
 	Episodes []int
+	// Auto has the node search for Episode (of Season) and download the best
+	// release that holds it, in place of a magnet, a file or a search result.
+	Auto    bool
+	Episode *int
+	Season  *int
 }
 
 // TorrentLive is what the client last said about a torrent; absent when it has not been
@@ -93,13 +98,19 @@ func (s *Service) Add(ctx context.Context, req AddRequest) (*TorrentDownload, er
 		return nil, apperr.Invalid("media_ref", "a download has to be for a title")
 	}
 	given := 0
-	for _, set := range []bool{req.Magnet != "", len(req.Torrent) > 0, req.ReleaseID != ""} {
+	for _, set := range []bool{req.Magnet != "", len(req.Torrent) > 0, req.ReleaseID != "", req.Auto} {
 		if set {
 			given++
 		}
 	}
 	if given != 1 {
-		return nil, apperr.Invalid("magnet", "give one of a magnet link, a .torrent file or a search result")
+		return nil, apperr.Invalid("magnet", "give one of a magnet link, a .torrent file, a search result or auto")
+	}
+
+	if req.Auto {
+		if err := s.pickDownloadRelease(ctx, &req); err != nil {
+			return nil, err
+		}
 	}
 
 	if req.ReleaseID != "" {
@@ -429,4 +440,81 @@ func (s *Service) find(ctx context.Context, id int64) (*store.Download, error) {
 // relPath is a torrent file's path inside the library folder.
 func relPath(download store.Download, file qbittorrent.File) string {
 	return path.Join(download.RelDir, file.Name)
+}
+
+// pickDownloadRelease searches for the episode and settles the request on the
+// best release that holds it. A release of the episode alone comes before a
+// batch; from a batch only the episode's files are downloaded.
+func (s *Service) pickDownloadRelease(ctx context.Context, req *AddRequest) error {
+	var episode, season int
+	if req.Episode != nil {
+		episode = *req.Episode
+	}
+	if req.Season != nil {
+		season = *req.Season
+	}
+
+	result, err := s.Search(ctx, SearchRequest{MediaRef: req.MediaRef, Episode: episode, Season: season})
+	if err != nil {
+		return err
+	}
+
+	profile, err := s.Profile(ctx)
+	if err != nil {
+		return err
+	}
+
+	best := bestDownloadRelease(result.Releases, episode > 0, profile)
+	if best == nil {
+		if episode > 0 {
+			return apperr.New(apperr.KindNotFound, "No seeded release of episode %d was found: try choosing one in the search", episode)
+		}
+		return apperr.New(apperr.KindNotFound, "No seeded release was found: try choosing one in the search")
+	}
+
+	req.ReleaseID = best.ID
+	if episode > 0 {
+		req.Episodes = []int{episode}
+		req.ChooseFiles = best.Match == "batch"
+	}
+
+	return nil
+}
+
+// bestDownloadRelease is the release an automatic download takes: one that holds
+// the episode, has seeders or sits with the debrid service, and has no excluded
+// word; then the profile's choice, the episode alone, the better scored.
+func bestDownloadRelease(releases []TorrentRelease, forEpisode bool, profile *TorrentProfile) *TorrentRelease {
+	var best *TorrentRelease
+
+	for i := range releases {
+		found := &releases[i]
+
+		if forEpisode && found.Match != "episode" && found.Match != "batch" {
+			continue
+		}
+		if excluded(found.Title, profile) {
+			continue
+		}
+		if found.Seeders == 0 && (found.Cached == nil || !*found.Cached) {
+			continue
+		}
+
+		if best == nil || downloadsBetter(found, best) {
+			best = found
+		}
+	}
+
+	return best
+}
+
+func downloadsBetter(a, b *TorrentRelease) bool {
+	if a.Eligible != b.Eligible {
+		return a.Eligible
+	}
+	if (a.Match == "episode") != (b.Match == "episode") {
+		return a.Match == "episode"
+	}
+
+	return beats(*a, *b)
 }

@@ -667,7 +667,14 @@ export const ru: Translation = {
 		downloadMissing_many: 'Загрузить · не хватает {{count}}',
 		downloadMissing_other: 'Загрузить · не хватает {{count}}',
 		card: {
+			watch: 'Смотреть',
+			autoDownload: {
+				searching: 'Ищу релиз {{label}}…',
+				started: '{{label}} загружается',
+				failed: 'Не удалось загрузить {{label}}'
+			},
 			menu: {
+				download: 'Загрузить «{{label}}»',
 				more: 'Другие способы воспроизведения',
 				selectEpisode: 'Выбрать эпизод',
 				playFromStart: 'Смотреть с начала',
@@ -678,8 +685,7 @@ export const ru: Translation = {
 				showAll: 'Все эпизоды',
 				next: 'Далее',
 				season: 'С{{number}}',
-				episode: 'Эпизод {{number}}',
-				notInLibrary: 'Нет в библиотеке'
+				episode: 'Эпизод {{number}}'
 			},
 			play: 'Смотреть эпизод {{episode}}',
 			read: 'Читать главу {{chapter}}',

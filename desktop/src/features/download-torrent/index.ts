@@ -3,3 +3,6 @@ export type { AddTorrentDrawerProps } from './ui/add-torrent-drawer/AddTorrentDr
 
 export { TorrentDownloadList } from './ui/torrent-download-list/TorrentDownloadList'
 export type { TorrentDownloadListProps } from './ui/torrent-download-list/TorrentDownloadList'
+
+export { episodeDownloadRequested } from './model/episode-download'
+export type { EpisodeDownload } from './model/episode-download'
