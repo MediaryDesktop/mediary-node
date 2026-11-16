@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { listableEpisode, watchedProgressPatch } from './watched'
+import { listableEpisode, watchedProgressPatch } from './episodes'
 
 describe('watchedProgressPatch', () => {
 	it('raises the list to an episode marked watched past it', () => {

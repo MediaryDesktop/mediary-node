@@ -13,18 +13,17 @@ import { titleFilesQuery } from '@entities/library-item'
 import type { LibraryFile } from '@entities/library-item'
 import type { MediaEpisode } from '@entities/media'
 import { $playerMode, playbackModel, playerOpened, thumbnailUrl } from '@entities/playback'
-import { setEpisodeWatchedMutation, titleMarks, titleProgressQuery } from '@entities/progress'
+import { titleMarks, titleProgressQuery } from '@entities/progress'
 import { useMissingToolAction } from '@entities/tool'
-import { updateTrackerEntryMutation } from '@entities/tracker'
 
 import { episodeFor, episodeOrder, groupTitleFiles, isWatched } from '@features/continue-watching'
+import { episodeMarked, listableEpisode } from '@features/mark-progress'
 
 import { EpisodeItem } from '../episode-row/EpisodeItem'
 import rowStyles from '../episode-row/EpisodeRow.module.scss'
 import sectionStyles from '../EpisodeSection.module.scss'
 import { seasonsOf } from '../lib/seasons'
 import { useEpisodeMeta } from '../lib/useEpisodeMeta'
-import { listableEpisode, watchedProgressPatch } from '../lib/watched'
 import { NotInLibrary } from '../not-in-library/NotInLibrary'
 
 import { ToWatchCard } from './to-watch-rail/ToWatchCard'
@@ -56,8 +55,7 @@ export function EpisodeLibrary({
 		data,
 		progressData,
 		askProgress,
-		setWatched,
-		updateEntry,
+		markEpisode,
 		playExternally,
 		session,
 		starting,
@@ -67,8 +65,7 @@ export function EpisodeLibrary({
 		titleFilesQuery.$data,
 		titleProgressQuery.$data,
 		titleProgressQuery.start,
-		setEpisodeWatchedMutation.start,
-		updateTrackerEntryMutation.start,
+		episodeMarked,
 		playbackModel.playRequested,
 		playbackModel.$session,
 		playbackModel.$starting,
@@ -129,14 +126,8 @@ export function EpisodeLibrary({
 		fallback
 	]
 
-	const toggleWatched = (number: number, watched: boolean) => {
-		setWatched({ mediaRef, episode: number, watched })
-
-		const patch = watchedProgressPatch(number, watched, { progress, listed })
-		if (patch) {
-			updateEntry({ mediaRef, patch })
-		}
-	}
+	const toggleWatched = (number: number, watched: boolean) =>
+		markEpisode({ mediaRef, episode: number, watched, progress, listed })
 
 	const item = (file: LibraryFile) => {
 		const episode = episodeFor(meta, file)

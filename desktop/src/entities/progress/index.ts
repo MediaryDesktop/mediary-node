@@ -2,3 +2,4 @@ export { setChapterReadMutation, setEpisodeWatchedMutation, titleProgressQuery }
 export { NO_MARKS, titleMarks } from './lib/marks'
 export type { TitleMarks } from './lib/marks'
 export type { ChapterState, EpisodeState, TitleProgress } from './api/api'
+export { setChapterReadFx, setEpisodeWatchedFx } from './api/api'

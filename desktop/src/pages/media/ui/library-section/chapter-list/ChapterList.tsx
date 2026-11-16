@@ -14,13 +14,13 @@ import {
 	mangaDownloadSettingsQuery,
 	mangaDownloadsQuery
 } from '@entities/manga-source'
-import { setChapterReadMutation, titleMarks, titleProgressQuery } from '@entities/progress'
+import { titleMarks, titleProgressQuery } from '@entities/progress'
 import { filterChapters, isChapterRead } from '@entities/reader'
 import type { ChapterOption, ChapterRow as Row } from '@entities/reader'
-import { updateTrackerEntryMutation } from '@entities/tracker'
 
 import { downloadRequested } from '@features/download-chapters'
 import { LinkSourceDrawer } from '@features/link-manga-source'
+import { chapterMarked, readProgress } from '@features/mark-progress'
 import { useTitleChapters } from '@features/title-chapters'
 
 import { ChapterFilters } from './chapter-filters/ChapterFilters'
@@ -35,8 +35,6 @@ import {
 	pageCount,
 	pageOf,
 	presentSources,
-	readProgress,
-	readProgressPatch,
 	savableOption,
 	sortRows,
 	sourceCounts
@@ -58,10 +56,9 @@ const ORDER_KEY = 'mediary.chapterOrder'
 export function ChapterList({ mediaRef, title, progress, listed }: ChapterListProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
-	const [unlink, updateEntry, setRead, downloadsData, save, extensions, progressData] = useUnit([
+	const [unlink, markChapter, downloadsData, save, extensions, progressData] = useUnit([
 		deleteMangaLinkMutation.start,
-		updateTrackerEntryMutation.start,
-		setChapterReadMutation.start,
+		chapterMarked,
 		mangaDownloadsQuery.$data,
 		downloadRequested,
 		extensionsQuery.$data,
@@ -165,17 +162,8 @@ export function ChapterList({ mediaRef, title, progress, listed }: ChapterListPr
 		void navigate({ to: '/read/$ref', params: { ref: option.ref } })
 	}
 
-	const markRead = (row: Row, read: boolean) => {
-		if (row.number !== null) {
-			setRead({ mediaRef, chapter: row.number, read })
-		}
-
-		const patch = readProgressPatch(row.number, read, { progress, listed })
-
-		if (patch) {
-			updateEntry({ mediaRef, patch })
-		}
-	}
+	const markRead = (row: Row, read: boolean) =>
+		markChapter({ mediaRef, chapter: row.number, read, progress, listed })
 
 	return (
 		<section className={styles.card}>
