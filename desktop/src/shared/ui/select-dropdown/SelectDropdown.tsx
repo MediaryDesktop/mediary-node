@@ -33,10 +33,6 @@ interface SelectDropdownBaseProps {
 	startIcon?: ReactNode
 	accentWhenSelected?: boolean
 	footer?: ReactNode
-	// The panel sits above nearly everything by default, so it does not vanish
-	// under its own anchor. A select whose footer can open a dialog (a "new
-	// list" button and the like) needs the opposite: a dialog opened afterward
-	// should cover it, not the other way round. Pass a lower value for that case.
 	panelZIndex?: string | number
 }
 
@@ -83,9 +79,6 @@ export function SelectDropdown(props: SelectDropdownProps) {
 	const selectedOptions = selectedOptionsOf(options, selected)
 	const visible = filterOptions(options, query)
 	const activeIndex = activeIndexOf(visible, activeValue ?? selected[0])
-	// Only a real hover or keyboard step should paint an option as active — the
-	// fallback above (to the selected item) exists purely to give aria-activedescendant
-	// and keyboard stepping a sensible starting point, not to highlight anything visually.
 	const visualActiveIndex = activeValue === null ? -1 : activeIndex
 
 	const commit = (next: string[]) => {

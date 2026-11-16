@@ -126,7 +126,6 @@
 		padding: 0.875rem 1.25rem;
 		border-top: 1px solid var(--border);
 
-		// Кнопки у футері компактніші за звичайні: діалог не має виглядати важчим за свій зміст
 		> button {
 			height: var(--control-height-sm);
 			min-height: var(--control-height-sm);
@@ -136,7 +135,6 @@
 		}
 	}
 
-	// Без тіла (діалоги підтвердження) роздільник зайвий: текст і кнопки й так розділені відступом
 	&.bare .footer {
 		margin-top: 0.5rem;
 		border-top: 0;

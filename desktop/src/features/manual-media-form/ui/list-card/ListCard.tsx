@@ -26,9 +26,6 @@ export function ListCard({ lists, value, onChange, onCreateList, disabled }: Lis
 			title={t('manualMedia.list.title')}
 			subtitle={t('manualMedia.list.hint')}
 		>
-			{/* A native <label> would implicitly bind to the first tag's remove
-			button — the first focusable thing inside it once a list is picked —
-			so hovering the field would light that button up instead. */}
 			<Field as='div' label={t('manualMedia.list.label')}>
 				<SelectDropdown
 					mode='multiple'
@@ -39,8 +36,6 @@ export function ListCard({ lists, value, onChange, onCreateList, disabled }: Lis
 					clearable
 					disabled={disabled}
 					accentWhenSelected
-					// "+ New list" opens the create-list drawer over this page; the
-					// drawer must cover the panel, not sit behind it.
 					panelZIndex='calc(var(--layer-overlay) - 1)'
 					footer={
 						onCreateList && (

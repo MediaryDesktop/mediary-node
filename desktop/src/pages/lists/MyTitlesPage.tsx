@@ -22,8 +22,6 @@ import styles from './ListDetailPage.module.scss'
 
 type Filter = ListMediaType | 'all'
 
-// "My titles": every title the user described, of every kind. It does not hang
-// on a list entry or on AniList, so a title made by hand can always be found.
 export function MyTitlesPage() {
 	const { t } = useTranslation()
 	const navigate = useNavigate()

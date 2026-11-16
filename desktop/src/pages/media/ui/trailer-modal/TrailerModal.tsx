@@ -7,13 +7,8 @@ import { Icon, Modal } from '@shared/ui'
 import { mediaPreviewModel } from '@entities/media'
 import type { MediaTrailer } from '@entities/media'
 
+import { youtubeUrl } from './lib/youtube'
 import styles from './TrailerModal.module.scss'
-
-export function youtubeUrl(trailer: MediaTrailer | null | undefined): string | null {
-	return trailer?.site === 'youtube' && trailer.id
-		? `https://www.youtube.com/watch?v=${encodeURIComponent(trailer.id)}`
-		: null
-}
 
 interface PlayerProps {
 	host: string
@@ -44,7 +39,6 @@ function Player({ host, id, title, url, thumbnail }: PlayerProps) {
 		return () => window.removeEventListener('message', onMessage)
 	}, [host])
 
-	// Автор відео може заборонити вбудовування: тоді лишається посилання на YouTube
 	if (failed) {
 		return (
 			<a className={styles.fallback} href={url} target='_blank' rel='noreferrer'>

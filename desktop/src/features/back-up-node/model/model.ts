@@ -20,6 +20,7 @@ import {
 	revokeDeviceFx,
 	unpairNodeFx
 } from '../api/api'
+import type { ExportedBackup } from '../api/api'
 import { isOlderThan } from '../lib/version'
 
 export const syncStatusQuery = createQuery({ effect: fetchSyncStatusFx, name: 'syncStatus' })
@@ -37,6 +38,22 @@ export const backUpNowMutation = createMutation({ effect: backUpNowFx, name: 'ba
 export const restoreMutation = createMutation({ effect: restoreBackupFx, name: 'restoreBackup' })
 
 export const exportBackupMutation = createMutation({ effect: exportBackupFx, name: 'exportBackup' })
+
+// The node hands the backup over as bytes; where they land on disk is the
+// user's choice, asked by the shell. False when they cancelled.
+const saveBackupFileFx = createEffect(({ file_name, data }: ExportedBackup) =>
+	window.mediary.dialog.saveFile(file_name, data)
+)
+
+sample({ clock: exportBackupMutation.finished.success, fn: ({ result }) => result, target: saveBackupFileFx })
+
+export const backupFileSaved = sample({
+	clock: saveBackupFileFx.doneData,
+	filter: Boolean,
+	fn: () => undefined
+})
+
+export const backupFileSaveFailed = saveBackupFileFx.fail.map(() => undefined)
 
 export const importBackupMutation = createMutation({ effect: importBackupFileFx, name: 'importBackup' })
 

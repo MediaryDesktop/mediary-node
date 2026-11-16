@@ -81,6 +81,16 @@ export default tseslint.config(
 	},
 
 	{
+		files: ['**/*.cjs'],
+		languageOptions: {
+			ecmaVersion: 'latest',
+			sourceType: 'commonjs',
+			globals: globals.node
+		},
+		rules: { '@typescript-eslint/no-require-imports': 'off' }
+	},
+
+	{
 		files: ['src/**/*.{ts,tsx}', 'vitest.setup.ts'],
 		languageOptions: {
 			parserOptions: {

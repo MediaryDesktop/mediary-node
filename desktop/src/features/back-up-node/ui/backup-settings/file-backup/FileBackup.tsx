@@ -9,7 +9,12 @@ import { useUnitWatch } from '@shared/lib'
 import { Button, Modal, toast } from '@shared/ui'
 
 import { BACKUP_TOAST_ID } from '../../../config/toast'
-import { exportBackupMutation, importBackupMutation } from '../../../model/model'
+import {
+	backupFileSaved,
+	backupFileSaveFailed,
+	exportBackupMutation,
+	importBackupMutation
+} from '../../../model/model'
 
 import styles from './FileBackup.module.scss'
 
@@ -25,12 +30,10 @@ export function FileBackup() {
 		importBackupMutation.$pending
 	])
 
-	useUnitWatch(exportBackupMutation.finished.success, ({ result }) => {
-		window.mediary.dialog
-			.saveFile(result.file_name, result.data)
-			.then(saved => saved && toast.success(t('backup.file.saved'), { id: BACKUP_TOAST_ID }))
-			.catch(() => toast.error(t('backup.file.saveFailed'), { id: BACKUP_TOAST_ID }))
-	})
+	useUnitWatch(backupFileSaved, () => toast.success(t('backup.file.saved'), { id: BACKUP_TOAST_ID }))
+	useUnitWatch(backupFileSaveFailed, () =>
+		toast.error(t('backup.file.saveFailed'), { id: BACKUP_TOAST_ID })
+	)
 	useUnitWatch(exportBackupMutation.finished.failure, ({ error }) =>
 		toast.error(problemDetail(error, t('backup.file.saveFailed')), { id: BACKUP_TOAST_ID })
 	)
@@ -45,7 +48,6 @@ export function FileBackup() {
 	const onPick = (event: ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0] ?? null
 
-		// Cleared so that choosing the same file again fires change again.
 		event.target.value = ''
 
 		if (file) {

@@ -37,7 +37,8 @@ import { RecommendationsSection } from '../relations-section/RecommendationsSect
 import { RelationsSection } from '../relations-section/RelationsSection'
 import { StreamSection } from '../stream-section/StreamSection'
 import { TorrentSection } from '../torrent-section/TorrentSection'
-import { TrailerModal, youtubeUrl } from '../trailer-modal/TrailerModal'
+import { youtubeUrl } from '../trailer-modal/lib/youtube'
+import { TrailerModal } from '../trailer-modal/TrailerModal'
 
 import styles from './MediaView.module.scss'
 
@@ -240,7 +241,12 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 				<p className={styles.fullDescription}>{description || t('media.noDescription')}</p>
 			</Modal>
 
-			<TrailerModal open={trailerOpen} onOpenChange={setTrailerOpen} title={title} trailer={media?.trailer} />
+			<TrailerModal
+				open={trailerOpen}
+				onOpenChange={setTrailerOpen}
+				title={title}
+				trailer={media?.trailer}
+			/>
 
 			{media && (
 				<Modal

@@ -3,7 +3,7 @@
 	aspect-ratio: 16 / 9;
 	overflow: hidden;
 	border-radius: 12px;
-	background: #000;
+	background: var(--media);
 
 	.frame {
 		position: absolute;
@@ -32,7 +32,7 @@
 			align-items: center;
 			justify-content: center;
 			gap: 0.5rem;
-			color: #fff;
+			color: var(--on-media);
 			font-weight: 500;
 		}
 	}

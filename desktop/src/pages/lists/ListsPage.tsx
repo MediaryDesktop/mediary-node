@@ -99,8 +99,6 @@ export function ListsPage() {
 		return sortLists(matched, sort)
 	}, [allLists, filter, search, sort])
 
-	// "My titles" is not one of the user's lists: it gathers every title they
-	// described, of every kind, and is always first.
 	const myTitles = useMemo(() => {
 		const titles = manual?.titles ?? []
 		const ofFilter = filter === 'all' ? titles : titles.filter(title => title.media_type === filter)
