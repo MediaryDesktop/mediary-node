@@ -9,6 +9,9 @@ import type { MediaInfo } from '../../../api/api'
 import { fontUrl, mediaUrl, subtitleUrl } from '../../../lib/urls'
 import { playbackModel } from '../../../model/model'
 
+import { playerFailure } from './failure'
+import type { PlayerFailure } from './failure'
+
 type Track = NonNullable<MediaInfo['audios']>[number]
 type Font = NonNullable<MediaInfo['fonts']>[number]
 
@@ -44,26 +47,10 @@ export interface MediaPipelineOptions {
 	onFailed: (failure: PlayerFailure) => void
 }
 
-export interface PlayerFailure {
-	status?: number
-	message?: string
-}
-
 function failureOf(data: ErrorData): PlayerFailure {
-	const status = data.response?.code || undefined
 	const details = data.networkDetails as { responseText?: unknown } | undefined
 
-	let message: string | undefined
-	if (typeof details?.responseText === 'string') {
-		try {
-			const body = JSON.parse(details.responseText) as { detail?: unknown }
-			message = typeof body.detail === 'string' ? body.detail : undefined
-		} catch {
-			message = undefined
-		}
-	}
-
-	return { status, message }
+	return playerFailure({ status: data.response?.code || undefined, responseText: details?.responseText })
 }
 
 export function useMediaPipeline({

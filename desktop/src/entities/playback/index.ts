@@ -33,7 +33,7 @@ export { VideoPlayer } from './ui/video-player/lazy-video-player'
 export { usePlayerEntrance } from './ui/video-player/lib/usePlayerEntrance'
 export type { VideoSource } from './lib/source'
 export type { VideoPlayerProps } from './ui/video-player/VideoPlayer'
-export type { PlayerFailure } from './ui/video-player/lib/useMediaPipeline'
+export type { PlayerFailure } from './ui/video-player/lib/failure'
 
 export { fetchPlaybackStreamFx } from './api/api'
 export type { MediaInfo, PlaybackAction, PlaybackSession, PlaybackStatus, PlaybackStream } from './api/api'

@@ -226,7 +226,7 @@ export function PlayerHost() {
 				onLeft={finish}
 				onOpenExternally={openExternally}
 				failureAction={failure =>
-					isMissingToolError({ status: failure.status, body: { detail: failure.message } })
+					isMissingToolError(failure)
 						? { label: t('player.openDependencies'), onClick: openDependencies }
 						: undefined
 				}
