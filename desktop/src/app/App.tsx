@@ -5,6 +5,7 @@ import { ScrollProgress } from '@shared/ui'
 
 import { nodeBridgeMounted, subscribeToNodeState } from '@infra/node'
 
+import { subscribeToPip } from '@entities/playback'
 import { sessionModel } from '@entities/session'
 
 import { WindowChrome } from './layout/window-chrome/WindowChrome'
@@ -15,11 +16,15 @@ import { router } from './router'
 
 export function App() {
 	useEffect(() => {
-		const unsubscribe = subscribeToNodeState()
+		const unsubscribeNode = subscribeToNodeState()
+		const unsubscribePip = subscribeToPip()
 		nodeBridgeMounted()
 		sessionModel.appStarted()
 
-		return unsubscribe
+		return () => {
+			unsubscribeNode()
+			unsubscribePip()
+		}
 	}, [])
 
 	return (

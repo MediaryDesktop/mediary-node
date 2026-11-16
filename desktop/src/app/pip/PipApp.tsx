@@ -1,41 +1,33 @@
 import { useUnit } from 'effector-react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
 
 import { problemDetail } from '@shared/api'
-import type { HttpRequestError } from '@shared/api'
 import type { PipIntent, PipOpenOptions } from '@shared/bridge'
 import { useTranslation } from '@shared/i18n'
 import { Button, ReelLoader } from '@shared/ui'
 
-import { $nodeConnection, nodeBridgeMounted, subscribeToNodeState } from '@infra/node'
+import { nodeBridgeMounted, subscribeToNodeState, useNodeData } from '@infra/node'
 
 import {
 	browserCanPlayType,
 	canFallBack,
 	chooseSource,
-	fetchPlaybackStreamFx,
+	playbackStreamQuery,
 	VideoPlayer
 } from '@entities/playback'
-import type { PlaybackStream, PlayerSnapshot } from '@entities/playback'
+import type { PlayerSnapshot } from '@entities/playback'
 
 import styles from './PipApp.module.scss'
 
-// How often the main process is told where playback is, at most.
 const REPORT_EVERY_MS = 500
 
-/**
- * The page of the always-on-top window: nothing but the player, taking up where
- * the mini player left off. The window's frame is the player's own header.
- */
 export function PipApp() {
 	const { t } = useTranslation()
 
 	const [options, setOptions] = useState<PipOpenOptions | null>(null)
-	const [stream, setStream] = useState<PlaybackStream | null>(null)
-	const [error, setError] = useState<HttpRequestError | null>(null)
 	const [directFailed, setDirectFailed] = useState(false)
 
-	const connection = useUnit($nodeConnection)
+	const [data, error] = useUnit([playbackStreamQuery.$data, playbackStreamQuery.$error])
 
 	const snapshot = useRef<PlayerSnapshot | null>(null)
 	const lastReport = useRef(0)
@@ -51,21 +43,9 @@ export function PipApp() {
 
 	const fileId = options?.fileId
 
-	useEffect(() => {
-		if (fileId === undefined || !connection) {
-			return
-		}
+	useNodeData(playbackStreamQuery, { params: fileId ?? 0, enabled: fileId !== undefined })
 
-		let current = true
-
-		fetchPlaybackStreamFx(fileId)
-			.then(response => current && setStream(response.stream))
-			.catch((failure: HttpRequestError) => current && setError(failure))
-
-		return () => {
-			current = false
-		}
-	}, [fileId, connection])
+	const stream = data && data.stream.file_id === fileId ? data.stream : null
 
 	const finish = useCallback((intent: PipIntent) => {
 		void window.mediary.pip.finish(intent, snapshot.current)
@@ -111,23 +91,33 @@ export function PipApp() {
 	}
 
 	return (
-		<VideoPlayer
-			key={`${stream.file_id}-${source.kind}`}
-			stream={stream}
-			source={source}
-			heading={stream.title}
-			subheading={
-				stream.episode !== undefined ? t('playback.episode', { number: stream.episode }) : undefined
+		<Suspense
+			fallback={
+				<div className={styles.message}>
+					<ReelLoader spinning />
+				</div>
 			}
-			mode='pip'
-			onMinimize={() => finish('mini')}
-			onExpand={() => finish('expand')}
-			onPin={() => finish('mini')}
-			onClose={() => finish('stop')}
-			onOpenExternally={() => finish('expand')}
-			startAt={{ position: options.position, playing: options.playing }}
-			onSnapshot={onSnapshot}
-			onFallback={canFallBack(source, stream) ? () => setDirectFailed(true) : undefined}
-		/>
+		>
+			<VideoPlayer
+				key={`${stream.file_id}-${source.kind}`}
+				stream={stream}
+				source={source}
+				heading={stream.title}
+				subheading={
+					stream.episode !== undefined
+						? t('playback.episode', { number: stream.episode })
+						: undefined
+				}
+				mode='pip'
+				onMinimize={() => finish('mini')}
+				onExpand={() => finish('expand')}
+				onPin={() => finish('mini')}
+				onClose={() => finish('stop')}
+				onOpenExternally={() => finish('expand')}
+				startAt={{ position: options.position, playing: options.playing }}
+				onSnapshot={onSnapshot}
+				onFallback={canFallBack(source, stream) ? () => setDirectFailed(true) : undefined}
+			/>
+		</Suspense>
 	)
 }

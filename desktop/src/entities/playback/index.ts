@@ -17,21 +17,22 @@ export {
 	playerExpanded,
 	playerMinimized,
 	playerOpened,
-	playerOpening,
-	playerPinned,
-	playerUnpinned
+	playerOpening
 } from './model/player-session'
 export type { PlayerMode } from './model/player-mode'
+export { $pipResume, pinRequested, pipResumeApplied, pipStopped, subscribeToPip } from './model/pip'
+export type { PlayerSnapshot } from './model/pip'
 
 export { browserCanPlayType, canDirectPlay } from './lib/codecs'
+export { pictureAspect } from './lib/fit'
 export { canFallBack, chooseSource } from './lib/source'
 export { thumbnailUrl } from './lib/urls'
 
 export { NowPlayingBar } from './ui/now-playing-bar/NowPlayingBar'
-export { VideoPlayer } from './ui/video-player/VideoPlayer'
+export { VideoPlayer } from './ui/video-player/lazy-video-player'
 export { usePlayerEntrance } from './ui/video-player/lib/usePlayerEntrance'
 export type { VideoSource } from './lib/source'
-export type { PlayerSnapshot, VideoPlayerProps } from './ui/video-player/VideoPlayer'
+export type { VideoPlayerProps } from './ui/video-player/VideoPlayer'
 export type { PlayerFailure } from './ui/video-player/lib/useMediaPipeline'
 
 export { fetchPlaybackStreamFx } from './api/api'

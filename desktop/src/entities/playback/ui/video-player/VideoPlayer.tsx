@@ -10,11 +10,12 @@ import type { VideoSource } from '../../lib/source'
 import { initialAudio, initialSubtitle } from '../../lib/tracks'
 import { directUrl } from '../../lib/urls'
 import { formatTimecode } from '../../model/model'
+import type { PlayerSnapshot } from '../../model/pip'
 
 import { useFullscreen } from './lib/useFullscreen'
 import { useIdleControls } from './lib/useIdleControls'
-import { useMediaPipeline } from './lib/useMediaPipeline'
 import type { PlayerFailure } from './lib/useMediaPipeline'
+import { useMediaPipeline } from './lib/useMediaPipeline'
 import { usePlayerEntrance } from './lib/usePlayerEntrance'
 import { usePlayerKeyboard } from './lib/usePlayerKeyboard'
 import { useProgressReport } from './lib/useProgressReport'
@@ -27,13 +28,6 @@ import styles from './VideoPlayer.module.scss'
 
 const LEAVE_MS = 240
 
-// Where playback stands, so a player built anew — in the pinned window, say —
-// carries on from the same moment.
-export interface PlayerSnapshot {
-	position: number
-	playing: boolean
-}
-
 export interface VideoPlayerProps {
 	stream: PlaybackStream
 	source: VideoSource
@@ -44,12 +38,9 @@ export interface VideoPlayerProps {
 	onExpand: () => void
 	onClose: () => void
 	onOpenExternally: () => void
-	/** Shows the pin button: pins the mini player, or (in 'pip') brings it back. */
 	onPin?: (snapshot: PlayerSnapshot) => void
-	/** Where to carry on when the player starts. */
 	startAt?: PlayerSnapshot | null
 	onStartApplied?: () => void
-	/** Told where playback is, as it moves. */
 	onSnapshot?: (snapshot: PlayerSnapshot) => void
 	failureAction?: (failure: PlayerFailure) => { label: string; onClick: () => void } | undefined
 
@@ -78,7 +69,6 @@ export function VideoPlayer({
 	leaving = false,
 	onLeft
 }: VideoPlayerProps) {
-	// Mini and pip are both the small player: no controls bar, no keys.
 	const mini = mode !== 'full'
 	const pinned = mode === 'pip'
 	const { t } = useTranslation()

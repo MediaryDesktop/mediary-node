@@ -4,7 +4,14 @@ import { HttpRequestError, problemDetail } from '@shared/api'
 import { translate } from '@shared/i18n'
 import { readStored, writeStored } from '@shared/lib'
 
-import { $playerMode, playbackModel, playerClosed, playerOpened, playerOpening } from '@entities/playback'
+import {
+	$playerMode,
+	pipStopped,
+	playbackModel,
+	playerClosed,
+	playerOpened,
+	playerOpening
+} from '@entities/playback'
 import { fetchTorrentStreamFx, startTorrentStreamFx } from '@entities/torrent'
 import type { StartTorrentStreamParams, TorrentStream } from '@entities/torrent'
 
@@ -152,3 +159,7 @@ sample({
 	fn: (_, fileId) => fileId,
 	target: playerOpened
 })
+
+// Stopping from the pinned window ends the whole playback, as the player's own
+// close button does.
+sample({ clock: pipStopped, target: streamCancelled })

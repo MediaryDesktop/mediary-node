@@ -1,7 +1,7 @@
 import { useNavigate } from '@tanstack/react-router'
 import clsx from 'clsx'
 import { useUnit } from 'effector-react'
-import { useEffect, useRef, useState } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 
 import { problemDetail } from '@shared/api'
@@ -12,23 +12,24 @@ import { useNodeData } from '@infra/node'
 import { useWindowControls } from '@infra/window'
 
 import {
+	$pipResume,
 	$playerExpanded,
 	$playerFileId,
 	$playerPinned,
 	browserCanPlayType,
 	canFallBack,
 	chooseSource,
+	pictureAspect,
+	pinRequested,
+	pipResumeApplied,
 	playbackModel,
 	playbackStreamQuery,
 	playerClosed,
 	playerExpanded,
 	playerMinimized,
-	playerPinned,
-	playerUnpinned,
 	usePlayerEntrance,
 	VideoPlayer
 } from '@entities/playback'
-import type { PlayerSnapshot } from '@entities/playback'
 import { isMissingToolError } from '@entities/tool'
 
 import { $stream, $streamError, $streamTarget, streamCancelled } from '@features/stream-torrent'
@@ -55,8 +56,9 @@ export function PlayerHost() {
 		streamError,
 		cancelStream,
 		pinned,
+		resume,
 		pin,
-		unpin
+		resumeApplied
 	] = useUnit([
 		$playerFileId,
 		$playerExpanded,
@@ -73,45 +75,12 @@ export function PlayerHost() {
 		$streamError,
 		streamCancelled,
 		$playerPinned,
-		playerPinned,
-		playerUnpinned
+		$pipResume,
+		pinRequested,
+		pipResumeApplied
 	])
 
 	const [directFailedFor, setDirectFailedFor] = useState<number | null>(null)
-
-	// Where playback stood when the pinned window gave the player back; the
-	// player built again takes it up and clears it.
-	const [resume, setResume] = useState<PlayerSnapshot | null>(null)
-
-	useEffect(
-		() =>
-			window.mediary.pip.onClosed(result => {
-				unpin()
-
-				if (result.intent === 'stop') {
-					close()
-					cancelStream()
-
-					return
-				}
-
-				setResume({ position: result.position, playing: result.playing })
-
-				if (result.intent === 'expand') {
-					expand()
-				}
-			}),
-		[unpin, close, cancelStream, expand]
-	)
-
-	// Whatever ends the pinned state from this side — another video, the player
-	// closed — takes the pinned window with it; when the window itself went,
-	// there is nothing left to close.
-	useEffect(() => {
-		if (!pinned) {
-			void window.mediary.pip.dismiss()
-		}
-	}, [pinned])
 
 	const [leaving, setLeaving] = useState(false)
 
@@ -145,7 +114,6 @@ export function PlayerHost() {
 
 	const finish = () => {
 		setLeaving(false)
-		setResume(null)
 		close()
 		cancelStream()
 	}
@@ -229,44 +197,42 @@ export function PlayerHost() {
 		)
 	}
 
-	return (
-		<VideoPlayer
-			key={`${fileId}-${source.kind}`}
-			stream={loadedStream}
-			source={source}
-			heading={loadedStream.title}
-			subheading={subheading}
-			mode={full ? 'full' : 'mini'}
-			onMinimize={minimize}
-			onExpand={expand}
-			onPin={
-				full
-					? undefined
-					: snapshot => {
-							const video = loadedStream.info.video ?? loadedStream.info.videos?.[0]
+	const loading = full ? (
+		<Panel onClose={requestClose} leaving={leaving} onLeft={finish}>
+			<ReelLoader spinning />
+		</Panel>
+	) : null
 
-							void window.mediary.pip
-								.open({
-									fileId,
-									...snapshot,
-									aspect: video?.width && video.height ? video.width / video.height : 16 / 9
-								})
-								.then(opened => opened && pin())
-						}
-			}
-			startAt={resume}
-			onStartApplied={() => setResume(null)}
-			leaving={leaving}
-			onClose={requestClose}
-			onLeft={finish}
-			onOpenExternally={openExternally}
-			failureAction={failure =>
-				isMissingToolError({ status: failure.status, body: { detail: failure.message } })
-					? { label: t('player.openDependencies'), onClick: openDependencies }
-					: undefined
-			}
-			onFallback={canFallBack(source, loadedStream) ? () => setDirectFailedFor(fileId) : undefined}
-		/>
+	return (
+		<Suspense fallback={loading}>
+			<VideoPlayer
+				key={`${fileId}-${source.kind}`}
+				stream={loadedStream}
+				source={source}
+				heading={loadedStream.title}
+				subheading={subheading}
+				mode={full ? 'full' : 'mini'}
+				onMinimize={minimize}
+				onExpand={expand}
+				onPin={
+					full
+						? undefined
+						: snapshot => pin({ fileId, ...snapshot, aspect: pictureAspect(loadedStream.info) })
+				}
+				startAt={resume}
+				onStartApplied={resumeApplied}
+				leaving={leaving}
+				onClose={requestClose}
+				onLeft={finish}
+				onOpenExternally={openExternally}
+				failureAction={failure =>
+					isMissingToolError({ status: failure.status, body: { detail: failure.message } })
+						? { label: t('player.openDependencies'), onClick: openDependencies }
+						: undefined
+				}
+				onFallback={canFallBack(source, loadedStream) ? () => setDirectFailedFor(fileId) : undefined}
+			/>
+		</Suspense>
 	)
 }
 
