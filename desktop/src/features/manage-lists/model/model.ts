@@ -1,7 +1,7 @@
 import { combine, createEvent, createStore, sample } from 'effector'
 
 import { HttpRequestError } from '@shared/api'
-import { atom } from '@shared/factory'
+import { atom, ownRequest } from '@shared/factory'
 import { translate } from '@shared/i18n'
 import { toast } from '@shared/ui'
 
@@ -78,6 +78,13 @@ export const manageListsModel = atom(() => {
 		(name, submitting) => name.trim().length > 0 && !submitting
 	)
 
+	// The drawer is opened from several places — the lists page, the entry
+	// drawer, the hand-made title form — and each wants to hear of the list it
+	// asked for, not of any list created anywhere.
+	const creation = ownRequest(createTrackerListMutation)
+
+	const created = creation.succeeded.map(({ result }) => result)
+
 	const submitAccepted = sample({ clock: submitted, filter: $canSubmit })
 
 	sample({
@@ -85,7 +92,7 @@ export const manageListsModel = atom(() => {
 		source: { name: $name, mediaType: $mediaType, icon: $icon, editingID: $editingID },
 		filter: ({ editingID }) => editingID === null,
 		fn: ({ name, mediaType, icon }) => ({ name: name.trim(), mediaType, icon }),
-		target: createTrackerListMutation.start
+		target: creation.sent
 	})
 
 	sample({
@@ -97,7 +104,7 @@ export const manageListsModel = atom(() => {
 	})
 
 	sample({
-		clock: [createTrackerListMutation.finished.success, renameTrackerListMutation.finished.success],
+		clock: [created, renameTrackerListMutation.finished.success],
 		target: drawerClosed
 	})
 
@@ -149,6 +156,7 @@ export const manageListsModel = atom(() => {
 		mediaTypeChanged,
 		iconChanged,
 		submitted,
+		created,
 		deleteRequested,
 		deleteCancelled,
 		deleteConfirmed,

@@ -1,15 +1,19 @@
 import { useNavigate } from '@tanstack/react-router'
+import { createEvent } from 'effector'
+import type { Unit } from 'effector'
 import { useUnit } from 'effector-react'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 
 import { getApiProblems, HttpRequestError, problemDetail } from '@shared/api'
 import { isLanguage, useTranslation } from '@shared/i18n'
-import { useGoBack } from '@shared/lib'
+import { useGoBack, useUnitWatch } from '@shared/lib'
 import { toast } from '@shared/ui'
+
+import { useNodeData } from '@infra/node'
 
 import { aiSettingsQuery, searchManualCoversFx, suggestManualMediaFx } from '@entities/media'
 import type { ManualDraft, ManualHint } from '@entities/media'
-import { createTrackerListMutation, isLocalTrackerType, trackerListsQuery } from '@entities/tracker'
+import { isLocalTrackerType, trackerListsQuery } from '@entities/tracker'
 
 import { saveManualMediaFx } from '../model/model'
 
@@ -19,6 +23,14 @@ import type { CoverSelection } from './cover'
 import { formatAfterTypeChange } from './draft'
 import { useManualMediaDeletion } from './useManualMediaDeletion'
 
+// A list the user has just created from this form's "+ New list".
+export interface CreatedList {
+	name: string
+	media_type: string
+}
+
+const NO_LIST_CREATED = createEvent<CreatedList>()
+
 export interface UseManualMediaFormOptions {
 	mode: 'create' | 'edit'
 	id?: string
@@ -27,6 +39,9 @@ export interface UseManualMediaFormOptions {
 	cancelTo: string
 	typeUnset?: boolean
 	onInvalid?: (field: 'media_type' | 'title', action: 'save' | 'suggest') => void
+	// Comes from whoever owns the list drawer the form asked to open; the form
+	// picks the new list for the title it describes.
+	listCreated?: Unit<CreatedList>
 }
 
 export function useManualMediaForm({
@@ -36,15 +51,17 @@ export function useManualMediaForm({
 	initialCoverUrl,
 	cancelTo,
 	typeUnset = false,
-	onInvalid
+	onInvalid,
+	listCreated = NO_LIST_CREATED
 }: UseManualMediaFormOptions) {
 	const { t, i18n } = useTranslation()
 	const navigate = useNavigate()
 	const goBack = useGoBack(cancelTo)
-	const [refreshAISettings, saveManual, loadLists] = useUnit([
+	const [refreshAISettings, saveManual, searchCovers, suggestDraft] = useUnit([
 		aiSettingsQuery.start,
 		saveManualMediaFx,
-		trackerListsQuery.start
+		searchManualCoversFx,
+		suggestManualMediaFx
 	])
 	const listCollection = useUnit(trackerListsQuery.$data)
 
@@ -66,25 +83,13 @@ export function useManualMediaForm({
 	const listOffered = mode === 'create' && typePicked && isLocalTrackerType(draft.media_type)
 	const lists = (listCollection?.lists ?? []).filter(list => list.media_type === draft.media_type)
 
-	useEffect(() => {
-		if (mode === 'create') {
-			loadLists()
+	useNodeData(trackerListsQuery, { enabled: mode === 'create' })
+
+	useUnitWatch(listCreated, list => {
+		if (mode === 'create' && list.media_type === draft.media_type) {
+			setListNames(current => (current.includes(list.name) ? current : [...current, list.name]))
 		}
-	}, [mode, loadLists])
-
-	const draftTypeRef = useRef(draft.media_type)
-
-	useEffect(() => {
-		draftTypeRef.current = draft.media_type
-	}, [draft.media_type])
-
-	useEffect(() => {
-		return createTrackerListMutation.finished.success.watch(({ result }) => {
-			if (mode === 'create' && result.media_type === draftTypeRef.current) {
-				setListNames(current => (current.includes(result.name) ? current : [...current, result.name]))
-			}
-		})
-	}, [mode])
+	})
 
 	const requireType = (action: 'save' | 'suggest') => {
 		if (typePicked) {
@@ -154,7 +159,7 @@ export function useManualMediaForm({
 		}
 
 		try {
-			const result = await searchManualCoversFx({
+			const result = await searchCovers({
 				type: found.media_type,
 				title: found.title,
 				year: found.year
@@ -199,7 +204,7 @@ export function useManualMediaForm({
 		setSuggesting(true)
 
 		try {
-			const suggestion = await suggestManualMediaFx(hint)
+			const suggestion = await suggestDraft(hint)
 			const { draft: merged, filled } = mergeSuggestion(draft, suggestion.draft, aiFilled)
 
 			setDraft(merged)

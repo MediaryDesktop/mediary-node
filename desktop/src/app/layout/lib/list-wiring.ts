@@ -1,7 +1,5 @@
 import { sample } from 'effector'
 
-import { createTrackerListMutation } from '@entities/tracker'
-
 import { manageListsModel } from '@features/manage-lists'
 import { manageEntryModel } from '@features/track-media'
 
@@ -17,9 +15,9 @@ sample({
 })
 
 sample({
-	clock: createTrackerListMutation.finished.success,
+	clock: manageListsModel.created,
 	source: { open: manageEntryModel.$open, target: manageEntryModel.$target },
-	filter: ({ open, target }, { result }) => open && target?.mediaType === result.media_type,
-	fn: (_, { result }) => result.name,
+	filter: ({ open, target }, list) => open && target?.mediaType === list.media_type,
+	fn: (_, list) => list.name,
 	target: manageEntryModel.listCreated
 })

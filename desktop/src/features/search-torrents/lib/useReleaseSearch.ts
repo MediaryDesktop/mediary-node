@@ -1,5 +1,7 @@
 import { useUnit } from 'effector-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+
+import { useNodeData, whenNodeReady } from '@infra/node'
 
 import { torrentSearchQuery, useTorrentSetup } from '@entities/torrent'
 
@@ -22,7 +24,7 @@ export function useReleaseSearch(mediaRef: string, target: SearchTarget) {
 		torrentSearchQuery.$data,
 		torrentSearchQuery.$error,
 		torrentSearchQuery.$pending,
-		torrentSearchQuery.start
+		whenNodeReady(torrentSearchQuery)
 	])
 
 	const [criteria, setCriteria] = useState<SearchCriteria>(() => ({
@@ -40,12 +42,10 @@ export function useReleaseSearch(mediaRef: string, target: SearchTarget) {
 		})
 	}
 
-	useEffect(() => {
-		if (setup.loaded && setup.hasSources) {
-			search({ mediaRef, episode: target.episode ?? 0, season: target.season ?? 0, query: '' })
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [setup.loaded, setup.hasSources, mediaRef])
+	useNodeData(torrentSearchQuery, {
+		params: { mediaRef, episode: target.episode ?? 0, season: target.season ?? 0, query: '' },
+		enabled: setup.loaded && setup.hasSources
+	})
 
 	const problem =
 		error && 'body' in error ? (error.body as { detail?: string; status?: number } | null) : null

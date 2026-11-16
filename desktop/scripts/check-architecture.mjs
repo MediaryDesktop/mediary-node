@@ -380,6 +380,133 @@ if (askingForThemselves.length === 0) {
 	console.error('')
 }
 
+// Components and hooks: what renders, and the use* functions beside it.
+const rendersOrHooks = files
+	.map(file => relative(SRC, file).split(sep).join('/'))
+	.filter(file => !file.startsWith('infrastructure/'))
+	.filter(file => !/\.test\.tsx?$/.test(file))
+	.filter(file => file.endsWith('.tsx') || /(^|\/)use[A-Z][^/]*\.ts$/.test(file))
+
+// An effect called by name from a component runs outside the scope the app is
+// rendered in, and its answer lands in local state nobody else can see. A
+// component starts an event or a mutation; when it must await an effect, it
+// binds it with useUnit first, which keeps the call in scope.
+const DIRECT_EFFECT_CALL = /(?<![.\w])(\w+Fx)\(/g
+
+const directEffectCalls = rendersOrHooks.flatMap(file => {
+	const names = [...readFileSync(join(SRC, file), 'utf8').matchAll(DIRECT_EFFECT_CALL)]
+		.map(match => match[1])
+		.filter(name => !/^create\w*Fx$/.test(name))
+
+	return [...new Set(names)].map(name => `${file} → ${name}()`)
+})
+
+if (directEffectCalls.length === 0) {
+	console.log('✔ Components and hooks call no effect directly.')
+} else {
+	console.error(
+		`✖ ${directEffectCalls.length} direct effect call(s) in components or hooks; start a unit, or bind the effect with useUnit:\n`
+	)
+
+	for (const line of directEffectCalls) {
+		console.error(`   ${line}`)
+	}
+
+	console.error('')
+}
+
+// The other way round the node rule (§2) is broken: a screen that starts a node
+// query from its own effect asks whether or not the node is up, and never asks
+// again after it restarts. Which queries are the node's is read off the source:
+// those whose effect is made with createNodeRequestFx.
+const sources = files.filter(file => !/\.test\.tsx?$/.test(file)).map(file => readFileSync(file, 'utf8'))
+
+const nodeEffects = new Set(
+	sources.flatMap(text => [...text.matchAll(/const\s+(\w+Fx)\s*=\s*createNodeRequestFx\b/g)].map(m => m[1]))
+)
+
+const nodeQueries = new Set(
+	sources.flatMap(text =>
+		[...text.matchAll(/const\s+(\w+)\s*=\s*createQuery\(\{\s*effect:\s*(\w+)/g)]
+			.filter(match => nodeEffects.has(match[2]))
+			.map(match => match[1])
+	)
+)
+
+function callBlocks(text, opener) {
+	const found = []
+	let start = text.indexOf(opener)
+
+	while (start !== -1) {
+		let depth = 0
+		let end = start + opener.length - 1
+
+		for (; end < text.length; end++) {
+			if (text[end] === '(') {
+				depth++
+			} else if (text[end] === ')' && --depth === 0) {
+				break
+			}
+		}
+
+		found.push(text.slice(start, end + 1))
+		start = text.indexOf(opener, end)
+	}
+
+	return found
+}
+
+// Names a component gives to `someQuery.start`, read from useUnit([...]) and
+// useUnit(someQuery.start).
+function startersOf(text) {
+	const starters = new Map()
+
+	for (const [, names, units] of text.matchAll(/const\s+\[([^\]]*)\]\s*=\s*useUnit\(\[([^\]]*)\]\)/g)) {
+		const unitList = units.split(',').map(unit => unit.trim())
+
+		names
+			.split(',')
+			.map(name => name.trim())
+			.forEach((name, index) => {
+				const query = /^(\w+)\.start$/.exec(unitList[index] ?? '')?.[1]
+
+				if (query) {
+					starters.set(name, query)
+				}
+			})
+	}
+
+	for (const [, name, query] of text.matchAll(/const\s+(\w+)\s*=\s*useUnit\((\w+)\.start\)/g)) {
+		starters.set(name, query)
+	}
+
+	return starters
+}
+
+const nodeQueriesFromEffects = rendersOrHooks.flatMap(file => {
+	const text = readFileSync(join(SRC, file), 'utf8')
+	const starters = [...startersOf(text)].filter(([, query]) => nodeQueries.has(query))
+	const effects = callBlocks(text, 'useEffect(')
+
+	return starters
+		.filter(([name]) => effects.some(effect => new RegExp(`(?<![.\\w])${name}\\(`).test(effect)))
+		.map(([, query]) => `${file} → ${query}.start`)
+})
+
+if (nodeQueriesFromEffects.length === 0) {
+	console.log(`✔ No screen starts a node query from its own effect (${nodeQueries.size} node queries).`)
+} else {
+	console.error(
+		`✖ ${nodeQueriesFromEffects.length} node query(ies) started from a component's effect; use useNodeData:\n`
+	)
+
+	for (const line of nodeQueriesFromEffects) {
+		console.error(`   ${line}`)
+	}
+
+	console.error('')
+}
+
 // Windows and macOS find './logo.module.scss' when the file is Logo.module.scss;
 // Linux does not, and the build and the tests there fail on a file that "exists".
 const listings = new Map()
@@ -465,6 +592,8 @@ if (cycles.length === 0) {
 		rawColours,
 		offScale,
 		bridgeOutside,
+		directEffectCalls,
+		nodeQueriesFromEffects,
 		wrongCase
 	]
 

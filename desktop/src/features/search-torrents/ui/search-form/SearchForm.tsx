@@ -35,7 +35,11 @@ export function SearchForm({ mediaRef, title, missing, poster, watching, onDone 
 	const { t } = useTranslation()
 	const navigate = useNavigate()
 
-	const [downloading, target] = useUnit([downloadReleasesFx.pending, $searchTarget])
+	const [downloading, target, downloadReleases] = useUnit([
+		downloadReleasesFx.pending,
+		$searchTarget,
+		downloadReleasesFx
+	])
 	const search = useReleaseSearch(mediaRef, target)
 	const { setup, result, pending, criteria } = search
 
@@ -77,7 +81,7 @@ export function SearchForm({ mediaRef, title, missing, poster, watching, onDone 
 
 	const download = async () => {
 		const chosen = (result?.releases ?? []).filter(found => selected.has(found.id))
-		const outcome = await downloadReleasesFx(downloadRequests(chosen, { mediaRef, title, missing }))
+		const outcome = await downloadReleases(downloadRequests(chosen, { mediaRef, title, missing }))
 
 		if (outcome.added > 0) {
 			toast.success(t('torrents.search.addedMany', { count: outcome.added }), {

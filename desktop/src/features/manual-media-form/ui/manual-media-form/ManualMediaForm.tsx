@@ -1,3 +1,5 @@
+import type { Unit } from 'effector'
+
 import { useTranslation } from '@shared/i18n'
 import { Button, Icon, Modal, PageHeader, Textarea } from '@shared/ui'
 
@@ -5,6 +7,7 @@ import type { ManualDraft } from '@entities/media'
 
 import { completeness } from '../../lib/completeness'
 import { useManualMediaForm } from '../../lib/useManualMediaForm'
+import type { CreatedList } from '../../lib/useManualMediaForm'
 import { AIAssistantCard } from '../ai-assistant-card/AIAssistantCard'
 import { BasicsTab } from '../basics-tab/BasicsTab'
 import { CompletenessCard } from '../completeness-card/CompletenessCard'
@@ -27,6 +30,7 @@ export interface ManualMediaFormProps {
 	cancelTo: string
 	typeUnset?: boolean
 	onCreateList?: (mediaType: ManualDraft['media_type']) => void
+	listCreated?: Unit<CreatedList>
 }
 
 export function ManualMediaForm({
@@ -36,7 +40,8 @@ export function ManualMediaForm({
 	initialCoverUrl,
 	cancelTo,
 	typeUnset = false,
-	onCreateList
+	onCreateList,
+	listCreated
 }: ManualMediaFormProps) {
 	const { t } = useTranslation()
 
@@ -70,7 +75,8 @@ export function ManualMediaForm({
 		initialDraft,
 		initialCoverUrl,
 		cancelTo,
-		typeUnset
+		typeUnset,
+		listCreated
 	})
 
 	return (

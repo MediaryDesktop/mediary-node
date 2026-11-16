@@ -29,6 +29,7 @@ export function MediaFormPage(props: MediaFormPageProps) {
 					initialDraft={{ media_type: props.mediaType ?? 'anime', title: props.title }}
 					cancelTo='/search'
 					onCreateList={createList}
+					listCreated={manageListsModel.created}
 				/>
 			</PageTransition>
 		)
