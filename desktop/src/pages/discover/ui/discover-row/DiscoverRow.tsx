@@ -12,7 +12,7 @@ import { MediaCard, mediaTitle } from '@entities/media'
 import type { MediaSummary } from '@entities/media'
 import { canTrack, entryTracking, useTrackedEntries } from '@entities/tracker'
 
-import { EntryMenu } from '@features/track-media'
+import { EntryActions } from '@features/track-media'
 
 import type { SectionState } from '../../model/model'
 
@@ -83,7 +83,7 @@ export function DiscoverRow({ title, icon, state, onRetry }: DiscoverRowProps) {
 							tracking={entry ? entryTracking(entry, t) : null}
 							menu={
 								canTrack(media.media_type, connected) ? (
-									<EntryMenu
+									<EntryActions
 										media={{
 											mediaRef: media.media_ref,
 											mediaType: media.media_type,
@@ -96,6 +96,13 @@ export function DiscoverRow({ title, icon, state, onRetry }: DiscoverRowProps) {
 							previewRef={media.media_ref}
 							onOpen={() =>
 								navigate({ to: '/media/$mediaRef', params: { mediaRef: media.media_ref } })
+							}
+							onDownload={() =>
+								navigate({
+									to: '/media/$mediaRef',
+									params: { mediaRef: media.media_ref },
+									search: { view: 'torrent' }
+								})
 							}
 						/>
 					)

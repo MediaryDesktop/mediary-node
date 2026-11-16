@@ -123,6 +123,13 @@ export function SearchResults({ renderMenu }: SearchResultsProps) {
 											params: { mediaRef: media.media_ref }
 										})
 									}
+									onDownload={() =>
+										navigate({
+											to: '/media/$mediaRef',
+											params: { mediaRef: media.media_ref },
+											search: { view: 'torrent' }
+										})
+									}
 								/>
 							</li>
 						)

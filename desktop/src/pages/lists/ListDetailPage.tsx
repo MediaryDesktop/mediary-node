@@ -20,7 +20,7 @@ import {
 import type { TrackerCustomList, TrackerEntry, TrackerMediaType } from '@entities/tracker'
 
 import { ListOptionsMenu, manageListsModel } from '@features/manage-lists'
-import { EntryMenu } from '@features/track-media'
+import { EntryActions } from '@features/track-media'
 
 import { applyEntryFilters, formatsOf, genresOf, INITIAL_ENTRY_FILTERS } from './lib/entry-filters'
 import styles from './ListDetailPage.module.scss'
@@ -160,7 +160,7 @@ export function ListDetailPage({ listId }: ListDetailPageProps) {
 										scoreBadge={entry.media.average_score ?? undefined}
 										tracking={entryTracking(entry, t)}
 										menu={
-											<EntryMenu
+											<EntryActions
 												media={{
 													mediaRef: entry.media_ref,
 													mediaType: entry.media_type as TrackerMediaType,
@@ -178,6 +178,13 @@ export function ListDetailPage({ listId }: ListDetailPageProps) {
 											navigate({
 												to: '/media/$mediaRef',
 												params: { mediaRef: entry.media_ref }
+											})
+										}
+										onDownload={() =>
+											navigate({
+												to: '/media/$mediaRef',
+												params: { mediaRef: entry.media_ref },
+												search: { view: 'torrent' }
 											})
 										}
 									/>

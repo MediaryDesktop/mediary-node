@@ -11,7 +11,8 @@ import type { ExtensionsTab } from '@pages/extensions'
 import { HomePage } from '@pages/home'
 import { LibraryPage, ScanHistoryPage } from '@pages/library'
 import { ListDetailPage, ListsPage, MyTitlesPage } from '@pages/lists'
-import { MediaPage } from '@pages/media'
+import { isMediaPageView, MediaPage } from '@pages/media'
+import type { MediaPageView } from '@pages/media'
 import { MediaFormPage } from '@pages/media-form'
 import { SearchPage } from '@pages/search'
 import { isSettingsSection, SettingsPage } from '@pages/settings'
@@ -87,9 +88,14 @@ const listDetailRoute = createRoute({
 const mediaRoute = createRoute({
 	getParentRoute: () => framedRoute,
 	path: '/media/$mediaRef',
+	validateSearch: (search: Record<string, unknown>): { view?: MediaPageView; trailer?: boolean } => ({
+		...(isMediaPageView(search.view) ? { view: search.view } : {}),
+		...(search.trailer === true ? { trailer: true } : {})
+	}),
 	component: function MediaRoute() {
 		const { mediaRef } = mediaRoute.useParams()
-		return <MediaPage key={mediaRef} mediaRef={mediaRef} />
+		const { view, trailer } = mediaRoute.useSearch()
+		return <MediaPage key={mediaRef} mediaRef={mediaRef} initialView={view} initialTrailer={trailer} />
 	}
 })
 

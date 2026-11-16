@@ -10,7 +10,7 @@ import { mediaTitle } from '@entities/media'
 import { canTrack } from '@entities/tracker'
 
 import { SearchFilters, searchMediaModel, SearchResults, SearchToolbar } from '@features/search-media'
-import { EntryMenu } from '@features/track-media'
+import { EntryActions } from '@features/track-media'
 
 import styles from './SearchPage.module.scss'
 
@@ -42,7 +42,7 @@ export function SearchPage() {
 					<SearchResults
 						renderMenu={(media, entry) =>
 							canTrack(media.media_type, connected) ? (
-								<EntryMenu
+								<EntryActions
 									media={{
 										mediaRef: media.media_ref,
 										mediaType: media.media_type,

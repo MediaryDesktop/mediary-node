@@ -5,6 +5,7 @@ import { useTranslation } from '@shared/i18n'
 import { DropdownMenu, Icon, RippleButton } from '@shared/ui'
 import type { DropdownMenuItem } from '@shared/ui'
 
+import { useCardHold } from '@entities/media'
 import { isLocalTrackerType, trackerModel } from '@entities/tracker'
 import type { TrackerEntry, TrackerMediaType } from '@entities/tracker'
 
@@ -60,6 +61,7 @@ function sourceLink({ mediaRef, mediaType, siteUrl }: EntryMenuMedia): SourceLin
 
 export function EntryMenu({ media, entry, listName }: EntryMenuProps) {
 	const { t } = useTranslation()
+	const hold = useCardHold()
 
 	const [updating, requestUpdate, requestDelete, manageOpened, addOpened, rateOpened] = useUnit([
 		trackerModel.$updating,
@@ -145,6 +147,7 @@ export function EntryMenu({ media, entry, listName }: EntryMenuProps) {
 	return (
 		<DropdownMenu
 			items={items}
+			onOpenChange={hold}
 			trigger={
 				<RippleButton className={styles.trigger} aria-label={t('lists.menu')} disableRipple>
 					<Icon name='common/more-vertical' size={20} />

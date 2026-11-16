@@ -33,6 +33,9 @@ export type { FeaturedBannerProps, FeaturedMedia } from './ui/featured-banner/Fe
 export { MediaCard } from './ui/media-card/MediaCard'
 export type { MediaCardMedia, MediaCardProps } from './ui/media-card/MediaCard'
 export type { MediaTracking } from './ui/media-preview/MediaPreview'
+export { useCardHold } from './lib/card-hold'
+export { MediaCardSlotsProvider } from './lib/card-slots'
+export type { CardPlayContext, MediaCardSlots } from './lib/card-slots'
 
 export {
 	createManualMediaFx,

@@ -98,6 +98,13 @@ export function MyTitlesPage() {
 											params: { mediaRef: title.media_ref }
 										})
 									}
+									onDownload={() =>
+										navigate({
+											to: '/media/$mediaRef',
+											params: { mediaRef: title.media_ref },
+											search: { view: 'torrent' }
+										})
+									}
 								/>
 							</li>
 						))}

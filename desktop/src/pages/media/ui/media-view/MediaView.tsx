@@ -49,16 +49,18 @@ export interface MediaViewProps {
 	media: MediaDetails | null
 	sources: MediaSource[]
 	entry: TrackerEntry | null
+	initialView?: MediaViewKind
+	initialTrailer?: boolean
 }
 
-export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
+export function MediaView({ mediaRef, media, sources, entry, initialView, initialTrailer }: MediaViewProps) {
 	const { t, i18n } = useTranslation()
 	const navigate = useNavigate()
 	const [descriptionOpen, setDescriptionOpen] = useState(false)
 	const [detailsOpen, setDetailsOpen] = useState(false)
-	const [trailerOpen, setTrailerOpen] = useState(false)
+	const [trailerOpen, setTrailerOpen] = useState(initialTrailer ?? false)
 	const [deleteOpen, setDeleteOpen] = useState(false)
-	const [view, setView] = useState<MediaViewKind>('library')
+	const [view, setView] = useState<MediaViewKind>(initialView ?? 'library')
 	const [openSearch, closeSearch, streamTarget, requestStream, cancelStream, chosenVia] = useUnit([
 		searchOpened,
 		searchClosed,
@@ -207,6 +209,7 @@ export function MediaView({ mediaRef, media, sources, entry }: MediaViewProps) {
 							banner={base.banner_image}
 							released={seasonal ? null : releasedEpisodes(media, total)}
 							progress={entry?.progress ?? 0}
+							listed={entry !== null}
 						/>
 					) : (
 						<LibrarySection

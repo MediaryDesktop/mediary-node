@@ -8,6 +8,7 @@ import { CollapsibleSection, Icon, Notice, RippleButton, SegmentedControl, Switc
 
 import { useTorrentSetup } from '@entities/torrent'
 
+import { episodeMarked, listableEpisode } from '@features/mark-progress'
 import { searchOpened } from '@features/search-torrents'
 import {
 	$autoSelect,
@@ -44,6 +45,7 @@ export interface StreamSectionProps {
 	banner: string | null
 	released: number | null
 	progress: number
+	listed: boolean
 }
 
 export function StreamSection({
@@ -54,7 +56,8 @@ export function StreamSection({
 	coverColor,
 	banner,
 	released,
-	progress
+	progress,
+	listed
 }: StreamSectionProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
@@ -62,15 +65,17 @@ export function StreamSection({
 	const { meta, count } = useEpisodeMeta(mediaRef)
 	const text = useEpisodeText()
 
-	const [target, request, openSearch, chosenVia, chooseVia, autoSelect, changeAutoSelect] = useUnit([
-		$streamTarget,
-		streamRequested,
-		searchOpened,
-		$streamVia,
-		streamViaChanged,
-		$autoSelect,
-		autoSelectChanged
-	])
+	const [target, request, openSearch, chosenVia, chooseVia, autoSelect, changeAutoSelect, markEpisode] =
+		useUnit([
+			$streamTarget,
+			streamRequested,
+			searchOpened,
+			$streamVia,
+			streamViaChanged,
+			$autoSelect,
+			autoSelectChanged,
+			episodeMarked
+		])
 
 	const via = effectiveVia(chosenVia, Boolean(setup.debrid))
 
@@ -90,6 +95,9 @@ export function StreamSection({
 	const fallback = banner ?? cover
 	const busy = target !== null
 	const ofReleased = (item: StreamItem) => (!meta.seasonal && item.episode !== undefined ? released : null)
+
+	const toggleWatched = (item: StreamItem) =>
+		markEpisode({ mediaRef, episode: item.position, watched: item.position > progress, progress, listed })
 
 	const play = (item: StreamItem) => {
 		if (autoSelect) {
@@ -240,6 +248,9 @@ export function StreamSection({
 						watched={item.position <= progress}
 						disabled={busy || !setup.hasSources}
 						onPlay={() => play(item)}
+						onToggleWatched={
+							listableEpisode(item.position) ? () => toggleWatched(item) : undefined
+						}
 					/>
 				))}
 			</ul>

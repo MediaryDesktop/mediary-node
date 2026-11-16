@@ -12,7 +12,7 @@ import { MediaCard, mediaTitle } from '@entities/media'
 import type { MediaDetails } from '@entities/media'
 import { canTrack, entryTracking, useTrackedEntries } from '@entities/tracker'
 
-import { EntryMenu } from '@features/track-media'
+import { EntryActions } from '@features/track-media'
 
 export type RelatedTitle = NonNullable<MediaDetails['relations']>[number]
 
@@ -46,7 +46,7 @@ export function RelatedCards({ titles, title, icon, cornerLabel, ...rest }: Rela
 						tracking={entry ? entryTracking(entry, t) : null}
 						menu={
 							canTrack(title.media_type, connected) ? (
-								<EntryMenu
+								<EntryActions
 									media={{
 										mediaRef: title.media_ref,
 										mediaType: title.media_type,
@@ -61,6 +61,13 @@ export function RelatedCards({ titles, title, icon, cornerLabel, ...rest }: Rela
 							navigate({
 								to: '/media/$mediaRef',
 								params: { mediaRef: title.media_ref }
+							})
+						}
+						onDownload={() =>
+							navigate({
+								to: '/media/$mediaRef',
+								params: { mediaRef: title.media_ref },
+								search: { view: 'torrent' }
 							})
 						}
 					/>

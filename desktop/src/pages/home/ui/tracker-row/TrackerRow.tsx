@@ -8,7 +8,7 @@ import { MediaCard } from '@entities/media'
 import { entryTracking, preferredTitle } from '@entities/tracker'
 import type { TrackerEntry, TrackerMediaType, TrackerStatus } from '@entities/tracker'
 
-import { EntryMenu } from '@features/track-media'
+import { EntryActions } from '@features/track-media'
 
 const MAX_CARDS = 20
 
@@ -44,7 +44,7 @@ export function TrackerRow({ title, icon, status, entries }: TrackerRowProps) {
 					scoreBadge={entry.media.average_score ?? undefined}
 					tracking={entryTracking(entry, t)}
 					menu={
-						<EntryMenu
+						<EntryActions
 							media={{
 								mediaRef: entry.media_ref,
 								mediaType: entry.media_type as TrackerMediaType,
@@ -56,6 +56,13 @@ export function TrackerRow({ title, icon, status, entries }: TrackerRowProps) {
 					}
 					previewRef={entry.media_ref}
 					onOpen={() => navigate({ to: '/media/$mediaRef', params: { mediaRef: entry.media_ref } })}
+					onDownload={() =>
+						navigate({
+							to: '/media/$mediaRef',
+							params: { mediaRef: entry.media_ref },
+							search: { view: 'torrent' }
+						})
+					}
 				/>
 			))}
 		</Carousel>

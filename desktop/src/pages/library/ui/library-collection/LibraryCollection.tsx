@@ -10,7 +10,7 @@ import type { LibraryCollectionEntry } from '@entities/library-item'
 import { MediaCard } from '@entities/media'
 import { canTrack, entryTracking, useTrackedEntries } from '@entities/tracker'
 
-import { EntryMenu } from '@features/track-media'
+import { EntryActions } from '@features/track-media'
 
 import { useResolveUnmatched } from './lib/useResolveUnmatched'
 import styles from './LibraryCollection.module.scss'
@@ -54,7 +54,7 @@ export function LibraryCollection({ entries }: LibraryCollectionProps) {
 							tracking={trackedEntry ? entryTracking(trackedEntry, t) : null}
 							menu={
 								mediaType && canTrack(mediaType, connected) ? (
-									<EntryMenu
+									<EntryActions
 										media={{
 											mediaRef: entry.media_ref,
 											mediaType,
@@ -80,6 +80,13 @@ export function LibraryCollection({ entries }: LibraryCollectionProps) {
 							}
 							onOpen={() =>
 								navigate({ to: '/media/$mediaRef', params: { mediaRef: entry.media_ref } })
+							}
+							onDownload={() =>
+								navigate({
+									to: '/media/$mediaRef',
+									params: { mediaRef: entry.media_ref },
+									search: { view: 'torrent' }
+								})
 							}
 						/>
 					</li>

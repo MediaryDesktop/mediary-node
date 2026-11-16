@@ -1,5 +1,6 @@
 import './model/sync-toast'
 
+export { EntryActions } from './ui/entry-actions/EntryActions'
 export { EntryMenu } from './ui/entry-menu/EntryMenu'
 export type { EntryMenuMedia, EntryMenuProps } from './ui/entry-menu/EntryMenu'
 

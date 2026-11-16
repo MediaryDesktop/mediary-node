@@ -13,3 +13,41 @@
 
 	@include motion.popover;
 }
+
+.content.grow {
+	transform-origin: top left;
+
+	&[data-state="open"],
+	&[data-state="delayed-open"],
+	&[data-state="instant-open"] {
+		animation: hover-card-grow 140ms cubic-bezier(0.2, 0, 0, 1);
+	}
+
+	&[data-state="closed"] {
+		animation: hover-card-shrink 90ms ease-in forwards;
+	}
+
+	&[data-side="top"] {
+		transform-origin: bottom left;
+	}
+}
+
+@keyframes hover-card-grow {
+	from {
+		opacity: 0;
+		transform: scale(0.94);
+	}
+}
+
+@keyframes hover-card-shrink {
+	to {
+		opacity: 0;
+		transform: scale(0.97);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.content.grow[data-state] {
+		animation-duration: 1ms;
+	}
+}

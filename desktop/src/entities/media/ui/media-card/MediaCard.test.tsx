@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import { act, fireEvent, render, screen } from '@testing-library/react'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { MediaCard } from './MediaCard'
 
@@ -9,7 +9,22 @@ const MEDIA = {
 	cover_color: null
 }
 
+const TRACKING = {
+	status: 'CURRENT',
+	statusLabel: 'Watching',
+	score: 85,
+	genres: ['Adventure', 'Drama', 'Fantasy', 'Slice of Life'],
+	year: 2023,
+	mediaType: 'anime',
+	progress: 3,
+	total: 28
+}
+
 describe('MediaCard', () => {
+	afterEach(() => {
+		vi.useRealTimers()
+	})
+
 	it('opens the title when it is clickable', () => {
 		const onOpen = vi.fn()
 
@@ -32,23 +47,41 @@ describe('MediaCard', () => {
 		expect(screen.getByText('controls')).toBeInTheDocument()
 	})
 
-	it('shows list status, score and up to three genres for a tracked title', () => {
+	it('shows the progress of a tracked title on the poster', () => {
+		render(<MediaCard media={MEDIA} tracking={TRACKING} />)
+
+		expect(screen.getByText('3/28')).toBeInTheDocument()
+		expect(screen.getByTitle('Watching')).toBeInTheDocument()
+	})
+
+	it('opens a panel with the details and actions on hover', () => {
+		vi.useFakeTimers()
+		const onOpen = vi.fn()
+
 		render(
 			<MediaCard
 				media={MEDIA}
 				previewRef='anilist:100'
-				tracking={{
-					statusLabel: 'Watching',
-					score: 85,
-					genres: ['Adventure', 'Drama', 'Fantasy', 'Slice of Life'],
-					year: 2023
-				}}
+				tracking={TRACKING}
+				menu={<button type='button'>Add to list</button>}
+				onOpen={onOpen}
 			/>
 		)
 
+		expect(screen.queryByText('Watching')).toBeNull()
+
+		fireEvent.pointerEnter(screen.getByRole('button', { name: 'Frieren' }), { pointerType: 'mouse' })
+		act(() => {
+			vi.advanceTimersByTime(400)
+		})
+
 		expect(screen.getByText('Watching')).toBeInTheDocument()
-		expect(screen.getByText('8.5')).toBeInTheDocument()
-		expect(screen.getByText('2023')).toBeInTheDocument()
-		expect(screen.getByText('Adventure, Drama, Fantasy')).toBeInTheDocument()
+		expect(screen.getByText('3 / 28')).toBeInTheDocument()
+		expect(screen.getByText('Adventure, Drama, Fantasy, Slice of Life')).toBeInTheDocument()
+		expect(screen.getByRole('button', { name: 'Add to list' })).toBeInTheDocument()
+
+		fireEvent.click(screen.getByRole('button', { name: /media\.card\.play|Play episode 4/ }))
+
+		expect(onOpen).toHaveBeenCalledTimes(1)
 	})
 })

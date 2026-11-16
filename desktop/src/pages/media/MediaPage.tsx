@@ -13,15 +13,18 @@ import { aniListAccountModel } from '@entities/anilist-account'
 import { mediaDetailsModel, mediaPreviewModel } from '@entities/media'
 import { useTrackedEntry } from '@entities/tracker'
 
+import type { MediaPageView } from './lib/page-view'
 import styles from './MediaPage.module.scss'
 import { MediaHeroSkeleton } from './ui/media-hero/MediaHeroSkeleton'
 import { MediaView } from './ui/media-view/MediaView'
 
 export interface MediaPageProps {
 	mediaRef: string
+	initialView?: MediaPageView
+	initialTrailer?: boolean
 }
 
-export function MediaPage({ mediaRef }: MediaPageProps) {
+export function MediaPage({ mediaRef, initialView, initialTrailer }: MediaPageProps) {
 	const { t } = useTranslation()
 	const router = useRouter()
 
@@ -86,6 +89,8 @@ export function MediaPage({ mediaRef }: MediaPageProps) {
 						media={details.media}
 						sources={details.sources ?? []}
 						entry={entry}
+						initialView={initialView}
+						initialTrailer={initialTrailer}
 					/>
 				)}
 
