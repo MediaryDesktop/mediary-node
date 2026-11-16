@@ -2,7 +2,7 @@ import { createEvent, createStore, sample } from 'effector'
 import { or } from 'patronum'
 
 import { HttpRequestError } from '@shared/api'
-import { atom } from '@shared/factory'
+import { atom, onEach } from '@shared/factory'
 import { translate } from '@shared/i18n'
 import { toast } from '@shared/ui'
 
@@ -72,11 +72,11 @@ export const matchFileModel = atom(() => {
 		target: setLibraryMatchesMutation.start
 	})
 
-	setLibraryMatchMutation.finished.failure.watch(({ error }) => {
+	onEach(setLibraryMatchMutation.finished.failure, ({ error }) => {
 		toast.error(failureMessage(error), { id: 'library-match-failed' })
 	})
 
-	setLibraryMatchesMutation.finished.success.watch(({ result }) => {
+	onEach(setLibraryMatchesMutation.finished.success, ({ result }) => {
 		if (result.failed > 0) {
 			toast.error(translate('library.match.someFailed', { count: result.failed }), {
 				id: 'library-match-failed'

@@ -1,5 +1,6 @@
 import { createEvent, createStore } from 'effector'
 
+import { onEach } from '@shared/factory'
 import { readStored, writeStored } from '@shared/lib'
 
 export type PlayerMode = 'builtin' | 'external'
@@ -16,4 +17,4 @@ export const playerModeChanged = createEvent<PlayerMode>()
 
 export const $playerMode = createStore<PlayerMode>(readPlayerMode()).on(playerModeChanged, (_, mode) => mode)
 
-$playerMode.updates.watch(mode => writeStored(STORAGE_KEY, mode))
+onEach($playerMode.updates, mode => writeStored(STORAGE_KEY, mode))

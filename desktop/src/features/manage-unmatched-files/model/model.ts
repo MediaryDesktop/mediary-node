@@ -1,6 +1,6 @@
 import { createEvent, createStore } from 'effector'
 
-import { atom } from '@shared/factory'
+import { atom, onEach } from '@shared/factory'
 import { translate } from '@shared/i18n'
 import { toast } from '@shared/ui'
 
@@ -28,7 +28,7 @@ export const unmatchedFilesModel = atom(() => {
 		.on(ignoredRequested, () => true)
 		.reset(ignoredClosed)
 
-	setLibraryMatchesMutation.finished.success.watch(({ result }) =>
+	onEach(setLibraryMatchesMutation.finished.success, ({ result }) =>
 		reportFailures(
 			result,
 			count => translate('library.match.someFailed', { count }),
@@ -36,7 +36,7 @@ export const unmatchedFilesModel = atom(() => {
 		)
 	)
 
-	setLibraryFilesIgnoredMutation.finished.success.watch(({ result }) =>
+	onEach(setLibraryFilesIgnoredMutation.finished.success, ({ result }) =>
 		reportFailures(
 			result,
 			count => translate('library.unmatched.ignoreFailed', { count }),

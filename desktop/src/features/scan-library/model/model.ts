@@ -1,7 +1,7 @@
 import { createEvent, createStore, sample } from 'effector'
 
 import { problemDetail } from '@shared/api'
-import { atom } from '@shared/factory'
+import { atom, onEach } from '@shared/factory'
 import { translate } from '@shared/i18n'
 import { toast } from '@shared/ui'
 
@@ -21,7 +21,7 @@ export const scanLibraryModel = atom(() => {
 
 	sample({ clock: started, target: startLibraryScanMutation.start })
 
-	startLibraryScanMutation.finished.failure.watch(({ error }) => {
+	onEach(startLibraryScanMutation.finished.failure, ({ error }) => {
 		toast.error(problemDetail(error, translate('library.scan.failed')), { id: 'library-scan-failed' })
 	})
 

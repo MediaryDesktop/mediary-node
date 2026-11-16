@@ -1,6 +1,6 @@
 import { createEvent, createStore, sample } from 'effector'
 
-import { atom } from '@shared/factory'
+import { atom, onEach } from '@shared/factory'
 import { translate } from '@shared/i18n'
 import { toast } from '@shared/ui'
 
@@ -44,8 +44,8 @@ export const deleteAccountForm = atom(() => {
 	sample({ clock: codeRequested, target: sessionModel.accountDeletionRequested })
 	sample({ clock: [opened, codeRequested], fn: () => '', target: form.fields.code.changed })
 
-	sessionModel.accountDeletionCodeFailed.watch(notifyFailure)
-	sessionModel.accountDeleted.watch(() => toast.success(translate('auth.deleteAccount.deleted')))
+	onEach(sessionModel.accountDeletionCodeFailed, notifyFailure)
+	onEach(sessionModel.accountDeleted, () => toast.success(translate('auth.deleteAccount.deleted')))
 
 	return {
 		...form,

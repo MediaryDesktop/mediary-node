@@ -1,6 +1,7 @@
 import { createEffect, createEvent, createStore, merge, sample } from 'effector'
 
 import { HttpRequestError, problemDetail } from '@shared/api'
+import { onEach } from '@shared/factory'
 import { translate } from '@shared/i18n'
 import { readStored, writeStored } from '@shared/lib'
 
@@ -33,7 +34,7 @@ export const $streamVia = createStore<StreamVia>(
 	readStored(VIA_KEY) === 'embedded' ? 'embedded' : 'debrid'
 ).on(streamViaChanged, (_, via) => via)
 
-streamViaChanged.watch(via => writeStored(VIA_KEY, via))
+onEach(streamViaChanged, via => writeStored(VIA_KEY, via))
 
 const AUTO_SELECT_KEY = 'mediary.stream.autoSelect'
 
@@ -45,7 +46,7 @@ export const $autoSelect = createStore(readStored(AUTO_SELECT_KEY) !== 'off').on
 	(_, on) => on
 )
 
-autoSelectChanged.watch(on => writeStored(AUTO_SELECT_KEY, on ? 'on' : 'off'))
+onEach(autoSelectChanged, on => writeStored(AUTO_SELECT_KEY, on ? 'on' : 'off'))
 
 export const streamRequested = createEvent<StreamTarget>()
 export const streamCancelled = createEvent()

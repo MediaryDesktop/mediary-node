@@ -1,6 +1,6 @@
 import { combine, createEvent, createStore, sample } from 'effector'
 
-import { atom } from '@shared/factory'
+import { atom, onEach } from '@shared/factory'
 import { translate } from '@shared/i18n'
 import { toast } from '@shared/ui'
 
@@ -83,7 +83,7 @@ export const manageEntryModel = atom(() => {
 		filter: (target, { params }) => target?.entry === null && target.mediaRef === params.mediaRef
 	})
 
-	added.watch(target => {
+	onEach(added, target => {
 		if (target) {
 			const key = isLocalTrackerType(target.mediaType)
 				? 'lists.addEntry.doneLocal'

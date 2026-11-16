@@ -96,6 +96,7 @@ export const sessionModel = atom(() => {
 	const $isAuthenticated = $account.map(account => account !== null)
 	const $pending = combine(signInFx.pending, signUpFx.pending, (signIn, signUp) => signIn || signUp)
 
+	// eslint-disable-next-line no-restricted-syntax -- a mirror, not an effect: the cloud client reads the token from its own module, including the initial null
 	$token.watch(setCloudToken)
 
 	const signInFailed = signInFx.failData
@@ -223,6 +224,7 @@ export const sessionModel = atom(() => {
 	sample({ clock: accountRefreshRequested, target: accountQuery.start })
 
 	const settled = new Promise<void>(resolve => {
+		// eslint-disable-next-line no-restricted-syntax -- bridges the store to a promise for code outside the graph; it unsubscribes itself
 		const stop = $restoring.watch(restoring => {
 			if (restoring) {
 				return

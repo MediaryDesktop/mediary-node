@@ -1,6 +1,6 @@
 import { createEvent, sample } from 'effector'
 
-import { atom } from '@shared/factory'
+import { atom, onEach } from '@shared/factory'
 
 import { sessionModel } from '@entities/session'
 
@@ -32,7 +32,7 @@ export const verifyEmailForm = atom(() => {
 	sample({ clock: resent, target: sessionModel.emailVerificationRequested })
 	sample({ clock: resent, fn: () => '', target: form.fields.code.changed })
 
-	sessionModel.emailVerificationFailed.watch(notifyFailure)
+	onEach(sessionModel.emailVerificationFailed, notifyFailure)
 
 	return {
 		...form,

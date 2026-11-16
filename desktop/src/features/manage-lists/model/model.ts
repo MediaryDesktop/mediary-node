@@ -1,7 +1,7 @@
-import { combine, createEvent, createStore, sample } from 'effector'
+import { combine, createEvent, createStore, merge, sample } from 'effector'
 
 import { HttpRequestError } from '@shared/api'
-import { atom, ownRequest } from '@shared/factory'
+import { atom, onEach, ownRequest } from '@shared/factory'
 import { translate } from '@shared/i18n'
 import { toast } from '@shared/ui'
 
@@ -127,15 +127,13 @@ export const manageListsModel = atom(() => {
 		target: deleteTrackerListMutation.start
 	})
 
-	for (const mutation of [
-		createTrackerListMutation,
-		renameTrackerListMutation,
-		deleteTrackerListMutation
-	]) {
-		mutation.finished.failure.watch(({ error }) => {
-			toast.error(failureMessage(error), { id: 'tracker-list-failed' })
-		})
-	}
+	const failed = merge([
+		createTrackerListMutation.finished.failure.map(({ error }) => error),
+		renameTrackerListMutation.finished.failure.map(({ error }) => error),
+		deleteTrackerListMutation.finished.failure.map(({ error }) => error)
+	])
+
+	onEach(failed, error => toast.error(failureMessage(error), { id: 'tracker-list-failed' }))
 
 	return {
 		$open,

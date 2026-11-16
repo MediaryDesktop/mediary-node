@@ -1,3 +1,4 @@
+import { onEach } from '@shared/factory'
 import { translate } from '@shared/i18n'
 import { toast } from '@shared/ui'
 
@@ -16,7 +17,7 @@ function stopWaiting() {
 	}
 }
 
-trackerModel.entryUpdated.watch(({ result }) => {
+onEach(trackerModel.entryUpdated, ({ result }) => {
 	if (!result.sync_pending) {
 		return
 	}
@@ -32,7 +33,7 @@ trackerModel.entryUpdated.watch(({ result }) => {
 	}, SYNC_PATIENCE_MS)
 })
 
-trackerModel.entriesSynced.watch(() => {
+onEach(trackerModel.entriesSynced, () => {
 	if (!syncing) {
 		return
 	}
@@ -43,7 +44,7 @@ trackerModel.entriesSynced.watch(() => {
 	toast.success(translate('lists.sync.done'), { id: SYNC_TOAST })
 })
 
-trackerModel.entryUpdateFailed.watch(() => {
+onEach(trackerModel.entryUpdateFailed, () => {
 	syncing = false
 	stopWaiting()
 

@@ -1,7 +1,7 @@
 import { createEvent, createStore, sample } from 'effector'
 
 import { HttpRequestError } from '@shared/api'
-import { atom } from '@shared/factory'
+import { atom, onEach } from '@shared/factory'
 import { translate } from '@shared/i18n'
 import { toast } from '@shared/ui'
 
@@ -25,17 +25,20 @@ export const oauthPanel = atom(() => {
 		(_, provider) => provider
 	)
 
-	providerChosen.watch(storeLastProvider)
+	onEach(providerChosen, storeLastProvider)
 
-	sample({
-		clock: sessionModel.oauthFailed,
-		source: $lastUsed,
+	onEach(
+		sample({
+			clock: sessionModel.oauthFailed,
+			source: $lastUsed,
 
-		fn: (provider, error) =>
-			error instanceof HttpRequestError && error.body?.detail
-				? error.body.detail
-				: translate('auth.providers.failed', { provider: providerLabel(provider ?? '') })
-	}).watch(message => toast.error(message))
+			fn: (provider, error) =>
+				error instanceof HttpRequestError && error.body?.detail
+					? error.body.detail
+					: translate('auth.providers.failed', { provider: providerLabel(provider ?? '') })
+		}),
+		message => toast.error(message)
+	)
 
 	sample({ clock: providerChosen, target: sessionModel.oauthRequested })
 	sample({ clock: cancelled, target: sessionModel.oauthCancelRequested })

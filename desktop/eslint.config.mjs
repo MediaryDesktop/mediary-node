@@ -135,6 +135,21 @@ export default tseslint.config(
 	},
 
 	{
+		files: ['src/**/*.{ts,tsx}'],
+		ignores: ['src/**/*.test.{ts,tsx}'],
+		rules: {
+			'no-restricted-syntax': [
+				'error',
+				{
+					selector: "CallExpression[callee.type='MemberExpression'][callee.property.name='watch']",
+					message:
+						'A side effect on a unit is onEach(unit, fn) from @shared/factory: it runs in scope, and a test can replace it.'
+				}
+			]
+		}
+	},
+
+	{
 		files: ['electron/**/*.ts', 'electron.vite.config.ts', 'vitest.config.ts'],
 		languageOptions: {
 			parserOptions: { project: './tsconfig.node.json' },

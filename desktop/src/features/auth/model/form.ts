@@ -1,6 +1,8 @@
 import { combine, createEvent, createStore, sample } from 'effector'
 import type { Event, EventCallable, Store, UnitTargetable } from 'effector'
 
+import { onEach } from '@shared/factory'
+
 import { notifyFailure, notifyProblems } from '../lib'
 
 export interface Field {
@@ -58,11 +60,14 @@ export function createAuthForm<Names extends string, Payload, Context = void>(
 		})
 	})
 
-	sample({
-		clock: checked,
-		filter: ({ problems }) => problems.length > 0,
-		fn: ({ problems }) => problems
-	}).watch(notifyProblems)
+	onEach(
+		sample({
+			clock: checked,
+			filter: ({ problems }) => problems.length > 0,
+			fn: ({ problems }) => problems
+		}),
+		notifyProblems
+	)
 
 	sample({
 		clock: checked,
@@ -71,7 +76,9 @@ export function createAuthForm<Names extends string, Payload, Context = void>(
 		target: config.submit
 	})
 
-	config.failure?.watch(notifyFailure)
+	if (config.failure) {
+		onEach(config.failure, notifyFailure)
+	}
 
 	return { fields, submitted, $pending: config.pending, $values }
 }
