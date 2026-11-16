@@ -6,7 +6,7 @@ cmd/openapi            експорт специфікації без старт
       ↓
 internal/app           композиційний корінь — єдине місце, що знає всі модулі
       ↓
-internal/modules/      library · torrent · playback · reader · sync · extension
+internal/modules/      library · torrent · playback · reader · progress · sync · extension
       ↓
 internal/httpapi/      chi + huma, локальний токен, мапінг помилок
 internal/wsapi/        WebSocket-міст із шини подій

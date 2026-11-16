@@ -10,6 +10,8 @@ import (
 )
 
 type Querier interface {
+	ClearBookStates(ctx context.Context) error
+	ClearChapterStates(ctx context.Context) error
 	ClearCustomListItems(ctx context.Context) error
 	ClearCustomLists(ctx context.Context) error
 	ClearLibraryFileIgnored(ctx context.Context, id int64) (int64, error)
@@ -17,6 +19,7 @@ type Querier interface {
 	ClearListIcons(ctx context.Context) error
 	ClearManualTitles(ctx context.Context) error
 	ClearTrackerEntries(ctx context.Context) error
+	ClearWatchStates(ctx context.Context) error
 	// What the filter tabs above the list show. One query rather than three: the
 	// three numbers have to agree with each other, and they only do if they are read
 	// from the same snapshot.
@@ -34,6 +37,7 @@ type Querier interface {
 	DeleteAutoVideoMatchesForRoot(ctx context.Context, rootID int64) error
 	DeleteBookDownload(ctx context.Context, id int64) (int64, error)
 	DeleteBookOPDSServer(ctx context.Context, id int64) (int64, error)
+	DeleteBookPosition(ctx context.Context, fileID int64) error
 	DeleteCustomList(ctx context.Context, id int64) (int64, error)
 	DeleteCustomListItemsForRef(ctx context.Context, mediaRef string) error
 	DeleteExtension(ctx context.Context, id string) (int64, error)
@@ -68,9 +72,14 @@ type Querier interface {
 	GetBookDownload(ctx context.Context, id int64) (BookDownload, error)
 	GetBookOPDSServer(ctx context.Context, id int64) (BookOpdsServer, error)
 	GetBookPosition(ctx context.Context, fileID int64) (BookPosition, error)
+	GetBookState(ctx context.Context, contentKey string) (BookState, error)
+	GetChapterStateByNumber(ctx context.Context, arg GetChapterStateByNumberParams) (ChapterState, error)
+	GetChapterStateBySource(ctx context.Context, sourceRef sql.NullString) (ChapterState, error)
 	GetCustomList(ctx context.Context, id int64) (CustomList, error)
 	GetExtension(ctx context.Context, id string) (Extension, error)
 	GetLibraryFile(ctx context.Context, id int64) (GetLibraryFileRow, error)
+	// What the file holds, computed once and kept until a scan sees it change.
+	GetLibraryFileContentKey(ctx context.Context, id int64) (GetLibraryFileContentKeyRow, error)
 	GetLibraryRoot(ctx context.Context, id int64) (GetLibraryRootRow, error)
 	GetMangaDownload(ctx context.Context, id int64) (MangaDownload, error)
 	GetMangaSourceLinkBySeries(ctx context.Context, arg GetMangaSourceLinkBySeriesParams) (MangaSourceLink, error)
@@ -86,6 +95,13 @@ type Querier interface {
 	GetTorrentRuleByMedia(ctx context.Context, mediaRef string) (TorrentRule, error)
 	GetTorznabSource(ctx context.Context, id int64) (TorznabSource, error)
 	GetTrackerEntry(ctx context.Context, mediaRef string) (TrackerEntry, error)
+	GetWatchStateByContent(ctx context.Context, contentKey sql.NullString) (WatchState, error)
+	// Queries owned by the progress module: where the user is in each episode,
+	// chapter and book. Every row has exactly one key (a title and a unit within
+	// it, or a reference that does not depend on this computer), and the snapshot
+	// queries are ordered by it, so an unchanged state encodes to the same bytes.
+	GetWatchStateByEpisode(ctx context.Context, arg GetWatchStateByEpisodeParams) (WatchState, error)
+	InsertChapterState(ctx context.Context, arg InsertChapterStateParams) error
 	InsertCustomList(ctx context.Context, arg InsertCustomListParams) (CustomList, error)
 	InsertCustomListItem(ctx context.Context, arg InsertCustomListItemParams) error
 	InsertExtension(ctx context.Context, arg InsertExtensionParams) (Extension, error)
@@ -99,6 +115,7 @@ type Querier interface {
 	InsertScanRunRoot(ctx context.Context, arg InsertScanRunRootParams) error
 	InsertTorrentDownload(ctx context.Context, arg InsertTorrentDownloadParams) (TorrentDownload, error)
 	InsertTorznabSource(ctx context.Context, arg InsertTorznabSourceParams) (TorznabSource, error)
+	InsertWatchState(ctx context.Context, arg InsertWatchStateParams) error
 	// Every file at once, for the explorer's tree. The tree is the whole library by
 	// definition, so paging it would only mean the client asking for page after page
 	// before it can draw anything.
@@ -106,6 +123,9 @@ type Querier interface {
 	ListAniListOutbox(ctx context.Context, accountID int64) ([]AnilistOutbox, error)
 	ListBookDownloads(ctx context.Context, limit int64) ([]BookDownload, error)
 	ListBookOPDSServers(ctx context.Context) ([]BookOpdsServer, error)
+	// The positions kept before book_state, which the reader moves there one by
+	// one as it learns their files' content keys.
+	ListBookPositions(ctx context.Context) ([]BookPosition, error)
 	ListCustomListItems(ctx context.Context, listID int64) ([]CustomListItem, error)
 	ListCustomListMembership(ctx context.Context, mediaType string) ([]ListCustomListMembershipRow, error)
 	ListCustomLists(ctx context.Context) ([]ListCustomListsRow, error)
@@ -129,12 +149,16 @@ type Querier interface {
 	ListScanRunGroups(ctx context.Context, scanRunID int64) ([]ScanRunGroup, error)
 	ListScanRunRoots(ctx context.Context, scanRunID int64) ([]ScanRunRoot, error)
 	ListScanRuns(ctx context.Context, arg ListScanRunsParams) ([]ScanRun, error)
+	ListTitleChapterStates(ctx context.Context, mediaRef sql.NullString) ([]ChapterState, error)
+	ListTitleWatchStates(ctx context.Context, mediaRef sql.NullString) ([]WatchState, error)
 	ListTorrentDownloadEpisodes(ctx context.Context, mediaRef string) ([]sql.NullString, error)
 	ListTorrentDownloads(ctx context.Context, limit int64) ([]TorrentDownload, error)
 	ListTorrentRules(ctx context.Context) ([]TorrentRule, error)
 	ListTorznabSources(ctx context.Context) ([]TorznabSource, error)
 	ListTrackerEntries(ctx context.Context, mediaType string) ([]TrackerEntry, error)
 	ListUnfinishedTorrentDownloads(ctx context.Context) ([]TorrentDownload, error)
+	// Episodes begun and not finished, latest first: what "continue watching" offers.
+	ListUnfinishedWatchStates(ctx context.Context, limit int64) ([]WatchState, error)
 	// Files the matcher still has to work out, ordered so that every episode of one
 	// title arrives together: the candidates are then looked up once per title
 	// instead of once per file.
@@ -164,6 +188,9 @@ type Querier interface {
 	SetBookDownloadProgress(ctx context.Context, arg SetBookDownloadProgressParams) error
 	SetBookDownloadState(ctx context.Context, arg SetBookDownloadStateParams) error
 	SetBookDownloadTarget(ctx context.Context, arg SetBookDownloadTargetParams) error
+	// The size is checked again: a scan that rewrote the row since the key was read
+	// leaves a key computed from the old file unwritten.
+	SetLibraryFileContentKey(ctx context.Context, arg SetLibraryFileContentKeyParams) error
 	SetLibraryFileIgnored(ctx context.Context, arg SetLibraryFileIgnoredParams) (int64, error)
 	SetLibraryRootContent(ctx context.Context, arg SetLibraryRootContentParams) (int64, error)
 	SetListIcon(ctx context.Context, arg SetListIconParams) error
@@ -175,6 +202,8 @@ type Querier interface {
 	SetTorrentDownloadName(ctx context.Context, arg SetTorrentDownloadNameParams) error
 	SetTorrentDownloadState(ctx context.Context, arg SetTorrentDownloadStateParams) error
 	SetTorrentRuleChecked(ctx context.Context, arg SetTorrentRuleCheckedParams) error
+	SnapshotBookStates(ctx context.Context) ([]BookState, error)
+	SnapshotChapterStates(ctx context.Context) ([]SnapshotChapterStatesRow, error)
 	SnapshotCustomListItems(ctx context.Context) ([]CustomListItem, error)
 	SnapshotCustomLists(ctx context.Context) ([]CustomList, error)
 	SnapshotListIcons(ctx context.Context) ([]ListIcon, error)
@@ -185,8 +214,10 @@ type Querier interface {
 	// out and written back by its backup part. Ordered everywhere, so an unchanged
 	// state always encodes to the same bytes and the cloud can tell it is unchanged.
 	SnapshotTrackerEntries(ctx context.Context) ([]TrackerEntry, error)
+	SnapshotWatchStates(ctx context.Context) ([]SnapshotWatchStatesRow, error)
 	TouchLibraryRoot(ctx context.Context, arg TouchLibraryRootParams) error
 	UpdateBookOPDSServer(ctx context.Context, arg UpdateBookOPDSServerParams) (BookOpdsServer, error)
+	UpdateChapterState(ctx context.Context, arg UpdateChapterStateParams) error
 	UpdateExtensionManifest(ctx context.Context, arg UpdateExtensionManifestParams) (Extension, error)
 	UpdateExtensionSettings(ctx context.Context, arg UpdateExtensionSettingsParams) (Extension, error)
 	UpdateLibraryFile(ctx context.Context, arg UpdateLibraryFileParams) error
@@ -198,11 +229,13 @@ type Querier interface {
 	UpdateManualTitle(ctx context.Context, arg UpdateManualTitleParams) (int64, error)
 	UpdateOPDSServer(ctx context.Context, arg UpdateOPDSServerParams) (OpdsServer, error)
 	UpdateTorznabSource(ctx context.Context, arg UpdateTorznabSourceParams) (TorznabSource, error)
+	UpdateWatchState(ctx context.Context, arg UpdateWatchStateParams) error
 	UpsertAniListMirror(ctx context.Context, arg UpsertAniListMirrorParams) error
 	UpsertAniListOutboxEntry(ctx context.Context, arg UpsertAniListOutboxEntryParams) error
 	// A manual match is the user's decision, so an automatic one never replaces it.
 	UpsertAutoFileMatch(ctx context.Context, arg UpsertAutoFileMatchParams) error
 	UpsertBookPosition(ctx context.Context, arg UpsertBookPositionParams) error
+	UpsertBookState(ctx context.Context, arg UpsertBookStateParams) error
 	UpsertMangaSourceLink(ctx context.Context, arg UpsertMangaSourceLinkParams) error
 	UpsertManualFileMatch(ctx context.Context, arg UpsertManualFileMatchParams) error
 	UpsertNodeMeta(ctx context.Context, arg UpsertNodeMetaParams) (NodeMetum, error)

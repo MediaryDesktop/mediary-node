@@ -19,6 +19,7 @@ type (
 	PlayableFile = service.PlayableFile
 	Library      = service.Library
 	Progress     = service.Progress
+	Positions    = service.Positions
 	Tools        = service.Tools
 )
 
@@ -41,6 +42,8 @@ type Deps struct {
 
 	Library  Library
 	Progress Progress
+	// Positions keeps where the user stopped; nil starts every file at its beginning.
+	Positions Positions
 
 	// LocalURL is the node's own address of a file's direct endpoint, token
 	// included; streams reach ffprobe, ffmpeg and mpv through it.
@@ -67,9 +70,10 @@ func New(deps Deps) *Module {
 			Socket: mpv.SocketPath(deps.DataDir),
 			Logger: deps.Logger,
 		},
-		Library:  deps.Library,
-		Progress: deps.Progress,
-		LocalURL: deps.LocalURL,
+		Library:   deps.Library,
+		Progress:  deps.Progress,
+		Positions: deps.Positions,
+		LocalURL:  deps.LocalURL,
 		Prober: videofile.Prober{
 			FFprobe:  func() (string, error) { return deps.Tools.Path("ffprobe") },
 			CacheDir: filepath.Join(deps.DataDir, "cache", "mediainfo"),

@@ -69,7 +69,7 @@ func TestStreamPlaysInMPVThroughTheNode(t *testing.T) {
 	launcher := &fakeLauncher{}
 	svc := New(zerolog.Nop(), events.NewHub(8), Options{Launcher: launcher, Library: fakeLibrary{file: remoteFile()}, LocalURL: localURL})
 
-	status, err := svc.Start(context.Background(), -3)
+	status, err := svc.Start(context.Background(), -3, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -104,7 +104,7 @@ func TestStreamHasNoStill(t *testing.T) {
 func TestStreamWithoutALocalAddressIsRefused(t *testing.T) {
 	svc := New(zerolog.Nop(), events.NewHub(8), Options{Launcher: &fakeLauncher{}, Library: fakeLibrary{file: remoteFile()}})
 
-	if _, err := svc.Start(context.Background(), -3); apperr.KindOf(err) != apperr.KindPrecondition {
+	if _, err := svc.Start(context.Background(), -3, false); apperr.KindOf(err) != apperr.KindPrecondition {
 		t.Errorf("err = %v, want precondition", err)
 	}
 }

@@ -41,11 +41,26 @@ type Progress interface {
 	MarkReadFraction(ctx context.Context, mediaRef string, fraction float64) error
 }
 
-type Options struct {
-	Library  Library
-	Progress Progress
+// BookPosition is where the reader left a book.
+type BookPosition = store.Position
 
-	// Store keeps where each book was left; nil leaves books without a place.
+// Positions keeps where the reader left each book and chapter, named so that
+// the place means the same on any computer. Implemented over the progress
+// module; read is this module's rule for a chapter being read.
+type Positions interface {
+	Book(ctx context.Context, book *BookFile) (*BookPosition, error)
+	SaveBook(ctx context.Context, book *BookFile, position BookPosition) error
+	ResumePage(ctx context.Context, chapter *Chapter) (int, error)
+	SavePage(ctx context.Context, chapter *Chapter, page int, read bool) error
+}
+
+type Options struct {
+	Library   Library
+	Progress  Progress
+	Positions Positions
+
+	// Store is where books were left before Positions kept them: read when
+	// Positions has nothing yet, and emptied into it.
 	Store  *store.Store
 	Logger zerolog.Logger
 	Now    func() time.Time
@@ -105,16 +120,45 @@ type Chapter struct {
 	// SourceName and Groups are the credit shown with an online chapter.
 	SourceName string
 	Groups     []string
+
+	// Identity names a chapter of an online source the same way on every
+	// computer: set by the source, empty for a library file, which is named
+	// by its content instead.
+	Identity string
+
+	// ResumePage is the page the chapter opens at: where the user stopped.
+	ResumePage int
 }
 
-// Chapter lists the pages of a chapter in reading order.
-func (s *Service) Chapter(ctx context.Context, chapter ref.ChapterRef) (*Chapter, error) {
-	source, err := s.source(chapter)
+// Chapter lists the pages of a chapter in reading order, and where the user
+// stopped in it.
+func (s *Service) Chapter(ctx context.Context, chapterRef ref.ChapterRef) (*Chapter, error) {
+	chapter, err := s.chapter(ctx, chapterRef)
 	if err != nil {
 		return nil, err
 	}
 
-	return source.Chapter(ctx, chapter)
+	if s.opts.Positions != nil {
+		page, err := s.opts.Positions.ResumePage(ctx, chapter)
+		if err != nil {
+			s.opts.Logger.Debug().Err(err).Str("ref", chapterRef.String()).Msg("could not read where the chapter was left")
+		}
+
+		if page < len(chapter.Pages) {
+			chapter.ResumePage = page
+		}
+	}
+
+	return chapter, nil
+}
+
+func (s *Service) chapter(ctx context.Context, chapterRef ref.ChapterRef) (*Chapter, error) {
+	source, err := s.source(chapterRef)
+	if err != nil {
+		return nil, err
+	}
+
+	return source.Chapter(ctx, chapterRef)
 }
 
 // PageImage returns one page of a chapter.
@@ -130,13 +174,24 @@ func (s *Service) PageImage(ctx context.Context, chapter ref.ChapterRef, index i
 // ReportPage is the reader's side of the progress rule: reaching the last page
 // counts the chapter as read. It reports whether the chapter counts, on this call
 // or an earlier one.
+//
+// Every report keeps the page, whether or not the chapter belongs to a title:
+// a list that cannot be reached does not cost the user their place.
 func (s *Service) ReportPage(ctx context.Context, chapterRef ref.ChapterRef, page int) (bool, error) {
-	chapter, err := s.Chapter(ctx, chapterRef)
+	chapter, err := s.chapter(ctx, chapterRef)
 	if err != nil {
 		return false, err
 	}
 
-	if !CountsAsRead(page, len(chapter.Pages)) {
+	read := CountsAsRead(page, len(chapter.Pages))
+
+	if s.opts.Positions != nil {
+		if err := s.opts.Positions.SavePage(ctx, chapter, page, read); err != nil {
+			s.opts.Logger.Warn().Err(err).Str("ref", chapterRef.String()).Msg("could not keep the page")
+		}
+	}
+
+	if !read {
 		return false, nil
 	}
 

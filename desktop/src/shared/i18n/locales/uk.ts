@@ -717,6 +717,9 @@ export const uk: Translation = {
 			others: 'Інше',
 			play: 'Дивитися: {{name}}',
 			playing: 'Грає',
+			started: 'Переглянуто',
+			markWatched: 'Позначити «{{label}}» переглянутою',
+			markUnwatched: 'Позначити «{{label}}» непереглянутою',
 			watched: 'Переглянуто',
 			missing: 'Останній скан не знайшов файл',
 			minutes: '{{count}} хв',
@@ -1084,7 +1087,9 @@ export const uk: Translation = {
 		pause: 'Пауза',
 		resume: 'Продовжити',
 		stop: 'Закрити плеєр',
-		failed: 'Не вдалося запустити плеєр'
+		failed: 'Не вдалося запустити плеєр',
+		resumed: 'Продовжено з {{time}}',
+		fromStart: 'Спочатку'
 	},
 
 	discover: {

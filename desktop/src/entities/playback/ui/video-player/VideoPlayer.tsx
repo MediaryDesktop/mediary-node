@@ -3,11 +3,13 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { useAfterDelay } from '@shared/lib'
+import { toast } from '@shared/ui'
 
 import type { PlaybackStream } from '../../api/api'
 import type { VideoSource } from '../../lib/source'
 import { initialAudio, initialSubtitle } from '../../lib/tracks'
 import { directUrl } from '../../lib/urls'
+import { formatTimecode } from '../../model/model'
 
 import { useFullscreen } from './lib/useFullscreen'
 import { useIdleControls } from './lib/useIdleControls'
@@ -101,7 +103,17 @@ export function VideoPlayer({
 	const [subtitle, setSubtitle] = useState<number | null>(() => initialSubtitle(subtitles))
 	const [audio, setAudio] = useState(() => initialAudio(audios))
 
-	const startAtRef = useRef(startAt)
+	const resumed = !startAt && stream.resume_at > 0
+	const startAtRef = useRef(resumed ? { position: stream.resume_at, playing: true } : startAt)
+	const resumedRef = useRef(
+		resumed
+			? {
+					id: `playback-resumed-${fileId}`,
+					message: t('playback.resumed', { time: formatTimecode(stream.resume_at) }),
+					fromStart: t('playback.fromStart')
+				}
+			: null
+	)
 	const onStartAppliedRef = useRef(onStartApplied)
 
 	useEffect(() => {
@@ -117,6 +129,19 @@ export function VideoPlayer({
 
 			if (!start.playing) {
 				video.pause()
+			}
+
+			const notice = resumedRef.current
+			if (notice) {
+				toast(notice.message, {
+					id: notice.id,
+					action: {
+						label: notice.fromStart,
+						onClick: () => {
+							video.currentTime = 0
+						}
+					}
+				})
 			}
 
 			onStartAppliedRef.current?.()

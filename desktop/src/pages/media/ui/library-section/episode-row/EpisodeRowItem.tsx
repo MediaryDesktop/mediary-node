@@ -18,7 +18,9 @@ export interface EpisodeRowItemProps {
 	images: (string | null | undefined)[]
 	coverColor: string | null
 	watched: boolean
+	started?: number
 	disabled: boolean
+	onToggleWatched?: () => void
 	onPlay: () => void
 	badge?: ReactNode
 	children?: ReactNode
@@ -32,7 +34,9 @@ export function EpisodeRowItem({
 	images,
 	coverColor,
 	watched,
+	started,
 	disabled,
+	onToggleWatched,
 	onPlay,
 	badge,
 	children
@@ -53,6 +57,18 @@ export function EpisodeRowItem({
 				<span className={styles.episodePlay}>
 					<Icon name='common/play' size={24} />
 				</span>
+				{started !== undefined && (
+					<span
+						className={styles.episodeStarted}
+						role='progressbar'
+						aria-label={t('media.library.started')}
+						aria-valuemin={0}
+						aria-valuemax={100}
+						aria-valuenow={Math.round(started * 100)}
+					>
+						<span style={{ width: `${Math.max(started * 100, 4)}%` }} />
+					</span>
+				)}
 			</button>
 
 			<EpisodeText
@@ -65,7 +81,12 @@ export function EpisodeRowItem({
 				{children}
 			</EpisodeText>
 
-			<EpisodeAside episode={episode} watched={watched} />
+			<EpisodeAside
+				label={label}
+				episode={episode}
+				watched={watched}
+				onToggleWatched={onToggleWatched}
+			/>
 		</li>
 	)
 }

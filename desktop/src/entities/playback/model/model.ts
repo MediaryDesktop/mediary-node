@@ -16,6 +16,8 @@ import {
 } from '../api/api'
 import type { PlaybackSession, ReportProgressParams } from '../api/api'
 
+import { $playerFileId, playerClosed } from './player-session'
+
 const playbackEvent = nodeTopic('playback')
 
 export const playbackQuery = createQuery({ effect: fetchPlaybackFx, name: 'playback' })
@@ -32,6 +34,10 @@ export const stopPlaybackMutation = createMutation({ effect: stopPlaybackFx, nam
 export const playbackStreamQuery = createQuery({ effect: fetchPlaybackStreamFx, name: 'playbackStream' })
 
 concurrency(playbackStreamQuery, { strategy: 'TAKE_LATEST' })
+
+// The stream's description carries where the user stopped; one kept from the
+// last time the file was open would start the next play there.
+sample({ clock: playerClosed, target: playbackStreamQuery.reset })
 
 function numberIn(payload: Record<string, unknown> | undefined, key: string): number {
 	const value = payload?.[key]
@@ -74,6 +80,16 @@ export const playbackModel = atom(() => {
 
 	sample({ clock: progressReported, target: reportPlaybackProgressFx })
 
+	// The built-in player's last word, once the node has it: its report as it
+	// closes, when no player is open any more. What the page shows of where the
+	// user stopped can be read again then.
+	const progressSettled = sample({
+		clock: reportPlaybackProgressFx.done,
+		source: $playerFileId,
+		filter: open => open === null,
+		fn: () => undefined
+	})
+
 	const transcodeClosed = createEvent<number>()
 
 	sample({ clock: transcodeClosed, target: stopTranscodeFx })
@@ -87,6 +103,7 @@ export const playbackModel = atom(() => {
 		playFailed: startPlaybackMutation.finished.failure,
 		watched: playbackEvent.filter({ fn: event => event.payload?.state === 'watched' }),
 		progressReported,
+		progressSettled,
 		transcodeClosed
 	}
 })

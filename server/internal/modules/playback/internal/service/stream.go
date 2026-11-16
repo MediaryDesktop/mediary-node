@@ -44,6 +44,8 @@ type Stream struct {
 	DirectURL string `json:"direct_url" doc:"Path that serves the file as it is, with range requests. The renderer appends the URL token as ?token= because a video element cannot send headers."`
 
 	HLSURL string `json:"hls_url,omitempty" doc:"Master playlist of the file transcoded to HLS, for when the renderer cannot play it directly. Absent while transcoding is turned off."`
+
+	ResumeAt float64 `json:"resume_at" doc:"Where the user stopped, in seconds, which is where the player starts unless the user asks for the beginning. Zero to start from the beginning."`
 }
 
 func (s *Service) Stream(ctx context.Context, fileID int64) (*Stream, error) {
@@ -65,6 +67,7 @@ func (s *Service) Stream(ctx context.Context, fileID int64) (*Stream, error) {
 		Info:      info,
 		DirectURL: fmt.Sprintf("/v1/playback/files/%d/direct", file.ID),
 		HLSURL:    s.hlsURL(file.ID),
+		ResumeAt:  s.resumeAt(ctx, file),
 	}, nil
 }
 

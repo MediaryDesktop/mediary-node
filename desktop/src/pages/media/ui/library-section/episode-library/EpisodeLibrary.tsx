@@ -11,7 +11,9 @@ import { titleFilesQuery } from '@entities/library-item'
 import type { LibraryFile } from '@entities/library-item'
 import type { MediaEpisode } from '@entities/media'
 import { $playerMode, playbackModel, playerOpened, thumbnailUrl } from '@entities/playback'
+import { setEpisodeWatchedMutation, titleMarks, titleProgressQuery } from '@entities/progress'
 import { useMissingToolAction } from '@entities/tool'
+import { updateTrackerEntryMutation } from '@entities/tracker'
 
 import { episodeFor, episodeOrder, groupTitleFiles, isWatched } from '@features/continue-watching'
 
@@ -20,6 +22,7 @@ import rowStyles from '../episode-row/EpisodeRow.module.scss'
 import sectionStyles from '../EpisodeSection.module.scss'
 import { seasonsOf } from '../lib/seasons'
 import { useEpisodeMeta } from '../lib/useEpisodeMeta'
+import { listableEpisode, watchedProgressPatch } from '../lib/watched'
 import { NotInLibrary } from '../not-in-library/NotInLibrary'
 
 import { ToWatchCard } from './to-watch-rail/ToWatchCard'
@@ -32,6 +35,7 @@ export interface EpisodeLibraryProps {
 	banner: string | null
 	total: number | null | undefined
 	progress: number
+	listed: boolean
 }
 
 export function EpisodeLibrary({
@@ -40,13 +44,29 @@ export function EpisodeLibrary({
 	coverColor,
 	banner,
 	total,
-	progress
+	progress,
+	listed
 }: EpisodeLibraryProps) {
 	const { t } = useTranslation()
 	const { meta, count } = useEpisodeMeta(mediaRef)
 
-	const [data, playExternally, session, starting, playerMode, openPlayer] = useUnit([
+	const [
+		data,
+		progressData,
+		askProgress,
+		setWatched,
+		updateEntry,
+		playExternally,
+		session,
+		starting,
+		playerMode,
+		openPlayer
+	] = useUnit([
 		titleFilesQuery.$data,
+		titleProgressQuery.$data,
+		titleProgressQuery.start,
+		setEpisodeWatchedMutation.start,
+		updateTrackerEntryMutation.start,
 		playbackModel.playRequested,
 		playbackModel.$session,
 		playbackModel.$starting,
@@ -63,6 +83,11 @@ export function EpisodeLibrary({
 	}
 
 	useNodeData(titleFilesQuery, { params: { mediaRef, kind: 'video' } })
+	useNodeData(titleProgressQuery, { params: mediaRef })
+
+	const marks = titleMarks(progressData, mediaRef)
+
+	useUnitWatch(playbackModel.progressSettled, () => askProgress(mediaRef))
 
 	const missingTool = useMissingToolAction()
 
@@ -88,7 +113,7 @@ export function EpisodeLibrary({
 	}
 
 	const order = episodeOrder(meta)
-	const groups = groupTitleFiles(files, progress, order)
+	const groups = groupTitleFiles(files, progress, order, marks.watched)
 	const fallback = banner ?? cover
 
 	const of = meta.seasonal ? null : (total ?? count)
@@ -99,8 +124,19 @@ export function EpisodeLibrary({
 		fallback
 	]
 
+	const toggleWatched = (number: number, watched: boolean) => {
+		setWatched({ mediaRef, episode: number, watched })
+
+		const patch = watchedProgressPatch(number, watched, { progress, listed })
+		if (patch) {
+			updateEntry({ mediaRef, patch })
+		}
+	}
+
 	const item = (file: LibraryFile) => {
 		const episode = episodeFor(meta, file)
+		const number = order(file)
+		const watched = isWatched(file, progress, order, marks.watched)
 
 		return (
 			<EpisodeItem
@@ -110,10 +146,12 @@ export function EpisodeLibrary({
 				seasonal={meta.seasonal}
 				images={imagesFor(file, episode)}
 				coverColor={coverColor}
-				watched={isWatched(file, progress, order)}
+				watched={watched}
+				started={watched || number === null ? undefined : marks.started.get(number)}
 				playing={session?.file_id === file.id}
 				disabled={starting}
 				onPlay={play}
+				onToggleWatched={listableEpisode(number) ? () => toggleWatched(number, !watched) : undefined}
 			/>
 		)
 	}

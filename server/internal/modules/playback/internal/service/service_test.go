@@ -213,7 +213,7 @@ var episodeFile = &PlayableFile{
 func TestStartOpensThePlayerOnTheScannedFile(t *testing.T) {
 	h := newHarness(t, episodeFile)
 
-	status, err := h.svc.Start(context.Background(), episodeFile.ID)
+	status, err := h.svc.Start(context.Background(), episodeFile.ID, false)
 	if err != nil {
 		t.Fatalf("start: %v", err)
 	}
@@ -234,7 +234,7 @@ func TestStartRefusesAFileTheScanNoLongerFinds(t *testing.T) {
 
 	h := newHarness(t, &missing)
 
-	_, err := h.svc.Start(context.Background(), missing.ID)
+	_, err := h.svc.Start(context.Background(), missing.ID, false)
 	if apperr.KindOf(err) != apperr.KindPrecondition {
 		t.Errorf("start on a missing file returned %v, want a precondition failure", err)
 	}
@@ -247,7 +247,7 @@ func TestStartRefusesAFileTheScanNoLongerFinds(t *testing.T) {
 func TestStartRefusesAnUnknownFile(t *testing.T) {
 	h := newHarness(t, nil)
 
-	_, err := h.svc.Start(context.Background(), 404)
+	_, err := h.svc.Start(context.Background(), 404, false)
 	if apperr.KindOf(err) != apperr.KindNotFound {
 		t.Errorf("start on an unknown file returned %v, want not found", err)
 	}
@@ -256,7 +256,7 @@ func TestStartRefusesAnUnknownFile(t *testing.T) {
 func TestWatchingMostOfTheEpisodeMarksItOnce(t *testing.T) {
 	h := newHarness(t, episodeFile)
 
-	if _, err := h.svc.Start(context.Background(), episodeFile.ID); err != nil {
+	if _, err := h.svc.Start(context.Background(), episodeFile.ID, false); err != nil {
 		t.Fatalf("start: %v", err)
 	}
 
@@ -288,7 +288,7 @@ func TestWatchingMostOfTheEpisodeMarksItOnce(t *testing.T) {
 func TestPlayingToTheEndMarksTheEpisodeEvenWithoutADuration(t *testing.T) {
 	h := newHarness(t, episodeFile)
 
-	if _, err := h.svc.Start(context.Background(), episodeFile.ID); err != nil {
+	if _, err := h.svc.Start(context.Background(), episodeFile.ID, false); err != nil {
 		t.Fatalf("start: %v", err)
 	}
 
@@ -305,7 +305,7 @@ func TestPlayingToTheEndMarksTheEpisodeEvenWithoutADuration(t *testing.T) {
 func TestClosingThePlayerEarlyMarksNothing(t *testing.T) {
 	h := newHarness(t, episodeFile)
 
-	if _, err := h.svc.Start(context.Background(), episodeFile.ID); err != nil {
+	if _, err := h.svc.Start(context.Background(), episodeFile.ID, false); err != nil {
 		t.Fatalf("start: %v", err)
 	}
 
@@ -329,7 +329,7 @@ func TestAnUnmatchedFileHasNothingToMark(t *testing.T) {
 
 	h := newHarness(t, unmatched)
 
-	if _, err := h.svc.Start(context.Background(), unmatched.ID); err != nil {
+	if _, err := h.svc.Start(context.Background(), unmatched.ID, false); err != nil {
 		t.Fatalf("start: %v", err)
 	}
 
@@ -347,7 +347,7 @@ func TestAFailedMarkIsNotRememberedAsDone(t *testing.T) {
 	h := newHarness(t, episodeFile)
 	h.progress.err = errors.New("anilist is unreachable")
 
-	if _, err := h.svc.Start(context.Background(), episodeFile.ID); err != nil {
+	if _, err := h.svc.Start(context.Background(), episodeFile.ID, false); err != nil {
 		t.Fatalf("start: %v", err)
 	}
 
@@ -365,12 +365,12 @@ func TestAFailedMarkIsNotRememberedAsDone(t *testing.T) {
 func TestStartingASecondFileClosesTheFirstPlayer(t *testing.T) {
 	h := newHarness(t, episodeFile)
 
-	if _, err := h.svc.Start(context.Background(), episodeFile.ID); err != nil {
+	if _, err := h.svc.Start(context.Background(), episodeFile.ID, false); err != nil {
 		t.Fatalf("first start: %v", err)
 	}
 	first := h.launcher.last()
 
-	if _, err := h.svc.Start(context.Background(), episodeFile.ID); err != nil {
+	if _, err := h.svc.Start(context.Background(), episodeFile.ID, false); err != nil {
 		t.Fatalf("second start: %v", err)
 	}
 
@@ -384,7 +384,7 @@ func TestStartingASecondFileClosesTheFirstPlayer(t *testing.T) {
 func TestControlSteersTheOpenPlayer(t *testing.T) {
 	h := newHarness(t, episodeFile)
 
-	if _, err := h.svc.Start(context.Background(), episodeFile.ID); err != nil {
+	if _, err := h.svc.Start(context.Background(), episodeFile.ID, false); err != nil {
 		t.Fatalf("start: %v", err)
 	}
 

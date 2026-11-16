@@ -65,6 +65,8 @@ type ChapterBody struct {
 
 	SourceName string   `json:"source_name,omitempty" doc:"Where an online chapter comes from, to credit it."`
 	Groups     []string `json:"groups,omitempty" doc:"Who translated it, to credit them."`
+
+	ResumePage int `json:"resume_page" doc:"Page to open at: where the user stopped, or 0 for a chapter never opened or already read to its end."`
 }
 
 type ChapterOutput struct {
@@ -151,7 +153,7 @@ func (h *Handler) registerChapters(api huma.API) {
 		Method:      http.MethodPost,
 		Path:        "/v1/reader/chapters/{ref}/progress",
 		Summary:     "Report the page the reader is on",
-		Description: "Reaching the last page counts the chapter as read. Only a whole chapter number moves the user's list; an extra such as 12.5 is read without moving it. The tracker never lowers progress.",
+		Description: "Keeps the page, so the chapter opens there next time. Reaching the last page counts the chapter as read. Only a whole chapter number moves the user's list; an extra such as 12.5 is read without moving it. The tracker never lowers progress.",
 		Tags:        []string{"reader"},
 	}, func(ctx context.Context, in *ChapterReadInput) (*ReadOutput, error) {
 		chapterRef, err := parseRef(in.Ref)
@@ -226,6 +228,8 @@ func (h *Handler) chapter(ctx context.Context, chapterRef ref.ChapterRef) (*Chap
 
 		SourceName: chapter.SourceName,
 		Groups:     chapter.Groups,
+
+		ResumePage: chapter.ResumePage,
 	}
 
 	return out, nil

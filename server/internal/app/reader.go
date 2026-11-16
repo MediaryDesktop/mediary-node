@@ -78,6 +78,7 @@ func (o opdsChapters) Chapter(ctx context.Context, chapter reader.ChapterRef) (*
 		Pages:      pages,
 		SourceName: found.SourceName,
 		Groups:     found.Groups,
+		Identity:   found.Identity,
 	}, nil
 }
 

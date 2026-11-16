@@ -16,6 +16,7 @@ import (
 	"github.com/MediaryDesktop/mediary-node/server/internal/modules/manga"
 	"github.com/MediaryDesktop/mediary-node/server/internal/modules/media"
 	"github.com/MediaryDesktop/mediary-node/server/internal/modules/playback"
+	"github.com/MediaryDesktop/mediary-node/server/internal/modules/progress"
 	"github.com/MediaryDesktop/mediary-node/server/internal/modules/reader"
 	"github.com/MediaryDesktop/mediary-node/server/internal/modules/sync"
 	"github.com/MediaryDesktop/mediary-node/server/internal/modules/tools"
@@ -191,17 +192,28 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 	})
 	toolsModule.Register(api)
 
+	// Where the user is in each episode, chapter and book. The player and the
+	// reader report here, and it names what they report so that it means the
+	// same on any computer; the number on the list stays the tracker's.
+	progressModule := progress.New(progress.Deps{
+		DB:     deps.DB,
+		Logger: moduleLogger(deps.Logger, "progress"),
+		Events: deps.Events,
+	})
+	progressModule.Register(api)
+
 	// The player opens files the library scanned, and streams the torrent module
 	// made from a debrid service, and reports what was watched to the tracker.
 	// Every edge is a port, joined here: playback knows none of these modules.
 	playbackModule := playback.New(playback.Deps{
-		Logger:   moduleLogger(deps.Logger, "playback"),
-		Events:   deps.Events,
-		Tools:    toolsModule,
-		DataDir:  deps.DataDir,
-		Library:  playableFiles{library: libraryModule, media: mediaModule, streams: torrentModule},
-		Progress: watchedEpisodes{tracker: trackerModule},
-		LocalURL: deps.LocalURL,
+		Logger:    moduleLogger(deps.Logger, "playback"),
+		Events:    deps.Events,
+		Tools:     toolsModule,
+		DataDir:   deps.DataDir,
+		Library:   playableFiles{library: libraryModule, media: mediaModule, streams: torrentModule},
+		Progress:  watchedEpisodes{tracker: trackerModule},
+		Positions: playbackPositions{progress: progressModule, library: libraryModule},
+		LocalURL:  deps.LocalURL,
 
 		Transcode:        deps.Transcode,
 		TranscodeDir:     deps.TranscodeDir,
@@ -252,16 +264,24 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 	// The reader reads the library's files and, through the manga module, chapters
 	// on the user's OPDS servers and from manga plugins. Every edge is a port
 	// joined here.
-	reader.New(reader.Deps{
-		DB:       deps.DB,
-		Logger:   moduleLogger(deps.Logger, "reader"),
-		Library:  readableFiles{library: libraryModule},
-		Progress: readChapters{tracker: trackerModule},
+	readerModule := reader.New(reader.Deps{
+		DB:        deps.DB,
+		Logger:    moduleLogger(deps.Logger, "reader"),
+		Library:   readableFiles{library: libraryModule},
+		Progress:  readChapters{tracker: trackerModule},
+		Positions: readingPositions{progress: progressModule, library: libraryModule},
 		Sources: map[string]reader.ChapterSource{
 			reader.SourceOPDS:   opdsChapters{manga: mangaModule},
 			reader.SourcePlugin: pluginChapters{manga: mangaModule},
 		},
-	}).Register(api)
+	})
+	readerModule.Register(api)
+
+	// Book places kept before the progress module move into it. Each needs its
+	// file read for a content key, so this runs beside startup, not in it.
+	if deps.DB != nil {
+		go moveBookPositions(queueCtx, readerModule, moduleLogger(deps.Logger, "reader"))
+	}
 
 	syncModule := sync.New(sync.Deps{
 		DB:      deps.DB,
@@ -272,8 +292,9 @@ func Register(ctx context.Context, api huma.API, deps Deps) (shutdown func()) {
 
 		// Manual titles before the tracker, so a restore writes the titles before
 		// the entries that point at them — not required by any constraint today,
-		// but the order the data depends on.
-		Parts: []backup.Part{mediaModule.BackupPart(), trackerModule.BackupPart()},
+		// but the order the data depends on. Where the user is in those titles
+		// comes last, for the same reason.
+		Parts: []backup.Part{mediaModule.BackupPart(), trackerModule.BackupPart(), progressModule.BackupPart()},
 	})
 	syncModule.Register(api)
 

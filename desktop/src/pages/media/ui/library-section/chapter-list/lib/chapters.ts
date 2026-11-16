@@ -35,14 +35,19 @@ export function isSaved(row: ChapterRow): boolean {
 	return row.options.some(option => option.source === LOCAL_SOURCE)
 }
 
-export function matchesStatus(row: ChapterRow, filter: StatusFilter, progress: number): boolean {
+export function matchesStatus(
+	row: ChapterRow,
+	filter: StatusFilter,
+	progress: number,
+	read?: ReadonlySet<number>
+): boolean {
 	switch (filter) {
 		case 'saved':
 			return isSaved(row)
 		case 'read':
-			return isChapterRead(row.number, progress)
+			return isChapterRead(row.number, progress, read)
 		case 'unread':
-			return !isChapterRead(row.number, progress)
+			return !isChapterRead(row.number, progress, read)
 		default:
 			return true
 	}
@@ -114,7 +119,8 @@ export type ChapterState =
 export function chapterState(
 	row: ChapterRow,
 	download: MangaDownload | undefined,
-	progress: number
+	progress: number,
+	read?: ReadonlySet<number>
 ): ChapterState {
 	if (download?.state === 'running') {
 		return { kind: 'saving', done: download.pages_done, total: download.pages_total }
@@ -122,7 +128,7 @@ export function chapterState(
 	if (download?.state === 'queued') {
 		return { kind: 'queued' }
 	}
-	if (isChapterRead(row.number, progress)) {
+	if (isChapterRead(row.number, progress, read)) {
 		return { kind: 'read' }
 	}
 	if (isSaved(row)) {

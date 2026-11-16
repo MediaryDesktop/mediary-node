@@ -1,6 +1,6 @@
 import { useRouter } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
@@ -23,19 +23,24 @@ export function ReadPage({ chapterRef, onOpenChapter }: ReadPageProps) {
 	const { t } = useTranslation()
 	const router = useRouter()
 
-	const [chapterData, chapterError, chapterPending, loadChapter] = useUnit([
+	const [chapterData, chapterError, chapterPending, loadChapter, forgetChapter] = useUnit([
 		chapterQuery.$data,
 		chapterQuery.$error,
 		chapterQuery.$pending,
-		chapterQuery.start
+		chapterQuery.start,
+		chapterQuery.reset
 	])
 
-	const [page, setPage] = useState(0)
+	useEffect(() => forgetChapter, [forgetChapter])
+
+	const [turned, setTurned] = useState<{ ref: string; page: number } | null>(null)
 	const [openedAt] = useState(() => performance.now())
 
 	useNodeData(chapterQuery, { params: chapterRef })
 
 	const chapter = chapterData?.chapter.ref === chapterRef ? chapterData.chapter : null
+	const page = turned?.ref === chapterRef ? turned.page : (chapter?.resume_page ?? 0)
+	const setPage = (next: number) => setTurned({ ref: chapterRef, page: next })
 
 	const { rows } = useTitleChapters(chapter?.media_ref)
 	const neighbours = useMemo(() => neighbourChapters(rows, chapterRef), [rows, chapterRef])

@@ -92,10 +92,19 @@ export function neighbourChapters(
 	}
 }
 
-export function isChapterRead(number: string | null, progress: number): boolean {
+const NONE_READ: ReadonlySet<number> = new Set()
+
+// Read is what the node marked read — an extra such as 12.5 included — or any
+// whole chapter up to the number on the user's list, which may have moved on
+// another device.
+export function isChapterRead(
+	number: string | null,
+	progress: number,
+	read: ReadonlySet<number> = NONE_READ
+): boolean {
 	const value = numeric(number)
 
-	return value !== null && value > 0 && value <= progress
+	return value !== null && value > 0 && (value <= progress || read.has(value))
 }
 
 const NUMBERED = /(?:\bch(?:apter|\.)?|#)\s*(\d+(?:\.\d+)?)/i

@@ -99,6 +99,7 @@ func humaConfig(opts Options) huma.Config {
 		{Name: "torrent", Description: "Providers and download management."},
 		{Name: "playback", Description: "mpv control, direct play and transcoding."},
 		{Name: "reader", Description: "Image-based and epub/pdf reading."},
+		{Name: "progress", Description: "Where the user is in each episode, chapter and book."},
 		{Name: "sync", Description: "Progress synchronisation with a paired cloud account."},
 		{Name: "extension", Description: "Plugin runtime for metadata and torrent providers."},
 	}

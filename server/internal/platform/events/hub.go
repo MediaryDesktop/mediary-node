@@ -16,6 +16,7 @@ const (
 	TopicSync          Topic = "sync"
 	TopicNotification  Topic = "notification"
 	TopicTracker       Topic = "tracker"
+	TopicProgress      Topic = "progress"
 	TopicAniListAuth   Topic = "anilist.session"
 	TopicMangaDownload Topic = "manga.download"
 	TopicBookDownload  Topic = "books.download"

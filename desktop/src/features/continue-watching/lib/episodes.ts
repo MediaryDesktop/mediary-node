@@ -19,16 +19,31 @@ export function episodeSeason(file: LibraryFile): number | null {
 	return file.match?.season ?? file.parsed.season ?? null
 }
 
-export function isWatched(file: LibraryFile, progress: number, order: EpisodeOrder = episodeNumber): boolean {
+const NONE_WATCHED: ReadonlySet<number> = new Set()
+
+// Watched is what the node marked watched, or anything up to the number on the
+// user's list: the list may have moved on another device, where the node never
+// saw the episodes.
+export function isWatched(
+	file: LibraryFile,
+	progress: number,
+	order: EpisodeOrder = episodeNumber,
+	watched: ReadonlySet<number> = NONE_WATCHED
+): boolean {
 	const number = order(file)
 
-	return number === null ? progress > 0 : number <= progress
+	if (number === null) {
+		return progress > 0
+	}
+
+	return number <= progress || watched.has(number)
 }
 
 export function groupTitleFiles(
 	files: LibraryFile[],
 	progress: number,
-	order: EpisodeOrder = episodeNumber
+	order: EpisodeOrder = episodeNumber,
+	watched: ReadonlySet<number> = NONE_WATCHED
 ): TitleEpisodes {
 	const main: LibraryFile[] = []
 	const specials: LibraryFile[] = []
@@ -68,7 +83,7 @@ export function groupTitleFiles(
 
 	const seen = new Set<number | null>()
 	const toWatch = main.filter(file => {
-		if (file.missing || isWatched(file, progress, order)) {
+		if (file.missing || isWatched(file, progress, order, watched)) {
 			return false
 		}
 

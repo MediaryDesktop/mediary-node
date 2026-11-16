@@ -1,3 +1,5 @@
+import clsx from 'clsx'
+
 import { useTranslation } from '@shared/i18n'
 import { Icon, Tooltip } from '@shared/ui'
 
@@ -8,26 +10,43 @@ import { useEpisodeText } from '../lib/useEpisodeText'
 import styles from './EpisodeRow.module.scss'
 
 export interface EpisodeAsideProps {
+	label?: string
 	episode: MediaEpisode | undefined
 	watched: boolean
+	onToggleWatched?: () => void
 }
 
-export function EpisodeAside({ episode, watched }: EpisodeAsideProps) {
+export function EpisodeAside({ label = '', episode, watched, onToggleWatched }: EpisodeAsideProps) {
 	const { t } = useTranslation()
 	const text = useEpisodeText()
 	const aired = text.aired(episode)
 	const overview = episode?.overview
 
-	if (!watched && !overview && !aired) {
+	if (!watched && !overview && !aired && !onToggleWatched) {
 		return null
 	}
 
+	const toggleLabel = t(watched ? 'media.library.markUnwatched' : 'media.library.markWatched', { label })
+
 	return (
 		<span className={styles.episodeAside}>
-			{watched && (
-				<span className={styles.watchedMark} title={t('media.library.watched')}>
+			{onToggleWatched ? (
+				<button
+					type='button'
+					className={clsx(styles.watchedToggle, watched && styles.on)}
+					aria-pressed={watched}
+					aria-label={toggleLabel}
+					title={toggleLabel}
+					onClick={onToggleWatched}
+				>
 					<Icon name='common/check' size={16} />
-				</span>
+				</button>
+			) : (
+				watched && (
+					<span className={styles.watchedMark} title={t('media.library.watched')}>
+						<Icon name='common/check' size={16} />
+					</span>
+				)
 			)}
 
 			{(overview || aired) && (

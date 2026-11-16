@@ -33,7 +33,8 @@ type PlaybackOutput struct {
 
 type StartInput struct {
 	Body struct {
-		FileID int64 `json:"file_id" doc:"Library file to play, as listed by listLibraryFiles."`
+		FileID    int64 `json:"file_id" doc:"Library file to play, as listed by listLibraryFiles."`
+		FromStart bool  `json:"from_start,omitempty" doc:"Start from the beginning rather than where the user stopped."`
 	}
 }
 
@@ -294,10 +295,10 @@ func (h *Handler) Register(api huma.API) {
 		Method:      http.MethodPost,
 		Path:        "/v1/playback",
 		Summary:     "Play a library file",
-		Description: "Opens the player on a scanned file. Starting a second file replaces the first — the node keeps one window. A matched file is marked watched once it is far enough through, and the tracker decides what that means for the user's list.",
+		Description: "Opens the player on a scanned file. Starting a second file replaces the first — the node keeps one window. It starts where the user stopped, unless that was near either end or `from_start` is set. A matched file is marked watched once it is far enough through, and the tracker decides what that means for the user's list.",
 		Tags:        []string{"playback"},
 	}, func(ctx context.Context, in *StartInput) (*PlaybackOutput, error) {
-		status, err := h.svc.Start(ctx, in.Body.FileID)
+		status, err := h.svc.Start(ctx, in.Body.FileID, in.Body.FromStart)
 		if err != nil {
 			return nil, httpapi.ToHTTP(err)
 		}

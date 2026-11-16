@@ -52,6 +52,21 @@
 				opacity: 1;
 			}
 
+			.episodeStarted {
+				position: absolute;
+				right: 0;
+				bottom: 0;
+				left: 0;
+				height: 0.25rem;
+				background: color-mix(in srgb, var(--media) 55%, transparent);
+
+				span {
+					display: block;
+					height: 100%;
+					background: var(--accent);
+				}
+			}
+
 			&:focus-visible {
 				outline: none;
 				box-shadow: var(--focus-shadow);
@@ -142,6 +157,30 @@
 				display: grid;
 				place-items: center;
 				color: var(--success-text);
+			}
+
+			.watchedToggle {
+				display: grid;
+				place-items: center;
+				padding: 0.25rem;
+				border: none;
+				border-radius: 50%;
+				background: none;
+				color: var(--text-muted);
+				cursor: pointer;
+
+				&:hover {
+					color: var(--text);
+				}
+
+				&.on {
+					color: var(--success-text);
+				}
+
+				&:focus-visible {
+					outline: none;
+					box-shadow: var(--focus-shadow);
+				}
 			}
 
 			.infoButton {

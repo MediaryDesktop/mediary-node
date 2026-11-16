@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"net/url"
 	"strings"
 
 	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
@@ -67,6 +68,31 @@ type ReadChapter struct {
 	Groups     []string
 	Number     string
 	Pages      int
+
+	// Identity names the chapter the same way on every computer, for state
+	// that must find it again after a restore: the server's address and the
+	// chapter's page path, or the plugin and its chapter id. Never the local
+	// server id, and never a credential.
+	Identity string
+}
+
+// opdsIdentity is the server's address with no credentials, its scheme and
+// host lower-cased and no trailing slash, then the chapter's page path: the
+// same chapter of the same server on another computer, where the server has
+// another id.
+func opdsIdentity(serverURL, template string) string {
+	address := strings.TrimRight(serverURL, "/")
+
+	if parsed, err := url.Parse(serverURL); err == nil && parsed.Host != "" {
+		parsed.User = nil
+		parsed.Scheme = strings.ToLower(parsed.Scheme)
+		parsed.Host = strings.ToLower(parsed.Host)
+		parsed.RawQuery = ""
+		parsed.Fragment = ""
+		address = strings.TrimRight(parsed.String(), "/")
+	}
+
+	return "opds-url:" + address + "#" + template
 }
 
 // Chapter describes a chapter on a server. Its title is whichever title is linked
@@ -85,7 +111,10 @@ func (s *Service) Chapter(ctx context.Context, serverID int64, rawKey string) (*
 		return nil, apperr.New(apperr.KindNotFound, "OPDS server %d does not exist", serverID)
 	}
 
-	chapter := &ReadChapter{Title: key.Title, Number: key.Number, Pages: key.Pages, SourceName: row.Name}
+	chapter := &ReadChapter{
+		Title: key.Title, Number: key.Number, Pages: key.Pages, SourceName: row.Name,
+		Identity: opdsIdentity(row.URL, key.Template),
+	}
 
 	link, err := s.store.LinkBySeries(ctx, sourceID(serverID), key.Series)
 	if err != nil {

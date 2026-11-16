@@ -66,6 +66,13 @@ func (m *Module) Playable(ctx context.Context, fileID int64) (*PlayableFile, err
 	return m.svc.Playable(ctx, fileID)
 }
 
+// ContentKey names what a file holds rather than where it is, the same for the
+// same file on any computer — for state that must find its file again after a
+// restore.
+func (m *Module) ContentKey(ctx context.Context, fileID int64) (string, error) {
+	return m.svc.ContentKey(ctx, fileID)
+}
+
 // RootPath is where a library folder is on disk, for a module that writes files
 // into it. It returns false when there is no folder with the id.
 func (m *Module) RootPath(ctx context.Context, rootID int64) (path string, found bool, err error) {

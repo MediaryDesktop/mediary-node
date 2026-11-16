@@ -52,6 +52,7 @@ export function LibrarySection({ mediaType, ...props }: LibrarySectionProps) {
 			banner={props.banner}
 			total={props.total}
 			progress={props.progress}
+			listed={props.listed}
 		/>
 	)
 }

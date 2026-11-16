@@ -771,6 +771,10 @@ components:
         ref:
           description: Chapter reference, for the page and progress endpoints.
           type: string
+        resume_page:
+          description: "Page to open at: where the user stopped, or 0 for a chapter never opened or already read to its end."
+          format: int64
+          type: integer
         source_name:
           description: Where an online chapter comes from, to credit it.
           type: string
@@ -781,6 +785,23 @@ components:
         - ref
         - title
         - pages
+        - resume_page
+      type: object
+    ChapterInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/ChapterInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        read:
+          description: Mark the chapter read, or forget that it was.
+          type: boolean
+      required:
+        - read
       type: object
     ChapterOutputBody:
       additionalProperties: false
@@ -796,6 +817,45 @@ components:
           $ref: "#/components/schemas/ChapterBody"
       required:
         - chapter
+      type: object
+    ChapterState:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/ChapterState.json
+          format: uri
+          readOnly: true
+          type: string
+        chapter:
+          description: "Chapter number as the source writes it: \"12\", \"12.5\"."
+          type: string
+        page:
+          description: Last page the reader showed, from 0.
+          format: int64
+          type: integer
+        pages:
+          description: Pages in the chapter; zero when it was only marked by hand.
+          format: int64
+          type: integer
+        read:
+          description: True once it was read to the end, or marked so by hand.
+          type: boolean
+        read_at:
+          description: When it was read to the end.
+          format: date-time
+          type: string
+        updated_at:
+          description: When this state last changed.
+          format: date-time
+          type: string
+      required:
+        - chapter
+        - page
+        - pages
+        - read
+        - updated_at
       type: object
     CheckBookOPDSServerInputBody:
       additionalProperties: false
@@ -1053,6 +1113,55 @@ components:
           type: object
         enabled:
           type: boolean
+      type: object
+    ContinueItem:
+      additionalProperties: false
+      properties:
+        duration:
+          description: Length of the episode, in seconds.
+          format: double
+          type: number
+        episode:
+          description: Episode number across seasons.
+          format: int64
+          type: integer
+        media_ref:
+          description: The title.
+          type: string
+        position:
+          description: Where the user stopped, in seconds.
+          format: double
+          type: number
+        updated_at:
+          description: When the user last played it.
+          format: date-time
+          type: string
+      required:
+        - media_ref
+        - episode
+        - position
+        - duration
+        - updated_at
+      type: object
+    ContinueOutputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/ContinueOutputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        items:
+          description: Episodes begun and not finished, latest first, one per title.
+          items:
+            $ref: "#/components/schemas/ContinueItem"
+          type:
+            - array
+            - "null"
+      required:
+        - items
       type: object
     ControlInputBody:
       additionalProperties: false
@@ -1482,6 +1591,22 @@ components:
         - runtime_minutes
         - air_date
       type: object
+    EpisodeInputBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/EpisodeInputBody.json
+          format: uri
+          readOnly: true
+          type: string
+        watched:
+          description: Mark the episode watched, or forget that it was.
+          type: boolean
+      required:
+        - watched
+      type: object
     EpisodeList:
       additionalProperties: false
       properties:
@@ -1505,6 +1630,51 @@ components:
         - media_ref
         - total
         - episodes
+      type: object
+    EpisodeState:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/EpisodeState.json
+          format: uri
+          readOnly: true
+          type: string
+        duration:
+          description: Length of the episode, in seconds; zero when no player reported it.
+          format: double
+          type: number
+        episode:
+          description: Episode number across seasons, as the user's list counts it.
+          format: int64
+          type: integer
+        last_watched_at:
+          description: When it was last watched through.
+          format: date-time
+          type: string
+        position:
+          description: Where the user stopped, in seconds.
+          format: double
+          type: number
+        updated_at:
+          description: When this state last changed.
+          format: date-time
+          type: string
+        watch_count:
+          description: How many times it was watched through.
+          format: int64
+          type: integer
+        watched:
+          description: True once it was watched through, or marked so by hand.
+          type: boolean
+      required:
+        - episode
+        - position
+        - duration
+        - watched
+        - watch_count
+        - updated_at
       type: object
     Episodes:
       additionalProperties: false
@@ -4806,6 +4976,9 @@ components:
           description: Library file to play, as listed by listLibraryFiles.
           format: int64
           type: integer
+        from_start:
+          description: Start from the beginning rather than where the user stopped.
+          type: boolean
       required:
         - file_id
       type: object
@@ -4927,6 +5100,10 @@ components:
         media_ref:
           description: Title this file is matched to. Absent while unmatched.
           type: string
+        resume_at:
+          description: Where the user stopped, in seconds, which is where the player starts unless the user asks for the beginning. Zero to start from the beginning.
+          format: double
+          type: number
         title:
           description: Title as the library reads it, for the UI.
           type: string
@@ -4935,6 +5112,7 @@ components:
         - title
         - info
         - direct_url
+        - resume_at
       type: object
     StreamCandidate:
       additionalProperties: false
@@ -5350,6 +5528,38 @@ components:
         - romaji
         - english
         - native
+      type: object
+    TitleProgress:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          examples:
+            - https://example.com/schemas/TitleProgress.json
+          format: uri
+          readOnly: true
+          type: string
+        chapters:
+          description: Every chapter the user opened or marked.
+          items:
+            $ref: "#/components/schemas/ChapterState"
+          type:
+            - array
+            - "null"
+        episodes:
+          description: Every episode the user played or marked, in order.
+          items:
+            $ref: "#/components/schemas/EpisodeState"
+          type:
+            - array
+            - "null"
+        media_ref:
+          description: The title these states belong to.
+          type: string
+      required:
+        - media_ref
+        - episodes
+        - chapters
       type: object
     Tool:
       additionalProperties: false
@@ -8872,7 +9082,7 @@ paths:
       tags:
         - playback
     post:
-      description: Opens the player on a scanned file. Starting a second file replaces the first — the node keeps one window. A matched file is marked watched once it is far enough through, and the tracker decides what that means for the user's list.
+      description: Opens the player on a scanned file. Starting a second file replaces the first — the node keeps one window. It starts where the user stopped, unless that was near either end or `from_start` is set. A matched file is marked watched once it is far enough through, and the tracker decides what that means for the user's list.
       operationId: startPlayback
       requestBody:
         content:
@@ -9255,6 +9465,159 @@ paths:
       summary: A still from the file
       tags:
         - playback
+  /v1/progress/continue:
+    get:
+      description: Episodes of matched titles the user began and did not finish, latest first, one per title. One stopped too near its start or its end to be worth returning to is left out.
+      operationId: listContinueWatching
+      parameters:
+        - description: How many titles at most; 0 for the most there can be.
+          explode: false
+          in: query
+          name: limit
+          schema:
+            description: How many titles at most; 0 for the most there can be.
+            format: int64
+            maximum: 50
+            minimum: 0
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContinueOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Episodes to continue
+      tags:
+        - progress
+  /v1/progress/titles/{media_ref}:
+    get:
+      description: "Every episode the user played or marked — where they stopped and whether they watched it through — and every chapter they opened or marked. A title the user never opened answers with both lists empty. The number on the user's list is the tracker's and is not here: an episode below it counts as watched even without a state of its own."
+      operationId: getTitleProgress
+      parameters:
+        - description: The title's media reference.
+          in: path
+          name: media_ref
+          required: true
+          schema:
+            description: The title's media reference.
+            examples:
+              - anilist:154587
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TitleProgress"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Episodes and chapters of a title the user is in
+      tags:
+        - progress
+  /v1/progress/titles/{media_ref}/chapters/{chapter}:
+    put:
+      description: The user's own mark. Unmarking forgets the page as well. The number on the user's list does not move either way; that is changed on the tracker entry.
+      operationId: setChapterRead
+      parameters:
+        - description: The title's media reference.
+          in: path
+          name: media_ref
+          required: true
+          schema:
+            description: The title's media reference.
+            examples:
+              - anilist:30002
+            type: string
+        - description: Chapter number as the source writes it.
+          in: path
+          name: chapter
+          required: true
+          schema:
+            description: Chapter number as the source writes it.
+            examples:
+              - "12.5"
+            maxLength: 32
+            minLength: 1
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChapterInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChapterState"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Mark a chapter read or not
+      tags:
+        - progress
+  /v1/progress/titles/{media_ref}/episodes/{episode}:
+    put:
+      description: The user's own mark. Unmarking forgets the episode's position as well. The number on the user's list does not move either way; that is changed on the tracker entry.
+      operationId: setEpisodeWatched
+      parameters:
+        - description: The title's media reference.
+          in: path
+          name: media_ref
+          required: true
+          schema:
+            description: The title's media reference.
+            examples:
+              - anilist:154587
+            type: string
+        - description: Episode number across seasons, as the user's list counts it.
+          in: path
+          name: episode
+          required: true
+          schema:
+            description: Episode number across seasons, as the user's list counts it.
+            format: int64
+            minimum: 1
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EpisodeInputBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EpisodeState"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Mark an episode watched or not
+      tags:
+        - progress
   /v1/reader/chapters/{ref}:
     get:
       description: "The chapter's pages in reading order, from whichever source the reference names. Chapter reference: local:<file id>, opds:<server id>:<entry id> or plugin:<plugin id>:<key>."
@@ -9318,7 +9681,7 @@ paths:
         - reader
   /v1/reader/chapters/{ref}/progress:
     post:
-      description: Reaching the last page counts the chapter as read. Only a whole chapter number moves the user's list; an extra such as 12.5 is read without moving it. The tracker never lowers progress.
+      description: Keeps the page, so the chapter opens there next time. Reaching the last page counts the chapter as read. Only a whole chapter number moves the user's list; an extra such as 12.5 is read without moving it. The tracker never lowers progress.
       operationId: reportReaderPageByRef
       parameters:
         - description: Chapter being read, as in getReaderChapterByRef.
@@ -10962,6 +11325,8 @@ tags:
     name: playback
   - description: Image-based and epub/pdf reading.
     name: reader
+  - description: Where the user is in each episode, chapter and book.
+    name: progress
   - description: Progress synchronisation with a paired cloud account.
     name: sync
   - description: Plugin runtime for metadata and torrent providers.

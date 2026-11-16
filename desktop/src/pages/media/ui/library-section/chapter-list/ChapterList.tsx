@@ -14,6 +14,7 @@ import {
 	mangaDownloadSettingsQuery,
 	mangaDownloadsQuery
 } from '@entities/manga-source'
+import { setChapterReadMutation, titleMarks, titleProgressQuery } from '@entities/progress'
 import { filterChapters, isChapterRead } from '@entities/reader'
 import type { ChapterOption, ChapterRow as Row } from '@entities/reader'
 import { updateTrackerEntryMutation } from '@entities/tracker'
@@ -57,17 +58,22 @@ const ORDER_KEY = 'mediary.chapterOrder'
 export function ChapterList({ mediaRef, title, progress, listed }: ChapterListProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
-	const [unlink, updateEntry, downloadsData, save, extensions] = useUnit([
+	const [unlink, updateEntry, setRead, downloadsData, save, extensions, progressData] = useUnit([
 		deleteMangaLinkMutation.start,
 		updateTrackerEntryMutation.start,
+		setChapterReadMutation.start,
 		mangaDownloadsQuery.$data,
 		downloadRequested,
-		extensionsQuery.$data
+		extensionsQuery.$data,
+		titleProgressQuery.$data
 	])
 
 	useNodeData(mangaDownloadsQuery)
 	useNodeData(mangaDownloadSettingsQuery)
 	useNodeData(extensionsQuery)
+	useNodeData(titleProgressQuery, { params: mediaRef })
+
+	const marked = titleMarks(progressData, mediaRef).read
 
 	const { rows, sources, links, problems, loadingOnline } = useTitleChapters(mediaRef)
 
@@ -98,7 +104,7 @@ export function ChapterList({ mediaRef, title, progress, listed }: ChapterListPr
 	const active = present.has(filter) ? filter : ALL
 	const shown = sortRows(
 		(active === ALL ? rows : filterChapters(rows, active)).filter(
-			row => matchesStatus(row, status, progress) && matchesSearch(row, query)
+			row => matchesStatus(row, status, progress, marked) && matchesSearch(row, query)
 		),
 		order
 	)
@@ -160,6 +166,10 @@ export function ChapterList({ mediaRef, title, progress, listed }: ChapterListPr
 	}
 
 	const markRead = (row: Row, read: boolean) => {
+		if (row.number !== null) {
+			setRead({ mediaRef, chapter: row.number, read })
+		}
+
 		const patch = readProgressPatch(row.number, read, { progress, listed })
 
 		if (patch) {
@@ -257,14 +267,15 @@ export function ChapterList({ mediaRef, title, progress, listed }: ChapterListPr
 					{visible.map(row => {
 						const from = savable.get(row.key)
 						const download = activeDownload(row, downloads)
-						const read = isChapterRead(row.number, progress)
-						const markable = readProgress(row.number, !read, progress) !== null
+						const read = isChapterRead(row.number, progress, marked)
+						const markable =
+							row.number !== null || readProgress(row.number, !read, progress) !== null
 
 						return (
 							<ChapterRow
 								key={row.key}
 								row={row}
-								state={chapterState(row, download, progress)}
+								state={chapterState(row, download, progress, marked)}
 								read={read}
 								icons={icons}
 								selected={from ? selected.has(row.key) : undefined}

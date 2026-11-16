@@ -23,6 +23,10 @@ const (
 	// second and the UI cannot use more than this.
 	positionInterval = time.Second
 
+	// How often mpv's position is kept while it plays. The last one is kept on
+	// close as well, so this only bounds what a crash loses.
+	saveInterval = 10 * time.Second
+
 	// Property ids for observe_property. They come back on every change, so the
 	// pump tells them apart by name rather than by id.
 	positionProperty = 1
@@ -34,6 +38,7 @@ type Options struct {
 	Launcher    Launcher
 	Library     Library
 	Progress    Progress
+	Positions   Positions
 	Prober      Prober
 	Extractor   Extractor
 	Thumbnailer Thumbnailer
@@ -56,6 +61,8 @@ type Service struct {
 	mu      sync.Mutex
 	session *PlaybackSession
 	player  Player
+	// file is what the open session plays, for keeping its position.
+	file *PlayableFile
 
 	// Files the built-in player already counted. Its reports arrive every few
 	// seconds past the threshold, and each would otherwise be another write to
@@ -83,8 +90,8 @@ func (s *Service) Status() PlaybackStatus {
 
 // Start opens the player on a library file. One window at a time: starting a second
 // file replaces the first, because two players fighting over the same speakers is
-// never what the user meant.
-func (s *Service) Start(ctx context.Context, fileID int64) (*PlaybackStatus, error) {
+// never what the user meant. It starts where the user stopped, unless fromStart.
+func (s *Service) Start(ctx context.Context, fileID int64, fromStart bool) (*PlaybackStatus, error) {
 	if s.opts.Launcher == nil {
 		return nil, apperr.New(apperr.KindPrecondition, "playback is not configured on this node")
 	}
@@ -101,7 +108,12 @@ func (s *Service) Start(ctx context.Context, fileID int64) (*PlaybackStatus, err
 		return nil, err
 	}
 
-	player, err := s.opts.Launcher.Start(ctx, source, 0)
+	startAt := 0.0
+	if !fromStart {
+		startAt = s.resumeAt(ctx, file)
+	}
+
+	player, err := s.opts.Launcher.Start(ctx, source, startAt)
 	if err != nil {
 		return nil, err
 	}
@@ -118,12 +130,14 @@ func (s *Service) Start(ctx context.Context, fileID int64) (*PlaybackStatus, err
 		Title:     file.Title,
 		MediaRef:  file.MediaRef,
 		Episode:   file.Episode,
+		Position:  startAt,
 		StartedAt: s.opts.Now(),
 	}
 
 	s.mu.Lock()
 	s.session = session
 	s.player = player
+	s.file = file
 	status := s.statusLocked()
 	s.mu.Unlock()
 
@@ -222,6 +236,7 @@ func (s *Service) stop() {
 // effect lives here; apply only folds the event into the session.
 func (s *Service) pump(ctx context.Context, player Player) {
 	lastPublished := time.Time{}
+	lastSaved := s.opts.Now()
 
 	for {
 		select {
@@ -232,7 +247,7 @@ func (s *Service) pump(ctx context.Context, player Player) {
 				return
 			}
 
-			change := s.apply(event)
+			change := s.apply(player, event)
 
 			switch {
 			case change.pauseChanged:
@@ -243,6 +258,11 @@ func (s *Service) pump(ctx context.Context, player Player) {
 				if now.Sub(lastPublished) >= positionInterval {
 					lastPublished = now
 					s.publish("position", s.snapshot())
+				}
+
+				if now.Sub(lastSaved) >= saveInterval {
+					lastSaved = now
+					s.savePosition(ctx, player, false)
 				}
 			}
 
@@ -272,7 +292,7 @@ type applied struct {
 	reachedWatched bool
 }
 
-func (s *Service) apply(event mpv.Event) applied {
+func (s *Service) apply(player Player, event mpv.Event) applied {
 	if event.Name != "property-change" {
 		return applied{}
 	}
@@ -280,8 +300,10 @@ func (s *Service) apply(event mpv.Event) applied {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
+	// A replaced player's last events still arrive; they describe the file it
+	// played, not the session open now.
 	session := s.session
-	if session == nil {
+	if session == nil || !s.ownsLocked(player) {
 		return applied{}
 	}
 
@@ -314,23 +336,42 @@ func (s *Service) apply(event mpv.Event) applied {
 }
 
 func (s *Service) finish(ctx context.Context, player Player, playedToEnd bool) {
-	if playedToEnd {
+	s.mu.Lock()
+	owned := s.ownsLocked(player)
+	s.mu.Unlock()
+
+	if playedToEnd && owned {
 		s.markWatched(ctx)
 	}
+
+	s.savePosition(ctx, player, playedToEnd)
 
 	if err := player.Close(); err != nil {
 		s.logger.Debug().Err(err).Msg("close player")
 	}
 
+	// A player replaced by the next file ends after that file's session began;
+	// the session is the new one's now, and so is announcing its end.
 	s.mu.Lock()
-	if s.player == player {
-		s.player = nil
+	if !s.ownsLocked(player) {
+		s.mu.Unlock()
+
+		return
 	}
+
+	s.player = nil
 	ended := s.session
 	s.session = nil
+	s.file = nil
 	s.mu.Unlock()
 
 	s.publish("ended", ended)
+}
+
+// ownsLocked says whether the open session is player's: it is the open player,
+// or the user stopped it and nothing has been started since.
+func (s *Service) ownsLocked(player Player) bool {
+	return s.player == player || s.player == nil
 }
 
 // markWatched tells the tracker once per session. The tracker owns what happens
@@ -371,10 +412,67 @@ func (s *Service) markWatched(ctx context.Context) {
 	s.publish("watched", &snapshot)
 }
 
+// savePosition keeps where the session of player is. The player passed in is
+// checked against the open one: a pump that outlived its session — a second
+// file was started — must not write its last position over the new file's.
+func (s *Service) savePosition(ctx context.Context, player Player, playedToEnd bool) {
+	s.mu.Lock()
+	if !s.ownsLocked(player) || s.session == nil || s.file == nil {
+		s.mu.Unlock()
+
+		return
+	}
+
+	file := s.file
+	position, duration := s.session.Position, s.session.Duration
+	s.mu.Unlock()
+
+	if s.opts.Positions == nil || (position <= 0 && !playedToEnd) {
+		return
+	}
+
+	reached := shouldMarkWatched(position, duration, playedToEnd)
+	if err := s.opts.Positions.SavePosition(ctx, file, position, duration, reached); err != nil {
+		s.logger.Warn().Err(err).Int64("file_id", file.ID).Msg("could not keep the playback position")
+	}
+}
+
+// resumeAt is where a file's next play starts; anything wrong with finding out
+// starts it from the beginning, which is what playback did before.
+func (s *Service) resumeAt(ctx context.Context, file *PlayableFile) float64 {
+	if s.opts.Positions == nil {
+		return 0
+	}
+
+	at, err := s.opts.Positions.ResumeAt(ctx, file)
+	if err != nil {
+		s.logger.Debug().Err(err).Int64("file_id", file.ID).Msg("could not read where playback stopped")
+
+		return 0
+	}
+
+	return at
+}
+
 // ReportProgress is the built-in player's side of what the mpv pump does: the
 // renderer says where it is, and the same rule decides when the episode counts.
+// Every report keeps the position; a list that cannot be reached does not cost
+// the user their place.
 func (s *Service) ReportProgress(ctx context.Context, fileID int64, position, duration float64, ended bool) (bool, error) {
-	if !shouldMarkWatched(position, duration, ended) {
+	reached := shouldMarkWatched(position, duration, ended)
+
+	if s.opts.Positions != nil && (position > 0 || ended) {
+		file, err := s.playable(ctx, fileID)
+		if err != nil {
+			return false, err
+		}
+
+		if err := s.opts.Positions.SavePosition(ctx, file, position, duration, reached); err != nil {
+			s.logger.Warn().Err(err).Int64("file_id", fileID).Msg("could not keep the playback position")
+		}
+	}
+
+	if !reached {
 		return false, nil
 	}
 

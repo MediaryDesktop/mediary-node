@@ -267,6 +267,35 @@ func (q *Queries) GetLibraryFile(ctx context.Context, id int64) (GetLibraryFileR
 	return i, err
 }
 
+const getLibraryFileContentKey = `-- name: GetLibraryFileContentKey :one
+SELECT f.content_key, f.size_bytes, f.rel_path, r.path AS root_path, f.missing_since
+FROM library_file f
+         JOIN library_root r ON r.id = f.root_id
+WHERE f.id = ?
+`
+
+type GetLibraryFileContentKeyRow struct {
+	ContentKey   sql.NullString `json:"content_key"`
+	SizeBytes    int64          `json:"size_bytes"`
+	RelPath      string         `json:"rel_path"`
+	RootPath     string         `json:"root_path"`
+	MissingSince sql.NullInt64  `json:"missing_since"`
+}
+
+// What the file holds, computed once and kept until a scan sees it change.
+func (q *Queries) GetLibraryFileContentKey(ctx context.Context, id int64) (GetLibraryFileContentKeyRow, error) {
+	row := q.db.QueryRowContext(ctx, getLibraryFileContentKey, id)
+	var i GetLibraryFileContentKeyRow
+	err := row.Scan(
+		&i.ContentKey,
+		&i.SizeBytes,
+		&i.RelPath,
+		&i.RootPath,
+		&i.MissingSince,
+	)
+	return i, err
+}
+
 const getLibraryRoot = `-- name: GetLibraryRoot :one
 SELECT id, path, content, added_at, last_scan_at
 FROM library_root
@@ -828,6 +857,26 @@ func (q *Queries) MarkLibraryFileMissing(ctx context.Context, arg MarkLibraryFil
 	return err
 }
 
+const setLibraryFileContentKey = `-- name: SetLibraryFileContentKey :exec
+UPDATE library_file
+SET content_key = ?
+WHERE id = ?
+  AND size_bytes = ?
+`
+
+type SetLibraryFileContentKeyParams struct {
+	ContentKey sql.NullString `json:"content_key"`
+	ID         int64          `json:"id"`
+	SizeBytes  int64          `json:"size_bytes"`
+}
+
+// The size is checked again: a scan that rewrote the row since the key was read
+// leaves a key computed from the old file unwritten.
+func (q *Queries) SetLibraryFileContentKey(ctx context.Context, arg SetLibraryFileContentKeyParams) error {
+	_, err := q.db.ExecContext(ctx, setLibraryFileContentKey, arg.ContentKey, arg.ID, arg.SizeBytes)
+	return err
+}
+
 const setLibraryFileIgnored = `-- name: SetLibraryFileIgnored :execrows
 UPDATE library_file
 SET ignored_at = ?
@@ -901,7 +950,8 @@ SET kind           = ?,
     probe_version    = ?,
     book_title       = ?,
     book_authors     = ?,
-    book_isbn        = ?
+    book_isbn        = ?,
+    content_key      = NULL
 WHERE id = ?
 `
 

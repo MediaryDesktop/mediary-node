@@ -1200,7 +1200,7 @@ export interface paths {
 		put?: never
 		/**
 		 * Play a library file
-		 * @description Opens the player on a scanned file. Starting a second file replaces the first — the node keeps one window. A matched file is marked watched once it is far enough through, and the tracker decides what that means for the user's list.
+		 * @description Opens the player on a scanned file. Starting a second file replaces the first — the node keeps one window. It starts where the user stopped, unless that was near either end or `from_start` is set. A matched file is marked watched once it is far enough through, and the tracker decides what that means for the user's list.
 		 */
 		post: operations['startPlayback']
 		/**
@@ -1433,6 +1433,86 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/v1/progress/continue': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Episodes to continue
+		 * @description Episodes of matched titles the user began and did not finish, latest first, one per title. One stopped too near its start or its end to be worth returning to is left out.
+		 */
+		get: operations['listContinueWatching']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/progress/titles/{media_ref}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		/**
+		 * Episodes and chapters of a title the user is in
+		 * @description Every episode the user played or marked — where they stopped and whether they watched it through — and every chapter they opened or marked. A title the user never opened answers with both lists empty. The number on the user's list is the tracker's and is not here: an episode below it counts as watched even without a state of its own.
+		 */
+		get: operations['getTitleProgress']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/progress/titles/{media_ref}/chapters/{chapter}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		/**
+		 * Mark a chapter read or not
+		 * @description The user's own mark. Unmarking forgets the page as well. The number on the user's list does not move either way; that is changed on the tracker entry.
+		 */
+		put: operations['setChapterRead']
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/v1/progress/titles/{media_ref}/episodes/{episode}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		/**
+		 * Mark an episode watched or not
+		 * @description The user's own mark. Unmarking forgets the episode's position as well. The number on the user's list does not move either way; that is changed on the tracker entry.
+		 */
+		put: operations['setEpisodeWatched']
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/v1/reader/chapters/{ref}': {
 		parameters: {
 			query?: never
@@ -1484,7 +1564,7 @@ export interface paths {
 		put?: never
 		/**
 		 * Report the page the reader is on
-		 * @description Reaching the last page counts the chapter as read. Only a whole chapter number moves the user's list; an extra such as 12.5 is read without moving it. The tracker never lowers progress.
+		 * @description Keeps the page, so the chapter opens there next time. Reaching the last page counts the chapter as read. Only a whole chapter number moves the user's list; an extra such as 12.5 is read without moving it. The tracker never lowers progress.
 		 */
 		post: operations['reportReaderPageByRef']
 		delete?: never
@@ -2756,10 +2836,25 @@ export interface components {
 			pages: components['schemas']['Page'][] | null
 			/** @description Chapter reference, for the page and progress endpoints. */
 			ref: string
+			/**
+			 * Format: int64
+			 * @description Page to open at: where the user stopped, or 0 for a chapter never opened or already read to its end.
+			 */
+			resume_page: number
 			/** @description Where an online chapter comes from, to credit it. */
 			source_name?: string
 			/** @description Title as the source names it, for the UI. */
 			title: string
+		}
+		ChapterInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ChapterInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description Mark the chapter read, or forget that it was. */
+			read: boolean
 		}
 		ChapterOutputBody: {
 			/**
@@ -2769,6 +2864,38 @@ export interface components {
 			 */
 			readonly $schema?: string
 			chapter: components['schemas']['ChapterBody']
+		}
+		ChapterState: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ChapterState.json
+			 */
+			readonly $schema?: string
+			/** @description Chapter number as the source writes it: "12", "12.5". */
+			chapter: string
+			/**
+			 * Format: int64
+			 * @description Last page the reader showed, from 0.
+			 */
+			page: number
+			/**
+			 * Format: int64
+			 * @description Pages in the chapter; zero when it was only marked by hand.
+			 */
+			pages: number
+			/** @description True once it was read to the end, or marked so by hand. */
+			read: boolean
+			/**
+			 * Format: date-time
+			 * @description When it was read to the end.
+			 */
+			read_at?: string
+			/**
+			 * Format: date-time
+			 * @description When this state last changed.
+			 */
+			updated_at: string
 		}
 		CheckBookOPDSServerInputBody: {
 			/**
@@ -2928,6 +3055,40 @@ export interface components {
 				[key: string]: string
 			}
 			enabled?: boolean
+		}
+		ContinueItem: {
+			/**
+			 * Format: double
+			 * @description Length of the episode, in seconds.
+			 */
+			duration: number
+			/**
+			 * Format: int64
+			 * @description Episode number across seasons.
+			 */
+			episode: number
+			/** @description The title. */
+			media_ref: string
+			/**
+			 * Format: double
+			 * @description Where the user stopped, in seconds.
+			 */
+			position: number
+			/**
+			 * Format: date-time
+			 * @description When the user last played it.
+			 */
+			updated_at: string
+		}
+		ContinueOutputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/ContinueOutputBody.json
+			 */
+			readonly $schema?: string
+			/** @description Episodes begun and not finished, latest first, one per title. */
+			items: components['schemas']['ContinueItem'][] | null
 		}
 		ControlInputBody: {
 			/**
@@ -3158,6 +3319,16 @@ export interface components {
 				[key: string]: string
 			}
 		}
+		EpisodeInputBody: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/EpisodeInputBody.json
+			 */
+			readonly $schema?: string
+			/** @description Mark the episode watched, or forget that it was. */
+			watched: boolean
+		}
 		EpisodeList: {
 			/** @description One entry per episode, in order, whether or not anything is known about it beyond its number. */
 			episodes: components['schemas']['Episode'][] | null
@@ -3168,6 +3339,46 @@ export interface components {
 			 * @description Episodes the title has, or that have aired while the final count is unknown. Absent when no source can say.
 			 */
 			total: number | null
+		}
+		EpisodeState: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/EpisodeState.json
+			 */
+			readonly $schema?: string
+			/**
+			 * Format: double
+			 * @description Length of the episode, in seconds; zero when no player reported it.
+			 */
+			duration: number
+			/**
+			 * Format: int64
+			 * @description Episode number across seasons, as the user's list counts it.
+			 */
+			episode: number
+			/**
+			 * Format: date-time
+			 * @description When it was last watched through.
+			 */
+			last_watched_at?: string
+			/**
+			 * Format: double
+			 * @description Where the user stopped, in seconds.
+			 */
+			position: number
+			/**
+			 * Format: date-time
+			 * @description When this state last changed.
+			 */
+			updated_at: string
+			/**
+			 * Format: int64
+			 * @description How many times it was watched through.
+			 */
+			watch_count: number
+			/** @description True once it was watched through, or marked so by hand. */
+			watched: boolean
 		}
 		Episodes: {
 			/** Format: int64 */
@@ -5028,6 +5239,8 @@ export interface components {
 			 * @description Library file to play, as listed by listLibraryFiles.
 			 */
 			file_id: number
+			/** @description Start from the beginning rather than where the user stopped. */
+			from_start?: boolean
 		}
 		StartTorrentStreamInputBody: {
 			/**
@@ -5112,6 +5325,11 @@ export interface components {
 			info: components['schemas']['MediaInfo']
 			/** @description Title this file is matched to. Absent while unmatched. */
 			media_ref?: string
+			/**
+			 * Format: double
+			 * @description Where the user stopped, in seconds, which is where the player starts unless the user asks for the beginning. Zero to start from the beginning.
+			 */
+			resume_at: number
 			/** @description Title as the library reads it, for the UI. */
 			title: string
 		}
@@ -5341,6 +5559,20 @@ export interface components {
 			native: string | null
 			romaji: string | null
 			user_preferred: string | null
+		}
+		TitleProgress: {
+			/**
+			 * Format: uri
+			 * @description A URL to the JSON Schema for this object.
+			 * @example https://example.com/schemas/TitleProgress.json
+			 */
+			readonly $schema?: string
+			/** @description Every chapter the user opened or marked. */
+			chapters: components['schemas']['ChapterState'][] | null
+			/** @description Every episode the user played or marked, in order. */
+			episodes: components['schemas']['EpisodeState'][] | null
+			/** @description The title these states belong to. */
+			media_ref: string
 		}
 		Tool: {
 			/**
@@ -6017,7 +6249,9 @@ export type SchemaCandidatesOutputBody = components['schemas']['CandidatesOutput
 export type SchemaCatalogPlugin = components['schemas']['CatalogPlugin']
 export type SchemaChapter = components['schemas']['Chapter']
 export type SchemaChapterBody = components['schemas']['ChapterBody']
+export type SchemaChapterInputBody = components['schemas']['ChapterInputBody']
 export type SchemaChapterOutputBody = components['schemas']['ChapterOutputBody']
+export type SchemaChapterState = components['schemas']['ChapterState']
 export type SchemaCheckBookOpdsServerInputBody = components['schemas']['CheckBookOPDSServerInputBody']
 export type SchemaCheckBookOpdsServerOutputBody = components['schemas']['CheckBookOPDSServerOutputBody']
 export type SchemaCheckOpdsServerInputBody = components['schemas']['CheckOPDSServerInputBody']
@@ -6028,6 +6262,8 @@ export type SchemaCheckTorrentSourceInputBody = components['schemas']['CheckTorr
 export type SchemaCloudAiSettings = components['schemas']['CloudAISettings']
 export type SchemaCollectionOutputBody = components['schemas']['CollectionOutputBody']
 export type SchemaConfigureExtensionInputBody = components['schemas']['ConfigureExtensionInputBody']
+export type SchemaContinueItem = components['schemas']['ContinueItem']
+export type SchemaContinueOutputBody = components['schemas']['ContinueOutputBody']
 export type SchemaControlInputBody = components['schemas']['ControlInputBody']
 export type SchemaCounts = components['schemas']['Counts']
 export type SchemaCoverSource = components['schemas']['CoverSource']
@@ -6040,7 +6276,9 @@ export type SchemaEnqueueMangaDownloadsInputBody = components['schemas']['Enqueu
 export type SchemaEntriesOutputBody = components['schemas']['EntriesOutputBody']
 export type SchemaEntry = components['schemas']['Entry']
 export type SchemaEpisode = components['schemas']['Episode']
+export type SchemaEpisodeInputBody = components['schemas']['EpisodeInputBody']
 export type SchemaEpisodeList = components['schemas']['EpisodeList']
+export type SchemaEpisodeState = components['schemas']['EpisodeState']
 export type SchemaEpisodes = components['schemas']['Episodes']
 export type SchemaEpisodesOutputBody = components['schemas']['EpisodesOutputBody']
 export type SchemaErrorDetail = components['schemas']['ErrorDetail']
@@ -6165,6 +6403,7 @@ export type SchemaTmdbKeyInputBody = components['schemas']['TMDBKeyInputBody']
 export type SchemaTmdbSettings = components['schemas']['TMDBSettings']
 export type SchemaTitle = components['schemas']['Title']
 export type SchemaTitleNames = components['schemas']['TitleNames']
+export type SchemaTitleProgress = components['schemas']['TitleProgress']
 export type SchemaTool = components['schemas']['Tool']
 export type SchemaToolProgress = components['schemas']['ToolProgress']
 export type SchemaToolsOutputBody = components['schemas']['ToolsOutputBody']
@@ -9222,6 +9461,146 @@ export interface operations {
 					[name: string]: unknown
 				}
 				content?: never
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	listContinueWatching: {
+		parameters: {
+			query?: {
+				/** @description How many titles at most; 0 for the most there can be. */
+				limit?: number
+			}
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ContinueOutputBody']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	getTitleProgress: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description The title's media reference. */
+				media_ref: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['TitleProgress']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	setChapterRead: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description The title's media reference. */
+				media_ref: string
+				/** @description Chapter number as the source writes it. */
+				chapter: string
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['ChapterInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ChapterState']
+				}
+			}
+			/** @description Error */
+			default: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/problem+json': components['schemas']['ErrorModel']
+				}
+			}
+		}
+	}
+	setEpisodeWatched: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description The title's media reference. */
+				media_ref: string
+				/** @description Episode number across seasons, as the user's list counts it. */
+				episode: number
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['EpisodeInputBody']
+			}
+		}
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['EpisodeState']
+				}
 			}
 			/** @description Error */
 			default: {

@@ -719,6 +719,9 @@ export const ru: Translation = {
 			others: 'Другое',
 			play: 'Смотреть: {{name}}',
 			playing: 'Играет',
+			started: 'Просмотрено',
+			markWatched: 'Отметить «{{label}}» просмотренной',
+			markUnwatched: 'Отметить «{{label}}» непросмотренной',
 			watched: 'Просмотрено',
 			missing: 'Последний скан не нашёл файл',
 			minutes: '{{count}} мин',
@@ -1086,7 +1089,9 @@ export const ru: Translation = {
 		pause: 'Пауза',
 		resume: 'Продолжить',
 		stop: 'Закрыть плеер',
-		failed: 'Не удалось запустить плеер'
+		failed: 'Не удалось запустить плеер',
+		resumed: 'Продолжено с {{time}}',
+		fromStart: 'С начала'
 	},
 
 	discover: {

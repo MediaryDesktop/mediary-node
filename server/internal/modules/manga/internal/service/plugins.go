@@ -232,7 +232,12 @@ func (s *Service) PluginChapter(ctx context.Context, id, rawKey string) (*ReadCh
 		return nil, err
 	}
 
-	out := &ReadChapter{Number: key.Number, Pages: len(pages), SourceName: p.Name, Groups: key.Groups}
+	// The chapter id alone, not the whole key: the key also carries the
+	// translators' names, which the plugin may list differently next time.
+	out := &ReadChapter{
+		Number: key.Number, Pages: len(pages), SourceName: p.Name, Groups: key.Groups,
+		Identity: "plugin:" + id + ":" + key.Chapter,
+	}
 
 	link, err := s.store.LinkBySeries(ctx, SourcePrefixPlugin+id, key.Series)
 	if err != nil {

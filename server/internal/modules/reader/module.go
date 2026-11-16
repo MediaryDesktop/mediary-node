@@ -1,6 +1,7 @@
 package reader
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -19,6 +20,9 @@ type (
 	ReadableFile = service.PlayableFile
 	Library      = service.Library
 	Progress     = service.Progress
+	Positions    = service.Positions
+	BookFile     = service.BookFile
+	BookPosition = service.BookPosition
 
 	// A source of chapters other than the library, and what it hands back.
 	ChapterSource = service.Source
@@ -35,21 +39,23 @@ const (
 )
 
 type Deps struct {
-	// DB keeps where each book was left; nil leaves books without a place.
+	// DB holds where books were left before Positions kept them; nil for none.
 	DB     *sql.DB
 	Logger zerolog.Logger
 
-	Library  Library
-	Progress Progress
-	Sources  map[string]ChapterSource
+	Library   Library
+	Progress  Progress
+	Positions Positions
+	Sources   map[string]ChapterSource
 }
 
 func New(deps Deps) *Module {
 	opts := service.Options{
-		Library:  deps.Library,
-		Progress: deps.Progress,
-		Sources:  deps.Sources,
-		Logger:   deps.Logger,
+		Library:   deps.Library,
+		Progress:  deps.Progress,
+		Positions: deps.Positions,
+		Sources:   deps.Sources,
+		Logger:    deps.Logger,
 	}
 	if deps.DB != nil {
 		opts.Store = store.New(deps.DB)
@@ -57,11 +63,18 @@ func New(deps Deps) *Module {
 
 	svc := service.New(opts)
 
-	return &Module{handler: handler.New(svc)}
+	return &Module{handler: handler.New(svc), svc: svc}
 }
 
 type Module struct {
 	handler *handler.Handler
+	svc     *service.Service
+}
+
+// MoveLegacyPositions carries the places of books kept before Positions over
+// to it. It reads each book's file once, so it runs off the startup path.
+func (m *Module) MoveLegacyPositions(ctx context.Context) (int, error) {
+	return m.svc.MoveLegacyPositions(ctx)
 }
 
 func (m *Module) Register(api huma.API) {

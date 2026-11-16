@@ -9,6 +9,16 @@ import (
 	"context"
 )
 
+const deleteBookPosition = `-- name: DeleteBookPosition :exec
+DELETE FROM book_position
+WHERE file_id = ?
+`
+
+func (q *Queries) DeleteBookPosition(ctx context.Context, fileID int64) error {
+	_, err := q.db.ExecContext(ctx, deleteBookPosition, fileID)
+	return err
+}
+
 const getBookPosition = `-- name: GetBookPosition :one
 SELECT file_id, locator, fraction, updated_at
 FROM book_position
@@ -25,6 +35,42 @@ func (q *Queries) GetBookPosition(ctx context.Context, fileID int64) (BookPositi
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const listBookPositions = `-- name: ListBookPositions :many
+SELECT file_id, locator, fraction, updated_at
+FROM book_position
+ORDER BY file_id
+`
+
+// The positions kept before book_state, which the reader moves there one by
+// one as it learns their files' content keys.
+func (q *Queries) ListBookPositions(ctx context.Context) ([]BookPosition, error) {
+	rows, err := q.db.QueryContext(ctx, listBookPositions)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []BookPosition{}
+	for rows.Next() {
+		var i BookPosition
+		if err := rows.Scan(
+			&i.FileID,
+			&i.Locator,
+			&i.Fraction,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const upsertBookPosition = `-- name: UpsertBookPosition :exec

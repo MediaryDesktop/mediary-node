@@ -62,6 +62,82 @@ func (s *Service) Book(ctx context.Context, fileID int64) (*BookFile, error) {
 	}, nil
 }
 
+// keepPosition saves the place where it travels in a backup, and drops the old
+// row once it does. A book whose file cannot be read for its content key right
+// now keeps its place in the old table instead, so the place is never lost.
+func (s *Service) keepPosition(ctx context.Context, book *BookFile, position store.Position) error {
+	if s.opts.Positions != nil {
+		err := s.opts.Positions.SaveBook(ctx, book, position)
+		if err == nil {
+			s.dropLegacyPosition(ctx, book.FileID)
+
+			return nil
+		}
+
+		if s.opts.Store == nil {
+			return err
+		}
+
+		s.opts.Logger.Warn().Err(err).Int64("file_id", book.FileID).Msg("could not keep the book's place where backups find it")
+	}
+
+	if err := s.opts.Store.SetPosition(ctx, book.FileID, position); err != nil {
+		return apperr.Wrap(err, apperr.KindInternal, "store book position")
+	}
+
+	return nil
+}
+
+func (s *Service) dropLegacyPosition(ctx context.Context, fileID int64) {
+	if s.opts.Store == nil {
+		return
+	}
+
+	if err := s.opts.Store.DeletePosition(ctx, fileID); err != nil {
+		s.opts.Logger.Debug().Err(err).Int64("file_id", fileID).Msg("could not drop the old book position")
+	}
+}
+
+// MoveLegacyPositions carries the places kept in the old table over to
+// Positions, keeping when each was saved. A book that cannot be moved now — its
+// file missing, say — stays for the next start; one the library no longer has
+// is dropped, as its row would have been with the file.
+func (s *Service) MoveLegacyPositions(ctx context.Context) (moved int, err error) {
+	if s.opts.Store == nil || s.opts.Positions == nil {
+		return 0, nil
+	}
+
+	legacy, err := s.opts.Store.Positions(ctx)
+	if err != nil {
+		return 0, apperr.Wrap(err, apperr.KindInternal, "read old book positions")
+	}
+
+	for _, row := range legacy {
+		if ctx.Err() != nil {
+			return moved, ctx.Err()
+		}
+
+		book, err := s.Book(ctx, row.FileID)
+		if apperr.KindOf(err) == apperr.KindNotFound {
+			s.dropLegacyPosition(ctx, row.FileID)
+			continue
+		}
+		if err != nil {
+			continue
+		}
+
+		if err := s.opts.Positions.SaveBook(ctx, book, row.Position); err != nil {
+			s.opts.Logger.Debug().Err(err).Int64("file_id", row.FileID).Msg("old book position not moved yet")
+			continue
+		}
+
+		s.dropLegacyPosition(ctx, row.FileID)
+		moved++
+	}
+
+	return moved, nil
+}
+
 // bookExtension reads "book.fb2.zip" as the FB2 archive it is.
 func bookExtension(path string) string {
 	lower := strings.ToLower(path)
@@ -73,10 +149,23 @@ func bookExtension(path string) string {
 }
 
 // Position is the book and where the reader left it: nil for a book never opened.
+// A place kept before Positions existed is found in the old table until the
+// book is next saved, or until MoveLegacyPositions carries it over.
 func (s *Service) Position(ctx context.Context, fileID int64) (*BookFile, *store.Position, error) {
 	book, err := s.Book(ctx, fileID)
 	if err != nil {
 		return nil, nil, err
+	}
+
+	if s.opts.Positions != nil {
+		position, readErr := s.opts.Positions.Book(ctx, book)
+		if readErr != nil {
+			s.opts.Logger.Debug().Err(readErr).Int64("file_id", fileID).Msg("could not read where the book was left")
+		}
+
+		if position != nil {
+			return book, position, nil
+		}
 	}
 
 	if s.opts.Store == nil {
@@ -103,7 +192,7 @@ func (s *Service) SavePosition(
 		return nil, nil, err
 	}
 
-	if s.opts.Store == nil {
+	if s.opts.Store == nil && s.opts.Positions == nil {
 		return nil, nil, apperr.New(apperr.KindPrecondition, "this node keeps no reading positions")
 	}
 
@@ -112,8 +201,8 @@ func (s *Service) SavePosition(
 	}
 
 	position := store.Position{Locator: locator, Fraction: min(max(fraction, 0), 1), UpdatedAt: s.now()}
-	if err := s.opts.Store.SetPosition(ctx, fileID, position); err != nil {
-		return nil, nil, apperr.Wrap(err, apperr.KindInternal, "store book position")
+	if err := s.keepPosition(ctx, book, position); err != nil {
+		return nil, nil, err
 	}
 
 	if book.MediaRef != "" && s.opts.Progress != nil {

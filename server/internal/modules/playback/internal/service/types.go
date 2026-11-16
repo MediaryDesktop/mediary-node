@@ -57,6 +57,14 @@ type Progress interface {
 	MarkWatched(ctx context.Context, mediaRef string, episode int) error
 }
 
+// Positions keeps where the user stopped in each file and says where the next
+// play starts. Implemented over the progress module, which decides what is
+// worth returning to; reached is this module's rule for having watched it.
+type Positions interface {
+	SavePosition(ctx context.Context, file *PlayableFile, position, duration float64, reached bool) error
+	ResumeAt(ctx context.Context, file *PlayableFile) (float64, error)
+}
+
 // Player is a running player the node can steer. mpv satisfies it; tests use a
 // fake, because a test that needs a video window is a test nobody runs.
 type Player interface {

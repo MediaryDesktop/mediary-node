@@ -17,9 +17,11 @@ export interface EpisodeItemProps {
 	images: (string | null | undefined)[]
 	coverColor: string | null
 	watched: boolean
+	started?: number
 	playing: boolean
 	disabled: boolean
 	onPlay: (fileId: number) => void
+	onToggleWatched?: () => void
 }
 
 export function EpisodeItem({
@@ -29,9 +31,11 @@ export function EpisodeItem({
 	images,
 	coverColor,
 	watched,
+	started,
 	playing,
 	disabled,
-	onPlay
+	onPlay,
+	onToggleWatched
 }: EpisodeItemProps) {
 	const { t } = useTranslation()
 	const text = useEpisodeText()
@@ -45,7 +49,9 @@ export function EpisodeItem({
 			images={images}
 			coverColor={coverColor}
 			watched={watched}
+			started={started}
 			disabled={disabled || file.missing}
+			onToggleWatched={onToggleWatched}
 			onPlay={() => onPlay(file.id)}
 			badge={playing && <Badge tone='accent'>{t('media.library.playing')}</Badge>}
 		>

@@ -40,6 +40,39 @@ func (s *Store) Position(ctx context.Context, fileID int64) (*Position, error) {
 	return &Position{Locator: row.Locator, Fraction: row.Fraction, UpdatedAt: updated}, nil
 }
 
+// Kept is one position of the old table, with the file it belongs to.
+type Kept struct {
+	FileID   int64
+	Position Position
+}
+
+// Positions is every position in the old table, for moving them out of it.
+func (s *Store) Positions(ctx context.Context) ([]Kept, error) {
+	rows, err := sqlc.New(s.db).ListBookPositions(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("read book positions: %w", err)
+	}
+
+	kept := make([]Kept, 0, len(rows))
+	for _, row := range rows {
+		updated, _ := time.Parse(time.RFC3339, row.UpdatedAt)
+		kept = append(kept, Kept{
+			FileID:   row.FileID,
+			Position: Position{Locator: row.Locator, Fraction: row.Fraction, UpdatedAt: updated},
+		})
+	}
+
+	return kept, nil
+}
+
+func (s *Store) DeletePosition(ctx context.Context, fileID int64) error {
+	if err := sqlc.New(s.db).DeleteBookPosition(ctx, fileID); err != nil {
+		return fmt.Errorf("delete book position %d: %w", fileID, err)
+	}
+
+	return nil
+}
+
 func (s *Store) SetPosition(ctx context.Context, fileID int64, position Position) error {
 	err := sqlc.New(s.db).UpsertBookPosition(ctx, sqlc.UpsertBookPositionParams{
 		FileID:    fileID,

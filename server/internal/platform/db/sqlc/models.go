@@ -63,6 +63,26 @@ type BookPosition struct {
 	UpdatedAt string  `json:"updated_at"`
 }
 
+type BookState struct {
+	ContentKey string         `json:"content_key"`
+	MediaRef   sql.NullString `json:"media_ref"`
+	Locator    string         `json:"locator"`
+	Fraction   float64        `json:"fraction"`
+	UpdatedAt  int64          `json:"updated_at"`
+}
+
+type ChapterState struct {
+	ID        int64          `json:"id"`
+	MediaRef  sql.NullString `json:"media_ref"`
+	Chapter   sql.NullString `json:"chapter"`
+	SourceRef sql.NullString `json:"source_ref"`
+	Page      int64          `json:"page"`
+	Pages     int64          `json:"pages"`
+	Read      int64          `json:"read"`
+	ReadAt    sql.NullInt64  `json:"read_at"`
+	UpdatedAt int64          `json:"updated_at"`
+}
+
 type CustomList struct {
 	ID        int64  `json:"id"`
 	MediaType string `json:"media_type"`
@@ -128,6 +148,7 @@ type LibraryFile struct {
 	BookTitle       sql.NullString `json:"book_title"`
 	BookAuthors     sql.NullString `json:"book_authors"`
 	BookIsbn        sql.NullString `json:"book_isbn"`
+	ContentKey      sql.NullString `json:"content_key"`
 }
 
 type LibraryRoot struct {
@@ -310,4 +331,18 @@ type TrackerEntry struct {
 	CompletedDay   sql.NullInt64 `json:"completed_day"`
 	CreatedAt      int64         `json:"created_at"`
 	UpdatedAt      int64         `json:"updated_at"`
+}
+
+type WatchState struct {
+	ID            int64          `json:"id"`
+	MediaRef      sql.NullString `json:"media_ref"`
+	Episode       sql.NullInt64  `json:"episode"`
+	ContentKey    sql.NullString `json:"content_key"`
+	Position      float64        `json:"position"`
+	Duration      float64        `json:"duration"`
+	Watched       int64          `json:"watched"`
+	WatchCount    int64          `json:"watch_count"`
+	PassCounted   int64          `json:"pass_counted"`
+	LastWatchedAt sql.NullInt64  `json:"last_watched_at"`
+	UpdatedAt     int64          `json:"updated_at"`
 }

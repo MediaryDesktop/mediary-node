@@ -84,7 +84,8 @@ SET kind           = ?,
     probe_version    = ?,
     book_title       = ?,
     book_authors     = ?,
-    book_isbn        = ?
+    book_isbn        = ?,
+    content_key      = NULL
 WHERE id = ?;
 
 -- Only the parsed columns: the file itself did not change, a newer parser reads
@@ -266,3 +267,18 @@ FROM library_file f
          JOIN library_root r ON r.id = f.root_id
          LEFT JOIN file_match m ON m.file_id = f.id
 ORDER BY r.path, f.rel_path;
+
+-- What the file holds, computed once and kept until a scan sees it change.
+-- name: GetLibraryFileContentKey :one
+SELECT f.content_key, f.size_bytes, f.rel_path, r.path AS root_path, f.missing_since
+FROM library_file f
+         JOIN library_root r ON r.id = f.root_id
+WHERE f.id = ?;
+
+-- The size is checked again: a scan that rewrote the row since the key was read
+-- leaves a key computed from the old file unwritten.
+-- name: SetLibraryFileContentKey :exec
+UPDATE library_file
+SET content_key = ?
+WHERE id = ?
+  AND size_bytes = ?;

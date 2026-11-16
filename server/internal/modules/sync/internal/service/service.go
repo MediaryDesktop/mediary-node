@@ -438,7 +438,9 @@ func (s *Service) applyEncoded(ctx context.Context, body []byte) error {
 // Run uploads on its own until ctx ends: after a burst of changes has gone
 // quiet, and once a day regardless.
 func (s *Service) Run(ctx context.Context, tick time.Duration) {
-	changes, unsubscribe := s.hub.Subscribe(events.TopicTracker)
+	// A watched episode or a read chapter is a change to keep; a position alone
+	// is never announced, and rides along with the next backup.
+	changes, unsubscribe := s.hub.Subscribe(events.TopicTracker, events.TopicProgress)
 	defer unsubscribe()
 
 	ticker := time.NewTicker(tick)

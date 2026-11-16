@@ -719,6 +719,9 @@ export const en = {
 			others: 'Others',
 			play: 'Play {{name}}',
 			playing: 'Playing',
+			started: 'Watched so far',
+			markWatched: 'Mark “{{label}}” watched',
+			markUnwatched: 'Mark “{{label}}” unwatched',
 			watched: 'Watched',
 			missing: 'File not found on the last scan',
 			minutes: '{{count}}m',
@@ -1084,7 +1087,9 @@ export const en = {
 		pause: 'Pause',
 		resume: 'Resume',
 		stop: 'Close the player',
-		failed: 'Could not start the player'
+		failed: 'Could not start the player',
+		resumed: 'Resumed at {{time}}',
+		fromStart: 'From the start'
 	},
 
 	discover: {
