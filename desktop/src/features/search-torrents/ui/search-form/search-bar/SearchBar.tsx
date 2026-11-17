@@ -1,7 +1,7 @@
 import type { KeyboardEvent } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, Icon, Input } from '@shared/ui'
+import { Button, Icon, Input, Stepper } from '@shared/ui'
 
 import type { SearchCriteria } from '../../../lib/useReleaseSearch'
 
@@ -28,6 +28,9 @@ export function SearchBar({ criteria, onChange, seasonal, pending, disabled, onS
 		}
 	}
 
+	const season = Number(criteria.season) || 1
+	const episode = Number(criteria.episode) || 0
+
 	return (
 		<div className={styles.bar}>
 			<Input
@@ -40,27 +43,47 @@ export function SearchBar({ criteria, onChange, seasonal, pending, disabled, onS
 				aria-label={t('torrents.search.placeholder')}
 			/>
 			{seasonal && (
-				<Input
-					type='number'
-					min={1}
-					value={criteria.season}
-					onChange={event => set('season')(event.target.value)}
-					onKeyDown={searchOnEnter}
-					placeholder={t('torrents.search.season')}
-					className={styles.episode}
-					aria-label={t('torrents.search.season')}
-				/>
+				<div className={styles.step} role='group' aria-label={t('torrents.search.season')}>
+					<Stepper
+						value={
+							<input
+								type='number'
+								min={1}
+								className={styles.stepperInput}
+								aria-label={t('torrents.search.season')}
+								value={criteria.season}
+								disabled={disabled}
+								onChange={event => set('season')(event.target.value)}
+								onKeyDown={searchOnEnter}
+							/>
+						}
+						decrementDisabled={season <= 1}
+						disabled={disabled}
+						onDecrement={() => set('season')(String(season - 1))}
+						onIncrement={() => set('season')(String(season + 1))}
+					/>
+				</div>
 			)}
-			<Input
-				type='number'
-				min={0}
-				value={criteria.episode}
-				onChange={event => set('episode')(event.target.value)}
-				onKeyDown={searchOnEnter}
-				placeholder={t('torrents.search.episode')}
-				className={styles.episode}
-				aria-label={t('torrents.search.episode')}
-			/>
+			<div className={styles.step} role='group' aria-label={t('torrents.search.episode')}>
+				<Stepper
+					value={
+						<input
+							type='number'
+							min={0}
+							className={styles.stepperInput}
+							aria-label={t('torrents.search.episode')}
+							value={criteria.episode}
+							disabled={disabled}
+							onChange={event => set('episode')(event.target.value)}
+							onKeyDown={searchOnEnter}
+						/>
+					}
+					decrementDisabled={episode <= 0}
+					disabled={disabled}
+					onDecrement={() => set('episode')(String(episode - 1))}
+					onIncrement={() => set('episode')(String(episode + 1))}
+				/>
+			</div>
 			<Button loading={pending} disabled={disabled} onClick={onSearch}>
 				{t('torrents.search.submit')}
 			</Button>

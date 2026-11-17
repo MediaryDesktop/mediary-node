@@ -291,6 +291,8 @@ export function MediaPreview({
 					) : onOpen ? (
 						<Button
 							fullWidth
+							variant='primary'
+							size={reading ? 'small' : 'default'}
 							className={styles.primary}
 							startIcon={<Icon name={reading ? 'common/book-open' : 'common/play'} size={16} />}
 							onClick={onOpen}
@@ -299,19 +301,23 @@ export function MediaPreview({
 						</Button>
 					) : null}
 
-					{onDownload && !reading && (
-						<Button
-							size='small'
-							variant='control'
-							className={styles.download}
-							startIcon={<Icon name='common/download' size={16} />}
-							onClick={onDownload}
-						>
-							{t('media.card.download')}
-						</Button>
-					)}
+					{((onDownload && !reading) || actions) && (
+						<div className={styles.row}>
+							{onDownload && !reading && (
+								<Button
+									size='small'
+									variant='secondary'
+									className={styles.download}
+									startIcon={<Icon name='common/download' size={16} />}
+									onClick={onDownload}
+								>
+									{t('media.card.download')}
+								</Button>
+							)}
 
-					{actions && <div className={styles.row}>{actions}</div>}
+							{actions}
+						</div>
+					)}
 				</div>
 			</div>
 		</div>

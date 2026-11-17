@@ -162,15 +162,6 @@ export function MediaView({ mediaRef, media, sources, entry, initialView, initia
 				view={shown}
 				onViewChange={torrents ? setView : undefined}
 				streamable={streamable}
-				missingCount={missing?.length ?? null}
-				onDownload={
-					torrents
-						? () => {
-								setView('torrent')
-								openSearch()
-							}
-						: undefined
-				}
 				onOpenDetails={() => setDetailsOpen(true)}
 				editable={media?.editable}
 				onEdit={

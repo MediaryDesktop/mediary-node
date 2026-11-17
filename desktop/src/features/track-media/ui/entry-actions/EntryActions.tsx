@@ -1,4 +1,5 @@
 import { useUnit } from 'effector-react'
+import { MdFormatListBulletedAdd } from 'react-icons/md'
 
 import { useTranslation } from '@shared/i18n'
 import { Button, Icon } from '@shared/ui'
@@ -26,51 +27,64 @@ export function EntryActions({ media, entry, listName }: EntryMenuProps) {
 	const target = entry ? { entry, mediaType: media.mediaType } : null
 
 	return (
-		<div className={styles.actions}>
-			{target ? (
-				<Button
-					size='small'
-					variant='control'
-					disabled={busy}
-					startIcon={<Icon name='common/list-checks' size={16} />}
-					endIcon={<Icon name='common/chevron-down' size={16} />}
-					onClick={() => manageOpened(target)}
-				>
-					{t(`lists.status.${media.mediaType}.${target.entry.status}` as never)}
-				</Button>
-			) : (
-				<Button
-					size='small'
-					variant='control'
-					disabled={busy}
-					startIcon={<Icon name='common/plus' size={16} />}
-					onClick={() =>
-						addOpened({
-							mediaRef: media.mediaRef,
-							mediaType: media.mediaType,
-							title: media.title
-						})
-					}
-				>
-					{t('media.addToList')}
-				</Button>
-			)}
+		<>
+			<div className={styles.actions}>
+				{target ? (
+					<>
+						<Button
+							size='small'
+							variant='secondary'
+							iconOnly
+							className={styles.round}
+							disabled={busy}
+							aria-label={t('lists.manageEntry.action')}
+							title={t('lists.manageEntry.action')}
+							onClick={() => manageOpened(target)}
+						>
+							<Icon name='common/folder' size={16} />
+						</Button>
 
-			{target && (
-				<Button
-					size='small'
-					variant='control'
-					iconOnly
-					disabled={busy}
-					aria-label={t('lists.rateEntry.action')}
-					title={t('lists.rateEntry.action')}
-					onClick={() => rateOpened(target)}
-				>
-					<Icon name='common/star' size={16} />
-				</Button>
-			)}
+						<Button
+							size='small'
+							variant='secondary'
+							iconOnly
+							className={styles.round}
+							disabled={busy}
+							aria-label={t('lists.rateEntry.action')}
+							title={t('lists.rateEntry.action')}
+							onClick={() => rateOpened(target)}
+						>
+							<Icon name='common/pencil' size={16} />
+						</Button>
+					</>
+				) : (
+					<Button
+						size='small'
+						variant='secondary'
+						iconOnly
+						className={styles.round}
+						disabled={busy}
+						aria-label={t('media.addToList')}
+						title={t('media.addToList')}
+						onClick={() =>
+							addOpened({
+								mediaRef: media.mediaRef,
+								mediaType: media.mediaType,
+								title: media.title
+							})
+						}
+					>
+						<MdFormatListBulletedAdd size={20} />
+					</Button>
+				)}
+			</div>
 
-			<EntryMenu media={media} entry={entry} listName={listName} />
-		</div>
+			<EntryMenu
+				media={media}
+				entry={entry}
+				listName={listName}
+				triggerClassName={styles.corner}
+			/>
+		</>
 	)
 }

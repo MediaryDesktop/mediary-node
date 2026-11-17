@@ -28,8 +28,6 @@ export interface MediaActionsProps {
 	view: MediaView
 	onViewChange?: (view: MediaView) => void
 	streamable?: boolean
-	missingCount?: number | null
-	onDownload?: () => void
 	onOpenDetails: () => void
 	editable?: boolean
 	onEdit?: () => void
@@ -46,8 +44,6 @@ export function MediaActions({
 	view,
 	onViewChange,
 	streamable = false,
-	missingCount,
-	onDownload,
 	onOpenDetails,
 	editable = false,
 	onEdit,
@@ -165,14 +161,6 @@ export function MediaActions({
 					}
 					items={items}
 				/>
-
-				{onDownload && (
-					<Button startIcon={<Icon name='common/download' size={20} />} onClick={onDownload}>
-						{missingCount
-							? t('media.downloadMissing', { count: missingCount })
-							: t('media.searchTorrents')}
-					</Button>
-				)}
 			</div>
 
 			<div className={styles.viewTabs} role='tablist'>

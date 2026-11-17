@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { MouseEvent, PointerEvent } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Icon } from '@shared/ui'
+import { Icon, useRipple } from '@shared/ui'
 
 import { episodeTitle, useCardHold } from '@entities/media'
 import { $playerMode, playbackModel, PLAYER_MODES, playerModeChanged } from '@entities/playback'
@@ -52,6 +52,8 @@ export function PlayMenu({
 	const splitRef = useRef<HTMLDivElement>(null)
 	const pointerActiveRef = useRef(false)
 	const [width, setWidth] = useState<number | undefined>(undefined)
+	const mainRipple = useRipple<HTMLButtonElement>({ disabled: starting || busy })
+	const chevronRipple = useRipple<HTMLButtonElement>()
 
 	const [request, playExternally, playerMode, changePlayerMode] = useUnit([
 		titlePlayRequested,
@@ -153,6 +155,7 @@ export function PlayMenu({
 			}}
 		>
 			<button
+				ref={mainRipple}
 				type='button'
 				className={styles.main}
 				disabled={starting || busy}
@@ -166,7 +169,12 @@ export function PlayMenu({
 
 			<Menu.Root open={open} onOpenChange={changeOpen}>
 				<Menu.Trigger asChild>
-					<button type='button' className={styles.chevron} aria-label={t('media.card.menu.more')}>
+					<button
+						ref={chevronRipple}
+						type='button'
+						className={styles.chevron}
+						aria-label={t('media.card.menu.more')}
+					>
 						<Icon name='common/chevron-down' size={16} />
 					</button>
 				</Menu.Trigger>

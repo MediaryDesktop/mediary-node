@@ -3,9 +3,9 @@
 	align-self: stretch;
 	height: var(--control-height-sm);
 	overflow: hidden;
-	border-radius: var(--radius-md);
-	background: var(--surface-muted);
-	color: var(--text);
+	border-radius: var(--radius-full);
+	background: var(--accent);
+	color: var(--text-on-accent);
 
 	.main,
 	.chevron {
@@ -19,10 +19,6 @@
 		font: inherit;
 		cursor: pointer;
 		transition: background var(--motion-duration) ease;
-
-		&:hover {
-			background: color-mix(in srgb, var(--text) 8%, transparent);
-		}
 
 		&:focus-visible {
 			outline: 2px solid var(--focus-ring);
@@ -50,8 +46,8 @@
 	}
 
 	.divider {
-		width: 1px;
-		background: color-mix(in srgb, var(--media) 30%, transparent);
+		width: 2px;
+		background: var(--surface);
 	}
 
 	.chevron {
@@ -63,7 +59,6 @@
 	}
 
 	&.open .chevron {
-		background: color-mix(in srgb, var(--text) 14%, transparent);
 
 		svg {
 			transform: rotate(180deg);

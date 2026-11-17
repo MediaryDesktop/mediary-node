@@ -3,4 +3,20 @@
 	align-items: center;
 	flex-wrap: wrap;
 	gap: 0.5rem;
+
+	.round {
+		border-radius: var(--radius-full);
+	}
+}
+
+.corner {
+	position: absolute;
+	top: 0.5rem;
+	right: 0.5rem;
+	z-index: 2;
+	width: 2rem;
+	height: 2rem;
+	background: color-mix(in srgb, var(--media-veil) 60%, transparent);
+	color: var(--text-on-accent);
+	backdrop-filter: blur(4px);
 }

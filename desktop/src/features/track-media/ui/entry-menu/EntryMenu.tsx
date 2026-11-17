@@ -1,5 +1,5 @@
+import clsx from 'clsx'
 import { useUnit } from 'effector-react'
-import { MdFormatListBulletedAdd } from 'react-icons/md'
 
 import { useTranslation } from '@shared/i18n'
 import { DropdownMenu, Icon, RippleButton } from '@shared/ui'
@@ -8,9 +8,6 @@ import type { DropdownMenuItem } from '@shared/ui'
 import { useCardHold } from '@entities/media'
 import { isLocalTrackerType, trackerModel } from '@entities/tracker'
 import type { TrackerEntry, TrackerMediaType } from '@entities/tracker'
-
-import { manageEntryModel } from '../../model/manage-entry'
-import { rateEntryModel } from '../../model/rate-entry'
 
 import styles from './EntryMenu.module.scss'
 
@@ -25,6 +22,7 @@ export interface EntryMenuProps {
 	media: EntryMenuMedia
 	entry: TrackerEntry | null
 	listName?: string
+	triggerClassName?: string
 }
 
 interface SourceLink {
@@ -59,51 +57,18 @@ function sourceLink({ mediaRef, mediaType, siteUrl }: EntryMenuMedia): SourceLin
 	return url ? { name: 'AniList', url } : null
 }
 
-export function EntryMenu({ media, entry, listName }: EntryMenuProps) {
+export function EntryMenu({ media, entry, listName, triggerClassName }: EntryMenuProps) {
 	const { t } = useTranslation()
 	const hold = useCardHold()
 
-	const [updating, requestUpdate, requestDelete, manageOpened, addOpened, rateOpened] = useUnit([
+	const [updating, requestUpdate, requestDelete] = useUnit([
 		trackerModel.$updating,
 		trackerModel.entryUpdateRequested,
-		trackerModel.entryDeleteRequested,
-		manageEntryModel.opened,
-		manageEntryModel.addOpened,
-		rateEntryModel.opened
+		trackerModel.entryDeleteRequested
 	])
 
 	const busy = Boolean(updating[media.mediaRef])
 	const items: DropdownMenuItem[] = []
-
-	if (entry) {
-		const target = { entry, mediaType: media.mediaType }
-
-		items.push(
-			{
-				id: 'manage',
-				label: t('lists.manageEntry.action'),
-				icon: 'common/folder',
-				disabled: busy,
-				onSelect: () => manageOpened(target)
-			},
-			{
-				id: 'rate',
-				label: t('lists.rateEntry.action'),
-				icon: 'common/pencil',
-				disabled: busy,
-				onSelect: () => rateOpened(target)
-			}
-		)
-	} else {
-		items.push({
-			id: 'add',
-			label: t('lists.addEntry.action'),
-			icon: <MdFormatListBulletedAdd size={20} />,
-			disabled: busy,
-			onSelect: () =>
-				addOpened({ mediaRef: media.mediaRef, mediaType: media.mediaType, title: media.title })
-		})
-	}
 
 	const link = sourceLink(media)
 
@@ -149,7 +114,11 @@ export function EntryMenu({ media, entry, listName }: EntryMenuProps) {
 			items={items}
 			onOpenChange={hold}
 			trigger={
-				<RippleButton className={styles.trigger} aria-label={t('lists.menu')} disableRipple>
+				<RippleButton
+					className={clsx(styles.trigger, triggerClassName)}
+					aria-label={t('lists.menu')}
+					disableRipple
+				>
 					<Icon name='common/more-vertical' size={20} />
 				</RippleButton>
 			}

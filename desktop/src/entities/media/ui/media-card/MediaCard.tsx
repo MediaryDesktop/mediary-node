@@ -15,7 +15,6 @@ import type { MediaTracking } from '../media-preview/MediaPreview'
 import styles from './MediaCard.module.scss'
 
 const PANEL_OVERHANG = 16
-const PANEL_INSET = 24
 
 export interface MediaCardMedia {
 	title: MediaTitle
@@ -199,9 +198,8 @@ export function MediaCard({
 				<HoverCard
 					trigger={face}
 					side='bottom'
-					align='start'
+					align='center'
 					sideOffset={-(offset + PANEL_OVERHANG)}
-					alignOffset={-PANEL_INSET}
 					openDelay={50}
 					closeDelay={0}
 					motion='grow'

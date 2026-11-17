@@ -30,6 +30,14 @@
 	&[data-side="top"] {
 		transform-origin: bottom left;
 	}
+
+	&[data-align="center"] {
+		transform-origin: top center;
+
+		&[data-side="top"] {
+			transform-origin: bottom center;
+		}
+	}
 }
 
 @keyframes hover-card-grow {
