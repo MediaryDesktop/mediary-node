@@ -1,13 +1,11 @@
 import clsx from 'clsx'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { useAfterDelay } from '@shared/lib'
-import { toast } from '@shared/ui'
 
 import type { PlaybackStream } from '../../api/api'
 import type { VideoSource } from '../../lib/source'
-import { formatTimecode } from '../../lib/timecode'
 import { initialAudio, initialSubtitle } from '../../lib/tracks'
 import { directUrl } from '../../lib/urls'
 import type { PlayerSnapshot } from '../../model/pip'
@@ -20,6 +18,7 @@ import { usePlayerEntrance } from './lib/usePlayerEntrance'
 import { usePlayerKeyboard } from './lib/usePlayerKeyboard'
 import { useProgressReport } from './lib/useProgressReport'
 import { useStageFit } from './lib/useStageFit'
+import { useStartPosition } from './lib/useStartPosition'
 import { useVideoActions } from './lib/useVideoActions'
 import { PlayerControls } from './player-controls/PlayerControls'
 import { TrackMenus } from './player-controls/track-menus/TrackMenus'
@@ -93,60 +92,7 @@ export function VideoPlayer({
 	const [subtitle, setSubtitle] = useState<number | null>(() => initialSubtitle(subtitles))
 	const [audio, setAudio] = useState(() => initialAudio(audios))
 
-	const resumed = !startAt && stream.resume_at > 0
-	const startAtRef = useRef(resumed ? { position: stream.resume_at, playing: true } : startAt)
-	const resumedRef = useRef(
-		resumed
-			? {
-					id: `playback-resumed-${fileId}`,
-					message: t('playback.resumed', { time: formatTimecode(stream.resume_at) }),
-					fromStart: t('playback.fromStart')
-				}
-			: null
-	)
-	const onStartAppliedRef = useRef(onStartApplied)
-
-	useEffect(() => {
-		const video = videoRef.current
-		const start = startAtRef.current
-
-		if (!video || !start) {
-			return
-		}
-
-		const apply = () => {
-			video.currentTime = start.position
-
-			if (!start.playing) {
-				video.pause()
-			}
-
-			const notice = resumedRef.current
-			if (notice) {
-				toast(notice.message, {
-					id: notice.id,
-					action: {
-						label: notice.fromStart,
-						onClick: () => {
-							video.currentTime = 0
-						}
-					}
-				})
-			}
-
-			onStartAppliedRef.current?.()
-		}
-
-		if (video.readyState >= 1) {
-			apply()
-
-			return
-		}
-
-		video.addEventListener('loadedmetadata', apply, { once: true })
-
-		return () => video.removeEventListener('loadedmetadata', apply)
-	}, [])
+	useStartPosition({ videoRef, stream, startAt, onStartApplied })
 
 	const snapshotOf = (video: HTMLVideoElement): PlayerSnapshot => ({
 		position: video.currentTime,

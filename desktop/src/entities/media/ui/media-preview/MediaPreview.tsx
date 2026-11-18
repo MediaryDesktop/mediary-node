@@ -1,92 +1,19 @@
 import clsx from 'clsx'
 import { useStoreMap, useUnit } from 'effector-react'
 import type { ReactNode } from 'react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { Button, Icon } from '@shared/ui'
 
 import { useMediaCardSlots } from '../../lib/card-slots'
 import { enumLabel } from '../../lib/format'
+import { isReadMedia } from '../../lib/kinds'
 import { mediaPreviewModel } from '../../model/model'
 
+import { nextNumber, previewAction, previewFacts } from './lib/preview-text'
 import styles from './MediaPreview.module.scss'
-
-const TRAILER_DELAY = 300
-const REVEAL_FALLBACK_MS = 6000
-const READING_TYPES = ['manga', 'book']
-
-interface TrailerFrameProps {
-	host: string
-	id: string
-	title: string
-}
-
-interface TrailerMessage {
-	source?: unknown
-	state?: unknown
-}
-
-function TrailerFrame({ host, id, title }: TrailerFrameProps) {
-	const { t } = useTranslation()
-	const frameRef = useRef<HTMLIFrameElement>(null)
-	const [mounted, setMounted] = useState(false)
-	const [visible, setVisible] = useState(false)
-
-	useEffect(() => {
-		const timer = window.setTimeout(() => setMounted(true), TRAILER_DELAY)
-
-		return () => window.clearTimeout(timer)
-	}, [])
-
-	useEffect(() => {
-		if (!mounted) {
-			return
-		}
-
-		let confirmed = false
-
-		const onMessage = (event: MessageEvent<TrailerMessage | null>) => {
-			if (event.origin !== host || event.source !== frameRef.current?.contentWindow) {
-				return
-			}
-
-			if (event.data?.source === 'mediary-trailer') {
-				confirmed = true
-				setVisible(event.data.state === 'playing')
-			}
-		}
-
-		window.addEventListener('message', onMessage)
-
-		const fallback = window.setTimeout(() => {
-			if (!confirmed) {
-				setVisible(true)
-			}
-		}, REVEAL_FALLBACK_MS)
-
-		return () => {
-			window.removeEventListener('message', onMessage)
-			window.clearTimeout(fallback)
-		}
-	}, [host, mounted])
-
-	if (!mounted) {
-		return null
-	}
-
-	return (
-		<div className={clsx(styles.trailer, visible && styles.visible)}>
-			<iframe
-				ref={frameRef}
-				src={`${host}/trailer?v=${encodeURIComponent(id)}`}
-				title={t('media.trailerFor', { title })}
-				allow='autoplay; encrypted-media'
-				tabIndex={-1}
-			/>
-		</div>
-	)
-}
+import { TrailerFrame } from './trailer-frame/TrailerFrame'
 
 export interface MediaTracking {
 	status: string
@@ -154,7 +81,7 @@ export function MediaPreview({
 	}, [active, mediaRef, requestPreview])
 
 	const mediaType = details?.media_type ?? base.media_type ?? tracking?.mediaType ?? ''
-	const reading = READING_TYPES.includes(mediaType)
+	const reading = isReadMedia(mediaType)
 	const format = details?.format ?? base.format ?? null
 	const movie = format === 'MOVIE' || mediaType === 'movie'
 	const year = details?.season_year ?? base.season_year ?? tracking?.year ?? null
@@ -171,33 +98,24 @@ export function MediaPreview({
 	const duration = details?.duration ?? null
 	const seasons = details?.seasons ?? 0
 
-	const facts = [
+	const facts = previewFacts(t, {
+		reading,
+		movie,
 		statusLabel,
-		seasons > 1 ? t('media.card.seasons', { count: seasons }) : null,
-		reading
-			? chapters
-				? t('media.card.chapters', { count: chapters })
-				: volumes
-					? t('media.card.volumes', { count: volumes })
-					: null
-			: episodes && !movie
-				? t('media.card.episodes', { count: episodes })
-				: null,
-		!reading && duration ? t('media.card.minutesEach', { count: duration }) : null
-	].filter(Boolean)
+		seasons,
+		chapters,
+		volumes,
+		episodes,
+		duration
+	})
 
 	const total = tracking?.total ?? (reading ? chapters : episodes)
-	const next = Math.max(
-		1,
-		total ? Math.min((tracking?.progress ?? 0) + 1, total) : (tracking?.progress ?? 0) + 1
-	)
-	const primaryLabel = reading
-		? chapters || tracking
-			? t('media.card.read', { chapter: next })
-			: t('media.card.open')
-		: movie
-			? t('media.card.open')
-			: t('media.card.play', { episode: next })
+	const primaryLabel = previewAction(t, {
+		reading,
+		movie,
+		known: Boolean(chapters || tracking),
+		next: nextNumber(tracking?.progress ?? 0, total)
+	})
 
 	const trailerId = details?.trailer?.site === 'youtube' ? details.trailer.id : null
 	const thumbnail = details?.trailer?.thumbnail ?? null
