@@ -51,12 +51,18 @@
   `useSheetLeave` (`shared/lib`). Тривалості лишились у двох місцях —
   `$enter-duration`/`$leave-duration` і `SHEET_*_MS` поруч із хуками — бо SCSS
   і TS одне одного не читають.
-- **[поведінка?]** Номер епізоду файлу читається двома способами:
-  `episodeNumber` (`continue-watching`: спершу зіставлення, потім розбір
-  імені) і `fileNumber` (`library-item`: лише розбір імені, ще й розділ).
-  Провідник бібліотеки показує `fileNumber`, списки епізодів — `episodeNumber`,
-  тож для зіставленого вручну файлу числа можуть різнитись. Схоже на навмисне
-  («що розпізнано з імені» проти «чим файл є»), але варто підтвердити.
+- **[поведінка]** Номер епізоду файлу читається двома способами:
+  `episodeNumber` (`continue-watching`: `match.episode ?? parsed.episode`) і
+  `fileNumber` (`library-item`: `parsed.episode ?? parsed.chapter`, зіставлення
+  ігнорує). Панель деталей провідника
+  (`library-explorer/ui/detail-panel/DetailPanel.tsx`) показує поруч «Сезон»
+  через `fileSeason` (спершу зіставлення) і «Епізод» через `fileNumber` (лише
+  назва). Файл `s02e01.mkv`, вручну зіставлений як S3E5, там виглядає як
+  «Сезон 3, Епізод 1», а на сторінці тайтлу — S3E5. Виправлення:
+  `fileNumber` = `match.episode ?? parsed.episode ?? parsed.chapter`, як уже
+  робить `fileSeason`. Друге місце, де живе `fileNumber`, — сортування
+  незіставлених файлів — не зміниться: зіставлення там немає. Після цього
+  `episodeNumber` і `fileNumber` різнитимуться лише розділом коміксу.
 
 ## Свідомо лишено
 
