@@ -57,12 +57,6 @@ func New(opts Options) *Client {
 	return &Client{base: base, key: opts.Key, ua: opts.UserAgent, http: &http.Client{Timeout: timeout}}
 }
 
-// StaticKey is a Key for a key that is not saved yet, as when the settings try
-// one.
-func StaticKey(key string) func() (string, error) {
-	return func() (string, error) { return key, nil }
-}
-
 type User struct {
 	Email string `json:"email"`
 	// Plan is 0 for the free plan, then 1 Essential, 2 Pro, 3 Standard.

@@ -14,13 +14,11 @@ const (
 	TopicTorrent       Topic = "torrent"
 	TopicPlayback      Topic = "playback"
 	TopicSync          Topic = "sync"
-	TopicNotification  Topic = "notification"
 	TopicTracker       Topic = "tracker"
 	TopicProgress      Topic = "progress"
 	TopicAniListAuth   Topic = "anilist.session"
 	TopicMangaDownload Topic = "manga.download"
 	TopicBookDownload  Topic = "books.download"
-	TopicBookCatalog   Topic = "books.catalog"
 	TopicTools         Topic = "tools"
 	TopicExtension     Topic = "extension"
 

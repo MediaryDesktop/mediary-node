@@ -18,7 +18,7 @@ func serve(t *testing.T, handler http.HandlerFunc) *Client {
 	server := httptest.NewServer(handler)
 	t.Cleanup(server.Close)
 
-	return New(Options{BaseURL: server.URL, Key: StaticKey("secret-key"), UserAgent: "test"})
+	return New(Options{BaseURL: server.URL, Key: staticKey("secret-key"), UserAgent: "test"})
 }
 
 func reply(w http.ResponseWriter, data any) {
@@ -83,7 +83,7 @@ func TestUnsuccessfulAnswerIsAnErrorEvenWithOK(t *testing.T) {
 }
 
 func TestNoKeyIsAPrecondition(t *testing.T) {
-	client := New(Options{BaseURL: "http://127.0.0.1:1", Key: StaticKey("")})
+	client := New(Options{BaseURL: "http://127.0.0.1:1", Key: staticKey("")})
 
 	_, err := client.Torrents(context.Background())
 	if apperr.KindOf(err) != apperr.KindPrecondition {
@@ -212,4 +212,9 @@ func TestDeleteQueuedUsesTheQueueEndpoint(t *testing.T) {
 	if err := client.Delete(context.Background(), 7, true); err != nil {
 		t.Fatal(err)
 	}
+}
+
+// staticKey is a Key that always gives the same key.
+func staticKey(key string) func() (string, error) {
+	return func() (string, error) { return key, nil }
 }
