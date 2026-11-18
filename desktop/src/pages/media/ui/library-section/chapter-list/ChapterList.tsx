@@ -8,7 +8,7 @@ import { Button, EmptyState, Icon, Pagination } from '@shared/ui'
 
 import { useNodeData } from '@infra/node'
 
-import { extensionsQuery } from '@entities/extension'
+import { extensionsQuery, pluginIcons } from '@entities/extension'
 import {
 	deleteMangaLinkMutation,
 	mangaDownloadSettingsQuery,
@@ -92,11 +92,7 @@ export function ChapterList({ mediaRef, title, progress, listed }: ChapterListPr
 
 	const present = presentSources(rows)
 	const counts = sourceCounts(rows)
-	const icons = new Map(
-		(extensions?.extensions ?? []).flatMap(ext =>
-			ext.icon ? [[`plugin:${ext.id}`, ext.icon] as const] : []
-		)
-	)
+	const icons = pluginIcons(extensions?.extensions ?? [])
 
 	const active = present.has(filter) ? filter : ALL
 	const shown = sortRows(

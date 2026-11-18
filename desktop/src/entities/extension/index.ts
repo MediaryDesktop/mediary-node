@@ -16,4 +16,6 @@ export type {
 	ExtensionSetting
 } from './api/api'
 
+export { pluginIcons } from './lib/icons'
+
 export { installExtensionFx, previewExtensionFx, updateExtensionFx } from './api/api'

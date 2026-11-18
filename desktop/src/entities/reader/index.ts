@@ -1,4 +1,5 @@
 export { ReaderView } from './ui/reader-view/ReaderView'
+export { SourceIcon } from './ui/source-icon/SourceIcon'
 export type { ReaderViewProps } from './ui/reader-view/ReaderView'
 
 export { BookReaderView } from './ui/book-reader/BookReaderView'

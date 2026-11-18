@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Icon } from '@shared/ui'
 import type { IconName } from '@shared/ui'
 
-import { LOCAL_SOURCE } from '@entities/reader'
+import { LOCAL_SOURCE } from '../../lib/chapters'
 
 import styles from './SourceIcon.module.scss'
 

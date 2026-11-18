@@ -3,11 +3,10 @@ import clsx from 'clsx'
 import { useTranslation } from '@shared/i18n'
 import { Badge, Checkbox, DropdownMenu, Icon, RippleButton } from '@shared/ui'
 
-import { LOCAL_SOURCE } from '@entities/reader'
+import { LOCAL_SOURCE, SourceIcon } from '@entities/reader'
 import type { ChapterOption, ChapterRow as Row } from '@entities/reader'
 
 import type { ChapterState } from '../lib/chapters'
-import { SourceIcon } from '../source-icon/SourceIcon'
 
 import styles from './ChapterRow.module.scss'
 

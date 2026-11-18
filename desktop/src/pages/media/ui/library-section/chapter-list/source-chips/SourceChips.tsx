@@ -7,8 +7,7 @@ import { DropdownMenu, Icon, RippleButton } from '@shared/ui'
 import type { DropdownMenuItem } from '@shared/ui'
 
 import type { MangaLink } from '@entities/manga-source'
-
-import { SourceIcon } from '../source-icon/SourceIcon'
+import { SourceIcon } from '@entities/reader'
 
 import styles from './SourceChips.module.scss'
 

@@ -18,12 +18,12 @@ import {
 
 import { useNodeData } from '@infra/node'
 
-import { extensionsQuery } from '@entities/extension'
+import { extensionsQuery, pluginIcons } from '@entities/extension'
 import { mangaSearchQuery, putMangaLinkMutation } from '@entities/manga-source'
 import type { MangaSource } from '@entities/manga-source'
+import { SourceIcon } from '@entities/reader'
 
 import styles from './LinkSourceDrawer.module.scss'
-import { SourceOptionIcon } from './ui/source-option-icon/SourceOptionIcon'
 
 export interface LinkSourceDrawerProps {
 	open: boolean
@@ -89,9 +89,7 @@ function LinkForm({ mediaRef, title, sources, initialSource, onDone }: LinkFormP
 
 	useNodeData(extensionsQuery)
 
-	const icons = new Map<string, string>(
-		(extensions?.extensions ?? []).flatMap(ext => (ext.icon ? [[`plugin:${ext.id}`, ext.icon]] : []))
-	)
+	const icons = pluginIcons(extensions?.extensions ?? [])
 
 	useUnitWatch(putMangaLinkMutation.finished.success, () => onDone())
 	useUnitWatch(putMangaLinkMutation.finished.failure, ({ error }) =>
@@ -118,13 +116,7 @@ function LinkForm({ mediaRef, title, sources, initialSource, onDone }: LinkFormP
 						options={sources.map(item => ({
 							value: item.id,
 							label: item.name,
-							icon: (
-								<SourceOptionIcon
-									source={item.id}
-									name={item.name}
-									image={icons.get(item.id)}
-								/>
-							)
+							icon: <SourceIcon source={item.id} name={item.name} image={icons.get(item.id)} />
 						}))}
 						value={source}
 						onValueChange={setSource}
