@@ -306,6 +306,30 @@
   `SearchFilters`: опції з enum — одна функція; `search-media/lib/filters`
   отримав тести. `RuleDetails`: `RuleStatus` — у власній теці.
 
+### Етап 10 — контракти між слайсами, `app` і `shared` ✅
+
+- **Одне поняття — одна реалізація (продовження).** `isSeasonalRef`
+  (`entities/media`) замість шести `startsWith('tmdb:tv:')`. Підпис епізоду —
+  `episodeLabel` (`entities/media`) і `fileEpisodeLabel`
+  (`features/continue-watching`) замість п'яти копій; `useUpNextLabel` і
+  `useEpisodeText.label` мали однакове тіло. Id списку за статусом
+  (`status:PLANNING`) будувала `pages/home`, а розбирала `pages/lists` —
+  тепер `statusListId` / `statusOfListId` в `entities/tracker`. Іконка
+  джерела розділів — одна, `SourceIcon` в `entities/reader` (була ще копія в
+  `link-manga-source`); іконки плагінів за id джерела — `pluginIcons` в
+  `entities/extension`. `EpisodeLibrary` грає файл через `usePlayFile`, а не
+  власну копію з тостом.
+- **Частини — у власних теках.** `FreeCopies` (`EditionRow`,
+  `FormatAction`), картки плагінів, `PluginIcon`, `Hosts`, форма токена
+  AniList, поле налаштування плагіна, плеєр трейлера, `Panel` і
+  `PreparingStream` у `app/layout/player-host`. Клавіатура `IconPicker` —
+  `lib/icon-picker-keys.ts`.
+- **`app`.** `Panel` хоста плеєра бере `useAfterDelay` замість власного
+  таймера виходу.
+- **Межі модулів.** Ще ~30 імен, які читав лише їхній власний файл, більше не
+  експортуються й зникли з публічних `index.ts`.
+- **`shared`, `infrastructure`.** Доменних слів і дублів не знайдено.
+
 ## Чого план свідомо не робить
 
 - Не вводить нових слайсів і не рухає межі між ними (§12).
