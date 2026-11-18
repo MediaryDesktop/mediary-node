@@ -54,7 +54,7 @@ src/
 
 | Шар | Слайси |
 |---|---|
-| `entities` | `anilist-account` · `book-source` · `extension` · `library-item` · `manga-source` · `media` · `playback` · `progress` · `reader` · `session` · `tool` · `torrent` · `tracker` |
+| `entities` | `anilist-account` · `book-source` · `extension` · `library-item` · `manga-source` · `media` · `playback` · `progress` · `reader` · `session` · `sync` · `tool` · `torrent` · `tracker` |
 | `features` | `auth` · `auto-download-torrents` · `back-up-node` · `choose-player` · `connect-anilist` · `continue-watching` · `download-chapters` · `download-free-book` · `download-torrent` · `library-explorer` · `link-manga-source` · `manage-debrid-service` · `manage-library-roots` · `manage-lists` · `manage-opds-servers` · `manage-plugins` · `manage-source-keys` · `manage-tools` · `manage-torrent-client` · `manage-torznab-sources` · `manage-unmatched-files` · `manual-media-form` · `mark-progress` · `match-library-file` · `scan-library` · `search-media` · `search-torrents` · `setup-wizard` · `stream-torrent` · `switch-language` · `switch-theme` · `title-chapters` · `track-media` |
 | `pages` | `auth` · `discover` · `downloads` · `extensions` · `fallback` · `home` · `library` · `lists` · `media` · `media-form` · `read` · `search` · `settings` · `setup` · `watch` |
 | `infrastructure` | `cloud` · `node` · `window` |
