@@ -6,13 +6,21 @@ cmd/openapi            експорт специфікації без старт
       ↓
 internal/app           композиційний корінь — єдине місце, що знає всі модулі
       ↓
-internal/modules/      library · torrent · playback · reader · progress · sync · extension
+internal/modules/      booksource · extension · library · manga · media · playback ·
+                       progress · reader · sync · tools · torrent · tracker
       ↓
 internal/httpapi/      chi + huma, локальний токен, мапінг помилок
 internal/wsapi/        WebSocket-міст із шини подій
       ↓
-internal/platform/     db · events · cloud · backup · logging · apperr
+internal/platform/     ai · apperr · backup · childenv · cloud · db · events ·
+                       logging · safehttp · secrets · sources
 ```
+
+`platform/sources` — клієнти зовнішніх джерел (AniList, TMDB, Open Library,
+Google Books, OPDS, пошук картинок, AI-провайдери). Клієнта з ключем, токеном
+чи лімітом запитів (AniList, TMDB, книжкові каталоги) створює `internal/app` —
+один на ноду — і передає модулям через `Deps`; клієнта без стану (OPDS) модуль
+може створити сам. Актуальний список — `ls internal/modules internal/platform`.
 
 Та сама модель, що в `mediary-cloud`, і навмисно: два бекенди читає одна людина,
 і різні структури на однаковій задачі коштували б їй контексту на кожному
