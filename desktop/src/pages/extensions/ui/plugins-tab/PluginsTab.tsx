@@ -1,33 +1,21 @@
 import { useMemo, useState } from 'react'
-import type { ReactNode } from 'react'
-import {
-	LuBlocks,
-	LuBookOpen,
-	LuDatabase,
-	LuMagnet,
-	LuPuzzle,
-	LuSearchX,
-	LuShoppingBasket
-} from 'react-icons/lu'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, LoadFailed, Skeleton } from '@shared/ui'
 
 import { useNodeQuery } from '@infra/node'
 
 import { extensionCatalogQuery, extensionsQuery } from '@entities/extension'
-import type { CatalogPlugin, Extension } from '@entities/extension'
+import type { Extension } from '@entities/extension'
 
-import {
-	CatalogPluginCard,
-	InstalledPluginCard,
-	LANGUAGES,
-	matchesFilter,
-	usePluginFailures
-} from '@features/manage-plugins'
+import { LANGUAGES, matchesFilter, usePluginFailures } from '@features/manage-plugins'
 import type { InstallTarget } from '@features/manage-plugins'
 
-import { CatalogEmpty, CatalogFilters, CatalogSection } from '../catalog/Catalog'
+import { PLUGIN_TYPES } from '../../lib/plugin-types'
+import type { PluginTypeFilter } from '../../lib/plugin-types'
+import { CatalogFilters } from '../catalog/Catalog'
+
+import { CatalogPlugins } from './catalog-plugins/CatalogPlugins'
+import { InstalledPlugins } from './installed-plugins/InstalledPlugins'
 
 export type PluginsView = 'installed' | 'catalog'
 
@@ -37,29 +25,6 @@ export interface PluginsTabProps {
 	onInstall: (target: InstallTarget) => void
 	onSettings: (extension: Extension) => void
 	onRepositories: () => void
-}
-
-const TYPES = ['all', 'torrent-provider', 'manga-provider'] as const
-type TypeFilter = (typeof TYPES)[number]
-
-const SECTION_ICONS: Record<string, ReactNode> = {
-	'torrent-provider': <LuMagnet size={20} />,
-	'manga-provider': <LuBookOpen size={20} />
-}
-
-function byType<T extends { type: string }>(items: T[]): [string, T[]][] {
-	const order = TYPES.filter(type => type !== 'all') as string[]
-	const groups = new Map<string, T[]>()
-
-	for (const item of items) {
-		groups.set(item.type, [...(groups.get(item.type) ?? []), item])
-	}
-
-	return [...groups.entries()].sort(([a], [b]) => {
-		const left = order.indexOf(a)
-		const right = order.indexOf(b)
-		return (left < 0 ? order.length : left) - (right < 0 ? order.length : right)
-	})
 }
 
 export function PluginsTab({
@@ -77,7 +42,7 @@ export function PluginsTab({
 	const installed = installedState.data
 	const catalog = catalogState.data
 
-	const [type, setType] = useState<TypeFilter>('all')
+	const [type, setType] = useState<PluginTypeFilter>('all')
 	const [language, setLanguage] = useState('all')
 	const [search, setSearch] = useState('')
 
@@ -102,124 +67,10 @@ export function PluginsTab({
 		}
 	}
 
-	const typeLabel = (kind: string) =>
-		(TYPES as readonly string[]).includes(kind) ? t(`plugins.types.${kind as TypeFilter}`) : kind
-
-	const notFound = <CatalogEmpty icon={<LuSearchX size={28} />} title={t('extensions.notFound')} />
-
-	const body = () => {
-		if (view === 'installed') {
-			const section = (children: ReactNode) => (
-				<CatalogSection icon={<LuBlocks size={20} />} title={t('extensions.installed.section')}>
-					{children}
-				</CatalogSection>
-			)
-
-			if (installedState.phase === 'failed') {
-				return <LoadFailed onRetry={installedState.retry} />
-			}
-			if (extensions === null) {
-				return <Skeleton height='14rem' radius='var(--radius-lg)' />
-			}
-			if (extensions.length === 0) {
-				return section(
-					<CatalogEmpty
-						icon={<LuPuzzle size={28} />}
-						title={t('plugins.emptyInstalled.title')}
-						description={t('plugins.emptyInstalled.description')}
-						actions={
-							<>
-								<Button
-									variant='primary'
-									startIcon={<LuShoppingBasket size={16} />}
-									onClick={onBrowseCatalog}
-								>
-									{t('extensions.installed.browseCatalog')}
-								</Button>
-								<Button onClick={() => onInstall({ kind: 'install' })}>
-									{t('plugins.addByUrl')}
-								</Button>
-							</>
-						}
-					/>
-				)
-			}
-
-			if (shownInstalled.length === 0) {
-				return section(notFound)
-			}
-
-			return byType(shownInstalled).map(([kind, items]) => (
-				<CatalogSection
-					key={kind}
-					icon={SECTION_ICONS[kind] ?? <LuBlocks size={20} />}
-					title={typeLabel(kind)}
-				>
-					{items.map(ext => (
-						<InstalledPluginCard
-							key={ext.id}
-							extension={ext}
-							onUpdate={target => onInstall({ kind: 'update', extension: target })}
-							onSettings={onSettings}
-						/>
-					))}
-				</CatalogSection>
-			))
-		}
-
-		if (catalogState.phase === 'failed') {
-			return <LoadFailed onRetry={catalogState.retry} />
-		}
-		if (offered === null) {
-			return <Skeleton height='14rem' radius='var(--radius-lg)' />
-		}
-
-		const repositories = catalog?.repositories ?? []
-		if (repositories.length === 0) {
-			return (
-				<CatalogEmpty
-					icon={<LuDatabase size={28} />}
-					title={t('plugins.emptyCatalog.title')}
-					description={t('plugins.emptyCatalog.description')}
-					actions={
-						<Button variant='primary' onClick={onRepositories}>
-							{t('plugins.repositories.add')}
-						</Button>
-					}
-				/>
-			)
-		}
-
-		if (shownCatalog.length === 0) {
-			return (
-				<CatalogSection icon={<LuBlocks size={20} />} title={t('extensions.catalog.section')}>
-					{notFound}
-				</CatalogSection>
-			)
-		}
-
-		return byType(shownCatalog).map(([kind, items]) => (
-			<CatalogSection
-				key={kind}
-				icon={SECTION_ICONS[kind] ?? <LuBlocks size={20} />}
-				title={typeLabel(kind)}
-			>
-				{items.map((plugin: CatalogPlugin) => (
-					<CatalogPluginCard
-						key={plugin.manifest_url}
-						plugin={plugin}
-						onInstall={url => onInstall({ kind: 'install', url })}
-						onUpdate={updateFromCatalog}
-					/>
-				))}
-			</CatalogSection>
-		))
-	}
-
 	return (
 		<>
 			<CatalogFilters
-				types={TYPES.map(value => ({ value, label: t(`plugins.types.${value}`) }))}
+				types={PLUGIN_TYPES.map(value => ({ value, label: t(`plugins.types.${value}`) }))}
 				type={type}
 				onTypeChange={setType}
 				options={[
@@ -235,7 +86,28 @@ export function PluginsTab({
 				}
 			/>
 
-			{body()}
+			{view === 'installed' ? (
+				<InstalledPlugins
+					failed={installedState.phase === 'failed'}
+					onRetry={installedState.retry}
+					extensions={extensions}
+					shown={shownInstalled}
+					onBrowseCatalog={onBrowseCatalog}
+					onInstall={onInstall}
+					onSettings={onSettings}
+				/>
+			) : (
+				<CatalogPlugins
+					failed={catalogState.phase === 'failed'}
+					onRetry={catalogState.retry}
+					offered={offered}
+					hasRepositories={(catalog?.repositories ?? []).length > 0}
+					shown={shownCatalog}
+					onInstall={url => onInstall({ kind: 'install', url })}
+					onUpdate={updateFromCatalog}
+					onRepositories={onRepositories}
+				/>
+			)}
 		</>
 	)
 }

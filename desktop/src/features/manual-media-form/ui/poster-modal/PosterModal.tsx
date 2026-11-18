@@ -2,15 +2,17 @@ import { useUnit } from 'effector-react'
 import { useEffect, useRef, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { formatBytes } from '@shared/lib'
 import { Button, EmptyState, Icon, Input, Modal, SegmentedControl, toast } from '@shared/ui'
 
 import { manualCoverSearchQuery } from '@entities/media'
 
+import { coverPreviewUrl } from '../../lib/cover'
 import type { CoverSelection } from '../../lib/cover'
 import type { ManualMediaType } from '../../lib/draft'
 import { readImageFile } from '../../lib/read-image-file'
 
+import { CoverResults } from './cover-results/CoverResults'
+import { CurrentCover } from './current-cover/CurrentCover'
 import styles from './PosterModal.module.scss'
 
 export interface PosterModalProps {
@@ -56,33 +58,27 @@ export function PosterModal({
 		manualCoverSearchQuery.$error
 	])
 
-	const previewUrl =
-		selection.kind === 'remove'
-			? null
-			: selection.kind === 'keep'
-				? (existingCoverUrl ?? null)
-				: selection.previewUrl
+	const previewUrl = coverPreviewUrl(selection, existingCoverUrl)
 
 	useEffect(() => {
 		reset()
 	}, [reset])
 
-	const runSearch = () => {
-		const text = (query || title).trim()
+	const searchText = (query || title).trim()
+	const searchKey = `${mediaType}|${searchText}|${year ?? ''}`
 
-		if (typeMissing || text === '') {
+	const runSearch = () => {
+		if (typeMissing || searchText === '') {
 			return
 		}
 
-		lastSearch.current = `${mediaType}|${text}|${year ?? ''}`
+		lastSearch.current = searchKey
 		setSearched(true)
-		search({ type: mediaType, title: text, year })
+		search({ type: mediaType, title: searchText, year })
 	}
 
 	useEffect(() => {
-		const text = (query || title).trim()
-
-		if (open && tab === 'search' && lastSearch.current !== `${mediaType}|${text}|${year ?? ''}`) {
+		if (open && tab === 'search' && lastSearch.current !== searchKey) {
 			runSearch()
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- only opening searches by itself; edits to the title wait for the user's own search.
@@ -122,35 +118,15 @@ export function PosterModal({
 			footer={
 				<>
 					{previewUrl && (
-						<div className={styles.current}>
-							<img src={previewUrl} alt='' draggable={false} className={styles.currentThumb} />
-
-							<span className={styles.currentInfo}>
-								<span className={styles.currentLabel}>{t('manualMedia.cover.current')}</span>
-								<span className={styles.currentName}>
-									{selection.kind === 'data'
-										? `${selection.name} · ${formatBytes(selection.size)}`
-										: t(
-												selection.kind === 'url' && selection.source === 'search'
-													? 'manualMedia.cover.fromSearch'
-													: 'manualMedia.cover.fromUrl'
-											)}
-								</span>
-							</span>
-
-							{!disabled && (
-								<Button
-									variant='ghost'
-									size='small'
-									startIcon={<Icon name='common/trash' size={14} />}
-									onClick={() =>
-										choose(existingCoverUrl ? { kind: 'remove' } : { kind: 'keep' })
-									}
-								>
-									{t('manualMedia.cover.remove')}
-								</Button>
-							)}
-						</div>
+						<CurrentCover
+							previewUrl={previewUrl}
+							selection={selection}
+							onRemove={
+								disabled
+									? undefined
+									: () => choose(existingCoverUrl ? { kind: 'remove' } : { kind: 'keep' })
+							}
+						/>
 					)}
 
 					<Button variant='primary' onClick={() => onOpenChange(false)}>
@@ -212,41 +188,11 @@ export function PosterModal({
 						)}
 
 						{!typeMissing && searched && !searching && !failed && candidates && (
-							<>
-								{(candidates.images ?? []).length === 0 ? (
-									<EmptyState
-										title={t('manualMedia.cover.empty')}
-										description={t('manualMedia.cover.emptyHint')}
-									/>
-								) : (
-									<ul className={styles.grid}>
-										{candidates.images?.map(image => (
-											<li key={image.url}>
-												<button
-													type='button'
-													className={styles.candidate}
-													disabled={disabled}
-													onClick={() =>
-														choose({
-															kind: 'url',
-															value: image.url,
-															previewUrl: image.thumbnail,
-															source: 'search'
-														})
-													}
-												>
-													<img
-														src={image.thumbnail}
-														alt=''
-														draggable={false}
-														loading='lazy'
-													/>
-												</button>
-											</li>
-										))}
-									</ul>
-								)}
-							</>
+							<CoverResults
+								images={candidates.images ?? []}
+								disabled={disabled}
+								onChoose={choose}
+							/>
 						)}
 					</div>
 				)}

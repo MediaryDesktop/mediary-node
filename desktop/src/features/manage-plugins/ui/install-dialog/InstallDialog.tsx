@@ -1,4 +1,5 @@
 import { useUnit } from 'effector-react'
+import type { TFunction } from 'i18next'
 import { useEffect, useId, useState } from 'react'
 import type { ReactNode } from 'react'
 import { LuDownload, LuRefreshCw } from 'react-icons/lu'
@@ -48,6 +49,20 @@ type Step =
 	| { kind: 'consent'; preview: ExtensionPreview }
 	| { kind: 'failed'; message: string }
 
+function readManifest(
+	preview: (address: string) => Promise<ExtensionPreview>,
+	address: string,
+	t: TFunction
+): Promise<Step> {
+	return preview(address).then(
+		(result): Step => ({ kind: 'consent', preview: result }),
+		(error: unknown): Step => ({
+			kind: 'failed',
+			message: failure(error, t('plugins.dialog.readFailed'))
+		})
+	)
+}
+
 interface StepsProps {
 	target: InstallTarget
 	open: boolean
@@ -66,11 +81,7 @@ function Steps({ target, open, onClose }: StepsProps) {
 
 	const read = (address: string) => {
 		setStep({ kind: 'reading' })
-		preview(address)
-			.then(result => setStep({ kind: 'consent', preview: result }))
-			.catch((error: unknown) =>
-				setStep({ kind: 'failed', message: failure(error, t('plugins.dialog.readFailed')) })
-			)
+		void readManifest(preview, address, t).then(setStep)
 	}
 
 	useEffect(() => {
@@ -79,13 +90,7 @@ function Steps({ target, open, onClose }: StepsProps) {
 		}
 
 		let alive = true
-		preview(initialURL)
-			.then(result => alive && setStep({ kind: 'consent', preview: result }))
-			.catch(
-				(error: unknown) =>
-					alive &&
-					setStep({ kind: 'failed', message: failure(error, t('plugins.dialog.readFailed')) })
-			)
+		void readManifest(preview, initialURL, t).then(next => alive && setStep(next))
 
 		return () => {
 			alive = false

@@ -5,7 +5,7 @@ import { fileName } from '@entities/library-item'
 import type { LibraryFile } from '@entities/library-item'
 import type { MediaEpisode } from '@entities/media'
 
-import { useEpisodeText } from '../lib/useEpisodeText'
+import { useEpisodeText } from '../../lib/useEpisodeText'
 
 import styles from './EpisodeRow.module.scss'
 import { EpisodeRowItem } from './EpisodeRowItem'

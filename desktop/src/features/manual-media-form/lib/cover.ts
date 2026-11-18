@@ -17,3 +17,20 @@ export function coverSource(selection: CoverSelection): { url?: string; data?: s
 
 	return null
 }
+
+// The picture the form shows for the title: the one it already has while the
+// choice is to keep it, none once it is removed, otherwise the new pick.
+export function coverPreviewUrl(
+	selection: CoverSelection,
+	existing: string | null | undefined
+): string | null {
+	if (selection.kind === 'remove') {
+		return null
+	}
+
+	if (selection.kind === 'keep') {
+		return existing ?? null
+	}
+
+	return selection.previewUrl
+}

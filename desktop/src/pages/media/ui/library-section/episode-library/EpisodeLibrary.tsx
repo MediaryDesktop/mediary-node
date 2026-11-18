@@ -19,15 +19,14 @@ import { useMissingToolAction } from '@entities/tool'
 import { episodeFor, episodeOrder, groupTitleFiles, isWatched } from '@features/continue-watching'
 import { episodeMarked, listableEpisode } from '@features/mark-progress'
 
-import { EpisodeItem } from '../episode-row/EpisodeItem'
-import rowStyles from '../episode-row/EpisodeRow.module.scss'
-import sectionStyles from '../EpisodeSection.module.scss'
+import { useEpisodeMeta } from '../../../lib/useEpisodeMeta'
+import { EpisodeItem } from '../../episode-row/EpisodeItem'
+import rowStyles from '../../episode-row/EpisodeRow.module.scss'
+import sectionStyles from '../../episode-section/EpisodeSection.module.scss'
+import { ToWatchCard } from '../../to-watch-rail/ToWatchCard'
+import { ToWatchRail } from '../../to-watch-rail/ToWatchRail'
 import { seasonsOf } from '../lib/seasons'
-import { useEpisodeMeta } from '../lib/useEpisodeMeta'
 import { NotInLibrary } from '../not-in-library/NotInLibrary'
-
-import { ToWatchCard } from './to-watch-rail/ToWatchCard'
-import { ToWatchRail } from './to-watch-rail/ToWatchRail'
 
 export interface EpisodeLibraryProps {
 	mediaRef: string

@@ -8,11 +8,11 @@ import type { MediaEpisode } from '@entities/media'
 
 import type { EpisodeIndex } from '@features/continue-watching'
 
-import { EpisodeAside } from '../episode-row/EpisodeAside'
-import rowStyles from '../episode-row/EpisodeRow.module.scss'
-import { EpisodeText } from '../episode-row/EpisodeText'
-import sectionStyles from '../EpisodeSection.module.scss'
-import { useEpisodeText } from '../lib/useEpisodeText'
+import { useEpisodeText } from '../../../lib/useEpisodeText'
+import { EpisodeAside } from '../../episode-row/EpisodeAside'
+import rowStyles from '../../episode-row/EpisodeRow.module.scss'
+import { EpisodeText } from '../../episode-row/EpisodeText'
+import sectionStyles from '../../episode-section/EpisodeSection.module.scss'
 
 const MAX_EPISODE_PLACEHOLDERS = 28
 

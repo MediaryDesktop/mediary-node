@@ -5,7 +5,7 @@ import { Icon, Tooltip } from '@shared/ui'
 
 import type { MediaEpisode } from '@entities/media'
 
-import { useEpisodeText } from '../lib/useEpisodeText'
+import { useEpisodeText } from '../../lib/useEpisodeText'
 
 import styles from './EpisodeRow.module.scss'
 

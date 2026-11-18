@@ -2,7 +2,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { createEvent } from 'effector'
 import type { Unit } from 'effector'
 import { useUnit } from 'effector-react'
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 
 import { getApiProblems, HttpRequestError, problemDetail } from '@shared/api'
 import { isLanguage, useTranslation } from '@shared/i18n'
@@ -11,7 +11,7 @@ import { toast } from '@shared/ui'
 
 import { useNodeData } from '@infra/node'
 
-import { aiSettingsQuery, searchManualCoversFx, suggestManualMediaFx } from '@entities/media'
+import { aiSettingsQuery, suggestManualMediaFx } from '@entities/media'
 import type { ManualDraft, ManualHint } from '@entities/media'
 import { isLocalTrackerType, trackerListsQuery } from '@entities/tracker'
 
@@ -19,8 +19,8 @@ import { saveManualMediaFx } from '../model/model'
 
 import { hintNote, mergeSuggestion, withoutAiFilled } from './ai-merge'
 import type { AiMergeField } from './ai-merge'
-import type { CoverSelection } from './cover'
 import { formatAfterTypeChange } from './draft'
+import { useCoverChoice } from './useCoverChoice'
 
 // A list the user has just created from this form's "+ New list".
 export interface CreatedList {
@@ -71,18 +71,16 @@ export function useManualMediaForm({
 	const { t, i18n } = useTranslation()
 	const navigate = useNavigate()
 	const goBack = useGoBack(cancelTo)
-	const [refreshAISettings, saveManual, searchCovers, suggestDraft] = useUnit([
+	const [refreshAISettings, saveManual, suggestDraft] = useUnit([
 		aiSettingsQuery.start,
 		saveManualMediaFx,
-		searchManualCoversFx,
 		suggestManualMediaFx
 	])
 	const listCollection = useUnit(trackerListsQuery.$data)
 
 	const [draft, setDraft] = useState<ManualDraft>(initialDraft)
 	const [aiFilled, setAiFilled] = useState<ReadonlySet<AiMergeField>>(new Set())
-	const [cover, setCover] = useState<CoverSelection>({ kind: 'keep' })
-	const autoCover = useRef(false)
+	const { cover, pickCover, previewCoverUrl, findPoster, dropAutoCover } = useCoverChoice(initialCoverUrl)
 	const [errors, setErrors] = useState<Record<string, string>>({})
 	const [typePicked, setTypePicked] = useState(!typeUnset)
 	const [listNames, setListNames] = useState<string[]>([])
@@ -166,39 +164,6 @@ export function useManualMediaForm({
 				return without
 			})
 		}
-	}
-
-	const dropAutoCover = () => {
-		if (autoCover.current) {
-			autoCover.current = false
-			setCover({ kind: 'keep' })
-		}
-	}
-
-	const findPoster = async (found: ManualDraft) => {
-		if (initialCoverUrl || (cover.kind !== 'keep' && !autoCover.current)) {
-			return
-		}
-
-		try {
-			const result = await searchCovers({
-				type: found.media_type,
-				title: found.title,
-				year: found.year
-			})
-			const image = result.images?.[0]
-
-			if (image?.source === 'catalog') {
-				setCover(current =>
-					current.kind === 'keep' || autoCover.current
-						? { kind: 'url', value: image.url, previewUrl: image.thumbnail, source: 'search' }
-						: current
-				)
-				autoCover.current = true
-			} else {
-				dropAutoCover()
-			}
-		} catch {}
 	}
 
 	const suggest = async () => {
@@ -312,14 +277,6 @@ export function useManualMediaForm({
 		setDeleteOpen(false)
 		void navigate({ to: '/library' })
 	}
-
-	const pickCover = (chosen: CoverSelection) => {
-		autoCover.current = false
-		setCover(chosen)
-	}
-
-	const previewCoverUrl =
-		cover.kind === 'remove' ? null : cover.kind === 'keep' ? (initialCoverUrl ?? null) : cover.previewUrl
 
 	const dirty = JSON.stringify(draft) !== JSON.stringify(initialDraft) || cover.kind !== 'keep'
 

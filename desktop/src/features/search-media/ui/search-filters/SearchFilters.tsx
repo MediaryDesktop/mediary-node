@@ -1,4 +1,5 @@
 import { useUnit } from 'effector-react'
+import type { TFunction } from 'i18next'
 import { useMemo } from 'react'
 
 import { useTranslation } from '@shared/i18n'
@@ -7,6 +8,7 @@ import type { IconName, SelectDropdownOption } from '@shared/ui'
 
 import { enumLabel } from '@entities/media'
 import type {
+	MediaEnumGroup,
 	MediaSearchFormat,
 	MediaSearchSeason,
 	MediaSearchSort,
@@ -36,6 +38,10 @@ const TYPE_ICONS = {
 	dorama: 'categories/doramas',
 	book: 'categories/book'
 } as const satisfies Record<MediaSearchType, IconName>
+
+function enumOptions(t: TFunction, group: MediaEnumGroup, values: readonly string[]): SelectDropdownOption[] {
+	return values.map(value => ({ value, label: enumLabel(t, group, value) ?? value }))
+}
 
 function yearOptions(): SelectDropdownOption[] {
 	const latest = new Date().getFullYear() + 1
@@ -72,32 +78,9 @@ export function SearchFilters() {
 		[options, filters.adult]
 	)
 
-	const formats = useMemo<SelectDropdownOption[]>(
-		() =>
-			SEARCH_FORMATS[filters.type].map(format => ({
-				value: format,
-				label: enumLabel(t, 'format', format) ?? format
-			})),
-		[filters.type, t]
-	)
-
-	const statuses = useMemo<SelectDropdownOption[]>(
-		() =>
-			SEARCH_STATUSES.map(status => ({
-				value: status,
-				label: enumLabel(t, 'status', status) ?? status
-			})),
-		[t]
-	)
-
-	const seasons = useMemo<SelectDropdownOption[]>(
-		() =>
-			SEARCH_SEASONS.map(season => ({
-				value: season,
-				label: enumLabel(t, 'season', season) ?? season
-			})),
-		[t]
-	)
+	const formats = useMemo(() => enumOptions(t, 'format', SEARCH_FORMATS[filters.type]), [filters.type, t])
+	const statuses = useMemo(() => enumOptions(t, 'status', SEARCH_STATUSES), [t])
+	const seasons = useMemo(() => enumOptions(t, 'season', SEARCH_SEASONS), [t])
 
 	const years = useMemo(() => yearOptions(), [])
 	const aniList = isAniListType(filters.type)
