@@ -37,7 +37,7 @@ func TestTheContactGoesInTheUserAgent(t *testing.T) {
 		t.Fatalf("user agent %q", agent)
 	}
 
-	if New(Options{Contact: "x"}).interval != contactInterval || New(Options{}).interval != anonymousInterval {
+	if New(Options{Contact: "x"}).pacer.Interval() != contactInterval || New(Options{}).pacer.Interval() != anonymousInterval {
 		t.Fatal("an identified client may ask three times a second, an anonymous one once")
 	}
 }

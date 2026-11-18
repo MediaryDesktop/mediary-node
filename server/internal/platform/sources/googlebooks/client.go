@@ -17,11 +17,11 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
 	"github.com/MediaryDesktop/mediary-node/server/internal/platform/secrets"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/internal/pace"
 )
 
 const (
@@ -54,9 +54,7 @@ type Client struct {
 
 	backoff time.Duration
 
-	mu       sync.Mutex
-	interval time.Duration
-	next     time.Time
+	pacer *pace.Pacer
 }
 
 func NewKeys(store *secrets.Store, fallback string) *secrets.APIKey {
@@ -84,7 +82,7 @@ func New(opts Options) *Client {
 		userAgent: userAgent,
 		http:      &http.Client{Timeout: timeout},
 		keys:      opts.Keys,
-		interval:  interval,
+		pacer:     pace.New(interval),
 		backoff:   retryBackoff,
 	}
 }
@@ -142,7 +140,7 @@ func (c *Client) get(ctx context.Context, key, path string, query url.Values, ou
 
 // send makes one request, and reports whether a failure is worth another.
 func (c *Client) send(ctx context.Context, key, path string, query url.Values, out any) (bool, error) {
-	if err := c.wait(ctx); err != nil {
+	if err := c.pacer.Wait(ctx); err != nil {
 		return false, apperr.Wrap(err, apperr.KindUnavailable, "google books request cancelled")
 	}
 
@@ -219,30 +217,4 @@ func statusError(status int, raw []byte) error {
 // end of its own session with the node.
 func rejected() error {
 	return apperr.New(apperr.KindPrecondition, "Google Books rejected the API key").WithCode(apperr.CodeSetupRequired)
-}
-
-func (c *Client) wait(ctx context.Context) error {
-	c.mu.Lock()
-	now := time.Now()
-	at := c.next
-	if at.Before(now) {
-		at = now
-	}
-	c.next = at.Add(c.interval)
-	c.mu.Unlock()
-
-	delay := time.Until(at)
-	if delay <= 0 {
-		return nil
-	}
-
-	timer := time.NewTimer(delay)
-	defer timer.Stop()
-
-	select {
-	case <-ctx.Done():
-		return ctx.Err()
-	case <-timer.C:
-		return nil
-	}
 }

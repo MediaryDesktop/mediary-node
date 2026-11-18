@@ -13,12 +13,11 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/internal/pace"
 )
 
 const (
@@ -46,10 +45,7 @@ type Client struct {
 	http      *http.Client
 	keys      *Keys
 
-	mu           sync.Mutex
-	interval     time.Duration
-	next         time.Time
-	blockedUntil time.Time
+	pacer *pace.Pacer
 }
 
 func New(opts Options) *Client {
@@ -73,7 +69,7 @@ func New(opts Options) *Client {
 		userAgent: userAgent,
 		http:      &http.Client{Timeout: timeout},
 		keys:      opts.Keys,
-		interval:  interval,
+		pacer:     pace.New(interval),
 	}
 }
 
@@ -114,7 +110,7 @@ func (c *Client) call(ctx context.Context, path string, query url.Values, out an
 
 func (c *Client) get(ctx context.Context, key, path string, query url.Values, out any) error {
 	for attempt := 1; ; attempt++ {
-		if err := c.wait(ctx); err != nil {
+		if err := c.pacer.Wait(ctx); err != nil {
 			return apperr.Wrap(err, apperr.KindUnavailable, "tmdb request cancelled")
 		}
 
@@ -160,7 +156,7 @@ func (c *Client) send(ctx context.Context, key, path string, query url.Values, o
 
 	switch {
 	case resp.StatusCode == http.StatusTooManyRequests:
-		c.blockUntil(retryAt(resp.Header, time.Now()))
+		c.pacer.BlockUntil(pace.RetryAt(resp.Header, time.Now(), fallbackBackoff))
 		return true, nil
 	case resp.StatusCode == http.StatusUnauthorized:
 		return false, rejected()
@@ -190,56 +186,4 @@ func rejected() error {
 
 func isAccessToken(key string) bool {
 	return strings.HasPrefix(key, "eyJ") && strings.Count(key, ".") == 2
-}
-
-func (c *Client) wait(ctx context.Context) error {
-	c.mu.Lock()
-	now := time.Now()
-	at := c.next
-	if at.Before(now) {
-		at = now
-	}
-	if c.blockedUntil.After(at) {
-		at = c.blockedUntil
-	}
-	c.next = at.Add(c.interval)
-	c.mu.Unlock()
-
-	delay := time.Until(at)
-	if delay <= 0 {
-		return nil
-	}
-
-	timer := time.NewTimer(delay)
-	defer timer.Stop()
-
-	select {
-	case <-ctx.Done():
-		return ctx.Err()
-	case <-timer.C:
-		return nil
-	}
-}
-
-func (c *Client) blockUntil(until time.Time) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-
-	if until.After(c.blockedUntil) {
-		c.blockedUntil = until
-	}
-}
-
-func retryAt(headers http.Header, now time.Time) time.Time {
-	raw := headers.Get("Retry-After")
-
-	if seconds, err := strconv.Atoi(raw); err == nil && seconds >= 0 {
-		return now.Add(time.Duration(seconds) * time.Second)
-	}
-
-	if parsed, err := http.ParseTime(raw); err == nil {
-		return parsed
-	}
-
-	return now.Add(fallbackBackoff)
 }

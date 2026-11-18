@@ -15,10 +15,10 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/MediaryDesktop/mediary-node/server/internal/platform/apperr"
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/sources/internal/pace"
 )
 
 const (
@@ -37,8 +37,7 @@ type Client struct {
 	userAgent string
 	http      *http.Client
 
-	mu   sync.Mutex
-	next time.Time
+	pacer *pace.Pacer
 }
 
 func New(opts Options) *Client {
@@ -47,7 +46,7 @@ func New(opts Options) *Client {
 		timeout = 15 * time.Second
 	}
 
-	return &Client{endpoint: strings.TrimRight(opts.Endpoint, "/"), userAgent: opts.UserAgent, http: &http.Client{Timeout: timeout}}
+	return &Client{endpoint: strings.TrimRight(opts.Endpoint, "/"), userAgent: opts.UserAgent, http: &http.Client{Timeout: timeout}, pacer: pace.New(minInterval)}
 }
 
 // Mapping is the part of an ani.zip answer the node reads. Episodes is keyed the
@@ -74,7 +73,7 @@ type Episode struct {
 // nothing: most short and recent titles have no listing yet, and that is an
 // answer, not a failure.
 func (c *Client) ByAniList(ctx context.Context, aniListID int) (*Mapping, error) {
-	if err := c.wait(ctx); err != nil {
+	if err := c.pacer.Wait(ctx); err != nil {
 		return nil, apperr.Wrap(err, apperr.KindUnavailable, "ani.zip request cancelled")
 	}
 
@@ -115,30 +114,4 @@ func (c *Client) ByAniList(ctx context.Context, aniListID int) (*Mapping, error)
 	}
 
 	return &mapping, nil
-}
-
-func (c *Client) wait(ctx context.Context) error {
-	c.mu.Lock()
-	now := time.Now()
-	at := c.next
-	if at.Before(now) {
-		at = now
-	}
-	c.next = at.Add(minInterval)
-	c.mu.Unlock()
-
-	delay := time.Until(at)
-	if delay <= 0 {
-		return nil
-	}
-
-	timer := time.NewTimer(delay)
-	defer timer.Stop()
-
-	select {
-	case <-ctx.Done():
-		return ctx.Err()
-	case <-timer.C:
-		return nil
-	}
 }
