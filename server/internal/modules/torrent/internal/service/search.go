@@ -155,6 +155,17 @@ func (s *Service) Search(ctx context.Context, req SearchRequest) (*TorrentSearch
 		return nil, apperr.New(apperr.KindPrecondition, "add a Torznab source — Jackett or Prowlarr — or install a search plugin first")
 	}
 
+	// Every key is read before the first source is asked: a failure past that
+	// point would leave the askers already started with no one to hear them.
+	keys := make([]string, len(sources))
+	for i := range sources {
+		key, keyErr := s.secrets.Get(sourceKey(sources[i].ID))
+		if keyErr != nil {
+			return nil, apperr.Wrap(keyErr, apperr.KindInternal, "read a search source's key")
+		}
+		keys[i] = key
+	}
+
 	// The wait is the sources' alone: reading the profile and asking the debrid
 	// service afterwards still have the request's own time.
 	askCtx, cancel := context.WithTimeout(ctx, s.opts.SearchTimeout)
@@ -174,12 +185,8 @@ func (s *Service) Search(ctx context.Context, req SearchRequest) (*TorrentSearch
 	outcomes := make(map[string]*TorrentSourceOutcome, len(sources)+len(providers))
 	order := make([]string, 0, len(sources)+len(providers))
 
-	for _, source := range sources {
-		key, keyErr := s.secrets.Get(sourceKey(source.ID))
-		if keyErr != nil {
-			return nil, apperr.Wrap(keyErr, apperr.KindInternal, "read a search source's key")
-		}
-
+	for i, source := range sources {
+		key := keys[i]
 		outcomeKey := "t" + strconv.FormatInt(source.ID, 10)
 		outcomes[outcomeKey] = &TorrentSourceOutcome{ID: source.ID, Name: source.Name}
 		order = append(order, outcomeKey)
