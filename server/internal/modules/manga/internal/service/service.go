@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -163,7 +162,7 @@ type CheckResult struct {
 }
 
 func (s *Service) CheckServer(ctx context.Context, in CheckInput) (*CheckResult, error) {
-	address, err := validURL(in.URL)
+	address, err := opds.ServerURL(in.URL)
 	if err != nil {
 		return nil, err
 	}
@@ -222,28 +221,12 @@ func validServer(in ServerInput) (store.Server, error) {
 		return store.Server{}, apperr.Invalid("name", "a server name is at most 100 characters")
 	}
 
-	address, err := validURL(in.URL)
+	address, err := opds.ServerURL(in.URL)
 	if err != nil {
 		return store.Server{}, err
 	}
 
 	return store.Server{Name: name, URL: address, Username: strings.TrimSpace(in.Username)}, nil
-}
-
-func validURL(raw string) (string, error) {
-	raw = strings.TrimSpace(raw)
-
-	address, err := url.Parse(raw)
-	if err != nil || (address.Scheme != "http" && address.Scheme != "https") || address.Host == "" {
-		return "", apperr.Invalid("url", "the address must start with http:// or https://")
-	}
-	if address.User != nil {
-		return "", apperr.Invalid("url", "put the user name and password in their own fields, not in the address")
-	}
-
-	address.Fragment = ""
-
-	return address.String(), nil
 }
 
 func problem(err error) string {

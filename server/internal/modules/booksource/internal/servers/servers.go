@@ -8,7 +8,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -178,7 +177,7 @@ type CheckResult struct {
 
 // Check reads the catalogue and its search, the two things a book server needs.
 func (s *Servers) Check(ctx context.Context, in CheckInput) (*CheckResult, error) {
-	address, err := validURL(in.URL)
+	address, err := opds.ServerURL(in.URL)
 	if err != nil {
 		return nil, err
 	}
@@ -239,25 +238,11 @@ func valid(in Input) (name, address, username string, err error) {
 		return "", "", "", apperr.Invalid("name", "a server name is at most %d characters", maxNameRunes)
 	}
 
-	if address, err = validURL(in.URL); err != nil {
+	if address, err = opds.ServerURL(in.URL); err != nil {
 		return "", "", "", err
 	}
 
 	return name, address, strings.TrimSpace(in.Username), nil
-}
-
-func validURL(raw string) (string, error) {
-	address, err := url.Parse(strings.TrimSpace(raw))
-	if err != nil || (address.Scheme != "http" && address.Scheme != "https") || address.Host == "" {
-		return "", apperr.Invalid("url", "the address must start with http:// or https://")
-	}
-	if address.User != nil {
-		return "", apperr.Invalid("url", "put the user name and password in their own fields, not in the address")
-	}
-
-	address.Fragment = ""
-
-	return address.String(), nil
 }
 
 func problem(err error) string {

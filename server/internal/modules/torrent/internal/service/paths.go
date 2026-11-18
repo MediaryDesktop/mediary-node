@@ -4,6 +4,8 @@ import (
 	"path/filepath"
 	"strings"
 	"unicode"
+
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/filename"
 )
 
 // The longest folder name the node makes for a title; Windows paths still have a
@@ -33,6 +35,12 @@ func folderName(title string) string {
 	name = strings.TrimRight(name, ". ")
 	if name == "" {
 		return "Untitled"
+	}
+
+	// Windows keeps names like CON and NUL for devices and refuses a folder by
+	// one, as the book and manga downloads already know.
+	if filename.Reserved(name) {
+		name = "_" + name
 	}
 
 	return name

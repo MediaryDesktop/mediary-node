@@ -7,6 +7,8 @@ import (
 	"path"
 	"strings"
 	"unicode"
+
+	"github.com/MediaryDesktop/mediary-node/server/internal/platform/filename"
 )
 
 const maxNameRunes = 120
@@ -29,7 +31,7 @@ func RelPath(series, number, title string) string {
 		name = folder + " - Extra"
 	}
 
-	return path.Join(folder, truncate(name, maxNameRunes)+".cbz")
+	return path.Join(folder, filename.Truncate(name, maxNameRunes)+".cbz")
 }
 
 func padNumber(number string) string {
@@ -77,31 +79,9 @@ func clean(name string) string {
 	out := strings.Join(strings.Fields(b.String()), " ")
 	out = strings.Trim(out, ". ")
 
-	if reserved(out) {
+	if filename.Reserved(out) {
 		out = "_" + out
 	}
 
-	return truncate(out, maxNameRunes)
-}
-
-func reserved(name string) bool {
-	upper := strings.ToUpper(strings.SplitN(name, ".", 2)[0])
-
-	switch upper {
-	case "CON", "PRN", "AUX", "NUL",
-		"COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
-		"LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9":
-		return true
-	}
-
-	return false
-}
-
-func truncate(s string, runes int) string {
-	r := []rune(s)
-	if len(r) <= runes {
-		return s
-	}
-
-	return strings.TrimRight(string(r[:runes]), ". ")
+	return filename.Truncate(out, maxNameRunes)
 }

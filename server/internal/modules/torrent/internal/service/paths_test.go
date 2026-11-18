@@ -14,6 +14,8 @@ func TestFolderName(t *testing.T) {
 		"???":                          "Untitled",
 		"Tab\tand\nnewline":            "Tab and newline",
 		`Fate\stay night "UBW" <2014>`: "Fate stay night UBW 2014",
+		"Con":                          "_Con",
+		"Nul.":                         "_Nul",
 	}
 
 	for in, want := range cases {
