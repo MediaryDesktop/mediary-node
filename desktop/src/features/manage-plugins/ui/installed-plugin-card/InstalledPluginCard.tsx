@@ -1,38 +1,20 @@
 import { useUnit } from 'effector-react'
 import { useState } from 'react'
-import { LuDownload, LuEllipsisVertical, LuRefreshCw, LuSettings2 } from 'react-icons/lu'
+import { LuEllipsisVertical, LuRefreshCw, LuSettings2 } from 'react-icons/lu'
 import { TbBraces, TbBracesOff } from 'react-icons/tb'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, DropdownMenu, Icon, ItemCard, ItemCardAction, ItemCardMark, Modal } from '@shared/ui'
+import { Button, DropdownMenu, ItemCard, ItemCardAction, Modal } from '@shared/ui'
 import type { DropdownMenuItem } from '@shared/ui'
 
 import { configureExtensionMutation, removeExtensionMutation } from '@entities/extension'
-import type { CatalogPlugin, Extension } from '@entities/extension'
+import type { Extension } from '@entities/extension'
 
 import { languageName } from '../../lib/languages'
+import { PluginIcon } from '../plugin-icon/PluginIcon'
 
-import styles from './PluginCard.module.scss'
-
-function PluginIcon({ name, icon }: { name: string; icon?: string }) {
-	const [broken, setBroken] = useState(false)
-
-	if (icon && !broken) {
-		return <img src={icon} alt='' referrerPolicy='no-referrer' onError={() => setBroken(true)} />
-	}
-
-	return <span className={styles.letter}>{name.slice(0, 1).toUpperCase()}</span>
-}
-
-function Hosts({ hosts }: { hosts: string[] }) {
-	const { t } = useTranslation()
-
-	return (
-		<p className={styles.hosts} title={hosts.join(', ')}>
-			{hosts.length > 0 ? t('plugins.hosts', { hosts: hosts.join(', ') }) : t('plugins.noHosts')}
-		</p>
-	)
-}
+import { Hosts } from './hosts/Hosts'
+import styles from './InstalledPluginCard.module.scss'
 
 export interface InstalledPluginCardProps {
 	extension: Extension
@@ -152,68 +134,5 @@ export function InstalledPluginCard({ extension, onUpdate, onSettings }: Install
 				}
 			/>
 		</>
-	)
-}
-
-export interface CatalogPluginCardProps {
-	plugin: CatalogPlugin
-	onInstall: (manifestUrl: string) => void
-	onUpdate: (id: string) => void
-}
-
-export function CatalogPluginCard({ plugin, onInstall, onUpdate }: CatalogPluginCardProps) {
-	const { t } = useTranslation()
-
-	const action = () => {
-		if (plugin.update) {
-			return (
-				<ItemCardAction
-					label={t('plugins.update', { version: plugin.version })}
-					tone='success'
-					onClick={() => onUpdate(plugin.id)}
-				>
-					<LuRefreshCw size={16} />
-				</ItemCardAction>
-			)
-		}
-
-		if (plugin.installed) {
-			return (
-				<ItemCardMark
-					label={
-						plugin.installed_here ? t('plugins.installedHere') : t('plugins.installedElsewhere')
-					}
-				>
-					<Icon name='common/check' size={16} />
-				</ItemCardMark>
-			)
-		}
-
-		return (
-			<ItemCardAction
-				label={t('plugins.install')}
-				tone='primary'
-				onClick={() => onInstall(plugin.manifest_url)}
-			>
-				<LuDownload size={16} />
-			</ItemCardAction>
-		)
-	}
-
-	return (
-		<ItemCard
-			icon={<PluginIcon name={plugin.name} icon={plugin.icon} />}
-			title={plugin.name}
-			subtitle={plugin.id}
-			description={plugin.description}
-			highlight={plugin.update ? 'success' : undefined}
-			meta={[
-				plugin.version,
-				plugin.author,
-				languageName(plugin.lang, t('plugins.multiLanguage')),
-				t('plugins.from', { repository: plugin.repository_name })
-			]}
-			actions={action()}
-		/>
 	)
 }

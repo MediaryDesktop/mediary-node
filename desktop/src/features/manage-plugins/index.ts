@@ -1,6 +1,7 @@
 export { InstallDialog } from './ui/install-dialog/InstallDialog'
 export type { InstallTarget } from './ui/install-dialog/InstallDialog'
-export { CatalogPluginCard, InstalledPluginCard } from './ui/plugin-card/PluginCard'
+export { CatalogPluginCard } from './ui/catalog-plugin-card/CatalogPluginCard'
+export { InstalledPluginCard } from './ui/installed-plugin-card/InstalledPluginCard'
 export { RepositoriesDrawer } from './ui/repositories-drawer/RepositoriesDrawer'
 export { PluginSettingsDrawer } from './ui/settings-drawer/PluginSettingsDrawer'
 export { usePluginFailures } from './lib/usePluginFailures'
