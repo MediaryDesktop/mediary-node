@@ -1,11 +1,13 @@
 import { useUnit } from 'effector-react'
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 
 import { searchManualCoversFx } from '@entities/media'
 import type { ManualDraft } from '@entities/media'
 
 import { coverPreviewUrl } from './cover'
 import type { CoverSelection } from './cover'
+import { coverFound, coverLost, NO_COVER_CHOICE } from './cover-choice'
+import type { CoverChoice } from './cover-choice'
 
 // The cover the form will save. Besides the user's own pick, the assistant may
 // put one there: the first catalog poster for the title it recognised. Such a
@@ -13,24 +15,15 @@ import type { CoverSelection } from './cover'
 // user picks one themselves.
 export function useCoverChoice(initialCoverUrl: string | null | undefined) {
 	const searchCovers = useUnit(searchManualCoversFx)
-	const [cover, setCover] = useState<CoverSelection>({ kind: 'keep' })
-	const automatic = useRef(false)
+	const [choice, setChoice] = useState<CoverChoice>(NO_COVER_CHOICE)
 
-	const pickCover = (chosen: CoverSelection) => {
-		automatic.current = false
-		setCover(chosen)
-	}
+	const pickCover = (chosen: CoverSelection) => setChoice({ selection: chosen, automatic: false })
 
-	const dropAutoCover = () => {
-		if (automatic.current) {
-			automatic.current = false
-			setCover({ kind: 'keep' })
-		}
-	}
+	const dropAutoCover = () => setChoice(coverLost)
 
 	// A title that has a cover, or one the user picked, keeps it.
 	const findPoster = async (found: ManualDraft) => {
-		if (initialCoverUrl || (cover.kind !== 'keep' && !automatic.current)) {
+		if (initialCoverUrl || (choice.selection.kind !== 'keep' && !choice.automatic)) {
 			return
 		}
 
@@ -43,12 +36,14 @@ export function useCoverChoice(initialCoverUrl: string | null | undefined) {
 			const image = result.images?.[0]
 
 			if (image?.source === 'catalog') {
-				setCover(current =>
-					current.kind === 'keep' || automatic.current
-						? { kind: 'url', value: image.url, previewUrl: image.thumbnail, source: 'search' }
-						: current
+				setChoice(current =>
+					coverFound(current, {
+						kind: 'url',
+						value: image.url,
+						previewUrl: image.thumbnail,
+						source: 'search'
+					})
 				)
-				automatic.current = true
 			} else {
 				dropAutoCover()
 			}
@@ -56,9 +51,9 @@ export function useCoverChoice(initialCoverUrl: string | null | undefined) {
 	}
 
 	return {
-		cover,
+		cover: choice.selection,
 		pickCover,
-		previewCoverUrl: coverPreviewUrl(cover, initialCoverUrl),
+		previewCoverUrl: coverPreviewUrl(choice.selection, initialCoverUrl),
 		findPoster,
 		dropAutoCover
 	}
