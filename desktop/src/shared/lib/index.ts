@@ -7,6 +7,8 @@ export { firstPresent } from './format/text'
 
 export { useAfterDelay } from './hooks/useAfterDelay'
 export { useGoBack } from './hooks/useGoBack'
+export { useSheetEntrance, useSheetLeave } from './hooks/useSheetMotion'
+export type { SheetEntrance } from './hooks/useSheetMotion'
 export { rowWindow, useRowWindow } from './hooks/useRowWindow'
 export type { RowWindow } from './hooks/useRowWindow'
 export { useUnitWatch } from './hooks/useUnitWatch'

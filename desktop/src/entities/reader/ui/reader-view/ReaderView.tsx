@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { CSSProperties, MouseEvent } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { useAfterDelay } from '@shared/lib'
+import { useSheetEntrance, useSheetLeave } from '@shared/lib'
 import { Button, Icon, Tooltip, WindowControls } from '@shared/ui'
 
 import { useWindowControls } from '@infra/window'
@@ -13,14 +13,11 @@ import type { ReaderChapter } from '../../api/api'
 import { clampPage, isLastPage } from '../../lib/pages'
 import { pageUrl } from '../../lib/urls'
 import { readerModel } from '../../model/model'
-import { useBookEntrance } from '../book-reader/lib/useBookEntrance'
 
 import { usePagePrefetch } from './lib/usePagePrefetch'
 import { useReaderKeyboard } from './lib/useReaderKeyboard'
 import { useZoomPan } from './lib/useZoomPan'
 import styles from './ReaderView.module.scss'
-
-const LEAVE_MS = 240
 
 const CLICK_DELAY_MS = 220
 
@@ -55,12 +52,12 @@ export function ReaderView({
 	const [controlsVisible, setControlsVisible] = useState(true)
 	const [leaving, setLeaving] = useState(false)
 	const clickTimer = useRef<number | undefined>(undefined)
-	const entrance = useBookEntrance(openedAt)
+	const entrance = useSheetEntrance(openedAt)
 	const zoom = useZoomPan(current)
 
 	const requestClose = useCallback(() => setLeaving(true), [])
 
-	useAfterDelay(leaving, LEAVE_MS, onClose)
+	useSheetLeave(leaving, onClose)
 
 	const ref = chapter.ref
 

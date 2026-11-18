@@ -3,11 +3,10 @@ import type { ReactNode } from 'react'
 import { useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
+import { useSheetEntrance } from '@shared/lib'
 import { Button, Icon, WindowControls } from '@shared/ui'
 
 import { useWindowControls } from '@infra/window'
-
-import { useBookEntrance } from '@entities/reader'
 
 import styles from './Panel.module.scss'
 
@@ -22,7 +21,7 @@ export function Panel({ onClose, children, openedAt }: PanelProps) {
 
 	const { t } = useTranslation()
 	const [fallbackOpenedAt] = useState(() => performance.now())
-	const entrance = useBookEntrance(openedAt ?? fallbackOpenedAt)
+	const entrance = useSheetEntrance(openedAt ?? fallbackOpenedAt)
 	const entering = openedAt != null && entrance.entering
 
 	return (

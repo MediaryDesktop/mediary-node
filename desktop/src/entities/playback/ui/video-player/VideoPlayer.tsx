@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { useMemo, useRef, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { useAfterDelay } from '@shared/lib'
+import { useSheetLeave } from '@shared/lib'
 
 import type { PlaybackStream } from '../../api/api'
 import type { VideoSource } from '../../lib/source'
@@ -24,8 +24,6 @@ import { PlayerControls } from './player-controls/PlayerControls'
 import { TrackMenus } from './player-controls/track-menus/TrackMenus'
 import { PlayerHeader } from './player-header/PlayerHeader'
 import styles from './VideoPlayer.module.scss'
-
-const LEAVE_MS = 240
 
 export interface VideoPlayerProps {
 	stream: PlaybackStream
@@ -102,7 +100,7 @@ export function VideoPlayer({
 	const entrance = usePlayerEntrance()
 	const entering = entrance.entering && !mini
 
-	useAfterDelay(leaving, LEAVE_MS, () => onLeft?.())
+	useSheetLeave(leaving, () => onLeft?.())
 
 	const video = info.video ?? info.videos?.[0]
 	const fit = useStageFit(rootRef, video?.width && video.height ? video.width / video.height : null)

@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import type { ReactNode } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { useAfterDelay } from '@shared/lib'
+import { useSheetLeave } from '@shared/lib'
 import { Button, Icon, WindowControls } from '@shared/ui'
 
 import { useWindowControls } from '@infra/window'
@@ -10,8 +10,6 @@ import { useWindowControls } from '@infra/window'
 import { usePlayerEntrance } from '@entities/playback'
 
 import styles from '../PlayerHost.module.scss'
-
-const LEAVE_MS = 240
 
 export interface PanelProps {
 	onClose: () => void
@@ -27,7 +25,7 @@ export function Panel({ onClose, leaving, onLeft, children }: PanelProps) {
 
 	const entrance = usePlayerEntrance()
 
-	useAfterDelay(Boolean(leaving), LEAVE_MS, () => onLeft?.())
+	useSheetLeave(Boolean(leaving), () => onLeft?.())
 
 	return (
 		<div

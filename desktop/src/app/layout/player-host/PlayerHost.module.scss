@@ -1,3 +1,5 @@
+@use "../../../shared/style/animation/sheet-motion" as motion;
+
 .root {
 	position: fixed;
 	inset: 0;
@@ -7,13 +9,7 @@
 	background: var(--media);
 	color: var(--on-media);
 
-	&.enter {
-		animation: panel-in 340ms cubic-bezier(0.32, 0.72, 0, 1) both;
-	}
-
-	&.leave {
-		animation: panel-out 240ms ease-in forwards;
-	}
+	@include motion.sheet;
 
 	.top {
 		display: flex;
@@ -54,24 +50,5 @@
 			font-size: var(--font-size-xl);
 			font-weight: 650;
 		}
-	}
-}
-
-@keyframes panel-in {
-	from {
-		transform: translateY(100%);
-	}
-}
-
-@keyframes panel-out {
-	to {
-		transform: translateY(100%);
-	}
-}
-
-@media (prefers-reduced-motion: reduce) {
-	.root.enter,
-	.root.leave {
-		animation-duration: 1ms;
 	}
 }

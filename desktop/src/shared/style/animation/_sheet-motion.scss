@@ -1,0 +1,31 @@
+$enter-duration: 340ms;
+$leave-duration: 240ms;
+
+@mixin sheet {
+	&.enter {
+		animation: sheet-in $enter-duration cubic-bezier(0.32, 0.72, 0, 1) both;
+	}
+
+	&.leave {
+		animation: sheet-out $leave-duration ease-in forwards;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		&.enter,
+		&.leave {
+			animation-duration: 1ms;
+		}
+	}
+
+	@keyframes sheet-in {
+		from {
+			transform: translateY(100%);
+		}
+	}
+
+	@keyframes sheet-out {
+		to {
+			transform: translateY(100%);
+		}
+	}
+}

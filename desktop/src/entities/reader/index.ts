@@ -5,7 +5,6 @@ export type { ReaderViewProps } from './ui/reader-view/ReaderView'
 export { BookReaderView } from './ui/book-reader/BookReaderView'
 export type { BookReaderViewProps } from './ui/book-reader/BookReaderView'
 export type { BookLocation } from './ui/book-reader/types'
-export { useBookEntrance } from './ui/book-reader/lib/useBookEntrance'
 export { isPdf, loadBookFile } from './lib/book'
 
 export { bookStateQuery, chapterQuery, readerModel, saveBookPositionMutation } from './model/model'

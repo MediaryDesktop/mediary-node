@@ -4,7 +4,7 @@ import { lazy, Suspense, useCallback, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { useAfterDelay } from '@shared/lib'
+import { useSheetEntrance, useSheetLeave } from '@shared/lib'
 import { Button, Icon, WindowControls } from '@shared/ui'
 
 import { useWindowControls } from '@infra/window'
@@ -16,15 +16,12 @@ import { AppearanceTools } from './book-footer/appearance-tools/AppearanceTools'
 import { BookFooter } from './book-footer/BookFooter'
 import styles from './BookReaderView.module.scss'
 import { loadAppearance, saveAppearance, THEME_COLORS } from './lib/appearance'
-import { useBookEntrance } from './lib/useBookEntrance'
 import { useBookKeyboard } from './lib/useBookKeyboard'
 import { TocDrawer } from './toc-drawer/TocDrawer'
 import type { BookAppearance, BookLocation, BookViewHandle } from './types'
 import { FoliateView } from './views/FoliateView'
 
 const PdfView = lazy(() => import('./views/PdfView').then(module => ({ default: module.PdfView })))
-
-const LEAVE_MS = 240
 
 export interface BookReaderViewProps {
 	book: ReaderBook
@@ -50,12 +47,12 @@ export function BookReaderView({ book, file, locator, openedAt, onClose, onReloc
 	const [ready, setReady] = useState(false)
 	const [failed, setFailed] = useState(false)
 	const [leaving, setLeaving] = useState(false)
-	const entrance = useBookEntrance(openedAt)
+	const entrance = useSheetEntrance(openedAt)
 
 	const requestClose = useCallback(() => setLeaving(true), [])
 	const closeToc = useCallback(() => setTocOpen(false), [])
 
-	useAfterDelay(leaving, LEAVE_MS, onClose)
+	useSheetLeave(leaving, onClose)
 
 	const onKey = useBookKeyboard({ viewRef, tocOpen, onCloseToc: closeToc, onClose: requestClose })
 
