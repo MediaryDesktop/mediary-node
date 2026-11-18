@@ -1,7 +1,8 @@
+import { fileSeason } from '@entities/library-item'
 import type { LibraryFile } from '@entities/library-item'
 import type { MediaEpisode } from '@entities/media'
 
-import { episodeNumber, episodeOrder, episodeSeason, groupTitleFiles, indexEpisodes } from './episodes'
+import { episodeNumber, episodeOrder, groupTitleFiles, indexEpisodes } from './episodes'
 
 export interface PlayEntry {
 	key: string
@@ -59,7 +60,7 @@ export function playList(
 		const number = episodeNumber(file)
 
 		if (number !== null) {
-			const at = slot(meta.seasonal ? (episodeSeason(file) ?? 1) : null, number)
+			const at = slot(meta.seasonal ? (fileSeason(file) ?? 1) : null, number)
 
 			if (!fileAt.has(at)) {
 				fileAt.set(at, file)
@@ -89,7 +90,7 @@ export function playList(
 
 					return {
 						key: `file:${file.id}`,
-						season: meta.seasonal ? (episodeSeason(file) ?? 1) : null,
+						season: meta.seasonal ? (fileSeason(file) ?? 1) : null,
 						number,
 						position,
 						episode: null,

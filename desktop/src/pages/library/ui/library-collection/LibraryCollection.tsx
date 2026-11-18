@@ -1,6 +1,5 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
-import { useMemo } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { Icon } from '@shared/ui'
@@ -8,7 +7,7 @@ import { Icon } from '@shared/ui'
 import { aniListAccountModel } from '@entities/anilist-account'
 import type { LibraryCollectionEntry } from '@entities/library-item'
 import { MediaCard } from '@entities/media'
-import { canTrack, entryTracking, useTrackedEntries } from '@entities/tracker'
+import { canTrack, entryTracking, useTrackedByRef } from '@entities/tracker'
 
 import { EntryActions } from '@features/track-media'
 
@@ -24,8 +23,7 @@ export function LibraryCollection({ entries }: LibraryCollectionProps) {
 	const navigate = useNavigate()
 
 	const connected = useUnit(aniListAccountModel.$connected)
-	const tracked = useTrackedEntries(connected)
-	const trackedByRef = useMemo(() => new Map(tracked.map(entry => [entry.media_ref, entry])), [tracked])
+	const trackedByRef = useTrackedByRef(connected)
 	const resolvedByRef = useResolveUnmatched(entries)
 
 	return (

@@ -90,3 +90,10 @@ export function useTrackedEntry(mediaRef: string, enabled: boolean): TrackerEntr
 
 	return useMemo(() => entries.find(entry => entry.media_ref === mediaRef) ?? null, [entries, mediaRef])
 }
+
+// The same entries by title, for a screen that looks up the entry of each card.
+export function useTrackedByRef(enabled: boolean): Map<string, TrackerEntry> {
+	const tracked = useTrackedEntries(enabled)
+
+	return useMemo(() => new Map(tracked.map(entry => [entry.media_ref, entry])), [tracked])
+}

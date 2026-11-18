@@ -1,6 +1,5 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
-import { useMemo } from 'react'
 import type { ReactNode } from 'react'
 
 import { useTranslation } from '@shared/i18n'
@@ -10,7 +9,7 @@ import type { IconLike } from '@shared/ui'
 import { aniListAccountModel } from '@entities/anilist-account'
 import { MediaCard, mediaTitle } from '@entities/media'
 import type { MediaDetails } from '@entities/media'
-import { canTrack, entryTracking, useTrackedEntries } from '@entities/tracker'
+import { canTrack, entryTracking, useTrackedByRef } from '@entities/tracker'
 
 import { EntryActions } from '@features/track-media'
 
@@ -29,9 +28,8 @@ export function RelatedCards({ titles, title, icon, cornerLabel, ...rest }: Rela
 	const navigate = useNavigate()
 
 	const connected = useUnit(aniListAccountModel.$connected)
-	const tracked = useTrackedEntries(connected)
 
-	const trackedByRef = useMemo(() => new Map(tracked.map(entry => [entry.media_ref, entry])), [tracked])
+	const trackedByRef = useTrackedByRef(connected)
 
 	return (
 		<Carousel title={title} icon={icon} aria-label={rest['aria-label']}>

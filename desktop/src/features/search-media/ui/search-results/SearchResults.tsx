@@ -1,6 +1,6 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
-import { useMemo, useRef } from 'react'
+import { useRef } from 'react'
 import type { ReactNode } from 'react'
 
 import { useTranslation } from '@shared/i18n'
@@ -9,7 +9,7 @@ import { Button, EmptyState, PhaseTransition, Skeleton } from '@shared/ui'
 import { aniListAccountModel } from '@entities/anilist-account'
 import { MediaCard } from '@entities/media'
 import type { MediaSummary } from '@entities/media'
-import { entryTracking, useTrackedEntries } from '@entities/tracker'
+import { entryTracking, useTrackedByRef } from '@entities/tracker'
 import type { TrackerEntry } from '@entities/tracker'
 
 import { useFlipGrid } from '../../lib/useFlipGrid'
@@ -29,9 +29,8 @@ export function SearchResults({ renderMenu }: SearchResultsProps) {
 	const navigate = useNavigate()
 
 	const connected = useUnit(aniListAccountModel.$connected)
-	const tracked = useTrackedEntries(connected)
 
-	const trackedByRef = useMemo(() => new Map(tracked.map(entry => [entry.media_ref, entry])), [tracked])
+	const trackedByRef = useTrackedByRef(connected)
 
 	const [items, loading, loadingMore, failed, setupNeeded, loadMoreFailed, hasNextPage, loadMore, retry] =
 		useUnit([

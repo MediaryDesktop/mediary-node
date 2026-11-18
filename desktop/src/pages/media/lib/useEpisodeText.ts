@@ -1,11 +1,11 @@
 import { useTranslation } from '@shared/i18n'
 
-import { fileTitle } from '@entities/library-item'
+import { fileSeason, fileTitle } from '@entities/library-item'
 import type { LibraryFile } from '@entities/library-item'
 import { episodeTitle } from '@entities/media'
 import type { MediaEpisode } from '@entities/media'
 
-import { episodeNumber, episodeSeason } from '@features/continue-watching'
+import { episodeNumber } from '@features/continue-watching'
 
 export function useEpisodeText() {
 	const { t, i18n } = useTranslation()
@@ -18,7 +18,7 @@ export function useEpisodeText() {
 		}
 
 		return seasonal
-			? String(t('media.library.seasonEpisode', { season: episodeSeason(file) ?? 1, number }))
+			? String(t('media.library.seasonEpisode', { season: fileSeason(file) ?? 1, number }))
 			: String(t('media.library.episode', { number }))
 	}
 

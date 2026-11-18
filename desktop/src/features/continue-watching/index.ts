@@ -11,7 +11,6 @@ export {
 	episodeFor,
 	episodeNumber,
 	episodeOrder,
-	episodeSeason,
 	groupTitleFiles,
 	indexEpisodes,
 	isWatched

@@ -1,4 +1,6 @@
 export { formatBytes, formatCompact, formatDateTime, formatDuration, formatWeekday } from './format/format'
+export { dateInputValue, parseDateInput, todayInputValue } from './format/date-input'
+export type { DateInputParts } from './format/date-input'
 export { formatRelativeTime } from './format/relative-time'
 export type { RelativeTimeOptions } from './format/relative-time'
 export { firstPresent } from './format/text'

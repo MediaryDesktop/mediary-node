@@ -1,10 +1,4 @@
-export function dateFromParts(year?: number, month?: number, day?: number): string {
-	if (!year || !month || !day) {
-		return ''
-	}
-
-	return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-}
+import { dateInputValue, parseDateInput } from '@shared/lib'
 
 export interface DateParts {
 	year?: number
@@ -12,12 +6,10 @@ export interface DateParts {
 	day?: number
 }
 
+export function dateFromParts(year?: number, month?: number, day?: number): string {
+	return dateInputValue(year, month, day)
+}
+
 export function partsFromDate(value: string): DateParts {
-	const [year, month, day] = value.split('-').map(Number)
-
-	if (!year || !month || !day) {
-		return {}
-	}
-
-	return { year, month, day }
+	return parseDateInput(value) ?? {}
 }

@@ -2,6 +2,7 @@ import { combine, createEvent, createStore, sample } from 'effector'
 
 import { atom, onEach } from '@shared/factory'
 import { translate } from '@shared/i18n'
+import { todayInputValue } from '@shared/lib'
 import { toast } from '@shared/ui'
 
 import {
@@ -12,7 +13,6 @@ import {
 } from '@entities/tracker'
 import type { TrackerEntry, TrackerMediaType, TrackerStatus } from '@entities/tracker'
 
-import { today } from '../lib/entry-dates'
 import { isEmptyPatch, managePatch } from '../lib/patches'
 
 import type { EntryTarget, NewEntryTarget } from './types'
@@ -62,7 +62,7 @@ export const manageEntryModel = atom(() => {
 		.on(listCreated, (lists, name) => (lists.includes(name) ? lists : [...lists, name]))
 
 	const $dirty = combine($target, $status, $lists, (target, status, lists) =>
-		target ? !isEmptyPatch(managePatch(target.entry, status, lists, today())) : false
+		target ? !isEmptyPatch(managePatch(target.entry, status, lists, todayInputValue())) : false
 	)
 
 	sample({
@@ -72,7 +72,7 @@ export const manageEntryModel = atom(() => {
 		fn: ({ target, status, lists }) => {
 			const { mediaRef, entry } = target as ManageTarget
 
-			return { mediaRef, patch: managePatch(entry, status, lists, today()) }
+			return { mediaRef, patch: managePatch(entry, status, lists, todayInputValue()) }
 		},
 		target: updateTrackerEntryMutation.start
 	})

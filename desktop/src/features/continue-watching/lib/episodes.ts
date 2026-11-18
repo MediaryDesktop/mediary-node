@@ -1,3 +1,4 @@
+import { fileSeason } from '@entities/library-item'
 import type { LibraryFile } from '@entities/library-item'
 import type { MediaEpisode } from '@entities/media'
 
@@ -13,10 +14,6 @@ export type EpisodeOrder = (file: LibraryFile) => number | null
 
 export function episodeNumber(file: LibraryFile): number | null {
 	return file.match?.episode ?? file.parsed.episode ?? null
-}
-
-export function episodeSeason(file: LibraryFile): number | null {
-	return file.match?.season ?? file.parsed.season ?? null
 }
 
 const NONE_WATCHED: ReadonlySet<number> = new Set()
@@ -130,7 +127,7 @@ function fileKey(index: EpisodeIndex, file: LibraryFile): string | null {
 		return null
 	}
 
-	return key(index.seasonal ? (episodeSeason(file) ?? 1) : null, number)
+	return key(index.seasonal ? (fileSeason(file) ?? 1) : null, number)
 }
 
 export function episodeFor(index: EpisodeIndex, file: LibraryFile): MediaEpisode | undefined {
@@ -155,6 +152,8 @@ export function episodeOrder(index: EpisodeIndex): EpisodeOrder {
 			return known
 		}
 
-		return ((episodeSeason(file) ?? 1) + 1) * 100_000 + (episodeNumber(file) ?? 0)
+		// An episode the catalog does not list goes after every one it does,
+		// still in season and number order among the others like it.
+		return ((fileSeason(file) ?? 1) + 1) * 100_000 + (episodeNumber(file) ?? 0)
 	}
 }
