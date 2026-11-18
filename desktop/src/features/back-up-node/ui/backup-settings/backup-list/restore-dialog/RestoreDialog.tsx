@@ -6,9 +6,10 @@ import { useTranslation } from '@shared/i18n'
 import { formatDateTime, useUnitWatch } from '@shared/lib'
 import { Button, Modal, toast } from '@shared/ui'
 
-import type { SyncBackup } from '../../../../api/api'
+import { restoreMutation } from '@entities/sync'
+import type { SyncBackup } from '@entities/sync'
+
 import { BACKUP_TOAST_ID } from '../../../../config/toast'
-import { restoreMutation } from '../../../../model/model'
 
 export function RestoreDialog({ backup, onClose }: { backup: SyncBackup | null; onClose: () => void }) {
 	const { t, i18n } = useTranslation()

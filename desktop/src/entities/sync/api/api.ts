@@ -13,7 +13,6 @@ export type Paired = NodeSchemas['SyncPairOutputBody']
 export type BackupResult = NodeSchemas['SyncBackupNowOutputBody']
 export type ExportedBackup = NodeSchemas['SyncExportOutputBody']
 export type Device = CloudSchemas['DeviceBody']
-export type CloudHealth = CloudSchemas['HealthOutputBody']
 
 type PairingCode = CloudOperation<'createPairingCode'>['responses'][201]['content']['application/json']
 
@@ -101,7 +100,3 @@ export const deleteBackupFx = createCloudRequestFx<string, void>(id => ({
 	url: `/v1/backups/${encodeURIComponent(id)}`,
 	method: 'DELETE'
 }))
-
-export const fetchCloudHealthFx = createCloudRequestFx<void, CloudHealth>({ url: '/v1/health' })
-
-export const fetchAppVersionFx = createEffect<void, string>(() => window.mediary.app.version())

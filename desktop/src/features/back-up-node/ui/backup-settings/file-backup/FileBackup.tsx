@@ -8,13 +8,10 @@ import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
 import { Button, Modal, toast } from '@shared/ui'
 
+import { exportBackupMutation, importBackupMutation } from '@entities/sync'
+
 import { BACKUP_TOAST_ID } from '../../../config/toast'
-import {
-	backupFileSaved,
-	backupFileSaveFailed,
-	exportBackupMutation,
-	importBackupMutation
-} from '../../../model/model'
+import { backupFileSaved, backupFileSaveFailed } from '../../../model/model'
 
 import styles from './FileBackup.module.scss'
 

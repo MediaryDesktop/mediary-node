@@ -1,43 +1,13 @@
-import { createMutation, createQuery, keepFresh } from '@farfetched/core'
+import { createQuery } from '@farfetched/core'
 import { combine, createEffect, createEvent, createStore, sample } from 'effector'
 
-import { nodeTopic } from '@infra/node'
+import { fetchCloudHealthFx } from '@infra/cloud'
 
 import { sessionModel } from '@entities/session'
+import { exportBackupMutation, fetchSyncStatusFx, pairMutation } from '@entities/sync'
+import type { ExportedBackup } from '@entities/sync'
 
-import {
-	backUpNowFx,
-	deleteBackupFx,
-	exportBackupFx,
-	fetchAppVersionFx,
-	fetchBackupsFx,
-	fetchCloudHealthFx,
-	fetchDevicesFx,
-	fetchSyncStatusFx,
-	importBackupFileFx,
-	pairThisNodeFx,
-	restoreBackupFx,
-	revokeDeviceFx,
-	unpairNodeFx
-} from '../api/api'
-import type { ExportedBackup } from '../api/api'
 import { isOlderThan } from '../lib/version'
-
-export const syncStatusQuery = createQuery({ effect: fetchSyncStatusFx, name: 'syncStatus' })
-
-export const backupsQuery = createQuery({ effect: fetchBackupsFx, name: 'backups' })
-
-export const devicesQuery = createQuery({ effect: fetchDevicesFx, name: 'devices' })
-
-export const pairMutation = createMutation({ effect: pairThisNodeFx, name: 'pairNode' })
-
-export const unpairMutation = createMutation({ effect: unpairNodeFx, name: 'unpairNode' })
-
-export const backUpNowMutation = createMutation({ effect: backUpNowFx, name: 'backUpNow' })
-
-export const restoreMutation = createMutation({ effect: restoreBackupFx, name: 'restoreBackup' })
-
-export const exportBackupMutation = createMutation({ effect: exportBackupFx, name: 'exportBackup' })
 
 // The node hands the backup over as bytes; where they land on disk is the
 // user's choice, asked by the shell. False when they cancelled.
@@ -55,24 +25,9 @@ export const backupFileSaved = sample({
 
 export const backupFileSaveFailed = saveBackupFileFx.fail.map(() => undefined)
 
-export const importBackupMutation = createMutation({ effect: importBackupFileFx, name: 'importBackup' })
-
-export const deleteBackupMutation = createMutation({ effect: deleteBackupFx, name: 'deleteBackup' })
-
-export const revokeDeviceMutation = createMutation({ effect: revokeDeviceFx, name: 'revokeDevice' })
-
-const syncChanged = nodeTopic('sync')
-
-keepFresh(syncStatusQuery, { triggers: [syncChanged] })
-
-keepFresh(backupsQuery, {
-	triggers: [syncChanged, deleteBackupMutation.finished.success]
-})
-
-keepFresh(devicesQuery, {
-	triggers: [pairMutation.finished.success, revokeDeviceMutation.finished.success]
-})
-
+// Signing in with a verified email pairs this node with the account, unless it
+// already is. It listens to the session — another entity — so it is wired here
+// rather than in entities/sync.
 const linkedFx = createEffect(async () => (await fetchSyncStatusFx()).linked)
 
 sample({
@@ -84,6 +39,8 @@ sample({
 sample({ clock: linkedFx.doneData, filter: linked => !linked, target: pairMutation.start })
 
 const cloudHealthQuery = createQuery({ effect: fetchCloudHealthFx, name: 'cloudHealth' })
+
+const fetchAppVersionFx = createEffect<void, string>(() => window.mediary.app.version())
 
 export const clientGateMounted = createEvent()
 

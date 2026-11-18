@@ -7,8 +7,7 @@ import { formatRelativeTime, useUnitWatch } from '@shared/lib'
 import { Button, Icon, toast } from '@shared/ui'
 
 import { sessionModel } from '@entities/session'
-
-import { devicesQuery, revokeDeviceMutation, syncStatusQuery } from '../../model/model'
+import { devicesQuery, revokeDeviceMutation, syncStatusQuery } from '@entities/sync'
 
 import styles from './DevicesSettings.module.scss'
 

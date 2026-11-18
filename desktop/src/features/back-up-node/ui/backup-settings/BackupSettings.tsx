@@ -11,17 +11,10 @@ import { Button, Icon, toast } from '@shared/ui'
 import { useNodeData } from '@infra/node'
 
 import { returnAfterAuthRequested, sessionModel } from '@entities/session'
+import { backUpNowMutation, pairMutation, syncStatusQuery, unpairMutation } from '@entities/sync'
 
 import { BACKUP_TOAST_ID } from '../../config/toast'
-import {
-	$updateRequired,
-	$updateUrl,
-	backUpNowMutation,
-	clientGateMounted,
-	pairMutation,
-	syncStatusQuery,
-	unpairMutation
-} from '../../model/model'
+import { $updateRequired, $updateUrl, clientGateMounted } from '../../model/model'
 
 import { BackupList } from './backup-list/BackupList'
 import styles from './BackupSettings.module.scss'

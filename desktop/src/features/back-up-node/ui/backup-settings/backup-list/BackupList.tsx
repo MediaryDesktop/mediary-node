@@ -9,9 +9,10 @@ import { Button, Icon, toast } from '@shared/ui'
 
 import { useNodeData } from '@infra/node'
 
-import type { SyncBackup } from '../../../api/api'
+import { backupsQuery, deleteBackupMutation } from '@entities/sync'
+import type { SyncBackup } from '@entities/sync'
+
 import { BACKUP_TOAST_ID } from '../../../config/toast'
-import { backupsQuery, deleteBackupMutation } from '../../../model/model'
 
 import styles from './BackupList.module.scss'
 import { RestoreDialog } from './restore-dialog/RestoreDialog'
