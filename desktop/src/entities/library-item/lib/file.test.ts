@@ -46,4 +46,13 @@ describe('library file helpers', () => {
 		expect(isMatched(matched)).toBe(true)
 		expect(isMatched(file())).toBe(false)
 	})
+
+	it('takes season and episode from the same place, the match first', () => {
+		const matched = file({
+			match: { media_ref: 'anilist:1', confidence: 1, source: 'manual', season: 3, episode: 5 }
+		})
+
+		expect([fileSeason(matched), fileNumber(matched)]).toEqual([3, 5])
+		expect([fileSeason(file()), fileNumber(file())]).toEqual([2, 1])
+	})
 })

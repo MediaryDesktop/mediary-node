@@ -51,18 +51,10 @@
   `useSheetLeave` (`shared/lib`). Тривалості лишились у двох місцях —
   `$enter-duration`/`$leave-duration` і `SHEET_*_MS` поруч із хуками — бо SCSS
   і TS одне одного не читають.
-- **[поведінка]** Номер епізоду файлу читається двома способами:
-  `episodeNumber` (`continue-watching`: `match.episode ?? parsed.episode`) і
-  `fileNumber` (`library-item`: `parsed.episode ?? parsed.chapter`, зіставлення
-  ігнорує). Панель деталей провідника
-  (`library-explorer/ui/detail-panel/DetailPanel.tsx`) показує поруч «Сезон»
-  через `fileSeason` (спершу зіставлення) і «Епізод» через `fileNumber` (лише
-  назва). Файл `s02e01.mkv`, вручну зіставлений як S3E5, там виглядає як
-  «Сезон 3, Епізод 1», а на сторінці тайтлу — S3E5. Виправлення:
-  `fileNumber` = `match.episode ?? parsed.episode ?? parsed.chapter`, як уже
-  робить `fileSeason`. Друге місце, де живе `fileNumber`, — сортування
-  незіставлених файлів — не зміниться: зіставлення там немає. Після цього
-  `episodeNumber` і `fileNumber` різнитимуться лише розділом коміксу.
+- ~~**[поведінка]** Панель деталей провідника показувала «Сезон» зі
+  зіставлення, а «Епізод» — лише з назви файлу~~ — `fileNumber` тепер, як і
+  `fileSeason`, бере спершу `match.episode`; файл, вручну зіставлений як S3E5,
+  і в провіднику S3E5. Тест — у `library-item/lib/file.test.ts`.
 
 ## Свідомо лишено
 

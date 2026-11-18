@@ -26,8 +26,11 @@ export function fileName(file: LibraryFile): string {
 	return parts[parts.length - 1] || file.rel_path
 }
 
+// The episode (or, for comics, chapter) the file holds: what the match settled
+// on — a manual match above all — else what the file name says. The same rule
+// as fileSeason, so the two always describe one episode.
 export function fileNumber(file: LibraryFile): number | null {
-	return file.parsed.episode ?? file.parsed.chapter ?? null
+	return file.match?.episode ?? file.parsed.episode ?? file.parsed.chapter ?? null
 }
 
 export function fileSeason(file: LibraryFile): number | null {
