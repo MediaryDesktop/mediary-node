@@ -1,68 +1,15 @@
 import { useUnit } from 'effector-react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect } from 'react'
 
 import { useTranslation } from '@shared/i18n'
-import { Icon, Modal } from '@shared/ui'
+import { Modal } from '@shared/ui'
 
 import { mediaPreviewModel } from '@entities/media'
 import type { MediaTrailer } from '@entities/media'
 
 import { youtubeUrl } from './lib/youtube'
+import { Player } from './player/Player'
 import styles from './TrailerModal.module.scss'
-
-interface PlayerProps {
-	host: string
-	id: string
-	title: string
-	url: string
-	thumbnail: string | null
-}
-
-function Player({ host, id, title, url, thumbnail }: PlayerProps) {
-	const { t } = useTranslation()
-	const frameRef = useRef<HTMLIFrameElement>(null)
-	const [failed, setFailed] = useState(false)
-
-	useEffect(() => {
-		const onMessage = (event: MessageEvent<{ source?: unknown; state?: unknown } | null>) => {
-			if (event.origin !== host || event.source !== frameRef.current?.contentWindow) {
-				return
-			}
-
-			if (event.data?.source === 'mediary-trailer' && event.data.state === 'error') {
-				setFailed(true)
-			}
-		}
-
-		window.addEventListener('message', onMessage)
-
-		return () => window.removeEventListener('message', onMessage)
-	}, [host])
-
-	if (failed) {
-		return (
-			<a className={styles.fallback} href={url} target='_blank' rel='noreferrer'>
-				{thumbnail && <img src={thumbnail} alt='' draggable={false} />}
-
-				<span className={styles.fallbackLabel}>
-					<Icon name='common/external-link' size={20} />
-					{t('media.trailerEmbedBlocked')}
-				</span>
-			</a>
-		)
-	}
-
-	return (
-		<iframe
-			ref={frameRef}
-			className={styles.frame}
-			src={`${host}/trailer?v=${encodeURIComponent(id)}&mode=watch`}
-			title={t('media.trailerFor', { title })}
-			allow='autoplay; encrypted-media; fullscreen'
-			allowFullScreen
-		/>
-	)
-}
 
 export interface TrailerModalProps {
 	open: boolean

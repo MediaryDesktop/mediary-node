@@ -51,5 +51,13 @@
 - ~~Повтор «`useMissingToolAction` + тост `playback.playFailed`» у
   `useContinueWatching` і `EpisodeLibrary`~~ — `EpisodeLibrary` тепер бере
   `usePlayFile`, копії немає.
+- Пара «Drawer + форма» в одному файлі (`AddTorrentDrawer`,
+  `TorrentFilesDrawer`, `LinkSourceDrawer`, `PluginSettingsDrawer`,
+  `MediaFormPage`): обгортка рендерить форму з `key`, щоб відкриття для
+  іншого об'єкта скидало її стан. Форма — частина обгортки, а не окрема тема.
+- Ще ~20 `.tsx` тримають поруч із компонентом дрібну приватну частину на
+  5–20 рядків (`Field`, `Row`, `Card`…) або навмисний набір пов'язаних частин
+  (`extensions/ui/catalog/Catalog.tsx`, `extensions/ui/actions/Actions.tsx`).
+  Знайти: файли з кількома `function [A-Z]` у `entities|features|pages`.
 - Стилі `PlayMenu` — один файл на всі підменю: `.episode .text` перебиває
   `.item .text` лише порядком у файлі.

@@ -4,7 +4,8 @@ import { useTranslation } from '@shared/i18n'
 
 import { aniListAccountModel } from '@entities/anilist-account'
 
-import { ConnectAniList, GetTokenLink } from '../../ConnectAniList'
+import { ConnectAniList } from '../../ConnectAniList'
+import { GetTokenLink } from '../get-token-link/GetTokenLink'
 
 import styles from './AniListAccountSettings.module.scss'
 
