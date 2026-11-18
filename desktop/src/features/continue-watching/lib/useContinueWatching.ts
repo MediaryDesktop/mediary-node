@@ -78,7 +78,7 @@ export function useContinueWatching(entries: TrackerEntry[]): ContinueWatchingSt
 
 	useEffect(() => {
 		changed(candidates)
-		// eslint-disable-next-line react-hooks/exhaustive-deps
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- `key` stands for `candidates`: every refetch builds a new array, often with the same titles in it.
 	}, [key, changed])
 
 	return useMemo(() => {

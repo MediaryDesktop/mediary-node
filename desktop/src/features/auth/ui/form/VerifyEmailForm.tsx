@@ -5,7 +5,7 @@ import type { FormEvent } from 'react'
 import { useTranslation } from '@shared/i18n'
 import { Button, OtpInput } from '@shared/ui'
 
-import { useOtpCountdown } from '../../hooks'
+import { useOtpCountdown } from '../../lib'
 import { verifyEmailForm } from '../../model'
 import { CODE_LENGTH } from '../../validation'
 import { AuthLink, OtpCountdownTimer } from '../common'

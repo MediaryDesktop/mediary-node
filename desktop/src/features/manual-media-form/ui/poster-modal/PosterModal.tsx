@@ -85,7 +85,7 @@ export function PosterModal({
 		if (open && tab === 'search' && lastSearch.current !== `${mediaType}|${text}|${year ?? ''}`) {
 			runSearch()
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- only opening searches by itself; edits to the title wait for the user's own search.
 	}, [open])
 
 	const choose = (next: CoverSelection) => {

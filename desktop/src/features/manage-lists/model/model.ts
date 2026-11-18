@@ -14,20 +14,19 @@ import type { ListMediaType, TrackerCustomList } from '@entities/tracker'
 
 const DEFAULT_MEDIA_TYPE: ListMediaType = 'anime'
 
+// 409 — a list of that name exists, 428 — the list lives on AniList and it is
+// not connected, 503 — the node cannot reach where the list lives.
 function failureMessage(error: unknown): string {
-	if (error instanceof HttpRequestError && error.status === 409) {
-		return translate('lists.manage.duplicate')
+	switch (error instanceof HttpRequestError ? error.status : null) {
+		case 409:
+			return translate('lists.manage.duplicate')
+		case 428:
+			return translate('lists.manage.notConnected')
+		case 503:
+			return translate('lists.manage.offline')
+		default:
+			return translate('lists.manage.failed')
 	}
-
-	if (error instanceof HttpRequestError && error.status === 428) {
-		return translate('lists.manage.notConnected')
-	}
-
-	if (error instanceof HttpRequestError && error.status === 503) {
-		return translate('lists.manage.offline')
-	}
-
-	return translate('lists.manage.failed')
 }
 
 export const manageListsModel = atom(() => {

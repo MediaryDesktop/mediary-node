@@ -5,7 +5,7 @@ import { SiQbittorrent } from 'react-icons/si'
 import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
-import { Button, ConnectionCheck, Icon, Input, SelectDropdown, toast } from '@shared/ui'
+import { Button, ConnectionCheck, Icon, SelectDropdown, toast } from '@shared/ui'
 
 import { AddRootMenu, libraryModel, libraryRootsQuery } from '@entities/library-item'
 import { readyDebrid, torrentDebridQuery } from '@entities/torrent'
@@ -17,6 +17,7 @@ import { clientForm } from '../../model/form'
 import { FOLDER_REQUESTER } from '../../model/model'
 
 import { OptionCard } from './option-card/OptionCard'
+import { QbittorrentDetail } from './qbittorrent-detail/QbittorrentDetail'
 import styles from './TorrentClientForm.module.scss'
 
 export interface TorrentClientFormProps {
@@ -42,17 +43,15 @@ export function TorrentClientForm({ settings, fields }: TorrentClientFormProps) 
 		clientForm.$check
 	])
 
-	const [pick, connectionChanged, mappingChanged, folderPicked, runCheck, submit, reset] = useUnit([
+	const [pick, folderPicked, runCheck, submit, reset] = useUnit([
 		clientForm.picked,
-		clientForm.connectionChanged,
-		clientForm.mappingChanged,
 		clientForm.folderPicked,
 		clientForm.checkRequested,
 		clientForm.submitted,
 		clientForm.reset
 	])
 
-	const { choice, url, username, password, rootId, mapClient, mapNode } = fields
+	const { choice, url, rootId } = fields
 
 	const qbittorrent = choice === 'qbittorrent'
 	const throughDebrid = choice === 'debrid'
@@ -89,6 +88,16 @@ export function TorrentClientForm({ settings, fields }: TorrentClientFormProps) 
 				: result.problem
 		} as const)
 
+	const connectionCheck = (disabled: boolean) => (
+		<ConnectionCheck
+			label={t('torrents.settings.check')}
+			checking={checking}
+			disabled={disabled}
+			onCheck={() => runCheck()}
+			status={checkStatus}
+		/>
+	)
+
 	return (
 		<form
 			className={styles.root}
@@ -116,13 +125,7 @@ export function TorrentClientForm({ settings, fields }: TorrentClientFormProps) 
 								</span>
 							</div>
 
-							<ConnectionCheck
-								label={t('torrents.settings.check')}
-								checking={checking}
-								disabled={saving}
-								onCheck={() => runCheck()}
-								status={checkStatus}
-							/>
+							{connectionCheck(saving)}
 						</div>
 					}
 				/>
@@ -135,125 +138,12 @@ export function TorrentClientForm({ settings, fields }: TorrentClientFormProps) 
 					disabled={saving}
 					onSelect={() => pick('qbittorrent')}
 					detail={
-						<div className={styles.detailStack}>
-							<div className={styles.fieldGrid}>
-								<label className={styles.field}>
-									<span className={styles.fieldLabel}>
-										{t('torrents.settings.urlLabel')}
-									</span>
-									<Input
-										value={url}
-										onChange={event =>
-											connectionChanged({ field: 'url', value: event.target.value })
-										}
-										disabled={saving}
-										autoComplete='off'
-										spellCheck={false}
-										placeholder='http://localhost:8080'
-									/>
-								</label>
-
-								<label className={styles.field}>
-									<span className={styles.fieldLabel}>
-										{t('torrents.settings.usernameLabel')}
-									</span>
-									<Input
-										value={username}
-										onChange={event =>
-											connectionChanged({
-												field: 'username',
-												value: event.target.value
-											})
-										}
-										disabled={saving}
-										autoComplete='off'
-										spellCheck={false}
-										placeholder='Admin'
-									/>
-								</label>
-							</div>
-
-							<label className={styles.field}>
-								<span className={styles.fieldLabel}>
-									{t('torrents.settings.passwordLabel')}
-								</span>
-								<Input
-									type='password'
-									revealable
-									value={password}
-									onChange={event =>
-										connectionChanged({ field: 'password', value: event.target.value })
-									}
-									disabled={saving}
-									autoComplete='new-password'
-									placeholder={
-										settings.has_password
-											? t('torrents.settings.passwordKept')
-											: t('torrents.settings.passwordHint')
-									}
-								/>
-							</label>
-
-							<div className={styles.checkRow}>
-								<ConnectionCheck
-									label={t('torrents.settings.check')}
-									checking={checking}
-									disabled={missingUrl || saving}
-									onCheck={() => runCheck()}
-									status={checkStatus}
-								/>
-							</div>
-
-							<div className={styles.mappingBlock}>
-								<div className={styles.mappingHeader}>
-									<span className={styles.detailLabel}>
-										{t('torrents.settings.mappingLabel')}
-									</span>
-									<span className={styles.detailHint}>
-										{t('torrents.settings.mappingHint')}
-									</span>
-								</div>
-
-								<div className={styles.fieldGrid}>
-									<label className={styles.field}>
-										<span className={styles.fieldLabel}>
-											{t('torrents.settings.mappingClient')}
-										</span>
-										<Input
-											value={mapClient}
-											onChange={event =>
-												mappingChanged({
-													field: 'mapClient',
-													value: event.target.value
-												})
-											}
-											disabled={saving}
-											autoComplete='off'
-											spellCheck={false}
-											placeholder='/downloads'
-										/>
-									</label>
-									<label className={styles.field}>
-										<span className={styles.fieldLabel}>
-											{t('torrents.settings.mappingNode')}
-										</span>
-										<Input
-											value={mapNode}
-											onChange={event =>
-												mappingChanged({
-													field: 'mapNode',
-													value: event.target.value
-												})
-											}
-											disabled={saving}
-											autoComplete='off'
-											spellCheck={false}
-											placeholder='D:\Anime'
-										/>
-									</label>
-								</div>
-							</div>
-						</div>
+						<QbittorrentDetail
+							fields={fields}
+							hasPassword={settings.has_password}
+							disabled={saving}
+							check={connectionCheck(missingUrl || saving)}
+						/>
 					}
 				/>
 
@@ -270,15 +160,7 @@ export function TorrentClientForm({ settings, fields }: TorrentClientFormProps) 
 								<p className={styles.detailHint}>
 									{t('torrents.settings.debridHint', { service: debrid.name })}
 								</p>
-								<div className={styles.checkRow}>
-									<ConnectionCheck
-										label={t('torrents.settings.check')}
-										checking={checking}
-										disabled={saving}
-										onCheck={() => runCheck()}
-										status={checkStatus}
-									/>
-								</div>
+								<div className={styles.checkRow}>{connectionCheck(saving)}</div>
 							</div>
 						) : (
 							<p className={styles.detailHint}>{t('torrents.settings.debridMissing')}</p>

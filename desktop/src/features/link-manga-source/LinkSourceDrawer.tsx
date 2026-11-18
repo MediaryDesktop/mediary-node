@@ -23,7 +23,7 @@ import { mangaSearchQuery, putMangaLinkMutation } from '@entities/manga-source'
 import type { MangaSource } from '@entities/manga-source'
 
 import styles from './LinkSourceDrawer.module.scss'
-import { SourceOptionIcon } from './source-option-icon/SourceOptionIcon'
+import { SourceOptionIcon } from './ui/source-option-icon/SourceOptionIcon'
 
 export interface LinkSourceDrawerProps {
 	open: boolean

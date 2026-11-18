@@ -20,7 +20,7 @@ import type { ChapterOption, ChapterRow as Row } from '@entities/reader'
 
 import { downloadRequested } from '@features/download-chapters'
 import { LinkSourceDrawer } from '@features/link-manga-source'
-import { chapterMarked, readProgress } from '@features/mark-progress'
+import { chapterMarked } from '@features/mark-progress'
 import { useTitleChapters } from '@features/title-chapters'
 
 import { ChapterFilters } from './chapter-filters/ChapterFilters'
@@ -139,10 +139,14 @@ export function ChapterList({ mediaRef, title, progress, listed }: ChapterListPr
 		writeStored(ORDER_KEY, value)
 	})
 
-	const toggle = (keys: string[], on: boolean) =>
+	const toggle = (key: string, on: boolean) =>
 		setSelected(previous => {
 			const next = new Set(previous)
-			keys.forEach(key => (on ? next.add(key) : next.delete(key)))
+			if (on) {
+				next.add(key)
+			} else {
+				next.delete(key)
+			}
 
 			return next
 		})
@@ -256,8 +260,6 @@ export function ChapterList({ mediaRef, title, progress, listed }: ChapterListPr
 						const from = savable.get(row.key)
 						const download = activeDownload(row, downloads)
 						const read = isChapterRead(row.number, progress, marked)
-						const markable =
-							row.number !== null || readProgress(row.number, !read, progress) !== null
 
 						return (
 							<ChapterRow
@@ -267,10 +269,10 @@ export function ChapterList({ mediaRef, title, progress, listed }: ChapterListPr
 								read={read}
 								icons={icons}
 								selected={from ? selected.has(row.key) : undefined}
-								onSelect={on => toggle([row.key], on)}
+								onSelect={on => toggle(row.key, on)}
 								onOpen={open}
 								onSave={from ? () => save([from.ref]) : undefined}
-								onToggleRead={markable ? () => markRead(row, !read) : undefined}
+								onToggleRead={row.number !== null ? () => markRead(row, !read) : undefined}
 							/>
 						)
 					})}

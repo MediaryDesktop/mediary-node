@@ -138,19 +138,14 @@ sample({
 	target: streamFailed
 })
 
+// An external player opens a window of its own, so the built-in one, opened
+// while the stream was being prepared, closes.
 sample({
 	clock: streamPlaying,
 	source: $playerMode,
 	filter: mode => mode === 'external',
 	fn: (_, fileId) => fileId,
-	target: playbackModel.playRequested
-})
-
-sample({
-	clock: streamPlaying,
-	source: $playerMode,
-	filter: mode => mode === 'external',
-	target: playerClosed
+	target: [playbackModel.playRequested, playerClosed]
 })
 
 sample({

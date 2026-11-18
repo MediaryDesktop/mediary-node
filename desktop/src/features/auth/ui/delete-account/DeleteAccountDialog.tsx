@@ -6,7 +6,7 @@ import { Button, Modal, OtpInput } from '@shared/ui'
 
 import { sessionModel } from '@entities/session'
 
-import { useOtpCountdown } from '../../hooks'
+import { useOtpCountdown } from '../../lib'
 import { deleteAccountForm } from '../../model'
 import { CODE_LENGTH } from '../../validation'
 import { AuthLink, OtpCountdownTimer } from '../common'

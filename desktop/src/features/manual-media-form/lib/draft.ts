@@ -32,16 +32,8 @@ export function isManualMediaType(value: unknown): value is ManualMediaType {
 	return typeof value === 'string' && (MANUAL_MEDIA_TYPES as readonly string[]).includes(value)
 }
 
-export function isManualRef(mediaRef: string): boolean {
-	return mediaRef.startsWith('manual:')
-}
-
 export function manualId(mediaRef: string): string {
 	return mediaRef.slice('manual:'.length)
-}
-
-export function emptyManualDraft(mediaType: ManualMediaType, title: string): ManualDraft {
-	return { media_type: mediaType, title }
 }
 
 export function draftFromDetails(media: MediaDetails): ManualDraft {

@@ -24,41 +24,21 @@ import { useNodeData } from '@infra/node'
 
 import { manualTitlesQuery } from '@entities/media'
 import { LIST_MEDIA_TYPES, listTitleCount, MediaTypeIcon, trackerListsQuery } from '@entities/tracker'
-import type { ListMediaType, TrackerCustomList } from '@entities/tracker'
 
 import { ListOptionsMenu, manageListsModel } from '@features/manage-lists'
 
+import { LIST_SORTS, listsPhase, myTitlesCard, visibleLists } from './lib/lists-view'
+import type { ListsFilter, ListsSort } from './lib/lists-view'
 import styles from './ListsPage.module.scss'
 import { ListCard } from './ui/list-card/ListCard'
 
-type Filter = ListMediaType | 'all'
-type SortKey = 'recent' | 'name' | 'size'
 type View = 'grid' | 'rows'
-
-const SORT_KEYS: readonly SortKey[] = ['recent', 'name', 'size']
 
 const VIEWS: readonly View[] = ['grid', 'rows']
 
 const VIEW_ICONS: Record<View, IconLike> = {
 	grid: <CiGrid41 size={20} />,
 	rows: <CiGrid2H size={20} />
-}
-
-function changedAt(list: TrackerCustomList): number {
-	return list.updated_at ? Date.parse(list.updated_at) : 0
-}
-
-function sortLists(lists: TrackerCustomList[], key: SortKey): TrackerCustomList[] {
-	const sorted = lists.slice()
-
-	switch (key) {
-		case 'name':
-			return sorted.sort((a, b) => a.name.localeCompare(b.name))
-		case 'size':
-			return sorted.sort((a, b) => b.count - a.count)
-		default:
-			return sorted.sort((a, b) => changedAt(b) - changedAt(a))
-	}
 }
 
 export function ListsPage() {
@@ -74,9 +54,9 @@ export function ListsPage() {
 
 	const createRequested = useUnit(manageListsModel.createRequested)
 
-	const [filter, setFilter] = useState<Filter>('all')
+	const [filter, setFilter] = useState<ListsFilter>('all')
 	const [search, setSearch] = useState('')
-	const [sort, setSort] = useState<SortKey>('recent')
+	const [sort, setSort] = useState<ListsSort>('recent')
 	const [view, setView] = useState<View>('grid')
 
 	const manual = useUnit(manualTitlesQuery.$data)
@@ -86,48 +66,22 @@ export function ListsPage() {
 
 	const allLists = useMemo(() => lists?.lists ?? [], [lists])
 
-	const visible = useMemo(() => {
-		const needle = search.trim().toLowerCase()
+	const visible = useMemo(
+		() => visibleLists(allLists, { filter, search, sort }),
+		[allLists, filter, search, sort]
+	)
 
-		const matched = allLists.filter(list => {
-			const byType = filter === 'all' || list.media_type === filter
-			const byName = needle === '' || list.name.toLowerCase().includes(needle)
+	const myTitles = useMemo(
+		() => myTitlesCard(manual?.titles ?? [], { filter, search, name: t('lists.myTitles.name') }),
+		[manual, filter, search, t]
+	)
 
-			return byType && byName
-		})
-
-		return sortLists(matched, sort)
-	}, [allLists, filter, search, sort])
-
-	const myTitles = useMemo(() => {
-		const titles = manual?.titles ?? []
-		const ofFilter = filter === 'all' ? titles : titles.filter(title => title.media_type === filter)
-		const needle = search.trim().toLowerCase()
-		const name = t('lists.myTitles.name')
-
-		const shown =
-			(filter === 'all' || ofFilter.length > 0) &&
-			(needle === '' || name.toLowerCase().includes(needle))
-
-		return shown
-			? {
-					name,
-					count: ofFilter.length,
-					covers: ofFilter.flatMap(title => (title.cover_image ? [title.cover_image] : []))
-				}
-			: null
-	}, [manual, filter, search, t])
-
-	const phase =
-		visible.length > 0 || myTitles
-			? 'lists'
-			: listsPending && allLists.length === 0
-				? 'loading'
-				: listsError && allLists.length === 0
-					? 'failed'
-					: !listsPending && !listsError
-						? 'empty'
-						: 'idle'
+	const phase = listsPhase({
+		shown: visible.length > 0 || myTitles !== null,
+		known: allLists.length > 0,
+		pending: listsPending,
+		failed: Boolean(listsError)
+	})
 
 	const summary = [
 		t('lists.listCount', { count: allLists.length }),
@@ -173,8 +127,8 @@ export function ListsPage() {
 
 						<SelectDropdown
 							value={sort}
-							onChange={next => setSort((next as SortKey) ?? 'recent')}
-							options={SORT_KEYS.map(key => ({
+							onChange={next => setSort((next as ListsSort) ?? 'recent')}
+							options={LIST_SORTS.map(key => ({
 								value: key,
 								label: t(`lists.sort.${key}`)
 							}))}

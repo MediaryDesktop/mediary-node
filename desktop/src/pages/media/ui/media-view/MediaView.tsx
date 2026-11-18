@@ -4,14 +4,14 @@ import { useEffect, useRef, useState } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { formatRelativeTime, formatWeekday, useUnitWatch } from '@shared/lib'
-import { Button, Icon, Modal, PhaseTransition } from '@shared/ui'
+import { Icon, Modal, PhaseTransition } from '@shared/ui'
 
 import { mediaTitle } from '@entities/media'
 import type { MediaDetails, MediaSource } from '@entities/media'
 import { useTorrentSetup } from '@entities/torrent'
 import type { TrackerEntry } from '@entities/tracker'
 
-import { manualId, useManualMediaDeletion } from '@features/manual-media-form'
+import { DeleteManualMediaDialog, manualId } from '@features/manual-media-form'
 import {
 	searchClosed,
 	searchOpened,
@@ -76,11 +76,8 @@ export function MediaView({ mediaRef, media, sources, entry, initialView, initia
 	const subject = resolveSubject(media, entry)
 	const torrents = subject ? subject.mediaType !== 'manga' && subject.mediaType !== 'book' : false
 	const seasonal = mediaRef.startsWith('tmdb:tv:')
-	const missing = useMissingEpisodes(
-		mediaRef,
-		seasonal ? null : releasedEpisodes(media, subject?.total),
-		torrents
-	)
+	const released = seasonal ? null : releasedEpisodes(media, subject?.total)
+	const missing = useMissingEpisodes(mediaRef, released, torrents)
 
 	const searchOnArrival = useRef(initialView === 'torrent')
 
@@ -90,13 +87,6 @@ export function MediaView({ mediaRef, media, sources, entry, initialView, initia
 			openSearch()
 		}
 	}, [torrents, openSearch])
-
-	const { remove, deleting } = useManualMediaDeletion(() => {
-		setDeleteOpen(false)
-		void navigate({ to: '/library' })
-	})
-
-	const confirmDelete = () => remove(manualId(mediaRef))
 
 	if (!subject) {
 		return null
@@ -112,17 +102,16 @@ export function MediaView({ mediaRef, media, sources, entry, initialView, initia
 	const shown: MediaViewKind = view === 'stream' && !streamable ? 'library' : view
 	const via = effectiveVia(chosenVia, Boolean(setup.debrid))
 
-	const releaseKey = (id: string) => `${mediaRef}/release:${id}`
+	const releasePrefix = `${mediaRef}/release:`
 	const watching: ReleaseWatching | undefined = streamable
 		? {
-				activeId:
-					streamTarget?.key.startsWith(`${mediaRef}/release:`) === true
-						? streamTarget.key.slice(`${mediaRef}/release:`.length)
-						: null,
+				activeId: streamTarget?.key.startsWith(releasePrefix)
+					? streamTarget.key.slice(releasePrefix.length)
+					: null,
 				busy: streamTarget !== null,
 				onWatch: (release, episode) =>
 					requestStream({
-						key: releaseKey(release.id),
+						key: releasePrefix + release.id,
 						label: release.title,
 						params: {
 							media_ref: mediaRef,
@@ -207,7 +196,7 @@ export function MediaView({ mediaRef, media, sources, entry, initialView, initia
 							cover={base.cover_image}
 							coverColor={base.cover_color}
 							banner={base.banner_image}
-							released={seasonal ? null : releasedEpisodes(media, total)}
+							released={released}
 							progress={entry?.progress ?? 0}
 							listed={entry !== null}
 						/>
@@ -263,27 +252,15 @@ export function MediaView({ mediaRef, media, sources, entry, initialView, initia
 			)}
 
 			{media?.editable && (
-				<Modal
+				<DeleteManualMediaDialog
 					open={deleteOpen}
 					onOpenChange={setDeleteOpen}
-					size='sm'
-					title={t('manualMedia.delete.title', { title })}
-					description={t('manualMedia.delete.hint')}
-					footer={
-						<>
-							<Button
-								variant='secondary'
-								onClick={() => setDeleteOpen(false)}
-								disabled={deleting}
-							>
-								{t('manualMedia.cancel')}
-							</Button>
-
-							<Button variant='primary' onClick={confirmDelete} loading={deleting}>
-								{t('manualMedia.delete.confirm')}
-							</Button>
-						</>
-					}
+					id={manualId(mediaRef)}
+					title={title}
+					onDeleted={() => {
+						setDeleteOpen(false)
+						void navigate({ to: '/library' })
+					}}
 				/>
 			)}
 		</>

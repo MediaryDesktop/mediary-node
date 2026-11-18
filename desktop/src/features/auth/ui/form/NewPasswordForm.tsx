@@ -4,7 +4,7 @@ import type { FormEvent } from 'react'
 import { useTranslation } from '@shared/i18n'
 import { Button, Icon, Input, OtpInput } from '@shared/ui'
 
-import { useOtpCountdown } from '../../hooks'
+import { useOtpCountdown } from '../../lib'
 import { newPasswordForm } from '../../model'
 import { CODE_LENGTH, MIN_PASSWORD_LENGTH } from '../../validation'
 import { OtpCountdownTimer } from '../common'

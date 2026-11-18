@@ -1,7 +1,7 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 import clsx from 'clsx'
 import { useUnit } from 'effector-react'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 
 import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
@@ -52,13 +52,13 @@ export function AutoDownloadRules() {
 	)
 
 	const rules = data?.rules ?? []
+	const ruleRefs = useMemo(() => new Set((data?.rules ?? []).map(rule => rule.media_ref)), [data])
 
 	useEffect(() => {
-		for (const ref of new Set(rules.map(rule => rule.media_ref))) {
+		for (const ref of ruleRefs) {
 			requestPreview(ref)
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps -- `rules` is stable enough: it only grows a new identity when `data` itself does.
-	}, [data, requestPreview])
+	}, [ruleRefs, requestPreview])
 
 	const setupMissing = setup.incomplete
 

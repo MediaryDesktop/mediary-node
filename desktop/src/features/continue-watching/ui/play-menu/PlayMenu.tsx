@@ -2,20 +2,20 @@ import * as Menu from '@radix-ui/react-dropdown-menu'
 import clsx from 'clsx'
 import { useStoreMap, useUnit } from 'effector-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { MouseEvent, PointerEvent } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 import { Icon, useRipple } from '@shared/ui'
 
-import { episodeTitle, useCardHold } from '@entities/media'
-import { $playerMode, playbackModel, PLAYER_MODES, playerModeChanged } from '@entities/playback'
-import type { PlayerMode } from '@entities/playback'
+import { useCardHold } from '@entities/media'
+import { playbackModel } from '@entities/playback'
 
 import { playList } from '../../lib/play-list'
 import type { PlayEntry } from '../../lib/play-list'
 import { usePlayFile } from '../../lib/useContinueWatching'
 import { $titleEpisodes, $titleFiles, titlePlayRequested } from '../../model/title-play'
 
+import { EpisodeItem } from './episode-item/EpisodeItem'
+import { PlayerModeMenu } from './player-mode-menu/PlayerModeMenu'
 import styles from './PlayMenu.module.scss'
 
 export interface PlayMenuProps {
@@ -45,7 +45,7 @@ export function PlayMenu({
 	onDownloadEpisode,
 	busy = false
 }: PlayMenuProps) {
-	const { t, i18n } = useTranslation()
+	const { t } = useTranslation()
 	const hold = useCardHold()
 	const { play, starting } = usePlayFile()
 	const nextRef = useRef<HTMLDivElement>(null)
@@ -55,12 +55,7 @@ export function PlayMenu({
 	const mainRipple = useRipple<HTMLButtonElement>({ disabled: starting || busy })
 	const chevronRipple = useRipple<HTMLButtonElement>()
 
-	const [request, playExternally, playerMode, changePlayerMode] = useUnit([
-		titlePlayRequested,
-		playbackModel.playRequested,
-		$playerMode,
-		playerModeChanged
-	])
+	const [request, playExternally] = useUnit([titlePlayRequested, playbackModel.playRequested])
 
 	const files = useStoreMap({
 		store: $titleFiles,
@@ -122,14 +117,12 @@ export function PlayMenu({
 		}
 	}
 
-	const downloadEntry = (event: MouseEvent, entry: PlayEntry) => {
-		event.preventDefault()
-		event.stopPropagation()
-		changeOpen(false)
-		onDownloadEpisode?.(entry)
-	}
-
-	const keepFromItem = (event: PointerEvent) => event.stopPropagation()
+	const downloadEntry = onDownloadEpisode
+		? (entry: PlayEntry) => {
+				changeOpen(false)
+				onDownloadEpisode(entry)
+			}
+		: undefined
 
 	const skipFocusReturn = (event: Event) => {
 		if (pointerActiveRef.current) {
@@ -138,10 +131,6 @@ export function PlayMenu({
 	}
 
 	const mainLabel = next ? t('media.card.play', { episode: next.number }) : label
-
-	const entryTitle = (entry: PlayEntry) =>
-		(entry.episode ? episodeTitle(entry.episode, i18n.language) : null) ??
-		t('media.card.menu.episode', { number: entry.number })
 
 	return (
 		<div
@@ -224,65 +213,16 @@ export function PlayMenu({
 										)}
 
 										<div className={styles.list}>
-											{shown.map(entry => {
-												const isNext = entry === next
-
-												return (
-													<Menu.Item
-														key={entry.key}
-														ref={isNext ? nextRef : undefined}
-														className={clsx(
-															styles.item,
-															styles.episode,
-															isNext && styles.next,
-															!entry.file && styles.absent
-														)}
-														onSelect={() => playEntry(entry)}
-													>
-														<span className={styles.number}>{entry.number}</span>
-														<span className={styles.text}>
-															{entryTitle(entry)}
-														</span>
-
-														{isNext && (
-															<span className={styles.tag}>
-																{t('media.card.menu.next')}
-															</span>
-														)}
-
-														{entry.watched ? (
-															<Icon
-																name='common/check'
-																size={14}
-																className={styles.aside}
-															/>
-														) : !entry.file && onDownloadEpisode ? (
-															<button
-																type='button'
-																tabIndex={-1}
-																className={styles.download}
-																aria-label={t('media.card.menu.download', {
-																	label: entryTitle(entry)
-																})}
-																title={t('media.card.menu.download', {
-																	label: entryTitle(entry)
-																})}
-																onPointerDown={keepFromItem}
-																onPointerUp={keepFromItem}
-																onClick={event => downloadEntry(event, entry)}
-															>
-																<Icon name='common/download' size={14} />
-															</button>
-														) : entry.episode?.runtime_minutes ? (
-															<span className={styles.aside}>
-																{t('media.library.minutes', {
-																	count: entry.episode.runtime_minutes
-																})}
-															</span>
-														) : null}
-													</Menu.Item>
-												)
-											})}
+											{shown.map(entry => (
+												<EpisodeItem
+													key={entry.key}
+													ref={entry === next ? nextRef : undefined}
+													entry={entry}
+													isNext={entry === next}
+													onPlay={playEntry}
+													onDownload={downloadEntry}
+												/>
+											))}
 										</div>
 
 										{onOpen && (
@@ -327,40 +267,7 @@ export function PlayMenu({
 							<span className={styles.text}>{t('media.card.menu.playExternal')}</span>
 						</Menu.Item>
 
-						<Menu.Sub>
-							<Menu.SubTrigger className={styles.item}>
-								<Icon name='common/player' size={16} className={styles.icon} />
-								<span className={styles.text}>{t('media.card.menu.player')}</span>
-								<span className={styles.value}>
-									{t(`settings.player.modes.${playerMode}`)}
-								</span>
-							</Menu.SubTrigger>
-
-							<Menu.Portal>
-								<Menu.SubContent className={styles.menu} sideOffset={8} collisionPadding={12}>
-									<Menu.RadioGroup
-										value={playerMode}
-										onValueChange={value => changePlayerMode(value as PlayerMode)}
-									>
-										{PLAYER_MODES.map(mode => (
-											<Menu.RadioItem
-												key={mode}
-												value={mode}
-												className={styles.item}
-												onSelect={event => event.preventDefault()}
-											>
-												<span className={styles.text}>
-													{t(`settings.player.modes.${mode}`)}
-												</span>
-												<Menu.ItemIndicator className={styles.aside}>
-													<Icon name='common/check' size={14} />
-												</Menu.ItemIndicator>
-											</Menu.RadioItem>
-										))}
-									</Menu.RadioGroup>
-								</Menu.SubContent>
-							</Menu.Portal>
-						</Menu.Sub>
+						<PlayerModeMenu />
 
 						{next && onMarkWatched && (
 							<>

@@ -1,7 +1,7 @@
 import type { Unit } from 'effector'
 
 import { useTranslation } from '@shared/i18n'
-import { Button, Icon, Modal, PageHeader, Textarea } from '@shared/ui'
+import { Button, Icon, PageHeader, Textarea } from '@shared/ui'
 
 import type { ManualDraft } from '@entities/media'
 
@@ -11,6 +11,7 @@ import type { CreatedList } from '../../lib/useManualMediaForm'
 import { AIAssistantCard } from '../ai-assistant-card/AIAssistantCard'
 import { BasicsTab } from '../basics-tab/BasicsTab'
 import { CompletenessCard } from '../completeness-card/CompletenessCard'
+import { DeleteManualMediaDialog } from '../delete-manual-media-dialog/DeleteManualMediaDialog'
 import { DetailsTab } from '../details-tab/DetailsTab'
 import { GenresPanel } from '../genres-panel/GenresPanel'
 import { IdentityCard } from '../identity-card/IdentityCard'
@@ -60,14 +61,13 @@ export function ManualMediaForm({
 		dirty,
 		saving,
 		suggesting,
-		deleting,
 		deleteOpen,
 		setDeleteOpen,
 		posterOpen,
 		setPosterOpen,
 		suggest,
 		save,
-		confirmDelete,
+		afterDelete,
 		goBack
 	} = useManualMediaForm({
 		mode,
@@ -236,23 +236,12 @@ export function ManualMediaForm({
 				disabled={saving}
 			/>
 
-			<Modal
+			<DeleteManualMediaDialog
 				open={deleteOpen}
 				onOpenChange={setDeleteOpen}
-				size='sm'
-				title={t('manualMedia.delete.title', { title: draft.title })}
-				description={t('manualMedia.delete.hint')}
-				footer={
-					<>
-						<Button variant='secondary' onClick={() => setDeleteOpen(false)} disabled={deleting}>
-							{t('manualMedia.cancel')}
-						</Button>
-
-						<Button variant='primary' onClick={confirmDelete} loading={deleting}>
-							{t('manualMedia.delete.confirm')}
-						</Button>
-					</>
-				}
+				id={id}
+				title={draft.title}
+				onDeleted={afterDelete}
 			/>
 		</div>
 	)

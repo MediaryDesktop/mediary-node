@@ -21,7 +21,6 @@ import { hintNote, mergeSuggestion, withoutAiFilled } from './ai-merge'
 import type { AiMergeField } from './ai-merge'
 import type { CoverSelection } from './cover'
 import { formatAfterTypeChange } from './draft'
-import { useManualMediaDeletion } from './useManualMediaDeletion'
 
 // A list the user has just created from this form's "+ New list".
 export interface CreatedList {
@@ -30,6 +29,21 @@ export interface CreatedList {
 }
 
 const NO_LIST_CREATED = createEvent<CreatedList>()
+
+// What to say when the assistant refuses: 428 — no key is set up, 429 — the
+// shared allowance is spent. Both are fixed in the app settings, so their
+// toast offers a way there.
+function aiFailureText(status: number) {
+	if (status === 428) {
+		return { fallback: 'manualMedia.ai.needsKey', settings: 'manualMedia.ai.openSettings' } as const
+	}
+
+	if (status === 429) {
+		return { fallback: 'manualMedia.ai.limitReached', settings: 'manualMedia.ai.addOwn' } as const
+	}
+
+	return { fallback: 'manualMedia.ai.failed', settings: null } as const
+}
 
 export interface UseManualMediaFormOptions {
 	mode: 'create' | 'edit'
@@ -91,15 +105,23 @@ export function useManualMediaForm({
 		}
 	})
 
-	const requireType = (action: 'save' | 'suggest') => {
-		if (typePicked) {
-			return true
+	// Both actions need to know what the title is: its type and its name. The
+	// first missing one is marked on the form, and the caller hears which.
+	const requireTypeAndTitle = (action: 'save' | 'suggest'): string | null => {
+		if (!typePicked) {
+			setErrors(current => ({ ...current, media_type: t('manualMedia.validation.typeRequired') }))
+			onInvalid?.('media_type', action)
+			return null
 		}
 
-		setErrors(current => ({ ...current, media_type: t('manualMedia.validation.typeRequired') }))
-		onInvalid?.('media_type', action)
+		const title = draft.title.trim()
+		if (title === '') {
+			setErrors(current => ({ ...current, title: t('manualMedia.validation.titleRequired') }))
+			onInvalid?.('title', action)
+			return null
+		}
 
-		return false
+		return title
 	}
 
 	const patch = (next: Partial<ManualDraft>) => {
@@ -180,14 +202,8 @@ export function useManualMediaForm({
 	}
 
 	const suggest = async () => {
-		if (!requireType('suggest')) {
-			return
-		}
-
-		const title = draft.title.trim()
-		if (title === '') {
-			setErrors(current => ({ ...current, title: t('manualMedia.validation.titleRequired') }))
-			onInvalid?.('title', 'suggest')
+		const title = requireTypeAndTitle('suggest')
+		if (title === null) {
 			return
 		}
 
@@ -222,24 +238,17 @@ export function useManualMediaForm({
 			}
 		} catch (error) {
 			const failure = HttpRequestError.fromUnknown(error)
+			const { fallback, settings } = aiFailureText(failure.status)
 
-			const openSettings = () => navigate({ to: '/settings', search: { section: 'app' } })
-
-			if (failure.status === 428) {
-				toast.error(problemDetail(failure, t('manualMedia.ai.needsKey')), {
-					id: 'manual-media-ai',
-					action: { label: t('manualMedia.ai.openSettings'), onClick: openSettings }
-				})
-			} else if (failure.status === 429) {
-				toast.error(problemDetail(failure, t('manualMedia.ai.limitReached')), {
-					id: 'manual-media-ai',
-					action: { label: t('manualMedia.ai.addOwn'), onClick: openSettings }
-				})
-			} else {
-				toast.error(problemDetail(failure, t('manualMedia.ai.failed')), {
-					id: 'manual-media-ai'
-				})
-			}
+			toast.error(problemDetail(failure, t(fallback)), {
+				id: 'manual-media-ai',
+				action: settings
+					? {
+							label: t(settings),
+							onClick: () => navigate({ to: '/settings', search: { section: 'app' } })
+						}
+					: undefined
+			})
 		} finally {
 			setSuggesting(false)
 			refreshAISettings()
@@ -247,14 +256,7 @@ export function useManualMediaForm({
 	}
 
 	const save = async () => {
-		if (!requireType('save')) {
-			return
-		}
-
-		const title = draft.title.trim()
-		if (title === '') {
-			setErrors(current => ({ ...current, title: t('manualMedia.validation.titleRequired') }))
-			onInvalid?.('title', 'save')
+		if (requireTypeAndTitle('save') === null) {
 			return
 		}
 
@@ -306,15 +308,9 @@ export function useManualMediaForm({
 		}
 	}
 
-	const { remove, deleting } = useManualMediaDeletion(() => {
+	const afterDelete = () => {
 		setDeleteOpen(false)
 		void navigate({ to: '/library' })
-	})
-
-	const confirmDelete = () => {
-		if (id) {
-			remove(id)
-		}
 	}
 
 	const pickCover = (chosen: CoverSelection) => {
@@ -343,14 +339,13 @@ export function useManualMediaForm({
 		dirty,
 		saving,
 		suggesting,
-		deleting,
 		deleteOpen,
 		setDeleteOpen,
 		posterOpen,
 		setPosterOpen,
 		suggest,
 		save,
-		confirmDelete,
+		afterDelete,
 		goBack
 	}
 }

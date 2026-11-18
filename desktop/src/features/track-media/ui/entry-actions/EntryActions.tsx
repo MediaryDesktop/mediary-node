@@ -79,12 +79,7 @@ export function EntryActions({ media, entry, listName }: EntryMenuProps) {
 				)}
 			</div>
 
-			<EntryMenu
-				media={media}
-				entry={entry}
-				listName={listName}
-				triggerClassName={styles.corner}
-			/>
+			<EntryMenu media={media} entry={entry} listName={listName} triggerClassName={styles.corner} />
 		</>
 	)
 }
