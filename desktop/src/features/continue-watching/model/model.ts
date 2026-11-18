@@ -2,7 +2,7 @@ import { combine, createEffect, createEvent, createStore, sample } from 'effecto
 
 import { fetchTitleFilesFx } from '@entities/library-item'
 import type { LibraryFile } from '@entities/library-item'
-import { fetchMediaEpisodesFx } from '@entities/media'
+import { fetchMediaEpisodesFx, isSeasonalRef } from '@entities/media'
 import type { MediaEpisode } from '@entities/media'
 
 import { upNext } from '../lib/up-next'
@@ -79,7 +79,7 @@ export const $items = combine($candidates, $files, $episodes, (candidates, files
 		const titleFiles = files[mediaRef]
 		const list = episodes[mediaRef]
 
-		if (!titleFiles || (mediaRef.startsWith('tmdb:tv:') && !list)) {
+		if (!titleFiles || (isSeasonalRef(mediaRef) && !list)) {
 			return []
 		}
 

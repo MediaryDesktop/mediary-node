@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { isReadMedia, isVideoMedia } from './kinds'
+import { isReadMedia, isSeasonalRef, isVideoMedia } from './kinds'
 
 describe('media kinds', () => {
 	it('tells watched titles from read ones', () => {
@@ -13,5 +13,11 @@ describe('media kinds', () => {
 	it('counts a type it does not know as neither', () => {
 		expect(isVideoMedia('podcast')).toBe(false)
 		expect(isReadMedia('podcast')).toBe(false)
+	})
+
+	it('knows a series numbered by season by its reference', () => {
+		expect(isSeasonalRef('tmdb:tv:1399')).toBe(true)
+		expect(isSeasonalRef('tmdb:movie:1399')).toBe(false)
+		expect(isSeasonalRef('anilist:1')).toBe(false)
 	})
 })

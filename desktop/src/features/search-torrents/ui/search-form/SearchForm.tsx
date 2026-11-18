@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react'
 import { useTranslation } from '@shared/i18n'
 import { DrawerForm, EmptyState, Skeleton, toast } from '@shared/ui'
 
+import { isSeasonalRef } from '@entities/media'
 import { TorrentSetupNotice } from '@entities/torrent'
 import type { TorrentRelease } from '@entities/torrent'
 
@@ -117,7 +118,7 @@ export function SearchForm({ mediaRef, title, missing, poster, watching, onDone 
 				<SearchBar
 					criteria={criteria}
 					onChange={search.setCriteria}
-					seasonal={mediaRef.startsWith('tmdb:tv:')}
+					seasonal={isSeasonalRef(mediaRef)}
 					pending={pending}
 					disabled={!setup.hasSources}
 					onSearch={run}

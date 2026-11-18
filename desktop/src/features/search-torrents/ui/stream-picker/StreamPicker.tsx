@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react'
 import { useTranslation } from '@shared/i18n'
 import { Icon, Skeleton } from '@shared/ui'
 
+import { isSeasonalRef } from '@entities/media'
 import { TorrentSetupNotice } from '@entities/torrent'
 import type { TorrentRelease } from '@entities/torrent'
 
@@ -40,7 +41,7 @@ export function StreamPicker({ mediaRef, poster, search, watching }: StreamPicke
 	const navigate = useNavigate()
 	const target = useUnit($searchTarget)
 	const { setup, result, pending, criteria } = search
-	const seasonal = mediaRef.startsWith('tmdb:tv:')
+	const seasonal = isSeasonalRef(mediaRef)
 
 	const [kind, setKind] = useState<ReleaseKind>('all')
 	const [source, setSource] = useState(ALL_SOURCES)

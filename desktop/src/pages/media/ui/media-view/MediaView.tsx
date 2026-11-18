@@ -6,7 +6,7 @@ import { useTranslation } from '@shared/i18n'
 import { formatRelativeTime, formatWeekday, useUnitWatch } from '@shared/lib'
 import { Icon, Modal, PhaseTransition } from '@shared/ui'
 
-import { isReadMedia, isVideoMedia, mediaTitle } from '@entities/media'
+import { isReadMedia, isSeasonalRef, isVideoMedia, mediaTitle } from '@entities/media'
 import type { MediaDetails, MediaSource } from '@entities/media'
 import { useTorrentSetup } from '@entities/torrent'
 import type { TrackerEntry } from '@entities/tracker'
@@ -73,7 +73,7 @@ export function MediaView({ mediaRef, media, sources, entry, initialView, initia
 
 	const subject = resolveSubject(media, entry)
 	const torrents = subject ? !isReadMedia(subject.mediaType) : false
-	const seasonal = mediaRef.startsWith('tmdb:tv:')
+	const seasonal = isSeasonalRef(mediaRef)
 	const released = seasonal ? null : releasedEpisodes(media, subject?.total)
 	const missing = useMissingEpisodes(mediaRef, released, torrents)
 

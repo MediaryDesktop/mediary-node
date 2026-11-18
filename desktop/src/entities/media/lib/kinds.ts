@@ -10,3 +10,8 @@ export function isVideoMedia(mediaType: string): boolean {
 export function isReadMedia(mediaType: string): boolean {
 	return mediaType === 'manga' || mediaType === 'book'
 }
+
+// A TMDB series: its episodes are numbered within seasons, not from one.
+export function isSeasonalRef(mediaRef: string): boolean {
+	return mediaRef.startsWith('tmdb:tv:')
+}

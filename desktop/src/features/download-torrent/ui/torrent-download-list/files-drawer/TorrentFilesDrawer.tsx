@@ -10,6 +10,7 @@ import { Button, Checkbox, Drawer, DrawerForm, DrawerSection, toast } from '@sha
 import { useNodeData } from '@infra/node'
 
 import { titleFilesQuery } from '@entities/library-item'
+import { isSeasonalRef } from '@entities/media'
 import {
 	selectTorrentFilesMutation,
 	torrentFilesClosed,
@@ -81,7 +82,7 @@ function FilesForm({ download, onDone }: { download: TorrentDownload; onDone: ()
 
 	const files = useMemo(() => sortFiles(data?.files ?? []), [data])
 
-	const seasonal = download.media_ref.startsWith('tmdb:tv:')
+	const seasonal = isSeasonalRef(download.media_ref)
 
 	const owned = useMemo(
 		() => OwnedEpisodes.fromLibrary(library?.files.items ?? [], seasonal),

@@ -1,12 +1,11 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
 import { useCallback } from 'react'
-import { IoIosRefresh } from 'react-icons/io'
 
 import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
-import { formatBytes, useUnitWatch } from '@shared/lib'
-import { Button, Icon, toast } from '@shared/ui'
+import { useUnitWatch } from '@shared/lib'
+import { toast } from '@shared/ui'
 
 import { useNodeData } from '@infra/node'
 
@@ -16,13 +15,10 @@ import {
 	bookEditionsQuery,
 	bookSourcesQuery,
 	enqueueBookDownloadMutation,
-	retryBookDownloadMutation,
 	useBookFolderAction
 } from '@entities/book-source'
-import type { BookDownload, BookEdition, BookFormat } from '@entities/book-source'
 
-import { downloadRequested } from '../../model/model'
-
+import { EditionRow } from './edition-row/EditionRow'
 import styles from './FreeCopies.module.scss'
 
 export interface FreeCopiesProps {
@@ -50,7 +46,7 @@ export function FreeCopies({ mediaRef }: FreeCopiesProps) {
 	useNodeData(bookDownloadsQuery)
 	useNodeData(bookDownloadSettingsQuery)
 
-	useNodeData(bookEditionsQuery, { params: mediaRef, enabled: Boolean(anySource) })
+	useNodeData(bookEditionsQuery, { params: mediaRef, enabled: anySource })
 
 	useUnitWatch(enqueueBookDownloadMutation.finished.success, () =>
 		toast.success(t('bookSources.copies.queued'), { id: 'book-download-queued' })
@@ -105,123 +101,5 @@ export function FreeCopies({ mediaRef }: FreeCopiesProps) {
 				</p>
 			))}
 		</section>
-	)
-}
-
-interface EditionRowProps {
-	edition: BookEdition
-	mediaRef: string
-	downloads: BookDownload[]
-}
-
-function EditionRow({ edition, mediaRef, downloads }: EditionRowProps) {
-	const meta = [
-		(edition.authors ?? []).join(', '),
-		edition.source,
-		edition.language?.toUpperCase(),
-		edition.year ? String(edition.year) : ''
-	].filter(Boolean)
-
-	return (
-		<li className={styles.row}>
-			<span className={styles.icon} aria-hidden>
-				<Icon name='categories/book' size={18} />
-			</span>
-
-			<div className={styles.body}>
-				<p className={styles.name} title={edition.title}>
-					{edition.title}
-				</p>
-				<span className={styles.meta}>{meta.join(' · ')}</span>
-			</div>
-
-			<div className={styles.formats}>
-				{(edition.formats ?? []).map(format => (
-					<FormatAction
-						key={format.type}
-						edition={edition}
-						format={format}
-						mediaRef={mediaRef}
-						download={downloads.find(
-							item => item.edition_ref === edition.ref && item.format === format.type
-						)}
-					/>
-				))}
-			</div>
-		</li>
-	)
-}
-
-interface FormatActionProps {
-	edition: BookEdition
-	format: BookFormat
-	mediaRef: string
-	download: BookDownload | undefined
-}
-
-function FormatAction({ edition, format, mediaRef, download }: FormatActionProps) {
-	const { t } = useTranslation()
-	const navigate = useNavigate()
-
-	const [request, retry, queueing] = useUnit([
-		downloadRequested,
-		retryBookDownloadMutation.start,
-		enqueueBookDownloadMutation.$pending
-	])
-
-	const label = [format.ext.replace('.', '').toUpperCase(), format.size ? formatBytes(format.size) : '']
-		.filter(Boolean)
-		.join(' · ')
-
-	if (download?.state === 'done' && download.file_id) {
-		const fileId = String(download.file_id)
-
-		return (
-			<Button
-				size='small'
-				variant='primary'
-				startIcon={<Icon name='common/book-open' size={16} />}
-				onClick={() => void navigate({ to: '/read-book/$fileId', params: { fileId } })}
-			>
-				{t('reader.book.read')}
-			</Button>
-		)
-	}
-
-	if (download?.state === 'queued' || download?.state === 'running') {
-		const percent =
-			download.bytes_total > 0 ? Math.round((download.bytes_done / download.bytes_total) * 100) : null
-
-		return (
-			<Button size='small' disabled>
-				{percent === null
-					? t(`bookSources.downloads.states.${download.state}`)
-					: t('bookSources.copies.saving', { percent })}
-			</Button>
-		)
-	}
-
-	if (download?.state === 'failed' || download?.state === 'cancelled') {
-		return (
-			<Button
-				size='small'
-				startIcon={<IoIosRefresh size={14} />}
-				title={download.error}
-				onClick={() => retry(download.id)}
-			>
-				{t('bookSources.copies.retry', { format: label })}
-			</Button>
-		)
-	}
-
-	return (
-		<Button
-			size='small'
-			startIcon={<Icon name='common/download' size={16} />}
-			disabled={queueing}
-			onClick={() => request({ edition_ref: edition.ref, format: format.type, media_ref: mediaRef })}
-		>
-			{label}
-		</Button>
 	)
 }

@@ -11,6 +11,7 @@ import type { ListMediaType } from '@entities/tracker'
 import { filterIcons, iconLabel } from '../../../lib/icon-search'
 
 import styles from './IconPicker.module.scss'
+import { handleIconPickerKey } from './lib/icon-picker-keys'
 
 export interface IconPickerProps {
 	value: string
@@ -64,67 +65,18 @@ export function IconPicker({ value, mediaType, onChange, disabled }: IconPickerP
 		return () => document.removeEventListener('pointerdown', onPointerDown)
 	}, [open, close])
 
-	const cells = () => Array.from(gridRef.current?.querySelectorAll<HTMLButtonElement>('button') ?? [])
-
-	const focusCell = (index: number) => {
-		const all = cells()
-		all[Math.min(Math.max(index, 0), all.length - 1)]?.focus()
-	}
-
-	const onPanelKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-		if (event.key === 'Escape') {
-			event.preventDefault()
-			close()
-			triggerRef.current?.focus()
-			return
-		}
-
-		if (event.target === searchRef.current) {
-			if (event.key === 'ArrowDown') {
-				event.preventDefault()
-				const all = cells()
-				const current = all.findIndex(cell => cell.dataset.icon === value)
-				focusCell(current >= 0 ? current : 0)
-			} else if (event.key === 'Enter') {
-				event.preventDefault()
-				const first = options[0]
-				if (first !== undefined) {
-					choose(first)
-				}
+	const onPanelKeyDown = (event: KeyboardEvent<HTMLDivElement>) =>
+		handleIconPickerKey(event, {
+			searchRef,
+			gridRef,
+			value,
+			options,
+			onChoose: choose,
+			onClose: () => {
+				close()
+				triggerRef.current?.focus()
 			}
-			return
-		}
-
-		const all = cells()
-		const at = all.findIndex(cell => cell === document.activeElement)
-		if (at < 0) {
-			return
-		}
-
-		const top = all[0]?.offsetTop ?? 0
-		const columns = Math.max(all.filter(cell => cell.offsetTop === top).length, 1)
-
-		const step: Record<string, number> = {
-			ArrowRight: 1,
-			ArrowLeft: -1,
-			ArrowDown: columns,
-			ArrowUp: -columns
-		}
-
-		const delta = step[event.key]
-		if (delta === undefined) {
-			return
-		}
-
-		event.preventDefault()
-
-		if (event.key === 'ArrowUp' && at < columns) {
-			searchRef.current?.focus()
-			return
-		}
-
-		focusCell(at + delta)
-	}
+		})
 
 	const selectedLabel = value === '' ? t('lists.manage.iconDefault') : iconLabel(value)
 

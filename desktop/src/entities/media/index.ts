@@ -17,7 +17,7 @@ export {
 
 export { alternativeTitles, episodeTitle, mediaTitle } from './lib/titles'
 export { enumLabel, formatMediaDate, scoreTone } from './lib/format'
-export { isReadMedia, isVideoMedia } from './lib/kinds'
+export { isReadMedia, isSeasonalRef, isVideoMedia } from './lib/kinds'
 export type { MediaEnumGroup, ScoreTone } from './lib/format'
 
 export { FeaturedBanner } from './ui/featured-banner/FeaturedBanner'
