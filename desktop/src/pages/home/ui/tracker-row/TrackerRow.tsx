@@ -5,7 +5,7 @@ import { Carousel } from '@shared/ui'
 import type { IconName } from '@shared/ui'
 
 import { MediaCard } from '@entities/media'
-import { entryTracking, preferredTitle } from '@entities/tracker'
+import { entryTracking, preferredTitle, statusListId } from '@entities/tracker'
 import type { TrackerEntry, TrackerMediaType, TrackerStatus } from '@entities/tracker'
 
 import { EntryActions } from '@features/track-media'
@@ -34,7 +34,7 @@ export function TrackerRow({ title, icon, status, entries }: TrackerRowProps) {
 			icon={icon}
 			more={{
 				label: t('lists.seeAll'),
-				onClick: () => navigate({ to: '/lists/$listId', params: { listId: `status:${status}` } })
+				onClick: () => navigate({ to: '/lists/$listId', params: { listId: statusListId(status) } })
 			}}
 		>
 			{entries.slice(0, MAX_CARDS).map(entry => (

@@ -1,22 +1,23 @@
-import { useNavigate } from '@tanstack/react-router'
 import { useUnit } from 'effector-react'
-import { useCallback } from 'react'
 
-import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
 import { useUnitWatch } from '@shared/lib'
-import { toast } from '@shared/ui'
 
 import { useNodeData } from '@infra/node'
 
 import { titleFilesQuery } from '@entities/library-item'
 import type { LibraryFile } from '@entities/library-item'
 import type { MediaEpisode } from '@entities/media'
-import { $playerMode, playbackModel, playerOpened, thumbnailUrl } from '@entities/playback'
+import { playbackModel, thumbnailUrl } from '@entities/playback'
 import { titleMarks, titleProgressQuery } from '@entities/progress'
-import { useMissingToolAction } from '@entities/tool'
 
-import { episodeFor, episodeOrder, groupTitleFiles, isWatched } from '@features/continue-watching'
+import {
+	episodeFor,
+	episodeOrder,
+	groupTitleFiles,
+	isWatched,
+	usePlayFile
+} from '@features/continue-watching'
 import { episodeMarked, listableEpisode } from '@features/mark-progress'
 
 import { useEpisodeMeta } from '../../../lib/useEpisodeMeta'
@@ -50,35 +51,14 @@ export function EpisodeLibrary({
 	const { t } = useTranslation()
 	const { meta, count } = useEpisodeMeta(mediaRef)
 
-	const [
-		data,
-		progressData,
-		askProgress,
-		markEpisode,
-		playExternally,
-		session,
-		starting,
-		playerMode,
-		openPlayer
-	] = useUnit([
+	const { play, starting } = usePlayFile()
+	const [data, progressData, askProgress, markEpisode, session] = useUnit([
 		titleFilesQuery.$data,
 		titleProgressQuery.$data,
 		titleProgressQuery.start,
 		episodeMarked,
-		playbackModel.playRequested,
-		playbackModel.$session,
-		playbackModel.$starting,
-		$playerMode,
-		playerOpened
+		playbackModel.$session
 	])
-
-	const play = (fileId: number) => {
-		if (playerMode === 'external') {
-			playExternally(fileId)
-		} else {
-			openPlayer(fileId)
-		}
-	}
 
 	useNodeData(titleFilesQuery, { params: { mediaRef, kind: 'video' } })
 	useNodeData(titleProgressQuery, { params: mediaRef })
@@ -86,18 +66,6 @@ export function EpisodeLibrary({
 	const marks = titleMarks(progressData, mediaRef)
 
 	useUnitWatch(playbackModel.progressSettled, () => askProgress(mediaRef))
-
-	const navigate = useNavigate()
-	const missingTool = useMissingToolAction(
-		useCallback(() => void navigate({ to: '/extensions', search: { tab: 'dependencies' } }), [navigate])
-	)
-
-	useUnitWatch(playbackModel.playFailed, ({ error }) =>
-		toast.error(problemDetail(error, t('playback.failed')), {
-			id: 'playback-failed',
-			action: missingTool(error)
-		})
-	)
 
 	const files = (data?.files.items ?? []).filter(file => file.match?.media_ref === mediaRef)
 

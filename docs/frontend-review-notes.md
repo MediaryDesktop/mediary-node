@@ -48,7 +48,8 @@
 
 - `MediaTracking` (`entities/media`) і `EntryTracking` (`entities/tracker`) —
   однакові типи: сутності не імпортують одна одну (§4), це структурна копія.
-- Повтор «`useMissingToolAction` + тост `playback.playFailed`» у
-  `useContinueWatching` і `EpisodeLibrary` — лишено ще етапом 1.
+- ~~Повтор «`useMissingToolAction` + тост `playback.playFailed`» у
+  `useContinueWatching` і `EpisodeLibrary`~~ — `EpisodeLibrary` тепер бере
+  `usePlayFile`, копії немає.
 - Стилі `PlayMenu` — один файл на всі підменю: `.episode .text` перебиває
   `.item .text` лише порядком у файлі.

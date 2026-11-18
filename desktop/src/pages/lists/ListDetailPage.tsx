@@ -14,6 +14,7 @@ import {
 	isTrackerMediaType,
 	ListIcon,
 	preferredTitle,
+	statusOfListId,
 	trackerListsQuery,
 	useTrackedEntries
 } from '@entities/tracker'
@@ -26,8 +27,6 @@ import { applyEntryFilters, formatsOf, genresOf, INITIAL_ENTRY_FILTERS } from '.
 import styles from './ListDetailPage.module.scss'
 import { ListFilters } from './ui/list-filters/ListFilters'
 
-const STATUS_PREFIX = 'status:'
-
 const STATUS_LABELS = {
 	PLANNING: 'lists.shortcut.watchlist',
 	COMPLETED: 'lists.shortcut.completed',
@@ -37,13 +36,9 @@ const STATUS_LABELS = {
 type PinnedStatus = keyof typeof STATUS_LABELS
 
 function pinnedStatusOf(listId: string): PinnedStatus | null {
-	if (!listId.startsWith(STATUS_PREFIX)) {
-		return null
-	}
+	const status = statusOfListId(listId)
 
-	const status = listId.slice(STATUS_PREFIX.length)
-
-	return status in STATUS_LABELS ? (status as PinnedStatus) : null
+	return status !== null && status in STATUS_LABELS ? (status as PinnedStatus) : null
 }
 
 export interface ListDetailPageProps {

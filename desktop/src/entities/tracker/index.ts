@@ -6,7 +6,7 @@ export {
 } from './model/model'
 
 export { canTrack, isLocalTrackerType, isTrackerMediaType, TRACKER_MEDIA_TYPES } from './lib/media-types'
-export { isTrackerStatus, TRACKER_STATUSES } from './lib/statuses'
+export { isTrackerStatus, statusListId, statusOfListId, TRACKER_STATUSES } from './lib/statuses'
 export type { TrackerStatus } from './lib/statuses'
 export { formatProgress, preferredTitle } from './lib/format'
 
