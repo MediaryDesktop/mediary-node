@@ -93,6 +93,13 @@ type StreamOutput struct {
 }
 
 func (h *Handler) Register(api huma.API) {
+	h.registerStream(api)
+	h.registerHLS(api)
+	h.registerSession(api)
+}
+
+// registerStream registers what the built-in player plays a file from, and what it reports back.
+func (h *Handler) registerStream(api huma.API) {
 	huma.Register(api, huma.Operation{
 		OperationID: "getPlaybackStream",
 		Method:      http.MethodGet,
@@ -189,6 +196,43 @@ func (h *Handler) Register(api huma.API) {
 	})
 
 	huma.Register(api, huma.Operation{
+		OperationID: "getPlaybackDirect",
+		Method:      http.MethodGet,
+		Path:        "/v1/playback/files/{id}/direct",
+		Summary:     "Serve a file as it is",
+		Description: "The file's bytes with range support, for a video element to play directly. For a stream (a negative ID) the node passes the request on to the debrid service, so the client never holds the service's link and the link can be renewed behind the same address. Accepts the URL token as ?token=, because a video element cannot send headers.",
+		Tags:        []string{"playback"},
+	}, func(ctx context.Context, in *FileInput) (*huma.StreamResponse, error) {
+		source, err := h.svc.DirectSource(ctx, in.ID)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		contentType := videofile.ContainerMimeType(filepath.Ext(source.Name))
+
+		return &huma.StreamResponse{Body: func(hctx huma.Context) {
+			if source.Open != nil {
+				serveStream(ctx, hctx, source.Open, source.Name, contentType)
+				return
+			}
+			if source.Remote {
+				proxyRemote(hctx, source.Path, contentType, func() (string, error) {
+					fresh, renewErr := h.svc.RenewDirectSource(ctx, in.ID)
+					if renewErr != nil {
+						return "", renewErr
+					}
+					return fresh.Path, nil
+				})
+				return
+			}
+			serveFile(hctx, source.Path, contentType)
+		}}, nil
+	})
+}
+
+// registerHLS registers the transcoded stream, for a file the player cannot play as it is.
+func (h *Handler) registerHLS(api huma.API) {
+	huma.Register(api, huma.Operation{
 		OperationID: "getPlaybackHLSMaster",
 		Method:      http.MethodGet,
 		Path:        "/v1/playback/files/{id}/hls/master.m3u8",
@@ -241,41 +285,10 @@ func (h *Handler) Register(api huma.API) {
 
 		return &struct{}{}, nil
 	})
+}
 
-	huma.Register(api, huma.Operation{
-		OperationID: "getPlaybackDirect",
-		Method:      http.MethodGet,
-		Path:        "/v1/playback/files/{id}/direct",
-		Summary:     "Serve a file as it is",
-		Description: "The file's bytes with range support, for a video element to play directly. For a stream (a negative ID) the node passes the request on to the debrid service, so the client never holds the service's link and the link can be renewed behind the same address. Accepts the URL token as ?token=, because a video element cannot send headers.",
-		Tags:        []string{"playback"},
-	}, func(ctx context.Context, in *FileInput) (*huma.StreamResponse, error) {
-		source, err := h.svc.DirectSource(ctx, in.ID)
-		if err != nil {
-			return nil, httpapi.ToHTTP(err)
-		}
-
-		contentType := videofile.ContainerMimeType(filepath.Ext(source.Name))
-
-		return &huma.StreamResponse{Body: func(hctx huma.Context) {
-			if source.Open != nil {
-				serveStream(ctx, hctx, source.Open, source.Name, contentType)
-				return
-			}
-			if source.Remote {
-				proxyRemote(hctx, source.Path, contentType, func() (string, error) {
-					fresh, renewErr := h.svc.RenewDirectSource(ctx, in.ID)
-					if renewErr != nil {
-						return "", renewErr
-					}
-					return fresh.Path, nil
-				})
-				return
-			}
-			serveFile(hctx, source.Path, contentType)
-		}}, nil
-	})
-
+// registerSession registers playback in an external player the node starts and steers.
+func (h *Handler) registerSession(api huma.API) {
 	huma.Register(api, huma.Operation{
 		OperationID: "getPlayback",
 		Method:      http.MethodGet,

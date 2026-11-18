@@ -113,6 +113,13 @@ type ListOutput struct {
 }
 
 func (h *Handler) Register(api huma.API) {
+	h.registerAniList(api)
+	h.registerEntries(api)
+	h.registerLists(api)
+}
+
+// registerAniList registers the AniList account the anime and manga lists live in.
+func (h *Handler) registerAniList(api huma.API) {
 	huma.Register(api, huma.Operation{
 		OperationID: "getAniListSession",
 		Method:      http.MethodGet,
@@ -164,7 +171,10 @@ func (h *Handler) Register(api huma.API) {
 
 		return nil, nil
 	})
+}
 
+// registerEntries registers the user's entries: a title, its status and progress.
+func (h *Handler) registerEntries(api huma.API) {
 	huma.Register(api, huma.Operation{
 		OperationID: "listTrackerEntries",
 		Method:      http.MethodGet,
@@ -239,6 +249,28 @@ func (h *Handler) Register(api huma.API) {
 	})
 
 	huma.Register(api, huma.Operation{
+		OperationID:   "refreshTrackerEntries",
+		Method:        http.MethodPost,
+		Path:          "/v1/tracker/refresh",
+		Summary:       "Refresh tracker entries",
+		Description:   "Starts a background refresh; the result arrives as a `tracker` event.",
+		Tags:          []string{"tracker"},
+		DefaultStatus: http.StatusAccepted,
+	}, func(ctx context.Context, in *MediaTypeQuery) (*AcceptedOutput, error) {
+		if err := h.svc.RequestRefresh(ctx, in.Type); err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		out := &AcceptedOutput{}
+		out.Body.Accepted = true
+
+		return out, nil
+	})
+}
+
+// registerLists registers the lists the user made.
+func (h *Handler) registerLists(api huma.API) {
+	huma.Register(api, huma.Operation{
 		OperationID: "listTrackerLists",
 		Method:      http.MethodGet,
 		Path:        "/v1/tracker/lists",
@@ -305,24 +337,5 @@ func (h *Handler) Register(api huma.API) {
 		}
 
 		return nil, nil
-	})
-
-	huma.Register(api, huma.Operation{
-		OperationID:   "refreshTrackerEntries",
-		Method:        http.MethodPost,
-		Path:          "/v1/tracker/refresh",
-		Summary:       "Refresh tracker entries",
-		Description:   "Starts a background refresh; the result arrives as a `tracker` event.",
-		Tags:          []string{"tracker"},
-		DefaultStatus: http.StatusAccepted,
-	}, func(ctx context.Context, in *MediaTypeQuery) (*AcceptedOutput, error) {
-		if err := h.svc.RequestRefresh(ctx, in.Type); err != nil {
-			return nil, httpapi.ToHTTP(err)
-		}
-
-		out := &AcceptedOutput{}
-		out.Body.Accepted = true
-
-		return out, nil
 	})
 }

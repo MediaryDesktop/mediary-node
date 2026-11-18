@@ -151,6 +151,13 @@ type ScanRunOutput struct {
 }
 
 func (h *Handler) Register(api huma.API) {
+	h.registerRoots(api)
+	h.registerScans(api)
+	h.registerFiles(api)
+}
+
+// registerRoots registers the folders the library is made of.
+func (h *Handler) registerRoots(api huma.API) {
 	huma.Register(api, huma.Operation{
 		OperationID: "listLibraryRoots",
 		Method:      http.MethodGet,
@@ -224,7 +231,10 @@ func (h *Handler) Register(api huma.API) {
 
 		return nil, nil
 	})
+}
 
+// registerScans registers scanning those folders, now and in the past.
+func (h *Handler) registerScans(api huma.API) {
 	huma.Register(api, huma.Operation{
 		OperationID:   "startLibraryScan",
 		Method:        http.MethodPost,
@@ -259,6 +269,53 @@ func (h *Handler) Register(api huma.API) {
 		return out, nil
 	})
 
+	huma.Register(api, huma.Operation{
+		OperationID: "listLibraryScanHistory",
+		Method:      http.MethodGet,
+		Path:        "/v1/library/scan/history",
+		Summary:     "Past scans",
+		Description: "Every scan the node has run, newest first, kept independently of the single current-scan slot so a scan from days ago is still readable.",
+		Tags:        []string{"library"},
+	}, func(ctx context.Context, in *ScanHistoryInput) (*ScanHistoryOutput, error) {
+		history, err := h.svc.ScanHistory(ctx, service.ScanHistoryQuery{
+			From:   optionalTime(in.From),
+			To:     optionalTime(in.To),
+			Limit:  in.Limit,
+			Offset: in.Offset,
+		})
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		out := &ScanHistoryOutput{}
+		out.Body.History = history
+
+		return out, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID: "getLibraryScanHistoryRun",
+		Method:      http.MethodGet,
+		Path:        "/v1/library/scan/history/{id}",
+		Summary:     "One past scan",
+		Description: "What one scan matched, grouped by title, and every file it looked at but could not match.",
+		Tags:        []string{"library"},
+	}, func(ctx context.Context, in *ScanRunInput) (*ScanRunOutput, error) {
+		run, err := h.svc.ScanRun(ctx, in.ID)
+		if err != nil {
+			return nil, httpapi.ToHTTP(err)
+		}
+
+		out := &ScanRunOutput{}
+		out.Body.Run = run
+		out.Body.Sources = []httpapi.Source{httpapi.AniListSource}
+
+		return out, nil
+	})
+}
+
+// registerFiles registers the files found, and what each is matched to.
+func (h *Handler) registerFiles(api huma.API) {
 	huma.Register(api, huma.Operation{
 		OperationID: "listLibraryFiles",
 		Method:      http.MethodGet,
@@ -411,50 +468,6 @@ func (h *Handler) Register(api huma.API) {
 
 		out := &CollectionOutput{}
 		out.Body.Collection = collection
-		out.Body.Sources = []httpapi.Source{httpapi.AniListSource}
-
-		return out, nil
-	})
-
-	huma.Register(api, huma.Operation{
-		OperationID: "listLibraryScanHistory",
-		Method:      http.MethodGet,
-		Path:        "/v1/library/scan/history",
-		Summary:     "Past scans",
-		Description: "Every scan the node has run, newest first, kept independently of the single current-scan slot so a scan from days ago is still readable.",
-		Tags:        []string{"library"},
-	}, func(ctx context.Context, in *ScanHistoryInput) (*ScanHistoryOutput, error) {
-		history, err := h.svc.ScanHistory(ctx, service.ScanHistoryQuery{
-			From:   optionalTime(in.From),
-			To:     optionalTime(in.To),
-			Limit:  in.Limit,
-			Offset: in.Offset,
-		})
-		if err != nil {
-			return nil, httpapi.ToHTTP(err)
-		}
-
-		out := &ScanHistoryOutput{}
-		out.Body.History = history
-
-		return out, nil
-	})
-
-	huma.Register(api, huma.Operation{
-		OperationID: "getLibraryScanHistoryRun",
-		Method:      http.MethodGet,
-		Path:        "/v1/library/scan/history/{id}",
-		Summary:     "One past scan",
-		Description: "What one scan matched, grouped by title, and every file it looked at but could not match.",
-		Tags:        []string{"library"},
-	}, func(ctx context.Context, in *ScanRunInput) (*ScanRunOutput, error) {
-		run, err := h.svc.ScanRun(ctx, in.ID)
-		if err != nil {
-			return nil, httpapi.ToHTTP(err)
-		}
-
-		out := &ScanRunOutput{}
-		out.Body.Run = run
 		out.Body.Sources = []httpapi.Source{httpapi.AniListSource}
 
 		return out, nil
