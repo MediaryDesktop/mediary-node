@@ -4,6 +4,7 @@ import { IoLibraryOutline } from 'react-icons/io5'
 import { useTranslation } from '@shared/i18n'
 import { FallbackImage, Skeleton } from '@shared/ui'
 
+import { episodeLabel } from '@entities/media'
 import type { MediaEpisode } from '@entities/media'
 
 import type { EpisodeIndex } from '@features/continue-watching'
@@ -41,9 +42,7 @@ export function NotInLibrary({ cover, coverColor, banner, total, meta }: NotInLi
 	const placeholders: Placeholder[] = meta.seasonal
 		? meta.list.slice(0, MAX_EPISODE_PLACEHOLDERS).map(episode => ({
 				key: `${episode.season}:${episode.number}`,
-				label: String(
-					t('media.library.seasonEpisode', { season: episode.season ?? 1, number: episode.number })
-				),
+				label: episodeLabel(t, episode.number, episode.season ?? 1),
 				episode
 			}))
 		: Array.from({ length: Math.min(total, MAX_EPISODE_PLACEHOLDERS) }, (_, index) => ({

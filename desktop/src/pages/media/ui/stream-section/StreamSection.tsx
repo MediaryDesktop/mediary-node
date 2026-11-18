@@ -4,6 +4,7 @@ import { useUnit } from 'effector-react'
 import { useTranslation } from '@shared/i18n'
 import { Notice } from '@shared/ui'
 
+import { episodeLabel } from '@entities/media'
 import { useTorrentSetup } from '@entities/torrent'
 
 import { episodeMarked, listableEpisode } from '@features/mark-progress'
@@ -77,8 +78,8 @@ export function StreamSection({
 		meta,
 		released: released ?? count,
 		labels: {
-			episode: number => String(t('media.library.episode', { number })),
-			seasonEpisode: (season, number) => String(t('media.library.seasonEpisode', { season, number }))
+			episode: number => episodeLabel(t, number, null),
+			seasonEpisode: (season, number) => episodeLabel(t, number, season)
 		}
 	})
 	const toWatch = upNext(items, progress, RAIL_SIZE)

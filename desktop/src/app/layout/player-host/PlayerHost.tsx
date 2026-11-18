@@ -1,15 +1,12 @@
 import { useNavigate } from '@tanstack/react-router'
-import clsx from 'clsx'
 import { useUnit } from 'effector-react'
-import { Suspense, useEffect, useRef, useState } from 'react'
-import type { ReactNode } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 
 import { problemDetail } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
-import { Button, Icon, ReelLoader, WindowControls } from '@shared/ui'
+import { Button, ReelLoader } from '@shared/ui'
 
 import { useNodeData } from '@infra/node'
-import { useWindowControls } from '@infra/window'
 
 import {
 	$pipResume,
@@ -27,15 +24,15 @@ import {
 	playerClosed,
 	playerExpanded,
 	playerMinimized,
-	usePlayerEntrance,
 	VideoPlayer
 } from '@entities/playback'
 import { isMissingToolError } from '@entities/tool'
 
 import { $stream, $streamError, $streamTarget, streamCancelled } from '@features/stream-torrent'
 
+import { Panel } from './panel/Panel'
 import styles from './PlayerHost.module.scss'
-import { PreparingStream } from './PreparingStream'
+import { PreparingStream } from './preparing-stream/PreparingStream'
 
 export function PlayerHost() {
 	const { t } = useTranslation()
@@ -233,55 +230,5 @@ export function PlayerHost() {
 				onFallback={canFallBack(source, loadedStream) ? () => setDirectFailedFor(fileId) : undefined}
 			/>
 		</Suspense>
-	)
-}
-
-interface PanelProps {
-	onClose: () => void
-	leaving?: boolean
-	onLeft?: () => void
-	children: ReactNode
-}
-
-function Panel({ onClose, leaving, onLeft, children }: PanelProps) {
-	const windowControls = useWindowControls()
-
-	const { t } = useTranslation()
-
-	const entrance = usePlayerEntrance()
-
-	const onLeftRef = useRef(onLeft)
-	useEffect(() => {
-		onLeftRef.current = onLeft
-	})
-
-	useEffect(() => {
-		if (!leaving) {
-			return
-		}
-
-		const timer = window.setTimeout(() => onLeftRef.current?.(), 240)
-
-		return () => window.clearTimeout(timer)
-	}, [leaving])
-
-	return (
-		<div
-			className={clsx(styles.root, entrance.entering && styles.enter, leaving && styles.leave)}
-			style={entrance.entering && !leaving ? entrance.style : undefined}
-		>
-			<header className={styles.top}>
-				<Button
-					variant='chrome'
-					iconOnly
-					aria-label={t('playback.stop')}
-					startIcon={<Icon name='common/arrow-left' size={18} />}
-					onClick={onClose}
-				/>
-				<WindowControls {...windowControls} className={styles.window} />
-			</header>
-
-			<div className={styles.body}>{children}</div>
-		</div>
 	)
 }

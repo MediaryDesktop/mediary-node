@@ -67,3 +67,10 @@ export function formatMediaDate(date: MediaDate, locale: string): string | null 
 		timeZone: 'UTC'
 	}).format(value)
 }
+
+// "Episode 3", or the season too for a show numbered by season.
+export function episodeLabel(t: TFunction, number: number, season: number | null): string {
+	return season !== null
+		? String(t('media.library.seasonEpisode', { season, number }))
+		: String(t('media.library.episode', { number }))
+}

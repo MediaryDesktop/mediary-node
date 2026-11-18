@@ -9,7 +9,7 @@ import { toast } from '@shared/ui'
 
 import { useNodeData } from '@infra/node'
 
-import { fileSeason, fileTitle, libraryCollectionQuery } from '@entities/library-item'
+import { libraryCollectionQuery } from '@entities/library-item'
 import { isVideoMedia } from '@entities/media'
 import { $playerMode, playbackModel, playerOpened } from '@entities/playback'
 import { useMissingToolAction } from '@entities/tool'
@@ -18,7 +18,7 @@ import type { TrackerEntry } from '@entities/tracker'
 import { $items, $loading, candidatesChanged } from '../model/model'
 import type { Candidate, UpNextItem } from '../model/model'
 
-import { episodeNumber } from './episodes'
+import { fileEpisodeLabel } from './episodes'
 
 const WATCHING = new Set(['CURRENT', 'REPEATING'])
 
@@ -127,15 +127,5 @@ export function usePlayFile(): { play: (fileId: number) => void; starting: boole
 export function useUpNextLabel(): (item: UpNextItem) => string {
 	const { t } = useTranslation()
 
-	return item => {
-		const number = episodeNumber(item.file)
-
-		if (number === null) {
-			return fileTitle(item.file)
-		}
-
-		return item.seasonal
-			? String(t('media.library.seasonEpisode', { season: fileSeason(item.file) ?? 1, number }))
-			: String(t('media.library.episode', { number }))
-	}
+	return item => fileEpisodeLabel(t, item.file, item.seasonal)
 }

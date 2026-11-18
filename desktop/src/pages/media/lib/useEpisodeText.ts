@@ -1,26 +1,15 @@
 import { useTranslation } from '@shared/i18n'
 
-import { fileSeason, fileTitle } from '@entities/library-item'
 import type { LibraryFile } from '@entities/library-item'
 import { episodeTitle } from '@entities/media'
 import type { MediaEpisode } from '@entities/media'
 
-import { episodeNumber } from '@features/continue-watching'
+import { fileEpisodeLabel } from '@features/continue-watching'
 
 export function useEpisodeText() {
 	const { t, i18n } = useTranslation()
 
-	const label = (file: LibraryFile, seasonal = false): string => {
-		const number = episodeNumber(file)
-
-		if (number === null) {
-			return fileTitle(file)
-		}
-
-		return seasonal
-			? String(t('media.library.seasonEpisode', { season: fileSeason(file) ?? 1, number }))
-			: String(t('media.library.episode', { number }))
-	}
+	const label = (file: LibraryFile, seasonal = false): string => fileEpisodeLabel(t, file, seasonal)
 
 	const name = (episode: MediaEpisode | undefined): string | null =>
 		episode ? episodeTitle(episode, i18n.language) : null

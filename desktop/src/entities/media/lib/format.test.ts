@@ -1,7 +1,7 @@
 import type { TFunction } from 'i18next'
 import { describe, expect, it, vi } from 'vitest'
 
-import { enumLabel, formatMediaDate, scoreTone } from './format'
+import { enumLabel, episodeLabel, formatMediaDate, scoreTone } from './format'
 
 describe('formatMediaDate', () => {
 	it('formats as much of the date as is known', () => {
@@ -31,5 +31,15 @@ describe('scoreTone', () => {
 		expect(scoreTone(65)).toBe('good')
 		expect(scoreTone(80)).toBe('great')
 		expect(scoreTone(95)).toBe('best')
+	})
+})
+
+describe('episodeLabel', () => {
+	it('names the season only for a show numbered by season', () => {
+		const t = ((key: string, options: Record<string, unknown>) =>
+			`${key}:${Object.values(options).join(',')}`) as unknown as TFunction
+
+		expect(episodeLabel(t, 3, null)).toBe('media.library.episode:3')
+		expect(episodeLabel(t, 3, 2)).toBe('media.library.seasonEpisode:2,3')
 	})
 })

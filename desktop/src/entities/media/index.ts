@@ -16,7 +16,7 @@ export {
 } from './model/model'
 
 export { alternativeTitles, episodeTitle, mediaTitle } from './lib/titles'
-export { enumLabel, formatMediaDate, scoreTone } from './lib/format'
+export { enumLabel, episodeLabel, formatMediaDate, scoreTone } from './lib/format'
 export { isReadMedia, isSeasonalRef, isVideoMedia } from './lib/kinds'
 export type { MediaEnumGroup, ScoreTone } from './lib/format'
 

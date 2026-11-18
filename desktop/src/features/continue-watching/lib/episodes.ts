@@ -1,5 +1,8 @@
-import { fileSeason } from '@entities/library-item'
+import type { TFunction } from 'i18next'
+
+import { fileSeason, fileTitle } from '@entities/library-item'
 import type { LibraryFile } from '@entities/library-item'
+import { episodeLabel } from '@entities/media'
 import type { MediaEpisode } from '@entities/media'
 
 export interface TitleEpisodes {
@@ -14,6 +17,18 @@ export type EpisodeOrder = (file: LibraryFile) => number | null
 
 export function episodeNumber(file: LibraryFile): number | null {
 	return file.match?.episode ?? file.parsed.episode ?? null
+}
+
+// How a library file is named in an episode list: by its episode — with the
+// season for a show numbered by season — or by its own title when it has no number.
+export function fileEpisodeLabel(t: TFunction, file: LibraryFile, seasonal: boolean): string {
+	const number = episodeNumber(file)
+
+	if (number === null) {
+		return fileTitle(file)
+	}
+
+	return episodeLabel(t, number, seasonal ? (fileSeason(file) ?? 1) : null)
 }
 
 const NONE_WATCHED: ReadonlySet<number> = new Set()

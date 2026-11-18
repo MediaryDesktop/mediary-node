@@ -3,6 +3,7 @@ import { useUnit } from 'effector-react'
 
 import { useTranslation } from '@shared/i18n'
 
+import { episodeLabel } from '@entities/media'
 import type { CardPlayContext, MediaCardSlots } from '@entities/media'
 import { useTorrentSetup } from '@entities/torrent'
 
@@ -37,10 +38,7 @@ function CardPlay({
 
 	const via = effectiveVia(chosenVia, Boolean(setup.debrid))
 
-	const episodeLabel = (entry: PlayEntry) =>
-		entry.season !== null
-			? String(t('media.library.seasonEpisode', { season: entry.season, number: entry.number }))
-			: String(t('media.library.episode', { number: entry.number }))
+	const entryLabel = (entry: PlayEntry) => episodeLabel(t, entry.number, entry.season)
 
 	const streamEntry = (entry: PlayEntry | null) => {
 		if (!entry && mediaType !== 'movie') {
@@ -50,7 +48,7 @@ function CardPlay({
 
 		stream({
 			key: entry ? `${mediaRef}/${entry.season ?? ''}:${entry.number}` : `${mediaRef}/movie`,
-			label: entry ? `${title} · ${episodeLabel(entry)}` : title,
+			label: entry ? `${title} · ${entryLabel(entry)}` : title,
 			params: {
 				media_ref: mediaRef,
 				title,
@@ -82,7 +80,7 @@ function CardPlay({
 					title,
 					episode: entry.number,
 					season: entry.season ?? undefined,
-					label: `${title} · ${episodeLabel(entry)}`
+					label: `${title} · ${entryLabel(entry)}`
 				})
 			}
 		/>
