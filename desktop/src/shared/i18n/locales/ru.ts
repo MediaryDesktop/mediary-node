@@ -777,8 +777,7 @@ export const ru: Translation = {
 		},
 		menu: {
 			label: 'Больше действий',
-			details: 'Подробности',
-			addToLibrary: 'Добавить в библиотеку'
+			details: 'Подробности'
 		},
 		sections: {
 			synopsis: 'Описание',

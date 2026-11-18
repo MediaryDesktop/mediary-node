@@ -3,7 +3,7 @@ import { useUnit } from 'effector-react'
 import { useTranslation } from '@shared/i18n'
 import { DatePicker, Drawer, DrawerForm, DrawerSection, RatingStars, Stepper, Textarea } from '@shared/ui'
 
-import { formatProgress, preferredTitle } from '@entities/tracker'
+import { formatProgress } from '@entities/tracker'
 
 import { rateEntryModel } from '../../model/rate-entry'
 
@@ -61,7 +61,7 @@ export function RateEntryDrawer() {
 			open={open}
 			onOpenChange={next => !next && closed()}
 			title={t('lists.rateEntry.title')}
-			description={entry ? preferredTitle(entry.media.title) : undefined}
+			description={target?.title}
 			closable={false}
 		>
 			<DrawerForm

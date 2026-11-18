@@ -43,7 +43,23 @@ export interface RateForm {
 	volumes: number
 }
 
-export function rateFormOf(entry: TrackerEntry): RateForm {
+const BLANK_RATE_FORM: RateForm = {
+	score: 0,
+	notes: '',
+	startedAt: '',
+	completedAt: '',
+	repeat: 0,
+	progress: 0,
+	volumes: 0
+}
+
+// What the rate drawer starts from: the entry as saved, or a blank form for a
+// title on no list yet — so whatever the user fills in is what gets sent.
+export function rateFormOf(entry: TrackerEntry | null): RateForm {
+	if (!entry) {
+		return BLANK_RATE_FORM
+	}
+
 	return {
 		score: entry.score,
 		notes: entry.notes ?? '',
@@ -56,7 +72,7 @@ export function rateFormOf(entry: TrackerEntry): RateForm {
 }
 
 export function ratePatch(
-	entry: TrackerEntry,
+	entry: TrackerEntry | null,
 	form: RateForm,
 	mediaType: TrackerMediaType
 ): TrackerEntryPatch {

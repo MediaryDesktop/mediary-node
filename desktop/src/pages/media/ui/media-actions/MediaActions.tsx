@@ -49,15 +49,20 @@ export function MediaActions({
 }: MediaActionsProps) {
 	const { t } = useTranslation()
 
-	const [connected, manageOpened, addOpened, rateOpened] = useUnit([
+	const [connected, manageOpened, addOpened, rateOpened, rateAddOpened] = useUnit([
 		aniListAccountModel.$connected,
 		manageEntryModel.opened,
 		manageEntryModel.addOpened,
-		rateEntryModel.opened
+		rateEntryModel.opened,
+		rateEntryModel.addOpened
 	])
 
 	const trackerType = isTrackerMediaType(mediaType) ? mediaType : null
 	const target = entry && trackerType ? { entry, mediaType: trackerType } : null
+	const newEntry =
+		!entry && trackerType && canTrack(trackerType, connected)
+			? { mediaRef, mediaType: trackerType, title }
+			: null
 
 	const offered: (DropdownMenuItem | null | undefined | '')[] = [
 		target && {
@@ -78,12 +83,11 @@ export function MediaActions({
 			icon: 'common/external-link',
 			onSelect: () => window.open(siteUrl, '_blank', 'noreferrer')
 		},
-		{
-			id: 'library',
-			label: t('media.menu.addToLibrary'),
-			icon: <IoLibraryOutline size={20} />,
-			disabled: true,
-			onSelect: () => {}
+		newEntry && {
+			id: 'rate',
+			label: t('lists.rateEntry.action'),
+			icon: 'common/star',
+			onSelect: () => rateAddOpened(newEntry)
 		},
 		onEdit && {
 			id: 'edit',

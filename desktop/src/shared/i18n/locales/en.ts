@@ -777,8 +777,7 @@ export const en = {
 		},
 		menu: {
 			label: 'More actions',
-			details: 'Details',
-			addToLibrary: 'Add to library'
+			details: 'Details'
 		},
 		sections: {
 			synopsis: 'Synopsis',

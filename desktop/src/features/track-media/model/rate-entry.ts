@@ -1,16 +1,26 @@
-import { combine, createEvent, createStore, sample } from 'effector'
+import { combine, createEvent, createStore, merge, sample } from 'effector'
 
-import { atom } from '@shared/factory'
+import { atom, onEach } from '@shared/factory'
 
-import { updateTrackerEntryMutation } from '@entities/tracker'
+import { preferredTitle, updateTrackerEntryMutation } from '@entities/tracker'
+import type { TrackerEntry, TrackerMediaType } from '@entities/tracker'
 
-import { dateToInput } from '../lib/entry-dates'
-import { isEmptyPatch, ratePatch } from '../lib/patches'
+import { isEmptyPatch, rateFormOf, ratePatch } from '../lib/patches'
 
-import type { EntryTarget } from './types'
+import { announceAdded } from './added-toast'
+import type { EntryTarget, NewEntryTarget } from './types'
+
+interface RateTarget {
+	mediaRef: string
+	mediaType: TrackerMediaType
+	title: string
+	// Null for a title on no list yet: saving the rating adds it, as PLANNING.
+	entry: TrackerEntry | null
+}
 
 export const rateEntryModel = atom(() => {
 	const opened = createEvent<EntryTarget>()
+	const addOpened = createEvent<NewEntryTarget>()
 	const closed = createEvent()
 	const scoreChanged = createEvent<number>()
 	const notesChanged = createEvent<string>()
@@ -21,38 +31,48 @@ export const rateEntryModel = atom(() => {
 	const volumesChanged = createEvent<number>()
 	const submitted = createEvent()
 
-	const $target = createStore<EntryTarget | null>(null).on(opened, (_, target) => target)
+	const shown = merge([
+		opened.map(({ entry, mediaType }): RateTarget => ({
+			mediaRef: entry.media_ref,
+			mediaType,
+			title: preferredTitle(entry.media.title),
+			entry
+		})),
+		addOpened.map((target): RateTarget => ({ ...target, entry: null }))
+	])
+
+	const $target = createStore<RateTarget | null>(null).on(shown, (_, target) => target)
 
 	const $open = createStore(false)
-		.on(opened, () => true)
+		.on(shown, () => true)
 		.reset(closed)
 
 	const $score = createStore(0)
-		.on(opened, (_, { entry }) => entry.score)
+		.on(shown, (_, { entry }) => rateFormOf(entry).score)
 		.on(scoreChanged, (_, score) => score)
 
 	const $notes = createStore('')
-		.on(opened, (_, { entry }) => entry.notes ?? '')
+		.on(shown, (_, { entry }) => rateFormOf(entry).notes)
 		.on(notesChanged, (_, notes) => notes)
 
 	const $startedAt = createStore('')
-		.on(opened, (_, { entry }) => dateToInput(entry.started_at))
+		.on(shown, (_, { entry }) => rateFormOf(entry).startedAt)
 		.on(startedAtChanged, (_, value) => value)
 
 	const $completedAt = createStore('')
-		.on(opened, (_, { entry }) => dateToInput(entry.completed_at))
+		.on(shown, (_, { entry }) => rateFormOf(entry).completedAt)
 		.on(completedAtChanged, (_, value) => value)
 
 	const $repeat = createStore(0)
-		.on(opened, (_, { entry }) => entry.repeat)
+		.on(shown, (_, { entry }) => rateFormOf(entry).repeat)
 		.on(repeatChanged, (_, repeat) => repeat)
 
 	const $progress = createStore(0)
-		.on(opened, (_, { entry }) => entry.progress)
+		.on(shown, (_, { entry }) => rateFormOf(entry).progress)
 		.on(progressChanged, (_, progress) => progress)
 
 	const $volumes = createStore(0)
-		.on(opened, (_, { entry }) => entry.progress_volumes ?? 0)
+		.on(shown, (_, { entry }) => rateFormOf(entry).volumes)
 		.on(volumesChanged, (_, volumes) => volumes)
 
 	const $form = combine({
@@ -74,11 +94,23 @@ export const rateEntryModel = atom(() => {
 		source: { target: $target, form: $form },
 		filter: ({ target }) => target !== null,
 		fn: ({ target, form }) => {
-			const { entry, mediaType } = target as EntryTarget
+			const { mediaRef, entry, mediaType } = target as RateTarget
 
-			return { mediaRef: entry.media_ref, patch: ratePatch(entry, form, mediaType) }
+			return { mediaRef, patch: ratePatch(entry, form, mediaType) }
 		},
 		target: updateTrackerEntryMutation.start
+	})
+
+	const added = sample({
+		clock: updateTrackerEntryMutation.finished.success,
+		source: $target,
+		filter: (target, { params }) => target?.entry === null && target.mediaRef === params.mediaRef
+	})
+
+	onEach(added, target => {
+		if (target) {
+			announceAdded(target)
+		}
 	})
 
 	sample({ clock: updateTrackerEntryMutation.finished.success, target: closed })
@@ -96,6 +128,7 @@ export const rateEntryModel = atom(() => {
 		$dirty,
 		$saving: updateTrackerEntryMutation.$pending,
 		opened,
+		addOpened,
 		closed,
 		scoreChanged,
 		notesChanged,

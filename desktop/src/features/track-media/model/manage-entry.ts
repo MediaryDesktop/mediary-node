@@ -1,20 +1,14 @@
 import { combine, createEvent, createStore, sample } from 'effector'
 
 import { atom, onEach } from '@shared/factory'
-import { translate } from '@shared/i18n'
 import { todayInputValue } from '@shared/lib'
-import { toast } from '@shared/ui'
 
-import {
-	isLocalTrackerType,
-	preferredTitle,
-	trackerListsQuery,
-	updateTrackerEntryMutation
-} from '@entities/tracker'
+import { preferredTitle, trackerListsQuery, updateTrackerEntryMutation } from '@entities/tracker'
 import type { TrackerEntry, TrackerMediaType, TrackerStatus } from '@entities/tracker'
 
 import { isEmptyPatch, managePatch } from '../lib/patches'
 
+import { announceAdded } from './added-toast'
 import type { EntryTarget, NewEntryTarget } from './types'
 
 interface ManageTarget {
@@ -85,10 +79,7 @@ export const manageEntryModel = atom(() => {
 
 	onEach(added, target => {
 		if (target) {
-			const key = isLocalTrackerType(target.mediaType)
-				? 'lists.addEntry.doneLocal'
-				: 'lists.addEntry.done'
-			toast.success(translate(key, { title: target.title }))
+			announceAdded(target)
 		}
 	})
 

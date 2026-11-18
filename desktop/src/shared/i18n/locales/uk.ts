@@ -775,8 +775,7 @@ export const uk: Translation = {
 		},
 		menu: {
 			label: 'Більше дій',
-			details: 'Подробиці',
-			addToLibrary: 'Додати до бібліотеки'
+			details: 'Подробиці'
 		},
 		sections: {
 			synopsis: 'Опис',

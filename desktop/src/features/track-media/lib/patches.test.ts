@@ -61,4 +61,11 @@ describe('ratePatch', () => {
 		expect(ratePatch(saved, form, 'manga')).toEqual({ progress_volumes: 3 })
 		expect(isEmptyPatch(ratePatch(saved, form, 'anime'))).toBe(true)
 	})
+
+	it('sends what was filled in for a title on no list yet, and nothing else', () => {
+		const form = { ...rateFormOf(null), score: 80, notes: 'later' }
+
+		expect(isEmptyPatch(ratePatch(null, rateFormOf(null), 'movie'))).toBe(true)
+		expect(ratePatch(null, form, 'movie')).toEqual({ score: 80, notes: 'later' })
+	})
 })
