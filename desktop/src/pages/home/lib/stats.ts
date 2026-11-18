@@ -1,3 +1,4 @@
+import { isVideoMedia } from '@entities/media'
 import { TRACKER_MEDIA_TYPES, TRACKER_STATUSES } from '@entities/tracker'
 import type { TrackerEntry, TrackerMediaType, TrackerStatus } from '@entities/tracker'
 
@@ -36,8 +37,6 @@ export interface TrackerStats {
 	genres: GenreCount[]
 	genreTags: number
 }
-
-const WATCHED_TYPES = new Set<string>(['anime', 'movie', 'series', 'dorama'])
 
 const TOP_RATED = 5
 
@@ -80,7 +79,7 @@ export function trackerStats(entries: TrackerEntry[], now = new Date()): Tracker
 		row.total++
 		row.counts[status]++
 
-		if (WATCHED_TYPES.has(entry.media_type)) {
+		if (isVideoMedia(entry.media_type)) {
 			episodes += entry.progress
 			watchedTitles += entry.progress > 0 ? 1 : 0
 		} else if (entry.media_type === 'manga') {
@@ -145,51 +144,58 @@ export interface ActivityPoint {
 	completed: number
 }
 
-export function activity(entries: TrackerEntry[], range: ActivityRange, now = new Date()): ActivityPoint[] {
-	const unique = uniqueEntries(entries)
+type EntryDate = TrackerEntry['started_at'] | undefined
 
-	if (range === 'all') {
-		const years = unique.flatMap(entry =>
-			[entry.started_at?.year, entry.completed_at?.year].filter((year): year is number => year != null)
-		)
-		if (years.length === 0) {
-			return []
-		}
+interface Timeline {
+	points: ActivityPoint[]
+	at: (date: EntryDate) => ActivityPoint | undefined
+}
 
-		const first = Math.min(...years)
-		const points = Array.from({ length: now.getFullYear() - first + 1 }, (_, index) => ({
-			year: first + index,
-			month: null,
-			started: 0,
-			completed: 0
-		}))
-
-		for (const entry of unique) {
-			const started = points.find(point => point.year === entry.started_at?.year)
-			const completed = points.find(point => point.year === entry.completed_at?.year)
-			if (started) {
-				started.started++
-			}
-			if (completed && entry.status === 'COMPLETED') {
-				completed.completed++
-			}
-		}
-
-		return points
+// One point a year, from the first year any entry was started or completed in.
+function yearly(entries: TrackerEntry[], now: Date): Timeline | null {
+	const years = entries.flatMap(entry =>
+		[entry.started_at?.year, entry.completed_at?.year].filter((year): year is number => year != null)
+	)
+	if (years.length === 0) {
+		return null
 	}
 
-	const count = range === '6m' ? 6 : 12
+	const first = Math.min(...years)
+	const points = Array.from({ length: now.getFullYear() - first + 1 }, (_, index) => ({
+		year: first + index,
+		month: null,
+		started: 0,
+		completed: 0
+	}))
+
+	return { points, at: date => points.find(point => point.year === date?.year) }
+}
+
+// One point a month for the last `count` months, this one included.
+function monthly(count: number, now: Date): Timeline {
 	const points: ActivityPoint[] = Array.from({ length: count }, (_, index) => {
 		const date = new Date(now.getFullYear(), now.getMonth() - (count - 1 - index), 1)
 		return { year: date.getFullYear(), month: date.getMonth() + 1, started: 0, completed: 0 }
 	})
 
-	const at = (date: TrackerEntry['started_at'] | undefined) =>
-		points.find(point => point.year === date?.year && point.month === date?.month)
+	return {
+		points,
+		at: date => points.find(point => point.year === date?.year && point.month === date?.month)
+	}
+}
+
+// How many titles were started and completed in each period of the range.
+export function activity(entries: TrackerEntry[], range: ActivityRange, now = new Date()): ActivityPoint[] {
+	const unique = uniqueEntries(entries)
+	const timeline = range === 'all' ? yearly(unique, now) : monthly(range === '6m' ? 6 : 12, now)
+
+	if (!timeline) {
+		return []
+	}
 
 	for (const entry of unique) {
-		const started = at(entry.started_at)
-		const completed = at(entry.completed_at)
+		const started = timeline.at(entry.started_at)
+		const completed = timeline.at(entry.completed_at)
 		if (started) {
 			started.started++
 		}
@@ -198,5 +204,5 @@ export function activity(entries: TrackerEntry[], range: ActivityRange, now = ne
 		}
 	}
 
-	return points
+	return timeline.points
 }

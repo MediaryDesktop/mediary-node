@@ -24,23 +24,22 @@ export function isSettingsSection(value: unknown): value is SettingsSection {
 export interface SectionInfo {
 	id: SettingsSection
 	icon: IconLike
-	key: 'app' | 'account' | 'backup' | 'devices' | 'library' | 'metadata' | 'torrents' | 'manga' | 'books'
 }
 
 export const SECTION_GROUPS: readonly (readonly SectionInfo[])[] = [
-	[{ id: 'app', icon: 'common/settings', key: 'app' }],
-	[{ id: 'account', icon: 'common/user', key: 'account' }],
+	[{ id: 'app', icon: 'common/settings' }],
+	[{ id: 'account', icon: 'common/user' }],
 	[
-		{ id: 'backup', icon: <IoCloudOutline size={18} />, key: 'backup' },
-		{ id: 'devices', icon: <PiDevicesLight size={18} />, key: 'devices' }
+		{ id: 'backup', icon: <IoCloudOutline size={18} /> },
+		{ id: 'devices', icon: <PiDevicesLight size={18} /> }
 	],
-	[{ id: 'library', icon: <IoLibraryOutline size={18} />, key: 'library' }],
+	[{ id: 'library', icon: <IoLibraryOutline size={18} /> }],
 	[
-		{ id: 'metadata', icon: 'common/database', key: 'metadata' },
-		{ id: 'torrents', icon: 'common/download', key: 'torrents' }
+		{ id: 'metadata', icon: 'common/database' },
+		{ id: 'torrents', icon: 'common/download' }
 	],
 	[
-		{ id: 'manga', icon: 'categories/manga', key: 'manga' },
-		{ id: 'books', icon: 'categories/book', key: 'books' }
+		{ id: 'manga', icon: 'categories/manga' },
+		{ id: 'books', icon: 'categories/book' }
 	]
 ]

@@ -1,6 +1,7 @@
 import { useTranslation } from '@shared/i18n'
 import { Checkbox } from '@shared/ui'
 
+import { isReadMedia } from '@entities/media'
 import type { ManualDraft } from '@entities/media'
 
 import { Field } from '../field/Field'
@@ -16,7 +17,7 @@ export interface DetailsTabProps {
 
 export function DetailsTab({ draft, onChange, disabled }: DetailsTabProps) {
 	const { t } = useTranslation()
-	const bookish = draft.media_type === 'manga' || draft.media_type === 'book'
+	const bookish = isReadMedia(draft.media_type)
 
 	return (
 		<div className={styles.root}>

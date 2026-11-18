@@ -29,7 +29,6 @@ export interface MediaActionsProps {
 	onViewChange?: (view: MediaView) => void
 	streamable?: boolean
 	onOpenDetails: () => void
-	editable?: boolean
 	onEdit?: () => void
 	onDelete?: () => void
 }
@@ -45,7 +44,6 @@ export function MediaActions({
 	onViewChange,
 	streamable = false,
 	onOpenDetails,
-	editable = false,
 	onEdit,
 	onDelete
 }: MediaActionsProps) {
@@ -61,61 +59,47 @@ export function MediaActions({
 	const trackerType = isTrackerMediaType(mediaType) ? mediaType : null
 	const target = entry && trackerType ? { entry, mediaType: trackerType } : null
 
-	const items: DropdownMenuItem[] = [
+	const offered: (DropdownMenuItem | null | undefined | '')[] = [
+		target && {
+			id: 'manage',
+			label: t('lists.manageEntry.action'),
+			icon: 'common/folder',
+			onSelect: () => manageOpened(target)
+		},
 		{
 			id: 'details',
 			label: t('media.menu.details'),
 			icon: 'common/info',
 			onSelect: onOpenDetails
 		},
-		...(siteUrl
-			? [
-					{
-						id: 'anilist',
-						label: t('media.openOn', { name: sources[0]?.name ?? 'AniList' }),
-						icon: 'common/external-link',
-						onSelect: () => window.open(siteUrl, '_blank', 'noreferrer')
-					} satisfies DropdownMenuItem
-				]
-			: []),
+		siteUrl && {
+			id: 'source',
+			label: t('media.openOn', { name: sources[0]?.name ?? 'AniList' }),
+			icon: 'common/external-link',
+			onSelect: () => window.open(siteUrl, '_blank', 'noreferrer')
+		},
 		{
 			id: 'library',
 			label: t('media.menu.addToLibrary'),
 			icon: <IoLibraryOutline size={20} />,
 			disabled: true,
 			onSelect: () => {}
+		},
+		onEdit && {
+			id: 'edit',
+			label: t('manualMedia.editAction'),
+			icon: 'common/pencil',
+			onSelect: onEdit
+		},
+		onDelete && {
+			id: 'delete',
+			label: t('manualMedia.delete.action'),
+			icon: 'common/trash',
+			danger: true,
+			onSelect: onDelete
 		}
 	]
-
-	if (editable) {
-		if (onEdit) {
-			items.push({
-				id: 'edit',
-				label: t('manualMedia.editAction'),
-				icon: 'common/pencil',
-				onSelect: onEdit
-			})
-		}
-
-		if (onDelete) {
-			items.push({
-				id: 'delete',
-				label: t('manualMedia.delete.action'),
-				icon: 'common/trash',
-				danger: true,
-				onSelect: onDelete
-			})
-		}
-	}
-
-	if (target) {
-		items.unshift({
-			id: 'manage',
-			label: t('lists.manageEntry.action'),
-			icon: 'common/folder',
-			onSelect: () => manageOpened(target)
-		})
-	}
+	const items = offered.filter((item): item is DropdownMenuItem => Boolean(item))
 
 	return (
 		<div className={styles.actions}>

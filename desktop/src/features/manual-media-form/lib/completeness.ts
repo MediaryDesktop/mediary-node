@@ -1,3 +1,4 @@
+import { isReadMedia } from '@entities/media'
 import type { ManualDraft } from '@entities/media'
 
 import { isEmptyValue } from './draft'
@@ -37,7 +38,7 @@ export interface CompletenessFields {
 
 export function completenessFields(mediaType: ManualMediaType): CompletenessFields {
 	const main = mainCountField(mediaType) ?? 'duration'
-	const credits = mediaType === 'manga' || mediaType === 'book' ? 'authors' : 'studios'
+	const credits = isReadMedia(mediaType) ? 'authors' : 'studios'
 
 	const additional: CompletenessField[] = [
 		'original_title',

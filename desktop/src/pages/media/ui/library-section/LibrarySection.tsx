@@ -1,11 +1,11 @@
+import { isVideoMedia } from '@entities/media'
+
 import { FreeCopies } from '@features/download-free-book'
 
 import { BookFiles } from './book-files/BookFiles'
 import { ChapterList } from './chapter-list/ChapterList'
 import { EpisodeLibrary } from './episode-library/EpisodeLibrary'
 import styles from './LibrarySection.module.scss'
-
-const VIDEO_TYPES = ['anime', 'movie', 'series', 'dorama']
 
 export interface LibrarySectionProps {
 	mediaRef: string
@@ -40,7 +40,7 @@ export function LibrarySection({ mediaType, ...props }: LibrarySectionProps) {
 		)
 	}
 
-	if (!VIDEO_TYPES.includes(mediaType)) {
+	if (!isVideoMedia(mediaType)) {
 		return null
 	}
 

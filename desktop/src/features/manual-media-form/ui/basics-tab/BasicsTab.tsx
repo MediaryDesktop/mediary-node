@@ -1,6 +1,7 @@
 import { useTranslation } from '@shared/i18n'
 import { Input, Stepper } from '@shared/ui'
 
+import { isReadMedia } from '@entities/media'
 import type { ManualDraft } from '@entities/media'
 
 import { Field } from '../field/Field'
@@ -27,7 +28,7 @@ export function BasicsTab({ draft, onChange, disabled }: BasicsTabProps) {
 
 	const seasonal =
 		draft.media_type === 'anime' || draft.media_type === 'series' || draft.media_type === 'dorama'
-	const timed = draft.media_type !== 'manga' && draft.media_type !== 'book'
+	const timed = !isReadMedia(draft.media_type)
 
 	return (
 		<div className={styles.grid}>

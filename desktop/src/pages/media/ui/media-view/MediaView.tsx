@@ -6,7 +6,7 @@ import { useTranslation } from '@shared/i18n'
 import { formatRelativeTime, formatWeekday, useUnitWatch } from '@shared/lib'
 import { Icon, Modal, PhaseTransition } from '@shared/ui'
 
-import { mediaTitle } from '@entities/media'
+import { isReadMedia, isVideoMedia, mediaTitle } from '@entities/media'
 import type { MediaDetails, MediaSource } from '@entities/media'
 import { useTorrentSetup } from '@entities/torrent'
 import type { TrackerEntry } from '@entities/tracker'
@@ -42,8 +42,6 @@ import { TrailerModal } from '../trailer-modal/TrailerModal'
 
 import styles from './MediaView.module.scss'
 
-const VIDEO_TYPES = ['anime', 'movie', 'series', 'dorama']
-
 export interface MediaViewProps {
 	mediaRef: string
 	media: MediaDetails | null
@@ -74,7 +72,7 @@ export function MediaView({ mediaRef, media, sources, entry, initialView, initia
 	useUnitWatch(streamRequested, () => closeSearch())
 
 	const subject = resolveSubject(media, entry)
-	const torrents = subject ? subject.mediaType !== 'manga' && subject.mediaType !== 'book' : false
+	const torrents = subject ? !isReadMedia(subject.mediaType) : false
 	const seasonal = mediaRef.startsWith('tmdb:tv:')
 	const released = seasonal ? null : releasedEpisodes(media, subject?.total)
 	const missing = useMissingEpisodes(mediaRef, released, torrents)
@@ -98,7 +96,7 @@ export function MediaView({ mediaRef, media, sources, entry, initialView, initia
 	const description = media?.description ?? ''
 	const airing = media?.next_airing_episode
 
-	const streamable = torrents && VIDEO_TYPES.includes(mediaType)
+	const streamable = torrents && isVideoMedia(mediaType)
 	const shown: MediaViewKind = view === 'stream' && !streamable ? 'library' : view
 	const via = effectiveVia(chosenVia, Boolean(setup.debrid))
 
@@ -152,7 +150,6 @@ export function MediaView({ mediaRef, media, sources, entry, initialView, initia
 				onViewChange={torrents ? setView : undefined}
 				streamable={streamable}
 				onOpenDetails={() => setDetailsOpen(true)}
-				editable={media?.editable}
 				onEdit={
 					media?.editable
 						? () => navigate({ to: '/media/$mediaRef/edit', params: { mediaRef } })

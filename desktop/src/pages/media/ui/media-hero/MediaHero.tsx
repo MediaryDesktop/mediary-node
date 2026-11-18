@@ -5,7 +5,14 @@ import { useTranslation } from '@shared/i18n'
 import { formatCompact } from '@shared/lib'
 import { Badge, Icon } from '@shared/ui'
 
-import { alternativeTitles, enumLabel, formatMediaDate, mediaTitle, scoreTone } from '@entities/media'
+import {
+	alternativeTitles,
+	enumLabel,
+	formatMediaDate,
+	isReadMedia,
+	mediaTitle,
+	scoreTone
+} from '@entities/media'
 import type { MediaDetails, MediaSource } from '@entities/media'
 import { isTrackerMediaType } from '@entities/tracker'
 import type { TrackerEntry } from '@entities/tracker'
@@ -210,7 +217,7 @@ export function MediaHero({
 								</a>
 							)}
 
-							{mediaType !== 'manga' && mediaType !== 'book' && hasTrailer && (
+							{!isReadMedia(mediaType) && hasTrailer && (
 								<span className={styles.iconActionWrap}>
 									<button type='button' className={styles.textLink} onClick={onOpenTrailer}>
 										{t('media.trailer')}

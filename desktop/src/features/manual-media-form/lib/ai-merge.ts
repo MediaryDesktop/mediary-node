@@ -1,3 +1,4 @@
+import { isReadMedia } from '@entities/media'
 import type { ManualDraft } from '@entities/media'
 
 import { isEmptyValue } from './draft'
@@ -76,8 +77,7 @@ export function hintNote(draft: ManualDraft): string {
 		parts.push(draft.synonyms.join(', '))
 	}
 
-	const credits =
-		draft.media_type === 'manga' || draft.media_type === 'book' ? draft.authors : draft.studios
+	const credits = isReadMedia(draft.media_type) ? draft.authors : draft.studios
 	if (credits && credits.length > 0) {
 		parts.push(credits.join(', '))
 	}

@@ -10,6 +10,7 @@ import { toast } from '@shared/ui'
 import { useNodeData } from '@infra/node'
 
 import { fileTitle, libraryCollectionQuery } from '@entities/library-item'
+import { isVideoMedia } from '@entities/media'
 import { $playerMode, playbackModel, playerOpened } from '@entities/playback'
 import { useMissingToolAction } from '@entities/tool'
 import type { TrackerEntry } from '@entities/tracker'
@@ -19,7 +20,6 @@ import type { Candidate, UpNextItem } from '../model/model'
 
 import { episodeNumber, episodeSeason } from './episodes'
 
-const VIDEO_TYPES = new Set(['anime', 'movie', 'series', 'dorama'])
 const WATCHING = new Set(['CURRENT', 'REPEATING'])
 
 const MAX_TITLES = 12
@@ -56,7 +56,7 @@ export function useContinueWatching(entries: TrackerEntry[]): ContinueWatchingSt
 		)
 
 		return [...byEntry.values()]
-			.filter(entry => WATCHING.has(entry.status) && VIDEO_TYPES.has(entry.media_type))
+			.filter(entry => WATCHING.has(entry.status) && isVideoMedia(entry.media_type))
 			.filter(entry => (held.get(entry.media_ref) ?? 0) > 0)
 			.sort((a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at))
 			.slice(0, MAX_TITLES)
