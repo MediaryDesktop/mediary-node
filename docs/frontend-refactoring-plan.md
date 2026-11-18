@@ -277,6 +277,35 @@
   `AutoDownloadRules`: залежність ефекту через `useMemo` замість
   `eslint-disable`; дві інші такі директиви отримали причину.
 
+### Етап 9 — повтори понять і решта великих файлів ✅
+
+Кілька заходів після етапу 8. Підозріле, що не виправлялось одразу, —
+у [frontend-review-notes.md](frontend-review-notes.md).
+
+- **Одне поняття — одна реалізація.** «Дивляться чи читають»
+  (`isVideoMedia` / `isReadMedia` в `entities/media`) замість чотирьох
+  наборів відео-типів і семи ручних перевірок «манга або книга». Значення
+  `<input type="date">` — `shared/lib/format/date-input` замість двох копій
+  у `manual-media-form` і `track-media`. Записи трекера за тайтлом —
+  `useTrackedByRef` замість чотирьох однакових `useMemo`. Сезон файлу —
+  `fileSeason` з `library-item` замість копії `episodeSeason`.
+- **Великі файли.** `PosterModal` (309 → 255: `CurrentCover`,
+  `CoverResults`), `useManualMediaForm` (351 → 308: вибір обкладинки —
+  `useCoverChoice`), `MediaPreview` (325 → 244: `TrailerFrame`, тексти
+  картки — `lib/preview-text` з тестами), `VideoPlayer` (314 → 260:
+  `useStartPosition`), `StreamSection` (259 → 181: `StreamSettings`),
+  `PluginsTab` (241: `InstalledPlugins`, `CatalogPlugins`, `PluginSections`,
+  `byType` — у `lib/` з тестом), `SettingsPage` (розділи — `SectionContent`,
+  рядки — `SettingsCard`; поле `key` у розділу дублювало `id`).
+- **Структура `pages/media`.** `episode-row`, `to-watch-rail`, стилі секції й
+  хуки `useEpisodeMeta` / `useEpisodeText` ділять `library-section` і
+  `stream-section`, тож піднялись на рівень `ui/` і `lib/` сторінки.
+- **Дрібне.** `MediaActions`: меню — один декларативний список, зайвий проп
+  `editable`. `activity` у статистиці — один цикл на обидві шкали.
+  `InstallDialog`: читання маніфесту — одна функція замість двох копій.
+  `SearchFilters`: опції з enum — одна функція; `search-media/lib/filters`
+  отримав тести. `RuleDetails`: `RuleStatus` — у власній теці.
+
 ## Чого план свідомо не робить
 
 - Не вводить нових слайсів і не рухає межі між ними (§12).
