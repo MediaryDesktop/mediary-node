@@ -5,7 +5,7 @@ export { BookReaderView } from './ui/book-reader/BookReaderView'
 export type { BookReaderViewProps } from './ui/book-reader/BookReaderView'
 export type { BookLocation } from './ui/book-reader/types'
 export { useBookEntrance } from './ui/book-reader/lib/useBookEntrance'
-export { bookFileName, isPdf, loadBookFile } from './lib/book'
+export { isPdf, loadBookFile } from './lib/book'
 
 export {
 	bookStateQuery,
@@ -24,4 +24,4 @@ export {
 } from './lib/chapters'
 export type { ChapterOption, ChapterRow } from './lib/chapters'
 export { localRef, routeRef } from './lib/refs'
-export type { ReaderBook, ReaderBookPosition, ReaderChapter, ReaderPage } from './api/api'
+export type { ReaderBook, ReaderChapter } from './api/api'

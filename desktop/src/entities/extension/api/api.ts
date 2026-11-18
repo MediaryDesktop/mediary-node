@@ -4,7 +4,6 @@ import type { NodeSchemas } from '@infra/node'
 export type Extension = NodeSchemas['Extension']
 export type ExtensionSetting = NodeSchemas['ExtensionSetting']
 export type ExtensionPreview = NodeSchemas['ExtensionPreview']
-export type ExtensionUpdate = NodeSchemas['ExtensionUpdate']
 export type ExtensionCatalog = NodeSchemas['ExtensionCatalog']
 export type CatalogPlugin = NodeSchemas['CatalogPlugin']
 export type ExtensionRepository = NodeSchemas['ExtensionRepository']

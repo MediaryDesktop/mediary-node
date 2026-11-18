@@ -1,32 +1,23 @@
 export {
 	aiSettingsQuery,
-	alternativeTitles,
-	createManualMediaMutation,
-	deleteManualCoverMutation,
 	deleteManualMediaMutation,
-	enumLabel,
-	episodeTitle,
-	formatMediaDate,
 	googleBooksSettingsQuery,
 	manualCoverSearchQuery,
 	manualTitlesQuery,
 	mediaDetailsModel,
-	mediaDetailsQuery,
 	mediaEpisodesQuery,
 	mediaFilterOptionsQuery,
 	mediaPreviewModel,
 	mediaSearchQuery,
-	mediaTitle,
-	scoreTone,
 	setAISettingsMutation,
 	setGoogleBooksKeyMutation,
-	setManualCoverMutation,
 	setTMDBKeyMutation,
-	suggestManualMediaMutation,
-	tmdbSettingsQuery,
-	updateManualMediaMutation
+	tmdbSettingsQuery
 } from './model/model'
-export type { MediaEnumGroup, ScoreTone } from './model/model'
+
+export { alternativeTitles, episodeTitle, mediaTitle } from './lib/titles'
+export { enumLabel, formatMediaDate, scoreTone } from './lib/format'
+export type { MediaEnumGroup, ScoreTone } from './lib/format'
 
 export { FeaturedBanner } from './ui/featured-banner/FeaturedBanner'
 export type { FeaturedBannerProps, FeaturedMedia } from './ui/featured-banner/FeaturedBanner'
@@ -72,7 +63,6 @@ export type {
 	MediaEpisode,
 	MediaEpisodeList,
 	MediaFilterOptions,
-	MediaFilterTag,
 	MediaSearchFormat,
 	MediaSearchQuery,
 	MediaSearchResponse,
@@ -83,6 +73,5 @@ export type {
 	MediaSource,
 	MediaSummary,
 	MediaTitle,
-	RelatedMedia,
 	TMDBSettings
 } from './api/api'

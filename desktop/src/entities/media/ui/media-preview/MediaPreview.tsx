@@ -7,7 +7,8 @@ import { useTranslation } from '@shared/i18n'
 import { Button, Icon } from '@shared/ui'
 
 import { useMediaCardSlots } from '../../lib/card-slots'
-import { enumLabel, mediaPreviewModel } from '../../model/model'
+import { enumLabel } from '../../lib/format'
+import { mediaPreviewModel } from '../../model/model'
 
 import styles from './MediaPreview.module.scss'
 

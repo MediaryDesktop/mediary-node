@@ -1,9 +1,7 @@
 export {
 	addLibraryRootMutation,
-	deleteLibraryFileMutation,
 	deleteLibraryFilesMutation,
 	deleteLibraryMatchesMutation,
-	deleteLibraryMatchMutation,
 	deleteLibraryRootMutation,
 	libraryCandidatesQuery,
 	libraryCollectionQuery,
@@ -12,7 +10,6 @@ export {
 	libraryScanQuery,
 	libraryScanRunQuery,
 	libraryTreeQuery,
-	setLibraryFileIgnoredMutation,
 	setLibraryFilesIgnoredMutation,
 	setLibraryMatchesMutation,
 	setLibraryMatchMutation,
@@ -39,26 +36,17 @@ export {
 
 export { fetchTitleFilesFx } from './api/api'
 
-export { LibraryFileRow } from './ui/library-file-row/LibraryFileRow'
-export type { LibraryFileRowProps } from './ui/library-file-row/LibraryFileRow'
-
 export type {
-	LibraryCollection,
 	LibraryCollectionEntry,
 	LibraryContent,
-	LibraryCounts,
 	LibraryFile,
-	LibraryFileKind,
-	LibraryFileMatch,
 	LibraryFileParsed,
 	LibraryMediaForm,
 	LibraryRoot,
 	LibraryScan,
-	LibraryScanHistoryPage,
 	LibraryScanRunDetail,
 	LibraryScanRunFileLog,
 	LibraryScanRunGroup,
-	LibraryScanRunSummary,
 	LibrarySuggestion,
 	LibraryTitle,
 	SetLibraryFileIgnoredParams,

@@ -4,8 +4,6 @@ import type { NodeSchemas } from '@infra/node'
 export type TrackerMediaType = 'anime' | 'manga' | 'movie' | 'series' | 'dorama' | 'book'
 export type TrackerCollection = NodeSchemas['EntriesOutputBody']
 export type TrackerEntry = NodeSchemas['Entry']
-export type TrackerList = NodeSchemas['List']
-export type TrackerSource = NodeSchemas['Source']
 export type TrackerTitle = NodeSchemas['Title']
 
 export const fetchTrackerEntriesFx = createNodeRequestFx<TrackerMediaType, TrackerCollection>(mediaType => ({

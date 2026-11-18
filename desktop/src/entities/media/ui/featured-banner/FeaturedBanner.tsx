@@ -6,7 +6,8 @@ import { useTranslation } from '@shared/i18n'
 import { Icon, Skeleton } from '@shared/ui'
 
 import type { MediaSummary } from '../../api/api'
-import { enumLabel, mediaTitle, scoreTone } from '../../model/model'
+import { enumLabel, scoreTone } from '../../lib/format'
+import { mediaTitle } from '../../lib/titles'
 
 import styles from './FeaturedBanner.module.scss'
 import { useBannerRotation } from './lib/useBannerRotation'

@@ -2,7 +2,6 @@ import { createNodeRequestFx } from '@infra/node'
 import type { NodeSchemas } from '@infra/node'
 
 export type ReaderChapter = NodeSchemas['ChapterBody']
-export type ReaderPage = NodeSchemas['Page']
 
 export const fetchChapterFx = createNodeRequestFx<string, NodeSchemas['ChapterOutputBody']>(ref => ({
 	url: `/v1/reader/chapters/${encodeURIComponent(ref)}`,
@@ -24,7 +23,6 @@ export const reportReaderPageFx = createNodeRequestFx<ReportPageParams, NodeSche
 )
 
 export type ReaderBook = NodeSchemas['BookInfo']
-export type ReaderBookPosition = NodeSchemas['BookPosition']
 export type ReaderBookState = Omit<NodeSchemas['BookPositionOutputBody'], '$schema'>
 
 export const fetchBookStateFx = createNodeRequestFx<number, ReaderBookState>(fileId => ({

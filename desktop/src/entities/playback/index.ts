@@ -1,7 +1,5 @@
 export {
-	formatTimecode,
 	playbackModel,
-	playbackProgress,
 	playbackQuery,
 	playbackStreamQuery,
 	startPlaybackMutation,
@@ -26,6 +24,7 @@ export type { PlayerSnapshot } from './model/pip'
 export { browserCanPlayType, canDirectPlay } from './lib/codecs'
 export { pictureAspect } from './lib/fit'
 export { canFallBack, chooseSource } from './lib/source'
+export { formatTimecode } from './lib/timecode'
 export { thumbnailUrl } from './lib/urls'
 
 export { NowPlayingBar } from './ui/now-playing-bar/NowPlayingBar'
@@ -36,4 +35,4 @@ export type { VideoPlayerProps } from './ui/video-player/VideoPlayer'
 export type { PlayerFailure } from './ui/video-player/lib/failure'
 
 export { fetchPlaybackStreamFx } from './api/api'
-export type { MediaInfo, PlaybackAction, PlaybackSession, PlaybackStatus, PlaybackStream } from './api/api'
+export type { MediaInfo, PlaybackAction, PlaybackSession, PlaybackStream } from './api/api'

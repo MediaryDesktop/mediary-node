@@ -25,10 +25,8 @@ export type {
 	MangaChapter,
 	MangaDownload,
 	MangaLink,
-	MangaSeries,
 	MangaSource,
 	MangaSourceProblem,
 	OPDSCheckResult,
-	OPDSServer,
 	OPDSServerInput
 } from './api/api'

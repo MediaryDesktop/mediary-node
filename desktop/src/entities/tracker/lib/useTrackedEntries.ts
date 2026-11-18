@@ -4,9 +4,10 @@ import { useEffect, useMemo } from 'react'
 
 import { $nodeReady, whenNodeReady } from '@infra/node'
 
-import type { TrackerEntry } from '../api/api'
-import type { TrackerMediaType } from '../api/api'
-import { isLocalTrackerType, TRACKER_MEDIA_TYPES, trackerQueries } from '../model/model'
+import type { TrackerEntry, TrackerMediaType } from '../api/api'
+import { trackerQueries } from '../model/model'
+
+import { isLocalTrackerType, TRACKER_MEDIA_TYPES } from './media-types'
 
 /**
  * Latches on once reached instead of tracking the current pending state, so a

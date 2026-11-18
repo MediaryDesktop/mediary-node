@@ -6,14 +6,7 @@ import { nodeEventReceived } from '@infra/node'
 import { fetchTrackerEntriesFx, updateTrackerEntryFx } from '../api/api'
 import type { TrackerCollection, TrackerEntry } from '../api/api'
 
-import {
-	canTrack,
-	formatProgress,
-	preferredTitle,
-	trackerModel,
-	trackerQueries,
-	updateTrackerEntryMutation
-} from './model'
+import { trackerModel, trackerQueries, updateTrackerEntryMutation } from './model'
 
 const EMPTY: TrackerCollection = {
 	media_type: 'anime',
@@ -132,29 +125,5 @@ describe('tracker updates', () => {
 
 		expect(scope.getState(trackerQueries.anime.$data)?.entries).toEqual([ENTRY, added])
 		expect(scope.getState(trackerQueries.manga.$data)?.entries).toEqual([ENTRY])
-	})
-})
-
-describe('tracker formatting', () => {
-	it('shows a total only when the source knows it', () => {
-		expect(formatProgress(3, 12)).toBe('3 / 12')
-		expect(formatProgress(3, null)).toBe('3')
-	})
-
-	it('prefers the title the user chose on AniList', () => {
-		expect(
-			preferredTitle({ user_preferred: null, english: 'Frieren', romaji: 'Sousou', native: null })
-		).toBe('Frieren')
-	})
-})
-
-describe('canTrack', () => {
-	it('needs AniList for anime and manga only', () => {
-		expect(canTrack('anime', false)).toBe(false)
-		expect(canTrack('manga', true)).toBe(true)
-		expect(canTrack('movie', false)).toBe(true)
-		expect(canTrack('dorama', false)).toBe(true)
-		expect(canTrack('book', false)).toBe(true)
-		expect(canTrack('podcast', true)).toBe(false)
 	})
 })

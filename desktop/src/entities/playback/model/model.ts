@@ -107,26 +107,3 @@ export const playbackModel = atom(() => {
 		transcodeClosed
 	}
 })
-
-export function playbackProgress(session: PlaybackSession | null): number {
-	if (!session || session.duration <= 0) {
-		return 0
-	}
-
-	return Math.min(Math.max(session.position / session.duration, 0), 1)
-}
-
-export function formatTimecode(seconds: number): string {
-	if (!Number.isFinite(seconds) || seconds < 0) {
-		return '0:00'
-	}
-
-	const whole = Math.floor(seconds)
-	const hours = Math.floor(whole / 3600)
-	const minutes = Math.floor((whole % 3600) / 60)
-	const rest = whole % 60
-
-	const padded = `${minutes.toString().padStart(hours > 0 ? 2 : 1, '0')}:${rest.toString().padStart(2, '0')}`
-
-	return hours > 0 ? `${hours}:${padded}` : padded
-}

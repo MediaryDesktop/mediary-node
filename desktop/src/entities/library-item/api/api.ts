@@ -3,23 +3,15 @@ import type { NodeSchemas } from '@infra/node'
 
 export type LibraryRoot = NodeSchemas['Root']
 export type LibraryFile = NodeSchemas['File']
-export type LibraryFilePage = NodeSchemas['FilePage']
 export type LibraryFileParsed = NodeSchemas['Parsed']
-export type LibraryFileMatch = NodeSchemas['Match']
 export type LibraryScan = NodeSchemas['ScanStatus']
-export type LibraryScanRoot = NodeSchemas['ScanRootResult']
 export type LibrarySuggestion = NodeSchemas['Suggestion']
 export type LibraryTitle = NodeSchemas['MatchedTitle']
-export type LibraryCounts = NodeSchemas['Counts']
-export type LibraryCollection = NodeSchemas['LibraryCollection']
 export type LibraryCollectionEntry = NodeSchemas['LibraryCollectionEntry']
-export type LibraryScanRunSummary = NodeSchemas['ScanRunSummary']
 export type LibraryScanRunDetail = NodeSchemas['ScanRunDetail']
-export type LibraryScanHistoryPage = NodeSchemas['ScanHistoryPage']
 export type LibraryScanRunGroup = NodeSchemas['ScanRunGroupDetail']
 export type LibraryScanRunFileLog = NodeSchemas['ScanRunFileLogDetail']
 
-export type LibraryFileKind = LibraryFile['kind']
 export type LibraryMediaForm = NonNullable<LibraryFileParsed['form']>
 
 export const fetchLibraryRootsFx = createNodeRequestFx<void, NodeSchemas['RootsOutputBody']>(() => ({

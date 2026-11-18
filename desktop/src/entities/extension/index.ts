@@ -4,11 +4,8 @@ export {
 	configureExtensionMutation,
 	extensionCatalogQuery,
 	extensionsQuery,
-	installExtensionMutation,
-	previewExtensionMutation,
 	removeExtensionMutation,
-	removeExtensionRepositoryMutation,
-	updateExtensionMutation
+	removeExtensionRepositoryMutation
 } from './model/model'
 export type {
 	CatalogPlugin,
@@ -16,8 +13,7 @@ export type {
 	ExtensionCatalog,
 	ExtensionPreview,
 	ExtensionRepository,
-	ExtensionSetting,
-	ExtensionUpdate
+	ExtensionSetting
 } from './api/api'
 
 export { installExtensionFx, previewExtensionFx, updateExtensionFx } from './api/api'

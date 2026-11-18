@@ -6,7 +6,7 @@ import { nodeEventReceived } from '@infra/node'
 import { fetchPlaybackFx, startPlaybackFx, stopPlaybackFx } from '../api/api'
 import type { PlaybackSession } from '../api/api'
 
-import { formatTimecode, playbackModel, playbackProgress, playbackQuery } from './model'
+import { playbackModel, playbackQuery } from './model'
 
 const SESSION: PlaybackSession = {
 	file_id: 7,
@@ -120,29 +120,5 @@ describe('playback session', () => {
 		await allSettled(playbackQuery.start, { scope })
 
 		expect(scope.getState(playbackModel.$session)?.file_id).toBe(SESSION.file_id)
-	})
-})
-
-describe('playbackProgress', () => {
-	it('is zero until the duration is known', () => {
-		expect(playbackProgress({ ...SESSION, position: 120 })).toBe(0)
-		expect(playbackProgress(null)).toBe(0)
-	})
-
-	it('is the share of the file that was played', () => {
-		expect(playbackProgress({ ...SESSION, position: 720, duration: 1440 })).toBe(0.5)
-	})
-})
-
-describe('formatTimecode', () => {
-	it('reads as a timecode', () => {
-		expect(formatTimecode(0)).toBe('0:00')
-		expect(formatTimecode(65)).toBe('1:05')
-		expect(formatTimecode(3725)).toBe('1:02:05')
-	})
-
-	it('survives what the player has not reported yet', () => {
-		expect(formatTimecode(Number.NaN)).toBe('0:00')
-		expect(formatTimecode(-5)).toBe('0:00')
 	})
 })

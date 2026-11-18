@@ -8,26 +8,19 @@ import { HoverCard, Icon } from '@shared/ui'
 
 import type { MediaTitle } from '../../api/api'
 import { CardHoldContext } from '../../lib/card-hold'
-import { enumLabel, mediaPreviewModel, mediaTitle } from '../../model/model'
+import { enumLabel } from '../../lib/format'
+import { mediaTitle } from '../../lib/titles'
+import { mediaPreviewModel } from '../../model/model'
 import { MediaPreview } from '../media-preview/MediaPreview'
-import type { MediaTracking } from '../media-preview/MediaPreview'
+import type { MediaPreviewBase, MediaTracking } from '../media-preview/MediaPreview'
 
 import styles from './MediaCard.module.scss'
 
 const PANEL_OVERHANG = 16
 
-export interface MediaCardMedia {
+export interface MediaCardMedia extends MediaPreviewBase {
 	title: MediaTitle
-	cover_image: string | null
 	cover_color: string | null
-	media_type?: string
-	format?: string | null
-	status?: string | null
-	season_year?: number | null
-	average_score?: number | null
-	episodes?: number | null
-	chapters?: number | null
-	genres?: string[] | null
 }
 
 export interface MediaCardProps {

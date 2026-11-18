@@ -3,7 +3,7 @@ import type { CSSProperties, ReactNode } from 'react'
 
 import { useTranslation } from '@shared/i18n'
 
-import { formatTimecode } from '../../../model/model'
+import { formatTimecode } from '../../../lib/timecode'
 import type { VideoActions } from '../lib/useVideoActions'
 
 import { ControlButton } from './control-button/ControlButton'

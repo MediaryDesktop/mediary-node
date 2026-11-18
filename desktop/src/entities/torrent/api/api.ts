@@ -3,9 +3,7 @@ import type { NodeSchemas } from '@infra/node'
 
 export type TorrentDownload = NodeSchemas['TorrentDownload']
 export type TorrentDownloads = NodeSchemas['TorrentDownloadsOutputBody']
-export type TorrentClientStatus = NodeSchemas['TorrentClientStatus']
 export type TorrentSettings = NodeSchemas['TorrentSettings']
-export type TorrentPathMap = NodeSchemas['TorrentPathMap']
 export type TorrentCheckResult = NodeSchemas['TorrentCheckResult']
 export type TorrentFile = NodeSchemas['TorrentFile']
 export type TorrentSource = NodeSchemas['TorrentSource']

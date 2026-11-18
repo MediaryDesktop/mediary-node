@@ -7,9 +7,9 @@ import { toast } from '@shared/ui'
 
 import type { PlaybackStream } from '../../api/api'
 import type { VideoSource } from '../../lib/source'
+import { formatTimecode } from '../../lib/timecode'
 import { initialAudio, initialSubtitle } from '../../lib/tracks'
 import { directUrl } from '../../lib/urls'
-import { formatTimecode } from '../../model/model'
 import type { PlayerSnapshot } from '../../model/pip'
 
 import type { PlayerFailure } from './lib/failure'

@@ -74,16 +74,6 @@ export const startLibraryScanMutation = createMutation({
 
 export const setLibraryMatchMutation = createMutation({ effect: setLibraryMatchFx, name: 'setLibraryMatch' })
 
-export const setLibraryFileIgnoredMutation = createMutation({
-	effect: setLibraryFileIgnoredFx,
-	name: 'setLibraryFileIgnored'
-})
-
-export const deleteLibraryFileMutation = createMutation({
-	effect: deleteLibraryFileFx,
-	name: 'deleteLibraryFile'
-})
-
 export interface BulkOutcome {
 	done: number
 	failed: number
@@ -121,20 +111,12 @@ export const deleteLibraryMatchesMutation = createMutation({
 	name: 'deleteLibraryMatches'
 })
 
-export const deleteLibraryMatchMutation = createMutation({
-	effect: deleteLibraryMatchFx,
-	name: 'deleteLibraryMatch'
-})
-
 keepFresh(libraryRootsQuery, { triggers: [libraryUpdated, nodeStreamResumed] })
 
 const filesChanged = [
 	libraryUpdated,
 	nodeStreamResumed,
 	setLibraryMatchMutation.finished.success,
-	deleteLibraryMatchMutation.finished.success,
-	setLibraryFileIgnoredMutation.finished.success,
-	deleteLibraryFileMutation.finished.success,
 	setLibraryMatchesMutation.finished.success,
 	setLibraryFilesIgnoredMutation.finished.success,
 	deleteLibraryFilesMutation.finished.success,

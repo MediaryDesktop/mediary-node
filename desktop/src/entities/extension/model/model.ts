@@ -9,11 +9,8 @@ import {
 	configureExtensionFx,
 	fetchExtensionCatalogFx,
 	fetchExtensionsFx,
-	installExtensionFx,
-	previewExtensionFx,
 	removeExtensionFx,
-	removeExtensionRepositoryFx,
-	updateExtensionFx
+	removeExtensionRepositoryFx
 } from '../api/api'
 
 export const extensionsQuery = createQuery({ effect: fetchExtensionsFx, name: 'extensions' })
@@ -23,14 +20,6 @@ export const extensionCatalogQuery = createQuery({
 	name: 'extensionCatalog'
 })
 
-export const previewExtensionMutation = createMutation({
-	effect: previewExtensionFx,
-	name: 'previewExtension'
-})
-export const installExtensionMutation = createMutation({
-	effect: installExtensionFx,
-	name: 'installExtension'
-})
 export const configureExtensionMutation = createMutation({
 	effect: configureExtensionFx,
 	name: 'configureExtension'
@@ -40,7 +29,6 @@ export const checkExtensionUpdatesMutation = createMutation({
 	effect: checkExtensionUpdatesFx,
 	name: 'checkExtensionUpdates'
 })
-export const updateExtensionMutation = createMutation({ effect: updateExtensionFx, name: 'updateExtension' })
 export const addExtensionRepositoryMutation = createMutation({
 	effect: addExtensionRepositoryFx,
 	name: 'addExtensionRepository'

@@ -5,10 +5,8 @@ export type MediaTitle = NodeSchemas['TitleNames']
 export type MediaDate = NodeSchemas['FuzzyDate']
 export type MediaAiringEpisode = NodeSchemas['AiringEpisode']
 export type MediaTrailer = NodeSchemas['Trailer']
-export type RelatedMedia = NodeSchemas['RelatedMedia']
 export type MediaSource = NodeSchemas['Source']
 export type MediaFilterOptions = NodeSchemas['FilterOptions']
-export type MediaFilterTag = NodeSchemas['FilterTag']
 
 export type MediaDetails = Omit<NodeSchemas['MediaDetails'], 'next_airing_episode' | 'trailer'> & {
 	next_airing_episode: MediaAiringEpisode | null

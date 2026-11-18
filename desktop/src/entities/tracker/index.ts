@@ -1,19 +1,16 @@
 export {
-	canTrack,
 	deleteTrackerEntryMutation,
-	formatProgress,
-	isLocalTrackerType,
-	isTrackerMediaType,
-	isTrackerStatus,
-	preferredTitle,
 	trackerModel,
 	trackerQueries,
-	TRACKER_MEDIA_TYPES,
-	TRACKER_STATUSES,
 	updateTrackerEntryMutation
 } from './model/model'
 
-export { isListIcon, LIST_ICONS, ListIcon } from './ui/list-icon/ListIcon'
+export { canTrack, isLocalTrackerType, isTrackerMediaType, TRACKER_MEDIA_TYPES } from './lib/media-types'
+export { isTrackerStatus, TRACKER_STATUSES } from './lib/statuses'
+export type { TrackerStatus } from './lib/statuses'
+export { formatProgress, preferredTitle } from './lib/format'
+
+export { LIST_ICONS, ListIcon } from './ui/list-icon/ListIcon'
 export type { ListIconProps } from './ui/list-icon/ListIcon'
 
 export { MEDIA_TYPE_ICONS, MediaTypeIcon } from './ui/media-type-icon/MediaTypeIcon'
@@ -23,9 +20,6 @@ export { useTrackedEntries, useTrackedEntry, useTrackedEntriesReady } from './li
 
 export { entryTracking } from './lib/tracking'
 export type { EntryTracking } from './lib/tracking'
-
-export { formatScoreValue, nextScore } from './lib/score-format'
-export type { ScoreFormat } from './lib/score-format'
 
 export {
 	createTrackerListMutation,
@@ -38,8 +32,6 @@ export {
 
 export { createTrackerListFx, fetchTrackerListsFx, updateTrackerEntryFx } from './api/api'
 
-export type { TrackerStatus } from './model/model'
-
 export type {
 	CreateTrackerListParams,
 	ListMediaType,
@@ -48,9 +40,7 @@ export type {
 	TrackerCustomList,
 	TrackerEntry,
 	TrackerEntryPatch,
-	TrackerList,
 	TrackerListCollection,
 	TrackerMediaType,
-	TrackerSource,
 	UpdateTrackerEntryParams
 } from './api/api'

@@ -1,7 +1,6 @@
 import { createNodeRequestFx } from '@infra/node'
 import type { NodeSchemas } from '@infra/node'
 
-export type PlaybackStatus = NodeSchemas['PlaybackStatus']
 export type PlaybackSession = NodeSchemas['PlaybackSession']
 export type PlaybackAction = NodeSchemas['ControlInputBody']['action']
 export type PlaybackStream = NodeSchemas['Stream']

@@ -3,12 +3,9 @@ import { createEffect } from 'effector'
 import { createNodeRequestFx } from '@infra/node'
 import type { NodeSchemas } from '@infra/node'
 
-export type BookSource = NodeSchemas['BookSource']
 export type BookEdition = NodeSchemas['BookEdition']
 export type BookFormat = NodeSchemas['BookFormat']
-export type BookSourceOutcome = NodeSchemas['BookSourceOutcome']
 export type BookDownload = NodeSchemas['BookDownload']
-export type BookOPDSServer = NodeSchemas['BookOPDSServerBody']
 export type BookOPDSServerInput = NodeSchemas['BookOPDSServerInputBody']
 export type BookOPDSCheckInput = NodeSchemas['CheckBookOPDSServerInputBody']
 export type BookOPDSCheckResult = NodeSchemas['CheckBookOPDSServerOutputBody']

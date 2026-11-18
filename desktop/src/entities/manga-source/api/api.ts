@@ -3,12 +3,10 @@ import { createEffect } from 'effector'
 import { createNodeRequestFx } from '@infra/node'
 import type { NodeSchemas } from '@infra/node'
 
-export type OPDSServer = NodeSchemas['OPDSServerBody']
 export type OPDSServerInput = NodeSchemas['OPDSServerInputBody']
 export type OPDSCheckInput = NodeSchemas['CheckOPDSServerInputBody']
 export type OPDSCheckResult = NodeSchemas['CheckOPDSServerOutputBody']
 export type MangaSource = NodeSchemas['MangaSourceBody']
-export type MangaSeries = NodeSchemas['MangaSeriesBody']
 export type MangaLink = NodeSchemas['MangaLinkBody']
 export type MangaChapter = NodeSchemas['MangaChapterBody']
 export type MangaSourceProblem = NodeSchemas['MangaSourceProblemBody']
