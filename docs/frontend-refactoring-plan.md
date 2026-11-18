@@ -244,6 +244,39 @@
 лишив `.title`/`.meta`/`.description`/`.detailsLink` плоско всередині `.info`
 замість `.heading`/`.detailsGroup` — виправлено окремим комітом.
 
+### Етап 8 — мертвий код і логіка в `entities`, `features`, `pages` ✅
+
+Пошук невикористаних експортів (TypeScript language service, `findReferences`
+по кожному експорту; скрипт поза репо) і ручний прохід по моделях і найбільших
+файлах трьох шарів. Поведінка не змінювалась.
+
+- **Мертвий код.** Мутації, яких ніхто не запускав: `extension`
+  (preview/install/update — діалог встановлення бере ефекти напряму), `media`
+  (create/update/suggest/set-/delete-cover ручного тайтлу — форма зберігає
+  через `saveManualMediaFx`), `library-item` (одиночні delete/ignore/unmatch —
+  їх замінили масові). Компонент `LibraryFileRow` і `tracker/lib/score-format`
+  жили лише у власних тестах; `playbackProgress`, `isManualRef`,
+  `emptyManualDraft` — без жодного виклику. ~25 type-аліасів у `api.ts`, що не
+  читались ніде, і шість імен у публічних `index.ts`, які ззовні ніхто не брав.
+- **Чисті функції — з моделей у `lib/`** (§12): `media/lib/titles.ts`,
+  `media/lib/format.ts`, `tracker/lib/{media-types,statuses,format}.ts`,
+  `playback/lib/timecode.ts`; тести переїхали разом із ними.
+- **Структура.** `features/auth/hooks` → `lib/`;
+  `link-manga-source/source-option-icon` → `ui/`.
+- **Великі файли.** `PlayMenu` (384 → 291): рядок епізоду й підменю плеєра —
+  окремі компоненти; стилі лишились одним файлом, бо `.episode .text`
+  перебиває `.item .text` порядком у файлі. `TorrentClientForm` (346 → 228):
+  деталі qBittorrent — `QbittorrentDetail`, потрійний `ConnectionCheck` —
+  одна функція.
+- **Спрощення.** `ListsPage`: сортування, фільтр, картка «Мої тайтли» і
+  п'ятирівневий тернарник фази — `lib/lists-view.ts` з тестами. Модалка
+  видалення ручного тайтлу була двічі (форма й сторінка тайтлу) —
+  `DeleteManualMediaDialog`. `useManualMediaForm`: одна перевірка «тип і
+  назва» замість двох копій, тексти відмови AI — функцією замість трьох гілок.
+  `ChapterList`: умова `markable` мала гілку, що ніколи не давала `true`.
+  `AutoDownloadRules`: залежність ефекту через `useMemo` замість
+  `eslint-disable`; дві інші такі директиви отримали причину.
+
 ## Чого план свідомо не робить
 
 - Не вводить нових слайсів і не рухає межі між ними (§12).

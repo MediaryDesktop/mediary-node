@@ -225,7 +225,7 @@ sample({ clock: sessionModel.signedOut, fn: () => ({ to: '/' }), target: navigat
 Критичний для продукту `playback` усе одно лишається сутністю. А коріння
 бібліотеки, тека завантажень і налаштування плеєра — доменні дані з реальними
 власниками, навіть якщо вони «про ноду»: вони належать `entities/library-item`,
-`entities/download`, `entities/playback`.
+`entities/torrent`, `entities/playback`.
 
 ### shared — інструментарій
 
