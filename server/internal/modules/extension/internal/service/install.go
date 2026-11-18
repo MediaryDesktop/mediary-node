@@ -197,7 +197,7 @@ func (s *Service) Update(ctx context.Context, id, consent string) (*Extension, e
 
 	// Secrets of fields the new version no longer has go with them.
 	for _, name := range dropped {
-		_ = s.secrets.Set(secretKey(id, name), "")
+		s.forgetSecret(id, name)
 	}
 	_ = os.RemoveAll(filepath.Join(s.opts.Dir, id, ext.Manifest.Version))
 
@@ -254,7 +254,7 @@ func (s *Service) Remove(ctx context.Context, id string) error {
 
 	for _, f := range ext.Manifest.Config {
 		if f.Secret {
-			_ = s.secrets.Set(secretKey(id, f.Name), "")
+			s.forgetSecret(id, f.Name)
 		}
 	}
 	if err = os.RemoveAll(filepath.Join(s.opts.Dir, id)); err != nil {
@@ -394,4 +394,13 @@ func messageOf(err error) string {
 	}
 
 	return err.Error()
+}
+
+// forgetSecret erases a plugin's secret setting. A failure does not undo what
+// was already done, but a key left on disk is worth a line in the log, as the
+// plugin's code left behind is.
+func (s *Service) forgetSecret(id, name string) {
+	if err := s.secrets.Set(secretKey(id, name), ""); err != nil {
+		s.logger.Warn().Err(err).Str("plugin", id).Str("setting", name).Msg("the plugin's secret stays on disk")
+	}
 }
