@@ -44,7 +44,7 @@ export function emptyCounts(): StatusCounts {
 	return Object.fromEntries(TRACKER_STATUSES.map(status => [status, 0])) as StatusCounts
 }
 
-export function uniqueEntries(entries: TrackerEntry[]): TrackerEntry[] {
+function uniqueEntries(entries: TrackerEntry[]): TrackerEntry[] {
 	return [...new Map(entries.map(entry => [entry.media_ref, entry])).values()]
 }
 

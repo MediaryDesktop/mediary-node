@@ -2,7 +2,7 @@ import type { TrackerEntry, TrackerEntryPatch, TrackerMediaType, TrackerStatus }
 
 import { dateToInput, inputToDate } from './entry-dates'
 
-export function sameLists(left: string[], right: string[]): boolean {
+function sameLists(left: string[], right: string[]): boolean {
 	return left.length === right.length && left.every(name => right.includes(name))
 }
 

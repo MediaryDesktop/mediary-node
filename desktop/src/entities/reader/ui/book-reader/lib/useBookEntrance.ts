@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { CSSProperties } from 'react'
 
-export const BOOK_ENTER_MS = 340
+const BOOK_ENTER_MS = 340
 
 export function useBookEntrance(openedAt: number) {
 	const [elapsed] = useState(() => performance.now() - openedAt)

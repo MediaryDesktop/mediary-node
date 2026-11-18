@@ -6,7 +6,7 @@ export const BOOK_THEMES: readonly BookTheme[] = ['dark', 'sepia', 'light']
 
 export const FONT_SIZES = { min: 70, max: 180, step: 10 } as const
 
-export const DEFAULT_APPEARANCE: BookAppearance = { theme: 'dark', fontSize: 100 }
+const DEFAULT_APPEARANCE: BookAppearance = { theme: 'dark', fontSize: 100 }
 
 export const THEME_COLORS: Record<BookTheme, { background: string; text: string; link: string }> = {
 	dark: { background: '#16161a', text: '#dcdcdc', link: '#8ab4f8' },

@@ -4,7 +4,7 @@ import type { ManualDraft } from '@entities/media'
 import { isEmptyValue } from './draft'
 import type { ManualMediaType } from './draft'
 
-export function mainCountField(mediaType: ManualMediaType): keyof ManualDraft | null {
+function mainCountField(mediaType: ManualMediaType): keyof ManualDraft | null {
 	switch (mediaType) {
 		case 'manga':
 			return 'chapters'

@@ -9,7 +9,7 @@ import type { MediaDetails } from '@entities/media'
 
 type ResolvedTitle = NonNullable<LibraryCollectionEntry['title']>
 
-export function resolvedTitle(ref: string, media: MediaDetails): ResolvedTitle {
+function resolvedTitle(ref: string, media: MediaDetails): ResolvedTitle {
 	return {
 		media_ref: media.media_ref,
 		media_type: media.media_type as ResolvedTitle['media_type'],

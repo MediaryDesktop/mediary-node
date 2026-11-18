@@ -1,7 +1,7 @@
 import type { RippleOptions } from '../types'
 
-export const GROW_MS = 250
-export const FADE_MS = 300
+const GROW_MS = 250
+const FADE_MS = 300
 
 function calculate(event: MouseEvent | Touch | null, host: HTMLElement, options: RippleOptions) {
 	const rect = host.getBoundingClientRect()

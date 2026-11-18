@@ -50,7 +50,7 @@ onEach(autoSelectChanged, on => writeStored(AUTO_SELECT_KEY, on ? 'on' : 'off'))
 
 export const streamRequested = createEvent<StreamTarget>()
 export const streamCancelled = createEvent()
-export const streamPlaying = createEvent<number>()
+const streamPlaying = createEvent<number>()
 const streamFailed = createEvent<string>()
 
 export const $streamTarget = createStore<StreamTarget | null>(null)

@@ -10,7 +10,7 @@ export interface Field {
 	$value: Store<string>
 }
 
-export function createField(initial = ''): Field {
+function createField(initial = ''): Field {
 	const changed = createEvent<string>()
 	const $value = createStore(initial).on(changed, (_, value) => value)
 

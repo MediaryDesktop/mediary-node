@@ -83,7 +83,7 @@ sample({
 
 sample({ clock: linkedFx.doneData, filter: linked => !linked, target: pairMutation.start })
 
-export const cloudHealthQuery = createQuery({ effect: fetchCloudHealthFx, name: 'cloudHealth' })
+const cloudHealthQuery = createQuery({ effect: fetchCloudHealthFx, name: 'cloudHealth' })
 
 export const clientGateMounted = createEvent()
 

@@ -8,13 +8,7 @@ export type { BookLocation } from './ui/book-reader/types'
 export { useBookEntrance } from './ui/book-reader/lib/useBookEntrance'
 export { isPdf, loadBookFile } from './lib/book'
 
-export {
-	bookStateQuery,
-	chapterQuery,
-	readerModel,
-	reportPageMutation,
-	saveBookPositionMutation
-} from './model/model'
+export { bookStateQuery, chapterQuery, readerModel, saveBookPositionMutation } from './model/model'
 export {
 	chapterNumberFromName,
 	filterChapters,

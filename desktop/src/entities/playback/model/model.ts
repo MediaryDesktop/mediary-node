@@ -22,14 +22,14 @@ const playbackEvent = nodeTopic('playback')
 
 export const playbackQuery = createQuery({ effect: fetchPlaybackFx, name: 'playback' })
 
-export const startPlaybackMutation = createMutation({ effect: startPlaybackFx, name: 'startPlayback' })
+const startPlaybackMutation = createMutation({ effect: startPlaybackFx, name: 'startPlayback' })
 
-export const controlPlaybackMutation = createMutation({
+const controlPlaybackMutation = createMutation({
 	effect: controlPlaybackFx,
 	name: 'controlPlayback'
 })
 
-export const stopPlaybackMutation = createMutation({ effect: stopPlaybackFx, name: 'stopPlayback' })
+const stopPlaybackMutation = createMutation({ effect: stopPlaybackFx, name: 'stopPlayback' })
 
 export const playbackStreamQuery = createQuery({ effect: fetchPlaybackStreamFx, name: 'playbackStream' })
 

@@ -38,7 +38,7 @@ import type {
 	Session
 } from '../api/api'
 
-export const accountQuery = createQuery({ effect: fetchAccountFx, name: 'account' })
+const accountQuery = createQuery({ effect: fetchAccountFx, name: 'account' })
 
 export function landingRoute(account: Account) {
 	return account.email_verified ? '/' : '/verify-email'

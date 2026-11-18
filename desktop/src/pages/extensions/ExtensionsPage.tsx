@@ -18,7 +18,7 @@ import { CatalogActions, DependenciesActions, InstalledActions } from './ui/acti
 import { DependenciesTab } from './ui/dependencies-tab/DependenciesTab'
 import { PluginsTab } from './ui/plugins-tab/PluginsTab'
 
-export const EXTENSIONS_TABS = ['installed', 'catalog', 'dependencies'] as const
+const EXTENSIONS_TABS = ['installed', 'catalog', 'dependencies'] as const
 
 export type ExtensionsTab = (typeof EXTENSIONS_TABS)[number]
 

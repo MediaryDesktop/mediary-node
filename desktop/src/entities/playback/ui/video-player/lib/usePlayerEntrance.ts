@@ -4,7 +4,7 @@ import type { CSSProperties } from 'react'
 
 import { $playerOpenedAt } from '../../../model/player-session'
 
-export const PLAYER_ENTER_MS = 340
+const PLAYER_ENTER_MS = 340
 
 export function usePlayerEntrance() {
 	const openedAt = useUnit($playerOpenedAt)

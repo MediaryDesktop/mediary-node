@@ -4,11 +4,11 @@ import type { NodeConnection, NodeState } from '@shared/bridge'
 
 export const nodeBridgeMounted = createEvent()
 
-export const readNodeConnectionFx = createEffect<void, NodeConnection>(() => window.mediary.node.connection())
+const readNodeConnectionFx = createEffect<void, NodeConnection>(() => window.mediary.node.connection())
 
-export const readNodeStateFx = createEffect<void, NodeState>(() => window.mediary.node.state())
+const readNodeStateFx = createEffect<void, NodeState>(() => window.mediary.node.state())
 
-export const nodeStateChanged = createEvent<NodeState>()
+const nodeStateChanged = createEvent<NodeState>()
 
 export const $nodeConnection = createStore<NodeConnection | null>(null).on(
 	readNodeConnectionFx.doneData,

@@ -15,7 +15,7 @@ export const updateTrackerEntryMutation = createMutation({
 	name: 'updateTrackerEntry'
 })
 
-export const deleteTrackerEntryMutation = createMutation({
+const deleteTrackerEntryMutation = createMutation({
 	effect: deleteTrackerEntryFx,
 	name: 'deleteTrackerEntry'
 })

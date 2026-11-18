@@ -19,7 +19,7 @@ type PairingCode = CloudOperation<'createPairingCode'>['responses'][201]['conten
 
 export const fetchSyncStatusFx = createNodeRequestFx<void, SyncStatus>({ url: '/v1/sync/status' })
 
-export const pairNodeFx = createNodeRequestFx<string, Paired>(code => ({
+const pairNodeFx = createNodeRequestFx<string, Paired>(code => ({
 	url: '/v1/sync/pairing',
 	method: 'POST',
 	body: { code },

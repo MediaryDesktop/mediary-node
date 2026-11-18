@@ -1,9 +1,4 @@
-export {
-	deleteTrackerEntryMutation,
-	trackerModel,
-	trackerQueries,
-	updateTrackerEntryMutation
-} from './model/model'
+export { trackerModel, trackerQueries, updateTrackerEntryMutation } from './model/model'
 
 export { canTrack, isLocalTrackerType, isTrackerMediaType, TRACKER_MEDIA_TYPES } from './lib/media-types'
 export { isTrackerStatus, statusListId, statusOfListId, TRACKER_STATUSES } from './lib/statuses'
@@ -13,7 +8,7 @@ export { formatProgress, preferredTitle } from './lib/format'
 export { LIST_ICONS, ListIcon } from './ui/list-icon/ListIcon'
 export type { ListIconProps } from './ui/list-icon/ListIcon'
 
-export { MEDIA_TYPE_ICONS, MediaTypeIcon } from './ui/media-type-icon/MediaTypeIcon'
+export { MediaTypeIcon } from './ui/media-type-icon/MediaTypeIcon'
 export type { MediaTypeIconProps } from './ui/media-type-icon/MediaTypeIcon'
 
 export {

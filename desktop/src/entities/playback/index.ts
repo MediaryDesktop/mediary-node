@@ -1,10 +1,4 @@
-export {
-	playbackModel,
-	playbackQuery,
-	playbackStreamQuery,
-	startPlaybackMutation,
-	stopPlaybackMutation
-} from './model/model'
+export { playbackModel, playbackQuery, playbackStreamQuery } from './model/model'
 
 export { $playerMode, PLAYER_MODES, playerModeChanged } from './model/player-mode'
 export {

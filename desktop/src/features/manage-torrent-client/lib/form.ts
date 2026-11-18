@@ -37,7 +37,7 @@ export function fieldsOf(settings: TorrentSettings): ClientFields {
 	}
 }
 
-export function clientOf(choice: ClientChoice): TorrentClientKind {
+function clientOf(choice: ClientChoice): TorrentClientKind {
 	return choice === NONE ? '' : choice
 }
 

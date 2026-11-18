@@ -23,7 +23,7 @@ function matchesOnAniList(file: LibraryFile, content: LibraryContent | undefined
 	)
 }
 
-export function isUnmatched(file: LibraryFile): boolean {
+function isUnmatched(file: LibraryFile): boolean {
 	return !isMatched(file) && !isIgnored(file) && isTrackable(file)
 }
 

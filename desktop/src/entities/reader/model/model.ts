@@ -8,7 +8,7 @@ import type { ReportPageParams } from '../api/api'
 
 export const chapterQuery = createQuery({ effect: fetchChapterFx, name: 'readerChapter' })
 
-export const reportPageMutation = createMutation({ effect: reportReaderPageFx, name: 'reportReaderPage' })
+const reportPageMutation = createMutation({ effect: reportReaderPageFx, name: 'reportReaderPage' })
 
 export const bookStateQuery = createQuery({ effect: fetchBookStateFx, name: 'readerBookState' })
 

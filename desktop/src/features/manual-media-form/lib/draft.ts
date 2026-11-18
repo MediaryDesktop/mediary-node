@@ -11,7 +11,7 @@ export const MANUAL_MEDIA_TYPES: readonly ManualMediaType[] = [
 	'book'
 ]
 
-export const MANUAL_FORMATS: Record<ManualMediaType, NonNullable<ManualDraft['format']>[]> = {
+const MANUAL_FORMATS: Record<ManualMediaType, NonNullable<ManualDraft['format']>[]> = {
 	anime: ['TV', 'TV_SHORT', 'MOVIE', 'SPECIAL', 'OVA', 'ONA', 'MUSIC'],
 	manga: ['MANGA', 'NOVEL', 'ONE_SHOT'],
 	movie: ['MOVIE'],

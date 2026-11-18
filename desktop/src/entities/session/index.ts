@@ -1,4 +1,4 @@
-export { accountQuery, landingRoute, oauthProvidersQuery, resolveSession, sessionModel } from './model/model'
+export { landingRoute, oauthProvidersQuery, resolveSession, sessionModel } from './model/model'
 
 export type { ResolvedSession } from './model/model'
 

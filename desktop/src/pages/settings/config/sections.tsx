@@ -3,7 +3,7 @@ import { PiDevicesLight } from 'react-icons/pi'
 
 import type { IconLike } from '@shared/ui'
 
-export const SETTINGS_SECTIONS = [
+const SETTINGS_SECTIONS = [
 	'app',
 	'account',
 	'backup',

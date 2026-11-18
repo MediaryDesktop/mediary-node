@@ -4,7 +4,6 @@ export {
 	$streamTarget,
 	$streamVia,
 	streamCancelled,
-	streamPlaying,
 	streamRequested,
 	streamViaChanged
 } from './model/model'

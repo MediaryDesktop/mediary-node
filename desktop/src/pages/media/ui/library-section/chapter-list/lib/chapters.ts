@@ -30,7 +30,7 @@ export type StatusFilter = 'all' | 'saved' | 'read' | 'unread'
 
 export const STATUS_FILTERS: readonly StatusFilter[] = ['all', 'saved', 'read', 'unread']
 
-export function isSaved(row: ChapterRow): boolean {
+function isSaved(row: ChapterRow): boolean {
 	return row.options.some(option => option.source === LOCAL_SOURCE)
 }
 
@@ -106,7 +106,7 @@ export function chapterState(
 	return { kind: 'online' }
 }
 
-export const PAGE_SIZE = 50
+const PAGE_SIZE = 50
 
 export function pageCount(total: number, size = PAGE_SIZE): number {
 	return Math.max(1, Math.ceil(total / size))
@@ -131,7 +131,7 @@ export function latestDownloads(items: MangaDownload[]): Map<string, MangaDownlo
 	return downloads
 }
 
-export function isActive(item: MangaDownload | undefined): boolean {
+function isActive(item: MangaDownload | undefined): boolean {
 	return item?.state === 'queued' || item?.state === 'running'
 }
 
