@@ -1,5 +1,4 @@
 import { useUnit } from 'effector-react'
-import type { TFunction } from 'i18next'
 import { useEffect, useId, useState } from 'react'
 import type { ReactNode } from 'react'
 import { LuDownload, LuRefreshCw } from 'react-icons/lu'
@@ -7,6 +6,7 @@ import { LuDownload, LuRefreshCw } from 'react-icons/lu'
 import { problemDetail } from '@shared/api'
 import type { RequestFailure } from '@shared/api'
 import { useTranslation } from '@shared/i18n'
+import { useLatestAttempt } from '@shared/lib'
 import { Button, Input, Modal, Notice, ReelLoader, toast } from '@shared/ui'
 
 import { installExtensionFx, previewExtensionFx, updateExtensionFx } from '@entities/extension'
@@ -47,19 +47,15 @@ type Step =
 	| { kind: 'address' }
 	| { kind: 'reading' }
 	| { kind: 'consent'; preview: ExtensionPreview }
-	| { kind: 'failed'; message: string }
+	| { kind: 'failed'; error: unknown; during: 'read' | 'install' }
 
 function readManifest(
 	preview: (address: string) => Promise<ExtensionPreview>,
-	address: string,
-	t: TFunction
+	address: string
 ): Promise<Step> {
 	return preview(address).then(
 		(result): Step => ({ kind: 'consent', preview: result }),
-		(error: unknown): Step => ({
-			kind: 'failed',
-			message: failure(error, t('plugins.dialog.readFailed'))
-		})
+		(error: unknown): Step => ({ kind: 'failed', error, during: 'read' })
 	)
 }
 
@@ -79,9 +75,12 @@ function Steps({ target, open, onClose }: StepsProps) {
 	const [step, setStep] = useState<Step>(initialURL ? { kind: 'reading' } : { kind: 'address' })
 	const [busy, setBusy] = useState(false)
 
+	const reads = useLatestAttempt()
+
 	const read = (address: string) => {
+		const attempt = reads.next()
 		setStep({ kind: 'reading' })
-		void readManifest(preview, address, t).then(setStep)
+		void readManifest(preview, address).then(next => reads.isLatest(attempt) && setStep(next))
 	}
 
 	useEffect(() => {
@@ -89,13 +88,9 @@ function Steps({ target, open, onClose }: StepsProps) {
 			return
 		}
 
-		let alive = true
-		void readManifest(preview, initialURL, t).then(next => alive && setStep(next))
-
-		return () => {
-			alive = false
-		}
-	}, [initialURL, preview, t])
+		const attempt = reads.next()
+		void readManifest(preview, initialURL).then(next => reads.isLatest(attempt) && setStep(next))
+	}, [initialURL, preview, reads])
 
 	const confirm = (previewed: ExtensionPreview) => {
 		setBusy(true)
@@ -113,7 +108,7 @@ function Steps({ target, open, onClose }: StepsProps) {
 			onClose()
 		}).catch((error: unknown) => {
 			setBusy(false)
-			setStep({ kind: 'failed', message: failure(error, t('plugins.dialog.installFailed')) })
+			setStep({ kind: 'failed', error, during: 'install' })
 		})
 	}
 
@@ -174,7 +169,16 @@ function Steps({ target, open, onClose }: StepsProps) {
 
 			case 'failed':
 				return {
-					body: <Notice tone='danger'>{step.message}</Notice>,
+					body: (
+						<Notice tone='danger'>
+							{failure(
+								step.error,
+								step.during === 'read'
+									? t('plugins.dialog.readFailed')
+									: t('plugins.dialog.installFailed')
+							)}
+						</Notice>
+					),
 					footer: (
 						<>
 							{cancel}
