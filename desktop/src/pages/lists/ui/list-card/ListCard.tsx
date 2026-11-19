@@ -1,4 +1,3 @@
-import clsx from 'clsx'
 import type { ReactNode } from 'react'
 
 import { useTranslation } from '@shared/i18n'
@@ -13,11 +12,10 @@ export interface ListCardProps {
 	updatedAt?: string | null
 	badge: ReactNode
 	menu?: ReactNode
-	view: 'grid' | 'rows'
 	onOpen: () => void
 }
 
-export function ListCard({ name, count, covers, updatedAt, badge, menu, view, onOpen }: ListCardProps) {
+export function ListCard({ name, count, covers, updatedAt, badge, menu, onOpen }: ListCardProps) {
 	const { t, i18n } = useTranslation()
 
 	const shown = covers.slice(0, 3)
@@ -29,7 +27,7 @@ export function ListCard({ name, count, covers, updatedAt, badge, menu, view, on
 	].filter(Boolean)
 
 	return (
-		<article className={clsx(styles.card, view === 'rows' && styles.row)}>
+		<article className={styles.card}>
 			<button type='button' className={styles.open} onClick={onOpen}>
 				<span className={styles.collage} aria-hidden>
 					{[0, 1, 2].map(slot => (

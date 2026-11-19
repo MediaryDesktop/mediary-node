@@ -109,6 +109,7 @@ export const ru: Translation = {
 	},
 
 	lists: {
+		pageTitle: 'Библиотека',
 		listCount_one: '{{count}} список',
 		listCount_few: '{{count}} списка',
 		listCount_many: '{{count}} списков',
@@ -156,10 +157,6 @@ export const ru: Translation = {
 			recent: 'Недавно обновлённые',
 			name: 'По названию',
 			size: 'Самые большие'
-		},
-		view: {
-			grid: 'Сетка',
-			rows: 'Список'
 		},
 		myTitles: {
 			name: 'Мои тайтлы',

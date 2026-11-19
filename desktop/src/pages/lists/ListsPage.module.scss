@@ -2,37 +2,23 @@
 	.section {
 		.toolbar {
 			display: flex;
-			flex-direction: column;
-			gap: 0.5rem;
+			flex-wrap: wrap;
+			align-items: center;
+			gap: 0.75rem;
 			margin-bottom: 1.25rem;
 
-			.top {
-				display: flex;
-				flex-wrap: wrap;
-				align-items: center;
-				gap: 0.5rem;
-
-				.search {
-					flex: 1 1 12rem;
-					min-width: 12rem;
-				}
-
-				.sort {
-					flex: 0 0 17rem;
-				}
+			.search {
+				flex: 0 1 22rem;
+				min-width: 14rem;
 			}
 
-			.filters {
-				display: flex;
-				flex-wrap: wrap;
-				align-items: center;
-				justify-content: space-between;
-				gap: 0.5rem;
+			.types {
+				flex: 0 0 auto;
+				max-width: 100%;
+			}
 
-				.types {
-					flex: 0 0 auto;
-					max-width: 100%;
-				}
+			.create {
+				margin-left: auto;
 			}
 		}
 
@@ -40,10 +26,6 @@
 			display: grid;
 			grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
 			gap: 1rem;
-
-			&.rows {
-				grid-template-columns: 1fr;
-			}
 		}
 
 		.muted {

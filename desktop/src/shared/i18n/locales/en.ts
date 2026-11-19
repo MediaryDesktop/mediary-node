@@ -111,6 +111,7 @@ export const en = {
 	},
 
 	lists: {
+		pageTitle: 'Library',
 		listCount_one: '{{count}} list',
 		listCount_few: '{{count}} lists',
 		listCount_many: '{{count}} lists',
@@ -158,10 +159,6 @@ export const en = {
 			recent: 'Recently updated',
 			name: 'Name',
 			size: 'Most titles'
-		},
-		view: {
-			grid: 'Grid view',
-			rows: 'List view'
 		},
 		myTitles: {
 			name: 'My titles',

@@ -249,7 +249,7 @@ export const sprites = defineSpriteMap([
 			[
 				defineSpriteSymbol(['anime'], [733.333, 756, '0 0 550 567']),
 				defineSpriteSymbol(['book'], [733.333, 666.667, '0 0 550 500']),
-				defineSpriteSymbol(['doramas'], [802.667, 610.667, '0 0 602 458']),
+				defineSpriteSymbol(['doramas'], [1564, 1284, '0 0 1173 963']),
 				defineSpriteSymbol(['manga'], [800, 733.333, '0 0 600 550']),
 				defineSpriteSymbol(['movie'], [760, 600, '0 0 570 450']),
 				defineSpriteSymbol(['series'], [802.667, 610.667, '0 0 602 458'])

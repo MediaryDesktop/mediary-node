@@ -1,8 +1,7 @@
 import { useNavigate } from '@tanstack/react-router'
-import clsx from 'clsx'
 import { useUnit } from 'effector-react'
 import { useMemo, useState } from 'react'
-import { CiGrid2H, CiGrid41 } from 'react-icons/ci'
+import { BsFillGrid3X3GapFill } from 'react-icons/bs'
 
 import { useTranslation } from '@shared/i18n'
 import {
@@ -13,12 +12,8 @@ import {
 	PageHeader,
 	PageTransition,
 	PhaseTransition,
-	renderIcon,
-	SegmentedControl,
-	SelectDropdown,
-	SelectionGroup
+	SegmentedControl
 } from '@shared/ui'
-import type { IconLike } from '@shared/ui'
 
 import { useNodeData } from '@infra/node'
 
@@ -27,19 +22,10 @@ import { LIST_MEDIA_TYPES, MediaTypeIcon, trackerListsQuery } from '@entities/tr
 
 import { ListOptionsMenu, manageListsModel } from '@features/manage-lists'
 
-import { LIST_SORTS, listsPhase, myTitlesCard, visibleLists } from './lib/lists-view'
-import type { ListsFilter, ListsSort } from './lib/lists-view'
+import { listsPhase, myTitlesCard, visibleLists } from './lib/lists-view'
+import type { ListsFilter } from './lib/lists-view'
 import styles from './ListsPage.module.scss'
 import { ListCard } from './ui/list-card/ListCard'
-
-type View = 'grid' | 'rows'
-
-const VIEWS: readonly View[] = ['grid', 'rows']
-
-const VIEW_ICONS: Record<View, IconLike> = {
-	grid: <CiGrid41 size={20} />,
-	rows: <CiGrid2H size={20} />
-}
 
 export function ListsPage() {
 	const { t } = useTranslation()
@@ -56,8 +42,6 @@ export function ListsPage() {
 
 	const [filter, setFilter] = useState<ListsFilter>('all')
 	const [search, setSearch] = useState('')
-	const [sort, setSort] = useState<ListsSort>('recent')
-	const [view, setView] = useState<View>('grid')
 	const [section, setSection] = useState<'myList' | 'title' | 'fixMatches'>('myList')
 
 	const manual = useUnit(manualTitlesQuery.$data)
@@ -68,8 +52,8 @@ export function ListsPage() {
 	const allLists = useMemo(() => lists?.lists ?? [], [lists])
 
 	const visible = useMemo(
-		() => visibleLists(allLists, { filter, search, sort }),
-		[allLists, filter, search, sort]
+		() => visibleLists(allLists, { filter, search, sort: 'recent' }),
+		[allLists, filter, search]
 	)
 
 	const myTitles = useMemo(
@@ -86,81 +70,60 @@ export function ListsPage() {
 
 	const summary = t('lists.listCount', { count: allLists.length })
 
-	const typeOptions = [
-		{ value: 'all' as const, label: t('lists.filterAll') },
+	const typeItems = [
+		{
+			value: 'all' as const,
+			label: <BsFillGrid3X3GapFill size={18} />,
+			ariaLabel: t('lists.filterAll')
+		},
 		...LIST_MEDIA_TYPES.map(type => ({
 			value: type,
-			label: t(`lists.mediaType.${type}`),
-			icon: <MediaTypeIcon type={type} size={20} />
+			label: <MediaTypeIcon type={type} size={26} />,
+			ariaLabel: t(`lists.mediaType.${type}`)
 		}))
 	]
 
 	return (
 		<PageTransition className={styles.root}>
 			<PageHeader
-				title={t('nav.lists')}
+				title={t('lists.pageTitle')}
 				subtitle={summary}
 				tabs={[
 					{ key: 'myList', label: t('lists.tabs.myList'), active: section === 'myList', onSelect: () => setSection('myList') },
 					{ key: 'title', label: t('lists.tabs.title'), active: section === 'title', onSelect: () => setSection('title') },
 					{ key: 'fixMatches', label: t('lists.tabs.fixMatches'), active: section === 'fixMatches', onSelect: () => setSection('fixMatches') }
 				]}
-				rightContent={
-					<Button
-						variant='primary'
-						startIcon={<Icon name='common/plus' size={16} />}
-						onClick={() => createRequested()}
-					>
-						{t('lists.manage.new')}
-					</Button>
-				}
 			/>
 
 			{section !== 'myList' && <EmptyState title={t('lists.tabs.comingSoon')} />}
 
 			{section === 'myList' && <section className={styles.section}>
 				<div className={styles.toolbar}>
-					<div className={styles.top}>
-						<Input
-							value={search}
-							onChange={event => setSearch(event.target.value)}
-							placeholder={t('lists.search')}
-							startIcon={<Icon name='common/search' size={22} />}
-							className={styles.search}
-						/>
+					<Input
+						value={search}
+						onChange={event => setSearch(event.target.value)}
+						placeholder={t('lists.search')}
+						startIcon={<Icon name='common/search' size={22} />}
+						className={styles.search}
+					/>
 
-						<SelectDropdown
-							value={sort}
-							onChange={next => setSort((next as ListsSort) ?? 'recent')}
-							options={LIST_SORTS.map(key => ({
-								value: key,
-								label: t(`lists.sort.${key}`)
-							}))}
-							startIcon={<Icon name='common/sort' size={16} />}
-							className={styles.sort}
-						/>
-					</div>
+					<SegmentedControl
+						size='large'
+						items={typeItems}
+						value={filter}
+						onValueChange={setFilter}
+						label={t('lists.yours')}
+						className={styles.types}
+					/>
 
-					<div className={styles.filters}>
-						<SelectionGroup
-							options={typeOptions}
-							value={filter}
-							onValueChange={setFilter}
-							label={t('lists.yours')}
-							className={styles.types}
-						/>
-
-						<SegmentedControl
-							size='large'
-							items={VIEWS.map(mode => ({
-								value: mode,
-								label: renderIcon(VIEW_ICONS[mode], 16),
-								ariaLabel: t(`lists.view.${mode}`)
-							}))}
-							value={view}
-							onValueChange={setView}
-						/>
-					</div>
+					<Button
+						variant='primary'
+						startIcon={<Icon name='common/plus' size={16} />}
+						onClick={() => createRequested()}
+						className={styles.create}
+					>
+						{t('lists.manage.new')}
+					</Button>
 				</div>
 
 				<PhaseTransition phase={phase}>
@@ -178,7 +141,7 @@ export function ListsPage() {
 					)}
 
 					{phase === 'lists' && (
-						<div className={clsx(styles.grid, view === 'rows' && styles.rows)}>
+						<div className={styles.grid}>
 							{myTitles && (
 								<ListCard
 									name={myTitles.name}
@@ -190,7 +153,6 @@ export function ListsPage() {
 											{t('lists.myTitles.badge')}
 										</>
 									}
-									view={view}
 									onOpen={() => navigate({ to: '/lists/my-titles' })}
 								/>
 							)}
@@ -209,7 +171,6 @@ export function ListsPage() {
 										</>
 									}
 									menu={<ListOptionsMenu list={list} />}
-									view={view}
 									onOpen={() =>
 										navigate({ to: '/lists/$listId', params: { listId: list.id } })
 									}

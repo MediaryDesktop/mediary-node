@@ -134,28 +134,4 @@
 		top: 0.5rem;
 		right: 0.5rem;
 	}
-
-	&.row {
-		.open {
-			flex-direction: row;
-			align-items: center;
-			gap: 0.875rem;
-			padding: 0.625rem;
-		}
-
-		.collage {
-			flex-shrink: 0;
-			width: 6.5rem;
-			border-radius: var(--radius-sm);
-			overflow: hidden;
-		}
-
-		.text {
-			padding: 0;
-
-			.badge {
-				margin-top: 0.25rem;
-			}
-		}
-	}
 }
