@@ -2,7 +2,7 @@
 	min-height: 100vh;
 
 	.main {
-		--page-inset-top: calc(var(--titlebar-height) + 1rem);
+		--page-inset-top: calc(var(--titlebar-height) + 0.5rem);
 		--page-inset-x: 2rem;
 		--page-inset-left: calc(var(--sidebar-width) + var(--page-inset-x));
 

@@ -1,7 +1,9 @@
 import clsx from 'clsx'
 import type { ReactNode } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 
 import { useTranslation } from '../../i18n'
+import { Badge } from '../badge/Badge'
 import { Icon } from '../icon/Icon'
 
 import styles from './PageHeader.module.scss'
@@ -11,11 +13,20 @@ export interface PageHeaderCrumb {
 	onSelect?: () => void
 }
 
+export interface PageHeaderTab {
+	key: string
+	label: ReactNode
+	badge?: ReactNode
+	active?: boolean
+	onSelect?: () => void
+}
+
 export interface PageHeaderProps {
 	title: ReactNode
 	icon?: ReactNode
 	subtitle?: ReactNode
 	breadcrumbs?: PageHeaderCrumb[]
+	tabs?: PageHeaderTab[]
 	rightContent?: ReactNode
 	className?: string
 	children?: ReactNode
@@ -26,6 +37,7 @@ export function PageHeader({
 	icon,
 	subtitle,
 	breadcrumbs,
+	tabs,
 	rightContent,
 	className,
 	children
@@ -33,6 +45,26 @@ export function PageHeader({
 	const { t } = useTranslation()
 
 	const trail = breadcrumbs && breadcrumbs.length > 0 ? breadcrumbs : null
+	const hasTabs = tabs && tabs.length > 0
+	const activeKey = tabs?.find(tab => tab.active)?.key
+
+	const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({})
+	const [indicator, setIndicator] = useState<{ left: number; width: number } | null>(null)
+
+	useLayoutEffect(() => {
+		const updateIndicator = () => {
+			const node = activeKey ? tabRefs.current[activeKey] : null
+			setIndicator(node ? { left: node.offsetLeft, width: node.offsetWidth } : null)
+		}
+
+		const frame = requestAnimationFrame(updateIndicator)
+
+		window.addEventListener('resize', updateIndicator)
+		return () => {
+			cancelAnimationFrame(frame)
+			window.removeEventListener('resize', updateIndicator)
+		}
+	}, [activeKey, tabs?.length])
 
 	return (
 		<header className={clsx(styles.header, className)}>
@@ -63,17 +95,47 @@ export function PageHeader({
 			<div className={styles.topRow}>
 				{icon && <span className={styles.icon}>{icon}</span>}
 
-				<h1 className={styles.title}>{title}</h1>
+				<div className={styles.titleGroup}>
+					<h1 className={styles.title}>{title}</h1>
+					{subtitle && <span className={styles.subtitle}>{subtitle}</span>}
+				</div>
 
 				{rightContent && <div className={styles.rightContent}>{rightContent}</div>}
 			</div>
 
-			{(subtitle || children) && (
-				<div className={clsx(styles.content, icon && styles.withIcon)}>
-					{subtitle && <p className={styles.subtitle}>{subtitle}</p>}
-					{children}
-				</div>
+			{hasTabs && (
+				<nav className={styles.tabs} aria-label={t('common.sections')}>
+					{tabs.map(tab => (
+						<button
+							key={tab.key}
+							ref={node => {
+								tabRefs.current[tab.key] = node
+							}}
+							type='button'
+							className={clsx(styles.tab, tab.active && styles.tabActive)}
+							aria-current={tab.active ? 'page' : undefined}
+							onClick={tab.onSelect}
+						>
+							{tab.label}
+
+							{tab.badge != null && (
+								<Badge size='sm' className={styles.tabBadge}>
+									{tab.badge}
+								</Badge>
+							)}
+						</button>
+					))}
+
+					{indicator && (
+						<span
+							className={styles.indicator}
+							style={{ transform: `translateX(${indicator.left}px)`, width: indicator.width }}
+						/>
+					)}
+				</nav>
 			)}
+
+			{children && <div className={styles.content}>{children}</div>}
 		</header>
 	)
 }

@@ -101,6 +101,7 @@ export const uk: Translation = {
 	common: {
 		cancel: 'Скасувати',
 		breadcrumbs: 'Шлях навігації',
+		sections: 'Розділи сторінки',
 		connected: 'Підключено',
 		connectionFailed: 'Не вдалося підключитися',
 		loadFailed: 'Не вдалося завантажити. Перевірте, що нода працює, і спробуйте ще раз.',
@@ -122,6 +123,12 @@ export const uk: Translation = {
 		seeAll: 'Показати всі',
 		noMatches: 'За цим запитом немає списків',
 		noLists: 'Списків поки немає',
+		tabs: {
+			myList: 'Мій список',
+			title: 'Тайтл',
+			fixMatches: 'Виправити збіги',
+			comingSoon: 'Скоро буде доступно'
+		},
 		filters: {
 			search: 'Пошук у цьому списку',
 			anyStatus: 'Будь-який статус',

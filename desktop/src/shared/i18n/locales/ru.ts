@@ -101,6 +101,7 @@ export const ru: Translation = {
 	common: {
 		cancel: 'Отменить',
 		breadcrumbs: 'Путь навигации',
+		sections: 'Разделы страницы',
 		connected: 'Подключено',
 		connectionFailed: 'Не удалось подключиться',
 		loadFailed: 'Не удалось загрузить. Проверьте, что нода работает, и попробуйте ещё раз.',
@@ -122,6 +123,12 @@ export const ru: Translation = {
 		seeAll: 'Показать все',
 		noMatches: 'По этому запросу списков нет',
 		noLists: 'Списков пока нет',
+		tabs: {
+			myList: 'Мой список',
+			title: 'Тайтл',
+			fixMatches: 'Исправить совпадения',
+			comingSoon: 'Скоро будет доступно'
+		},
 		filters: {
 			search: 'Поиск в этом списке',
 			anyStatus: 'Любой статус',

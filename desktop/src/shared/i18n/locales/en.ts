@@ -103,6 +103,7 @@ export const en = {
 	common: {
 		cancel: 'Cancel',
 		breadcrumbs: 'Breadcrumb',
+		sections: 'Page sections',
 		connected: 'Connected',
 		connectionFailed: 'Connection failed',
 		loadFailed: 'Could not load this. Check that the node is running and try again.',
@@ -124,6 +125,12 @@ export const en = {
 		seeAll: 'See all',
 		noMatches: 'No list matches that search',
 		noLists: 'No lists yet',
+		tabs: {
+			myList: 'My list',
+			title: 'Title',
+			fixMatches: 'Fix matches',
+			comingSoon: 'Coming soon'
+		},
 		filters: {
 			search: 'Search in this list',
 			anyStatus: 'Any status',

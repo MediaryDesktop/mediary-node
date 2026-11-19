@@ -23,7 +23,7 @@ import type { IconLike } from '@shared/ui'
 import { useNodeData } from '@infra/node'
 
 import { manualTitlesQuery } from '@entities/media'
-import { LIST_MEDIA_TYPES, listTitleCount, MediaTypeIcon, trackerListsQuery } from '@entities/tracker'
+import { LIST_MEDIA_TYPES, MediaTypeIcon, trackerListsQuery } from '@entities/tracker'
 
 import { ListOptionsMenu, manageListsModel } from '@features/manage-lists'
 
@@ -58,6 +58,7 @@ export function ListsPage() {
 	const [search, setSearch] = useState('')
 	const [sort, setSort] = useState<ListsSort>('recent')
 	const [view, setView] = useState<View>('grid')
+	const [section, setSection] = useState<'myList' | 'title' | 'fixMatches'>('myList')
 
 	const manual = useUnit(manualTitlesQuery.$data)
 
@@ -83,10 +84,7 @@ export function ListsPage() {
 		failed: Boolean(listsError)
 	})
 
-	const summary = [
-		t('lists.listCount', { count: allLists.length }),
-		t('lists.titleCount', { count: listTitleCount(allLists) })
-	]
+	const summary = t('lists.listCount', { count: allLists.length })
 
 	const typeOptions = [
 		{ value: 'all' as const, label: t('lists.filterAll') },
@@ -101,8 +99,12 @@ export function ListsPage() {
 		<PageTransition className={styles.root}>
 			<PageHeader
 				title={t('nav.lists')}
-				icon={<Icon name='common/list' size={24} />}
-				subtitle={summary.join(' · ')}
+				subtitle={summary}
+				tabs={[
+					{ key: 'myList', label: t('lists.tabs.myList'), active: section === 'myList', onSelect: () => setSection('myList') },
+					{ key: 'title', label: t('lists.tabs.title'), active: section === 'title', onSelect: () => setSection('title') },
+					{ key: 'fixMatches', label: t('lists.tabs.fixMatches'), active: section === 'fixMatches', onSelect: () => setSection('fixMatches') }
+				]}
 				rightContent={
 					<Button
 						variant='primary'
@@ -114,7 +116,9 @@ export function ListsPage() {
 				}
 			/>
 
-			<section className={styles.section}>
+			{section !== 'myList' && <EmptyState title={t('lists.tabs.comingSoon')} />}
+
+			{section === 'myList' && <section className={styles.section}>
 				<div className={styles.toolbar}>
 					<div className={styles.top}>
 						<Input
@@ -220,7 +224,7 @@ export function ListsPage() {
 						/>
 					)}
 				</PhaseTransition>
-			</section>
+			</section>}
 		</PageTransition>
 	)
 }
